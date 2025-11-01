@@ -171,15 +171,15 @@ class MemoryGame(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.hybrid_command(name="paires", description="Jouer au Memory Game (solo ou multi)")
-    async def slash_memory(self, ctx_or_interaction, mode: str = "solo", theme: str = "fruits"):
+    @app_commands.command(name="paires", description="Trouver les paires.")
+    async def slash_memory(self, interaction: discord.Interaction, mode: str = "solo", theme: str = "fruits"):
         mode = "multi" if mode.lower() in ["multi", "m"] else "solo"
-        await self.start_game(ctx_or_interaction, mode=mode, theme=theme)
+        await self.start_game(interaction, mode=mode, theme=theme)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="paires")
+    @commands.command(name="paires", help="Trouver les paires.")
     async def prefix_memory(self, ctx: commands.Context, mode: str = "solo", theme: str = "fruits"):
         mode = "multi" if mode.lower() in ["multi", "m"] else "solo"
         await self.start_game(ctx, mode=mode, theme=theme)
