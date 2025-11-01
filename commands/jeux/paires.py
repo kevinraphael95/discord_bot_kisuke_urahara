@@ -10,6 +10,7 @@
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
 import discord
+from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
 import random
@@ -46,9 +47,6 @@ class MemoryGameView(View):
         self.message = None     # message Discord contenant le plateau
         self.create_buttons()
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🧱 Création des boutons
-    # ────────────────────────────────────────────────────────────────────────────
     def create_buttons(self):
         for r in range(self.size):
             for c in range(self.size):
@@ -57,14 +55,10 @@ class MemoryGameView(View):
                 self.add_item(btn)
                 self.buttons[(r, c)] = btn
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🧠 Gestion du clic sur une carte
-    # ────────────────────────────────────────────────────────────────────────────
     def make_callback(self, r, c):
         async def callback(interaction: discord.Interaction):
-            # Mode solo : vérifier joueur
             if self.mode == "solo":
-                player_id = getattr(self.ctx_or_interaction.user, "id", getattr(self.ctx_or_interaction.author, "id", None))
+                player_id = getattr(self.ctx_or_interaction, "user", getattr(self.ctx_or_interaction, "author", None)).id
                 if interaction.user.id != player_id:
                     await interaction.response.send_message(
                         "❌ Ce jeu est en mode **solo**, seul le joueur peut cliquer.", ephemeral=True
@@ -72,15 +66,10 @@ class MemoryGameView(View):
                     return
 
             pos = (r, c)
-            if pos in self.found or any(pos == f[:2] for f in self.flipped):
+            if pos in self.found or any(pos == f[:2] for f in self.flipped) or len(self.flipped) >= 2:
                 await interaction.response.defer()
                 return
 
-            if len(self.flipped) >= 2:
-                await interaction.response.defer()
-                return
-
-            # Révéler la carte
             emoji = self.board[r][c]
             btn = self.buttons[pos]
             btn.label = emoji
@@ -88,24 +77,19 @@ class MemoryGameView(View):
             self.flipped.append((r, c, emoji))
             await safe_edit(interaction.message, view=self)
 
-            # Vérification si deux cartes sont retournées
             if len(self.flipped) == 2:
                 await asyncio.sleep(1.2)
                 (r1, c1, e1), (r2, c2, e2) = self.flipped
 
                 if e1 == e2:
-                    # ✅ Paire trouvée
                     for rr, cc in [(r1, c1), (r2, c2)]:
                         self.buttons[(rr, cc)].style = discord.ButtonStyle.success
                         self.buttons[(rr, cc)].disabled = True
                     self.found.update({(r1, c1), (r2, c2)})
-
                     if self.mode == "multi":
                         uid = interaction.user.id
                         self.scores[uid] = self.scores.get(uid, 0) + 1
-
                 else:
-                    # ❌ Mauvaise paire
                     uid = interaction.user.id
                     self.errors[uid] = self.errors.get(uid, 0) + 1
                     for rr, cc in [(r1, c1), (r2, c2)]:
@@ -115,19 +99,15 @@ class MemoryGameView(View):
                 self.flipped.clear()
                 await safe_edit(interaction.message, view=self)
 
-                # Fin de la partie
                 if len(self.found) == self.size * self.size:
                     await self.end_game(interaction)
 
         return callback
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🏁 Fin du jeu
-    # ────────────────────────────────────────────────────────────────────────────
     async def end_game(self, interaction):
         content = ""
         if self.mode == "solo":
-            player_id = getattr(self.ctx_or_interaction.user, "id", getattr(self.ctx_or_interaction.author, "id", None))
+            player_id = getattr(self.ctx_or_interaction, "user", getattr(self.ctx_or_interaction, "author", None)).id
             errs = self.errors.get(player_id, 0)
             content = f"🎉 **Partie terminée !** Toutes les paires ont été trouvées.\n💡 Erreurs : **{errs}**"
         else:
@@ -139,7 +119,6 @@ class MemoryGameView(View):
             else:
                 content = "🎉 Partie terminée ! Aucune paire trouvée... 😅"
 
-        # Désactiver tous les boutons
         for btn in self.children:
             btn.disabled = True
 
@@ -149,7 +128,7 @@ class MemoryGameView(View):
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class MemoryGame(commands.Cog):
-    """Jeu de paires Memory — Mode solo (moins d’erreurs) ou multi (plus de paires)"""
+    """Commande /paires et !paires — Jeu de Memory (solo ou multi)"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -168,19 +147,17 @@ class MemoryGame(commands.Cog):
             view=view
         )
 
-    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(name="paires", description="Trouver les paires.")
-    async def slash_memory(self, interaction: discord.Interaction, mode: str = "solo", theme: str = "fruits"):
+    @app_commands.command(name="paires", description="Jouer au Memory Game")
+    @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
+    async def slash_paires(self, interaction: discord.Interaction, mode: str = "solo", theme: str = "fruits"):
         mode = "multi" if mode.lower() in ["multi", "m"] else "solo"
         await self.start_game(interaction, mode=mode, theme=theme)
 
-    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="paires", help="Trouver les paires.")
-    async def prefix_memory(self, ctx: commands.Context, mode: str = "solo", theme: str = "fruits"):
+    @commands.command(name="paires", help="Jouer au Memory Game")
+    @commands.cooldown(1, 10.0, commands.BucketType.user)
+    async def prefix_paires(self, ctx: commands.Context, mode: str = "solo", theme: str = "fruits"):
         mode = "multi" if mode.lower() in ["multi", "m"] else "solo"
         await self.start_game(ctx, mode=mode, theme=theme)
 
