@@ -13,16 +13,16 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
-from utils.discord_utils import safe_send, safe_edit
+from utils.discord_utils import safe_send, safe_edit, safe_interact
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Données du tutoriel
 # ────────────────────────────────────────────────────────────────────────────────
 PAGES = [
     {
-        "title": "📖 Bienvenue dans le mini-jeu de Reiatsu",
+        "title": "📖 Bienvenue dans le mini-jeu de absorption Reiatsu",
         "description": (
-            "💠 Le Reiatsu apparaît régulièrement sur le serveur sur le salon x.\n\n"
+            "💠 Le Reiatsu apparaît régulièrement sur le serveur sur le salon [insérer nom du salon].\n\n"
             "- Quand un Reiatsu apparaît sur le serveur, absorbe le en cliquant sur l'emoji en réaction.\n"
             "- Un Reiatsu normal rapporte +1 et un Super Reiatsu rapporte +100 (rare)\n"
             "- Le but est de récupérer le plus de Reiatsu possible, le Reiatsu aura des utilités plus tard."
@@ -32,8 +32,9 @@ PAGES = [
     {
         "title": "⚡ Commandes principales",
         "description": (
-            "- `/reiatsu` : Voir les infos générales et le classement\n"
-            "- `/reiatsuprofil` : Voir ton profil, classe, skill et cooldowns"
+            "- `!!reiatsu` ou `!!rts` : Voir les infos générales : sur quel salon le reiatsu apparaît et dans combien de temps et le classement (top 10).\n"
+            "- `!!reiatsuprofil` ou `!!p` : Voir ton profil qui contient toutes tes infos : ta quantité de Reiatsu, ta classe, et le cooldown de ton skill\n"
+            "- `!!classe` pour choisir ou changer ta classe
         ),
         "color": discord.Color.blue()
     },
@@ -41,44 +42,27 @@ PAGES = [
         "title": "🎭 Choisir une classe",
         "description": (
             "Chaque classe a un **passif** et un **skill actif**\n"
-            "Le passif s'active automatiqument, le skill doit être activé.\n\n"
-            "🥷 Voleur : Vol garanti possible (12h)\n"
-            "🌀 Absorbeur : Prochain Reiatsu = Super (24h)\n"
-            "🎭 Illusionniste : Faux Reiatsu, chance de ne rien perdre (8h)\n"
-            "🎲 Parieur : Mise pour gagner 30 Reiatsu (12h)"
+            "Le passif s'active automatiqument, le skill doit être activé avec la commande `!!skill`.\n\n"
+            "[insérer classes passifs et skills]"
         ),
         "color": discord.Color.green()
-    },
-    {
-        "title": "🌀 Activer ton skill",
-        "description": (
-            "📌 Commande : `/skill` ou `!skill`\n\n"
-            "- Illusionniste : crée un faux Reiatsu\n"
-            "- Voleur : prochain vol garanti\n"
-            "- Absorbeur : prochain Reiatsu = Super\n"
-            "- Parieur : mise 10 Reiatsu pour tenter d’en gagner 30"
-        ),
-        "color": discord.Color.orange()
-    },
+    }, 
     {
         "title": "🩸 Voler du Reiatsu",
         "description": (
-            "📌 Commande : `/reiatsuvol @joueur` ou `!reiatsuvol @joueur`\n\n"
-            "- Voler 10% du Reiatsu de la cible\n"
-            "- Chances : Voleur 67% / Autres 25%\n"
-            "- Skill actif Voleur : vol garanti + double\n"
-            "- Illusionniste actif : 50% chance de ne rien perdre\n"
-            "- Cooldown : 24h (19h pour Voleur)"
+            "📌 Commande : `!!reiatsuvol @joueur` ou `!rtsv @joueur` pour voler du reiatsu à un autre joueur.\n\n"
+            "- De base tu as 25% de chance de voler 10% du reiatsu d'un joueur et un cooldown de 24h.\n"
+            "- Mais les classes Voleur et Illusioniste influencent ces stats."
         ),
         "color": discord.Color.red()
     },
     {
-        "title": "💡 Conseils pour bien débuter",
+        "title": "💡 Astuces",
         "description": (
-            "1. Choisis ta classe selon ton style.\n"
-            "2. Active ton skill régulièrement.\n"
-            "3. Participe aux vols et aux orbes.\n"
-            "4. Consulte ton profil pour points et cooldowns."
+            "1. La commande `!!motsecret` permet de gagner jusqu'à 1000 reiatsu, vas voir.\n"
+            "2. La commande `!!keylottery` ou `!!kl` permet de miser 250 reiatsu pour les doubler ou gagner une clé steam.\n"
+            "3. Coucou comment ça va yo.\n"
+            "4. [insérer astuce]"
         ),
         "color": discord.Color.teal()
     }
@@ -106,7 +90,7 @@ class TutoView(View):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.user_id:
-            await safe_edit(interaction.message, content="❌ Tu ne peux pas interagir avec ce tutoriel.", view=None)
+            await safe_interact(interaction, content="❌ Tu ne peux pas interagir avec ce tutoriel.", ephemeral=True)
             return False
         return True
 
@@ -119,12 +103,12 @@ class TutoView(View):
     @discord.ui.button(label="⬅️ Précédent", style=discord.ButtonStyle.secondary)
     async def prev_page(self, interaction: discord.Interaction, button: Button):
         self.index = (self.index - 1) % len(PAGES)
-        await safe_edit(interaction.message, embed=self.get_embed(), view=self)
+        await safe_interact(interaction, embed=self.get_embed(), view=self, edit=True)
 
     @discord.ui.button(label="➡️ Suivant", style=discord.ButtonStyle.secondary)
     async def next_page(self, interaction: discord.Interaction, button: Button):
         self.index = (self.index + 1) % len(PAGES)
-        await safe_edit(interaction.message, embed=self.get_embed(), view=self)
+        await safe_interact(interaction, embed=self.get_embed(), view=self, edit=True)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -168,5 +152,3 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Reiatsu"
     await bot.add_cog(cog)
-
-
