@@ -1,37 +1,37 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 💡 lightsout.py — Commande interactive /lightsout et !lightsout
+# 💡 lightsout.py — Commande interactive !lightsout
 # Objectif : Jeu "Lights Out" avec grille de boutons interactifs (toujours résoluble)
 # Catégorie : Jeux
-# Accès : Tous
-# Cooldown : 1 utilisation / 5 secondes / utilisateur
+# Accès : Public
 # ────────────────────────────────────────────────────────────────────────────────
 
 import discord
-from discord import app_commands
 from discord.ext import commands, tasks
 import asyncio
+import random
 import numpy as np
-from utils.discord_utils import safe_send, safe_respond
-
-TAILLE_GRILLE = 5
-INACTIVITE_MAX = 180
+from utils.discord_utils import safe_send, safe_edit
 
 # ────────────────────────────────────────────────────────────────────────────────
-class LightsOut(commands.Cog):
-    """
-    Commande /lightsout et !lightsout — Jeu interactif Lights Out 5x5 avec solution
-    """
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.sessions = {}
-        self.verif_inactivite.start()
+TAILLE_GRILLE = 5           # Taille de la grille (5x5)
+INACTIVITE_MAX = 180        # 3 minutes (en secondes)
+COULEUR_ACTIVE = 0xFFD700   # Couleur jaune (lumière allumée)
+COULEUR_INACTIVE = 0x2F3136 # Couleur sombre (lumière éteinte)
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Génération de la grille résoluble
-    # ────────────────────────────────────────────────────────────────────────────
-    def generate_grid(self):
-        n = TAILLE_GRILLE
+# ────────────────────────────────────────────────────────────────────────────────
+class LightsOutGame:
+    def __init__(self, size: int = TAILLE_GRILLE, mode: str = "solo"):
+        self.size = size
+        self.mode = mode
+        self.terminee = False
+        self.grid = self.generate_solvable_grid()
+
+    def generate_solvable_grid(self):
+        """Crée une grille toujours résoluble."""
+        n = self.size
+        # vecteur de coups aléatoire
         x = np.random.randint(0, 2, size=(n*n), dtype=int)
+        # matrice des toggles
         A = np.zeros((n*n, n*n), dtype=int)
         for y in range(n):
             for x0 in range(n):
@@ -40,140 +40,127 @@ class LightsOut(commands.Cog):
                     nx, ny = x0+dx, y+dy
                     if 0 <= nx < n and 0 <= ny < n:
                         A[ny*n + nx, idx] = 1
+        # multiplie pour obtenir la grille finale
         b = (A @ x) % 2
-        return [[bool(b[y*n + x0]) for x0 in range(n)] for y in range(n)]
+        grid = [[bool(b[y*n + x0]) for x0 in range(n)] for y in range(n)]
+        return grid
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Calcul de la solution (Gauss-Jordan mod 2)
-    # ────────────────────────────────────────────────────────────────────────────
-    def solve_mod2(self, grid):
-        n = TAILLE_GRILLE
-        A = np.zeros((n*n, n*n), dtype=int)
-        for y in range(n):
-            for x in range(n):
-                idx = y*n + x
-                for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
-                    nx, ny = x+dx, y+dy
-                    if 0 <= nx < n and 0 <= ny < n:
-                        A[ny*n + nx, idx] = 1
-        b = np.array([int(grid[y][x]) for y in range(n) for x in range(n)], dtype=int)
-        # Gauss-Jordan mod 2
-        for col in range(n*n):
-            pivot = None
-            for row in range(col, n*n):
-                if A[row, col] == 1:
-                    pivot = row
-                    break
-            if pivot is None:
-                continue
-            if pivot != col:
-                A[[col, pivot]] = A[[pivot, col]]
-                b[[col, pivot]] = b[[pivot, col]]
-            for row in range(n*n):
-                if row != col and A[row, col] == 1:
-                    A[row] = (A[row] + A[col]) % 2
-                    b[row] = (b[row] + b[col]) % 2
-        return b.reshape((n,n))
+    def toggle(self, x: int, y: int):
+        """Inverse l’état d’une case et de ses voisines."""
+        if self.terminee:
+            return
+        for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
+            nx, ny = x+dx, y+dy
+            if 0 <= nx < self.size and 0 <= ny < self.size:
+                self.grid[ny][nx] = not self.grid[ny][nx]
+        if self.check_win():
+            self.terminee = True
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Création embed de la grille
-    # ────────────────────────────────────────────────────────────────────────────
-    def get_embed(self, grid, solution_highlight=None):
-        desc = ""
-        n = TAILLE_GRILLE
-        for y in range(n):
-            for x in range(n):
-                if solution_highlight is not None and solution_highlight[y][x]:
-                    desc += "💡"
-                else:
-                    desc += "🔆" if grid[y][x] else "⬛"
-            desc += "\n"
+    def check_win(self) -> bool:
+        """Retourne True si toutes les lumières sont éteintes."""
+        return all(not cell for row in self.grid for cell in row)
+
+    def get_embed(self) -> discord.Embed:
         embed = discord.Embed(
-            title="💡 Jeu Lights Out",
-            description=desc,
-            color=discord.Color.gold()
+            title=f"💡 Jeu Lights Out — mode {self.mode.capitalize()}",
+            description="Clique sur les boutons pour éteindre toutes les lumières !",
+            color=discord.Color.gold(),
         )
+        status = "✅ Toutes les lumières sont éteintes ! Bravo !" if self.terminee else "🕹️ Clique sur les cases pour jouer."
+        embed.add_field(name="État", value=status, inline=False)
         return embed
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Création de la vue avec boutons et solution
-    # ────────────────────────────────────────────────────────────────────────────
-    def create_view(self, grid, channel_id):
-        n = TAILLE_GRILLE
-        view = discord.ui.View(timeout=None)
+# ────────────────────────────────────────────────────────────────────────────────
+class LightsOutView(discord.ui.View):
+    def __init__(self, game: LightsOutGame, parent_cog, channel_id: int, player_id: int | None = None):
+        super().__init__(timeout=None)
+        self.game = game
+        self.parent_cog = parent_cog
+        self.channel_id = channel_id
+        self.player_id = player_id
+        self.update_buttons()
 
-        for y in range(n):
-            for x in range(n):
-                button = discord.ui.Button(label=" ", emoji="🔆" if grid[y][x] else "⬛",
-                                           style=discord.ButtonStyle.success if grid[y][x] else discord.ButtonStyle.secondary)
-                async def callback(interaction, xx=x, yy=y):
-                    session = self.sessions.get(channel_id)
-                    if not session:
-                        await interaction.response.send_message("❌ Partie terminée.", ephemeral=True)
-                        return
-                    # Toggle case et voisines
-                    for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
-                        nx, ny = xx+dx, yy+dy
-                        if 0 <= nx < n and 0 <= ny < n:
-                            session['grid'][ny][nx] = not session['grid'][ny][nx]
-                    embed = self.get_embed(session['grid'])
-                    await interaction.response.edit_message(embed=embed, view=view)
-                button.callback = callback
-                view.add_item(button)
+    def update_buttons(self):
+        self.clear_items()
+        for y in range(self.game.size):
+            row = []
+            for x in range(self.game.size):
+                style = discord.ButtonStyle.success if self.game.grid[y][x] else discord.ButtonStyle.secondary
+                emoji = "🔆" if self.game.grid[y][x] else "⬛"
+                button = discord.ui.Button(label=" ", emoji=emoji, style=style, custom_id=f"light_{x}_{y}")
+                button.callback = self.make_callback(x, y)
+                row.append(button)
+            for b in row:
+                self.add_item(b)
 
-        # Bouton solution
-        solution_button = discord.ui.Button(label="💡 Solution", style=discord.ButtonStyle.primary)
-        async def solution_callback(interaction):
-            session = self.sessions.get(channel_id)
+    def make_callback(self, x: int, y: int):
+        async def callback(interaction: discord.Interaction):
+            session = self.parent_cog.sessions.get(self.channel_id)
             if not session:
-                await interaction.response.send_message("❌ Partie terminée.", ephemeral=True)
+                await interaction.response.send_message("❌ Cette partie n'existe plus.", ephemeral=True)
                 return
-            sol = self.solve_mod2(session['grid'])
-            embed = self.get_embed(session['grid'], solution_highlight=sol)
-            await interaction.response.edit_message(embed=embed, view=view)
-        solution_button.callback = solution_callback
-        view.add_item(solution_button)
-        return view
+            if self.game.mode == "solo" and interaction.user.id != self.player_id:
+                await interaction.response.send_message(
+                    "❌ Seul le joueur ayant lancé la partie peut jouer en mode solo.", ephemeral=True
+                )
+                return
+            session.last_activity = asyncio.get_event_loop().time()
+            self.game.toggle(x, y)
+            self.update_buttons()
+            embed = self.game.get_embed()
+            await interaction.response.edit_message(embed=embed, view=self)
+            if self.game.terminee:
+                await safe_send(interaction.channel, f"🎉 Bravo {interaction.user.mention} ! Toutes les lumières sont éteintes !")
+                self.parent_cog.sessions.pop(self.channel_id, None)
+        return callback
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(name="lightsout", description="💡 Lance une partie Lights Out")
-    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_lightsout(self, interaction: discord.Interaction):
-        grid = self.generate_grid()
-        view = self.create_view(grid, interaction.channel_id)
-        self.sessions[interaction.channel_id] = {'grid': grid}
-        embed = self.get_embed(grid)
-        await safe_respond(interaction, embed=embed, view=view)
+# ────────────────────────────────────────────────────────────────────────────────
+class LightsOutSession:
+    def __init__(self, game: LightsOutGame, message: discord.Message, mode: str = "solo", author_id: int | None = None):
+        self.game = game
+        self.message = message
+        self.mode = mode
+        self.last_activity = asyncio.get_event_loop().time()
+        self.author_id = author_id
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="lightsout")
-    @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_lightsout(self, ctx: commands.Context):
-        grid = self.generate_grid()
-        view = self.create_view(grid, ctx.channel.id)
-        self.sessions[ctx.channel.id] = {'grid': grid}
-        embed = self.get_embed(grid)
-        await safe_send(ctx.channel, embed=embed, view=view)
+# ────────────────────────────────────────────────────────────────────────────────
+class LightsOut(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.sessions = {}
+        self.verif_inactivite.start()
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Vérification inactivité
-    # ────────────────────────────────────────────────────────────────────────────
+    def cog_unload(self):
+        self.verif_inactivite.cancel()
+
+    @commands.command(name="lightsout", aliases=["lo"])
+    async def lightsout_cmd(self, ctx: commands.Context, mode: str = ""):
+        mode = mode.lower()
+        if mode not in ("multi", "m"):
+            mode = "solo"
+        channel_id = ctx.channel.id
+        if channel_id in self.sessions:
+            await safe_send(ctx.channel, "❌ Une partie est déjà en cours dans ce salon.")
+            return
+        game = LightsOutGame(mode=mode)
+        embed = game.get_embed()
+        view = LightsOutView(game, self, channel_id, player_id=ctx.author.id if mode=="solo" else None)
+        message = await safe_send(ctx.channel, embed=embed, view=view)
+        session = LightsOutSession(game, message, mode=mode, author_id=ctx.author.id)
+        self.sessions[channel_id] = session
+
     @tasks.loop(seconds=30)
     async def verif_inactivite(self):
         now = asyncio.get_event_loop().time()
-        to_remove = []
+        a_supprimer = []
         for cid, session in list(self.sessions.items()):
-            if now - session.get('last_activity', now) > INACTIVITE_MAX:
-                to_remove.append(cid)
-        for cid in to_remove:
-            self.sessions.pop(cid, None)
+            if now - session.last_activity > INACTIVITE_MAX:
+                a_supprimer.append(cid)
+        for cid in a_supprimer:
+            session = self.sessions.pop(cid, None)
+            if session:
+                await safe_send(session.message.channel, "⏰ Partie terminée pour inactivité (3 minutes sans action).")
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🔌 Setup du Cog
 # ────────────────────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = LightsOut(bot)
