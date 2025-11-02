@@ -33,9 +33,9 @@ def render_bars(data, highlight_indices=None, max_length=12):
         height = int((n / max_val) * max_length)
         # barre normale : blanc, barre en surbrillance : orange
         if i in highlight_indices:
-            bar = ":orange_square:" * height
+            bar = "🟥" * height
         else:
-            bar = ":white_large_square:" * height
+            bar = "⬜" * height
         lines.append(bar)
     return "\n".join(lines)
 
