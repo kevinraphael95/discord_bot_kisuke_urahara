@@ -179,11 +179,11 @@ class Skill(commands.Cog):
                 slots = [random.choice(symbols) for _ in range(3)]
 
                 if len(set(slots)) == 1:
-                    result_text = "💥 **JACKPOT !** Tu gagnes **+50 Reiatsu !**"
-                    gain = 100
-                elif len(set(slots)) == 2:
-                    result_text = "✨ **Pas mal !** Deux symboles identiques, tu gagnes **+20 Reiatsu.**"
+                    result_text = "💥 **JACKPOT ! Trois symboles identiques ! Tu gagnes +160 Reiatsu !**"
                     gain = 160
+                elif len(set(slots)) == 2:
+                    result_text = "✨ **Deux symboles identiques ! Tu gagnes +100 Reiatsu !**"
+                    gain = 100
                 else:
                     result_text = "❌ **Perdu !** Tu perds ta mise de 30 Reiatsu."
                     gain = -mise
