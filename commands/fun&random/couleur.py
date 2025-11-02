@@ -4,6 +4,7 @@
 # Catégorie : 🎨 Fun&Random
 # Accès : Public
 # Cooldown : 1 utilisation / 3 sec / utilisateur
+# Version : ✅ Optimisée, sécurisée, cohérente avec safe_interact
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -13,72 +14,73 @@ import random
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_interact
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎛️ Vue interactive avec bouton "Nouvelle couleur"
 # ────────────────────────────────────────────────────────────────────────────────
 class CouleurView(discord.ui.View):
-    def __init__(self, author):
+    def __init__(self, author: discord.User | discord.Member):
         super().__init__(timeout=60)
         self.author = author
-        self.message = None
+        self.message: discord.Message | None = None
 
-    def generer_embed(self):
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🎨 Génération d'un embed de couleur aléatoire
+    # ────────────────────────────────────────────────────────────────────────────
+    def generer_embed(self) -> discord.Embed:
         """Génère un embed avec une couleur aléatoire et son aperçu visuel."""
         code_hex = random.randint(0, 0xFFFFFF)
         hex_str = f"#{code_hex:06X}"
-        r = (code_hex >> 16) & 0xFF
-        g = (code_hex >> 8) & 0xFF
-        b = code_hex & 0xFF
+        r, g, b = (code_hex >> 16) & 0xFF, (code_hex >> 8) & 0xFF, code_hex & 0xFF
         rgb_str = f"({r}, {g}, {b})"
-
-        image_url = f"https://dummyimage.com/700x200/{code_hex:06x}/{code_hex:06x}.png&text=+"
 
         embed = discord.Embed(
             title="🌈 Couleur aléatoire",
             description=f"🔹 **Code HEX** : `{hex_str}`\n🔸 **Code RGB** : `{rgb_str}`",
             color=code_hex
         )
-        embed.set_image(url=image_url)
+        embed.set_image(
+            url=f"https://dummyimage.com/700x200/{code_hex:06x}/{code_hex:06x}.png&text=+"
+        )
         return embed
 
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔁 Bouton de régénération
+    # ────────────────────────────────────────────────────────────────────────────
     @discord.ui.button(label="🔁 Nouvelle couleur", style=discord.ButtonStyle.primary)
     async def regenerate(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Régénère la couleur si c'est l'auteur qui clique sur le bouton."""
         if interaction.user != self.author:
-            return await interaction.response.send_message(
-                "❌ Tu ne peux pas utiliser ce bouton.", ephemeral=True
+            return await safe_interact(
+                interaction,
+                content="❌ Tu ne peux pas utiliser ce bouton.",
+                ephemeral=True
             )
 
-        try:
-            # ✅ Toujours acquitter avant d'éditer
-            if not interaction.response.is_done():
-                await interaction.response.defer()
+        new_embed = self.generer_embed()
 
-            new_embed = self.generer_embed()
+        # ✅ Edition du message de manière sécurisée
+        await safe_interact(
+            interaction,
+            edit=True,
+            embed=new_embed,
+            view=self
+        )
 
-            # ✅ Modification directe du message (pas safe_edit)
-            if self.message:
-                await self.message.edit(embed=new_embed, view=self)
-            else:
-                await interaction.message.edit(embed=new_embed, view=self)
-
-        except Exception as e:
-            if interaction.response.is_done():
-                await interaction.followup.send(f"❌ Erreur : {e}", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"❌ Erreur : {e}", ephemeral=True)
-
+    # ────────────────────────────────────────────────────────────────────────────
+    # ⏰ Timeout : désactivation du bouton
+    # ────────────────────────────────────────────────────────────────────────────
     async def on_timeout(self):
         """Désactive le bouton quand le délai est écoulé."""
         for child in self.children:
             child.disabled = True
         if self.message:
             try:
-                await self.message.edit(view=self)
+                await safe_edit(self.message, view=self)
             except Exception:
                 pass
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -101,11 +103,15 @@ class CouleurCommand(commands.Cog):
             view = CouleurView(interaction.user)
             embed = view.generer_embed()
 
-            await interaction.response.send_message(embed=embed, view=view)
+            await safe_interact(interaction, embed=embed, view=view)
             view.message = await interaction.original_response()
         except Exception as e:
             print(f"[ERREUR /couleur] {e}")
-            await safe_respond(interaction, "❌ Une erreur est survenue lors de la génération de la couleur.", ephemeral=True)
+            await safe_respond(
+                interaction,
+                content="❌ Une erreur est survenue lors de la génération de la couleur.",
+                ephemeral=True
+            )
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
