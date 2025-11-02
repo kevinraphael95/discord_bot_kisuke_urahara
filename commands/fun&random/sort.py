@@ -40,7 +40,11 @@ class Sorting(commands.Cog):
     """Commande /sorting et !sorting — Visualise un algorithme de tri en temps réel"""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.algorithms = {name: {"func": func, "desc": "Description à compléter"} for name, func in all_algos.items()}
+        # On récupère la description depuis algo.desc si elle existe
+        self.algorithms = {
+            name: {"func": func, "desc": getattr(func, "desc", "Description à compléter")}
+            for name, func in all_algos.items()
+        }
 
     async def visualize_sorting(self, channel_or_interaction, algorithm_name: str):
         algo_info = self.algorithms[algorithm_name]
