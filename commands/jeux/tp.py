@@ -12,7 +12,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
+from utils.discord_utils import safe_send, safe_respond, safe_edit  # ✅ Utilitaires sécurisés
 import json
 import random
 import os
@@ -21,9 +21,8 @@ import os
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class TramProbleme(commands.Cog):
-    """
-    Commande /tram_probleme et !tram_probleme — Quiz du dilemme du tramway
-    """
+    """Commande /tram_probleme et !tram_probleme — Quiz du dilemme du tramway"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.questions_path = os.path.join("data", "tram_questions.json")
@@ -37,7 +36,7 @@ class TramProbleme(commands.Cog):
                 data = json.load(f)
             return data.get("questions", [])
         except Exception as e:
-            print(f"[ERREUR] Impossible de charger le fichier JSON : {e}")
+            print(f"[ERREUR JSON] {e}")
             return []
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -47,10 +46,9 @@ class TramProbleme(commands.Cog):
         name="tram_probleme",
         description="Teste ta morale dans un quiz absurde du dilemme du tramway."
     )
-    @app_commands.describe(story="Active le mode histoire complète (toutes les questions enchaînées dans l'ordre).")
+    @app_commands.describe(story="Active le mode histoire complète (enchaînement total des questions).")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_tram_probleme(self, interaction: discord.Interaction, story: bool = False):
-        """Commande slash interactive"""
         await self.run_tram_quiz(interaction, story)
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -59,16 +57,16 @@ class TramProbleme(commands.Cog):
     @commands.command(name="tram_probleme", aliases=["tp"])
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_tram_probleme(self, ctx: commands.Context, *args):
-        """Commande préfixe interactive"""
         story = any(arg.lower() in ["story", "histoire", "mode_story"] for arg in args)
         await self.run_tram_quiz(ctx, story)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🎮 Fonction principale du quiz (profil moral)
+    # 🎮 Fonction principale
     # ────────────────────────────────────────────────────────────────────────────
     async def run_tram_quiz(self, ctx_or_inter, story: bool = False):
-        is_interaction = isinstance(ctx_or_inter, discord.Interaction)
-        send = safe_respond if is_interaction else safe_send
+        is_inter = isinstance(ctx_or_inter, discord.Interaction)
+        send = safe_respond if is_inter else safe_send
+        edit = safe_edit
 
         questions = self.load_questions()
         if not questions:
@@ -78,28 +76,30 @@ class TramProbleme(commands.Cog):
         if not story:
             random.shuffle(questions)
 
-        utilitarisme_count = 0
-        deontologie_count = 0
-
-        # 🧮 Compteurs de vies sauvées/tuées
+        utilitarisme, deontologie = 0, 0
         total_saved = {"humain": 0, "enfant": 0, "pa": 0, "animal": 0, "robot": 0}
         total_killed = {"humain": 0, "enfant": 0, "pa": 0, "animal": 0, "robot": 0}
 
-        await send(
-            ctx_or_inter,
-            "🚋 **Bienvenue dans le Dilemme du Tramway !**\n"
-            "Prépare-toi à remettre ton éthique en question...\n"
-            f"🧩 Mode story : {'✅ Activé (ordre fixe)' if story else '❌ Désactivé (ordre aléatoire)'}"
+        # ───────────────────────────────────────
+        # Message d’intro
+        # ───────────────────────────────────────
+        embed = discord.Embed(
+            title="🚋 Dilemme du Tramway",
+            description=(
+                "Bienvenue dans le test moral ultime.\n"
+                "Tu devras faire des choix... difficiles.\n\n"
+                f"🧩 Mode story : {'✅ Activé (ordre fixe)' if story else '❌ Désactivé (aléatoire)'}"
+            ),
+            color=discord.Color.orange()
         )
+        msg = await send(ctx_or_inter, embed=embed)
 
         total_q = len(questions) if story else min(5, len(questions))
 
         for i, question in enumerate(questions[:total_q], start=1):
-            embed = discord.Embed(
-                title=f"🚨 Question {i}/{total_q}",
-                description=question["question"],
-                color=discord.Color.orange()
-            )
+            embed.title = f"🚨 Question {i}/{total_q}"
+            embed.description = question["question"]
+            embed.clear_fields()
             embed.set_footer(text="Fais ton choix moral... ou pas 😈")
 
             view = discord.ui.View(timeout=60)
@@ -109,82 +109,79 @@ class TramProbleme(commands.Cog):
                 button = discord.ui.Button(label=option["text"], style=discord.ButtonStyle.primary)
 
                 async def button_callback(interaction, choice=option):
-                    nonlocal utilitarisme_count, deontologie_count, answered
+                    nonlocal utilitarisme, deontologie, answered
                     answered = True
 
                     result = choice.get("result", "🤔 Choix étrange...")
-                    ethics_type = choice.get("ethics")
+                    ethics = choice.get("ethics")
+                    if ethics == "utilitarisme":
+                        utilitarisme += 1
+                    elif ethics == "déontologie":
+                        deontologie += 1
 
-                    # Comptage du type de morale
-                    if ethics_type == "utilitarisme":
-                        utilitarisme_count += 1
-                    elif ethics_type == "déontologie":
-                        deontologie_count += 1
-
-                    # Comptabilise les vies sauvées et perdues
                     for key in total_saved:
                         total_saved[key] += choice.get("saved", {}).get(key, 0)
                         total_killed[key] += choice.get("killed", {}).get(key, 0)
 
-                    await interaction.response.send_message(
-                        f"🧠 Tu as choisi : **{choice['text']}**\n{result}",
-                        ephemeral=True
-                    )
+                    embed.add_field(name="🧠 Ton choix", value=f"**{choice['text']}**\n{result}", inline=False)
+                    await edit(msg, embed=embed, view=None)
+                    await interaction.response.defer()
                     view.stop()
 
                 button.callback = button_callback
                 view.add_item(button)
 
-            await send(ctx_or_inter, embed=embed, view=view)
+            await edit(msg, embed=embed, view=view)
             timeout = await view.wait()
 
             if story and not answered:
-                await send(ctx_or_inter, "⛔ Le tram s’arrête. Tu n’as pas répondu à temps.")
+                embed.description = "⛔ Le tram s’arrête... tu n’as pas répondu à temps."
+                embed.color = discord.Color.red()
+                await edit(msg, embed=embed, view=None)
                 return
 
             if story and i < total_q:
-                await send(ctx_or_inter, "🚋 Le tramway continue sa route...\n")
+                embed.description = "🚋 Le tramway continue sa route..."
+                await edit(msg, embed=embed, view=None)
+                await discord.utils.sleep_until(discord.utils.utcnow() + discord.utils.timedelta(seconds=2))
 
         # ───────────────────────────────────────────────
-        # Résultats finaux avec profil moral + bilan
+        # Résultats finaux
         # ───────────────────────────────────────────────
-        embed_result = discord.Embed(
+        embed = discord.Embed(
             title="🎉 Résultats du Dilemme du Tramway",
             color=discord.Color.green()
         )
-        embed_result.add_field(
+        embed.add_field(
             name="⚖️ Équilibre éthique",
-            value=f"Utilitarisme : {utilitarisme_count}\nDéontologie : {deontologie_count}",
+            value=f"Utilitarisme : {utilitarisme}\nDéontologie : {deontologie}",
             inline=False
         )
 
-        if utilitarisme_count > deontologie_count:
-            profil = "Tu es plutôt **utilitariste** – tu cherches à maximiser le bien global, quitte à salir tes mains. 🤔"
-        elif deontologie_count > utilitarisme_count:
+        if utilitarisme > deontologie:
+            profil = "Tu es plutôt **utilitariste** – tu cherches à maximiser le bien global, quitte à te salir les mains. 🤔"
+        elif deontologie > utilitarisme:
             profil = "Tu es plutôt **déontologique** – tu respectes les principes moraux, même face au chaos. 🧘"
         else:
-            profil = "Ton équilibre moral est parfait : un tram entre la raison et la règle. 🚋⚖️"
+            profil = "Ton équilibre moral est parfait : un tram entre la raison et la règle. ⚖️🚋"
 
-        embed_result.add_field(name="🧭 Profil moral", value=profil, inline=False)
+        embed.add_field(name="🧭 Profil moral", value=profil, inline=False)
 
-        # Ajout du bilan moral
-        saved_summary = (
+        saved = (
             f"🕊️ **Tu as sauvé :** {total_saved['humain']} adultes, "
             f"{total_saved['enfant']} enfants, {total_saved['pa']} personnes âgées, "
             f"{total_saved['animal']} animaux et {total_saved['robot']} robots."
         )
-
-        killed_summary = (
+        killed = (
             f"💀 **Tu as tué :** {total_killed['humain']} adultes, "
-            f" {total_killed['enfant']} enfants, {total_killed['pa']} personnes âgées, "
+            f"{total_killed['enfant']} enfants, {total_killed['pa']} personnes âgées, "
             f"{total_killed['animal']} animaux et {total_killed['robot']} robots."
         )
 
-        embed_result.add_field(name="📊 Bilan moral", value=f"{saved_summary}\n{killed_summary}", inline=False)
+        embed.add_field(name="📊 Bilan moral", value=f"{saved}\n{killed}", inline=False)
+        embed.set_footer(text="Fin du test moral 🛤️")
 
-        embed_result.set_footer(text="Fin du quiz du tramway 🛤️")
-        await send(ctx_or_inter, embed=embed_result)
-
+        await edit(msg, embed=embed, view=None)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
