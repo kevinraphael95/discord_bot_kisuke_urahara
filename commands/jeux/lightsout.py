@@ -5,17 +5,13 @@
 # Accès : Public
 # ────────────────────────────────────────────────────────────────────────────────
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord.ext import commands, tasks
 import asyncio
 import random
+import numpy as np
 from utils.discord_utils import safe_send, safe_edit
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 📦 Paramètres
 # ────────────────────────────────────────────────────────────────────────────────
 TAILLE_GRILLE = 5           # Taille de la grille (5x5)
 INACTIVITE_MAX = 180        # 3 minutes (en secondes)
@@ -23,37 +19,40 @@ COULEUR_ACTIVE = 0xFFD700   # Couleur jaune (lumière allumée)
 COULEUR_INACTIVE = 0x2F3136 # Couleur sombre (lumière éteinte)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧩 Classe LightsOutGame
-# ────────────────────────────────────────────────────────────────────────────────
 class LightsOutGame:
     def __init__(self, size: int = TAILLE_GRILLE, mode: str = "solo"):
         self.size = size
-        self.terminee = False
         self.mode = mode
+        self.terminee = False
         self.grid = self.generate_solvable_grid()
 
     def generate_solvable_grid(self):
-        """Crée une grille résoluble en partant de toutes les lumières éteintes."""
-        grid = [[False]*self.size for _ in range(self.size)]
-        n_coups = random.randint(5, 15)  # nombre de coups aléatoires pour créer une grille
-        for _ in range(n_coups):
-            x = random.randint(0, self.size-1)
-            y = random.randint(0, self.size-1)
-            self._apply_toggle(grid, x, y)
+        """Crée une grille toujours résoluble."""
+        n = self.size
+        # vecteur de coups aléatoire
+        x = np.random.randint(0, 2, size=(n*n), dtype=int)
+        # matrice des toggles
+        A = np.zeros((n*n, n*n), dtype=int)
+        for y in range(n):
+            for x0 in range(n):
+                idx = y*n + x0
+                for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
+                    nx, ny = x0+dx, y+dy
+                    if 0 <= nx < n and 0 <= ny < n:
+                        A[ny*n + nx, idx] = 1
+        # multiplie pour obtenir la grille finale
+        b = (A @ x) % 2
+        grid = [[bool(b[y*n + x0]) for x0 in range(n)] for y in range(n)]
         return grid
 
-    def _apply_toggle(self, grid, x, y):
-        """Inverse une case et ses voisines sur une grille donnée."""
+    def toggle(self, x: int, y: int):
+        """Inverse l’état d’une case et de ses voisines."""
+        if self.terminee:
+            return
         for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
             nx, ny = x+dx, y+dy
             if 0 <= nx < self.size and 0 <= ny < self.size:
-                grid[ny][nx] = not grid[ny][nx]
-
-    def toggle(self, x: int, y: int):
-        """Inverse l’état d’une case et de ses voisines sur la grille du jeu."""
-        if self.terminee:
-            return
-        self._apply_toggle(self.grid, x, y)
+                self.grid[ny][nx] = not self.grid[ny][nx]
         if self.check_win():
             self.terminee = True
 
@@ -62,7 +61,6 @@ class LightsOutGame:
         return all(not cell for row in self.grid for cell in row)
 
     def get_embed(self) -> discord.Embed:
-        """Crée un embed représentant l’état du jeu."""
         embed = discord.Embed(
             title=f"💡 Jeu Lights Out — mode {self.mode.capitalize()}",
             description="Clique sur les boutons pour éteindre toutes les lumières !",
@@ -72,8 +70,6 @@ class LightsOutGame:
         embed.add_field(name="État", value=status, inline=False)
         return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🎮 Classe LightsOutView (interface de jeu)
 # ────────────────────────────────────────────────────────────────────────────────
 class LightsOutView(discord.ui.View):
     def __init__(self, game: LightsOutGame, parent_cog, channel_id: int, player_id: int | None = None):
@@ -85,22 +81,13 @@ class LightsOutView(discord.ui.View):
         self.update_buttons()
 
     def update_buttons(self):
-        """Met à jour les boutons selon l’état de la grille."""
         self.clear_items()
         for y in range(self.game.size):
             row = []
             for x in range(self.game.size):
-                style = (
-                    discord.ButtonStyle.success if self.game.grid[y][x]
-                    else discord.ButtonStyle.secondary
-                )
+                style = discord.ButtonStyle.success if self.game.grid[y][x] else discord.ButtonStyle.secondary
                 emoji = "🔆" if self.game.grid[y][x] else "⬛"
-                button = discord.ui.Button(
-                    label=" ",
-                    emoji=emoji,
-                    style=style,
-                    custom_id=f"light_{x}_{y}",
-                )
+                button = discord.ui.Button(label=" ", emoji=emoji, style=style, custom_id=f"light_{x}_{y}")
                 button.callback = self.make_callback(x, y)
                 row.append(button)
             for b in row:
@@ -110,33 +97,23 @@ class LightsOutView(discord.ui.View):
         async def callback(interaction: discord.Interaction):
             session = self.parent_cog.sessions.get(self.channel_id)
             if not session:
-                await interaction.response.send_message(
-                    "❌ Cette partie n'existe plus.", ephemeral=True
-                )
+                await interaction.response.send_message("❌ Cette partie n'existe plus.", ephemeral=True)
                 return
-
             if self.game.mode == "solo" and interaction.user.id != self.player_id:
                 await interaction.response.send_message(
-                    "❌ Seul le joueur ayant lancé la partie peut jouer en mode solo.",
-                    ephemeral=True
+                    "❌ Seul le joueur ayant lancé la partie peut jouer en mode solo.", ephemeral=True
                 )
                 return
-
             session.last_activity = asyncio.get_event_loop().time()
             self.game.toggle(x, y)
             self.update_buttons()
-
             embed = self.game.get_embed()
             await interaction.response.edit_message(embed=embed, view=self)
-
             if self.game.terminee:
                 await safe_send(interaction.channel, f"🎉 Bravo {interaction.user.mention} ! Toutes les lumières sont éteintes !")
                 self.parent_cog.sessions.pop(self.channel_id, None)
-
         return callback
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🧩 Classe LightsOutSession
 # ────────────────────────────────────────────────────────────────────────────────
 class LightsOutSession:
     def __init__(self, game: LightsOutGame, message: discord.Message, mode: str = "solo", author_id: int | None = None):
@@ -147,11 +124,7 @@ class LightsOutSession:
         self.author_id = author_id
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
 class LightsOut(commands.Cog):
-    """Commande !lightsout — Jeu Lights Out interactif."""
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.sessions = {}
@@ -160,24 +133,18 @@ class LightsOut(commands.Cog):
     def cog_unload(self):
         self.verif_inactivite.cancel()
 
-    @commands.command(
-        name="lightsout", aliases=["lo"],
-        help="Joue au jeu des lumières à éteindre (solo ou multi).",
-        description="!lightsout [multi] — Éteins toutes les lumières !",
-    )
+    @commands.command(name="lightsout", aliases=["lo"])
     async def lightsout_cmd(self, ctx: commands.Context, mode: str = ""):
         mode = mode.lower()
         if mode not in ("multi", "m"):
             mode = "solo"
-
         channel_id = ctx.channel.id
         if channel_id in self.sessions:
             await safe_send(ctx.channel, "❌ Une partie est déjà en cours dans ce salon.")
             return
-
         game = LightsOutGame(mode=mode)
         embed = game.get_embed()
-        view = LightsOutView(game, self, channel_id, player_id=ctx.author.id if mode == "solo" else None)
+        view = LightsOutView(game, self, channel_id, player_id=ctx.author.id if mode=="solo" else None)
         message = await safe_send(ctx.channel, embed=embed, view=view)
         session = LightsOutSession(game, message, mode=mode, author_id=ctx.author.id)
         self.sessions[channel_id] = session
@@ -194,8 +161,6 @@ class LightsOut(commands.Cog):
             if session:
                 await safe_send(session.message.channel, "⏰ Partie terminée pour inactivité (3 minutes sans action).")
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🔌 Setup du Cog
 # ────────────────────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = LightsOut(bot)
