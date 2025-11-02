@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 tram_probleme.py — Commande /tram_probleme et !tram_probleme
-# Objectif : Quiz interactif du dilemme du tramway avec mode story et profil moral
+# Objectif : Quiz interactif du dilemme du tramway avec bouton "Commencer" et "Continuer"
 # Catégorie : Fun
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
@@ -12,7 +12,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond, safe_edit  # ✅ Utilitaires sécurisés
+from utils.discord_utils import safe_send, safe_respond, safe_edit
 import json
 import random
 import os
@@ -76,44 +76,73 @@ class TramProbleme(commands.Cog):
         if not story:
             random.shuffle(questions)
 
-        utilitarisme, deontologie = 0, 0
+        utilitarisme = 0
+        deontologie = 0
         total_saved = {"humain": 0, "enfant": 0, "pa": 0, "animal": 0, "robot": 0}
         total_killed = {"humain": 0, "enfant": 0, "pa": 0, "animal": 0, "robot": 0}
 
-        # ───────────────────────────────────────
-        # Message d’intro
-        # ───────────────────────────────────────
+        # ──────────────────────────────────────────────────────────────
+        # Message d’intro avec bouton "Commencer"
+        # ──────────────────────────────────────────────────────────────
         embed = discord.Embed(
             title="🚋 Dilemme du Tramway",
             description=(
                 "Bienvenue dans le test moral ultime.\n"
                 "Tu devras faire des choix... difficiles.\n\n"
-                f"🧩 Mode story : {'✅ Activé (ordre fixe)' if story else '❌ Désactivé (aléatoire)'}"
+                f"🧩 Mode story : {'✅ Activé (ordre fixe)' if story else '❌ Désactivé (aléatoire)'}\n\n"
+                "Appuie sur **▶️ Commencer** quand tu es prêt."
             ),
             color=discord.Color.orange()
         )
-        msg = await send(ctx_or_inter, embed=embed)
 
+        view_start = discord.ui.View(timeout=60)
+        started = False
+
+        async def start_callback(interaction):
+            nonlocal started
+            started = True
+            await interaction.response.defer()
+            view_start.stop()
+
+        start_button = discord.ui.Button(label="▶️ Commencer", style=discord.ButtonStyle.green)
+        start_button.callback = start_callback
+        view_start.add_item(start_button)
+
+        msg = await send(ctx_or_inter, embed=embed, view=view_start)
+        await view_start.wait()
+
+        if not started:
+            embed.description = "⛔ Le tram s’arrête... tu n’as pas pris le départ à temps."
+            embed.color = discord.Color.red()
+            await edit(msg, embed=embed, view=None)
+            return
+
+        # ──────────────────────────────────────────────────────────────
+        # Boucle des questions
+        # ──────────────────────────────────────────────────────────────
         total_q = len(questions) if story else min(5, len(questions))
 
         for i, question in enumerate(questions[:total_q], start=1):
             embed.title = f"🚨 Question {i}/{total_q}"
             embed.description = question["question"]
             embed.clear_fields()
+            embed.color = discord.Color.orange()
             embed.set_footer(text="Fais ton choix moral... ou pas 😈")
 
             view = discord.ui.View(timeout=60)
             answered = False
+            next_question = False
 
             for option in question["options"]:
                 button = discord.ui.Button(label=option["text"], style=discord.ButtonStyle.primary)
 
                 async def button_callback(interaction, choice=option):
-                    nonlocal utilitarisme, deontologie, answered
+                    nonlocal utilitarisme, deontologie, answered, next_question
                     answered = True
 
                     result = choice.get("result", "🤔 Choix étrange...")
                     ethics = choice.get("ethics")
+
                     if ethics == "utilitarisme":
                         utilitarisme += 1
                     elif ethics == "déontologie":
@@ -124,8 +153,24 @@ class TramProbleme(commands.Cog):
                         total_killed[key] += choice.get("killed", {}).get(key, 0)
 
                     embed.add_field(name="🧠 Ton choix", value=f"**{choice['text']}**\n{result}", inline=False)
+                    embed.set_footer(text="Appuie sur ➡️ Continuer pour passer à la suite.")
                     await edit(msg, embed=embed, view=None)
                     await interaction.response.defer()
+
+                    # Bouton "Continuer" après le choix
+                    view_continue = discord.ui.View(timeout=60)
+
+                    async def continue_callback(inter2):
+                        nonlocal next_question
+                        next_question = True
+                        await inter2.response.defer()
+                        view_continue.stop()
+
+                    cont_btn = discord.ui.Button(label="➡️ Continuer", style=discord.ButtonStyle.green)
+                    cont_btn.callback = continue_callback
+                    view_continue.add_item(cont_btn)
+                    await edit(msg, embed=embed, view=view_continue)
+                    await view_continue.wait()
                     view.stop()
 
                 button.callback = button_callback
@@ -140,14 +185,15 @@ class TramProbleme(commands.Cog):
                 await edit(msg, embed=embed, view=None)
                 return
 
-            if story and i < total_q:
-                embed.description = "🚋 Le tramway continue sa route..."
+            if story and not next_question:
+                embed.description = "🚋 Le tram s’arrête... tu n’as pas continué à temps."
+                embed.color = discord.Color.red()
                 await edit(msg, embed=embed, view=None)
-                await discord.utils.sleep_until(discord.utils.utcnow() + discord.utils.timedelta(seconds=2))
+                return
 
-        # ───────────────────────────────────────────────
+        # ──────────────────────────────────────────────────────────────
         # Résultats finaux
-        # ───────────────────────────────────────────────
+        # ──────────────────────────────────────────────────────────────
         embed = discord.Embed(
             title="🎉 Résultats du Dilemme du Tramway",
             color=discord.Color.green()
