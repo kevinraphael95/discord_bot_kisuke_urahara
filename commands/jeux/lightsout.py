@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 💡 lightsout.py — Commande interactive !lightsout
-# Objectif : Jeu "Lights Out" avec grille de boutons interactifs (résoluble)
+# Objectif : Jeu "Lights Out" avec grille de boutons interactifs (toujours résoluble)
 # Catégorie : Jeux
 # Accès : Public
 # ────────────────────────────────────────────────────────────────────────────────
@@ -13,7 +13,6 @@ from discord.ext import commands, tasks
 import asyncio
 import random
 from utils.discord_utils import safe_send, safe_edit
-import numpy as np  # Pour la génération résoluble
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Paramètres
@@ -27,41 +26,34 @@ COULEUR_INACTIVE = 0x2F3136 # Couleur sombre (lumière éteinte)
 # 🧩 Classe LightsOutGame
 # ────────────────────────────────────────────────────────────────────────────────
 class LightsOutGame:
-    def __init__(self, size: int = TAILLE_GRILLE, mode: str = "solo", resolvable: bool = True):
+    def __init__(self, size: int = TAILLE_GRILLE, mode: str = "solo"):
         self.size = size
         self.terminee = False
         self.mode = mode
-
-        if resolvable:
-            self.grid = self.generate_solvable_grid()
-        else:
-            self.grid = [[random.choice([True, False]) for _ in range(size)] for _ in range(size)]
+        self.grid = self.generate_solvable_grid()
 
     def generate_solvable_grid(self):
-        """Crée une grille résoluble via un vecteur de coups aléatoire."""
-        n = self.size
-        x = np.random.randint(0, 2, size=(n*n), dtype=int)  # vecteur de coups aléatoire
-        A = np.zeros((n*n, n*n), dtype=int)
-        for y in range(n):
-            for x0 in range(n):
-                idx = y*n + x0
-                for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
-                    nx, ny = x0+dx, y+dy
-                    if 0 <= nx < n and 0 <= ny < n:
-                        A[ny*n+nx, idx] = 1
-        b = A @ x % 2  # grille finale solvable
-        grid = [[bool(b[y*n + x0]) for x0 in range(n)] for y in range(n)]
+        """Crée une grille résoluble en partant de toutes les lumières éteintes."""
+        grid = [[False]*self.size for _ in range(self.size)]
+        n_coups = random.randint(5, 15)  # nombre de coups aléatoires pour créer une grille
+        for _ in range(n_coups):
+            x = random.randint(0, self.size-1)
+            y = random.randint(0, self.size-1)
+            self._apply_toggle(grid, x, y)
         return grid
 
+    def _apply_toggle(self, grid, x, y):
+        """Inverse une case et ses voisines sur une grille donnée."""
+        for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
+            nx, ny = x+dx, y+dy
+            if 0 <= nx < self.size and 0 <= ny < self.size:
+                grid[ny][nx] = not grid[ny][nx]
+
     def toggle(self, x: int, y: int):
-        """Inverse l’état d’une case et de ses voisines."""
+        """Inverse l’état d’une case et de ses voisines sur la grille du jeu."""
         if self.terminee:
             return
-        directions = [(0,0),(1,0),(-1,0),(0,1),(0,-1)]
-        for dx, dy in directions:
-            nx, ny = x + dx, y + dy
-            if 0 <= nx < self.size and 0 <= ny < self.size:
-                self.grid[ny][nx] = not self.grid[ny][nx]
+        self._apply_toggle(self.grid, x, y)
         if self.check_win():
             self.terminee = True
 
@@ -183,7 +175,7 @@ class LightsOut(commands.Cog):
             await safe_send(ctx.channel, "❌ Une partie est déjà en cours dans ce salon.")
             return
 
-        game = LightsOutGame(mode=mode, resolvable=True)
+        game = LightsOutGame(mode=mode)
         embed = game.get_embed()
         view = LightsOutView(game, self, channel_id, player_id=ctx.author.id if mode == "solo" else None)
         message = await safe_send(ctx.channel, embed=embed, view=view)
