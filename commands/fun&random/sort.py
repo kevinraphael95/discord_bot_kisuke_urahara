@@ -20,16 +20,22 @@ from utils.algorithms import algorithms as all_algos  # ✅ Import des algorithm
 # ────────────────────────────────────────────────────────────────────────────────
 # Visualisation des barres
 # ────────────────────────────────────────────────────────────────────────────────
-def render_bars(data, sorted_indices=None, max_length=12):
-    if sorted_indices is None:
-        sorted_indices = []
+def render_bars(data, highlight_indices=None, max_length=12):
+    """
+    Génère une représentation visuelle des barres pour Discord.
+    highlight_indices : liste des indices des colonnes en cours de déplacement (orange)
+    """
+    if highlight_indices is None:
+        highlight_indices = []
     max_val = max(data)
     lines = []
     for i, n in enumerate(data):
         height = int((n / max_val) * max_length)
-        bar = "▇" * height
-        if i in sorted_indices:
-            bar = f"{bar} ✅"
+        # barre normale : blanc, barre en surbrillance : orange
+        if i in highlight_indices:
+            bar = ":orange_square:" * height
+        else:
+            bar = ":white_large_square:" * height
         lines.append(bar)
     return "\n".join(lines)
 
@@ -68,6 +74,7 @@ class Sorting(commands.Cog):
                 else:
                     msg = await safe_send(channel_or_interaction, embed=embed)
 
+        # première étape
         embed = discord.Embed(
             title=f"🔄 {algorithm_name} — En cours...",
             description=f"{algo_info['desc']}\n```\n{render_bars(data)}\n```",
@@ -75,20 +82,22 @@ class Sorting(commands.Cog):
         )
         await send(embed)
 
-        async for step, sorted_idx in algo(data.copy()):
+        # visualisation dynamique
+        async for step, highlight in algo(data.copy()):
             iteration += 1
             await asyncio.sleep(delay)
             embed = discord.Embed(
                 title=f"🔄 {algorithm_name} — Étape {iteration}",
-                description=f"{algo_info['desc']}\n```\n{render_bars(step, sorted_idx)}\n```",
+                description=f"{algo_info['desc']}\n```\n{render_bars(step, highlight)}\n```",
                 color=discord.Color.orange()
             )
             await send(embed)
 
+        # résultat final
         sorted_data = sorted(data)
         embed = discord.Embed(
             title=f"✅ {algorithm_name} terminé !",
-            description=f"{algo_info['desc']}\n```\n{render_bars(sorted_data, list(range(len(sorted_data))))}\n```",
+            description=f"{algo_info['desc']}\n```\n{render_bars(sorted_data)}\n```",
             color=discord.Color.green()
         )
         embed.add_field(name="🧮 Itérations totales", value=f"{iteration}", inline=False)
