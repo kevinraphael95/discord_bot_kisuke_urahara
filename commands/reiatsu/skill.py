@@ -18,6 +18,7 @@ from dateutil import parser
 from datetime import datetime, timedelta, timezone
 import os
 import json
+import random
 from utils.discord_utils import safe_send, safe_respond
 from utils.supabase_client import supabase
 from utils.reiatsu_utils import ensure_profile, has_class
@@ -65,10 +66,7 @@ class Skill(commands.Cog):
 
             classe = player["classe"]
 
-            # ────────────────────────────────────────────────────────────────────────
-            # 🔸 Suppression automatique du message de commande pour Illusionniste
-            # (Discrétion : le message !!skill est supprimé dès l’activation)
-            # ────────────────────────────────────────────────────────────────────────
+            # 🔸 Suppression automatique du message pour Illusionniste
             if classe == "Illusionniste" and isinstance(channel, discord.TextChannel):
                 try:
                     async for msg in channel.history(limit=5):
@@ -81,7 +79,7 @@ class Skill(commands.Cog):
             classe_data = self.config["CLASSES"].get(classe, {})
             base_cd = classe_data.get("Cooldown", 12)
 
-            # 🔹 Récupération du timestamp en base
+            # 🔹 Récupération du timestamp
             res = supabase.table("reiatsu").select("last_skilled_at, active_skill, fake_spawn_id").eq("user_id", user.id).execute()
             data = res.data[0] if res.data else {}
             last_skill = data.get("last_skilled_at")
@@ -122,6 +120,7 @@ class Skill(commands.Cog):
             update_data = {"last_skilled_at": datetime.utcnow().isoformat()}
             msg = ""
 
+            # ───────────── Illusionniste ─────────────
             if classe == "Illusionniste":
                 if fake_spawn_id:
                     await safe_send(channel, "⚠️ Tu as déjà un faux Reiatsu actif !")
@@ -130,7 +129,6 @@ class Skill(commands.Cog):
                 update_data["active_skill"] = True
                 supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
 
-                # Vérification du salon de spawn configuré
                 conf_data = supabase.table("reiatsu_config").select("*").eq("guild_id", channel.guild.id).execute()
                 if not conf_data.data or not conf_data.data[0].get("channel_id"):
                     await safe_send(channel, "❌ Aucun canal de spawn configuré pour ce serveur.")
@@ -138,12 +136,10 @@ class Skill(commands.Cog):
 
                 spawn_channel = self.bot.get_channel(int(conf_data.data[0]["channel_id"]))
 
-                # Spawn du faux Reiatsu identique au vrai
                 cog = self.bot.get_cog("ReiatsuSpawner")
                 if cog:
                     await cog._spawn_message(spawn_channel, guild_id=None, is_fake=True, owner_id=user.id)
 
-                # Message éphémère pour le joueur
                 embed = discord.Embed(
                     title="🎭 Skill Illusionniste activé !",
                     description="Un faux Reiatsu est apparu dans le serveur…\nTu ne peux pas l’absorber toi-même.",
@@ -151,30 +147,68 @@ class Skill(commands.Cog):
                 )
                 await safe_send(channel, embed=embed, ephemeral=True)
 
+            # ───────────── Voleur ─────────────
             elif classe == "Voleur":
                 update_data["active_skill"] = True
                 msg = "🥷 **Vol garanti activé !** Ton prochain vol réussira à coup sûr."
 
+            # ───────────── Absorbeur ─────────────
             elif classe == "Absorbeur":
                 update_data["active_skill"] = True
                 msg = "🌀 **Super Absorption !** Le prochain Reiatsu sera forcément un Super Reiatsu."
 
+            # ───────────── Parieur (nouvelle version 🎰) ─────────────
             elif classe == "Parieur":
                 points = player.get("points", 0)
-                if points < 10:
+                mise = 10
+
+                if points < mise:
                     await safe_send(channel, "❌ Tu n'as pas assez de Reiatsu pour parier (10 requis).")
                     return
-                import random
-                gain = 30
-                if random.random() < 0.5:
-                    update_data["points"] = points - 10
-                    msg = "🎲 **Perdu !** Tu as perdu 10 Reiatsu."
+
+                symbols = ["💎", "🍀", "🔥", "💀", "🎴", "🌸", "🪙"]
+
+                message = await safe_send(channel, "🎰 Lancement de la machine à sous Reiatsu...")
+                await asyncio.sleep(1.2)
+
+                # Animation courte
+                for _ in range(3):
+                    await message.edit(content=f"🎰 {random.choice(symbols)} | {random.choice(symbols)} | {random.choice(symbols)}")
+                    await asyncio.sleep(0.5)
+
+                slots = [random.choice(symbols) for _ in range(3)]
+
+                if len(set(slots)) == 1:
+                    result_text = "💥 **JACKPOT !** Tu gagnes **+50 Reiatsu !**"
+                    gain = 50
+                elif len(set(slots)) == 2:
+                    result_text = "✨ **Pas mal !** Deux symboles identiques, tu gagnes **+20 Reiatsu.**"
+                    gain = 20
                 else:
-                    update_data["points"] = points - 10 + gain
-                    msg = f"🎲 **Gagné !** Tu as misé 10 Reiatsu et remporté **{gain}**."
+                    result_text = "❌ **Perdu !** Tu perds ta mise de 10 Reiatsu."
+                    gain = -mise
+
+                new_points = points + gain if gain > 0 else points - mise
+                update_data = {
+                    "points": max(0, new_points),
+                    "last_skilled_at": datetime.utcnow().isoformat()
+                }
+                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
+
+                embed = discord.Embed(
+                    title="🎰 Machine à Sous Reiatsu",
+                    description=f"{slots[0]} | {slots[1]} | {slots[2]}\n\n{result_text}",
+                    color=discord.Color.gold() if gain > 0 else discord.Color.red()
+                )
+                embed.set_footer(text=f"Mise : 10 Reiatsu • Solde actuel : {max(0, new_points)}")
+
+                await message.edit(content=None, embed=embed)
+
+                # Empêche l'affichage du message "En cours"
+                return
 
             # ✅ Mise à jour Supabase pour les autres classes
-            if classe != "Illusionniste":
+            if classe not in ["Illusionniste", "Parieur"]:
                 supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
                 embed = discord.Embed(
                     title=f"🎴 Skill de {player.get('username', user.name)}",
@@ -210,7 +244,3 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Reiatsu"
     await bot.add_cog(cog)
-
-
-
-
