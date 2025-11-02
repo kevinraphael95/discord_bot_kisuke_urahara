@@ -155,7 +155,7 @@ class ReiatsuCommand(commands.Cog):
             ),
             color=discord.Color.purple()
         )
-        embed.set_footer(text="💠 Utilise /reiatsuprofil pour ton profil personnel.")
+        embed.set_footer(text="💠 Utilise `!!tutoreiatsu` ou `!!tutorts` pour en savoir plus sur le Reiatsu.")
         view = ReiatsuView(author, spawn_link=spawn_link)
 
         if isinstance(channel_or_interaction, discord.Interaction):
