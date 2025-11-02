@@ -97,7 +97,7 @@ class Sorting(commands.Cog):
         name="sorting",
         description="Visualise un algorithme de tri en temps réel."
     )
-    @app_commands.describe(algorithme="Nom, numéro ou 'random' pour un tri aléatoire")
+    @app_commands.describe(algorithme="Trie 12 barres en longueurs différentes selon un algorithme.")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_sorting(self, interaction: discord.Interaction, algorithme: str = None):
         await self.handle_sorting(interaction, algorithme)
@@ -105,7 +105,7 @@ class Sorting(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="sorting")
+    @commands.command(name="sorting", aliases=["sort"], help="Trie 12 barres en longueurs différentes selon un algorithme.")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_sorting(self, ctx: commands.Context, *, algorithme: str = None):
         await self.handle_sorting(ctx.channel, algorithme)
