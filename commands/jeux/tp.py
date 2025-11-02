@@ -118,7 +118,7 @@ class TramProbleme(commands.Cog):
             return
 
         # ──────────────────────────────────────────────────────────────
-        # Boucle des questions
+        # Boucle des questions avec timeout pour tous les modes
         # ──────────────────────────────────────────────────────────────
         total_q = len(questions) if story else min(5, len(questions))
 
@@ -157,7 +157,7 @@ class TramProbleme(commands.Cog):
                     await edit(msg, embed=embed, view=None)
                     await interaction.response.defer()
 
-                    # Bouton "Continuer" après le choix
+                    # Bouton "Continuer"
                     view_continue = discord.ui.View(timeout=60)
 
                     async def continue_callback(inter2):
@@ -177,15 +177,15 @@ class TramProbleme(commands.Cog):
                 view.add_item(button)
 
             await edit(msg, embed=embed, view=view)
-            timeout = await view.wait()
+            await view.wait()
 
-            if story and not answered:
+            if not answered:
                 embed.description = "⛔ Le tram s’arrête... tu n’as pas répondu à temps."
                 embed.color = discord.Color.red()
                 await edit(msg, embed=embed, view=None)
                 return
 
-            if story and not next_question:
+            if not next_question:
                 embed.description = "🚋 Le tram s’arrête... tu n’as pas continué à temps."
                 embed.color = discord.Color.red()
                 await edit(msg, embed=embed, view=None)
