@@ -34,7 +34,7 @@ PAGES = [
         "description": (
             "- `!!reiatsu` ou `!!rts` : Voir les infos générales : sur quel salon le reiatsu apparaît et dans combien de temps et le classement (top 10).\n"
             "- `!!reiatsuprofil` ou `!!p` : Voir ton profil qui contient toutes tes infos : ta quantité de Reiatsu, ta classe, et le cooldown de ton skill\n"
-            "- `!!classe` pour choisir ou changer ta classe
+            "- `!!classe` pour choisir ou changer ta classe"
         ),
         "color": discord.Color.blue()
     },
