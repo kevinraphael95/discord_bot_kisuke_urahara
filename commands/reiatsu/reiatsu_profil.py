@@ -165,7 +165,7 @@ class ReiatsuProfil(commands.Cog):
             inline=False
         )
 
-        embed.set_footer(text="Utilise /classe pour changer de voie ou /skill pour activer ton pouvoir.")
+        embed.set_footer(text="💠 Utilise `!!tutoreiatsu` ou `!!tutorts` pour en savoir plus sur le Reiatsu.")
 
         # Envoi du profil
         if isinstance(channel_or_interaction, discord.Interaction):
