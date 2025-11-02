@@ -135,55 +135,6 @@ class ChoisirClasse(commands.Cog):
         self.bot = bot
         self.config = config
 
-    # ────────────────────────────────────────────────────────────────────────
-    # 🔹 Vérification du cooldown ou skill actif
-    # ────────────────────────────────────────────────────────────────────────
-    async def _verif_cooldown(self, user_id: int):
-        """Empêche le changement de classe si skill en cours ou en cooldown."""
-        player = ensure_profile(user_id, "Unknown")  # auto création si nécessaire
-        classe = player.get("classe", None)
-        classe_data = self.config["CLASSES"].get(classe, {}) if classe else {}
-        base_cd = classe_data.get("Cooldown", 12)
-
-        res = supabase.table("reiatsu").select("last_skilled_at, active_skill").eq("user_id", str(user_id)).execute()
-        user_data = res.data[0] if res.data else {}
-        last_skill = user_data.get("last_skilled_at")
-        active_skill = user_data.get("active_skill", False)
-
-        # Skill encore actif
-        if active_skill:
-            embed = discord.Embed(
-                title="🌀 Skill en cours d’utilisation",
-                description="Tu ne peux pas changer de classe tant que ton **skill actif** est en cours.",
-                color=discord.Color.orange()
-            )
-            embed.set_footer(text="Attends la fin de ton skill avant de retenter.")
-            return embed
-
-        # Skill encore en cooldown
-        if last_skill:
-            try:
-                last_dt = parser.parse(last_skill)
-                if not last_dt.tzinfo:
-                    last_dt = last_dt.replace(tzinfo=timezone.utc)
-                next_cd = last_dt + timedelta(hours=base_cd)
-                now_dt = datetime.now(timezone.utc)
-
-                if now_dt < next_cd:
-                    restant = next_cd - now_dt
-                    h, m = divmod(int(restant.total_seconds() // 60), 60)
-                    temps = f"{restant.days}j {h}h{m}m" if restant.days else f"{h}h{m}m"
-                    embed = discord.Embed(
-                        title="⏳ Skill en cooldown",
-                        description=f"Ton **skill** est encore en recharge pendant `{temps}`.\nTu pourras changer de classe une fois le cooldown terminé.",
-                        color=discord.Color.red()
-                    )
-                    embed.set_footer(text="Patience, le Reiatsu se régénère…")
-                    return embed
-            except:
-                pass
-
-        return None
 
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Envoi du menu interactif
@@ -200,10 +151,6 @@ class ChoisirClasse(commands.Cog):
     @commands.command(name="classe", help="Choisir sa classe Reiatsu")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def classe_prefix(self, ctx: commands.Context):
-        embed = await self._verif_cooldown(ctx.author.id)
-        if embed:
-            await safe_send(ctx.channel, embed=embed)
-            return
         await self._send_menu(ctx.channel, ctx.author.id)
 
     # ────────────────────────────────────────────────────────────────────────
@@ -211,10 +158,6 @@ class ChoisirClasse(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="classe", description="Choisir sa classe Reiatsu")
     async def classe_slash(self, interaction: discord.Interaction):
-        embed = await self._verif_cooldown(interaction.user.id)
-        if embed:
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-            return
         await interaction.response.defer()
         await self._send_menu(interaction.channel, interaction.user.id)
         try:
