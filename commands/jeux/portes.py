@@ -61,8 +61,12 @@ class RepondreButton(Button):
         self.parent_view = parent_view
 
     async def callback(self, interaction: discord.Interaction):
+        # Vérification utilisateur
         if interaction.user.id != self.parent_view.user_id:
-            return await safe_interact(interaction, content="⛔ Ce n’est pas ton tour.", ephemeral=True)
+            return await interaction.response.send_message(
+                "⛔ Ce n’est pas ton tour.", ephemeral=True
+            )
+        # Envoi direct du modal
         await interaction.response.send_modal(ReponseModal(self.parent_view))
 
 
@@ -74,9 +78,17 @@ class ContinuerButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         new_view = PortesView(self.next_enigme, self.parent_view.user_id)
-        await safe_interact(interaction, content=None, edit=True, embed=new_view.build_embed(), view=new_view)
+        await safe_interact(
+            interaction,
+            content=None,
+            edit=True,
+            embed=new_view.build_embed(),
+            view=new_view
+        )
 
-
+# ────────────────────────────────────────────────────────────────────────────────
+# 🏗️ Vue principale du jeu
+# ────────────────────────────────────────────────────────────────────────────────
 class PortesView(View):
     def __init__(self, enigme, user_id):
         super().__init__(timeout=None)
@@ -95,7 +107,9 @@ class PortesView(View):
 
     async def check_answer(self, interaction: discord.Interaction, answer: str):
         if interaction.user.id != self.user_id:
-            return await safe_interact(interaction, content="⛔ Ce n’est pas ton tour.", ephemeral=True)
+            return await interaction.response.send_message(
+                "⛔ Ce n’est pas ton tour.", ephemeral=True
+            )
 
         normalized = normalize(answer)
         valid_answers = self.enigme["reponse"]
@@ -131,7 +145,7 @@ class PortesView(View):
                 }).execute()
 
             # Message réponse
-            await safe_interact(interaction,
+            await interaction.response.send_message(
                 content=f"✅ Bonne réponse ! Tu passes à la porte {next_door} 🚪\n{reward_message}",
                 ephemeral=True
             )
@@ -144,7 +158,9 @@ class PortesView(View):
                 await safe_interact(interaction, content=None, edit=True, embed=self.build_embed(), view=self)
 
         else:
-            await safe_interact(interaction, content="❌ Mauvaise réponse... Essaie encore !", ephemeral=True)
+            await interaction.response.send_message(
+                "❌ Mauvaise réponse... Essaie encore !", ephemeral=True
+            )
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧩 Cog principal
@@ -193,7 +209,6 @@ class Portes(commands.Cog):
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_portes(self, ctx: commands.Context):
         await self._start_portes(ctx.channel, ctx.author)
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
