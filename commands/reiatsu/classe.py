@@ -1,6 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 choisir_classe.py — Commande interactive !classe /classe
-# Objectif : Permet aux joueurs de choisir leur classe Reiatsu via des boutons et pagination
+# Objectif : Afficher toutes les classes Reiatsu sur une seule page
+#             et permettre au joueur d’en choisir une via un bouton
 # Catégorie : Reiatsu
 # Accès : Public
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
@@ -13,14 +14,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
-from datetime import datetime, timedelta, timezone
-from dateutil import parser
 import json
 import os
 
 from utils.supabase_client import supabase
 from utils.discord_utils import safe_send, safe_respond, safe_edit
-from utils.reiatsu_utils import ensure_profile
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Chargement de la configuration Reiatsu
@@ -40,35 +38,49 @@ config = load_reiatsu_config()
 CLASSES = list(config.get("CLASSES", {}).items())
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ UI — Pagination + Choix de classe
+# 🎛️ UI — Liste complète des classes avec boutons
 # ────────────────────────────────────────────────────────────────────────────────
-class ClassePageView(View):
-    def __init__(self, user_id: int, index: int = 0):
+class ClasseSelectView(View):
+    def __init__(self, user_id: int):
         super().__init__(timeout=60)
         self.user_id = user_id
-        self.index = index
-        self.total = len(CLASSES)
-        self.update_buttons()
+        self.create_buttons()
 
-    def update_buttons(self):
-        self.clear_items()
+    def create_buttons(self):
+        """Crée un bouton pour chaque classe définie dans la config Reiatsu."""
+        for nom, data in CLASSES:
+            symbole = data.get("Symbole", "🌀")
+            btn = Button(label=f"{symbole} {nom}", style=discord.ButtonStyle.primary)
+            btn.callback = self._generate_callback(nom, data)
+            self.add_item(btn)
 
-        # Boutons de navigation
-        prev_btn = Button(label="⬅️ Précédent", style=discord.ButtonStyle.secondary)
-        prev_btn.callback = self.prev_page
-        self.add_item(prev_btn)
+    def _generate_callback(self, nom, data):
+        async def callback(interaction: discord.Interaction):
+            if interaction.user.id != self.user_id:
+                await safe_respond(interaction, "❌ Tu ne peux pas choisir pour un autre joueur.", ephemeral=True)
+                return
 
-        next_btn = Button(label="➡️ Suivant", style=discord.ButtonStyle.secondary)
-        next_btn.callback = self.next_page
-        self.add_item(next_btn)
+            try:
+                nouveau_cd = 19 if nom == "Voleur" else 24
+                supabase.table("reiatsu").update({
+                    "classe": nom,
+                    "steal_cd": nouveau_cd
+                }).eq("user_id", str(self.user_id)).execute()
 
-        # Bouton choisir
-        choose_btn = Button(label="✅ Choisir cette classe", style=discord.ButtonStyle.success)
-        choose_btn.callback = self.choose_class
-        self.add_item(choose_btn)
+                symbole = data.get("Symbole", "🌀")
+                embed = discord.Embed(
+                    title=f"✅ Classe choisie : {symbole} {nom}",
+                    description=f"**Passive :** {data['Passive']}\n**Active :** {data['Active']}",
+                    color=discord.Color.green()
+                )
+                await interaction.response.edit_message(embed=embed, view=None)
+
+            except Exception as e:
+                await safe_respond(interaction, f"❌ Erreur lors de l'enregistrement : {e}", ephemeral=True)
+        return callback
 
     async def on_timeout(self):
-        """Désactive automatiquement les boutons après le temps limite."""
+        """Désactive les boutons après expiration."""
         for item in self.children:
             item.disabled = True
         if hasattr(self, "message"):
@@ -77,71 +89,37 @@ class ClassePageView(View):
             except:
                 pass
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if interaction.user.id != self.user_id:
-            await safe_respond(interaction, "❌ Tu ne peux pas interagir avec le menu d’un autre joueur.", ephemeral=True)
-            return False
-        return True
-
-    # ──────────────────────────────
-    # Callbacks
-    # ──────────────────────────────
-    async def prev_page(self, interaction: discord.Interaction):
-        self.index = (self.index - 1) % self.total
-        await interaction.response.edit_message(embed=self.get_embed(), view=self)
-
-    async def next_page(self, interaction: discord.Interaction):
-        self.index = (self.index + 1) % self.total
-        await interaction.response.edit_message(embed=self.get_embed(), view=self)
-
-    async def choose_class(self, interaction: discord.Interaction):
-        nom, data = CLASSES[self.index]
-        try:
-            nouveau_cd = 19 if nom == "Voleur" else 24
-            supabase.table("reiatsu").update({
-                "classe": nom,
-                "steal_cd": nouveau_cd
-            }).eq("user_id", str(self.user_id)).execute()
-
-            symbole = data.get("Symbole", "🌀")
-            embed = discord.Embed(
-                title=f"✅ Classe choisie : {symbole} {nom}",
-                description=f"**Passive** : {data['Passive']}\n**Active** : {data['Active']}",
-                color=discord.Color.green()
-            )
-            await interaction.response.edit_message(embed=embed, view=None)
-
-        except Exception as e:
-            await safe_respond(interaction, f"❌ Erreur lors de l'enregistrement : {e}", ephemeral=True)
-
-    def get_embed(self):
-        nom, data = CLASSES[self.index]
-        symbole = data.get("Symbole", "🌀")
-        embed = discord.Embed(
-            title=f"🎭 Classe {self.index + 1}/{self.total} — {symbole} {nom}",
-            description=f"**Passif** : {data['Passive']}\n**Skill** : {data['Active']}",
-            color=discord.Color.purple()
-        )
-        embed.set_footer(text="Utilise les flèches pour naviguer et ✅ pour choisir cette classe")
-        return embed
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class ChoisirClasse(commands.Cog):
-    """Commande !classe ou /classe — Choisir sa classe Reiatsu via pagination et boutons"""
+    """Commande !classe ou /classe — Choisir sa classe Reiatsu via une vue complète"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.config = config
 
-
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Envoi du menu interactif
     # ────────────────────────────────────────────────────────────────────────
     async def _send_menu(self, channel: discord.abc.Messageable, user_id: int):
-        view = ClassePageView(user_id)
-        embed = view.get_embed()
+        view = ClasseSelectView(user_id)
+        description = "\n\n".join(
+            [
+                f"{data.get('Symbole', '🌀')} **{nom}**\n"
+                f"> 🧩 **Passive :** {data['Passive']}\n"
+                f"> ⚡ **Active :** {data['Active']}"
+                for nom, data in CLASSES
+            ]
+        )
+
+        embed = discord.Embed(
+            title="🎭 Choisis ta classe Reiatsu",
+            description=description,
+            color=discord.Color.purple()
+        )
+        embed.set_footer(text="Clique sur le bouton correspondant à la classe que tu veux choisir.")
+
         message = await safe_send(channel, embed=embed, view=view)
         view.message = message
 
@@ -174,5 +152,3 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Reiatsu"
     await bot.add_cog(cog)
-
-
