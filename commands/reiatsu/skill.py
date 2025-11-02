@@ -160,10 +160,10 @@ class Skill(commands.Cog):
             # ───────────── Parieur (nouvelle version 🎰) ─────────────
             elif classe == "Parieur":
                 points = player.get("points", 0)
-                mise = 10
+                mise = 30
 
                 if points < mise:
-                    await safe_send(channel, "❌ Tu n'as pas assez de Reiatsu pour parier (10 requis).")
+                    await safe_send(channel, "❌ Tu n'as pas assez de Reiatsu pour parier (30 requis).")
                     return
 
                 symbols = ["💎", "🍀", "🔥", "💀", "🎴", "🌸", "🪙"]
@@ -180,12 +180,12 @@ class Skill(commands.Cog):
 
                 if len(set(slots)) == 1:
                     result_text = "💥 **JACKPOT !** Tu gagnes **+50 Reiatsu !**"
-                    gain = 50
+                    gain = 100
                 elif len(set(slots)) == 2:
                     result_text = "✨ **Pas mal !** Deux symboles identiques, tu gagnes **+20 Reiatsu.**"
-                    gain = 20
+                    gain = 160
                 else:
-                    result_text = "❌ **Perdu !** Tu perds ta mise de 10 Reiatsu."
+                    result_text = "❌ **Perdu !** Tu perds ta mise de 30 Reiatsu."
                     gain = -mise
 
                 new_points = points + gain if gain > 0 else points - mise
