@@ -32,7 +32,7 @@
     "Parieur": {
       "Symbole": "🎲",
       "Passive": "Pendant l'absorption d'un reiatsu : 50% de chance de rater, 50% d'en récupérer aléatoirement entre 5 et 12",
-      "Active": "Machine à sous. (CD: 12h)",
+      "Active": "Machine à sous. Mise 30 reiatsu. 2 symboles identiques : 100 reiatsu gagné. 3 symboles : 160 reiatsu. (CD: 12h)",
       "Cooldown" : 12
     }
   }
