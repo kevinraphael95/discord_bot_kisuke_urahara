@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 💡 lightsout.py — Commande interactive !lightsout
-# Objectif : Jeu "Lights Out" avec grille de boutons interactifs
+# Objectif : Jeu "Lights Out" avec grille de boutons interactifs (résoluble)
 # Catégorie : Jeux
 # Accès : Public
 # ────────────────────────────────────────────────────────────────────────────────
@@ -13,6 +13,7 @@ from discord.ext import commands, tasks
 import asyncio
 import random
 from utils.discord_utils import safe_send, safe_edit
+import numpy as np  # Pour la génération résoluble
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Paramètres
@@ -26,17 +27,37 @@ COULEUR_INACTIVE = 0x2F3136 # Couleur sombre (lumière éteinte)
 # 🧩 Classe LightsOutGame
 # ────────────────────────────────────────────────────────────────────────────────
 class LightsOutGame:
-    def __init__(self, size: int = TAILLE_GRILLE, mode: str = "solo"):
+    def __init__(self, size: int = TAILLE_GRILLE, mode: str = "solo", resolvable: bool = True):
         self.size = size
-        self.grid = [[random.choice([True, False]) for _ in range(size)] for _ in range(size)]
         self.terminee = False
         self.mode = mode
+
+        if resolvable:
+            self.grid = self.generate_solvable_grid()
+        else:
+            self.grid = [[random.choice([True, False]) for _ in range(size)] for _ in range(size)]
+
+    def generate_solvable_grid(self):
+        """Crée une grille résoluble via un vecteur de coups aléatoire."""
+        n = self.size
+        x = np.random.randint(0, 2, size=(n*n), dtype=int)  # vecteur de coups aléatoire
+        A = np.zeros((n*n, n*n), dtype=int)
+        for y in range(n):
+            for x0 in range(n):
+                idx = y*n + x0
+                for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
+                    nx, ny = x0+dx, y+dy
+                    if 0 <= nx < n and 0 <= ny < n:
+                        A[ny*n+nx, idx] = 1
+        b = A @ x % 2  # grille finale solvable
+        grid = [[bool(b[y*n + x0]) for x0 in range(n)] for y in range(n)]
+        return grid
 
     def toggle(self, x: int, y: int):
         """Inverse l’état d’une case et de ses voisines."""
         if self.terminee:
             return
-        directions = [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]
+        directions = [(0,0),(1,0),(-1,0),(0,1),(0,-1)]
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.size and 0 <= ny < self.size:
@@ -102,7 +123,6 @@ class LightsOutView(discord.ui.View):
                 )
                 return
 
-            # Mode solo : uniquement le joueur d'origine peut cliquer
             if self.game.mode == "solo" and interaction.user.id != self.player_id:
                 await interaction.response.send_message(
                     "❌ Seul le joueur ayant lancé la partie peut jouer en mode solo.",
@@ -142,15 +162,12 @@ class LightsOut(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.sessions = {}  # dict channel_id -> LightsOutSession
+        self.sessions = {}
         self.verif_inactivite.start()
 
     def cog_unload(self):
         self.verif_inactivite.cancel()
 
-    # ───────────────────────────────────────────────────────────────────────
-    # 🎮 Commande principale
-    # ───────────────────────────────────────────────────────────────────────
     @commands.command(
         name="lightsout", aliases=["lo"],
         help="Joue au jeu des lumières à éteindre (solo ou multi).",
@@ -166,16 +183,13 @@ class LightsOut(commands.Cog):
             await safe_send(ctx.channel, "❌ Une partie est déjà en cours dans ce salon.")
             return
 
-        game = LightsOutGame(mode=mode)
+        game = LightsOutGame(mode=mode, resolvable=True)
         embed = game.get_embed()
         view = LightsOutView(game, self, channel_id, player_id=ctx.author.id if mode == "solo" else None)
         message = await safe_send(ctx.channel, embed=embed, view=view)
         session = LightsOutSession(game, message, mode=mode, author_id=ctx.author.id)
         self.sessions[channel_id] = session
 
-    # ───────────────────────────────────────────────────────────────────────
-    # ⏰ Vérification d’inactivité
-    # ───────────────────────────────────────────────────────────────────────
     @tasks.loop(seconds=30)
     async def verif_inactivite(self):
         now = asyncio.get_event_loop().time()
