@@ -7,7 +7,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 📦 Imports
+# 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord.ext import commands
@@ -65,7 +65,6 @@ class Hollow(commands.Cog):
         # ───────── Vue avec bouton ─────────
         view = discord.ui.View(timeout=60)
 
-        # ───────── Bouton Attaquer ─────────
         class AttackButton(discord.ui.Button):
             def __init__(self):
                 super().__init__(label="⚔️ Attaquer", style=discord.ButtonStyle.danger)
@@ -98,10 +97,12 @@ class Hollow(commands.Cog):
                 async def update_embed(e: discord.Embed):
                     await interaction.edit_original_response(embed=e)
 
+                # Préparation
                 embed.clear_fields()
                 embed.add_field(name="Préparation...", value="Les épreuves vont commencer...", inline=False)
                 await update_embed(embed)
 
+                # Lancer les 3 tâches
                 try:
                     victoire = await lancer_3_taches(interaction, embed, update_embed)
                 except Exception:
