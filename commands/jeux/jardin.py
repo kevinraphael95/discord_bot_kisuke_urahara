@@ -12,55 +12,13 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import json
-import datetime
 from utils.discord_utils import safe_send, safe_respond
-from utils.supabase_client import supabase
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 🌱 Imports utilitaires et UI
-# ────────────────────────────────────────────────────────────────────────────────
-from utils.jardin_utils import (
-    set_constants,
-    get_or_create_garden,
-    build_garden_embed
-)
+from utils.jardin_utils import get_or_create_garden, build_garden_embed
 from utils.jardin_ui_utils import JardinView
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🌾 Chargement des constantes depuis le JSON
-# ────────────────────────────────────────────────────────────────────────────────
-with open("data/jardin_config.json", "r", encoding="utf-8") as f:
-    CONFIG = json.load(f)
-
-TABLE_NAME = "gardens"
-
-DEFAULT_GRID = CONFIG["DEFAULT_GRID"]
-DEFAULT_INVENTORY = CONFIG["DEFAULT_INVENTORY"]
-FLEUR_EMOJIS = CONFIG["FLEUR_EMOJIS"]
-FLEUR_VALUES = CONFIG["FLEUR_VALUES"]
-FLEUR_SIGNS = CONFIG["FLEUR_SIGNS"]
-FLEUR_LIST = list(FLEUR_EMOJIS.items())
-FERTILIZE_COOLDOWN = datetime.timedelta(minutes=CONFIG["FERTILIZE_COOLDOWN_MINUTES"])
-FERTILIZE_PROBABILITY = CONFIG["FERTILIZE_PROBABILITY"]
-POTIONS = CONFIG["POTIONS"]
-
-# Initialisation des constantes dans jardin_utils
-set_constants(
-    table_name=TABLE_NAME,
-    default_grid=DEFAULT_GRID,
-    default_inventory=DEFAULT_INVENTORY,
-    fleur_emojis=FLEUR_EMOJIS,
-    fleur_values=FLEUR_VALUES,
-    fleur_signs=FLEUR_SIGNS,
-    fleur_list=FLEUR_LIST,
-    fertilize_cooldown=FERTILIZE_COOLDOWN,
-    fertilize_probability=FERTILIZE_PROBABILITY,
-    potions=POTIONS
-)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 Cog principal — Commande Jardin
+# 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class Jardin(commands.Cog):
     """Commande /jardin et !jardin — Voir son jardin"""
@@ -68,24 +26,26 @@ class Jardin(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ──────────────────────────────────────────────────────────────────────────────
-    # 📤 Envoi du jardin (utilisé par les deux commandes)
-    # ──────────────────────────────────────────────────────────────────────────────
     async def _send_garden(self, target_user, viewer_id, respond_func):
+        """Affiche le jardin d’un utilisateur donné."""
         try:
             garden = await get_or_create_garden(target_user.id, target_user.name)
             embed = build_garden_embed(garden, viewer_id)
             view = None
+
             if target_user.id == viewer_id:
                 view = JardinView(garden, viewer_id)
                 view.update_buttons()
+
             await respond_func(embed=embed, view=view)
+
         except Exception as e:
             print(f"[ERREUR jardin] {e}")
             await respond_func("❌ Une erreur est survenue.", ephemeral=True)
 
+
     # ──────────────────────────────────────────────────────────────────────────────
-    # 🌸 Commande Slash
+    # Commande Slash
     # ──────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="jardin",
@@ -94,14 +54,11 @@ class Jardin(commands.Cog):
     @app_commands.checks.cooldown(1, 5.0)
     async def slash_jardin(self, interaction: discord.Interaction, user: discord.User = None):
         target = user or interaction.user
-        await self._send_garden(
-            target,
-            interaction.user.id,
-            lambda **kwargs: safe_respond(interaction, **kwargs)
-        )
+        await self._send_garden(target, interaction.user.id, lambda **kwargs: safe_respond(interaction, **kwargs))
+
 
     # ──────────────────────────────────────────────────────────────────────────────
-    # 🌿 Commande Préfixe
+    # Commande Préfixe
     # ──────────────────────────────────────────────────────────────────────────────
     @commands.command(
         name="jardin",
@@ -110,11 +67,8 @@ class Jardin(commands.Cog):
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     async def prefix_jardin(self, ctx: commands.Context, user: discord.User = None):
         target = user or ctx.author
-        await self._send_garden(
-            target,
-            ctx.author.id,
-            lambda **kwargs: safe_send(ctx.channel, **kwargs)
-        )
+        await self._send_garden(target, ctx.author.id, lambda **kwargs: safe_send(ctx.channel, **kwargs))
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
