@@ -14,7 +14,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Modal, TextInput, Button
 from pathlib import Path
-from utils.discord_utils import safe_send, safe_interact
+from utils.discord_utils import safe_send
 from utils.supabase_client import supabase
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ class ReponseModal(Modal):
         await self.parent_view.check_answer(interaction, self.answer_input.value)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎮 Boutons et vue principale
+# 🎮 Boutons et vues
 # ────────────────────────────────────────────────────────────────────────────────
 class RepondreButton(Button):
     def __init__(self, parent_view):
@@ -61,12 +61,10 @@ class RepondreButton(Button):
         self.parent_view = parent_view
 
     async def callback(self, interaction: discord.Interaction):
-        # Vérification utilisateur
         if interaction.user.id != self.parent_view.user_id:
             return await interaction.response.send_message(
                 "⛔ Ce n’est pas ton tour.", ephemeral=True
             )
-        # Envoi direct du modal
         await interaction.response.send_modal(ReponseModal(self.parent_view))
 
 
@@ -77,14 +75,12 @@ class ContinuerButton(Button):
         self.next_enigme = next_enigme
 
     async def callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self.parent_view.user_id:
+            return await interaction.response.send_message("⛔ Ce n’est pas ton tour.", ephemeral=True)
+
         new_view = PortesView(self.next_enigme, self.parent_view.user_id)
-        await safe_interact(
-            interaction,
-            content=None,
-            edit=True,
-            embed=new_view.build_embed(),
-            view=new_view
-        )
+        embed = new_view.build_embed()
+        await interaction.response.edit_message(embed=embed, view=new_view)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🏗️ Vue principale du jeu
@@ -107,9 +103,7 @@ class PortesView(View):
 
     async def check_answer(self, interaction: discord.Interaction, answer: str):
         if interaction.user.id != self.user_id:
-            return await interaction.response.send_message(
-                "⛔ Ce n’est pas ton tour.", ephemeral=True
-            )
+            return await interaction.response.send_message("⛔ Ce n’est pas ton tour.", ephemeral=True)
 
         normalized = normalize(answer)
         valid_answers = self.enigme["reponse"]
@@ -144,23 +138,29 @@ class PortesView(View):
                     "points": points
                 }).execute()
 
-            # Message réponse
             await interaction.response.send_message(
                 content=f"✅ Bonne réponse ! Tu passes à la porte {next_door} 🚪\n{reward_message}",
                 ephemeral=True
             )
 
-            # Préparer la prochaine énigme
             next_enigme = next((e for e in ENIGMES if e["id"] == next_door), None)
             if next_enigme and next_door <= 100:
                 self.clear_items()
                 self.add_item(ContinuerButton(self, next_enigme))
-                await safe_interact(interaction, content=None, edit=True, embed=self.build_embed(), view=self)
+                embed = discord.Embed(
+                    title=f"🚪 Porte {next_enigme['id']} — {next_enigme['titre']}",
+                    description=f"**Énigme :**\n{next_enigme['enigme']}",
+                    color=discord.Color.blurple()
+                )
+                embed.set_footer(text="Clique sur le bouton pour répondre.")
+                await interaction.followup.edit_message(
+                    message_id=interaction.message.id,
+                    embed=embed,
+                    view=self
+                )
 
         else:
-            await interaction.response.send_message(
-                "❌ Mauvaise réponse... Essaie encore !", ephemeral=True
-            )
+            await interaction.response.send_message("❌ Mauvaise réponse... Essaie encore !", ephemeral=True)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧩 Cog principal
@@ -184,7 +184,8 @@ class Portes(commands.Cog):
         view = PortesView(enigme, user.id)
         embed = view.build_embed()
 
-        await safe_send(channel,
+        await safe_send(
+            channel,
             f"🚪 {user.mention} commence ou reprend le Jeu des Portes !\nClique sur **💬 Répondre** pour commencer.",
             embed=embed,
             view=view
