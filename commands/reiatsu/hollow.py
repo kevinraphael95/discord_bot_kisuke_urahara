@@ -13,7 +13,6 @@ import discord
 from discord.ext import commands
 import os
 import traceback
-import asyncio
 from utils.supabase_client import supabase
 from utils.taches import lancer_3_taches
 
@@ -66,63 +65,66 @@ class Hollow(commands.Cog):
         # ───────── Vue avec bouton ─────────
         view = discord.ui.View(timeout=60)
 
-        @discord.ui.button(label="⚔️ Attaquer", style=discord.ButtonStyle.danger)
-        async def attack_button(interaction: discord.Interaction, button: discord.ui.Button):
-            if interaction.user.id != ctx.author.id:
-                return await interaction.response.send_message("❌ Ce combat ne t'appartient pas.", ephemeral=True)
+        # ───────── Bouton Attaquer ─────────
+        class AttackButton(discord.ui.Button):
+            def __init__(self):
+                super().__init__(label="⚔️ Attaquer", style=discord.ButtonStyle.danger)
 
-            button.disabled = True
-            for c in view.children:
-                c.disabled = True
-            await interaction.response.edit_message(view=view)
+            async def callback(self, interaction: discord.Interaction):
+                if interaction.user.id != ctx.author.id:
+                    return await interaction.response.send_message("❌ Ce combat ne t'appartient pas.", ephemeral=True)
 
-            # Déduire le reiatsu
-            try:
-                supabase.table("reiatsu").update({"points": reiatsu - REIATSU_COST}).eq("user_id", user_id).execute()
-            except Exception:
-                traceback.print_exc()
-                return await ctx.send("⚠️ Erreur de mise à jour du reiatsu.")
+                self.disabled = True
+                for child in view.children:
+                    child.disabled = True
+                await interaction.response.edit_message(view=view)
 
-            # Combat : lancement des épreuves
-            embed.title = "⚔️ Combat contre le Hollow"
-            embed.description = (
-                f"{ctx.author.display_name} affronte le Hollow !\n\n"
-                f"🌀 Trois épreuves vont être lancées... sois prêt !"
-            )
-            embed.color = discord.Color.orange()
-            await interaction.edit_original_response(embed=embed, attachments=[], view=None)
+                # Déduire le reiatsu
+                try:
+                    supabase.table("reiatsu").update({"points": reiatsu - REIATSU_COST}).eq("user_id", user_id).execute()
+                except Exception:
+                    traceback.print_exc()
+                    return await ctx.send("⚠️ Erreur de mise à jour du reiatsu.")
 
-            async def update_embed(e: discord.Embed):
-                await interaction.edit_original_response(embed=e)
+                # Lancer les épreuves
+                embed.title = "⚔️ Combat contre le Hollow"
+                embed.description = (
+                    f"{ctx.author.display_name} affronte le Hollow !\n\n"
+                    f"🌀 Trois épreuves vont être lancées... sois prêt !"
+                )
+                embed.color = discord.Color.orange()
+                await interaction.edit_original_response(embed=embed, attachments=[], view=None)
 
-            embed.clear_fields()
-            embed.add_field(name="Préparation...", value="Les épreuves vont commencer...", inline=False)
-            await update_embed(embed)
-            
-            try:
-                victoire = await lancer_3_taches(interaction, embed, update_embed)
-            except Exception:
-                traceback.print_exc()
-                victoire = False
+                async def update_embed(e: discord.Embed):
+                    await interaction.edit_original_response(embed=e)
 
-            # Résultat final
-            result = discord.Embed(
-                title="🎯 Résultat du combat",
-                description=(
-                    f"🎉 Tu as vaincu le Hollow ! Bravo, {ctx.author.mention} !" if victoire
-                    else f"💀 Le Hollow t’a vaincu... retente ta chance !"
-                ),
-                color=discord.Color.green() if victoire else discord.Color.red()
-            )
-            result.set_footer(text=f"Combat terminé pour {ctx.author.display_name}")
-            await interaction.edit_original_response(embed=result, view=None)
+                embed.clear_fields()
+                embed.add_field(name="Préparation...", value="Les épreuves vont commencer...", inline=False)
+                await update_embed(embed)
 
-        view.add_item(attack_button)
+                try:
+                    victoire = await lancer_3_taches(interaction, embed, update_embed)
+                except Exception:
+                    traceback.print_exc()
+                    victoire = False
+
+                # Résultat final
+                result = discord.Embed(
+                    title="🎯 Résultat du combat",
+                    description=(
+                        f"🎉 Tu as vaincu le Hollow ! Bravo, {ctx.author.mention} !"
+                        if victoire else f"💀 Le Hollow t’a vaincu... retente ta chance !"
+                    ),
+                    color=discord.Color.green() if victoire else discord.Color.red()
+                )
+                result.set_footer(text=f"Combat terminé pour {ctx.author.display_name}")
+                await interaction.edit_original_response(embed=result, view=None)
+
+        view.add_item(AttackButton())
 
         # ───────── Envoi du message ─────────
         msg = await ctx.send(embed=embed, file=file, view=view)
         view.message = msg
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
