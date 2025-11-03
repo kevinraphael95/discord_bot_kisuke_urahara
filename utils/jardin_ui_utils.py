@@ -51,10 +51,9 @@ class GardenButton(discord.ui.Button):
         self.label = "🌱"
         await interaction.response.edit_message(view=view)
 
-
 class GardenGridView(discord.ui.View):
     def __init__(self, garden: dict, user_id: int):
-        super().__init__(timeout=120)
+        super().__init__(timeout=180)
         self.garden = garden
         self.user_id = user_id
 
@@ -64,9 +63,16 @@ class GardenGridView(discord.ui.View):
                 custom_id = f"{i}-{j}"
                 self.add_item(GardenButton(label=emoji, row=i, custom_id=custom_id))
 
+        # Bouton Retour à la vue principale
+        @discord.ui.button(label="🔙 Retour", style=discord.ButtonStyle.gray)
+        async def back_to_main(interaction: discord.Interaction, button: discord.ui.Button):
+            if interaction.user.id != self.user_id:
+                return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
+            main_view = JardinView(self.garden, self.user_id)
+            await interaction.response.edit_message(embed=build_garden_embed(self.garden, self.user_id), view=main_view)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🌱 JardinView — Boutons Jardin améliorés
+# 🌱 JardinView — Boutons Jardin principaux
 # ────────────────────────────────────────────────────────────────────────────────
 class JardinView(discord.ui.View):
     def __init__(self, garden: dict, user_id: int):
@@ -74,12 +80,10 @@ class JardinView(discord.ui.View):
         self.garden = garden
         self.user_id = user_id
 
-    # ───────── Boutons principaux ─────────
     @discord.ui.button(label="🪴 Grille", style=discord.ButtonStyle.green)
     async def show_grid(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
-
         grid_view = GardenGridView(self.garden, self.user_id)
         await interaction.response.edit_message(
             content="🌾 **Clique sur les fleurs pour les cueillir !**",
@@ -91,24 +95,21 @@ class JardinView(discord.ui.View):
     async def fertilize(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
-
         now = datetime.datetime.now(datetime.timezone.utc)
         last = self.garden.get("last_fertilize")
         if last:
             last_dt = datetime.datetime.fromisoformat(last)
             if now < last_dt + FERTILIZE_COOLDOWN:
                 return await interaction.response.send_message("⏳ Engrais en cooldown !", ephemeral=True)
-
         self.garden["garden_grid"] = pousser_fleurs(self.garden["garden_grid"])
         self.garden["last_fertilize"] = now.isoformat()
         await self.update_garden_db()
         await interaction.response.edit_message(embed=build_garden_embed(self.garden, self.user_id))
-    
+
     @discord.ui.button(label="✂️ Couper", style=discord.ButtonStyle.green)
     async def cut_flowers(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
-
         self.garden["garden_grid"], self.garden = couper_fleurs(self.garden["garden_grid"], self.garden)
         await self.update_garden_db()
         await interaction.response.edit_message(embed=build_garden_embed(self.garden, self.user_id))
@@ -117,7 +118,6 @@ class JardinView(discord.ui.View):
     async def open_alchimie(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
-
         from utils.jardin_ui_utils import AlchimieView
         alchimie_view = AlchimieView(self.garden, self.user_id)
         await interaction.response.edit_message(embed=alchimie_view.build_embed(), view=alchimie_view)
@@ -126,11 +126,9 @@ class JardinView(discord.ui.View):
     async def show_inventory(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
-
         embed = build_potions_embed(self.garden.get("potions", {}))
         await interaction.response.edit_message(embed=embed)
 
-    # ───────── Helper ─────────
     async def update_garden_db(self):
         supabase.table("gardens").update({
             "garden_grid": self.garden["garden_grid"],
