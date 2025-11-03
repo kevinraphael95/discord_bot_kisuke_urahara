@@ -6,9 +6,6 @@
 # Cooldown : Paramétrable par commande
 # ────────────────────────────────────────────────────────────────────────────────
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -34,8 +31,8 @@ class Jardin(commands.Cog):
             view = None
 
             if target_user.id == viewer_id:
+                # On instancie la vue principale avec tous les boutons
                 view = JardinView(garden, viewer_id)
-                view.update_buttons()
 
             await respond_func(embed=embed, view=view)
 
@@ -54,7 +51,11 @@ class Jardin(commands.Cog):
     @app_commands.checks.cooldown(1, 5.0)
     async def slash_jardin(self, interaction: discord.Interaction, user: discord.User = None):
         target = user or interaction.user
-        await self._send_garden(target, interaction.user.id, lambda **kwargs: safe_respond(interaction, **kwargs))
+        await self._send_garden(
+            target,
+            interaction.user.id,
+            lambda **kwargs: safe_respond(interaction, **kwargs)
+        )
 
 
     # ──────────────────────────────────────────────────────────────────────────────
@@ -67,7 +68,11 @@ class Jardin(commands.Cog):
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     async def prefix_jardin(self, ctx: commands.Context, user: discord.User = None):
         target = user or ctx.author
-        await self._send_garden(target, ctx.author.id, lambda **kwargs: safe_send(ctx.channel, **kwargs))
+        await self._send_garden(
+            target,
+            ctx.author.id,
+            lambda **kwargs: safe_send(ctx.channel, **kwargs)
+        )
 
 
 # ────────────────────────────────────────────────────────────────────────────────
