@@ -21,7 +21,7 @@ from utils.discord_utils import safe_send, safe_respond  # ✅ Sécurisé
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class Stats(commands.Cog):
-    """Commande /stats et !stats — Affiche les statistiques du bot"""
+    """Commande /stats et !!stats — Affiche les statistiques du bot"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -55,7 +55,7 @@ class Stats(commands.Cog):
             name="🤖 Bot",
             value=f"Nom: **{self.bot.user}**\n"
                   f"ID: `{self.bot.user.id}`\n"
-                  f"Prefix: `!` + Slash\n"
+                  f"Prefix: `!!` + Slash\n"
                   f"Serveurs: `{len(self.bot.guilds)}`\n"
                   f"Utilisateurs: `{len(self.bot.users)}`",
             inline=False
