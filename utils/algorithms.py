@@ -4,7 +4,7 @@
 # ────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────
-# Tri classiques
+# Tris classiques
 # ────────────────────────────────────────────────────────────────
 async def bubble_sort(data):
     """Compare chaque élément avec le suivant et fait remonter les plus grands."""
@@ -13,7 +13,7 @@ async def bubble_sort(data):
         for j in range(0, n - i - 1):
             if data[j] > data[j + 1]:
                 data[j], data[j + 1] = data[j + 1], data[j]
-            yield data, list(range(n - i, n))
+                yield data, [j, j + 1]  # 🟥 surbrillance limitée aux éléments échangés
 bubble_sort.desc = "Compare chaque élément avec le suivant et fait remonter les plus grands."
 
 async def insertion_sort(data):
@@ -24,9 +24,9 @@ async def insertion_sort(data):
         while j >= 0 and data[j] > key:
             data[j + 1] = data[j]
             j -= 1
-            yield data, list(range(i + 1))
+            yield data, [j + 1, j + 2]
         data[j + 1] = key
-        yield data, list(range(i + 1))
+        yield data, [j + 1, i]
 insertion_sort.desc = "Insère chaque élément dans la partie déjà triée."
 
 async def selection_sort(data):
@@ -37,8 +37,9 @@ async def selection_sort(data):
         for j in range(i + 1, n):
             if data[j] < data[min_idx]:
                 min_idx = j
-        data[i], data[min_idx] = data[min_idx], data[i]
-        yield data, list(range(i + 1))
+        if min_idx != i:
+            data[i], data[min_idx] = data[min_idx], data[i]
+            yield data, [i, min_idx]
 selection_sort.desc = "Sélectionne le plus petit élément restant et le place au bon endroit."
 
 async def quick_sort(data, low=0, high=None):
@@ -46,17 +47,15 @@ async def quick_sort(data, low=0, high=None):
     if high is None:
         high = len(data) - 1
     if low < high:
-        pivot, left, right = data[high], low, high - 1
-        while left <= right:
-            while left <= right and data[left] < pivot:
+        pivot = data[high]
+        left = low
+        for j in range(low, high):
+            if data[j] < pivot:
+                data[left], data[j] = data[j], data[left]
+                yield data, [left, j]
                 left += 1
-            while left <= right and data[right] >= pivot:
-                right -= 1
-            if left < right:
-                data[left], data[right] = data[right], data[left]
-            yield data, list(range(low))
         data[left], data[high] = data[high], data[left]
-        yield data, list(range(low, left + 1))
+        yield data, [left, high]
         async for step, sorted_idx in quick_sort(data, low, left - 1):
             yield step, sorted_idx
         async for step, sorted_idx in quick_sort(data, left + 1, high):
@@ -82,15 +81,16 @@ async def merge_sort(data, start=0, end=None):
             else:
                 data[k] = right[j]
                 j += 1
-            yield data, list(range(start, k + 1))
+            yield data, [k]
 merge_sort.desc = "Divise et fusionne récursivement les sous-listes pour trier."
 
 async def heap_sort(data):
     """Tri utilisant un tas binaire."""
     n = len(data)
+
     def heapify(n, i):
         largest = i
-        l, r = 2*i + 1, 2*i + 2
+        l, r = 2 * i + 1, 2 * i + 2
         if l < n and data[l] > data[largest]:
             largest = l
         if r < n and data[r] > data[largest]:
@@ -98,13 +98,15 @@ async def heap_sort(data):
         if largest != i:
             data[i], data[largest] = data[largest], data[i]
             heapify(n, largest)
-    for i in range(n//2 - 1, -1, -1):
+
+    for i in range(n // 2 - 1, -1, -1):
         heapify(n, i)
-        yield data, []
+        yield data, [i]
+
     for i in range(n - 1, 0, -1):
         data[i], data[0] = data[0], data[i]
+        yield data, [0, i]
         heapify(i, 0)
-        yield data, list(range(i, n))
 heap_sort.desc = "Tri utilisant un tas binaire."
 
 async def shell_sort(data):
@@ -118,9 +120,9 @@ async def shell_sort(data):
             while j >= gap and data[j - gap] > temp:
                 data[j] = data[j - gap]
                 j -= gap
-                yield data, list(range(i + 1))
+                yield data, [j, j + gap]
             data[j] = temp
-            yield data, list(range(i + 1))
+            yield data, [j, i]
         gap //= 2
 shell_sort.desc = "Améliore Insertion Sort avec des gaps."
 
@@ -136,7 +138,7 @@ async def cocktail_sort(data):
             if data[i] > data[i + 1]:
                 data[i], data[i + 1] = data[i + 1], data[i]
                 swapped = True
-            yield data, list(range(i + 1))
+                yield data, [i, i + 1]
         if not swapped:
             break
         swapped = False
@@ -145,7 +147,7 @@ async def cocktail_sort(data):
             if data[i] > data[i + 1]:
                 data[i], data[i + 1] = data[i + 1], data[i]
                 swapped = True
-            yield data, list(range(i + 1))
+                yield data, [i, i + 1]
         start += 1
 cocktail_sort.desc = "Version bidirectionnelle de Bubble Sort."
 
@@ -165,7 +167,7 @@ async def comb_sort(data):
             if data[i] > data[i + gap]:
                 data[i], data[i + gap] = data[i + gap], data[i]
                 sorted_ = False
-            yield data, list(range(i + 1))
+                yield data, [i, i + gap]
             i += 1
 comb_sort.desc = "Amélioration de Bubble Sort avec un gap variable."
 
@@ -178,22 +180,22 @@ async def pair_sum_sort(data):
     swapped = True
     while swapped:
         swapped = False
-        pairs = [(i, i+1) for i in range(0, n-1, 2)]
-        sums = [data[i]+data[j] for i,j in pairs]
+        pairs = [(i, i + 1) for i in range(0, n - 1, 2)]
+        sums = [data[i] + data[j] for i, j in pairs]
         sorted_pairs = [pairs[i] for i in sorted(range(len(pairs)), key=lambda x: sums[x])]
         new_data = []
-        for i,j in sorted_pairs:
+        for i, j in sorted_pairs:
             new_data.extend([data[i], data[j]])
         for k in range(len(new_data)):
             if data[k] != new_data[k]:
                 data[k] = new_data[k]
                 swapped = True
-            yield data, list(range(len(data)))
-        pairs = [(i, i+1) for i in range(1, n-1, 2)]
-        sums = [data[i]+data[j] for i,j in pairs]
+                yield data, [k]
+        pairs = [(i, i + 1) for i in range(1, n - 1, 2)]
+        sums = [data[i] + data[j] for i, j in pairs]
         sorted_pairs = [pairs[i] for i in sorted(range(len(pairs)), key=lambda x: sums[x])]
         new_data = data[:1]
-        for i,j in sorted_pairs:
+        for i, j in sorted_pairs:
             new_data.extend([data[i], data[j]])
         if len(new_data) < n:
             new_data.append(data[-1])
@@ -201,7 +203,7 @@ async def pair_sum_sort(data):
             if data[k] != new_data[k]:
                 data[k] = new_data[k]
                 swapped = True
-            yield data, list(range(len(data)))
+                yield data, [k]
 pair_sum_sort.desc = "Tri par paires basé sur la somme des éléments."
 
 async def pair_shift_sort(data):
@@ -210,16 +212,15 @@ async def pair_shift_sort(data):
     while True:
         changed = False
         i = 0
-        while i < n-1:
-            a,b = data[i], data[i+1]
-            if a != b:
-                gap = abs(a-b)
-                if a > b:
-                    new_pos = min(i+gap, n-1)
-                    data.insert(new_pos, data.pop(i))
-                    changed = True
+        while i < n - 1:
+            a, b = data[i], data[i + 1]
+            if a > b:
+                gap = abs(a - b)
+                new_pos = min(i + gap, n - 1)
+                data.insert(new_pos, data.pop(i))
+                changed = True
+                yield data, [i, new_pos]
             i += 1
-            yield data, [i]
         if not changed:
             break
 pair_shift_sort.desc = "Déplace le plus grand élément d'une paire vers la droite."
@@ -230,20 +231,20 @@ async def centrifugal_sort(data):
     changed = True
     while changed:
         changed = False
-        for i in range(0, n-2, 3):
-            triplet = data[i:i+3]
+        for i in range(0, n - 2, 3):
+            triplet = data[i:i + 3]
             sorted_triplet = sorted(triplet)
             if triplet != sorted_triplet:
-                data[i:i+3] = sorted_triplet
+                data[i:i + 3] = sorted_triplet
                 changed = True
-            yield data, list(range(i,i+3))
-        for i in range(1, n-2, 3):
-            triplet = data[i:i+3]
+                yield data, list(range(i, i + 3))
+        for i in range(1, n - 2, 3):
+            triplet = data[i:i + 3]
             sorted_triplet = sorted(triplet)
             if triplet != sorted_triplet:
-                data[i:i+3] = sorted_triplet
+                data[i:i + 3] = sorted_triplet
                 changed = True
-            yield data, list(range(i,i+3))
+                yield data, list(range(i, i + 3))
 centrifugal_sort.desc = "Tri par triplets, le nombre du milieu est replacé entre les deux autres."
 
 # ────────────────────────────────────────────────────────────────
