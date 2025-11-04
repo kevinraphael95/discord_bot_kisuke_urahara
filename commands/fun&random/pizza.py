@@ -49,7 +49,6 @@ def generate_pizza_embed(data: dict) -> discord.Embed:
     embed.add_field(name="Fromage", value=fromage, inline=False)
     embed.add_field(name="Garnitures", value=", ".join(garnitures), inline=False)
     embed.add_field(name="Toppings spéciaux", value=", ".join(toppings), inline=False)
-    embed.set_footer(text="Clique sur 🍕 Nouvelle pizza pour en générer une autre !")
     return embed
 
 # ────────────────────────────────────────────────────────────────────────────────
