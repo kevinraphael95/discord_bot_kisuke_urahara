@@ -12,7 +12,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond, safe_edit
+from utils.discord_utils import safe_send, safe_respond, safe_edit, safe_interact
 import json
 import random
 import os
@@ -65,7 +65,7 @@ class TramProbleme(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     async def run_tram_quiz(self, ctx_or_inter, story: bool = False):
         is_inter = isinstance(ctx_or_inter, discord.Interaction)
-        send = safe_respond if is_inter else safe_send
+        send = safe_interact if is_inter else safe_send
         edit = safe_edit
 
         questions = self.load_questions()
@@ -108,7 +108,7 @@ class TramProbleme(commands.Cog):
         start_button.callback = start_callback
         view_start.add_item(start_button)
 
-        msg = await send(ctx_or_inter, embed=embed, view=view_start)
+        await send(ctx_or_inter, content=None, embed=embed, view=view_start)
         await view_start.wait()
 
         if not started:
@@ -118,7 +118,7 @@ class TramProbleme(commands.Cog):
             return
 
         # ──────────────────────────────────────────────────────────────
-        # Boucle des questions avec timeout pour tous les modes
+        # Boucle des questions
         # ──────────────────────────────────────────────────────────────
         total_q = len(questions) if story else min(5, len(questions))
 
@@ -133,6 +133,7 @@ class TramProbleme(commands.Cog):
             answered = False
             next_question = False
 
+            # Création des boutons pour les options
             for option in question["options"]:
                 button = discord.ui.Button(label=option["text"], style=discord.ButtonStyle.primary)
 
@@ -140,9 +141,9 @@ class TramProbleme(commands.Cog):
                     nonlocal utilitarisme, deontologie, answered, next_question
                     answered = True
 
+                    # Mise à jour des scores
                     result = choice.get("result", "🤔 Choix étrange...")
                     ethics = choice.get("ethics")
-
                     if ethics == "utilitarisme":
                         utilitarisme += 1
                     elif ethics == "déontologie":
@@ -152,33 +153,37 @@ class TramProbleme(commands.Cog):
                         total_saved[key] += choice.get("saved", {}).get(key, 0)
                         total_killed[key] += choice.get("killed", {}).get(key, 0)
 
+                    # Mise à jour du message avec le bouton Continuer dès le départ
                     embed.add_field(name="🧠 Ton choix", value=f"**{choice['text']}**\n{result}", inline=False)
                     embed.set_footer(text="Appuie sur ➡️ Continuer pour passer à la suite.")
-                    await edit(msg, embed=embed, view=None)
-                    await interaction.response.defer()
 
-                    # Bouton "Continuer"
                     view_continue = discord.ui.View(timeout=60)
 
                     async def continue_callback(inter2):
                         nonlocal next_question
                         next_question = True
-                        await inter2.response.defer()
+                        await safe_interact(inter2, edit=True)
                         view_continue.stop()
 
                     cont_btn = discord.ui.Button(label="➡️ Continuer", style=discord.ButtonStyle.green)
                     cont_btn.callback = continue_callback
                     view_continue.add_item(cont_btn)
-                    await edit(msg, embed=embed, view=view_continue)
+
+                    # ⚡ Envoi du choix + bouton en un seul appel sécurisé
+                    await safe_interact(interaction, content=None, embed=embed, view=view_continue, edit=True)
+
+                    # Attente de l'appui sur Continuer
                     await view_continue.wait()
                     view.stop()
 
                 button.callback = button_callback
                 view.add_item(button)
 
+            # ⚡ Envoi de la question
             await edit(msg, embed=embed, view=view)
             await view.wait()
 
+            # Gestion des timeouts
             if not answered:
                 embed.description = "⛔ Le tram s’arrête... tu n’as pas répondu à temps."
                 embed.color = discord.Color.red()
