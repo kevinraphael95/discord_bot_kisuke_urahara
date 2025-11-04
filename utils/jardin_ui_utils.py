@@ -16,6 +16,44 @@ from utils.jardin_utils import (
 from utils.supabase_client import supabase
 
 # ────────────────────────────────────────────────────────────────────────────────
+# 🌿 Views éphémères pour Alchimie et Inventaire
+# ────────────────────────────────────────────────────────────────────────────────
+class AlchimieEphemereView(discord.ui.View):
+    def __init__(self, garden: dict, user_id: int):
+        super().__init__(timeout=180)
+        self.garden = garden
+        self.user_id = user_id
+
+    @discord.ui.button(label="Créer une potion", style=discord.ButtonStyle.green)
+    async def create_potion(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user_id:
+            return await interaction.response.send_message("❌ Ce n’est pas ton jardin !", ephemeral=True)
+
+        # Exemple simple : ajouter une potion aléatoire
+        potion_id, potion_name = random.choice(list(POTIONS.items()))
+        self.garden.setdefault("potions", {})
+        self.garden["potions"][potion_name] = self.garden["potions"].get(potion_name, 0) + 1
+
+        # Update DB
+        supabase.table("gardens").update({"potions": self.garden["potions"]}).eq("user_id", self.user_id).execute()
+
+        await interaction.response.send_message(f"🧪 Tu as créé : {potion_name}", ephemeral=True)
+
+
+class InventoryEphemereView(discord.ui.View):
+    def __init__(self, garden: dict, user_id: int):
+        super().__init__(timeout=180)
+        self.garden = garden
+        self.user_id = user_id
+
+    @discord.ui.button(label="Fermer", style=discord.ButtonStyle.gray)
+    async def close_inventory(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user_id:
+            return await interaction.response.send_message("❌ Ce n’est pas ton inventaire !", ephemeral=True)
+        await interaction.message.delete()
+
+
+# ────────────────────────────────────────────────────────────────────────────────
 # 🌱 GardenGridView et GardenButton
 # ────────────────────────────────────────────────────────────────────────────────
 class GardenButton(discord.ui.Button):
@@ -105,7 +143,7 @@ class JardinView(discord.ui.View):
         self.garden["last_fertilize"] = now.isoformat()
         await self.update_garden_db()
         await interaction.response.edit_message(embed=build_garden_embed(self.garden, self.user_id))
-
+    
     @discord.ui.button(label="✂️ Couper", style=discord.ButtonStyle.green)
     async def cut_flowers(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
@@ -118,35 +156,39 @@ class JardinView(discord.ui.View):
     async def open_alchimie(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
-        from utils.jardin_ui_utils import AlchimieView
-        alchimie_view = AlchimieView(self.garden, self.user_id)
+
+        alchimie_view = AlchimieEphemereView(self.garden, self.user_id)
         await interaction.response.send_message(
             "💡 Bienvenue dans l’Alchimie !",
-            embed=alchimie_view.build_embed(),
+            embed=build_potions_embed(self.garden.get("potions", {})),
             view=alchimie_view,
             ephemeral=True
         )
+
 
     @discord.ui.button(label="🎒 Inventaire", style=discord.ButtonStyle.gray)
     async def show_inventory(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
 
-        # Construction du texte fleurs
-        fleurs = "\n".join(f"{emoji} {name} x{self.garden['inventory'].get(f,0)}"
-                           for f, emoji in FLEUR_EMOJIS.items())
+        # Texte fleurs
+        fleurs = "\n".join(f"{emoji} {name} x{self.garden['inventory'].get(name,0)}"
+                           for name, emoji in FLEUR_EMOJIS.items())
 
-        # Construction du texte potions
-        potions_embed = build_potions_embed(self.garden.get("potions", {}))
+        # Texte potions
+        potions = self.garden.get("potions", {})
+        potions_text = "\n".join(f"{name} x{qty}" for name, qty in potions.items()) or "Aucune"
 
         embed = discord.Embed(
             title="🎒 Inventaire",
             description=f"**Fleurs :**\n{fleurs}",
             color=discord.Color.blue()
         )
-        embed.add_field(name="🧪 Potions", value=potions_embed.description or "Aucune", inline=False)
+        embed.add_field(name="🧪 Potions", value=potions_text, inline=False)
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        inventory_view = InventoryEphemereView(self.garden, self.user_id)
+        await interaction.response.send_message(embed=embed, view=inventory_view, ephemeral=True)
+
 
     async def update_garden_db(self):
         supabase.table("gardens").update({
