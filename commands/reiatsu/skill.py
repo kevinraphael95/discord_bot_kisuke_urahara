@@ -156,7 +156,7 @@ class Skill(commands.Cog):
             elif classe == "Absorbeur":
                 update_data["active_skill"] = True
                 msg = "🌀 **Super Absorption !** Le prochain Reiatsu sera forcément un Super Reiatsu."
-
+                
             # ───────────── Parieur (nouvelle version 🎰) ─────────────
             elif classe == "Parieur":
                 points = player.get("points", 0)
@@ -168,16 +168,27 @@ class Skill(commands.Cog):
 
                 symbols = ["💎", "🍀", "🔥", "💀", "🎴", "🌸", "🪙"]
 
-                message = await safe_send(channel, "🎰 Lancement de la machine à sous Reiatsu...")
+                # ───────────── Embed initial ─────────────
+                slots = [random.choice(symbols) for _ in range(3)]
+                embed = discord.Embed(
+                    title="🎰 Machine à Sous Reiatsu",
+                    description=f"{slots[0]} | {slots[1]} | {slots[2]}\n\nLancement de la machine à sous...",
+                    color=discord.Color.gold()
+                )
+                embed.set_footer(text=f"Mise : {mise} Reiatsu • Solde actuel : {points}")
+                message = await safe_send(channel, embed=embed)
+
                 await asyncio.sleep(1.2)
 
-                # Animation courte
+                # ───────────── Animation courte ─────────────
                 for _ in range(3):
-                    await message.edit(content=f"🎰 {random.choice(symbols)} | {random.choice(symbols)} | {random.choice(symbols)}")
+                    slots = [random.choice(symbols) for _ in range(3)]
+                    embed.description = f"{slots[0]} | {slots[1]} | {slots[2]}\n\nLancement de la machine à sous..."
+                    await message.edit(embed=embed)
                     await asyncio.sleep(0.5)
 
+                # ───────────── Tirage final ─────────────
                 slots = [random.choice(symbols) for _ in range(3)]
-
                 if len(set(slots)) == 1:
                     result_text = "💥 **JACKPOT ! Trois symboles identiques ! Tu gagnes +160 Reiatsu !**"
                     gain = 160
@@ -195,27 +206,15 @@ class Skill(commands.Cog):
                 }
                 supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
 
-                embed = discord.Embed(
-                    title="🎰 Machine à Sous Reiatsu",
-                    description=f"{slots[0]} | {slots[1]} | {slots[2]}\n\n{result_text}",
-                    color=discord.Color.gold() if gain > 0 else discord.Color.red()
-                )
-                embed.set_footer(text=f"Mise : 10 Reiatsu • Solde actuel : {max(0, new_points)}")
-
-                await message.edit(content=None, embed=embed)
+                # ───────────── Mise à jour de l'embed final ─────────────
+                embed.description = f"{slots[0]} | {slots[1]} | {slots[2]}\n\n{result_text}"
+                embed.color = discord.Color.gold() if gain > 0 else discord.Color.red()
+                embed.set_footer(text=f"Mise : {mise} Reiatsu • Solde actuel : {max(0, new_points)}")
+                await message.edit(embed=embed)
 
                 # Empêche l'affichage du message "En cours"
                 return
 
-            # ✅ Mise à jour Supabase pour les autres classes
-            if classe not in ["Illusionniste", "Parieur"]:
-                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
-                embed = discord.Embed(
-                    title=f"🎴 Skill de {player.get('username', user.name)}",
-                    description=f"**Classe :** {classe}\n**Statut :** 🌀 En cours\n\n{msg}",
-                    color=discord.Color.green()
-                )
-                await safe_send(channel, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
