@@ -3,7 +3,7 @@
 # Objectif :
 #   - Faire croire à une commande de récompense journalière
 #   - En réalité, affiche une image troll 😏
-# Catégorie : Fun
+# Catégorie : Reiatsu
 # Accès : Public
 # ────────────────────────────────────────────────────────────────────────────────#
 
@@ -48,5 +48,5 @@ async def setup(bot: commands.Bot):
     cog = ReiatsuDaily(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun"
+            command.category = "Reiatsu"
     await bot.add_cog(cog)
