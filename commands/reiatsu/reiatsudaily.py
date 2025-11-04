@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────#
 # 📌 reiatsudaily.py — Commande simple /reiatsudaily et !reiatsudaily
 # Objectif : Fausse commande de récompense journalière (troll)
-# Catégorie : Fun
+# Catégorie : Reiatsu
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────#
@@ -99,5 +99,5 @@ async def setup(bot: commands.Bot):
     cog = ReiatsuDaily(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun"
+            command.category = "Reiatsu"
     await bot.add_cog(cog)
