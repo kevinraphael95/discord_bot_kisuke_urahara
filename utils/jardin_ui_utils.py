@@ -286,7 +286,7 @@ class JardinView(discord.ui.View):
     
 
 
-    @discord.ui.button(label="🎒 Inventaire", style=discord.ButtonStyle.gray)
+    @discord.ui.button(label="🎒 Inventaire", style=discord.ButtonStyle.blurple)
     async def show_inventory(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
