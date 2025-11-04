@@ -291,11 +291,9 @@ class JardinView(discord.ui.View):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
 
-        # Texte fleurs
         fleurs = "\n".join(f"{emoji} {name} x{self.garden['inventory'].get(name,0)}"
                            for name, emoji in FLEUR_EMOJIS.items())
 
-        # Texte potions
         potions = self.garden.get("potions", {})
         potions_text = "\n".join(f"{name} x{qty}" for name, qty in potions.items()) or "Aucune"
 
@@ -306,8 +304,8 @@ class JardinView(discord.ui.View):
         )
         embed.add_field(name="🧪 Potions", value=potions_text, inline=False)
 
-        inventory_view = InventoryEphemereView(self.garden, self.user_id)
-        await interaction.response.send_message(embed=embed, view=inventory_view, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 
     async def update_garden_db(self):
