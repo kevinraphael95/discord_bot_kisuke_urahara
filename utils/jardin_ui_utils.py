@@ -72,7 +72,7 @@ class GardenGridView(discord.ui.View):
             await interaction.response.edit_message(embed=build_garden_embed(self.garden, self.user_id), view=main_view)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🌱 JardinView — Boutons Jardin principaux
+# 🌱 JardinView — Boutons Jardin principaux (Alchimie & Inventaire éphémères)
 # ────────────────────────────────────────────────────────────────────────────────
 class JardinView(discord.ui.View):
     def __init__(self, garden: dict, user_id: int):
@@ -120,14 +120,33 @@ class JardinView(discord.ui.View):
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
         from utils.jardin_ui_utils import AlchimieView
         alchimie_view = AlchimieView(self.garden, self.user_id)
-        await interaction.response.edit_message(embed=alchimie_view.build_embed(), view=alchimie_view)
+        await interaction.response.send_message(
+            "💡 Bienvenue dans l’Alchimie !",
+            embed=alchimie_view.build_embed(),
+            view=alchimie_view,
+            ephemeral=True
+        )
 
     @discord.ui.button(label="🎒 Inventaire", style=discord.ButtonStyle.gray)
     async def show_inventory(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             return await interaction.response.send_message("❌ Ce jardin n’est pas à toi !", ephemeral=True)
-        embed = build_potions_embed(self.garden.get("potions", {}))
-        await interaction.response.edit_message(embed=embed)
+
+        # Construction du texte fleurs
+        fleurs = "\n".join(f"{emoji} {name} x{self.garden['inventory'].get(f,0)}"
+                           for f, emoji in FLEUR_EMOJIS.items())
+
+        # Construction du texte potions
+        potions_embed = build_potions_embed(self.garden.get("potions", {}))
+
+        embed = discord.Embed(
+            title="🎒 Inventaire",
+            description=f"**Fleurs :**\n{fleurs}",
+            color=discord.Color.blue()
+        )
+        embed.add_field(name="🧪 Potions", value=potions_embed.description or "Aucune", inline=False)
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def update_garden_db(self):
         supabase.table("gardens").update({
