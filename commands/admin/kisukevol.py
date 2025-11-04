@@ -21,8 +21,8 @@ from utils.reiatsu_utils import ensure_profile
 # ────────────────────────────────────────────────────────────────────────────────#
 # ⚙️ Paramètres de configuration
 # ────────────────────────────────────────────────────────────────────────────────#
-KISUKE_MULTIPLIER = 10  # Multiplie le gain de Kisuke (×10 du montant volé)
-ADMIN_LOG_CHANNEL_ID = None  # Remplace par un ID de salon pour les logs, sinon None
+KISUKE_MULTIPLIER = 10   # Multiplie le gain de Kisuke (×10 du montant volé)
+ADMIN_LOG_CHANNEL_ID = None  # Optionnel : ID d’un salon pour les logs admin
 VOL_COOLDOWN_HOURS = 6       # Cooldown interne (6h) pour Kisuke lui-même
 VOL_PROBA_VOLEUR = 0.67      # Chance de succès si Kisuke est Voleur
 VOL_PROBA_AUTRE = 0.25       # Chance de succès pour les autres classes
@@ -42,42 +42,49 @@ class KisukeVol(commands.Cog):
     # 🔹 Fonction interne commune
     # ────────────────────────────────────────────────────────────────────────────
     async def _kisukevol_logic(self, admin: discord.Member, channel: discord.abc.Messageable, guild: discord.Guild):
-        # Récupère tous les membres du serveur (hors bots)
-        membres = [m for m in guild.members if not m.bot]
-        if not membres:
-            await safe_send(channel, "⚠️ Aucun membre valide trouvé.")
-            return
+        # Récupère tous les utilisateurs du serveur avec Reiatsu > 0 dans la base
+        try:
+            data = supabase.table("reiatsu").select("*").gt("points", 0).execute()
+            if not data.data:
+                await safe_send(channel, "⚠️ Aucun utilisateur n’a de Reiatsu dans la base.")
+                return
 
-        # Choisit une cible aléatoire
-        cible = random.choice(membres)
-        cible_id = int(cible.id)
+            # Filtrer uniquement ceux qui sont encore sur le serveur
+            membres_db = [entry for entry in data.data if guild.get_member(int(entry["user_id"]))]
+
+            if not membres_db:
+                await safe_send(channel, "⚠️ Aucun membre valide trouvé dans la base et sur le serveur.")
+                return
+
+            # Choisit une cible aléatoire parmi eux
+            cible_data = random.choice(membres_db)
+            cible_id = int(cible_data["user_id"])
+            cible = guild.get_member(cible_id)
+
+        except Exception as e:
+            await safe_send(channel, f"❌ Erreur en accédant à la base Supabase : `{e}`")
+            return
 
         # Kisuke = le bot lui-même
         kisuke_member = self.bot.user
         kisuke_id = int(kisuke_member.id)
 
         # Vérifie et crée les profils si nécessaires
-        ensure_profile(cible_id, cible.name)
         ensure_profile(kisuke_id, "Kisuke")
 
-        # Récupération des données
-        cible_res = supabase.table("reiatsu").select("*").eq("user_id", cible_id).execute()
+        # Récupération des données Kisuke
         kisuke_res = supabase.table("reiatsu").select("*").eq("user_id", kisuke_id).execute()
-        if not cible_res.data or not kisuke_res.data:
-            await safe_send(channel, "⚠️ Impossible de charger les profils Reiatsu.")
+        if not kisuke_res.data:
+            await safe_send(channel, "⚠️ Impossible de charger le profil de Kisuke.")
             return
 
-        cible_data = cible_res.data[0]
         kisuke_data = kisuke_res.data[0]
-
-        cible_points = cible_data.get("points", 0) or 0
-        cible_classe = cible_data.get("classe")
         kisuke_points = kisuke_data.get("points", 0) or 0
         kisuke_classe = kisuke_data.get("classe")
         kisuke_active_skill = bool(kisuke_data.get("active_skill", False))
         dernier_vol = kisuke_data.get("last_steal_attempt")
 
-        # Cooldown interne de Kisuke
+        # Cooldown interne
         now = datetime.now(tz=timezone.utc)
         if dernier_vol:
             try:
@@ -90,6 +97,10 @@ class KisukeVol(commands.Cog):
             except Exception:
                 pass
 
+        # Récupère les infos de la cible
+        cible_points = cible_data.get("points", 0) or 0
+        cible_classe = cible_data.get("classe")
+
         if cible_points <= 0:
             await safe_send(channel, f"💨 Kisuke a tenté de voler {cible.mention}, mais il n’avait **aucun Reiatsu** !")
             return
@@ -100,7 +111,6 @@ class KisukeVol(commands.Cog):
         # 🎲 Calcul du succès
         if kisuke_classe == "Voleur" and kisuke_active_skill:
             succes = True
-            # Désactive le skill actif
             supabase.table("reiatsu").update({"active_skill": False}).eq("user_id", kisuke_id).execute()
         else:
             succes = random.random() < (VOL_PROBA_VOLEUR if kisuke_classe == "Voleur" else VOL_PROBA_AUTRE)
@@ -108,6 +118,7 @@ class KisukeVol(commands.Cog):
         # Mise à jour du timestamp (tentative)
         supabase.table("reiatsu").update({"last_steal_attempt": now.isoformat()}).eq("user_id", kisuke_id).execute()
 
+        # ✅ Succès du vol
         if succes:
             nouveau_cible_points = max(0, cible_points - montant)
             gain_kisuke = montant * KISUKE_MULTIPLIER
@@ -120,7 +131,7 @@ class KisukeVol(commands.Cog):
                 title="🌀 Kisuke a frappé !",
                 description=(
                     f"Kisuke a volé **{montant} Reiatsu** à {cible.mention} 😏\n"
-                    f"→ Il a transformé cette énergie en **{gain_kisuke} Reiatsu** grâce à son laboratoire !"
+                    f"→ Grâce à son laboratoire, il en tire **{gain_kisuke} Reiatsu** !"
                 ),
                 color=discord.Color.orange()
             )
@@ -136,6 +147,7 @@ class KisukeVol(commands.Cog):
                         f"🧪 Kisuke a volé **{montant} Reiatsu** à {cible.mention} (→ +{gain_kisuke} Reiatsu)."
                     )
 
+        # ❌ Échec du vol
         else:
             await safe_send(channel, f"😵 Kisuke a tenté de voler {cible.mention}... mais a échoué !")
 
@@ -177,3 +189,7 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Admin"
     await bot.add_cog(cog)
+
+
+
+
