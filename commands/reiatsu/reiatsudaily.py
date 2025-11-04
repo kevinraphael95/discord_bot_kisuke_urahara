@@ -10,6 +10,8 @@
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
 import discord
+import os
+import random
 from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
@@ -25,16 +27,34 @@ class ReiatsuDaily(commands.Cog):
         self.bot = bot
 
     # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction utilitaire — Sélection aléatoire d'image
+    # ────────────────────────────────────────────────────────────────────────────
+    def _get_random_daily_image(self) -> str | None:
+        """Retourne le chemin d'une image aléatoire depuis data/images/daily"""
+        dossier = "data/images/daily"
+        if not os.path.isdir(dossier):
+            return None
+
+        images = [f for f in os.listdir(dossier) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
+        if not images:
+            return None
+
+        return os.path.join(dossier, random.choice(images))
+
+    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="reiatsudaily",
-        description="Récompense journalière Reiatsu (ou pas 👀)"
+        description="Réclame tes 30 Reiatsu quotidien gratuit."
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_reiatsudaily(self, interaction: discord.Interaction):
-        """Commande slash troll avec image"""
-        image_path = "data/images/not_a_rick_roll.jpg"
+        """Commande slash troll avec image aléatoire"""
+        image_path = self._get_random_daily_image()
+        if not image_path:
+            await safe_respond(interaction, "❌ Aucune image trouvée dans `data/images/daily/`.")
+            return
 
         embed = discord.Embed(
             title="🎁 Récompense journalière Reiatsu !",
@@ -51,12 +71,16 @@ class ReiatsuDaily(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(
         name="reiatsudaily",
-        aliases=["rd", "dailyreiatsu"]
+        aliases=["rd", "dailyreiatsu"],
+        help="Réclame tes 30 Reiatsu quotidien gratuit."
     )
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_reiatsudaily(self, ctx: commands.Context):
-        """Commande préfixe troll avec image"""
-        image_path = "data/images/not_a_rick_roll.jpg"
+        """Commande préfixe troll avec image aléatoire"""
+        image_path = self._get_random_daily_image()
+        if not image_path:
+            await safe_send(ctx.channel, "❌ Aucune image trouvée dans `data/images/daily/`.")
+            return
 
         embed = discord.Embed(
             title="🎁 Récompense journalière Reiatsu !",
@@ -77,5 +101,3 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Fun"
     await bot.add_cog(cog)
-
-
