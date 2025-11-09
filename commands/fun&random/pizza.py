@@ -4,8 +4,12 @@
 # Catégorie : Fun&Random
 # Accès : Tous
 # Cooldown : 1 utilisation / 3 secondes / utilisateur
+# Version : ✅ Optimisée + intègre la quête "pizza"
 # ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -14,6 +18,7 @@ import json
 import os
 import random
 from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_interact
+from utils.supabase_client import supabase  # ✅ pour accéder à la base
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Chargement des données JSON
@@ -90,14 +95,42 @@ class PizzaAleatoire(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # Fonction interne partagée
-    async def _send_pizza(self, destination, author):
-        data = load_data()
-        if not data:
-            return await safe_send(destination, "❌ Impossible de charger les options de pizza.")
-        embed = generate_pizza_embed(data)
-        view = PizzaView(data, author)
-        view.message = await safe_send(destination, embed=embed, view=view)
+    # ────────────────────────────────────────────────────────────────────────────
+    # ⚙️ Validation de la quête pizza
+    # ────────────────────────────────────────────────────────────────────────────
+    async def valider_quete_pizza(
+        self,
+        user: discord.User,
+        channel: discord.abc.Messageable | None = None
+    ):
+        try:
+            data = supabase.table("reiatsu").select("quetes, niveau").eq("user_id", user.id).execute()
+            if not data.data:
+                return
+
+            quetes = data.data[0].get("quetes", [])
+            niveau = data.data[0].get("niveau", 1)
+
+            if "pizza" in quetes:
+                return
+
+            quetes.append("pizza")
+            new_lvl = niveau + 1
+            supabase.table("reiatsu").update({"quetes": quetes, "niveau": new_lvl}).eq("user_id", user.id).execute()
+
+            embed = discord.Embed(
+                title="🎉 Quête accomplie !",
+                description=f"Bravo **{user.name}** ! Tu as terminé la quête **Pizza** 🍕\n\n⭐ **Niveau +1 !** (Niveau {new_lvl})",
+                color=0xFFA500
+            )
+
+            if channel:
+                await safe_send(channel, embed=embed)
+            else:
+                await safe_send(user, embed=embed)
+
+        except Exception as e:
+            print(f"[ERREUR validation quête pizza] {e}")
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -116,8 +149,9 @@ class PizzaAleatoire(commands.Cog):
             await safe_interact(interaction, embed=embed, view=view)
             view.message = await interaction.original_response()
 
-        except app_commands.CommandOnCooldown as e:
-            await safe_respond(interaction, f"⏳ Attends encore {e.retry_after:.1f}s.", ephemeral=True)
+            # ✅ Validation de la quête dans le salon
+            await self.valider_quete_pizza(interaction.user, channel=interaction.channel)
+
         except Exception as e:
             print(f"[ERREUR /pizza] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue lors de la génération de la pizza.", ephemeral=True)
@@ -129,9 +163,17 @@ class PizzaAleatoire(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_pizza(self, ctx: commands.Context):
         try:
-            await self._send_pizza(ctx.channel, ctx.author)
-        except commands.CommandOnCooldown as e:
-            await safe_send(ctx, f"⏳ Attends encore {e.retry_after:.1f}s.")
+            data = load_data()
+            if not data:
+                return await safe_send(ctx, "❌ Impossible de charger les options de pizza.")
+
+            view = PizzaView(data, ctx.author)
+            embed = generate_pizza_embed(data)
+            view.message = await safe_send(ctx, embed=embed, view=view)
+
+            # ✅ Validation de la quête dans le salon
+            await self.valider_quete_pizza(ctx.author, channel=ctx.channel)
+
         except Exception as e:
             print(f"[ERREUR !pizza] {e}")
             await safe_send(ctx, "❌ Une erreur est survenue lors de la génération de la pizza.")
