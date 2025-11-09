@@ -143,7 +143,7 @@ class ReiatsuProfil(commands.Cog):
         # Statistiques
         embed.add_field(
             name="💠 Statistiques",
-            value=f"**Reiatsu :** {points}\n**Niveau :** {niveau} ★",
+            value=f"**Reiatsu :** {points}\n**Niveau :** {niveau} ★\n(`!!quete` pour voir les quêtes à faire pour monter de niveau)",
             inline=False
         )
 
