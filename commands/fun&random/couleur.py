@@ -57,7 +57,6 @@ class CouleurView(discord.ui.View):
             except Exception:
                 pass
 
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
@@ -69,7 +68,12 @@ class CouleurCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # ⚙️ Fonction interne pour valider la quête "couleur"
     # ────────────────────────────────────────────────────────────────────────────
-    async def valider_quete_couleur(self, user: discord.User, interaction: discord.Interaction | None = None):
+    async def valider_quete_couleur(
+        self, 
+        user: discord.User, 
+        channel: discord.abc.Messageable | None = None, 
+        interaction: discord.Interaction | None = None
+    ):
         try:
             data = supabase.table("reiatsu").select("quetes, niveau").eq("user_id", user.id).execute()
             if not data.data:
@@ -87,16 +91,28 @@ class CouleurCommand(commands.Cog):
             new_lvl = niveau + 1
             supabase.table("reiatsu").update({"quetes": quetes, "niveau": new_lvl}).eq("user_id", user.id).execute()
 
-            # ✅ Envoie un petit embed de félicitations
+            # ✅ Embed de félicitations
             embed = discord.Embed(
                 title="🎉 Quête accomplie !",
                 description=f"Bravo **{user.name}** ! Tu as terminé la quête **Couleur** 🏆\n\n⭐ **Niveau +1 !** (Niveau {new_lvl})",
                 color=0x00FF7F
             )
+
+            # Envoi dans le salon approprié
             if interaction:
-                await interaction.followup.send(embed=embed)
+                if channel:
+                    await safe_send(channel, embed=embed)
+                else:
+                    if not interaction.response.is_done():
+                        await interaction.response.send_message(embed=embed)
+                    else:
+                        await interaction.followup.send(embed=embed)
+            elif channel:
+                await safe_send(channel, embed=embed)
             else:
+                # fallback au MP
                 await safe_send(user, embed=embed)
+
         except Exception as e:
             print(f"[ERREUR validation quête couleur] {e}")
 
@@ -116,8 +132,8 @@ class CouleurCommand(commands.Cog):
             await safe_interact(interaction, embed=embed, view=view)
             view.message = await interaction.original_response()
 
-            # ✅ Validation de la quête
-            await self.valider_quete_couleur(interaction.user, interaction)
+            # ✅ Validation de la quête dans le salon
+            await self.valider_quete_couleur(interaction.user, channel=interaction.channel, interaction=interaction)
 
         except Exception as e:
             print(f"[ERREUR /couleur] {e}")
@@ -138,13 +154,12 @@ class CouleurCommand(commands.Cog):
             embed = view.generer_embed()
             view.message = await safe_send(ctx, embed=embed, view=view)
 
-            # ✅ Validation de la quête
-            await self.valider_quete_couleur(ctx.author)
+            # ✅ Validation de la quête dans le salon
+            await self.valider_quete_couleur(ctx.author, channel=ctx.channel)
 
         except Exception as e:
             print(f"[ERREUR !couleur] {e}")
             await safe_send(ctx, "❌ Une erreur est survenue lors de la génération de la couleur.")
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
