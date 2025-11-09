@@ -14,6 +14,7 @@ from discord.ext import commands
 from discord import app_commands
 import json, random, os
 from utils.discord_utils import safe_send, safe_respond
+from utils.supabase_client import supabase
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Chargement des données JSON
@@ -27,6 +28,37 @@ def load_characters():
     except Exception as e:
         print(f"[ERREUR JSON bmoji] {e}")
         return []
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🏆 Validation de la quête “Réussir un Bmoji”
+# ────────────────────────────────────────────────────────────────────────────────
+async def valider_quete_bmoji(user: discord.User, channel: discord.abc.Messageable):
+    try:
+        res = supabase.table("reiatsu").select("quetes, niveau").eq("user_id", user.id).execute()
+        data = res.data[0] if res.data else None
+
+        if not data:
+            return
+
+        quetes = data.get("quetes", [])
+        if "bmoji" in quetes:
+            return
+
+        quetes.append("bmoji")
+        nouveau_niveau = data.get("niveau", 0) + 1
+
+        supabase.table("reiatsu").update({"quetes": quetes, "niveau": nouveau_niveau}).eq("user_id", user.id).execute()
+
+        embed = discord.Embed(
+            title="🎉 Quête accomplie !",
+            description="Tu as réussi ton premier **Bmoji** !\nTu gagnes **+1 niveau** 🆙",
+            color=discord.Color.green()
+        )
+        embed.set_footer(text=f"Niveau actuel : {nouveau_niveau}")
+        await safe_send(channel, embed=embed)
+
+    except Exception as e:
+        print(f"[ERREUR validation quête Bmoji] {e}")
 
 # ────────────────────────────────────────────────────────────────────────────────
 # ⚔️ Fonction commune
@@ -99,11 +131,20 @@ async def _run_bmoji(target):
         await view.wait()
 
         # ─────────────── Résultat ───────────────
-        result_msg = "✅ Bonne réponse !" if view.success else f"❌ Mauvaise réponse (c'était {nom})"
-        if isinstance(target, discord.Interaction):
-            await target.followup.send(result_msg)
+        if view.success:
+            result_msg = "✅ Bonne réponse !"
+            if isinstance(target, discord.Interaction):
+                await target.followup.send(result_msg)
+                await valider_quete_bmoji(target.user, target.channel)
+            else:
+                await safe_send(target.channel, result_msg)
+                await valider_quete_bmoji(target.author, target.channel)
         else:
-            await safe_send(target.channel, result_msg)
+            result_msg = f"❌ Mauvaise réponse (c'était {nom})"
+            if isinstance(target, discord.Interaction):
+                await target.followup.send(result_msg)
+            else:
+                await safe_send(target.channel, result_msg)
 
     except Exception as e:
         print(f"[ERREUR bmoji] {e}")
