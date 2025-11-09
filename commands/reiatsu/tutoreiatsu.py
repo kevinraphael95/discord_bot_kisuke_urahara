@@ -60,8 +60,8 @@ PAGES = [
         "title": "Monter de niveaux grace aux quêtes",
         "description": (
             "La commande `!!quetes` permet de voir les quêtes à faire pour monter de niveau.\n"
-            "Chaque quête accomplie fait monter le niveau de 1.\n"
-            "Le niveau de départ est 0. Chaque niveau supplémentaire donnera ces boosts :\n"
+            "Le niveau de départ est 0. Chaque quête accomplie fait monter le niveau de 1.\n"
+            "Chaque niveau supplémentaire donnera ces boosts :\n"
             "- +0.5% de chance d'avoir un Super Reiatsu lors d'une absorption d'un Reiatsu\n"
             "- Autre chose ?"
         ),
