@@ -74,6 +74,9 @@ class ReiatsuProfil(commands.Cog):
         steal_cd = data.get("steal_cd")
         last_skill = data.get("last_skilled_at")
         active_skill = data.get("active_skill", False)
+        points = data.get("points", 0)
+        niveau = data.get("niveau", 1)
+
 
         # Gestion des classes
         CLASSES = load_classes()
@@ -140,7 +143,7 @@ class ReiatsuProfil(commands.Cog):
         # Statistiques
         embed.add_field(
             name="💠 Statistiques",
-            value=f"**Reiatsu :** {points}\n**Niveau :** ★★★☆☆",
+            value=f"**Reiatsu :** {points}\n**Niveau :** {niveau} ★",
             inline=False
         )
 
