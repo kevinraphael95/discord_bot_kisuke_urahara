@@ -75,7 +75,7 @@ class ReiatsuProfil(commands.Cog):
         last_skill = data.get("last_skilled_at")
         active_skill = data.get("active_skill", False)
         points = data.get("points", 0)
-        niveau = data.get("niveau", 1)
+        niveau = data.get("niveau", 0)
 
 
         # Gestion des classes
