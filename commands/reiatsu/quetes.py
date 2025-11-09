@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 quetes.py — Commande /quetes et !quetes
 # Objectif : Afficher la liste des quêtes et leur état d’avancement
-# Catégorie : 🎮 Progression
+# Catégorie : Reiatsu
 # Accès : Public
 # ────────────────────────────────────────────────────────────────────────────────
 
@@ -103,5 +103,5 @@ async def setup(bot: commands.Bot):
     cog = QuetesCommand(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Progression"
+            command.category = "Reiatsu"
     await bot.add_cog(cog)
