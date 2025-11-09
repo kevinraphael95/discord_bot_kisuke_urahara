@@ -37,7 +37,9 @@ def ensure_profile(user_id: int, username: str) -> dict:
         "active_skill": False,
         "last_skilled_at": None,
         "last_steal_attempt": None,
-        "steal_cd": 24
+        "steal_cd": 24,
+        "niveau": 0,
+        "quetes": []
     }
     supabase.table("reiatsu").insert(profile).execute()
     return profile
