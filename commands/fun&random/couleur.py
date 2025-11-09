@@ -4,7 +4,7 @@
 # Catégorie : 🎨 Fun&Random
 # Accès : Public
 # Cooldown : 1 utilisation / 3 sec / utilisateur
-# Version : ✅ Optimisée, sécurisée, cohérente avec safe_interact
+# Version : ✅ Optimisée + intègre la quête "couleur"
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -15,6 +15,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_interact
+from utils.supabase_client import supabase  # ✅ pour accéder à la base
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎛️ Vue interactive avec bouton "Nouvelle couleur"
@@ -25,11 +26,7 @@ class CouleurView(discord.ui.View):
         self.author = author
         self.message: discord.Message | None = None
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🎨 Génération d'un embed de couleur aléatoire
-    # ────────────────────────────────────────────────────────────────────────────
     def generer_embed(self) -> discord.Embed:
-        """Génère un embed avec une couleur aléatoire et son aperçu visuel."""
         code_hex = random.randint(0, 0xFFFFFF)
         hex_str = f"#{code_hex:06X}"
         r, g, b = (code_hex >> 16) & 0xFF, (code_hex >> 8) & 0xFF, code_hex & 0xFF
@@ -40,39 +37,18 @@ class CouleurView(discord.ui.View):
             description=f"🔹 **Code HEX** : `{hex_str}`\n🔸 **Code RGB** : `{rgb_str}`",
             color=code_hex
         )
-        embed.set_image(
-            url=f"https://dummyimage.com/700x200/{code_hex:06x}/{code_hex:06x}.png&text=+"
-        )
+        embed.set_image(url=f"https://dummyimage.com/700x200/{code_hex:06x}/{code_hex:06x}.png&text=+")
         return embed
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔁 Bouton de régénération
-    # ────────────────────────────────────────────────────────────────────────────
     @discord.ui.button(label="🔁 Nouvelle couleur", style=discord.ButtonStyle.primary)
     async def regenerate(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """Régénère la couleur si c'est l'auteur qui clique sur le bouton."""
         if interaction.user != self.author:
-            return await safe_interact(
-                interaction,
-                content="❌ Tu ne peux pas utiliser ce bouton.",
-                ephemeral=True
-            )
+            return await safe_interact(interaction, content="❌ Tu ne peux pas utiliser ce bouton.", ephemeral=True)
 
         new_embed = self.generer_embed()
+        await safe_interact(interaction, edit=True, embed=new_embed, view=self)
 
-        # ✅ Edition du message de manière sécurisée
-        await safe_interact(
-            interaction,
-            edit=True,
-            embed=new_embed,
-            view=self
-        )
-
-    # ────────────────────────────────────────────────────────────────────────────
-    # ⏰ Timeout : désactivation du bouton
-    # ────────────────────────────────────────────────────────────────────────────
     async def on_timeout(self):
-        """Désactive le bouton quand le délai est écoulé."""
         for child in self.children:
             child.disabled = True
         if self.message:
@@ -91,13 +67,47 @@ class CouleurCommand(commands.Cog):
         self.bot = bot
 
     # ────────────────────────────────────────────────────────────────────────────
+    # ⚙️ Fonction interne pour valider la quête "couleur"
+    # ────────────────────────────────────────────────────────────────────────────
+    async def valider_quete_couleur(self, user: discord.User, interaction: discord.Interaction | None = None):
+        try:
+            data = supabase.table("reiatsu").select("quetes, niveau").eq("user_id", user.id).execute()
+            if not data.data:
+                return  # Aucun profil trouvé
+
+            quetes = data.data[0].get("quetes", [])
+            niveau = data.data[0].get("niveau", 1)
+
+            # Si la quête est déjà faite, rien à faire
+            if "couleur" in quetes:
+                return
+
+            # Ajoute la quête et augmente le niveau
+            quetes.append("couleur")
+            new_lvl = niveau + 1
+            supabase.table("reiatsu").update({"quetes": quetes, "niveau": new_lvl}).eq("user_id", user.id).execute()
+
+            # ✅ Envoie un petit embed de félicitations
+            embed = discord.Embed(
+                title="🎉 Quête accomplie !",
+                description=f"Bravo **{user.name}** ! Tu as terminé la quête **Couleur** 🏆\n\n⭐ **Niveau +1 !** (Niveau {new_lvl})",
+                color=0x00FF7F
+            )
+            if interaction:
+                await interaction.followup.send(embed=embed)
+            else:
+                await safe_send(user, embed=embed)
+        except Exception as e:
+            print(f"[ERREUR validation quête couleur] {e}")
+
+    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="couleur",
         description="Affiche une couleur aléatoire avec un aperçu visuel et ses codes HEX & RGB."
     )
-    @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.user.id))  # cooldown : 1 fois / 3s / utilisateur
+    @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.user.id))
     async def slash_couleur(self, interaction: discord.Interaction):
         try:
             view = CouleurView(interaction.user)
@@ -105,13 +115,13 @@ class CouleurCommand(commands.Cog):
 
             await safe_interact(interaction, embed=embed, view=view)
             view.message = await interaction.original_response()
+
+            # ✅ Validation de la quête
+            await self.valider_quete_couleur(interaction.user, interaction)
+
         except Exception as e:
             print(f"[ERREUR /couleur] {e}")
-            await safe_respond(
-                interaction,
-                content="❌ Une erreur est survenue lors de la génération de la couleur.",
-                ephemeral=True
-            )
+            await safe_respond(interaction, content="❌ Une erreur est survenue lors de la génération de la couleur.", ephemeral=True)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
@@ -127,9 +137,14 @@ class CouleurCommand(commands.Cog):
             view = CouleurView(ctx.author)
             embed = view.generer_embed()
             view.message = await safe_send(ctx, embed=embed, view=view)
+
+            # ✅ Validation de la quête
+            await self.valider_quete_couleur(ctx.author)
+
         except Exception as e:
             print(f"[ERREUR !couleur] {e}")
             await safe_send(ctx, "❌ Une erreur est survenue lors de la génération de la couleur.")
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
