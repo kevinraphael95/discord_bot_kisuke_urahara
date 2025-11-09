@@ -11,8 +11,8 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond
-from supabase_client import supabase  # ton fichier de connexion Supabase
+from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
+from utils.reiatsu_utils import ensure_profile  # ⚡ Utilitaire pour les profils joueurs
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📜 Liste des quêtes disponibles
@@ -29,7 +29,9 @@ ALL_QUESTS = {
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class QuetesCommand(commands.Cog):
-    """Commande !quetes et /quetes — Affiche la liste des quêtes et leur statut."""
+    """
+    Commande /quetes et !quetes — Affiche la liste des quêtes et leur statut
+    """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -59,29 +61,14 @@ class QuetesCommand(commands.Cog):
     async def _show_quetes(self, source):
         """Affiche la liste des quêtes terminées et non terminées pour un joueur."""
         try:
-            user_id = (
-                source.user.id if isinstance(source, discord.Interaction)
-                else source.author.id
-            )
+            user = source.user if isinstance(source, discord.Interaction) else source.author
 
-            # Récupération des données joueur depuis Supabase
-            data = supabase.table("reiatsu").select("niveau", "quetes").eq("user_id", user_id).execute()
+            # ⚡ Récupération ou création du profil
+            profile = ensure_profile(user.id, user.name)
+            niveau = profile.get("niveau", 1)
+            quetes_faites = profile.get("quetes", [])
 
-            if not data.data:
-                # Création automatique si pas trouvé
-                supabase.table("reiatsu").insert({
-                    "user_id": user_id,
-                    "niveau": 1,
-                    "quetes": []
-                }).execute()
-                niveau = 1
-                quetes_faites = []
-            else:
-                joueur = data.data[0]
-                niveau = joueur.get("niveau", 1)
-                quetes_faites = joueur.get("quetes", [])
-
-            # Génération du texte
+            # Génération du texte des quêtes
             lines = []
             for key, desc in ALL_QUESTS.items():
                 if key in quetes_faites:
@@ -90,7 +77,7 @@ class QuetesCommand(commands.Cog):
                     lines.append(f"⁉️ {desc}")
 
             embed = discord.Embed(
-                title=f"📜 Liste des quêtes de {source.user.name if isinstance(source, discord.Interaction) else source.author.name}",
+                title=f"📜 Liste des quêtes de {user.name}",
                 description=f"⭐ **Niveau actuel :** {niveau}\n\n" + "\n".join(lines),
                 color=discord.Color.gold()
             )
@@ -103,10 +90,11 @@ class QuetesCommand(commands.Cog):
 
         except Exception as e:
             print(f"[ERREUR /quetes] {e}")
+            msg = "❌ Une erreur est survenue lors de la récupération des quêtes."
             if isinstance(source, discord.Interaction):
-                await safe_respond(source, content="❌ Une erreur est survenue lors de la récupération des quêtes.", ephemeral=True)
+                await safe_respond(source, content=msg, ephemeral=True)
             else:
-                await safe_send(source, "❌ Une erreur est survenue lors de la récupération des quêtes.")
+                await safe_send(source, msg)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
