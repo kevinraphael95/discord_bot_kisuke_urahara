@@ -1,4 +1,4 @@
-# ────────────────────────────────────────────────────────────────────────────────
+                            # ────────────────────────────────────────────────────────────────────────────────
 # 📌 skill.py — Commande interactive /skill et !skill
 # Objectif : Afficher et activer la compétence active du joueur
 # (Illusionniste, Voleur, Absorbeur, Parieur)
@@ -47,6 +47,38 @@ class Skill(commands.Cog):
         self.bot = bot
         self.config = load_reiatsu_config()
         self.skill_locks = {}
+
+    # ────────────────────────────────────────────────────────────────────────
+    # 🏆 Validation de la quête "skill"
+    # ────────────────────────────────────────────────────────────────────────
+    async def valider_quete_skill(self, user: discord.User, channel=None):
+        """Valide la quête 'Première utilisation du skill'."""
+        try:
+            data = supabase.table("reiatsu").select("quetes, niveau").eq("user_id", user.id).execute()
+            if not data.data:
+                return
+
+            quetes = data.data[0].get("quetes", [])
+            niveau = data.data[0].get("niveau", 1)
+
+            if "skill" in quetes:
+                return  # Quête déjà accomplie
+
+            quetes.append("skill")
+            new_lvl = niveau + 1
+            supabase.table("reiatsu").update({"quetes": quetes, "niveau": new_lvl}).eq("user_id", user.id).execute()
+
+            embed = discord.Embed(
+                title="🎯 Quête accomplie !",
+                description=f"Bravo **{user.name}** ! Tu as terminé la quête **Première utilisation du skill** 💫\n\n⭐ **Niveau +1 !** (Niveau {new_lvl})",
+                color=0xFFD700
+            )
+            if channel:
+                await channel.send(embed=embed)
+            else:
+                await user.send(embed=embed)
+        except Exception as e:
+            print(f"[ERREUR validation quête skill] {e}")
 
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction interne : activation du skill
@@ -215,6 +247,9 @@ class Skill(commands.Cog):
                 # Empêche l'affichage du message "En cours"
                 return
 
+            # ───────────── Validation de la quête ─────────────
+            await self.valider_quete_skill(user, channel)
+            supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
 
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
