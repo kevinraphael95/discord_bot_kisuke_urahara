@@ -22,7 +22,8 @@ ALL_QUESTS = {
     "pizza": "Faire une fois la commande pizza",
     "division": "Faire le quizz de la commande division",
     "entrainement": "Faire un score de minimum 5000 à l'entraînement cérébral",
-    "skill": "Utiliser ton skill"
+    "skill": "Utiliser ton skill",
+    "bmoji": "Réussi le minijeu de la commande bmoji"
 }
 
 # ────────────────────────────────────────────────────────────────────────────────
