@@ -140,7 +140,7 @@ class ReiatsuProfil(commands.Cog):
         # Statistiques
         embed.add_field(
             name="💠 Statistiques",
-            value=f"**Reiatsu :** {points}\n**Bonus :** +{bonus}%",
+            value=f"**Reiatsu :** {points}\n**Niveau :** ★★★☆☆",
             inline=False
         )
 
