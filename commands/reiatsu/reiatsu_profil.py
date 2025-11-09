@@ -57,7 +57,7 @@ class ReiatsuProfil(commands.Cog):
         # Récupération des données Reiatsu
         try:
             res = supabase.table("reiatsu").select(
-                "username, points, bonus5, classe, last_steal_attempt, steal_cd, last_skilled_at, active_skill"
+                "username, points, bonus5, classe, last_steal_attempt, steal_cd, last_skilled_at, active_skill, niveau"
             ).eq("user_id", user_id).execute()
         except Exception as e:
             print(f"[ERREUR DB] Lecture Reiatsu échouée : {e}")
