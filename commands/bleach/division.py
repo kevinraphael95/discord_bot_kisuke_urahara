@@ -4,6 +4,7 @@
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
+# Version : ✅ Optimisée + intègre la quête "division"
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -18,6 +19,7 @@ import asyncio
 import random
 from collections import Counter
 from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.supabase_client import supabase  # ✅ pour accès à la base
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Chargement des données JSON
@@ -48,7 +50,6 @@ class QuizView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.author.id
 
-
 class QuizButton(discord.ui.Button):
     def __init__(self, emoji, traits):
         super().__init__(emoji=emoji, style=discord.ButtonStyle.primary)
@@ -66,12 +67,43 @@ class QuizButton(discord.ui.Button):
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class Division(commands.Cog):
-    """
-    Commande /division et !division — Détermine ta division dans le Gotei 13
-    """
+    """Commande /division et !division — Détermine ta division dans le Gotei 13"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+    # ────────────────────────────────────────────────────────────────────────────
+    # ⚙️ Validation de la quête division
+    # ────────────────────────────────────────────────────────────────────────────
+    async def valider_quete_division(self, user: discord.User, channel: discord.abc.Messageable | None = None):
+        try:
+            data = supabase.table("reiatsu").select("quetes, niveau").eq("user_id", user.id).execute()
+            if not data.data:
+                return
+
+            quetes = data.data[0].get("quetes", [])
+            niveau = data.data[0].get("niveau", 1)
+
+            if "division" in quetes:
+                return
+
+            quetes.append("division")
+            new_lvl = niveau + 1
+            supabase.table("reiatsu").update({"quetes": quetes, "niveau": new_lvl}).eq("user_id", user.id).execute()
+
+            embed = discord.Embed(
+                title="🎉 Quête accomplie !",
+                description=f"Bravo **{user.name}** ! Tu as terminé la quête **Division** 🏆\n\n⭐ **Niveau +1 !** (Niveau {new_lvl})",
+                color=0x1E90FF
+            )
+
+            if channel:
+                await safe_send(channel, embed=embed)
+            else:
+                await safe_send(user, embed=embed)
+
+        except Exception as e:
+            print(f"[ERREUR validation quête division] {e}")
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction interne commune
@@ -91,7 +123,6 @@ class Division(commands.Cog):
         message = None
 
         for q_index, q in enumerate(questions, start=1):
-            # Choisir 4 réponses max parmi celles disponibles
             all_answers = list(q["answers"].items())
             selected_answers = random.sample(all_answers, min(4, len(all_answers)))
 
@@ -135,6 +166,9 @@ class Division(commands.Cog):
         embed_result.set_image(url=f"attachment://{os.path.basename(div_info['image'])}")
 
         await safe_edit(message, embed=embed_result, view=None)
+
+        # ✅ Validation de la quête dans le salon
+        await self.valider_quete_division(author, channel=channel)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
