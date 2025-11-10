@@ -16,7 +16,7 @@ class BleachSolo(commands.Cog):
     """Commande /bleach_solo — Mini-JDR solo interactif avec choix par réactions"""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        with open("bleach_solo_data.json", "r", encoding="utf-8") as f:
+        with open("data/bleach_solo_data.json", "r", encoding="utf-8") as f:
             self.data = json.load(f)
 
     def tirer_carte(self, pile):
