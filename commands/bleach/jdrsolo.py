@@ -6,14 +6,22 @@
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord import app_commands
 from discord.ext import commands
 import random, json
-from utils.discord_utils import safe_send, safe_respond
+from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 🧠 Cog principal
+# ────────────────────────────────────────────────────────────────────────────────
 class BleachSolo(commands.Cog):
-    """Commande /bleach_solo — Mini-JDR solo interactif avec choix par réactions"""
+    """
+    Commande /jdrsolo et !jdrsolo — Mini-JDR solo Bleach interactif avec zones, rencontres, objets, boss
+    """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         with open("data/bleach_solo_data.json", "r", encoding="utf-8") as f:
@@ -62,7 +70,7 @@ class BleachSolo(commands.Cog):
             elif action == "objet":
                 if joueur["objets"]:
                     objet = joueur["objets"].pop()
-                    degat = 3
+                    degat = objet.get("degat",3)
                     ennemi["pv"] -= degat
                     await safe_send(ctx, f"🧪 {joueur['nom']} utilise {objet['nom']} et inflige {degat} dégâts !")
                 else:
@@ -87,11 +95,11 @@ class BleachSolo(commands.Cog):
         description="Lance le mini-JDR solo Bleach avec zones, rencontres et combats interactifs."
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_bleach_solo(self, interaction: discord.Interaction):
+    async def slash_jdrsolo(self, interaction: discord.Interaction):
         await safe_respond(interaction, "🎮 Début du mini-JDR solo Bleach !")
         joueur = {"nom":"Shinigami","pv":10,"objets":[]}
 
-        for tour in range(3):  # exemple: 3 zones pour jouer
+        for tour in range(3):
             zone = random.choice(list(self.data["zones"].keys()))
             effet = self.data["zones"][zone][str(random.randint(1,6))]
             await safe_send(interaction, f"🌍 Zone: **{zone}** | Effet: {effet}")
@@ -110,7 +118,6 @@ class BleachSolo(commands.Cog):
             else:
                 await safe_send(interaction, "🌿 Rien à signaler dans cette zone.")
 
-        # Fin de partie : boss
         boss = self.tirer_carte("boss")
         if "pv" not in boss: boss["pv"]=10
         await safe_send(interaction, f"👑 Boss final : {boss['nom']} !")
@@ -122,8 +129,8 @@ class BleachSolo(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="jdrsolo")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_bleach_solo(self, ctx: commands.Context):
-        await self.slash_bleach_solo(ctx)
+    async def prefix_jdrsolo(self, ctx: commands.Context):
+        await self.slash_jdrsolo(ctx)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
@@ -132,5 +139,5 @@ async def setup(bot: commands.Bot):
     cog = BleachSolo(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Bleach"
+            command.category = "Fun"
     await bot.add_cog(cog)
