@@ -99,54 +99,51 @@ class BleachSolo(commands.Cog):
         else:
             await safe_send(ctx, f"🏆 Vous avez vaincu **{ennemi['nom']}** !")
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="jdrsolo",
         description="Lance le mini-JDR solo Bleach avec zones, rencontres et combats interactifs."
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_jdrsolo(self, interaction: discord.Interaction):
-        await safe_respond(interaction, "🎮 Début du mini-JDR solo Bleach !")
+        await self.jouer_jdr(interaction, interaction.user)
+    
+    # ────────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────────
+    @commands.command(name="jdrsolo")
+    @commands.cooldown(1, 5.0, commands.BucketType.user)
+    async def prefix_jdrsolo(self, ctx: commands.Context):
+        await self.jouer_jdr(ctx, ctx.author)
+    
+    # ────────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction commune utilisée par les deux
+    # ────────────────────────────────────────────────────────────────────────────────
+    async def jouer_jdr(self, ctx_or_inter, user):
+        await safe_send(ctx_or_inter, f"🎮 Début du mini-JDR solo Bleach pour **{user.display_name}** !")
         joueur = {"nom": "Shinigami", "pv": 10, "objets": []}
-
+    
         # Boucle zones
         for tour in range(3):
             zone = random.choice(self.data["zones"])
             effet = zone["d6"][str(random.randint(1, 6))]
-            await safe_send(interaction, f"🌍 Zone: **{zone['nom']}** | Effet: {effet}")
-
+            await safe_send(ctx_or_inter, f"🌍 Zone: **{zone['nom']}** | Effet: {effet}")
+    
             if "Rencontre" in effet or "rencontre" in effet:
                 ennemi = self.tirer_carte("rencontres")
-                if "pv" not in ennemi:
-                    ennemi["pv"] = 5
-                await self.lancer_combat(interaction, joueur, ennemi)
+                ennemi.setdefault("pv", 5)
+                await self.lancer_combat(ctx_or_inter, joueur, ennemi)
             elif "Objet" in effet or "Pouvoir" in effet:
                 objet = self.tirer_carte("objets_pouvoirs")
                 joueur["objets"].append(objet)
-                await safe_send(interaction, f"🎁 Vous trouvez un objet : {objet['nom']}")
+                await safe_send(ctx_or_inter, f"🎁 Vous trouvez un objet : {objet['nom']}")
             elif "Événement" in effet or "evenement" in effet:
                 evenement = self.tirer_carte("evenements")
-                await safe_send(interaction, f"✨ Événement : {evenement}")
-            else:
-                await safe_send(interaction, "🌿 Rien à signaler dans cette zone.")
+                await safe_send(ctx_or_inter, f"✨ Événement :_
 
-        # Boss final
-        boss = self.tirer_carte("boss")
-        if "pv" not in boss:
-            boss["pv"] = 10
-        await safe_send(interaction, f"👑 Boss final : {boss['nom']} !")
-        await self.lancer_combat(interaction, joueur, boss)
-        await safe_send(interaction, "🏁 Partie terminée !")
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="jdrsolo")
-    @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_jdrsolo(self, ctx: commands.Context):
-        await self.slash_jdrsolo(ctx)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
