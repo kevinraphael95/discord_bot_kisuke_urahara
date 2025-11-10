@@ -1,0 +1,79 @@
+{
+  "personnages": [
+    {"nom": "Shinigami", "objectif_principal": "Tuer Yhwach", "objectif_secondaire": "Trouver la Flèche d’Argent"},
+    {"nom": "Quincy", "objectif_principal": "Empêcher les Shinigami d’obtenir la Flèche, tuer un boss PNJ", "objectif_secondaire": "Neutraliser le Bankai/Shikai des Shinigami"},
+    {"nom": "Hollow/Arrancar", "objectif_principal": "Survivre et accumuler puissance", "objectif_secondaire": "Peut donner ou voler la Flèche"}
+  ],
+
+  "zones": [
+    {"nom": "Rue déserte", "d6": {"1": "Rien", "2": "Rencontre", "3": "Nouvelle Zone", "4": "Nouvelle Zone", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir"}},
+    {"nom": "Quartier commerçant", "d6": {"1": "Rien", "2": "Rencontre", "3": "Rencontre", "4": "Événement", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir"}},
+    {"nom": "Toits/Ruelles", "d6": {"1": "Rien", "2": "Rencontre", "3": "Nouvelle Zone", "4": "Nouvelle Zone", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir"}},
+    {"nom": "Seireitei", "d6": {"1": "Rien", "2": "Rencontre", "3": "Rencontre", "4": "Événement", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir"}},
+    {"nom": "Bibliothèque", "d6": {"1": "Rien", "2": "Rencontre", "3": "Nouvelle Zone", "4": "Nouvelle Zone", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir/Flèche"}},
+    {"nom": "Terrain d’entraînement", "d6": {"1": "Rien", "2": "Rencontre", "3": "Nouvelle Zone", "4": "Nouvelle Zone", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir (+1D6 combat)"}},
+    {"nom": "Désert (Hueco Mundo)", "d6": {"1": "Rien", "2": "Rencontre", "3": "Nouvelle Zone", "4": "Nouvelle Zone", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir"}},
+    {"nom": "Palais Arrancar", "d6": {"1": "Rien", "2": "Rencontre", "3": "Nouvelle Zone", "4": "Nouvelle Zone", "5": "Objet/Pouvoir", "6": "Objet/Pouvoir"}},
+    {"nom": "Cavernes", "d6": {"1": "Piège (-1 PV)", "2": "Piège (-1 PV)", "3": "Rencontre", "4": "Nouvelle Zone", "5": "Nouvelle Zone", "6": "Objet/Pouvoir"}},
+    {"nom": "Zone infestée de Hollows", "d6": {"1": "Rien", "2": "Rencontre", "3": "Rencontre", "4": "Rencontre", "5": "Événement", "6": "Objet/Pouvoir/Flèche"}}
+  ],
+
+  "rencontres": [
+    {"nom": "Hollow faible", "pv": 3},
+    {"nom": "Hollow moyen", "pv": 5},
+    {"nom": "Hollow puissant", "pv": 7},
+    {"nom": "Arrancar rang bas", "pv": 5},
+    {"nom": "Arrancar élite", "pv": 8},
+    {"nom": "Arrancar masqué", "pv": 6, "effet": "Aléatoire"},
+    {"nom": "Shinigami PNJ allié", "bonus": "+1D6"},
+    {"nom": "Shinigami PNJ ennemi", "pv": 6},
+    {"nom": "Quincy solitaire", "pv": 5},
+    {"nom": "Quincy groupe", "pv": 8},
+    {"nom": "Boss PNJ (capitaine commandant)", "pv": 10}
+  ],
+
+  "objets_pouvoirs": [
+    {"nom": "Flèche d’Argent", "effet": "Neutralise pouvoirs Quincy / +bonus contre Yhwach"},
+    {"nom": "Zanpakutō Shikai", "bonus": "+1D6 attaque"},
+    {"nom": "Zanpakutō Bankai", "bonus": "+2D6 attaque"},
+    {"nom": "Potion spirituelle", "pv": 2},
+    {"nom": "Potion énergétique", "pv": 1},
+    {"nom": "Cero", "attaque": 3},
+    {"nom": "Gran Rey Cero", "attaque": 5},
+    {"nom": "Hohō / Flash Step", "effet": "Esquive un tour"},
+    {"nom": "Fiole de reiatsu", "bonus": "+1 énergie"},
+    {"nom": "Masque Hollow temporaire", "bonus": "+2 attaque un tour"},
+    {"nom": "Objet mystique", "effet": "Déclenche événement spécial"}
+  ],
+
+  "evenements": [
+    "Tempête spirituelle (-1 tous jets)",
+    "Ruine partielle (-1 PV déplacement)",
+    "Piège spirituel (1-3 PV -1, 4-6 rien)",
+    "Renforts ennemis (pioche rencontre supplémentaire)",
+    "Objet caché (pioche 1 objet)",
+    "Distorsion temporelle (relance ou double effet)",
+    "Zone purifiée (+1 énergie)",
+    "Vision d’Ichigo (+1D6 prochain combat)",
+    "Malédiction spirituelle (-1 attaque prochain tour)",
+    "Chance inespérée (relance ou double effet objet)"
+  ],
+
+  "boss": [
+    {"nom": "Yhwach", "pv": 15, "attaque": "D6", "special": "+5 PV dégâts si Flèche d’Argent"},
+    {"nom": "Espada / Capitaines Shinigami", "pv": 8, "attaque": "D6"},
+    {"nom": "Capitaine commandant", "pv": 10, "attaque": "D6"}
+  ],
+
+  "quetes": [
+    "Chasser un Hollow",
+    "Récupérer un objet mystique",
+    "Protéger un PNJ",
+    "Affronter un Arrancar masqué",
+    "Survivre à une tempête spirituelle",
+    "Découvrir un secret de la Soul Society",
+    "Trouver la Flèche d’Argent (Shinigami)",
+    "Empêcher Shinigami de trouver la Flèche (Quincy)",
+    "Mini-quêtes secondaires (x7)"
+  ]
+}
