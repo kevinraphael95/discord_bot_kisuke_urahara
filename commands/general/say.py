@@ -6,14 +6,31 @@
 # Cooldown : 1 utilisation / 5 sec / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
-# ──────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
-# ──────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
 import discord
 import re
 from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_delete, safe_respond
+
+# ──────────────────────────────────────────────────────────────
+# 🔹 Vue pour les messages secrets
+# ──────────────────────────────────────────────────────────────
+class SecretMessageView(discord.ui.View):
+    def __init__(self, target_user: discord.User, secret_message: str):
+        super().__init__(timeout=None)
+        self.target_user = target_user
+        self.secret_message = secret_message
+
+    @discord.ui.button(label="🔒 Voir le message", style=discord.ButtonStyle.blurple)
+    async def reveal(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.target_user.id:
+            await interaction.response.send_message("❌ Ce message ne t’est pas destiné !", ephemeral=True)
+            return
+        await interaction.response.send_message(f"💌 **Message secret :** {self.secret_message}", ephemeral=True)
+
 
 # ──────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -90,22 +107,6 @@ class Say(commands.Cog):
         return re.sub(r"(?<!<a?):([a-zA-Z0-9_]+):", replacer, message)
 
     # ──────────────────────────────────────────────────────────────
-    # 🔹 Message secret via bouton
-    # ──────────────────────────────────────────────────────────────
-class SecretMessageView(discord.ui.View):
-    def __init__(self, target_user: discord.User, secret_message: str):
-        super().__init__(timeout=None)
-        self.target_user = target_user
-        self.secret_message = secret_message
-
-    @discord.ui.button(label="🔒 Voir le message", style=discord.ButtonStyle.blurple)
-    async def reveal(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user.id != self.target_user.id:
-            await interaction.response.send_message("❌ Ce message ne t’est pas destiné !", ephemeral=True)
-            return
-        await interaction.response.send_message(f"💌 **Message secret :** {self.secret_message}", ephemeral=True)
-
-    # ──────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ──────────────────────────────────────────────────────────────
     @app_commands.command(
@@ -172,6 +173,7 @@ class SecretMessageView(discord.ui.View):
         finally:
             await safe_delete(ctx.message)
 
+
 # ──────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
 # ──────────────────────────────────────────────────────────────
@@ -181,5 +183,3 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Général"
     await bot.add_cog(cog)
-
-
