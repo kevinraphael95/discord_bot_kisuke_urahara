@@ -6,9 +6,9 @@
 # Cooldown : 1 utilisation / 5 sec / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────
 import discord
 import re
 from discord import app_commands
@@ -20,6 +20,7 @@ from utils.discord_utils import safe_send, safe_delete, safe_respond
 # ──────────────────────────────────────────────────────────────
 class Say(commands.Cog):
     """Commande /say et !say — Faire répéter un message par le bot, avec options modulables."""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -121,9 +122,7 @@ class SecretMessageView(discord.ui.View):
         try:
             await interaction.response.defer()
             options, clean_message = self.parse_options(message)
-
             if options["chuchotte"]:
-                # Vérifie mention
                 mention = next((m for m in interaction.message.mentions), None)
                 if not mention:
                     await safe_respond(interaction, "❌ Tu dois mentionner une personne pour *chuchotte.", ephemeral=True)
@@ -133,12 +132,10 @@ class SecretMessageView(discord.ui.View):
                 await interaction.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
                 await safe_respond(interaction, "✅ Message secret envoyé !", ephemeral=True)
                 return
-
             if as_user:
                 await self._say_as_user(interaction.channel, interaction.user, clean_message, embed)
             else:
                 await self._say_message(interaction.channel, clean_message, embed)
-
             await safe_respond(interaction, "✅ Message envoyé !", ephemeral=True)
         except Exception as e:
             print(f"[ERREUR /say] {e}")
@@ -155,7 +152,6 @@ class SecretMessageView(discord.ui.View):
     async def prefix_say(self, ctx: commands.Context, *, message: str):
         try:
             options, clean_message = self.parse_options(message)
-
             if options["chuchotte"]:
                 mention = next((m for m in ctx.message.mentions), None)
                 if not mention:
@@ -166,7 +162,6 @@ class SecretMessageView(discord.ui.View):
                 await ctx.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
                 await safe_send(ctx.channel, "✅ Message secret envoyé !", allowed_mentions=discord.AllowedMentions.none())
                 return
-
             if options["as_user"]:
                 await self._say_as_user(ctx.channel, ctx.author, clean_message, options["embed"])
             else:
@@ -186,8 +181,5 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Général"
     await bot.add_cog(cog)
-
-
-
 
 
