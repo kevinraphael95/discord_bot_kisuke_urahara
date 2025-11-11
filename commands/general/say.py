@@ -94,17 +94,23 @@ class Say(commands.Cog):
             await webhook.delete()
 
     # ──────────────────────────────────────────────────────────────
-    # 🔹 Remplacement emojis custom (corrigé)
+    # 🔹 Remplacement emojis custom (tous les serveurs du bot)
     # ──────────────────────────────────────────────────────────────
     def _replace_custom_emojis(self, channel, message: str) -> str:
-        if not hasattr(channel, "guild"):
-            return message
-        all_emojis = {e.name.lower(): e for g in self.bot.guilds for e in g.emojis}
-        def replacer(match):
-            name = match.group(1).lower()
-            emoji = all_emojis.get(name)
-            return f"<{'a' if emoji.animated else ''}:{emoji.name}:{emoji.id}>" if emoji else match.group(0)
-        return re.sub(r"(?<!<a?):([a-zA-Z0-9_]+):", replacer, message)
+        all_emojis = {}
+        if hasattr(channel, "guild"):
+            # Emojis du serveur actuel
+            all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
+            # Emojis des autres serveurs du bot
+            for g in self.bot.guilds:
+                if g.id != channel.guild.id:
+                    all_emojis.update({e.name.lower(): str(e) for e in g.emojis})
+        return re.sub(
+            r":([a-zA-Z0-9_]+):",
+            lambda m: all_emojis.get(m.group(1).lower(), m.group(0)),
+            message,
+            flags=re.IGNORECASE
+        )
 
     # ──────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
