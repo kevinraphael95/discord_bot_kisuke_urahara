@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 bleach_solo.py — Commande simple /jdrsolo et !jdrsolo
 # Objectif : Mini-JDR solo Bleach interactif avec zones, rencontres, objets et boss
-# Catégorie : Fun
+# Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
@@ -189,5 +189,5 @@ async def setup(bot: commands.Bot):
     cog = BleachSolo(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun"
+            command.category = "Bleach"
     await bot.add_cog(cog)
