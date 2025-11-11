@@ -12,9 +12,9 @@ import discord
 from discord.ext import commands
 import re
 
-# ──────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
-# ──────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────────
 class AutoEmoji(commands.Cog):
     """
     Repost les messages contenant des emojis animés ou d'autres serveurs
@@ -24,29 +24,24 @@ class AutoEmoji(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ──────────────────────────────────────────────────────────────
-    # 🔹 Événement : nouveau message
-    # ──────────────────────────────────────────────────────────────
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.bot:
-            return  # Ignorer les bots
-        if not hasattr(message.channel, "guild"):
-            return  # Ignorer les DM
+        if message.author.bot or not hasattr(message.channel, "guild"):
+            return
         content = message.content
         if not content:
             return
 
-        # Construire dictionnaire des emojis d'autres serveurs
-        other_emojis = {}
-        for g in self.bot.guilds:
-            if g.id != message.guild.id:
-                for e in g.emojis:
-                    other_emojis[e.name.lower()] = f"<{'a' if e.animated else ''}:{e.name}:{e.id}>"
+        # Dictionnaire des emojis d'autres serveurs
+        other_emojis = {
+            e.name.lower(): f"<{'a' if e.animated else ''}:{e.name}:{e.id}>"
+            for g in self.bot.guilds if g.id != message.guild.id
+            for e in g.emojis
+        }
 
         found = False
 
-        # Remplacer uniquement les emojis d'autres serveurs
+        # Remplacement uniquement des emojis d'autres serveurs
         def replace_emoji(match):
             nonlocal found
             name = match.group(1).lower()
@@ -56,11 +51,10 @@ class AutoEmoji(commands.Cog):
             return match.group(0)
 
         new_content = re.sub(r":([a-zA-Z0-9_]+):", replace_emoji, content)
-
         if not found:
-            return  # Rien à remplacer
+            return
 
-        # Poster le message via webhook pour garder pseudo/avatar de l'auteur
+        # Poster via webhook pour conserver pseudo/avatar
         webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
         try:
             await webhook.send(
@@ -72,11 +66,12 @@ class AutoEmoji(commands.Cog):
         finally:
             await webhook.delete()
 
-        # Supprimer le message original
         await message.delete()
 
 # ──────────────────────────────────────────────────────────────
-# 🔌 Setup du Cog
+# 🔌 Setup
 # ──────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     await bot.add_cog(AutoEmoji(bot))
+
+
