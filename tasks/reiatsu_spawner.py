@@ -313,8 +313,4 @@ class ReiatsuSpawner(commands.Cog):
 # 🔌 Setup du Cog
 # ───────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
-    cog = ReiatsuSpawner(bot)
-    for command in cog.get_commands():
-        if not hasattr(command, "category"):
-            command.category = "Reiatsu"
-    await bot.add_cog(cog)
+    await bot.add_cog(ReiatsuSpawner(bot))
