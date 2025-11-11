@@ -20,7 +20,7 @@ from utils.discord_utils import safe_send, safe_delete, safe_respond
 # ──────────────────────────────────────────────────────────────
 class SecretMessageView(discord.ui.View):
     def __init__(self, target_user: discord.User, secret_message: str):
-        super().__init__(timeout=None)
+        super().__init__(timeout=1920)  # 32 minutes
         self.target_user = target_user
         self.secret_message = secret_message
 
@@ -31,6 +31,10 @@ class SecretMessageView(discord.ui.View):
             return
         await interaction.response.send_message(f"💌 **Message secret :** {self.secret_message}", ephemeral=True)
 
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+        self.stop()
 
 # ──────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -94,17 +98,22 @@ class Say(commands.Cog):
             await webhook.delete()
 
     # ──────────────────────────────────────────────────────────────
-    # 🔹 Remplacement emojis custom (tous les serveurs du bot)
+    # 🔹 Remplacement emojis custom (avec affichage correct)
     # ──────────────────────────────────────────────────────────────
     def _replace_custom_emojis(self, channel, message: str) -> str:
+        # Supprime l'affichage en texte brut des emojis non animés (<:nom:id>)
+        message = re.sub(r"<:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
+        # Supprime aussi les emojis animés (<a:nom:id>)
+        message = re.sub(r"<a:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
+
+        # Remplace par des emojis valides si trouvés dans les serveurs du bot
         all_emojis = {}
         if hasattr(channel, "guild"):
-            # Emojis du serveur actuel
             all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
-            # Emojis des autres serveurs du bot
             for g in self.bot.guilds:
                 if g.id != channel.guild.id:
                     all_emojis.update({e.name.lower(): str(e) for e in g.emojis})
+
         return re.sub(
             r":([a-zA-Z0-9_]+):",
             lambda m: all_emojis.get(m.group(1).lower(), m.group(0)),
@@ -137,13 +146,11 @@ class Say(commands.Cog):
                 secret_text = clean_message.replace(mention.mention, "").strip()
                 view = SecretMessageView(mention, secret_text)
                 await interaction.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
-                await safe_respond(interaction, "✅ Message secret envoyé !", ephemeral=True)
                 return
             if as_user:
                 await self._say_as_user(interaction.channel, interaction.user, clean_message, embed)
             else:
                 await self._say_message(interaction.channel, clean_message, embed)
-            await safe_respond(interaction, "✅ Message envoyé !", ephemeral=True)
         except Exception as e:
             print(f"[ERREUR /say] {e}")
             await safe_respond(interaction, "❌ Impossible d’envoyer le message.", ephemeral=True)
@@ -167,7 +174,6 @@ class Say(commands.Cog):
                 secret_text = clean_message.replace(mention.mention, "").strip()
                 view = SecretMessageView(mention, secret_text)
                 await ctx.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
-                await safe_send(ctx.channel, "✅ Message secret envoyé !", allowed_mentions=discord.AllowedMentions.none())
                 return
             if options["as_user"]:
                 await self._say_as_user(ctx.channel, ctx.author, clean_message, options["embed"])
