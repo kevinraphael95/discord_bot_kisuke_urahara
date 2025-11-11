@@ -28,11 +28,12 @@ class AutoEmoji(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot or not hasattr(message.channel, "guild"):
             return
+
         content = message.content
         if not content:
             return
 
-        # Dictionnaire des emojis d'autres serveurs
+        # Récupère tous les emojis des autres serveurs
         other_emojis = {
             e.name.lower(): f"<{'a' if e.animated else ''}:{e.name}:{e.id}>"
             for g in self.bot.guilds if g.id != message.guild.id
@@ -54,7 +55,7 @@ class AutoEmoji(commands.Cog):
         if not found:
             return
 
-        # Poster via webhook pour conserver pseudo/avatar
+        # Crée un webhook pour simuler le message
         webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
         try:
             await webhook.send(
@@ -66,12 +67,14 @@ class AutoEmoji(commands.Cog):
         finally:
             await webhook.delete()
 
+        # Supprime le message original
         await message.delete()
+
+        # Important : permettre aux autres Cogs et commands de traiter le message
+        await self.bot.process_commands(message)
 
 # ──────────────────────────────────────────────────────────────
 # 🔌 Setup
 # ──────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     await bot.add_cog(AutoEmoji(bot))
-
-
