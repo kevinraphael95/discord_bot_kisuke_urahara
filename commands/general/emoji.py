@@ -151,7 +151,7 @@ class EmojiCommand(commands.Cog):
     @commands.command(
         name="emoji",
         aliases=["e"],
-        help="😄 Affiche la liste des emojis des serveurss dans lesquels est le bot et permet d'en mmontrer un ou plusieurs.",
+        help="Montre un ou plusieurs emojis du serveur ou de tous les serveurs.",
         description="Affiche les emojis demandés ou tous les emojis du serveur (animés puis non animés) si aucun argument."
     )
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.user)
@@ -169,7 +169,7 @@ class EmojiCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="emoji",
-        description="😄 Affiche la liste des emojis des serveurss dans lesquels est le bot et permet d'en mmontrer un ou plusieurs."
+        description="Montre un ou plusieurs emojis du serveur ou de tous les serveurs."
     )
     @app_commands.describe(emojis="Noms des emojis à afficher, séparés par des espaces ou répétés (ex: :woah::woah:)")
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)
