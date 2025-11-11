@@ -23,6 +23,7 @@ class AutoEmoji(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.webhooks_cache = {}  # cache des webhooks par channel
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -55,22 +56,27 @@ class AutoEmoji(commands.Cog):
         if not found:
             return
 
-        # Crée un webhook pour simuler le message
-        webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
-        try:
-            await webhook.send(
-                content=new_content,
-                username=message.author.display_name,
-                avatar_url=message.author.display_avatar.url,
-                allowed_mentions=discord.AllowedMentions.all()
-            )
-        finally:
-            await webhook.delete()
+        # Récupère ou crée un webhook unique pour ce canal
+        webhook = self.webhooks_cache.get(message.channel.id)
+        if webhook is None:
+            webhooks = await message.channel.webhooks()
+            webhook = discord.utils.get(webhooks, name="AutoEmojiWebhook")
+            if webhook is None:
+                webhook = await message.channel.create_webhook(name="AutoEmojiWebhook")
+            self.webhooks_cache[message.channel.id] = webhook
+
+        # Envoi via le webhook
+        await webhook.send(
+            content=new_content,
+            username=message.author.display_name,
+            avatar_url=message.author.display_avatar.url,
+            allowed_mentions=discord.AllowedMentions.all()
+        )
 
         # Supprime le message original
         await message.delete()
 
-        # Important : permettre aux autres Cogs et commands de traiter le message
+        # Permettre aux autres cogs/commands de traiter le message
         await self.bot.process_commands(message)
 
 # ──────────────────────────────────────────────────────────────
