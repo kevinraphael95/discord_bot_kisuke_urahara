@@ -31,23 +31,10 @@ class AutoSay(commands.Cog):
         if not content:
             return
 
-        # Cherche tous les emojis custom du message
-        emojis_in_message = re.findall(r"<a?:([a-zA-Z0-9_]+):(\d+)>", content)
+        # Cherche tous les emojis custom du message (animés ou non)
+        emojis_in_message = re.findall(r"<a?:[a-zA-Z0-9_]+:\d+>", content)
         if not emojis_in_message:
             return  # pas d'emoji, on ignore
-
-        # Construire un dictionnaire des emojis accessibles dans le serveur
-        accessible_emojis = {e.id: str(e) for e in message.guild.emojis}
-
-        # Détecte s'il y a au moins un emoji non accessible
-        has_unavailable_emoji = False
-        for name, eid in emojis_in_message:
-            if int(eid) not in accessible_emojis:
-                has_unavailable_emoji = True
-                break
-
-        if not has_unavailable_emoji:
-            return  # tous les emojis sont accessibles, on ne repost pas
 
         # Récupère ou crée un webhook pour ce canal
         webhook = self.webhooks_cache.get(message.channel.id)
@@ -58,7 +45,7 @@ class AutoSay(commands.Cog):
                 webhook = await message.channel.create_webhook(name="AutoSayWebhook")
             self.webhooks_cache[message.channel.id] = webhook
 
-        # Reposte le message via webhook (comme "say *me")
+        # Reposte le message via webhook
         await webhook.send(
             content=content,
             username=message.author.display_name,
