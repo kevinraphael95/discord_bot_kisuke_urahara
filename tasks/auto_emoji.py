@@ -10,6 +10,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord.ext import commands
+import re
 
 # ──────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -19,7 +20,7 @@ class AutoEmoji(commands.Cog):
     Repost les messages contenant des emojis animés ou d'autres serveurs
     pour qu'ils s'affichent correctement, tout en conservant mentions et markdown.
     """
-    
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -32,21 +33,20 @@ class AutoEmoji(commands.Cog):
             return  # Ignorer les bots
         if not hasattr(message.channel, "guild"):
             return  # Ignorer les DM
-
         content = message.content
         if not content:
             return
 
-        # Récupérer tous les emojis animés et emojis d'autres serveurs
+        # Construire dictionnaire des emojis d'autres serveurs
         other_emojis = {}
         for g in self.bot.guilds:
             if g.id != message.guild.id:
                 for e in g.emojis:
                     other_emojis[e.name.lower()] = f"<{'a' if e.animated else ''}:{e.name}:{e.id}>"
 
-        import re
         found = False
-        # Fonction pour remplacer seulement les emojis d'autres serveurs
+
+        # Remplacer uniquement les emojis d'autres serveurs
         def replace_emoji(match):
             nonlocal found
             name = match.group(1).lower()
@@ -57,11 +57,10 @@ class AutoEmoji(commands.Cog):
 
         new_content = re.sub(r":([a-zA-Z0-9_]+):", replace_emoji, content)
 
-        # Si aucun emoji à remplacer, sortir
         if not found:
-            return
+            return  # Rien à remplacer
 
-        # Refaire le message via webhook
+        # Poster le message via webhook pour garder pseudo/avatar de l'auteur
         webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
         try:
             await webhook.send(
@@ -73,5 +72,11 @@ class AutoEmoji(commands.Cog):
         finally:
             await webhook.delete()
 
-        # Supprimer le message original pour un effet transparent
+        # Supprimer le message original
         await message.delete()
+
+# ──────────────────────────────────────────────────────────────
+# 🔌 Setup du Cog
+# ──────────────────────────────────────────────────────────────
+async def setup(bot: commands.Bot):
+    await bot.add_cog(AutoEmoji(bot))
