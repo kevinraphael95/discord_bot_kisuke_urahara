@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 📌 auto_emoji.py — Refaire automatiquement les messages avec emojis animés ou d'autres serveurs
-# Objectif : Simuler Not Quite Nitro, repost pour que les emojis fonctionnent partout
+# 📌 auto_say.py — Reposter automatiquement les messages avec emojis non accessibles
+# Objectif : Simuler un "say *me" automatique pour les emojis non affichables
 # Catégorie : Fun
 # Accès : Tous
 # ────────────────────────────────────────────────────────────────────────────────
@@ -15,11 +15,8 @@ import re
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
-class AutoEmoji(commands.Cog):
-    """
-    Repost les messages contenant des emojis animés ou d'autres serveurs
-    pour qu'ils s'affichent correctement, tout en conservant mentions et markdown.
-    """
+class AutoSay(commands.Cog):
+    """Reposte automatiquement les messages contenant des emojis non affichables"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -34,40 +31,36 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
-        # Récupère tous les emojis des autres serveurs
-        other_emojis = {
-            e.name.lower(): f"<{'a' if e.animated else ''}:{e.name}:{e.id}>"
-            for g in self.bot.guilds if g.id != message.guild.id
-            for e in g.emojis
-        }
+        # Cherche tous les emojis custom du message
+        emojis_in_message = re.findall(r"<a?:([a-zA-Z0-9_]+):(\d+)>", content)
+        if not emojis_in_message:
+            return  # pas d'emoji, on ignore
 
-        found = False
+        # Construire un dictionnaire des emojis accessibles dans le serveur
+        accessible_emojis = {e.id: str(e) for e in message.guild.emojis}
 
-        # Remplacement uniquement des emojis d'autres serveurs
-        def replace_emoji(match):
-            nonlocal found
-            name = match.group(1).lower()
-            if name in other_emojis:
-                found = True
-                return other_emojis[name]
-            return match.group(0)
+        # Détecte s'il y a au moins un emoji non accessible
+        has_unavailable_emoji = False
+        for name, eid in emojis_in_message:
+            if int(eid) not in accessible_emojis:
+                has_unavailable_emoji = True
+                break
 
-        new_content = re.sub(r":([a-zA-Z0-9_]+):", replace_emoji, content)
-        if not found:
-            return
+        if not has_unavailable_emoji:
+            return  # tous les emojis sont accessibles, on ne repost pas
 
-        # Récupère ou crée un webhook unique pour ce canal
+        # Récupère ou crée un webhook pour ce canal
         webhook = self.webhooks_cache.get(message.channel.id)
         if webhook is None:
             webhooks = await message.channel.webhooks()
-            webhook = discord.utils.get(webhooks, name="AutoEmojiWebhook")
+            webhook = discord.utils.get(webhooks, name="AutoSayWebhook")
             if webhook is None:
-                webhook = await message.channel.create_webhook(name="AutoEmojiWebhook")
+                webhook = await message.channel.create_webhook(name="AutoSayWebhook")
             self.webhooks_cache[message.channel.id] = webhook
 
-        # Envoi via le webhook
+        # Reposte le message via webhook (comme "say *me")
         await webhook.send(
-            content=new_content,
+            content=content,
             username=message.author.display_name,
             avatar_url=message.author.display_avatar.url,
             allowed_mentions=discord.AllowedMentions.all()
@@ -83,4 +76,4 @@ class AutoEmoji(commands.Cog):
 # 🔌 Setup
 # ──────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
-    await bot.add_cog(AutoEmoji(bot))
+    await bot.add_cog(AutoSay(bot))
