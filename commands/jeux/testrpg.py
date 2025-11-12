@@ -10,87 +10,157 @@ from discord.ext import commands
 import random
 from utils.discord_utils import safe_send, safe_respond  # Utilitaires sécurisés
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🧠 JSON intégré avec texte narratif
-# ────────────────────────────────────────────────────────────────────────────────
 jdr_json = {
     "intro": "🌌 **RÉVEIL – Un JDR Solo d’introspection et de mystère**\n\n"
-             "Tu t’éveilles dans un corps qui n’est pas le tien, dans un lieu inconnu. "
-             "Chaque clic sur un bouton révélera un fragment de ton aventure. "
-             "Imagine et décris mentalement tes émotions et observations.\n",
+             "Le silence t’enveloppe. L’air semble épais, presque irréel. "
+             "Quand tes paupières s’ouvrent enfin, la lumière t’agresse, blanche et immobile. "
+             "Tu respires lentement. Ce corps… il n’est pas le tien. "
+             "Ton esprit flotte, perdu entre le rêve et la réalité.\n\n"
+             "À chaque pression sur un bouton, un fragment de ton existence se révélera. "
+             "Observe, imagine, ressens. Ce voyage t’appartient, même si tu n’en connais pas encore la fin.",
+
     "chambre": {
-        "1": "Chambre simple et soigneusement rangée, presque trop parfaite.",
-        "2": "Chambre modeste, en léger désordre, comme oubliée.",
-        "3": "Chambre élégante, d’une beauté tranquille qui semble te regarder.",
-        "4": "Chambre luxueuse mais chaotique, où le luxe et le désordre se mêlent.",
-        "5": "Chambre étrange, parsemée d’objets insolites, défiant la logique.",
-        "6": "Pièce à moitié détruite ou abandonnée, témoin d’un passé oublié."
+        "1": "Tu te réveilles dans une chambre simple, méticuleusement rangée. "
+              "Chaque objet semble figé dans le temps, à sa juste place, comme s’il craignait de troubler le silence. "
+              "Cette perfection a quelque chose d’inquiétant.",
+        "2": "Une chambre modeste, au désordre tendre, t’entoure. "
+              "Les draps froissés, la poussière légère, tout évoque une présence disparue. "
+              "Quelqu’un vivait ici… mais plus toi.",
+        "3": "Une pièce élégante, baignée d’une lumière douce. "
+              "Tu sens un calme étrange, comme si la chambre te regardait en retour.",
+        "4": "Le décor déborde de luxe et de chaos : velours, verre brisé, parfums lourds. "
+              "C’est un palais qui a connu la folie. Et toi, spectateur de sa fin.",
+        "5": "Autour de toi, une chambre d’un autre monde. "
+              "Des objets absurdes — horloge inversée, miroir fissuré, tableau sans visage. "
+              "Ici, la logique n’a plus sa place.",
+        "6": "Tu te relèves dans une pièce à moitié détruite. "
+              "Les murs sont dévorés par le temps. Un souffle ancien te frôle, comme un souvenir effacé."
     },
+
     "corps": {
-        "1": "Sexe différent, plus jeune, fragile et curieux.",
-        "2": "Sexe différent, même âge, avec une histoire invisible dans les yeux.",
-        "3": "Sexe différent, plus âgé, empreint de secrets.",
-        "4": "Même sexe, plus jeune, avec une vulnérabilité étrange.",
-        "5": "Même sexe, même âge mais traits différents, écho d’une autre vie.",
-        "6": "Même sexe, plus âgé, chaque ride raconte une histoire."
+        "1": "Tu observes tes mains : fines, jeunes, fragiles. "
+              "Ton cœur bat trop vite. Ce corps ne t’appartient pas, et pourtant… il respire avec toi.",
+        "2": "Un visage inconnu te fixe dans le reflet. Même âge, autre histoire. "
+              "Dans ces yeux étrangers, tu crois lire la trace d’une vie oubliée.",
+        "3": "Ton corps est plus âgé. Les articulations grincent, la peau raconte. "
+              "Chaque cicatrice murmure un secret que tu n’as pas vécu.",
+        "4": "Même sexe, mais plus jeune. Ton souffle est léger, ton regard incertain. "
+              "Une vulnérabilité nouvelle t’habite.",
+        "5": "Même sexe, même âge, mais les traits changés. "
+              "C’est toi, et ce n’est pas toi. Une existence parallèle te contemple.",
+        "6": "Ton reflet porte des rides que tu ne reconnais pas. "
+              "Elles forment des souvenirs sur une peau qui n’a jamais été la tienne."
     },
+
     "lieu": {
-        "1": "Appartement moderne, sobre, où chaque objet semble posé avec soin.",
-        "2": "Vieille maison familiale, imprégnée de souvenirs et de fantômes du passé.",
-        "3": "Chambre d’hôtel anonyme, murs racontant mille vies.",
-        "4": "Hôpital silencieux, aux couloirs vides et odeurs antiseptiques.",
-        "5": "Laboratoire étrange, rempli d’instruments inconnus et lumière froide.",
-        "6": "Ruines désertées, où le vent murmure des histoires oubliées."
+        "1": "Un appartement moderne, lisse, presque clinique. "
+              "Chaque objet est à sa place, mais rien ne semble avoir de sens. "
+              "L’ordre ici n’est pas humain.",
+        "2": "Tu reconnais la chaleur d’une vieille maison. "
+              "Le bois craque, les murs respirent encore. "
+              "Des souvenirs étrangers glissent entre les ombres.",
+        "3": "Une chambre d’hôtel anonyme. "
+              "Les rideaux tremblent au vent d’une fenêtre entrouverte. "
+              "Tu es ici, mais tant d’autres y ont dormi avant toi.",
+        "4": "Tu ouvres les yeux sur la blancheur froide d’un hôpital. "
+              "L’odeur d’alcool et de solitude flotte dans l’air. "
+              "Tu entends des pas, mais personne n’entre.",
+        "5": "Des machines, des tubes, une lumière crue. "
+              "Tu es dans un laboratoire. Tu sens que tu n’es pas un patient… mais un sujet.",
+        "6": "Autour de toi, des ruines. "
+              "Des colonnes brisées, des inscriptions effacées. "
+              "Le vent murmure des noms que tu ne comprends pas."
     },
+
     "objet": {
-        "1": "Carte d’identité ou passeport, certitude d’une vie étrangère.",
-        "2": "Badge d’entreprise, clé d’un monde inconnu.",
-        "3": "Photo d’un groupe, avec ton visage mais des regards inconnus.",
-        "4": "Lettre adressée à toi, avec des mots mystérieux.",
-        "5": "Téléphone chargé de messages récents.",
-        "6": "Rien – seul ton reflet répète l’énigme de ton existence."
+        "1": "Sur la table, une carte d’identité. "
+              "Le nom t’est inconnu, mais la photo… c’est toi. Ou presque.",
+        "2": "Un badge d’entreprise pend à une chaise. "
+              "Le logo gravé semble t’observer, comme un œil froid et mécanique.",
+        "3": "Une photo. Tu souris, entouré d’inconnus. "
+              "Mais leurs regards ne sont pas tournés vers toi. Ils fixent quelque chose derrière.",
+        "4": "Une lettre, soigneusement pliée. "
+              "Ton prénom apparaît sur l’enveloppe, tracé d’une main tremblante. "
+              "L’encre a coulé, comme des larmes anciennes.",
+        "5": "Un téléphone vibre. Des messages s’enchaînent : ‘Où es-tu ?’, ‘Réponds-moi’. "
+              "Les noms te sont étrangers, mais la peur dans les mots est réelle.",
+        "6": "Rien. Seulement ton reflet dans un miroir fendu. "
+              "Et pour un instant… ton reflet ne bouge pas en même temps que toi."
     },
+
     "souvenir": {
-        "1": "Fragment d’une vie passée, photo floue dans un rêve.",
-        "2": "Événement dramatique, perte ou trahison, résonnant encore.",
-        "3": "Vision d’un autre corps ou d’une autre vie que tu as pu connaître.",
-        "4": "Lieu inconnu mais chargé de sens, phare dans le brouillard.",
-        "5": "Sensation étrange, presque magique, qui semble te guider.",
-        "6": "Rien de précis, juste un vide qui appelle à l’introspection."
+        "1": "Un éclat d’image traverse ton esprit : un visage riant sous la pluie. "
+              "Tu tends la main, mais le souvenir s’efface avant de le toucher.",
+        "2": "Une douleur sourde te serre le cœur. "
+              "Une perte, une trahison, une chute. Tu n’étais pas prêt à revivre cela.",
+        "3": "Tu te vois ailleurs, dans un autre corps, une autre vie. "
+              "La mémoire te trahit ou te protège — tu ne sais plus.",
+        "4": "Une rue pavée, un phare au loin, une chaleur familière. "
+              "Ce lieu t’appelle, même si tu ne l’as jamais vu.",
+        "5": "Une sensation étrange t’envahit : comme une magie douce. "
+              "Quelque chose — ou quelqu’un — te guide vers la vérité.",
+        "6": "Le vide. Pur, infini. Et dans ce néant, ton esprit dérive, libre et perdu à la fois."
     },
+
     "rencontre": {
-        "1": "Une personne inconnue frappe à la porte, curieuse ou hostile.",
-        "2": "Une voix résonne dans ta tête, douce ou menaçante.",
-        "3": "Un danger surgit : chute, accident ou prédateur.",
-        "4": "Une aide inattendue se manifeste, guide ou allié.",
-        "5": "Une vision, un symbole ou hallucination t’invite à comprendre.",
-        "6": "Silence complet, solitude totale, introspection profonde."
+        "1": "Trois coups secs à la porte. Ton cœur s’emballe. "
+              "Tu n’attendais personne, mais quelqu’un t’attend, lui.",
+        "2": "Une voix murmure à l’intérieur de ta tête. "
+              "Elle te parle comme à un vieil ami, avec une tendresse inquiétante.",
+        "3": "Un craquement soudain. Le sol cède, une ombre surgit. "
+              "Le danger a toujours le visage du réveil.",
+        "4": "Une main se tend vers toi, invisible mais rassurante. "
+              "Peut-être n’es-tu pas seul, finalement.",
+        "5": "Une vision éclate dans ton esprit — un symbole, une flamme, un œil qui s’ouvre. "
+              "Le sens t’échappe, mais ton cœur comprend.",
+        "6": "Rien. Le monde s’efface. "
+              "Il ne reste que toi, face à toi-même, dans un silence parfait."
     },
+
     "choix": {
-        "1": "Complication : obstacle ou énigme bloque ton chemin.",
-        "2": "Avancée prudente : indice découvert mais mystère demeure.",
-        "3": "Réussite : révélation partielle ou rencontre cruciale.",
-        "4": "Complication : obstacle ou énigme bloque ton chemin.",
-        "5": "Avancée prudente : indice découvert mais mystère demeure.",
-        "6": "Réussite : révélation partielle ou rencontre cruciale."
+        "1": "Un obstacle se dresse : une porte verrouillée, une peur ancienne, un doute persistant. "
+              "Le passage t’échappe.",
+        "2": "Tu avances prudemment. Chaque pas résonne dans un couloir d’incertitude. "
+              "Tu sens que quelque chose veille.",
+        "3": "Une lueur d’espoir éclaire ta route. "
+              "Tu as compris une part du mystère, mais la vérité reste voilée.",
+        "4": "Encore un mur. Encore un détour. "
+              "Le destin se joue de toi, t’obligeant à chercher plus loin.",
+        "5": "Tu suis ton instinct. La peur te guide mieux que la raison.",
+        "6": "Un instant suspendu. Tu vois enfin le fil qui relie chaque énigme. "
+              "Le sens commence à naître."
     },
+
     "revelation": {
-        "1": "Le corps appartient à quelqu’un que tu connais.",
-        "2": "Tu es dans un souvenir ou une simulation.",
-        "3": "Ton esprit est fragmenté entre plusieurs identités.",
-        "4": "Tu es au centre d’une expérience mystérieuse.",
-        "5": "Tu découvres un indice majeur sur ton passé ou ce lieu.",
-        "6": "Révélation complète : identité et contexte éclairés."
+        "1": "Ce corps… appartenait à quelqu’un que tu as aimé. "
+              "Et c’est dans sa peau que tu cherches à comprendre ta propre histoire.",
+        "2": "Tout s’éclaire : ce monde n’est qu’un souvenir, une illusion. "
+              "Tu n’étais qu’un esprit errant dans la mémoire d’un autre.",
+        "3": "Ton esprit est fragmenté. D’autres voix parlent en toi, t’observent, te jugent.",
+        "4": "Tu étais le sujet d’une expérience. Une conscience déplacée. "
+              "Un esprit transplanté dans un corps volé.",
+        "5": "Un nom, un lieu, une voix. Tout se connecte en une mosaïque claire. "
+              "Tu commences à comprendre.",
+        "6": "La vérité s’impose. Tu sais enfin qui tu es. "
+              "Et cette certitude te fait peur."
     },
+
     "conclusion": {
-        "1": "Tu retrouves ton corps originel, mais ton esprit est changé.",
-        "2": "Tu acceptes ce corps et cette vie, un nouveau départ.",
-        "3": "Tu découvres que tu n’étais jamais toi : fragment ou clone.",
-        "4": "Prisonnier d’un rêve ou d’une simulation, sans corps propre.",
-        "5": "Fusion complète avec ce corps et cette existence.",
-        "6": "Ouvert : invente la fin selon ton imagination."
+        "1": "Tu retrouves ton corps d’origine, mais quelque chose est resté derrière toi. "
+              "Ton esprit n’est plus le même.",
+        "2": "Tu acceptes cette nouvelle existence. "
+              "Ce corps devient le tien, cette vie ton destin.",
+        "3": "Tu découvres que tu n’as jamais existé. "
+              "Tu n’es qu’une copie, un souvenir matérialisé.",
+        "4": "Tu comprends enfin : tout cela n’était qu’un rêve. "
+              "Mais qui te dit que l’éveil sera différent ?",
+        "5": "Ton esprit fusionne avec cette chair étrangère. "
+              "Il n’y a plus de ‘toi’ ni ‘d’autre’. Seulement l’unité.",
+        "6": "Le récit s’achève ici. La suite dépend de ton imagination. "
+              "Après tout, chaque réveil cache une nouvelle naissance."
     }
 }
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧩 View pour boutons et progression chapitre par chapitre
