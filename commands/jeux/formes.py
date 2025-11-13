@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 memory_formes.py — Commande Memory : retenir et choisir les formes
 # Objectif : Jouer à un mini jeu mémoire avec une gridview de boutons
-# Catégorie : Jeu
+# Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
@@ -118,5 +118,5 @@ async def setup(bot: commands.Bot):
     cog = MemoryFormes(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Jeu"
+            command.category = "Jeux"
     await bot.add_cog(cog)
