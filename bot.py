@@ -152,7 +152,7 @@ async def on_message(message):
     if message.content.strip() in [f"<@!{bot.user.id}>", f"<@{bot.user.id}>"]:
         prefix = get_prefix(bot, message)
         embed = discord.Embed(
-            title="Coucou ! 🃏",
+            title="Coucou !",
             description=(
                 f"Bonjour ! Je suis **Kisuke Urahara**, un bot discord inspiré du manga Bleach.\n"
                 f"• Utilise la commande `{prefix}help` pour avoir la liste des commandes du bot "
@@ -201,5 +201,6 @@ if __name__ == "__main__":
         await bot.start(TOKEN)
 
     asyncio.run(start())
+
 
 
