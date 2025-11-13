@@ -2,215 +2,247 @@
   "titre": "Bleach – Le Premier Pas vers la Mort (Version étendue)",
   "contenu": [
     {
+      "page": 1,
       "texte": "Tu es Ichigo Kurosaki, 15 ans, capable de voir les fantômes. Une onde spirituelle traverse le ciel de Karakura. Soudain, un cri déchire la nuit.",
       "options": [
-        {"texte": "Courir vers la source du cri", "suivant": 1},
+        {"texte": "Courir vers la source du cri", "suivant": 4},
         {"texte": "Observer discrètement depuis le toit", "suivant": 2},
         {"texte": "Ignorer et rentrer chez toi", "suivant": 3}
       ]
     },
     {
+      "page": 2,
       "texte": "Depuis le toit, tu aperçois un Hollow s’attaquer à une âme. Une Shinigami apparaît et tranche le monstre d’un coup précis : c’est Rukia Kuchiki. Elle te fixe et demande : 'Tu peux me voir ?'",
       "options": [
-        {"texte": "Répondre calmement", "suivant": 4},
-        {"texte": "Faire une remarque sarcastique", "suivant": 5},
-        {"texte": "Rester silencieux", "suivant": 6}
+        {"texte": "Répondre calmement", "suivant": 5},
+        {"texte": "Faire une remarque sarcastique", "suivant": 6},
+        {"texte": "Rester silencieux", "suivant": 7}
       ]
     },
     {
+      "page": 3,
       "texte": "Tu ignores le cri. En rentrant, tu trouves ta maison en ruines. Ta famille est menacée par un Hollow géant.",
       "options": [
-        {"texte": "Fuir et prévenir tes sœurs", "suivant": 7},
-        {"texte": "Tenter de combattre le Hollow", "suivant": 8}
+        {"texte": "Fuir et prévenir tes sœurs", "suivant": 8},
+        {"texte": "Tenter de combattre le Hollow", "suivant": 9}
       ]
     },
     {
+      "page": 4,
       "texte": "Tu cours vers la ruelle. Le Hollow projette Rukia au sol. Elle tend son sabre vers toi : 'Prends-le, ou nous mourrons tous les deux !'",
       "options": [
-        {"texte": "Saisir le sabre", "suivant": 9},
-        {"texte": "Refuser, trop effrayé", "suivant": 10}
+        {"texte": "Saisir le sabre", "suivant": 10},
+        {"texte": "Refuser, trop effrayé", "suivant": 11}
       ]
     },
     {
+      "page": 5,
       "texte": "Rukia t’explique qu’elle est une Shinigami et que les Hollows menacent ta famille. Un Hollow énorme approche de ta maison !",
       "options": [
-        {"texte": "Combattre toi-même avec le sabre", "suivant": 9},
-        {"texte": "Laisser Rukia gérer", "suivant": 11},
-        {"texte": "Hésiter, paralysé", "suivant": 12}
+        {"texte": "Combattre toi-même avec le sabre", "suivant": 10},
+        {"texte": "Laisser Rukia gérer", "suivant": 12},
+        {"texte": "Hésiter, paralysé", "suivant": 13}
       ]
     },
     {
+      "page": 6,
       "texte": "Ton sarcasme fait sourire Rukia, mais avant qu’elle ne réponde, un Hollow surgit derrière toi.",
       "options": [
-        {"texte": "Courir vers le combat", "suivant": 9}
+        {"texte": "Courir vers le combat", "suivant": 10}
       ]
     },
     {
+      "page": 7,
       "texte": "Rester silencieux ne te sauve pas : le Hollow attaque. Rukia se relève pour te protéger.",
       "options": [
-        {"texte": "Combattre aux côtés de Rukia", "suivant": 9}
+        {"texte": "Combattre aux côtés de Rukia", "suivant": 10}
       ]
     },
     {
+      "page": 8,
       "texte": "Tu cours pour sauver tes sœurs. Le Hollow attaque. Rukia te donne son sabre pour te défendre.",
       "options": [
-        {"texte": "Saisir le sabre", "suivant": 9},
-        {"texte": "Hésiter et observer", "suivant": 12}
+        {"texte": "Saisir le sabre", "suivant": 10},
+        {"texte": "Hésiter et observer", "suivant": 13}
       ]
-    },
+   },
     {
-      "texte": "Tu saisis le sabre et une lumière éclate. Ton uniforme devient noir, ton sabre immense. Tu tranches le Hollow d’un seul coup. Tes sœurs sont sauves.",
-      "options": [
-        {"texte": "Aider Rukia à se relever", "suivant": 13},
-        {"texte": "Observer autour pour détecter d’autres Hollows", "suivant": 14}
-      ]
-    },
-    {
+      "page": 9,
       "texte": "Tu refuses le sabre. Le Hollow frappe, tout devient noir. Fin tragique : 'L’homme qui refusa son destin.'",
       "options": []
     },
     {
+      "page": 10,
+      "texte": "Tu saisis le sabre et une lumière éclate. Ton uniforme devient noir, ton sabre immense. Tu tranches le Hollow d’un seul coup. Tes sœurs sont sauves.",
+      "options": [
+        {"texte": "Aider Rukia à se relever", "suivant": 14},
+        {"texte": "Observer autour pour détecter d’autres Hollows", "suivant": 15}
+      ]
+    },
+    {
+      "page": 11,
       "texte": "Rukia se relève et te donne un conseil : 'Tu dois apprendre à utiliser ce pouvoir, Ichigo.'",
       "options": [
-        {"texte": "Accepter de devenir Shinigami temporaire", "suivant": 15},
-        {"texte": "Refuser et rester humain", "suivant": 16}
+        {"texte": "Accepter de devenir Shinigami temporaire", "suivant": 16},
+        {"texte": "Refuser et rester humain", "suivant": 17}
       ]
     },
     {
+      "page": 12,
       "texte": "Tu observes Rukia combattre seule. Elle est blessée mais te transmet son pouvoir. Tu deviens Shinigami.",
       "options": [
-        {"texte": "Commencer ton entraînement immédiatement", "suivant": 15},
-        {"texte": "Explorer la ville pour tester tes nouveaux pouvoirs", "suivant": 17}
+        {"texte": "Commencer ton entraînement immédiatement", "suivant": 16},
+        {"texte": "Explorer la ville pour tester tes nouveaux pouvoirs", "suivant": 18}
       ]
     },
     {
+      "page": 13,
       "texte": "Tu observes autour et détectes d’autres Hollows. Ton rôle de protecteur commence.",
       "options": [
-        {"texte": "Les affronter seul", "suivant": 18},
-        {"texte": "Appeler Rukia pour demander conseil", "suivant": 15}
+        {"texte": "Les affronter seul", "suivant": 19},
+        {"texte": "Appeler Rukia pour demander conseil", "suivant": 16}
       ]
     },
     {
+      "page": 14,
       "texte": "Le lendemain, Rukia t’explique que tu dois assumer ton rôle temporaire et protéger ta ville.",
       "options": [
-        {"texte": "Accepter ton rôle", "suivant": 19},
-        {"texte": "Refuser et chercher une solution alternative", "suivant": 16}
+        {"texte": "Accepter ton rôle", "suivant": 20},
+        {"texte": "Refuser et chercher une solution alternative", "suivant": 17}
       ]
     },
     {
+      "page": 15,
       "texte": "Tu acceptes ton rôle. Tu combats des Hollows avec Rukia et découvres que tes amis perçoivent aussi le monde spirituel.",
       "options": [
-        {"texte": "Suivre Rukia pour comprendre la Soul Society", "suivant": 20},
-        {"texte": "Entraîner tes pouvoirs seul", "suivant": 21}
+        {"texte": "Suivre Rukia pour comprendre la Soul Society", "suivant": 21},
+        {"texte": "Entraîner tes pouvoirs seul", "suivant": 22}
       ]
     },
     {
+      "page": 16,
       "texte": "Tu refuses ton rôle. Les Hollows continuent d’apparaître, mettant tes amis en danger. Tu dois te décider rapidement.",
       "options": [
-        {"texte": "Chercher Rukia pour recevoir son aide", "suivant": 15},
-        {"texte": "Affronter les Hollows sans elle", "suivant": 18}
+        {"texte": "Chercher Rukia pour recevoir son aide", "suivant": 16},
+        {"texte": "Affronter les Hollows sans elle", "suivant": 19}
       ]
     },
     {
+      "page": 17,
       "texte": "Une énergie inconnue apparaît : Byakuya et Renji sont devant toi. 'Rukia Kuchiki a violé la loi de la Soul Society.'",
       "options": [
-        {"texte": "Intervenir pour défendre Rukia", "suivant": 22},
-        {"texte": "Observer discrètement", "suivant": 23}
+        {"texte": "Intervenir pour défendre Rukia", "suivant": 23},
+        {"texte": "Observer discrètement", "suivant": 24}
       ]
     },
     {
+      "page": 18,
       "texte": "Tu restes caché. Rukia est emmenée de force. 'Adieu, Ichigo.' Tu décides de la sauver quoi qu’il en coûte.",
       "options": [
-        {"texte": "Chercher l’aide d’Urahara", "suivant": 24}
+        {"texte": "Chercher l’aide d’Urahara", "suivant": 25}
       ]
     },
     {
+      "page": 19,
       "texte": "Tu t’interposes face à Renji. Il te bat facilement, Byakuya t’achève. Tu te réveilles plus tard, décidé à devenir plus fort.",
       "options": [
-        {"texte": "Accepter l’entraînement d’Urahara", "suivant": 24}
+        {"texte": "Accepter l’entraînement d’Urahara", "suivant": 25}
       ]
     },
     {
+      "page": 20,
       "texte": "Tu cherches un moyen d’atteindre la Soul Society. Kisuke Urahara t’aborde : 'Tu veux sauver Rukia ?' ",
       "options": [
-        {"texte": "Accepter son aide", "suivant": 25},
-        {"texte": "Refuser, méfiant", "suivant": 26}
+        {"texte": "Accepter son aide", "suivant": 26},
+        {"texte": "Refuser, méfiant", "suivant": 27}
       ]
     },
     {
+      "page": 21,
       "texte": "Tu entres dans la boutique d’Urahara. Il te propose un entraînement pour redevenir Shinigami.",
       "options": [
-        {"texte": "Accepter l’entraînement", "suivant": 25},
-        {"texte": "Refuser, trop risqué", "suivant": 26}
+        {"texte": "Accepter l’entraînement", "suivant": 26},
+        {"texte": "Refuser, trop risqué", "suivant": 27}
       ]
     },
     {
-      "texte": "Urahara trace un cercle. 'Si tu survies, tu renaîtras Shinigami.' Zangetsu apparaît et t’attend.",
+      "page": 22,
+      "texte": "Urahara trace un cercle. 'Si tu survives, tu renaîtras Shinigami.' Zangetsu apparaît et t’attend.",
       "options": [
-        {"texte": "Accepter ton pouvoir", "suivant": 27},
-        {"texte": "Résister à la douleur", "suivant": 28}
+        {"texte": "Accepter ton pouvoir", "suivant": 28},
+        {"texte": "Résister à la douleur", "suivant": 29}
       ]
     },
     {
+      "page": 23,
       "texte": "Tu refuses l’entraînement. Urahara secoue la tête : 'Alors tu ne sauveras jamais Rukia.' Tu quittes la boutique, brisé.",
       "options": []
     },
     {
+      "page": 24,
       "texte": "Ton corps brûle, ton âme s’éveille. Tu brandis Zangetsu. Urahara ouvre un portail vers la Soul Society.",
       "options": [
-        {"texte": "Entrer dans le portail", "suivant": 29}
+        {"texte": "Entrer dans le portail", "suivant": 30}
       ]
     },
     {
+      "page": 25,
       "texte": "Ton Hollow intérieur prend le dessus. Urahara te maîtrise à moitié mort. Tu récupères le pouvoir et te prépares à entrer dans la Soul Society.",
       "options": [
-        {"texte": "Entrer dans le portail", "suivant": 29}
+        {"texte": "Entrer dans le portail", "suivant": 30}
       ]
     },
     {
+      "page": 26,
       "texte": "Le vortex s’ouvre. Urahara te regarde partir : 'Va la sauver, Ichigo Kurosaki.' Tu entres dans la Soul Society. Rukia t’attend, condamnée à mort.",
       "options": []
     },
     {
+      "page": 27,
       "texte": "Tu explores la ville après ton entraînement. Des Hollows plus faibles apparaissent. Tu peux les combattre pour t’entraîner ou les éviter.",
       "options": [
-        {"texte": "Combattre les Hollows pour t’entraîner", "suivant": 18},
-        {"texte": "Ignorer et explorer la ville", "suivant": 17}
+        {"texte": "Combattre les Hollows pour t’entraîner", "suivant": 19},
+        {"texte": "Ignorer et explorer la ville", "suivant": 18}
       ]
     },
     {
+      "page": 28,
       "texte": "Tu continues à t’entraîner avec Rukia. Des choix stratégiques s’offrent à toi : aider Orihime et Chad ou te concentrer sur ton propre entraînement.",
       "options": [
-        {"texte": "Aider tes amis", "suivant": 30},
-        {"texte": "Te concentrer sur ton entraînement", "suivant": 21}
+        {"texte": "Aider tes amis", "suivant": 31},
+        {"texte": "Te concentrer sur ton entraînement", "suivant": 22}
       ]
-    },
+   },
     {
+      "page": 29,
       "texte": "Tu aides tes amis. Ils commencent à percevoir l’invisible. Ensemble, vous combattez un Hollow qui attaque un groupe d’âmes perdues.",
       "options": [
-        {"texte": "Tuer le Hollow rapidement", "suivant": 31},
-        {"texte": "Essayer de le repousser avec stratégie", "suivant": 32}
+        {"texte": "Tuer le Hollow rapidement", "suivant": 32},
+        {"texte": "Essayer de le repousser avec stratégie", "suivant": 33}
       ]
     },
     {
+      "page": 30,
       "texte": "Tu tentes de repousser le Hollow stratégiquement. Tu évites des dommages mais le Hollow s’échappe pour revenir plus tard.",
       "options": [
-        {"texte": "Poursuivre le Hollow", "suivant": 31},
-        {"texte": "Ignorer et continuer à explorer la ville", "suivant": 17}
+        {"texte": "Poursuivre le Hollow", "suivant": 32},
+        {"texte": "Ignorer et continuer à explorer la ville", "suivant": 18}
       ]
     },
     {
+      "page": 31,
       "texte": "Tu élimines le Hollow avec tes amis. Tu gagnes de l’expérience et renforces les liens avec eux.",
       "options": [
-        {"texte": "Continuer à protéger la ville", "suivant": 15},
-        {"texte": "Chercher Rukia pour comprendre la Soul Society", "suivant": 20}
+        {"texte": "Continuer à protéger la ville", "suivant": 16},
+        {"texte": "Chercher Rukia pour comprendre la Soul Society", "suivant": 21}
       ]
     },
     {
+      "page": 32,
       "texte": "Tu aides tes amis et acquiers de nouvelles compétences. Tu peux désormais détecter des Hollows plus puissants.",
       "options": [
-        {"texte": "Chercher ces Hollows pour t’entraîner", "suivant": 18},
-        {"texte": "Chercher Rukia pour la sauver", "suivant": 24}
+        {"texte": "Chercher ces Hollows pour t’entraîner", "suivant": 19},
+        {"texte": "Chercher Rukia pour la sauver", "suivant": 25}
       ]
     }
   ]
