@@ -1,0 +1,98 @@
+{
+  "titre": "Le Château Hanté : Enquête Express",
+  "contenu": [
+    {
+      "texte": "Tu arrives devant le vieux château abandonné, missionné pour enquêter sur des disparitions mystérieuses. Que fais-tu ?",
+      "options": [
+        {"texte": "Entrer par la porte principale", "suivant": 1},
+        {"texte": "Chercher une entrée secrète autour du château", "suivant": 2},
+        {"texte": "Faire demi-tour et revenir plus tard", "suivant": 3}
+      ]
+    },
+    {
+      "texte": "À l'intérieur, le hall est plongé dans l'obscurité. Un fantôme apparaît et te fixe.",
+      "options": [
+        {"texte": "Parler au fantôme", "suivant": 4},
+        {"texte": "Fuir en courant", "suivant": 5},
+        {"texte": "Allumer une torche pour l'éclairer", "suivant": 6}
+      ]
+    },
+    {
+      "texte": "En explorant l'extérieur, tu trouves une porte cachée derrière des buissons. Un autre enquêteur humain s'y trouve.",
+      "options": [
+        {"texte": "Parler à l'autre enquêteur", "suivant": 7},
+        {"texte": "Entrer seul par la porte", "suivant": 8},
+        {"texte": "Faire demi-tour et retourner à la porte principale", "suivant": 1}
+      ]
+    },
+    {
+      "texte": "En revenant plus tard, le château semble encore plus mystérieux, et un murmure t'invite à entrer.",
+      "options": [
+        {"texte": "Entrer par la porte principale", "suivant": 1},
+        {"texte": "Explorer les jardins du château", "suivant": 9}
+      ]
+    },
+    {
+      "texte": "Le fantôme te parle : 'Je garde un trésor ancien. Tu peux tenter de le trouver en résolvant mon énigme, ou partir.'",
+      "options": [
+        {"texte": "Accepter le défi de l'énigme", "suivant": 10},
+        {"texte": "Refuser et partir", "suivant": 11}
+      ]
+    },
+    {
+      "texte": "En fuyant, tu glisses sur le sol humide et tombes dans le sous-sol. Un fantôme t'observe silencieusement.",
+      "options": [
+        {"texte": "Parler au fantôme", "suivant": 10},
+        {"texte": "Chercher une sortie rapidement", "suivant": 12}
+      ]
+    },
+    {
+      "texte": "La torche révèle un passage secret derrière le fantôme !",
+      "options": [
+        {"texte": "Explorer le passage", "suivant": 13},
+        {"texte": "Ignorer et continuer dans le hall", "suivant": 14}
+      ]
+    },
+    {
+      "texte": "L'autre enquêteur te dit qu'il cherche le trésor depuis des années. Vous décidez de coopérer pour le trouver.",
+      "options": [
+        {"texte": "Chercher le trésor ensemble", "suivant": 10},
+        {"texte": "Se disputer et se séparer", "suivant": 8}
+      ]
+    },
+    {
+      "texte": "En entrant seul par la porte secrète, tu déclenches un piège et tombes dans une salle remplie de squelettes.",
+      "options": []
+    },
+    {
+      "texte": "Dans les jardins, tu trouves un petit pavillon abandonné. Une lettre indique un passage secret dans le château.",
+      "options": [
+        {"texte": "Suivre le passage secret", "suivant": 13},
+        {"texte": "Ignorer et quitter le château", "suivant": 11}
+      ]
+    },
+    {
+      "texte": "Tu résous l'énigme du fantôme et il te montre le trésor caché ! Vous devenez riches et célèbres. Fin heureuse.",
+      "options": []
+    },
+    {
+      "texte": "Tu refuses le défi et quittes le château bredouille. Fin neutre.",
+      "options": []
+    },
+    {
+      "texte": "En cherchant une sortie, tu trouves un passage secret qui te ramène dehors sain et sauf. Fin prudente.",
+      "options": []
+    },
+    {
+      "texte": "Le passage secret mène à une bibliothèque cachée. Tu trouves des indices pour résoudre le mystère du château.",
+      "options": [
+        {"texte": "Étudier les indices", "suivant": 10},
+        {"texte": "Ignorer et continuer", "suivant": 14}
+      ]
+    },
+    {
+      "texte": "En continuant dans le hall, tu déclenches une alarme magique et le château se referme sur toi. Fin tragique.",
+      "options": []
+    }
+  ]
+}
