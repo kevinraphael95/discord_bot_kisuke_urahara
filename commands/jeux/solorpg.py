@@ -22,7 +22,7 @@ from utils.discord_utils import safe_send, safe_respond
 class SoloRPG(commands.Cog):
     """
     Commande /solorpg et !solorpg — Choisis une histoire et progresse dedans.
-    Compatible avec le format JSON { "titre": ..., "contenu": [ { "texte": ..., "options": [...] } ] }
+    Compatible avec le format JSON { "titre": ..., "contenu": [ { "page": ..., "texte": ..., "options": [...] } ] }
     """
 
     def __init__(self, bot: commands.Bot):
@@ -55,14 +55,14 @@ class SoloRPG(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Affichage d'une étape
     # ────────────────────────────────────────────────────────────────────────────
-    async def afficher_etape(self, ctx_or_interaction, histoire, index, historique=None):
-        """Affiche une étape avec ses choix et gère les boutons de navigation."""
+    async def afficher_etape(self, ctx_or_interaction, histoire, page, historique=None):
+        """Affiche une page avec ses choix et gère les boutons de navigation."""
         contenu = histoire.get("contenu", [])
         if historique is None:
             historique = []
 
         # ── Fin de l'histoire ──
-        if index >= len(contenu):
+        if page > len(contenu) or page <= 0:
             embed = discord.Embed(
                 title=histoire.get("titre", "Histoire inconnue"),
                 description="🏁 **Fin de l'histoire !** Merci d'avoir joué 🎉",
@@ -74,13 +74,13 @@ class SoloRPG(commands.Cog):
                 await safe_respond(ctx_or_interaction, embed=embed)
             return
 
-        etape = contenu[index]
+        etape = contenu[page - 1]
         texte = etape.get("texte", "...")
         options = etape.get("options", [])
 
         # ── Création de l'embed ──
         embed = discord.Embed(
-            title=f"{histoire['titre']} — Page {index + 1}",
+            title=f"{histoire['titre']} — Page {page}",
             description=texte,
             color=discord.Color.blurple()
         )
@@ -88,7 +88,7 @@ class SoloRPG(commands.Cog):
         # ── Ajout des choix dans l'embed ──
         if options:
             desc_choix = "\n".join(
-                [f"`{i+1}` — {opt['texte']} *(→ {opt.get('suivant', index + 1)})*"
+                [f"`{i+1}` — {opt['texte']} *(→ Page {opt.get('suivant', page+1)})*"
                  for i, opt in enumerate(options)]
             )
             embed.add_field(name="Choix disponibles :", value=desc_choix, inline=False)
@@ -106,9 +106,9 @@ class SoloRPG(commands.Cog):
                 bouton = discord.ui.Button(label=label, style=style)
 
                 async def callback(interaction: discord.Interaction, i=i):
-                    prochain_index = options[i].get("suivant", index + 1)
-                    new_historique = historique + [index]
-                    await self.afficher_etape(interaction, histoire, prochain_index, historique=new_historique)
+                    prochain_page = options[i].get("suivant", page+1)
+                    new_historique = historique + [page]
+                    await self.afficher_etape(interaction, histoire, prochain_page, historique=new_historique)
 
                 bouton.callback = callback
                 view.add_item(bouton)
@@ -121,8 +121,8 @@ class SoloRPG(commands.Cog):
             bouton_retour = discord.ui.Button(label="⬅️ Retour", style=discord.ButtonStyle.secondary)
 
             async def retour_callback(interaction: discord.Interaction):
-                dernier_index = historique[-1]
-                await self.afficher_etape(interaction, histoire, dernier_index, historique=historique[:-1])
+                dernier_page = historique[-1]
+                await self.afficher_etape(interaction, histoire, dernier_page, historique=historique[:-1])
 
             bouton_retour.callback = retour_callback
             view.add_item(bouton_retour)
@@ -157,7 +157,7 @@ class SoloRPG(commands.Cog):
         async def select_callback(select_interaction: discord.Interaction):
             titre = select_interaction.data["values"][0]
             histoire = self.histoires[titre]
-            await self.afficher_etape(select_interaction, histoire, 0)
+            await self.afficher_etape(select_interaction, histoire, 1)
 
         select.callback = select_callback
         view = discord.ui.View()
@@ -185,7 +185,7 @@ class SoloRPG(commands.Cog):
         async def select_callback(select_interaction: discord.Interaction):
             titre = select_interaction.data["values"][0]
             histoire = self.histoires[titre]
-            await self.afficher_etape(select_interaction, histoire, 0)
+            await self.afficher_etape(select_interaction, histoire, 1)
 
         select.callback = select_callback
         view = discord.ui.View()
