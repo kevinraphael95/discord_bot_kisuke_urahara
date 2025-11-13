@@ -98,23 +98,22 @@ class SoloRPG(commands.Cog):
         # ── Vue (boutons interactifs) ──
         view = discord.ui.View(timeout=None)
 
-        # Boutons de choix
+        # Boutons de choix (affichés par numéro de page)
         if options:
             for i, option in enumerate(options):
-                label = option.get("texte", f"Choix {i+1}")
+                page_suivante = option.get("suivant", page+1)
+                label = f"Page {page_suivante}"
                 style = discord.ButtonStyle.primary
                 bouton = discord.ui.Button(label=label, style=style)
-
+        
                 async def callback(interaction: discord.Interaction, i=i):
                     prochain_page = options[i].get("suivant", page+1)
                     new_historique = historique + [page]
                     await self.afficher_etape(interaction, histoire, prochain_page, historique=new_historique)
-
+        
                 bouton.callback = callback
                 view.add_item(bouton)
-        else:
-            bouton = discord.ui.Button(label="Fin", style=discord.ButtonStyle.secondary, disabled=True)
-            view.add_item(bouton)
+
 
         # Bouton retour
         if historique:
