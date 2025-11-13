@@ -14,17 +14,9 @@ from utils.discord_utils import safe_send, safe_respond  # Utilitaires sécuris�
 # 🧠 JSON narratif complet – version immersive et littéraire
 # ────────────────────────────────────────────────────────────────────────────────
 jdr_json = {
-    "intro": "🌌 **RÉVEIL – Un JDR Solo d’introspection et de mystère**\n\n"
-             "Le silence t’enveloppe comme un linceul. L’air est lourd, presque solide, "
-             "et chaque respiration semble une victoire sur un monde qui t’ignore. "
-             "Lorsque tes yeux s’ouvrent, la lumière blanche t’écorche la rétine. "
-             "Tout paraît figé, suspendu, irréel.\n\n"
-             "Tu sens le poids d’un corps… mais ce n’est pas le tien. "
-             "Tes membres répondent à des ordres étrangers. "
-             "Ton esprit vacille, comme si tu flottais entre rêve et réalité.\n\n"
-             "À chaque pression sur un bouton, un fragment de ton existence se révélera. "
-             "Reste attentif, écoute les battements de ce nouveau cœur. "
-             "Ce voyage t’appartient, même si tu n’en connais pas encore la fin.",
+    "intro": "🌌 **JDR Solo Test**\n\n"
+             "Le silence t’entourre, lorsque tes yeux s’ouvrent, tu te réveille dans une pièce que tu ne reconnais pas. "
+             "Quelque chose ne vas pas avec ton corps, tu es encore endormi mais tu ne te sens pas comme d'habitude. ",
 
     "chambre": {
         "1": "La pièce où tu te trouves est d’une propreté irréelle. "
@@ -62,14 +54,11 @@ jdr_json = {
               "Ce visage a ton âge, mais ses traits racontent une autre histoire. "
               "Des cicatrices invisibles se lisent dans son regard, un fardeau dont tu ignores tout.",
         "3": "Tes articulations craquent. Ce corps est vieux, usé par le temps. "
-              "Mais dans sa fatigue, tu ressens une force tranquille, celle de quelqu’un qui a trop vécu. "
               "Tu portes maintenant le poids d’années que tu n’as pas vécues.",
         "4": "Tu te découvres plus jeune. Ton souffle est vif, ton sang pulse fort. "
-              "Mais cette vitalité te semble étrangère, presque menaçante. "
               "Tu n’as pas grandi ici, dans cette chair neuve.",
-        "5": "Même sexe, même âge, mais tout est décalé : le nez, la voix, le regard. "
-              "C’est toi, dans une autre version de toi-même. "
-              "Un reflet d’un monde où tes choix furent différents.",
+        "5": "Même sexe, même âge, mais tout est différent : le nez, la voix, le regard. "
+              "Est-ce toi? Une autre version de toi-même? ",
         "6": "Tu habites un corps vieilli, mais digne. "
               "Chaque ride semble te parler, chaque souffle porte une mémoire. "
               "Tu ressens à la fois la fatigue et la paix d’une existence accomplie."
