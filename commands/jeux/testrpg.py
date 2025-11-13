@@ -15,173 +15,124 @@ import random
 from utils.discord_utils import safe_send, safe_respond  # Utilitaires sécurisés
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 JSON narratif complet – version immersive et littéraire
+# 🎮 JDR JSON — version "raconte ton histoire"
 # ────────────────────────────────────────────────────────────────────────────────
 jdr_json = {
-    "intro": "🌌 **JDR Solo Test**\n\n"
-             "Le silence t’entourre, lorsque tes yeux s’ouvrent, tu te réveille dans une pièce que tu ne reconnais pas. "
-             "Quelque chose ne vas pas avec ton corps, tu es encore endormi mais tu ne te sens pas comme d'habitude. ",
+    "intro": (
+        "🌌 **Réveil étrange**\n\n"
+        "Tu ouvres les yeux. L’air est froid. Ton corps te semble étranger. "
+        "Tes souvenirs se dispersent comme de la fumée. Où es-tu ? Et surtout… qui es-tu ?"
+    ),
 
     "chambre": {
-        "1": "La pièce où tu te trouves est d’une propreté irréelle. "
-              "Chaque livre est aligné, chaque cadre parfaitement droit. "
-              "L’air y est froid, comme si personne n’y avait respiré depuis des années. "
-              "Une lampe solitaire éclaire une chaise vide, témoin d’une attente interminable. "
-              "Tu as la sensation d’être observé… non par un être, mais par la perfection elle-même.",
-        "2": "Autour de toi, une chambre simple, habitée par la poussière. "
-              "Le lit est défait, les rideaux entrouverts laissent filtrer un souffle d’air fatigué. "
-              "Sur la table, une tasse renversée a séché depuis longtemps. "
-              "Tu ne reconnais rien, mais ton cœur bat plus vite, comme s’il se souvenait à ta place.",
-        "3": "Une chambre baignée d’une lumière dorée, presque apaisante. "
-              "Les murs racontent une histoire silencieuse : celle d’un lieu aimé puis oublié. "
-              "Le temps y circule autrement, ralenti, doux et mélancolique. "
-              "Tu pourrais t’y endormir à nouveau, si la peur ne te retenait pas.",
-        "4": "L’opulence t’écrase. Draps de soie, miroirs dorés, parfum sucré de roses fanées. "
-              "Mais sous cette beauté se cache une tension : des griffures sur la porte, "
-              "un verre brisé dans le coin, un manteau jeté à la hâte. "
-              "Quelqu’un vivait ici… et il est parti trop vite.",
-        "5": "Des objets absurdes s’entassent autour de toi : une horloge qui tourne à l’envers, "
-              "un tableau sans visage, un livre sans mots. "
-              "La pièce respire une logique étrangère, comme un rêve lucide. "
-              "Tu te demandes si tu t’es éveillé… ou endormi plus profondément.",
-        "6": "La chambre est en ruine. Les murs sont couverts de lierre, le plafond s’effrite. "
-              "Sous tes doigts, la poussière cache d’anciennes gravures — des noms effacés. "
-              "Le vent s’engouffre, portant des murmures indistincts. "
-              "Tu comprends que ce lieu n’appartient plus à personne depuis longtemps."
+        "1": "Une chambre trop parfaite. Rien ne dépasse, pas un grain de poussière. "
+              "Tu ressens une gêne, comme si l’ordre des lieux cachait un secret.",
+        "2": "La pièce semble abandonnée. Le lit défait, une tasse vide, une fenêtre entrouverte. "
+              "Quelqu’un vivait ici… récemment.",
+        "3": "La lumière du matin traverse les rideaux. Tout semble paisible, presque familier. "
+              "Tu pourrais croire que tu es chez toi, mais ce n’est pas le cas.",
+        "4": "Une chambre luxueuse, décorée avec soin. Mais les détails trahissent la hâte : "
+              "une porte forcée, un miroir fissuré, un parfum qui flotte encore.",
+        "5": "Tout ici défie la logique : les aiguilles d’une horloge tournent à l’envers, "
+              "un tableau change quand tu ne le regardes pas. Tu n’es pas dans un lieu ordinaire.",
+        "6": "La pièce est en ruine. Des plantes ont envahi le sol, la pluie s’infiltre. "
+              "Ce lieu a été oublié depuis longtemps."
     },
 
     "corps": {
-        "1": "Tu lèves une main tremblante, et ton cœur s’arrête. "
-              "Cette peau n’est pas la tienne. Plus jeune, plus frêle, presque translucide. "
-              "Chaque geste semble emprunté, comme si tu volais la vie d’un autre.",
-        "2": "Ton reflet te fixe dans une vitre fêlée. "
-              "Ce visage a ton âge, mais ses traits racontent une autre histoire. "
-              "Des cicatrices invisibles se lisent dans son regard, un fardeau dont tu ignores tout.",
-        "3": "Tes articulations craquent. Ce corps est vieux, usé par le temps. "
-              "Tu portes maintenant le poids d’années que tu n’as pas vécues.",
-        "4": "Tu te découvres plus jeune. Ton souffle est vif, ton sang pulse fort. "
-              "Tu n’as pas grandi ici, dans cette chair neuve.",
-        "5": "Même sexe, même âge, mais tout est différent : le nez, la voix, le regard. "
-              "Est-ce toi? Une autre version de toi-même? ",
-        "6": "Tu habites un corps vieilli, mais digne. "
-              "Chaque ride semble te parler, chaque souffle porte une mémoire. "
-              "Tu ressens à la fois la fatigue et la paix d’une existence accomplie."
+        "1": "Tu observes tes mains : ce ne sont pas les tiennes. Trop jeunes, trop fines. "
+              "Tu habites le corps d’un autre.",
+        "2": "Ton reflet te fixe dans une vitre. Le visage est le tien, mais différent. "
+              "Quelque chose d’autre vit derrière ces yeux.",
+        "3": "Tu ressens la lourdeur de l’âge. Chaque mouvement est une épreuve. "
+              "Ton souffle est court, mais ton esprit est vif.",
+        "4": "Ton corps est jeune, plein d’énergie. Tu sens que tu pourrais courir des heures. "
+              "Mais ce n’est pas ton corps.",
+        "5": "Même sexe, même âge, mais tout sonne faux. "
+              "Ta voix, ton regard, ta démarche — rien ne colle à ton souvenir.",
+        "6": "Tu portes un corps marqué par la vie. Chaque ride raconte une histoire que tu ignores."
     },
 
     "lieu": {
-        "1": "L’appartement est immaculé, presque clinique. "
-              "Aucun bruit, aucune trace de vie. Les murs blancs reflètent ton absence. "
-              "Un ordre si parfait qu’il en devient inhumain.",
-        "2": "Une maison ancienne t’accueille. "
-              "Le bois craque sous tes pas, les portraits te suivent du regard. "
-              "Un feu mourant lutte encore dans la cheminée. "
-              "Tu ressens une chaleur étrange, celle d’un souvenir que tu n’as jamais eu.",
-        "3": "Une chambre d’hôtel impersonnelle. "
-              "Le papier peint se décolle, le néon grésille. "
-              "Des centaines de vies sont passées ici, mais aucune n’a laissé de trace durable.",
-        "4": "Un hôpital. Blême, silencieux. "
-              "Le bip d’une machine rythme ton souffle. "
-              "Tu es seul, mais les murs semblent écouter. "
-              "Ici, tout est stérile, sauf la peur.",
-        "5": "Des câbles, des écrans, des seringues. "
-              "Tu es dans un laboratoire. Ton existence ici n’est pas naturelle. "
-              "Quelque chose t’a créé, ou t’a copié.",
-        "6": "Des ruines s’étendent à perte de vue. "
-              "Le vent emporte des bribes de voix anciennes. "
-              "Chaque pierre raconte une histoire que plus personne n’écoute."
+        "1": "Un appartement blanc, sans bruit, sans odeur. Trop propre. "
+              "Tu comprends qu’il a été préparé pour toi.",
+        "2": "Une vieille maison t’accueille. Le parquet grince, un feu s’éteint dans la cheminée. "
+              "Tu ressens une étrange chaleur familière.",
+        "3": "Une chambre d’hôtel anonyme. Un lieu de passage. "
+              "Tu te demandes combien d’inconnus se sont réveillés ici avant toi.",
+        "4": "Tu es dans une chambre d’hôpital. Les murs pâles te renvoient ton silence. "
+              "Un moniteur émet un bip régulier, presque rassurant.",
+        "5": "Des machines t’entourent. Des câbles sont branchés à ton bras. "
+              "Tu es dans un laboratoire. Ton réveil n’était pas naturel.",
+        "6": "Autour de toi, des ruines. Le vent siffle à travers des pierres effondrées. "
+              "Ce monde semble avoir survécu à quelque chose."
     },
 
     "objet": {
-        "1": "Sur la table, une carte d’identité. Ton visage y sourit, mais le nom est étranger. "
-              "Tu trembles. Qui es-tu vraiment ?",
-        "2": "Un badge d’entreprise. Le logo t’est inconnu, mais tu ressens un frisson en le touchant. "
-              "Tu sens qu’il a été ton dernier lien avec une vie effacée.",
-        "3": "Une photo jaunie. Ton visage y apparaît, entouré de rires et d’inconnus. "
-              "Mais leurs regards sont vides, absents, figés dans un instant sans fin.",
-        "4": "Une lettre pliée, adressée à toi. L’écriture est nerveuse, les mots tremblants : "
-              "‘Ne cherche pas à comprendre.’ Tu relis encore et encore, sans oser l’ouvrir davantage.",
-        "5": "Un téléphone vibre. Des dizaines de messages attendent. ‘Où es-tu ?’, ‘On sait.’, ‘Fuis.’ "
-              "Tu sens le danger approcher, mais tu ignores de quoi il s’agit.",
-        "6": "Rien. Juste ton reflet dans un miroir fissuré. "
-              "Un instant, ton image sourit alors que toi, non."
+        "1": "Sur la table, une carte d’identité. Ta photo, mais un autre nom. "
+              "Tu trembles en la lisant.",
+        "2": "Un badge d’entreprise. Le logo t’est inconnu, mais tu sens que tu y as travaillé. "
+              "Ton passé n’est peut-être pas perdu.",
+        "3": "Une vieille photo. Tu y es, entouré d’inconnus souriants. "
+              "Mais leurs visages sont flous, effacés par le temps.",
+        "4": "Une lettre cachetée porte ton nom. Les mots à l’intérieur te glacent : "
+              "« Ne te fie à personne. »",
+        "5": "Un téléphone clignote. Des dizaines de messages : ‘Fuis.’, ‘On t’a retrouvé.’, ‘Vite.’ "
+              "Quelque chose approche.",
+        "6": "Rien, sauf un miroir fissuré. Ton reflet te sourit, alors que tu ne bouges pas."
     },
 
     "souvenir": {
-        "1": "Une voix douce te parvient, lointaine. "
-              "Tu ris, sous la pluie, aux côtés de quelqu’un que tu aimes. "
-              "Puis la scène s’efface, ne laissant qu’une chaleur dans ta poitrine.",
-        "2": "Une douleur remonte. Une trahison, un adieu. "
-              "Tu revois un regard que tu n’as pas su retenir. "
-              "Ton cœur se serre, incapable de distinguer le réel du souvenir.",
-        "3": "Tu te souviens d’une autre vie. Une rue différente, un corps différent. "
-              "Les visages changent, mais la peur reste la même.",
-        "4": "Un phare. Une mer calme. Une silhouette t’attend, au loin. "
-              "Tu sais que ce lieu détient une vérité enfouie.",
-        "5": "Une sensation étrange, une lumière chaude. "
-              "Quelque chose ou quelqu’un te guide, bienveillant mais invisible. "
-              "Tu n’es peut-être pas seul.",
-        "6": "Le vide. Tu tends la main, mais il n’y a rien. "
-              "Ton esprit flotte, libre, effrayé, face à l’infini de lui-même."
+        "1": "Tu entends une voix. Douce, familière. "
+              "Un souvenir heureux, puis la douleur de l’avoir perdu.",
+        "2": "Une image revient : un départ, un adieu. Tu te souviens de la tristesse, pas des visages.",
+        "3": "Des vies s’entremêlent dans ton esprit. Tu as été plusieurs personnes, ou peut-être aucune.",
+        "4": "Tu vois la mer. Un phare au loin. Quelqu’un t’y attend. "
+              "Tu ressens l’urgence d’y retourner.",
+        "5": "Une lumière te guide, bienveillante. Tu sens qu’elle veut t’aider à comprendre.",
+        "6": "Le vide. Aucun souvenir. Tu existes, mais tu ignores pourquoi."
     },
 
     "rencontre": {
-        "1": "Un bruit à la porte. Trois coups précis. "
-              "Tu retiens ton souffle. L’air se fige. "
-              "Quand tu ouvres, il n’y a personne… mais la poignée est encore tiède.",
-        "2": "Une voix naît dans ta tête, familière. "
-              "Elle t’appelle par ton vrai nom — celui que tu ne te rappelais plus. "
-              "Elle murmure : ‘Il est temps de te souvenir.’",
-        "3": "Un craquement derrière toi. Une ombre bondit. "
-              "Tu tombes, le souffle coupé. La peur pure. Et pourtant, tu te sens vivant.",
-        "4": "Une silhouette t’approche. Son visage est flou, mais sa présence apaise. "
-              "‘Tu n’as jamais été seul’, dit-elle avant de disparaître.",
-        "5": "Une vision t’aveugle : un œil immense, un symbole ardent. "
-              "La vérité cherche à te parler, mais ton esprit se déchire sous le poids de sa lumière.",
-        "6": "Rien. Le monde s’éteint. "
-              "Tu es seul avec toi-même, et c’est peut-être la pire des rencontres."
+        "1": "Trois coups frappent à la porte. Personne dehors. "
+              "Mais la poignée est encore chaude.",
+        "2": "Une voix parle dans ta tête. Elle t’appelle par ton vrai nom. "
+              "Tu n’en avais aucun souvenir.",
+        "3": "Un bruit derrière toi. Une silhouette se jette dans l’ombre. "
+              "Ton cœur s’emballe.",
+        "4": "Une présence approche. Elle ne te veut pas de mal. "
+              "Tu ressens une paix étrange avant qu’elle disparaisse.",
+        "5": "Une vision t’aveugle. Un symbole ardent te traverse l’esprit. "
+              "Tu comprends… mais trop tard.",
+        "6": "Rien. Le silence absolu. Tu es seul, complètement seul."
     },
 
     "choix": {
-        "1": "Une porte close. Un mot gravé : ‘Souviens-toi’. "
-              "Tu hésites. La poignée brûle sous tes doigts.",
-        "2": "Tu marches dans un couloir sans fin. "
-              "Chaque pas t’éloigne de toi-même, mais tu continues, poussé par l’instinct.",
-        "3": "Une lumière au bout du chemin. Tu veux y croire, même si tu sens le piège.",
-        "4": "Tu trébuches. Le sol se dérobe. Rien ne répond plus à la logique. "
-              "Le monde se transforme, ou c’est toi qui changes.",
-        "5": "Tu fermes les yeux et avances sans réfléchir. "
-              "Le courage et la folie ont parfois le même goût.",
-        "6": "Tout devient clair. Chaque élément trouve sa place. "
-              "La cohérence naît enfin de la confusion."
+        "1": "Une porte close. Sur le bois, un mot gravé : ‘Souviens-toi’. "
+              "La poignée brûle sous ta main.",
+        "2": "Un long couloir s’étend devant toi. Tu avances, sans savoir où il mène.",
+        "3": "Une lumière t’appelle au loin. Elle semble t’attendre, ou te piéger.",
+        "4": "Le sol se dérobe. Le monde change autour de toi. Rien n’a plus de sens.",
+        "5": "Tu décides d’avancer les yeux fermés. Parfois, il faut croire sans comprendre.",
+        "6": "Tout devient clair. Les fragments s’assemblent. Tu vois enfin le tableau entier."
     },
 
     "revelation": {
-        "1": "Ce corps appartenait à une âme disparue. "
-              "Tu portes désormais la mémoire d’un autre, ses regrets, ses espoirs. "
-              "Peut-être n’es-tu qu’un hôte de passage.",
-        "2": "Tu comprends : rien de tout cela n’est réel. "
-              "Tu es un souvenir errant, une conscience oubliée dans une machine de chair.",
-        "3": "Des voix s’élèvent en toi. Elles sont toutes toi, et pourtant différentes. "
-              "Ton esprit est une mosaïque brisée.",
-        "4": "La vérité tombe : tu es le fruit d’une expérience. "
-              "Un esprit transplanté, une conscience déchirée. "
-              "Ton existence est un mensonge bien programmé.",
-        "5": "Les pièces du puzzle s’assemblent. Un nom revient, une ville, un visage. "
-              "La clarté t’envahit, belle et terrifiante à la fois.",
-        "6": "Tu sais. Enfin. Et cette vérité te fait trembler plus que le mensonge ne l’aurait fait."
+        "1": "Ce corps n’est pas le tien. Tu vis la mémoire d’un autre.",
+        "2": "Tu n’es pas réel. Tu es un souvenir piégé dans une conscience artificielle.",
+        "3": "Tu comprends : tu es plusieurs à la fois. Un esprit fragmenté, un être éclaté.",
+        "4": "Tu as été créé. Une expérience, un test. Une conscience transplantée.",
+        "5": "Tout revient : un nom, un lieu, une histoire. La vérité est là, terrifiante et belle.",
+        "6": "Tu sais enfin. Mais cette vérité te hante plus encore que le doute."
     },
 
     "conclusion": {
-        "1": "Tu retrouves ton corps d’origine, mais quelque chose de ce voyage est resté en toi. "
-              "Tu n’es plus la même personne.",
-        "2": "Tu choisis de rester. Ce nouveau corps devient le tien, cette vie, ton nouveau commencement.",
-        "3": "Tu comprends que tu n’as jamais existé. Tu es un souvenir né d’un autre rêve.",
-        "4": "Tout s’efface. Tu ouvres les yeux. "
-              "Mais au fond de toi, une voix murmure : ‘Et si tu dormais encore ?’",
-        "5": "Ton esprit et ce corps ne font plus qu’un. "
-              "Le passé s’efface, le futur s’ouvre, vaste et inconnu.",
-        "6": "Le silence retombe. L’histoire s’achève ici… ou recommence ailleurs. "
-              "Car chaque réveil est une nouvelle naissance."
+        "1": "Tu retrouves ton vrai corps. Mais quelque chose en toi est resté de ce voyage.",
+        "2": "Tu décides de rester. Ce nouveau corps devient ton refuge.",
+        "3": "Tu comprends que tu n’as jamais vécu. Tu n’étais qu’une idée fugace.",
+        "4": "Tu ouvres les yeux dans un autre monde. Peut-être un rêve. Peut-être le vrai réveil.",
+        "5": "Ton passé s’efface. Ton avenir commence ici.",
+        "6": "Le silence t’enveloppe. L’histoire s’achève… ou recommence ailleurs."
     }
 }
 
