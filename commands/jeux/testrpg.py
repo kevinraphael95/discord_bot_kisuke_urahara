@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 testrpg.py — Commande simple /testrpg et !testrpg
 # Objectif : JDR solo “Réveil” avec boutons pour découvrir l’histoire chapitre par chapitre
-# Catégorie : Autre
+# Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
@@ -212,5 +212,5 @@ async def setup(bot: commands.Bot):
     cog = TestRPG(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Autre"
+            command.category = "Jeux"
     await bot.add_cog(cog)
