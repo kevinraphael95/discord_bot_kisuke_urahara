@@ -1,97 +1,188 @@
 {
-  "titre": "Le Château Hanté : Enquête Express",
+  "titre": "Le Château Hanté : Enquête Express (Version étendue)",
   "contenu": [
     {
-      "texte": "Tu arrives devant le vieux château abandonné, missionné pour enquêter sur des disparitions mystérieuses. Que fais-tu ?",
+      "texte": "Tu arrives devant le vieux château abandonné, missionné pour enquêter sur des disparitions mystérieuses. Une brume froide s’élève du sol.",
       "options": [
         {"texte": "Entrer par la porte principale", "suivant": 1},
-        {"texte": "Chercher une entrée secrète autour du château", "suivant": 2},
-        {"texte": "Faire demi-tour et revenir plus tard", "suivant": 3}
+        {"texte": "Contourner le château pour chercher une entrée cachée", "suivant": 2},
+        {"texte": "Observer les environs depuis la colline voisine", "suivant": 3}
       ]
     },
     {
-      "texte": "À l'intérieur, le hall est plongé dans l'obscurité. Un fantôme apparaît et te fixe.",
+      "texte": "Le hall d’entrée est immense, poussiéreux et silencieux. Un chandelier oscille tout seul. Une porte mène vers la gauche, un escalier monte à l’étage.",
       "options": [
-        {"texte": "Parler au fantôme", "suivant": 4},
-        {"texte": "Fuir en courant", "suivant": 5},
-        {"texte": "Allumer une torche pour l'éclairer", "suivant": 6}
+        {"texte": "Explorer la pièce de gauche", "suivant": 4},
+        {"texte": "Monter à l’étage", "suivant": 5},
+        {"texte": "Allumer une torche et examiner le hall", "suivant": 6}
       ]
     },
     {
-      "texte": "En explorant l'extérieur, tu trouves une porte cachée derrière des buissons. Un autre enquêteur humain s'y trouve.",
+      "texte": "Tu découvres une porte secrète à moitié dissimulée par des lierres. Elle semble souvent utilisée.",
       "options": [
-        {"texte": "Parler à l'autre enquêteur", "suivant": 7},
-        {"texte": "Entrer seul par la porte", "suivant": 8},
-        {"texte": "Faire demi-tour et retourner à la porte principale", "suivant": 1}
+        {"texte": "Entrer par la porte secrète", "suivant": 7},
+        {"texte": "Frapper avant d’entrer (par politesse ?)", "suivant": 8},
+        {"texte": "Retourner à la porte principale", "suivant": 1}
       ]
     },
     {
-      "texte": "En revenant plus tard, le château semble encore plus mystérieux, et un murmure t'invite à entrer.",
+      "texte": "De la colline, tu vois une lumière bouger dans une tour du château. Un cri lointain résonne.",
       "options": [
-        {"texte": "Entrer par la porte principale", "suivant": 1},
-        {"texte": "Explorer les jardins du château", "suivant": 9}
+        {"texte": "Aller directement à la tour", "suivant": 9},
+        {"texte": "Rester pour observer plus longtemps", "suivant": 10},
+        {"texte": "Revenir à la porte principale", "suivant": 1}
       ]
     },
     {
-      "texte": "Le fantôme te parle : 'Je garde un trésor ancien. Tu peux tenter de le trouver en résolvant mon énigme, ou partir.'",
+      "texte": "Tu entres dans un salon couvert de portraits anciens. L’un d’eux te ressemble étrangement.",
       "options": [
-        {"texte": "Accepter le défi de l'énigme", "suivant": 10},
-        {"texte": "Refuser et partir", "suivant": 11}
+        {"texte": "Observer le portrait de plus près", "suivant": 11},
+        {"texte": "Ignorer et fouiller la pièce", "suivant": 12},
+        {"texte": "Retourner dans le hall", "suivant": 1}
       ]
     },
     {
-      "texte": "En fuyant, tu glisses sur le sol humide et tombes dans le sous-sol. Un fantôme t'observe silencieusement.",
+      "texte": "L’étage est couvert de toiles d’araignées. Une porte entrouverte laisse filtrer une lumière verte.",
       "options": [
-        {"texte": "Parler au fantôme", "suivant": 10},
-        {"texte": "Chercher une sortie rapidement", "suivant": 12}
+        {"texte": "Entrer dans la pièce éclairée", "suivant": 13},
+        {"texte": "Explorer les autres couloirs", "suivant": 14},
+        {"texte": "Redescendre dans le hall", "suivant": 1}
       ]
     },
     {
-      "texte": "La torche révèle un passage secret derrière le fantôme !",
+      "texte": "La torche révèle un passage caché derrière un rideau !",
       "options": [
-        {"texte": "Explorer le passage", "suivant": 13},
-        {"texte": "Ignorer et continuer dans le hall", "suivant": 14}
+        {"texte": "Explorer le passage", "suivant": 15},
+        {"texte": "L’ignorer et continuer dans le hall", "suivant": 16}
       ]
     },
     {
-      "texte": "L'autre enquêteur te dit qu'il cherche le trésor depuis des années. Vous décidez de coopérer pour le trouver.",
+      "texte": "Tu entres prudemment par la porte secrète... Un escalier descend vers une crypte souterraine.",
       "options": [
-        {"texte": "Chercher le trésor ensemble", "suivant": 10},
-        {"texte": "Se disputer et se séparer", "suivant": 8}
+        {"texte": "Descendre dans la crypte", "suivant": 17},
+        {"texte": "Refermer la porte et partir", "suivant": 1}
       ]
     },
     {
-      "texte": "En entrant seul par la porte secrète, tu déclenches un piège et tombes dans une salle remplie de squelettes.",
+      "texte": "Tu frappes doucement… Une voix fantomatique répond : 'Enfin quelqu’un de poli ! Entre, invité.'",
+      "options": [
+        {"texte": "Entrer", "suivant": 18},
+        {"texte": "Fuir en panique", "suivant": 19}
+      ]
+    },
+    {
+      "texte": "Tu atteins la tour. Une silhouette en cape noire te regarde depuis la fenêtre. Elle disparaît d’un coup.",
+      "options": [
+        {"texte": "Entrer dans la tour", "suivant": 20},
+        {"texte": "Fouiller la base de la tour", "suivant": 21}
+      ]
+    },
+    {
+      "texte": "Tu observes longtemps... Le château semble changer de forme. Tu clignes des yeux et te retrouves à sa porte. Temps perdu ?",
+      "options": [
+        {"texte": "Entrer maintenant", "suivant": 1},
+        {"texte": "Partir, trop bizarre", "suivant": 22}
+      ]
+    },
+    {
+      "texte": "Le portrait te sourit soudainement. Une voix murmure ton nom. Tu ressens une force étrange t’envahir.",
+      "options": [
+        {"texte": "Résister à la possession", "suivant": 23},
+        {"texte": "Céder à la voix", "suivant": 24}
+      ]
+    },
+    {
+      "texte": "Tu trouves une clé rouillée dans un tiroir, marquée d’un symbole étrange.",
+      "options": [
+        {"texte": "Garder la clé", "suivant": 6},
+        {"texte": "La jeter, trop risqué", "suivant": 16}
+      ]
+    },
+    {
+      "texte": "La pièce éclairée contient un autel et une statue en pierre d’une femme en pleurs.",
+      "options": [
+        {"texte": "Toucher la statue", "suivant": 25},
+        {"texte": "Prier devant l’autel", "suivant": 26},
+        {"texte": "Quitter discrètement", "suivant": 14}
+      ]
+    },
+    {
+      "texte": "Les couloirs mènent à une bibliothèque scellée. Une étrange odeur de brûlé s’en échappe.",
+      "options": [
+        {"texte": "Forcer la porte", "suivant": 27},
+        {"texte": "Revenir en arrière", "suivant": 5}
+      ]
+    },
+    {
+      "texte": "Le passage te conduit dans une cave remplie de coffres. L’un d’eux semble respirer.",
+      "options": [
+        {"texte": "Ouvrir le coffre", "suivant": 28},
+        {"texte": "Ignorer et chercher une autre issue", "suivant": 29}
+      ]
+    },
+    {
+      "texte": "Une trappe s’ouvre sous tes pieds et tu tombes dans l’obscurité. Fin tragique.",
       "options": []
     },
     {
-      "texte": "Dans les jardins, tu trouves un petit pavillon abandonné. Une lettre indique un passage secret dans le château.",
+      "texte": "La crypte abrite des tombeaux anciens. Une main squelettique sort lentement d’un cercueil.",
       "options": [
-        {"texte": "Suivre le passage secret", "suivant": 13},
-        {"texte": "Ignorer et quitter le château", "suivant": 11}
+        {"texte": "Frapper la main", "suivant": 30},
+        {"texte": "Fuir", "suivant": 1}
       ]
     },
     {
-      "texte": "Tu résous l'énigme du fantôme et il te montre le trésor caché ! Vous devenez riches et célèbres. Fin heureuse.",
+      "texte": "La voix t’accueille chaleureusement. C’était l’esprit du comte, prisonnier des lieux. Il te confie un secret avant de disparaître. Fin paisible.",
       "options": []
     },
     {
-      "texte": "Tu refuses le défi et quittes le château bredouille. Fin neutre.",
+      "texte": "Tu fuis si vite que tu tombes dans un fossé. Tu t’en sors, mais ton pantalon ne s’en remettra pas. Fin idiote.",
       "options": []
     },
     {
-      "texte": "En cherchant une sortie, tu trouves un passage secret qui te ramène dehors sain et sauf. Fin prudente.",
-      "options": []
-    },
-    {
-      "texte": "Le passage secret mène à une bibliothèque cachée. Tu trouves des indices pour résoudre le mystère du château.",
+      "texte": "À la base de la tour, tu trouves un parchemin scellé. Il contient le nom du fantôme du château.",
       "options": [
-        {"texte": "Étudier les indices", "suivant": 10},
-        {"texte": "Ignorer et continuer", "suivant": 14}
+        {"texte": "Lire le nom à voix haute", "suivant": 23},
+        {"texte": "Le garder pour plus tard", "suivant": 5}
       ]
     },
     {
-      "texte": "En continuant dans le hall, tu déclenches une alarme magique et le château se referme sur toi. Fin tragique.",
+      "texte": "Tu pars sans rien découvrir, mais au moins tu restes en vie. Fin neutre.",
+      "options": []
+    },
+    {
+      "texte": "Le fantôme t’apparaît. Il te remercie de l’avoir libéré. Tu ressors du château, apaisé. Fin heureuse.",
+      "options": []
+    },
+    {
+      "texte": "Le fantôme prend le contrôle de ton corps. Tu deviens le nouveau gardien du château. Fin maudite.",
+      "options": []
+    },
+    {
+      "texte": "La statue s’effrite et révèle un escalier menant à une salle secrète.",
+      "options": [
+        {"texte": "Descendre l’escalier", "suivant": 17},
+        {"texte": "Remonter à l’étage", "suivant": 5}
+      ]
+    },
+    {
+      "texte": "Une énergie t’enveloppe. Tu entends la voix d’un ancien esprit bienveillant. Tes blessures disparaissent. Tu ressors sain et sauf. Fin bénie.",
+      "options": []
+    },
+    {
+      "texte": "Tu forces la porte. Une explosion de flammes spectrales t’engloutit. Fin brûlée.",
+      "options": []
+    },
+    {
+      "texte": "Le coffre t’attaque ! Ce n’était pas un coffre, mais une créature déguisée. Fin dévorée.",
+      "options": []
+    },
+    {
+      "texte": "Tu trouves un escalier menant dehors. Tu fuis à temps, mais tu n’auras jamais percé le mystère. Fin prudente.",
+      "options": []
+    },
+    {
+      "texte": "Tu détruis la main, libérant un esprit vengeur. Le château explose dans une lumière bleue. Fin spectaculaire.",
       "options": []
     }
   ]
