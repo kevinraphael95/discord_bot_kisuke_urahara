@@ -19,7 +19,6 @@ from utils.discord_utils import safe_send, safe_respond  # Utilitaires sécuris�
 # ────────────────────────────────────────────────────────────────────────────────
 jdr_json = {
     "intro": (
-        "🌌 **Réveil étrange**\n\n"
         "Tu ouvres les yeux. L’air est froid. Ton corps te semble étranger. "
         "Tes souvenirs se dispersent comme de la fumée. Où es-tu ? Et surtout… qui es-tu ?"
     ),
