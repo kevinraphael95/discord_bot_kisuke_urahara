@@ -17,12 +17,14 @@ import os
 from utils.discord_utils import safe_send, safe_respond
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 Cog principal
+# 🧠 Cog principal : SoloRPG
 # ────────────────────────────────────────────────────────────────────────────────
 class SoloRPG(commands.Cog):
     """
-    Commande /solorpg et !solorpg — Choisis une histoire et progresse dedans
+    Commande /solorpg et !solorpg — Choisis une histoire et progresse dedans.
+    Compatible avec le format JSON { "titre": ..., "contenu": [ { "texte": ..., "options": [...] } ] }
     """
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.histoires_path = "data/solorpg"
@@ -32,29 +34,38 @@ class SoloRPG(commands.Cog):
     # 🔹 Chargement des histoires
     # ────────────────────────────────────────────────────────────────────────────
     def load_histoires(self):
+        """Charge tous les fichiers JSON depuis data/solorpg"""
         histoires = {}
+        if not os.path.exists(self.histoires_path):
+            os.makedirs(self.histoires_path)
+
         for fichier in os.listdir(self.histoires_path):
             if fichier.endswith(".json"):
                 chemin = os.path.join(self.histoires_path, fichier)
-                with open(chemin, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    histoires[data["titre"]] = data
+                try:
+                    with open(chemin, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        if "titre" in data:
+                            histoires[data["titre"]] = data
+                except Exception as e:
+                    print(f"⚠️ Erreur lors du chargement de {fichier} : {e}")
+
         return histoires
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Affichage d'une étape
     # ────────────────────────────────────────────────────────────────────────────
     async def afficher_etape(self, ctx_or_interaction, histoire, index, historique=None):
-        """Affiche une étape et ses options dans un seul embed avec boutons."""
-        contenu = histoire["contenu"]
+        """Affiche une étape avec ses choix et gère les boutons de navigation."""
+        contenu = histoire.get("contenu", [])
         if historique is None:
             historique = []
-    
-        # Si on dépasse la fin de l'histoire
+
+        # ── Fin de l'histoire ──
         if index >= len(contenu):
             embed = discord.Embed(
-                title=histoire["titre"],
-                description="🏁 Fin de l'histoire !",
+                title=histoire.get("titre", "Histoire inconnue"),
+                description="🏁 **Fin de l'histoire !** Merci d'avoir joué 🎉",
                 color=discord.Color.green()
             )
             if isinstance(ctx_or_interaction, commands.Context):
@@ -62,54 +73,61 @@ class SoloRPG(commands.Cog):
             else:
                 await safe_respond(ctx_or_interaction, embed=embed)
             return
-    
+
         etape = contenu[index]
-        description = etape["texte"]
+        texte = etape.get("texte", "...")
         options = etape.get("options", [])
-    
-        # Texte des choix (dans l'embed)
-        texte_choix = ""
-        for i, option in enumerate(options, start=1):
-            texte_choix += f"\n`{i}` — {option['texte']} *(→ {option.get('suivant', index + 1)})*"
-    
+
+        # ── Création de l'embed ──
         embed = discord.Embed(
-            title=f"{histoire['titre']} — Étape {index + 1}",
-            description=f"{description}\n\n**Choix :**{texte_choix if texte_choix else '\nAucun choix disponible.'}",
+            title=f"{histoire['titre']} — Page {index + 1}",
+            description=texte,
             color=discord.Color.blurple()
         )
-    
+
+        # ── Ajout des choix dans l'embed ──
+        if options:
+            desc_choix = "\n".join(
+                [f"`{i+1}` — {opt['texte']} *(→ {opt.get('suivant', index + 1)})*"
+                 for i, opt in enumerate(options)]
+            )
+            embed.add_field(name="Choix disponibles :", value=desc_choix, inline=False)
+        else:
+            embed.add_field(name="Aucun choix disponible", value="Fin de cette branche.", inline=False)
+
+        # ── Vue (boutons interactifs) ──
         view = discord.ui.View(timeout=None)
-    
-        # Ajout des boutons pour les choix
+
+        # Boutons de choix
         if options:
             for i, option in enumerate(options):
-                label = f"Aller à {option.get('suivant', index + 1)}"
-                bouton = discord.ui.Button(label=label, style=discord.ButtonStyle.primary)
-    
+                label = option.get("texte", f"Choix {i+1}")
+                style = discord.ButtonStyle.primary
+                bouton = discord.ui.Button(label=label, style=style)
+
                 async def callback(interaction: discord.Interaction, i=i):
                     prochain_index = options[i].get("suivant", index + 1)
-                    # Ajoute l'étape actuelle à l'historique
                     new_historique = historique + [index]
                     await self.afficher_etape(interaction, histoire, prochain_index, historique=new_historique)
-    
+
                 bouton.callback = callback
                 view.add_item(bouton)
         else:
-            bouton = discord.ui.Button(label="Fin de l'histoire", style=discord.ButtonStyle.secondary, disabled=True)
+            bouton = discord.ui.Button(label="Fin", style=discord.ButtonStyle.secondary, disabled=True)
             view.add_item(bouton)
-    
-        # Bouton retour si possible
+
+        # Bouton retour
         if historique:
             bouton_retour = discord.ui.Button(label="⬅️ Retour", style=discord.ButtonStyle.secondary)
-    
+
             async def retour_callback(interaction: discord.Interaction):
                 dernier_index = historique[-1]
                 await self.afficher_etape(interaction, histoire, dernier_index, historique=historique[:-1])
-    
+
             bouton_retour.callback = retour_callback
             view.add_item(bouton_retour)
-    
-        # Envoie ou met à jour le message selon le type d’interaction
+
+        # Envoi du message
         if isinstance(ctx_or_interaction, commands.Context):
             await safe_send(ctx_or_interaction.channel, embed=embed, view=view)
         else:
@@ -118,17 +136,22 @@ class SoloRPG(commands.Cog):
             except discord.errors.InteractionResponded:
                 await ctx_or_interaction.edit_original_response(embed=embed, view=view)
 
-
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
+    # 🔹 Menu de sélection d'histoire (Slash)
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(name="solorpg", description="Commence une histoire Solo RPG.")
+    @app_commands.command(name="solorpg", description="Commence une histoire Solo RPG interactive.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_solorpg(self, interaction: discord.Interaction):
-        """Commande slash avec menu déroulant"""
+        """Commande /solorpg — avec menu déroulant pour choisir une histoire"""
+        if not self.histoires:
+            return await safe_respond(interaction, "⚠️ Aucune histoire trouvée dans `data/solorpg/`.")
+
         select = discord.ui.Select(
-            placeholder="Choisis ton histoire...",
-            options=[discord.SelectOption(label=titre) for titre in self.histoires.keys()]
+            placeholder="📖 Choisis ton histoire...",
+            options=[
+                discord.SelectOption(label=titre, description=f"Histoire interactive : {titre}")
+                for titre in self.histoires.keys()
+            ]
         )
 
         async def select_callback(select_interaction: discord.Interaction):
@@ -139,18 +162,24 @@ class SoloRPG(commands.Cog):
         select.callback = select_callback
         view = discord.ui.View()
         view.add_item(select)
-        await safe_respond(interaction, "📖 Choisis une histoire :", view=view)
+        await safe_respond(interaction, "✨ Choisis une histoire à explorer :", view=view)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
+    # 🔹 Commande préfixe (!solorpg)
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="solorpg")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_solorpg(self, ctx: commands.Context):
-        """Commande préfixe avec menu déroulant identique au slash"""
+        """Commande préfixe identique à la slash, avec menu déroulant"""
+        if not self.histoires:
+            return await safe_send(ctx.channel, "⚠️ Aucune histoire trouvée dans `data/solorpg/`.")
+
         select = discord.ui.Select(
-            placeholder="Choisis ton histoire...",
-            options=[discord.SelectOption(label=titre) for titre in self.histoires.keys()]
+            placeholder="📖 Choisis ton histoire...",
+            options=[
+                discord.SelectOption(label=titre, description=f"Histoire interactive : {titre}")
+                for titre in self.histoires.keys()
+            ]
         )
 
         async def select_callback(select_interaction: discord.Interaction):
@@ -161,7 +190,7 @@ class SoloRPG(commands.Cog):
         select.callback = select_callback
         view = discord.ui.View()
         view.add_item(select)
-        await safe_send(ctx.channel, "📖 Choisis une histoire :", view=view)
+        await safe_send(ctx.channel, "✨ Choisis une histoire à explorer :", view=view)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
