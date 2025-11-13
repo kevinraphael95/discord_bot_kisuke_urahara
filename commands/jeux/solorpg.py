@@ -44,42 +44,80 @@ class SoloRPG(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Affichage d'une étape
     # ────────────────────────────────────────────────────────────────────────────
-    async def afficher_etape(self, ctx_or_interaction, histoire, index):
-        """Affiche une étape et ses options sous forme de boutons"""
+    async def afficher_etape(self, ctx_or_interaction, histoire, index, historique=None):
+        """Affiche une étape et ses options dans un seul embed avec boutons."""
         contenu = histoire["contenu"]
+        if historique is None:
+            historique = []
+    
+        # Si on dépasse la fin de l'histoire
         if index >= len(contenu):
-            embed = discord.Embed(title=histoire["titre"],
-                                  description="🏁 Fin de l'histoire !",
-                                  color=discord.Color.green())
+            embed = discord.Embed(
+                title=histoire["titre"],
+                description="🏁 Fin de l'histoire !",
+                color=discord.Color.green()
+            )
             if isinstance(ctx_or_interaction, commands.Context):
                 await safe_send(ctx_or_interaction.channel, embed=embed)
             else:
                 await safe_respond(ctx_or_interaction, embed=embed)
             return
-
+    
         etape = contenu[index]
         description = etape["texte"]
         options = etape.get("options", [])
-
-        embed = discord.Embed(title=histoire["titre"], description=description, color=discord.Color.green())
-
-        view = discord.ui.View()
+    
+        # Texte des choix (dans l'embed)
+        texte_choix = ""
+        for i, option in enumerate(options, start=1):
+            texte_choix += f"\n`{i}` — {option['texte']} *(→ {option.get('suivant', index + 1)})*"
+    
+        embed = discord.Embed(
+            title=f"{histoire['titre']} — Étape {index + 1}",
+            description=f"{description}\n\n**Choix :**{texte_choix if texte_choix else '\nAucun choix disponible.'}",
+            color=discord.Color.blurple()
+        )
+    
+        view = discord.ui.View(timeout=None)
+    
+        # Ajout des boutons pour les choix
         if options:
             for i, option in enumerate(options):
-                bouton = discord.ui.Button(label=option["texte"], style=discord.ButtonStyle.primary)
+                label = f"Aller à {option.get('suivant', index + 1)}"
+                bouton = discord.ui.Button(label=label, style=discord.ButtonStyle.primary)
+    
                 async def callback(interaction: discord.Interaction, i=i):
                     prochain_index = options[i].get("suivant", index + 1)
-                    await self.afficher_etape(interaction, histoire, prochain_index)
+                    # Ajoute l'étape actuelle à l'historique
+                    new_historique = historique + [index]
+                    await self.afficher_etape(interaction, histoire, prochain_index, historique=new_historique)
+    
                 bouton.callback = callback
                 view.add_item(bouton)
         else:
-            bouton = discord.ui.Button(label="Terminer", style=discord.ButtonStyle.secondary, disabled=True)
+            bouton = discord.ui.Button(label="Fin de l'histoire", style=discord.ButtonStyle.secondary, disabled=True)
             view.add_item(bouton)
-
+    
+        # Bouton retour si possible
+        if historique:
+            bouton_retour = discord.ui.Button(label="⬅️ Retour", style=discord.ButtonStyle.secondary)
+    
+            async def retour_callback(interaction: discord.Interaction):
+                dernier_index = historique[-1]
+                await self.afficher_etape(interaction, histoire, dernier_index, historique=historique[:-1])
+    
+            bouton_retour.callback = retour_callback
+            view.add_item(bouton_retour)
+    
+        # Envoie ou met à jour le message selon le type d’interaction
         if isinstance(ctx_or_interaction, commands.Context):
             await safe_send(ctx_or_interaction.channel, embed=embed, view=view)
         else:
-            await safe_respond(ctx_or_interaction, embed=embed, view=view)
+            try:
+                await ctx_or_interaction.response.edit_message(embed=embed, view=view)
+            except discord.errors.InteractionResponded:
+                await ctx_or_interaction.edit_original_response(embed=embed, view=view)
+
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
