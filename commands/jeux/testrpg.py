@@ -108,31 +108,47 @@ jdr_json = {
 
     "choix": {
         "1": "Une porte close. Sur le bois, un mot gravé : ‘Souviens-toi’. "
-              "La poignée brûle sous ta main.",
-        "2": "Un long couloir s’étend devant toi. Tu avances, sans savoir où il mène.",
-        "3": "Une lumière t’appelle au loin. Elle semble t’attendre, ou te piéger.",
-        "4": "Le sol se dérobe. Le monde change autour de toi. Rien n’a plus de sens.",
-        "5": "Tu décides d’avancer les yeux fermés. Parfois, il faut croire sans comprendre.",
-        "6": "Tout devient clair. Les fragments s’assemblent. Tu vois enfin le tableau entier."
+              "Tu hésites, mais une force te pousse à tourner la poignée.",
+        "2": "Un long couloir s’étend devant toi. Chaque pas fait écho dans le vide. "
+              "Avancer ou reculer ? Tu choisis d’avancer.",
+        "3": "Une lumière vacillante t’appelle au loin. Elle semble te connaître, "
+              "mais ses intentions restent floues.",
+        "4": "Le sol se dérobe légèrement. Tu sens que chaque décision modifie la réalité. "
+              "Il faut avancer avec prudence.",
+        "5": "Tu fermes les yeux et avances au hasard. Parfois, il faut sentir le chemin plus que le voir.",
+        "6": "Les fragments s’assemblent devant toi, mais quelques zones restent obscures. "
+              "Tu sais que certaines réponses viendront plus tard."
     },
-
+    
     "revelation": {
-        "1": "Ce corps n’est pas le tien. Tu vis la mémoire d’un autre.",
-        "2": "Tu n’es pas réel. Tu es un souvenir piégé dans une conscience artificielle.",
-        "3": "Tu comprends : tu es plusieurs à la fois. Un esprit fragmenté, un être éclaté.",
-        "4": "Tu as été créé. Une expérience, un test. Une conscience transplantée.",
-        "5": "Tout revient : un nom, un lieu, une histoire. La vérité est là, terrifiante et belle.",
-        "6": "Tu sais enfin. Mais cette vérité te hante plus encore que le doute."
+        "1": "Ce corps n’est pas le tien. Tu portes les souvenirs d’un autre, mais tu restes toi-même.",
+        "2": "Tu es le produit d’une expérience ou d’un souvenir préservé. "
+              "Une part de toi échappe encore à la compréhension.",
+        "3": "Tu découvres que ton esprit est fragmenté : plusieurs vies, plusieurs chemins. "
+              "Certaines vérités resteront partielles.",
+        "4": "Quelqu’un t’a placé ici pour observer, guider ou tester. "
+              "Mais qui ? Et pourquoi ?",
+        "5": "Les images, les noms et les lieux se recomposent. Une vérité émerge, "
+              "mais elle reste partielle, presque fragile.",
+        "6": "Tu comprends enfin quelque chose, mais le mystère n’est jamais totalement levé. "
+              "Le doute persiste, comme une brume légère."
     },
-
+    
     "conclusion": {
-        "1": "Tu retrouves ton vrai corps. Mais quelque chose en toi est resté de ce voyage.",
-        "2": "Tu décides de rester. Ce nouveau corps devient ton refuge.",
-        "3": "Tu comprends que tu n’as jamais vécu. Tu n’étais qu’une idée fugace.",
-        "4": "Tu ouvres les yeux dans un autre monde. Peut-être un rêve. Peut-être le vrai réveil.",
-        "5": "Ton passé s’efface. Ton avenir commence ici.",
-        "6": "Le silence t’enveloppe. L’histoire s’achève… ou recommence ailleurs."
+        "1": "Tu avances dans ce nouveau corps, portant les souvenirs d’un autre. "
+              "Le monde est vaste, et ton histoire ne fait que commencer.",
+        "2": "Tu choisis de rester dans ce lieu étrange, comme si tout pouvait encore se transformer. "
+              "Ton avenir est ouvert.",
+        "3": "Certains souvenirs se dissipent, d’autres restent. "
+              "Tu te sens à la fois toi-même et quelque chose d’autre.",
+        "4": "Le monde autour de toi change doucement, mystérieux mais accueillant. "
+              "Tu avances sans savoir exactement où.",
+        "5": "Tu fermes les yeux un instant, laissant le passé et le futur se mêler. "
+              "Puis tu continues, prêt à découvrir ce qui vient.",
+        "6": "Le silence demeure, mais il n’est plus inquiétant. "
+              "Il te rappelle que chaque fin est aussi un commencement."
     }
+
 }
 
 
