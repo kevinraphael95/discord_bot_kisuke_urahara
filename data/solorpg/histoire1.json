@@ -2,51 +2,58 @@
   "titre": "Le Château Hanté : Les Ombres du Passé",
   "contenu": [
     {
+      "page": 1,
       "texte": "La pluie tombe sans relâche sur le vieux château de Montelune. Envoyé par la Société d’Enquête Paranormale, tu dois percer le mystère de la disparition de trois visiteurs. Une lueur danse à la fenêtre du dernier étage.\n\nQue fais-tu ?",
       "options": [
-        {"texte": "Entrer par la grande porte du château", "suivant": 1},
-        {"texte": "Contourner par les jardins envahis de brume", "suivant": 2},
-        {"texte": "Observer la tour d’où provient la lumière", "suivant": 3}
+        {"texte": "Entrer par la grande porte du château", "suivant": 2},
+        {"texte": "Contourner par les jardins envahis de brume", "suivant": 3},
+        {"texte": "Observer la tour d’où provient la lumière", "suivant": 4}
       ]
     },
     {
+      "page": 2,
       "texte": "La grande porte s’ouvre dans un grincement lugubre. L’air y est glacial. Trois portraits te fixent : un vieil homme, une femme mélancolique, et un jeune garçon souriant. Le silence pèse lourd.",
       "options": [
-        {"texte": "Examiner les portraits", "suivant": 4},
-        {"texte": "Appeler à voix haute pour signaler ta présence", "suivant": 5},
-        {"texte": "Avancer vers le grand escalier", "suivant": 6}
+        {"texte": "Examiner les portraits", "suivant": 5},
+        {"texte": "Appeler à voix haute pour signaler ta présence", "suivant": 6},
+        {"texte": "Avancer vers le grand escalier", "suivant": 7}
       ]
     },
     {
+      "page": 3,
       "texte": "Les jardins sont noyés sous un épais brouillard. Une voix chuchote ton nom. Une silhouette blanche s’éloigne entre les arbres.",
       "options": [
-        {"texte": "La suivre discrètement", "suivant": 7},
-        {"texte": "L’appeler à haute voix", "suivant": 8},
-        {"texte": "Revenir vers la grande porte", "suivant": 1}
+        {"texte": "La suivre discrètement", "suivant": 8},
+        {"texte": "L’appeler à haute voix", "suivant": 9},
+        {"texte": "Revenir vers la grande porte", "suivant": 2}
       ]
     },
     {
+      "page": 4,
       "texte": "Tu lèves ton appareil photo vers la tour. Une silhouette t’observe à la fenêtre. Le flash jaillit, la lumière s’éteint, et la porte du château s’entrouvre lentement.",
       "options": [
-        {"texte": "Entrer par la porte entrouverte", "suivant": 1},
-        {"texte": "Chercher un accès direct à la tour", "suivant": 9}
+        {"texte": "Entrer par la porte entrouverte", "suivant": 2},
+        {"texte": "Chercher un accès direct à la tour", "suivant": 10}
       ]
     },
     {
+      "page": 5,
       "texte": "Les yeux du portrait de la femme bougent. Une larme coule sur sa joue peinte. Un murmure s’élève : *« Ne monte pas à l’étage. »*",
       "options": [
         {"texte": "Écouter l’avertissement et fouiller le rez-de-chaussée", "suivant": 11},
-        {"texte": "Ignorer et monter malgré tout", "suivant": 6}
+        {"texte": "Ignorer et monter malgré tout", "suivant": 7}
       ]
     },
     {
+      "page": 6,
       "texte": "Ta voix résonne. Après un long silence, un rire d’enfant répond depuis l’étage supérieur.",
       "options": [
-        {"texte": "Monter immédiatement", "suivant": 6},
+        {"texte": "Monter immédiatement", "suivant": 7},
         {"texte": "Chercher d’où vient le son au rez-de-chaussée", "suivant": 11}
       ]
     },
     {
+      "page": 7,
       "texte": "L’escalier grince à chaque pas. En haut, trois portes : l’une entrouverte et éclairée, l’autre fermée et griffée, la dernière à moitié brisée.",
       "options": [
         {"texte": "Entrer dans la pièce éclairée", "suivant": 12},
@@ -55,6 +62,7 @@
       ]
     },
     {
+      "page": 8,
       "texte": "Tu t’approches de la silhouette dans le brouillard. Elle s’arrête près d’une fontaine vide. *« Aide-moi... »* souffle-t-elle. Sa main est translucide.",
       "options": [
         {"texte": "Accepter de l’aider", "suivant": 15},
@@ -62,17 +70,20 @@
       ]
     },
     {
+      "page": 9,
       "texte": "« N’entre pas ici ! » crie la voix, mais il est trop tard : tu tombes dans un puits dissimulé. Le froid t’engloutit. Fin tragique.",
       "options": []
     },
     {
+      "page": 10,
       "texte": "La tour est scellée. Une clé pend à une gargouille, mais la statue semble t’observer. Ses yeux de pierre bougent à peine.",
       "options": [
         {"texte": "Prendre la clé malgré la peur", "suivant": 17},
-        {"texte": "Baisser les yeux et battre en retraite", "suivant": 2}
+        {"texte": "Baisser les yeux et battre en retraite", "suivant": 3}
       ]
     },
     {
+      "page": 11,
       "texte": "Tu explores un couloir sombre. Une porte dérobée mène à une bibliothèque ancienne. Une bougie brûle encore, presque consumée.",
       "options": [
         {"texte": "Lire le livre ouvert sur le bureau", "suivant": 18},
@@ -80,6 +91,7 @@
       ]
     },
     {
+      "page": 12,
       "texte": "Le rire d’enfant devient un sanglot. Tu ouvres un placard et découvres un journal couvert de sang : *« Nous avons réveillé quelque chose. »*",
       "options": [
         {"texte": "Lire le journal", "suivant": 20},
@@ -87,6 +99,7 @@
       ]
     },
     {
+      "page": 13,
       "texte": "La pièce éclairée contient une grande table. Une femme en robe blanche t’y attend. *« Tu es enfin revenu »,* dit-elle avec douceur.",
       "options": [
         {"texte": "Lui parler calmement", "suivant": 22},
@@ -94,6 +107,7 @@
       ]
     },
     {
+      "page": 14,
       "texte": "La porte griffée s’ouvre difficilement. L’intérieur est couvert de marques profondes. Tu entends une respiration derrière toi.",
       "options": [
         {"texte": "Se retourner", "suivant": 23},
@@ -101,13 +115,15 @@
       ]
     },
     {
+      "page": 15,
       "texte": "La pièce brisée est vide. Au centre, un miroir fendu reflète une version de toi plus âgée. Elle t’adresse un sourire triste.",
       "options": [
         {"texte": "Toucher le miroir", "suivant": 24},
-        {"texte": "Ignorer et repartir", "suivant": 6}
+        {"texte": "Ignorer et repartir", "suivant": 7}
       ]
     },
     {
+      "page": 16,
       "texte": "La silhouette t’emmène vers une crypte dissimulée sous la fontaine. Une tombe porte ton nom. *« Libère-moi »,* souffle-t-elle.",
       "options": [
         {"texte": "Ouvrir la tombe", "suivant": 25},
@@ -115,58 +131,69 @@
       ]
     },
     {
+      "page": 17,
       "texte": "Tu cours, trébuches et sors enfin du brouillard. Le château disparaît derrière toi comme une illusion. Fin prudente.",
       "options": []
     },
     {
+      "page": 18,
       "texte": "Tu prends la clé. La gargouille ouvre lentement les yeux : *« Garde-la bien... elle ouvre la chambre du Comte. »*",
       "options": [
-        {"texte": "Retourner au hall", "suivant": 1},
+        {"texte": "Retourner au hall", "suivant": 2},
         {"texte": "Aller directement à la tour avec la clé", "suivant": 27}
       ]
     },
     {
+      "page": 19,
       "texte": "Le livre parle du Comte Montelune, obsédé par la vie éternelle. Il aurait enfermé son âme dans un miroir maudit.",
       "options": [
-        {"texte": "Chercher ce miroir", "suivant": 14},
-        {"texte": "Quitter la bibliothèque", "suivant": 6}
+        {"texte": "Chercher ce miroir", "suivant": 15},
+        {"texte": "Quitter la bibliothèque", "suivant": 7}
       ]
     },
     {
+      "page": 20,
       "texte": "Tu trouves une trappe menant à une cave. Une faible lumière tremble au fond.",
       "options": [
         {"texte": "Descendre", "suivant": 25},
-        {"texte": "Ignorer et revenir au hall", "suivant": 6}
+        {"texte": "Ignorer et revenir au hall", "suivant": 7}
       ]
     },
     {
+      "page": 21,
       "texte": "Le journal révèle que trois visiteurs ont été piégés ici… Le troisième portait ton nom. Tu ressens un vertige glacé.",
       "options": [
-        {"texte": "Refuser d’y croire", "suivant": 14},
+        {"texte": "Refuser d’y croire", "suivant": 15},
         {"texte": "Chercher la vérité", "suivant": 25}
       ]
     },
     {
+      "page": 22,
       "texte": "Un murmure s’élève : *« Tu n’aurais jamais dû venir… »* L’air devient gelé. Tes forces t’abandonnent. Fin troublante.",
       "options": []
     },
     {
+      "page": 23,
       "texte": "Une créature surgit des ombres et t’agrippe. Tes cris se perdent dans le silence. Fin sanglante.",
       "options": []
     },
     {
+      "page": 24,
       "texte": "Le miroir t’aspire. Tu vois ta vie défiler avant d’être piégé dans la peinture du hall. Tes yeux suivent désormais les intrus. Fin hantée.",
       "options": []
     },
     {
+      "page": 25,
       "texte": "Sous la tombe, un médaillon brille faiblement. Une voix chuchote : *« Merci. »* Tu sens l’âme enfin libérée. Fin apaisée.",
       "options": []
     },
     {
+      "page": 26,
       "texte": "Tu refuses d’ouvrir la tombe. La silhouette hurle et s’efface, emportant la terre sous tes pieds. Fin tragique.",
       "options": []
     },
     {
+      "page": 27,
       "texte": "Tu ouvres la chambre du Comte. Un spectre t’attend, assis dans un fauteuil de velours. *« Je savais que tu viendrais... »*",
       "options": [
         {"texte": "Lui parler calmement", "suivant": 28},
@@ -174,6 +201,7 @@
       ]
     },
     {
+      "page": 28,
       "texte": "Le Comte t’écoute. *« Libère-moi. Remplace-moi. »* Sa voix est lasse, presque humaine.",
       "options": [
         {"texte": "Accepter de le remplacer", "suivant": 30},
@@ -181,14 +209,17 @@
       ]
     },
     {
+      "page": 29,
       "texte": "Tu attaques, mais ton arme traverse le vide. Le spectre rit, et ton cœur s’arrête. Fin violente.",
       "options": []
     },
     {
+      "page": 30,
       "texte": "Tu acceptes, et une paix étrange t’envahit. Le château retrouve sa lumière. Désormais, c’est toi qui le hantes. Fin éternelle.",
       "options": []
     },
     {
+      "page": 31,
       "texte": "Tu refuses, et le Comte hurle avant de disparaître. Le château s’effondre autour de toi. Tu t’éveilles dans la brume du matin. Fin victorieuse.",
       "options": []
     }
