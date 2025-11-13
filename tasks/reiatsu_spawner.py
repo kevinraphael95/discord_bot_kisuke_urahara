@@ -237,8 +237,11 @@ class ReiatsuSpawner(commands.Cog):
             supabase.table("reiatsu_config").update({
                 "is_spawn": False,
                 "message_id": None,
-                "spawn_delay": new_delay
+                "spawn_delay": new_delay,
+                # 🔥 Ajoute cette ligne :
+                "last_spawn_at": datetime.utcnow().isoformat(timespec="seconds")
             }).eq("guild_id", guild_id).execute()
+
 
             try:
                 if msg_id:
