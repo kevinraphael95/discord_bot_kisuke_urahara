@@ -24,7 +24,7 @@
       "texte": "Les jardins noyés sous la brume semblent respirer. Une voix murmure ton nom… la silhouette blanche d’une femme traverse lentement les arbres. Elle porte une tenue ancienne.\nElle ressemble étrangement à la femme du portrait du hall.",
       "options": [
         {"texte": "La suivre discrètement", "suivant": 8},
-        {"texte": "L’appeler à haute voix", "suivant": 9},
+        {"texte": "L’appeler à haute voix", "suivant": 2},
         {"texte": "Revenir vers la grande porte", "suivant": 2}
       ]
     },
@@ -36,7 +36,6 @@
         {"texte": "Chercher un accès direct à la tour", "suivant": 10}
       ]
     },
-
     {
       "page": 5,
       "texte": "Le portrait de la femme semble pleurer. Un murmure glisse : « Ne monte pas… C’est là que tout a commencé. »\nLa femme du tableau serait morte la première, prisonnière d’un rituel raté.",
@@ -45,7 +44,6 @@
         {"texte": "Ignorer et monter malgré tout", "suivant": 7}
       ]
     },
-
     {
       "page": 6,
       "texte": "Un rire d’enfant résonne à l’étage. Le garçon Montelune était connu pour jouer dans les couloirs… longtemps après sa mort.\nLe son n’est ni joyeux, ni vraiment humain.",
@@ -54,7 +52,6 @@
         {"texte": "Chercher d’où vient le son au rez-de-chaussée", "suivant": 11}
       ]
     },
-
     {
       "page": 7,
       "texte": "En haut de l’escalier, trois portes :\n• Une pièce éclairée, baignée d’une lumière chaude.\n• Une porte griffée, d’où émane une odeur de métal et de poussière.\n• Une pièce effondrée, ouverte sur les poutres.\n\nLa rumeur veut que chaque pièce corresponde au destin d’un membre de la famille.",
@@ -64,22 +61,14 @@
         {"texte": "Explorer la pièce brisée", "suivant": 14}
       ]
     },
-
     {
       "page": 8,
       "texte": "La silhouette t’amène à une fontaine asséchée. « Aide-moi… » dit-elle. Elle porte la même médaille que la femme Montelune sur son portrait.\nElle semble être piégée entre deux mondes.",
       "options": [
         {"texte": "Accepter de l’aider", "suivant": 15},
-        {"texte": "Refuser et fuir", "suivant": 16}
+        {"texte": "Refuser et fuir", "suivant": 2}
       ]
     },
-
-    {
-      "page": 9,
-      "texte": "Tu appelles… la silhouette se retourne.\nC’est le visage de la femme Montelune, déformé par la peur.\n« Ne fais pas la même erreur que nous… »\nUn pan du sol s’effondre sous toi.\n\nTu te réveilles dans les jardins, tremblant.\nFin : **Avertissement reçu** — tu en sais plus, mais le château te rejette.",
-      "options": []
-    },
-
     {
       "page": 10,
       "texte": "La tour est scellée. Une clé pend au cou d’une gargouille. Elle ouvre les yeux.\n« Le Comte protège ce qui reste de lui… prends-la si tu l’oses. »",
@@ -88,7 +77,6 @@
         {"texte": "Renoncer et repartir vers les jardins", "suivant": 3}
       ]
     },
-
     {
       "page": 11,
       "texte": "Tu trouves une bibliothèque ancienne. Les Montelune étaient obsédés par l’âme humaine.\nUne bougie brûle encore : quelqu’un est venu récemment.",
@@ -97,7 +85,6 @@
         {"texte": "Chercher d’autres indices", "suivant": 20}
       ]
     },
-
     {
       "page": 12,
       "texte": "La pièce éclairée semble accueillante. Un parfum familier flotte… alors que tu ne devrais rien reconnaître.\nDans un placard, un journal taché de sang : « Nous avons réveillé quelque chose… et il nous connaît tous. »",
@@ -106,7 +93,6 @@
         {"texte": "Reculer avant que quelqu’un arrive", "suivant": 7}
       ]
     },
-
     {
       "page": 13,
       "texte": "La porte griffée s’ouvre. Tout est marqué par des coups frénétiques. Au centre : une chaîne cassée.\nLe garçon Montelune aurait été enfermé ici durant le rituel.\nUne respiration se rapproche derrière toi…",
@@ -115,7 +101,6 @@
         {"texte": "Claquer la porte et reculer vers le couloir", "suivant": 7}
       ]
     },
-
     {
       "page": 14,
       "texte": "La pièce effondrée expose un miroir fendu. La légende dit que le Comte y a enfermé un fragment de son âme.\nTon propre reflet semble… plus vieux.",
@@ -124,7 +109,6 @@
         {"texte": "Reculer rapidement", "suivant": 7}
       ]
     },
-
     {
       "page": 15,
       "texte": "Dans la crypte sous la fontaine, une tombe porte ton nom. Pas celui que tu utilises… mais ton nom complet.\n« Nous avons échoué… ne fais pas comme lui », souffle l’esprit.",
@@ -133,13 +117,6 @@
         {"texte": "Refuser", "suivant": 25}
       ]
     },
-
-    {
-      "page": 16,
-      "texte": "Tu fuis. La brume se dissipe… tu te retrouves dehors.\nMais la silhouette te murmure : « Alors ils ne seront jamais sauvés… »\nFin : **Abandon** — tu pars vivant, mais le mystère reste entier.",
-      "options": []
-    },
-
     {
       "page": 18,
       "texte": "La gargouille te donne la clé : « Elle ouvre la chambre du Comte. Tu es prêt… contrairement aux autres. »",
@@ -148,7 +125,6 @@
         {"texte": "Aller directement à la tour", "suivant": 27}
       ]
     },
-
     {
       "page": 19,
       "texte": "Le livre détaille le rituel : le Comte cherchait l’immortalité en liant son âme à celle de sa famille.\nLes visiteurs disparus auraient servi de catalyseurs… comme toi.",
@@ -157,7 +133,6 @@
         {"texte": "Quitter la bibliothèque", "suivant": 7}
       ]
     },
-
     {
       "page": 20,
       "texte": "Tu trouves une trappe menant à une cave rituelle. Des symboles identiques à ceux des portraits y sont gravés.\nUne faible lumière pulse, comme un cœur.",
@@ -166,7 +141,6 @@
         {"texte": "Revenir au hall", "suivant": 7}
       ]
     },
-
     {
       "page": 21,
       "texte": "Le journal explique que les trois visiteurs… ne sont pas morts.\nIls ont été absorbés par le rituel et errent entre les pièces, sous des formes altérées.\nLe troisième, note le journal… avait le même nom que toi.",
@@ -175,31 +149,34 @@
         {"texte": "Chercher la vérité dans la cave", "suivant": 24}
       ]
     },
-
     {
       "page": 22,
-      "texte": "Tu te retournes.\nLe garçon Montelune, défiguré par le rituel, te fixe.\n« Tu es… comme nous. »\nIl disparaît, te laissant son jouet cassé : une toupie portant un symbole rituélique.\nFin : **Révélation de l’enfant** — tu comprends son rôle dans le rituel.",
-      "options": []
+      "texte": "Tu te retournes.\nLe garçon Montelune, défiguré par le rituel, te fixe.\n« Tu es… comme nous. »\nIl disparaît, te laissant son jouet cassé : une toupie portant un symbole rituélique.\nRetour au couloir pour continuer l’enquête.", 
+      "options": [
+        {"texte": "Revenir vers les portes de l’étage", "suivant": 7}
+      ]
     },
-
     {
       "page": 23,
-      "texte": "Le miroir t’engloutit.\nMais au lieu de mourir, tu vois : le Comte liant l’âme de sa famille, la femme suppliant, l’enfant criant, les visiteurs sacrifiés.\nQuand tu reviens à toi, tu es dans le hall… vivant.\nFin : **Vision du passé** — tu as appris toute la vérité.",
-      "options": []
+      "texte": "Le miroir t’engloutit.\nMais au lieu de mourir, tu vois : le Comte liant l’âme de sa famille, la femme suppliant, l’enfant criant, les visiteurs sacrifiés.\nQuand tu reviens à toi, tu es dans le hall… vivant.", 
+      "options": [
+        {"texte": "Continuer l’exploration", "suivant": 7}
+      ]
     },
-
     {
       "page": 24,
-      "texte": "Sous la tombe, tu trouves un médaillon enchanté. L’âme piégée — celle de la femme Montelune — s’échappe enfin.\nLe château respire différemment.\nFin : **Âme libérée** — une partie du rituel est brisée.",
-      "options": []
+      "texte": "Sous la tombe, tu trouves un médaillon enchanté. L’âme piégée — celle de la femme Montelune — s’échappe enfin.\nLe château respire différemment.", 
+      "options": [
+        {"texte": "Se diriger vers la chambre du Comte", "suivant": 27}
+      ]
     },
-
     {
       "page": 25,
-      "texte": "Tu refuses d’ouvrir la tombe.\nL’esprit recule… puis murmure : « Alors tu dois arrêter le Comte. »\nTu es ramené au hall.\nFin : **Choix du devoir** — tu n’apprends pas tout, mais tu restes dans la lutte.",
-      "options": []
+      "texte": "Tu refuses d’ouvrir la tombe.\nL’esprit recule… puis murmure : « Alors tu dois arrêter le Comte. »\nRetour au hall pour continuer la quête.", 
+      "options": [
+        {"texte": "Revenir vers les portes de l’étage", "suivant": 7}
+      ]
     },
-
     {
       "page": 27,
       "texte": "La clé ouvre la chambre du Comte. Il t’attend.\nUn spectre amaigri, fatigué.\n« Tu as vu nos erreurs. Termine ce que j’ai commencé… ou remplace-moi. »",
@@ -208,7 +185,6 @@
         {"texte": "Essayer de le combattre", "suivant": 29}
       ]
     },
-
     {
       "page": 28,
       "texte": "Le Comte avoue : le rituel a brisé sa famille, et il veut que quelqu’un l’achève définitivement.\n« Détruis le miroir… ou prends ma place pour garder les âmes. »",
@@ -217,19 +193,16 @@
         {"texte": "Refuser et briser le rituel", "suivant": 31}
       ]
     },
-
     {
       "page": 29,
       "texte": "Tu attaques.\nMais le Comte ne riposte pas. Il te montre simplement ce que la violence a fait à sa famille.\nTu vois leurs morts, le rituel, les visiteurs piégés.\nFin : **Compréhension forcée** — tu apprends toute l’histoire, mais échoues à agir.",
       "options": []
     },
-
     {
       "page": 30,
       "texte": "Tu acceptes. La paix t’envahit.\nLe château se stabilise : les âmes cessent d’errer.\nMais tu en deviens le nouveau gardien, lié à jamais.\nFin : **Gardien du château**",
       "options": []
     },
-
     {
       "page": 31,
       "texte": "Tu refuses et brises le rituel.\nLa chambre s’effondre, la tour s’écroule, et les âmes sont libérées.\nLe soleil se lève sur Montelune pour la première fois depuis des siècles.\nFin : **Victoire totale**",
