@@ -6,12 +6,12 @@
   "personnalite": ["Intelligent", "Calme", "Déterminé", "Stratégique", "Protecteur"],
   "race": ["Humain", "Quincy", "Transcendant"],
   "stats_base": {
+    "pv": 300,
     "attaque": 60,
-    "defense": 20,
-    "pression": 50,
-    "kido": 20,
-    "intelligence": 60,
-    "rapidite": 90,
+    "defense": 40,
+    "special": 50,
+    "special_def": 50,
+    "rapidite": 80,
     "total_stats": 300
   },
   "formes": {
@@ -38,36 +38,70 @@
           "type": "Électrik",
           "pp_max": 20,
           "statut": null
-        }
-      ]
-    },
-    "Letzt Stil": {
-      "bonus": {"attaque": 10, "rapidite": 10},
-      "activation": "Letzte Stil, erstrahle!",
-      "attaques": [
+        },
         {
-          "nom": "Licht Regen",
-          "description": "Pluie de flèches spirituelles sur l’ennemi.",
-          "puissance": 75,
-          "cout_endurance": 20,
-          "categorie": "Offensive",
+          "nom": "Tir de précision",
+          "description": "Prépare une flèche spéciale pour toucher avec plus de précision.",
+          "puissance": 0,
+          "cout_endurance": 10,
+          "categorie": "Statut",
           "type": "Électrik",
           "pp_max": 15,
+          "statut": "Augmente précision et rapidité flèches"
+        },
+        {
+          "nom": "Soin léger",
+          "description": "Restaure un peu de PV.",
+          "puissance": 30,
+          "cout_endurance": 10,
+          "categorie": "Soin",
+          "type": "Normal",
+          "pp_max": 10,
           "statut": null
         }
       ]
     },
     "Vollständig": {
-      "bonus": {"attaque": 20, "rapidite": 20, "pression": 10},
-      "activation": "Vollständig, montrez votre puissance!",
+      "bonus": {"attaque": 20, "rapidite": 20},
+      "activation": "Vollständig, Antithesis !",
       "attaques": [
+        {
+          "nom": "Antithèse",
+          "description": "Inverse complètement tout ce qui s'est déjà produit entre deux cibles. Puissance stratégique maximale.",
+          "puissance": 0,
+          "cout_endurance": 25,
+          "categorie": "Statut",
+          "type": "Électrik",
+          "pp_max": 5,
+          "statut": "Inverse effets entre deux cibles"
+        },
         {
           "nom": "Heilig Bogen",
           "description": "Arc Quincy ultime, extrêmement puissant et rapide.",
           "puissance": 90,
-          "cout_endurance": 25,
+          "cout_endurance": 20,
           "categorie": "Offensive",
           "type": "Électrik",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Flèches rapides",
+          "description": "Tire plusieurs flèches à grande vitesse.",
+          "puissance": 75,
+          "cout_endurance": 15,
+          "categorie": "Offensive",
+          "type": "Électrik",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Soin moyen",
+          "description": "Restaure un peu plus de PV.",
+          "puissance": 50,
+          "cout_endurance": 15,
+          "categorie": "Soin",
+          "type": "Normal",
           "pp_max": 10,
           "statut": null
         }
