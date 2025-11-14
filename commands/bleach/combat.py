@@ -137,11 +137,8 @@ def appliquer_attaque(a, d, atk, narratif):
 
     # ── Antithèse spéciale ──
     if atk.get("statut") == "Antithèse":
-        # échange des PV
         a["pv"], d["pv"] = d["pv"], a["pv"]
-        # échange des boosts
         a["boosts"], d["boosts"] = d["boosts"], a["boosts"]
-        # échange des statuts
         a["statut"], d["statut"] = d["statut"], a["statut"]
         narratif.append(f"⚡ **{a['nom']}** utilise *{atk['nom']}* ! Tout ce qui s'est passé entre **{a['nom']}** et **{d['nom']}** est inversé !")
         return
@@ -160,7 +157,6 @@ def appliquer_attaque(a, d, atk, narratif):
     if "statut" in atk and atk["statut"] and atk["statut"] != "Antithèse":
         d["statut"] = atk["statut"]
 
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Forme suivante (évolution en combat)
 # ────────────────────────────────────────────────────────────────────────────────
@@ -177,9 +173,7 @@ def forme_suivante(p: dict):
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class CombatCommand(commands.Cog):
-    """
-    Commande /combat et !combat — Combat style Pokémon complet avec statuts et formes évolutives
-    """
+    """Commande /combat et !combat — Combat style Pokémon complet avec statuts et formes évolutives"""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -192,7 +186,6 @@ class CombatCommand(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_combat(self, interaction: discord.Interaction):
-        """Commande slash combat sécurisée"""
         await self.run_combat(interaction.channel)
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -201,7 +194,6 @@ class CombatCommand(commands.Cog):
     @commands.command(name="combat")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_combat(self, ctx: commands.Context):
-        """Commande préfixe combat sécurisée"""
         await self.run_combat(ctx.channel)
 
     # ────────────────────────────────────────────────────────────────────────────
