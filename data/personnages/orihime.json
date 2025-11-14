@@ -6,11 +6,11 @@
   "personnalite": ["Bienveillant", "Protecteur", "Altruiste", "Amical", "Émotif"],
   "race": ["Humain", "Fullbringer"],
   "stats_base": {
+    "pv": 300,
     "attaque": 40,
     "defense": 100,
-    "pression": 65,
-    "kido": 10,
-    "intelligence": 55,
+    "special": 65,
+    "special_def": 55,
     "rapidite": 30,
     "total_stats": 300
   },
@@ -24,14 +24,14 @@
           "description": "Bouclier défensif qui repousse les attaques et protège Orihime ou ses alliés.",
           "puissance": 0,
           "cout_endurance": 15,
-          "categorie": "Défensive",
+          "categorie": "Statut",
           "type": "Fée",
           "pp_max": 20,
-          "statut": "Augmente défense"
+          "statut": "Augmente defense"
         },
         {
           "nom": "Shun Shun Rikka : Sōten Kisshun",
-          "description": "Guérison d'une partie ou d'une personne, peut réparer les blessures physiques.",
+          "description": "Guérison d'une partie ou d'une personne.",
           "puissance": 50,
           "cout_endurance": 20,
           "categorie": "Soin",
@@ -41,35 +41,26 @@
         },
         {
           "nom": "Hōchū",
-          "description": "Attaque offensive avec les six petites fées de Shun Shun Rikka, peut repousser ou bloquer un ennemi.",
+          "description": "Attaque offensive avec les six petites fées de Shun Shun Rikka.",
           "puissance": 45,
           "cout_endurance": 15,
-          "categorie": "Offensive",
+          "categorie": "Spécial",
           "type": "Fée",
           "pp_max": 15,
           "statut": null
         },
         {
           "nom": "Kaze no Chikai",
-          "description": "Projette une attaque douce mais persistante qui peut perturber les mouvements ennemis.",
+          "description": "Attaque douce mais persistante qui peut perturber les mouvements ennemis.",
           "puissance": 35,
           "cout_endurance": 10,
-          "categorie": "Contrôle",
+          "categorie": "Statut",
           "type": "Fée",
           "pp_max": 15,
-          "statut": "Peut réduire rapidité ennemi"
+          "statut": "Réduit rapidite ennemi"
         }
       ]
     }
   },
-  "images": [],
-  "statuts": {
-    "Paralysie": {"emoji": "⚡", "chance_move": 0.25},
-    "Brûlure": {"emoji": "🔥", "degats": 5, "attaque_mod": 0.5},
-    "Sommeil": {"emoji": "💤", "tour_max": 3},
-    "Gel": {"emoji": "❄️", "chance_move": 0.2},
-    "Poison": {"emoji": "☠️", "degats": 5},
-    "Confusion": {"emoji": "😵", "chance_self": 0.5, "degats": 10},
-    "Attraction": {"emoji": "❤️", "chance_skip": 0.25}
-  }
+  "images": []
 }
