@@ -1,0 +1,158 @@
+{
+  "nom": "NOM_PERSONNAGE",
+  "type": "TYPE_PRINCIPAL",
+  "genre": "Homme/Femme",
+  "sexualite": "Hétéro/Homo/Bi",
+  "personnalite": ["Trait1", "Trait2", "Trait3", "Trait4", "Trait5"],
+  "race": ["Race1", "Race2"],
+  "stats_base": {
+    "pv": 300,
+    "attaque": 50,
+    "defense": 50,
+    "special": 50,
+    "special_def": 50,
+    "rapidite": 50,
+    "total_stats": 300
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Attaque 1",
+          "description": "Description courte",
+          "puissance": 40,
+          "cout_endurance": 10,
+          "categorie": "Physique",
+          "type": "TYPE_PRINCIPAL",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Attaque 2",
+          "description": "Description courte",
+          "puissance": 30,
+          "cout_endurance": 10,
+          "categorie": "Spécial",
+          "type": "TYPE_PRINCIPAL",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Attaque 3",
+          "description": "Effet de statut ou boost",
+          "puissance": 0,
+          "cout_endurance": 10,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 15,
+          "statut": "Augmente rapidite"
+        },
+        {
+          "nom": "Attaque 4",
+          "description": "Soin ou récupération",
+          "puissance": 30,
+          "cout_endurance": 10,
+          "categorie": "Soin",
+          "type": "Normal",
+          "pp_max": 10,
+          "statut": null
+        }
+      ]
+    },
+    "Forme2": {
+      "bonus": {"attaque": 10},
+      "activation": "Phrase d'activation",
+      "attaques": [
+        {
+          "nom": "Attaque 1 améliorée",
+          "description": "Version plus puissante de l'attaque 1",
+          "puissance": 60,
+          "cout_endurance": 15,
+          "categorie": "Physique",
+          "type": "TYPE_PRINCIPAL",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Attaque 2 améliorée",
+          "description": "Version plus puissante de l'attaque 2",
+          "puissance": 60,
+          "cout_endurance": 15,
+          "categorie": "Spécial",
+          "type": "TYPE_PRINCIPAL",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Attaque 3 améliorée",
+          "description": "Effet de statut ou boost amélioré",
+          "puissance": 0,
+          "cout_endurance": 15,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 15,
+          "statut": "Augmente rapidite"
+        },
+        {
+          "nom": "Attaque 4 améliorée",
+          "description": "Soin plus puissant",
+          "puissance": 50,
+          "cout_endurance": 15,
+          "categorie": "Soin",
+          "type": "Normal",
+          "pp_max": 10,
+          "statut": null
+        }
+      ]
+    },
+    "Forme3": {
+      "bonus": {"attaque": 20, "rapidite": 10},
+      "activation": "Phrase d'activation ultime",
+      "attaques": [
+        {
+          "nom": "Attaque 1 ultime",
+          "description": "Version ultime de l'attaque 1",
+          "puissance": 80,
+          "cout_endurance": 20,
+          "categorie": "Physique",
+          "type": "TYPE_PRINCIPAL",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Attaque 2 ultime",
+          "description": "Version ultime de l'attaque 2",
+          "puissance": 80,
+          "cout_endurance": 20,
+          "categorie": "Spécial",
+          "type": "TYPE_PRINCIPAL",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Attaque 3 ultime",
+          "description": "Effet de statut ou boost ultime",
+          "puissance": 0,
+          "cout_endurance": 15,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 15,
+          "statut": "Augmente rapidite"
+        },
+        {
+          "nom": "Attaque 4 ultime",
+          "description": "Soin ultime",
+          "puissance": 80,
+          "cout_endurance": 20,
+          "categorie": "Soin",
+          "type": "Normal",
+          "pp_max": 5,
+          "statut": null
+        }
+      ]
+    }
+  },
+  "images": []
+}
