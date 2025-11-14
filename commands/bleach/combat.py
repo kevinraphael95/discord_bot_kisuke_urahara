@@ -2,6 +2,7 @@
 # 📌 combat.py — Commande interactive /combat et !combat
 # Objectif : Combat style Pokémon complet avec statuts et formes évolutives
 # Catégorie : Bleach
+# Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
@@ -12,7 +13,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import random, os, json
-from utils.discord_utils import safe_send
+from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Gestion des personnages et combat
@@ -30,6 +31,7 @@ STATUTS = COMBAT_DATA["statuts"]
 BOOSTS = COMBAT_DATA["boosts"]
 
 def load_character(name: str):
+    """Charge un personnage depuis le dossier data/personnages"""
     path = os.path.join(CHAR_DIR, f"{name.lower()}.json")
     if not os.path.isfile(path):
         return None
@@ -39,30 +41,35 @@ def load_character(name: str):
         return char
 
 def list_characters():
+    """Liste tous les personnages disponibles"""
     return [f.replace(".json", "") for f in os.listdir(CHAR_DIR) if f.endswith(".json")]
 
 def multiplier_type(atk_type, cible_type):
+    """Retourne le multiplicateur de type"""
     return TYPE_EFF.get(atk_type, {}).get(cible_type, 1)
 
 def init_combat(p: dict):
+    """Initialise un personnage pour le combat"""
     p = p.copy()
-    p["pv"] = p["stats_base"]["total_stats"] // 3  # Exemple PV calculé depuis stats_total
+    p["pv"] = p["stats_base"]["pv"]
     p["boosts"] = {b: 0 for b in BOOSTS}
     p["statut"] = None
     p["forme_actuelle"] = "Normal"
     p["sleep_turns"] = 0
     for f in p["formes"].values():
         for a in f["attaques"]:
-            a["PP"] = a.get("PP", 10)
+            a["PP"] = a.get("pp_max", 10)
     return p
 
 def attaque_disponible(p: dict):
+    """Retourne les attaques avec PP > 0"""
     return [a for a in p["formes"][p["forme_actuelle"]]["attaques"] if a["PP"] > 0]
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Gestion des statuts
 # ────────────────────────────────────────────────────────────────────────────────
 def appliquer_statut(p: dict, narratif: list):
+    """Applique les effets des statuts sur le personnage"""
     if not p["statut"]:
         return False
     s = STATUTS[p["statut"]]
@@ -95,58 +102,54 @@ def appliquer_statut(p: dict, narratif: list):
         deg = s["degats"]
         atk_mod = s["attaque_mod"]
         p["pv"] -= deg
-        p["boosts"]["Attaque"] *= atk_mod
+        p["boosts"]["attaque"] *= atk_mod
         narratif.append(f"{s['emoji']} **{p['nom']}** subit {deg} PV de brûlure et attaque réduite !")
-    elif p["statut"] == "Peut réduire rapidité ennemi":
-        s = STATUTS[p["statut"]]
-        if random.random() < s["chance"]:
-            p["boosts"]["Rapidite"] += s["mod_rapidite"]
-            narratif.append(f"{s['emoji']} **{p['nom']}** voit sa rapidité réduite !")
-
-    elif p["statut"] == "Augmente défense":
-        s = STATUTS[p["statut"]]
-        if random.random() < s["chance"]:
-            p["boosts"]["Defense"] += s["mod_defense"]
-            narratif.append(f"{s['emoji']} **{p['nom']}** augmente sa défense !")
-
-
     return False
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Calcul et application des dégâts
 # ────────────────────────────────────────────────────────────────────────────────
 def calcul_degats(a, d, atk):
-    if atk["categorie"] == "Offensive":
-        atk_stat = a["stats_base"]["attaque"] * (1 + a["boosts"]["Attaque"] / 2)
-        def_stat = d["stats_base"]["defense"] * (1 + d["boosts"]["Defense"] / 2)
+    """Calcul des dégâts style Pokémon"""
+    if atk["categorie"] == "Physique":
+        atk_stat = a["stats_base"]["attaque"] * (1 + a["boosts"].get("attaque", 0)/2)
+        def_stat = d["stats_base"]["defense"] * (1 + d["boosts"].get("defense", 0)/2)
+    elif atk["categorie"] == "Spécial":
+        atk_stat = a["stats_base"]["special"] * (1 + a["boosts"].get("special", 0)/2)
+        def_stat = d["stats_base"]["special_def"] * (1 + d["boosts"].get("special_def", 0)/2)
     else:
         return 0, 1, False
+
     base = ((2 * 50 / 5 + 2) * atk["puissance"] * (atk_stat / def_stat)) / 50 + 2
-    mult = multiplier_type(atk["type"], d["type"])
+    mult = multiplier_type(atk["type"], d["type"][0])
     rand = random.uniform(0.85, 1)
     crit = 1.5 if random.random() < 0.0625 else 1
     return int(base * mult * rand * crit), mult, crit > 1
 
 def appliquer_attaque(a, d, atk, narratif):
+    """Applique une attaque du personnage attaquant sur le défenseur"""
     if atk["categorie"] == "Soin":
         soin = atk["puissance"]
-        a["pv"] = min(a["stats_base"]["total_stats"] // 3, a["pv"] + soin)
+        a["pv"] = min(a["stats_base"]["pv"], a["pv"] + soin)
         narratif.append(f"{CATEGORIE_EMOJI['Soin']} **{a['nom']}** utilise *{atk['nom']}* et se soigne {soin} PV !")
         return
+
     degats, mult, crit = calcul_degats(a, d, atk)
     d["pv"] -= degats
     emoji_type = TYPE_EMOJI.get(atk["type"], "")
-    txt = f"{CATEGORIE_EMOJI['Offensive']} **{a['nom']}** utilise *{atk['nom']}* {emoji_type} et inflige {degats} PV à **{d['nom']}** !"
+    txt = f"{CATEGORIE_EMOJI.get(atk['categorie'], '⚔️')} **{a['nom']}** utilise *{atk['nom']}* {emoji_type} et inflige {degats} PV à **{d['nom']}** !"
     if crit: txt += " ⚡ Coup critique !"
     if mult > 1: txt += " 💥 Super efficace !"
     elif mult < 1: txt += " ⚠️ Pas très efficace..."
     narratif.append(txt)
-    if "statut" in atk: d["statut"] = atk["statut"]
+    if "statut" in atk and atk["statut"]:
+        d["statut"] = atk["statut"]
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Forme suivante (évolution en combat)
 # ────────────────────────────────────────────────────────────────────────────────
 def forme_suivante(p: dict):
+    """Gestion de l'évolution en combat"""
     formes = list(p["formes"].keys())
     idx = formes.index(p["forme_actuelle"])
     if idx < len(formes) - 1 and random.random() < 0.15:
@@ -158,7 +161,9 @@ def forme_suivante(p: dict):
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class CombatCommand(commands.Cog):
-    """Commande /combat et !combat — Combat Pokémon complet avec statuts et formes évolutives"""
+    """
+    Commande /combat et !combat — Combat style Pokémon complet avec statuts et formes évolutives
+    """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -171,6 +176,7 @@ class CombatCommand(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_combat(self, interaction: discord.Interaction):
+        """Commande slash combat sécurisée"""
         await self.run_combat(interaction.channel)
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -179,6 +185,7 @@ class CombatCommand(commands.Cog):
     @commands.command(name="combat")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_combat(self, ctx: commands.Context):
+        """Commande préfixe combat sécurisée"""
         await self.run_combat(ctx.channel)
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -190,6 +197,7 @@ class CombatCommand(commands.Cog):
             persos = [p for p in persos if p]
             if len(persos) < 2:
                 return await safe_send(channel, "❌ Pas assez de personnages.")
+
             p1, p2 = random.sample(persos, 2)
             p1, p2 = init_combat(p1), init_combat(p2)
             narratif = [f"⚔️ **Combat : {p1['nom']} vs {p2['nom']}** ⚔️\n"]
@@ -207,7 +215,7 @@ class CombatCommand(commands.Cog):
                         continue
                     dispo = attaque_disponible(attaquant)
                     if not dispo:
-                        atk = {"nom": "Tacle", "type": "Normal", "categorie": "Offensive", "puissance": 40, "PP": 1}
+                        atk = {"nom": "Tacle", "type": "Normal", "categorie": "Physique", "puissance": 40, "PP": 1}
                     else:
                         atk = random.choice(dispo)
                         atk["PP"] -= 1
@@ -223,9 +231,9 @@ class CombatCommand(commands.Cog):
                 break
 
             # ────────────────────────────────────────────────────────────────────
-            # 📜 Embed final avec pagination
+            # 📜 Pagination du narratif
             # ────────────────────────────────────────────────────────────────────
-            PAGINATION_TAILLE = 3500  # limite par page
+            PAGINATION_TAILLE = 3500
             texte_combat = "\n".join(narratif)
             pages = [texte_combat[i:i + PAGINATION_TAILLE] for i in range(0, len(texte_combat), PAGINATION_TAILLE)]
             index = 0
@@ -238,9 +246,6 @@ class CombatCommand(commands.Cog):
             embed.set_thumbnail(url=p1["image"])
             embed.set_image(url=p2["image"])
 
-            # ────────────────────────────────────────────────────────────────────
-            # 🔘 Pagination avec boutons
-            # ────────────────────────────────────────────────────────────────────
             class PagesView(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=120)
@@ -266,7 +271,6 @@ class CombatCommand(commands.Cog):
             import traceback
             traceback.print_exc()
             await safe_send(channel, f"❌ Erreur dans !combat : `{e}`")
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
