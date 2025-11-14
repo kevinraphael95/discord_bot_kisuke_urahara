@@ -40,14 +40,14 @@
           "statut": null
         },
         {
-          "nom": "Tir de précision",
-          "description": "Prépare une flèche spéciale pour toucher avec plus de précision.",
+          "nom": "Flèche rapide",
+          "description": "Prépare une flèche plus rapide.",
           "puissance": 0,
           "cout_endurance": 10,
           "categorie": "Statut",
           "type": "Électrik",
           "pp_max": 15,
-          "statut": "Augmente précision et rapidité flèches"
+          "statut": "Augmente rapidite"
         },
         {
           "nom": "Soin léger",
