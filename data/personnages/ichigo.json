@@ -6,13 +6,13 @@
   "personnalite": ["Courageux", "Déterminé", "Protecteur", "Impulsif", "Bienveillant"],
   "race": ["Humain", "Fullbring", "Shinigami", "Hollow", "Arrancar", "Vizard", "Quincy", "Transcendant"],
   "stats_base": {
+    "pv": 300,
     "attaque": 75,
     "defense": 50,
-    "pression": 50,
-    "kido": 10,
-    "intelligence": 35,
+    "special": 50,
+    "special_def": 50,
     "rapidite": 80,
-    "total_stats": 300
+    "total_stats": 305
   },
   "formes": {
     "Normal": {
@@ -24,9 +24,39 @@
           "description": "Vague d'énergie spirituelle simple mais efficace.",
           "puissance": 65,
           "cout_endurance": 15,
-          "categorie": "Offensive",
+          "categorie": "Physique",
           "type": "Ténèbres",
           "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Tacle",
+          "description": "Attaque simple mais fiable.",
+          "puissance": 40,
+          "cout_endurance": 5,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Shunpo",
+          "description": "Déplacement ultra-rapide pour esquiver ou se repositionner.",
+          "puissance": 0,
+          "cout_endurance": 10,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 20,
+          "statut": "Augmente rapidite"
+        },
+        {
+          "nom": "Soin léger",
+          "description": "Restaure un peu de PV.",
+          "puissance": 30,
+          "cout_endurance": 10,
+          "categorie": "Soin",
+          "type": "Normal",
+          "pp_max": 10,
           "statut": null
         }
       ]
@@ -40,20 +70,40 @@
           "description": "Version plus rapide et puissante du Getsuga Tenshō.",
           "puissance": 75,
           "cout_endurance": 20,
-          "categorie": "Offensive",
+          "categorie": "Physique",
           "type": "Ténèbres",
           "pp_max": 10,
           "statut": null
         },
         {
-          "nom": "Shunpo",
-          "description": "Déplacement ultra-rapide pour esquiver ou se repositionner.",
+          "nom": "Cero Hollow",
+          "description": "Vague d'énergie inspirée du Hollow intérieur.",
+          "puissance": 70,
+          "cout_endurance": 20,
+          "categorie": "Spécial",
+          "type": "Spectre",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Shunpo amélioré",
+          "description": "Déplacement instantané pour esquiver ou attaquer en surprise.",
           "puissance": 0,
-          "cout_endurance": 10,
+          "cout_endurance": 15,
           "categorie": "Statut",
           "type": "Normal",
-          "pp_max": 20,
-          "statut": "Augmente rapidité"
+          "pp_max": 15,
+          "statut": "Augmente rapidite"
+        },
+        {
+          "nom": "Soin moyen",
+          "description": "Restaure un peu plus de PV qu'avant.",
+          "puissance": 50,
+          "cout_endurance": 15,
+          "categorie": "Soin",
+          "type": "Normal",
+          "pp_max": 10,
+          "statut": null
         }
       ]
     },
@@ -66,42 +116,43 @@
           "description": "Getsuga Tenshō ultime, extrêmement rapide et dévastatrice.",
           "puissance": 85,
           "cout_endurance": 25,
-          "categorie": "Offensive",
+          "categorie": "Physique",
           "type": "Ténèbres",
           "pp_max": 5,
           "statut": null
         },
         {
-          "nom": "Cero Hollow",
-          "description": "Vague d'énergie inspirée du Hollow intérieur, très puissante mais coûteuse.",
+          "nom": "Cero Hollow Dévastateur",
+          "description": "Vague d'énergie inspirée du Hollow intérieur, très puissante.",
           "puissance": 90,
           "cout_endurance": 30,
-          "categorie": "Offensive",
+          "categorie": "Spécial",
           "type": "Spectre",
           "pp_max": 5,
           "statut": null
         },
         {
-          "nom": "Shunpo Amélioré",
-          "description": "Déplacement instantané à très haute vitesse pour esquiver ou attaquer en surprise.",
+          "nom": "Shunpo Suprême",
+          "description": "Déplacement ultra-rapide pour esquiver ou attaquer avec précision.",
           "puissance": 0,
           "cout_endurance": 15,
           "categorie": "Statut",
           "type": "Normal",
           "pp_max": 15,
-          "statut": "Augmente rapidité"
+          "statut": "Augmente rapidite"
+        },
+        {
+          "nom": "Soin puissant",
+          "description": "Restaure beaucoup de PV.",
+          "puissance": 80,
+          "cout_endurance": 20,
+          "categorie": "Soin",
+          "type": "Normal",
+          "pp_max": 5,
+          "statut": null
         }
       ]
     }
   },
-  "images": [],
-  "statuts": {
-    "Paralysie": {"emoji": "⚡", "chance_move": 0.25},
-    "Brûlure": {"emoji": "🔥", "degats": 5, "attaque_mod": 0.5},
-    "Sommeil": {"emoji": "💤", "tour_max": 3},
-    "Gel": {"emoji": "❄️", "chance_move": 0.2},
-    "Poison": {"emoji": "☠️", "degats": 5},
-    "Confusion": {"emoji": "😵", "chance_self": 0.5, "degats": 10},
-    "Attraction": {"emoji": "❤️", "chance_skip": 0.25}
-  }
+  "images": []
 }
