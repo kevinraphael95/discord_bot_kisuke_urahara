@@ -6,7 +6,7 @@
   "personnalite": ["Intelligent", "Calme", "Déterminé", "Stratégique", "Protecteur"],
   "race": ["Humain", "Quincy", "Transcendant"],
   "stats_base": {
-    "pv": 300,
+    "pv": 100,
     "attaque": 60,
     "defense": 40,
     "special": 50,
