@@ -108,14 +108,5 @@
       ]
     }
   },
-  "images": [],
-  "statuts": {
-    "Paralysie": {"emoji": "⚡", "chance_move": 0.25},
-    "Brûlure": {"emoji": "🔥", "degats": 5, "attaque_mod": 0.5},
-    "Sommeil": {"emoji": "💤", "tour_max": 3},
-    "Gel": {"emoji": "❄️", "chance_move": 0.2},
-    "Poison": {"emoji": "☠️", "degats": 5},
-    "Confusion": {"emoji": "😵", "chance_self": 0.5, "degats": 10},
-    "Attraction": {"emoji": "❤️", "chance_skip": 0.25}
-  }
+  "images": []
 }
