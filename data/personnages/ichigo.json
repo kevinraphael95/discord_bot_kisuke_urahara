@@ -6,7 +6,7 @@
   "personnalite": ["Courageux", "Déterminé", "Protecteur", "Impulsif", "Bienveillant"],
   "race": ["Humain", "Fullbring", "Shinigami", "Hollow", "Arrancar", "Vizard", "Quincy", "Transcendant"],
   "stats_base": {
-    "pv": 300,
+    "pv": 100,
     "attaque": 75,
     "defense": 50,
     "special": 50,
