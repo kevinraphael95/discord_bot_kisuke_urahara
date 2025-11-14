@@ -6,7 +6,7 @@
   "personnalite": ["Bienveillant", "Protecteur", "Altruiste", "Amical", "Émotif"],
   "race": ["Humain", "Fullbringer"],
   "stats_base": {
-    "pv": 300,
+    "pv": 100,
     "attaque": 40,
     "defense": 100,
     "special": 65,
