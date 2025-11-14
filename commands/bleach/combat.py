@@ -127,35 +127,77 @@ def calcul_degats(a, d, atk):
     return int(base * mult * rand * crit), mult, crit > 1
 
 def appliquer_attaque(a, d, atk, narratif):
-    """Applique une attaque du personnage attaquant sur le défenseur"""
-    # ── Soin classique ──
+    """Applique une attaque (Soin / Statut / Dégâts / Antithèse)"""
+
+    # ───────────────────────────────────────────────────────────
+    # 🟢 1. Attaque de SOIN (pas de dégâts)
+    # ───────────────────────────────────────────────────────────
     if atk["categorie"] == "Soin":
         soin = atk["puissance"]
         a["pv"] = min(a["stats_base"]["pv"], a["pv"] + soin)
-        narratif.append(f"{CATEGORIE_EMOJI['Soin']} **{a['nom']}** utilise *{atk['nom']}* et se soigne {soin} PV !")
+        narratif.append(
+            f"{CATEGORIE_EMOJI['Soin']} **{a['nom']}** utilise *{atk['nom']}* et récupère {soin} PV !"
+        )
         return
 
-    # ── Antithèse spéciale ──
+    # ───────────────────────────────────────────────────────────
+    # 🌀 2. Attaque STATUT (aucun dégâts)
+    # ───────────────────────────────────────────────────────────
+    if atk["categorie"] == "Statut" and atk.get("statut") != "Antithèse":
+        narratif.append(
+            f"{CATEGORIE_EMOJI['Statut']} **{a['nom']}** utilise *{atk['nom']}* !"
+        )
+
+        if atk.get("statut"):
+            d["statut"] = atk["statut"]
+            s = STATUTS[atk["statut"]]
+            narratif.append(
+                f"{s['emoji']} **{d['nom']}** est affecté par **{atk['statut']}** !"
+            )
+        return
+
+    # ───────────────────────────────────────────────────────────
+    # 🔁 3. ANTITHÈSE (inversion totale)
+    # ───────────────────────────────────────────────────────────
     if atk.get("statut") == "Antithèse":
         a["pv"], d["pv"] = d["pv"], a["pv"]
         a["boosts"], d["boosts"] = d["boosts"], a["boosts"]
         a["statut"], d["statut"] = d["statut"], a["statut"]
-        narratif.append(f"⚡ **{a['nom']}** utilise *{atk['nom']}* ! Tout ce qui s'est passé entre **{a['nom']}** et **{d['nom']}** est inversé !")
+
+        narratif.append(
+            f"🔁 **{a['nom']}** active *{atk['nom']}* ! Tous les effets subis entre "
+            f"**{a['nom']}** et **{d['nom']}** sont inversés !"
+        )
         return
 
-    # ── Dégâts classiques ──
+    # ───────────────────────────────────────────────────────────
+    # ⚔️ 4. Attaque OFFENSIVE (Physique ou Spéciale)
+    # ───────────────────────────────────────────────────────────
     degats, mult, crit = calcul_degats(a, d, atk)
     d["pv"] -= degats
+
     emoji_type = TYPE_EMOJI.get(atk["type"], "")
-    txt = f"{CATEGORIE_EMOJI.get(atk['categorie'], '⚔️')} **{a['nom']}** utilise *{atk['nom']}* {emoji_type} et inflige {degats} PV à **{d['nom']}** !"
-    if crit: txt += " ⚡ Coup critique !"
-    if mult > 1: txt += " 💥 Super efficace !"
-    elif mult < 1: txt += " ⚠️ Pas très efficace..."
+
+    txt = (
+        f"{CATEGORIE_EMOJI.get(atk['categorie'], '⚔️')} "
+        f"**{a['nom']}** utilise *{atk['nom']}* {emoji_type} et inflige {degats} PV !"
+    )
+
+    if crit:
+        txt += " ⚡ Coup critique !"
+    if mult > 1:
+        txt += " 💥 Super efficace !"
+    elif mult < 1:
+        txt += " ⚠️ Peu efficace..."
+
     narratif.append(txt)
 
-    # ── Application des statuts éventuels ──
-    if "statut" in atk and atk["statut"] and atk["statut"] != "Antithèse":
+    # ───────────────────────────────────────────────────────────
+    # 🧪 5. Application des statuts secondaires
+    # ───────────────────────────────────────────────────────────
+    if atk.get("statut") and atk["statut"] not in ["Antithèse"]:
         d["statut"] = atk["statut"]
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Forme suivante (évolution en combat)
