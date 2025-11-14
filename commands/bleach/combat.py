@@ -128,12 +128,25 @@ def calcul_degats(a, d, atk):
 
 def appliquer_attaque(a, d, atk, narratif):
     """Applique une attaque du personnage attaquant sur le défenseur"""
+    # ── Soin classique ──
     if atk["categorie"] == "Soin":
         soin = atk["puissance"]
         a["pv"] = min(a["stats_base"]["pv"], a["pv"] + soin)
         narratif.append(f"{CATEGORIE_EMOJI['Soin']} **{a['nom']}** utilise *{atk['nom']}* et se soigne {soin} PV !")
         return
 
+    # ── Antithèse spéciale ──
+    if atk.get("statut") == "Antithèse":
+        # échange des PV
+        a["pv"], d["pv"] = d["pv"], a["pv"]
+        # échange des boosts
+        a["boosts"], d["boosts"] = d["boosts"], a["boosts"]
+        # échange des statuts
+        a["statut"], d["statut"] = d["statut"], a["statut"]
+        narratif.append(f"⚡ **{a['nom']}** utilise *{atk['nom']}* ! Tout ce qui s'est passé entre **{a['nom']}** et **{d['nom']}** est inversé !")
+        return
+
+    # ── Dégâts classiques ──
     degats, mult, crit = calcul_degats(a, d, atk)
     d["pv"] -= degats
     emoji_type = TYPE_EMOJI.get(atk["type"], "")
@@ -142,8 +155,11 @@ def appliquer_attaque(a, d, atk, narratif):
     if mult > 1: txt += " 💥 Super efficace !"
     elif mult < 1: txt += " ⚠️ Pas très efficace..."
     narratif.append(txt)
-    if "statut" in atk and atk["statut"]:
+
+    # ── Application des statuts éventuels ──
+    if "statut" in atk and atk["statut"] and atk["statut"] != "Antithèse":
         d["statut"] = atk["statut"]
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Forme suivante (évolution en combat)
