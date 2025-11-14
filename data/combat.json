@@ -55,7 +55,9 @@
     "Augmente rapidite": {"emoji": "⚡", "mod_rapidite": 1, "chance": 1.0},
     "Augmente defense": {"emoji": "🛡️", "mod_defense": 1, "chance": 1.0},
     "Diminue attaque": {"emoji": "🔻", "mod_attaque": -1, "chance": 1.0},
-    "Soin": {"emoji": "💊"}
+    "Soin": {"emoji": "💊"},
+    "Réduit rapidite ennemi": { "emoji": "🐌", "mod_rapidite": -1, "chance": 1.0 },
+    "Antithèse": { "emoji": "🔁" }
   },
   "boosts": ["attaque", "defense", "special", "special_def", "rapidite"]
 }
