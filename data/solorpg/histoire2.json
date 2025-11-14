@@ -12,7 +12,7 @@
     },
     {
       "page": 2,
-      "texte": "Du toit, tu observes une scène impossible : un Hollow dévore presque une âme errante. Une silhouette élégante apparaît dans un éclair de lumière : Rukia Kuchiki, Shinigami. Elle élimine la menace d’un geste précis. Son regard se fige sur toi. « Tu... tu peux me voir ? »",
+      "texte": "Du toit, tu observes une scène impossible: un Hollow dévore presque une âme errante. Une silhouette élégante apparaît dans un éclair de lumière : Rukia Kuchiki, Shinigami. Elle élimine la menace d’un geste précis. Son regard se fige sur toi. « Tu... tu peux me voir ? »",
       "options": [
         {"texte": "Répondre calmement", "suivant": 5},
         {"texte": "Faire une remarque sarcastique", "suivant": 6},
@@ -245,7 +245,6 @@
         {"texte": "Rejoindre Urahara", "suivant": 25}
       ]
     },
-
     {
       "page": 33,
       "texte": "Tu tentes une stratégie. Le Hollow analyse tes mouvements… puis commence à parler. « Shinigami… tu n’es pas prêt. »",
