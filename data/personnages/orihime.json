@@ -7,10 +7,10 @@
   "race": ["Humain", "Fullbringer"],
   "stats_base": {
     "pv": 120,
-    "attaque": 45,
-    "defense": 80,
-    "special": 75,
-    "special_def": 90,
+    "attaque": 40,
+    "defense": 85,
+    "special": 90,
+    "special_def": 100,
     "rapidite": 35
   },
   "formes": {
@@ -20,44 +20,67 @@
       "attaques": [
         {
           "nom": "Santen Kesshun",
-          "description": "Bouclier défensif qui repousse les attaques et protège Orihime ou ses alliés.",
+          "description": "Bouclier défensif formé par Hinagiku, Lily et Baigon pour repousser les attaques.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 20,
-          "statut": null,
-          "boosts": {"defense": 1}
+          "statut": "Protection allié",
+          "boosts": {"defense": 2}
         },
         {
-          "nom": "Shun Shun Rikka : Sōten Kisshun",
-          "description": "Guérison d'une partie ou d'une personne.",
-          "puissance": 60,
+          "nom": "Sōten Kisshun",
+          "description": "Technique de guérison qui retourne l’état d’une personne ou d’un objet à son état initial.",
+          "puissance": 0,
           "categorie": "Soin",
           "type": "Fée",
           "pp_max": 15,
+          "statut": "Guérison complète"
+        },
+        {
+          "nom": "Koten Zanshun",
+          "description": "Attaque offensive utilisant Tsubaki pour couper et repousser les ennemis ou objets.",
+          "puissance": 60,
+          "categorie": "Physique",
+          "type": "Fée",
+          "pp_max": 10,
           "statut": null
         },
         {
-          "nom": "Hōchū",
-          "description": "Attaque offensive avec les six petites fées de Shun Shun Rikka.",
-          "puissance": 50,
+          "nom": "Shiten Kōshun",
+          "description": "Combine défense et attaque : absorbe l'impact et renvoie l’énergie sous forme d’explosion concentrée.",
+          "puissance": 75,
           "categorie": "Spécial",
           "type": "Fée",
-          "pp_max": 15,
+          "pp_max": 10,
           "statut": null
+        }
+      ]
+    },
+    "Fullbring Awakened": {
+      "bonus": {"special": 20, "defense": 15},
+      "activation": "Fullbring activé !",
+      "attaques": [
+        {
+          "nom": "Sōten Kisshun (Fullbring)",
+          "description": "Guérison avancée capable de restaurer entièrement des membres détruits ou des blessures graves.",
+          "puissance": 0,
+          "categorie": "Soin",
+          "type": "Fée",
+          "pp_max": 10,
+          "statut": "Guérison totale"
         },
         {
-          "nom": "Kaze no Chikai",
-          "description": "Attaque douce mais persistante qui peut perturber les mouvements ennemis.",
+          "nom": "Santen Kesshun (Dôme)",
+          "description": "Forme améliorée du bouclier, protège Orihime et plusieurs alliés dans un grand périmètre.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
-          "pp_max": 15,
-          "statut": null,
-          "boosts": {"rapidite": -1}
+          "pp_max": 5,
+          "statut": "Protection alliés étendue"
         }
       ]
     }
   },
-  "images": ["https://example.com/orihime.png"]
+  "images": []
 }
