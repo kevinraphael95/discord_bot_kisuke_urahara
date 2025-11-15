@@ -1,18 +1,17 @@
 {
   "nom": "Uryū Ishida",
-  "type": "Électrik",
+  "type": ["Électrik"],
   "genre": "Homme",
   "sexualite": "Hétéro",
   "personnalite": ["Intelligent", "Calme", "Déterminé", "Stratégique", "Protecteur"],
   "race": ["Humain", "Quincy", "Transcendant"],
   "stats_base": {
-    "pv": 100,
-    "attaque": 60,
-    "defense": 40,
-    "special": 50,
-    "special_def": 50,
-    "rapidite": 80,
-    "total_stats": 300
+    "pv": 90,
+    "attaque": 50,
+    "defense": 50,
+    "special": 85,
+    "special_def": 70,
+    "rapidite": 95
   },
   "formes": {
     "Normal": {
@@ -23,7 +22,7 @@
           "nom": "Seele Schneider",
           "description": "Attaque rapide avec l’arc Quincy classique.",
           "puissance": 60,
-          "categorie": "Offensive",
+          "categorie": "Spécial",
           "type": "Électrik",
           "pp_max": 15,
           "statut": null
@@ -32,7 +31,7 @@
           "nom": "Heilig Pfeil",
           "description": "Flèche spirituelle tirée à distance.",
           "puissance": 50,
-          "categorie": "Offensive",
+          "categorie": "Spécial",
           "type": "Électrik",
           "pp_max": 20,
           "statut": null
@@ -63,7 +62,7 @@
       "attaques": [
         {
           "nom": "Antithèse",
-          "description": "Inverse complètement tout ce qui s'est déjà produit entre deux cibles. Puissance stratégique maximale.",
+          "description": "Inverse complètement tout ce qui s'est déjà produit entre deux cibles.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Électrik",
@@ -74,7 +73,7 @@
           "nom": "Heilig Bogen",
           "description": "Arc Quincy ultime, extrêmement puissant et rapide.",
           "puissance": 90,
-          "categorie": "Offensive",
+          "categorie": "Spécial",
           "type": "Électrik",
           "pp_max": 10,
           "statut": null
@@ -83,7 +82,7 @@
           "nom": "Flèches rapides",
           "description": "Tire plusieurs flèches à grande vitesse.",
           "puissance": 75,
-          "categorie": "Offensive",
+          "categorie": "Spécial",
           "type": "Électrik",
           "pp_max": 10,
           "statut": null
@@ -100,5 +99,5 @@
       ]
     }
   },
-  "images": []
+  "images": ["https://example.com/uryu.png"]
 }
