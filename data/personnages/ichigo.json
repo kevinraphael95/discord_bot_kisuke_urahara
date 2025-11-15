@@ -43,7 +43,8 @@
           "categorie": "Statut",
           "type": "Normal",
           "pp_max": 20,
-          "statut": "Augmente rapidite"
+          "statut": null,
+          "boosts": {"rapidite": 1}
         },
         {
           "nom": "Soin léger",
@@ -85,7 +86,8 @@
           "categorie": "Statut",
           "type": "Normal",
           "pp_max": 15,
-          "statut": "Augmente rapidite"
+          "statut": null,
+          "boosts": {"rapidite": 1}
         },
         {
           "nom": "Soin moyen",
@@ -127,7 +129,8 @@
           "categorie": "Statut",
           "type": "Normal",
           "pp_max": 15,
-          "statut": "Augmente rapidite"
+          "statut": null,
+          "boosts": {"rapidite": 1}
         },
         {
           "nom": "Soin puissant",
