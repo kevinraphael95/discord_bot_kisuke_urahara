@@ -20,22 +20,22 @@
       "attaques": [
         {
           "nom": "Santen Kesshun",
-          "description": "Bouclier défensif formé par Hinagiku, Lily et Baigon pour repousser les attaques.",
+          "description": "Bouclier défensif qui augmente la défense d'Orihime pour repousser les attaques.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 20,
-          "statut": "Protection allié",
+          "statut": null,
           "boosts": {"defense": 2}
         },
         {
           "nom": "Sōten Kisshun",
-          "description": "Technique de guérison qui retourne l’état d’une personne ou d’un objet à son état initial.",
-          "puissance": 0,
+          "description": "Guérison classique pour restaurer les PV d'un allié ou d'elle-même.",
+          "puissance": 30,
           "categorie": "Soin",
           "type": "Fée",
           "pp_max": 15,
-          "statut": "Guérison complète"
+          "statut": null
         },
         {
           "nom": "Koten Zanshun",
@@ -63,21 +63,22 @@
       "attaques": [
         {
           "nom": "Sōten Kisshun (Fullbring)",
-          "description": "Guérison avancée capable de restaurer entièrement des membres détruits ou des blessures graves.",
-          "puissance": 0,
+          "description": "Guérison avancée qui restaure une grande quantité de PV à un allié ou à elle-même.",
+          "puissance": 60,
           "categorie": "Soin",
           "type": "Fée",
           "pp_max": 10,
-          "statut": "Guérison totale"
+          "statut": null
         },
         {
           "nom": "Santen Kesshun (Dôme)",
-          "description": "Forme améliorée du bouclier, protège Orihime et plusieurs alliés dans un grand périmètre.",
+          "description": "Bouclier amélioré qui augmente fortement la défense d'Orihime et des alliés à proximité.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 5,
-          "statut": "Protection alliés étendue"
+          "statut": null,
+          "boosts": {"defense": 3}
         }
       ]
     }
