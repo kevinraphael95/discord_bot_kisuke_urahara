@@ -24,8 +24,7 @@
           "puissance": 60,
           "categorie": "Spécial",
           "type": "Électrik",
-          "pp_max": 15,
-          "statut": null
+          "pp_max": 15
         },
         {
           "nom": "Heilig Pfeil",
@@ -33,37 +32,35 @@
           "puissance": 50,
           "categorie": "Spécial",
           "type": "Électrik",
-          "pp_max": 20,
-          "statut": null
+          "pp_max": 20
         },
         {
           "nom": "Flèche rapide",
-          "description": "Prépare une flèche plus rapide.",
+          "description": "Prépare une flèche plus rapide, augmentant la vitesse.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Électrik",
           "pp_max": 15,
-          "statut": null,
           "boosts": {"rapidite": 1}
         },
         {
-          "nom": "Soin léger",
-          "description": "Restaure un peu de PV.",
-          "puissance": 30,
-          "categorie": "Soin",
-          "type": "Normal",
-          "pp_max": 10,
-          "statut": null
+          "nom": "Blut Vene",
+          "description": "Renforce la défense grâce à l’énergie spirituelle dans le sang.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Électrik",
+          "pp_max": 5,
+          "boosts": {"defense": 2}
         }
       ]
     },
     "Vollständig": {
-      "bonus": {"attaque": 20, "rapidite": 20},
+      "bonus": {"attaque": 20, "special": 20, "rapidite": 20},
       "activation": "Vollständig, Antithesis !",
       "attaques": [
         {
           "nom": "Antithèse",
-          "description": "Inverse complètement tout ce qui s'est déjà produit entre deux cibles.",
+          "description": "Inverse complètement tout ce qui s'est produit entre deux cibles.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Électrik",
@@ -72,30 +69,28 @@
         },
         {
           "nom": "Heilig Bogen",
-          "description": "Arc Quincy ultime, extrêmement puissant et rapide.",
+          "description": "Arc Quincy ultime, très puissant et rapide.",
           "puissance": 90,
           "categorie": "Spécial",
           "type": "Électrik",
-          "pp_max": 10,
-          "statut": null
+          "pp_max": 10
         },
         {
-          "nom": "Flèches rapides",
-          "description": "Tire plusieurs flèches à grande vitesse.",
-          "puissance": 75,
+          "nom": "Composite Heilig Pfeil",
+          "description": "Combine plusieurs flèches pour créer une flèche géante perforante.",
+          "puissance": 120,
           "categorie": "Spécial",
           "type": "Électrik",
-          "pp_max": 10,
-          "statut": null
+          "pp_max": 3
         },
         {
-          "nom": "Soin moyen",
-          "description": "Restaure un peu plus de PV.",
-          "puissance": 50,
-          "categorie": "Soin",
-          "type": "Normal",
-          "pp_max": 10,
-          "statut": null
+          "nom": "Reishi Cage",
+          "description": "Crée une cage de flèches autour de l’ennemi et explose en forme de symbole Quincy.",
+          "puissance": 80,
+          "categorie": "Spécial",
+          "type": "Électrik",
+          "pp_max": 5,
+          "statut": "Prison"
         }
       ]
     }
