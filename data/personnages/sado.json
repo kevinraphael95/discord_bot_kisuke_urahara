@@ -25,7 +25,7 @@
           "categorie": "Statut",
           "type": "Combat",
           "pp_max": 10,
-          "statut": "Allié déplacé"
+          "statut": null
         },
         {
           "nom": "Grua Tirar",
