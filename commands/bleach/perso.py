@@ -68,9 +68,10 @@ class Perso(commands.Cog):
         embed.add_field(name="Race(s)", value=", ".join(char["race"]), inline=False)
 
         # ─────────────────────────────────────
-        # 📊 Stats (corrigé selon TON JSON)
+        # 📊 Stats
         # ─────────────────────────────────────
         stats = char["stats_base"]
+        total_stats = sum(stats[k] for k in ["pv","attaque","defense","special","special_def","rapidite"])
         embed.add_field(
             name="Stats de base",
             value=(
@@ -80,7 +81,7 @@ class Perso(commands.Cog):
                 f"• Spécial : {stats['special']}\n"
                 f"• Spécial Défense : {stats['special_def']}\n"
                 f"• Rapidité : {stats['rapidite']}\n"
-                f"• Total stats : {stats['total_stats']}"
+                f"• Total stats : {total_stats}"
             ),
             inline=False
         )
@@ -93,10 +94,12 @@ class Perso(commands.Cog):
                 f"• **{atk['nom']}**\n"
                 f"  ├ Puissance : {atk['puissance']}\n"
                 f"  ├ PP max : {atk['pp_max']}\n"
-                f"  └ Type : {atk['type']}"
-                for atk in forme["attaques"]
+                f"  ├ Type : {atk['type']}\n"
+                + (
+                    f"  └ Effet : {atk['statut']}" if atk.get("statut") else
+                    (f"  └ Boost : {', '.join([f'{k} +{v}' for k,v in atk['boosts'].items()])}" if atk.get("boosts") else "")
+                )
             )
-
 
             embed.add_field(
                 name=f"Forme: {forme_name}",
@@ -110,14 +113,12 @@ class Perso(commands.Cog):
         # ─────────────────────────────────────
         # 🖼️ Gestion des images
         # ─────────────────────────────────────
-        image_path = None
+        image_path = char.get("images")[0] if char.get("images") else "data/images/image_par_defaut.jpg"
 
-        if char.get("images"):
-            image_path = char["images"][0]
-        else:
-            image_path = "data/images/image_par_defaut.jpg"
-
-        if os.path.exists(image_path):
+        if image_path.startswith("http"):
+            embed.set_image(url=image_path)
+            await safe_send(channel, embed=embed)
+        elif os.path.exists(image_path):
             file = discord.File(image_path, filename=os.path.basename(image_path))
             embed.set_image(url=f"attachment://{os.path.basename(image_path)}")
             await safe_send(channel, embed=embed, file=file)
