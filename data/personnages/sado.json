@@ -1,0 +1,97 @@
+{
+  "nom": "Sado Yasutora",
+  "type": ["Combat"],
+  "genre": "Homme",
+  "sexualite": "Hétéro",
+  "personnalite": ["Calme", "Protecteur", "Loyal", "Déterminé", "Généreux"],
+  "race": ["Humain", "Fullbringer"],
+  "stats_base": {
+    "pv": 140,
+    "attaque": 100,
+    "defense": 85,
+    "special": 50,
+    "special_def": 60,
+    "rapidite": 65
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Chad Catapult",
+          "description": "Lance un allié dans les airs pour attaquer ou esquiver.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": "Allié déplacé"
+        },
+        {
+          "nom": "Grua Tirar",
+          "description": "Projection de l’ennemi par-dessus l’épaule, inspirée du seoi-nage.",
+          "puissance": 60,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": null
+        }
+      ]
+    },
+    "Brazo Derecha de Gigante": {
+      "bonus": {"attaque": 20, "defense": 15},
+      "activation": "Brazo Derecha de Gigante !",
+      "attaques": [
+        {
+          "nom": "El Directo",
+          "description": "Coup de poing droit surpuissant, chargé en énergie spirituelle.",
+          "puissance": 95,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Défensive Shield Form",
+          "description": "Transforme le bras droit en bouclier puissant, peut aussi attaquer.",
+          "puissance": 70,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": null
+        }
+      ]
+    },
+    "Brazo Izquierda del Diablo": {
+      "bonus": {"attaque": 25, "rapidite": 10},
+      "activation": "Brazo Izquierda del Diablo !",
+      "attaques": [
+        {
+          "nom": "La Muerte",
+          "description": "Coup de poing gauche dévastateur, utilisant les cinq doigts chargés de Reiryoku.",
+          "puissance": 100,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        }
+      ]
+    },
+    "Fullbring Awakened": {
+      "bonus": {"attaque": 30, "defense": 20, "rapidite": 15},
+      "activation": "Fullbring activé !",
+      "attaques": [
+        {
+          "nom": "La Muerte (Awakened)",
+          "description": "Sado utilise ses deux bras en mode Fullbring pour infliger des dégâts immenses avec possibilité de coup critique fatal.",
+          "puissance": 120,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        }
+      ]
+    }
+  },
+  "images": []
+}
