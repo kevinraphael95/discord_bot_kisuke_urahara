@@ -1,18 +1,17 @@
 {
   "nom": "Ichigo Kurosaki",
-  "type": "Ténèbres",
+  "type": ["Ténèbres"],
   "genre": "Homme",
   "sexualite": "Hétéro",
   "personnalite": ["Courageux", "Déterminé", "Protecteur", "Impulsif", "Bienveillant"],
   "race": ["Humain", "Fullbring", "Shinigami", "Hollow", "Arrancar", "Vizard", "Quincy", "Transcendant"],
   "stats_base": {
     "pv": 100,
-    "attaque": 75,
-    "defense": 50,
-    "special": 50,
-    "special_def": 50,
-    "rapidite": 80,
-    "total_stats": 305
+    "attaque": 85,
+    "defense": 70,
+    "special": 75,
+    "special_def": 65,
+    "rapidite": 90
   },
   "formes": {
     "Normal": {
@@ -34,7 +33,7 @@
           "puissance": 40,
           "categorie": "Physique",
           "type": "Normal",
-          "pp_max": 15,
+          "pp_max": 35,
           "statut": null
         },
         {
@@ -67,7 +66,7 @@
           "puissance": 75,
           "categorie": "Physique",
           "type": "Ténèbres",
-          "pp_max": 10,
+          "pp_max": 15,
           "statut": null
         },
         {
@@ -100,13 +99,13 @@
       ]
     },
     "Bankai": {
-      "bonus": {"attaque": 10},
+      "bonus": {"attaque": 15},
       "activation": "Tensa Zangetsu !",
       "attaques": [
         {
           "nom": "Getsuga Tenshō Ultime",
           "description": "Getsuga Tenshō ultime, extrêmement rapide et dévastatrice.",
-          "puissance": 85,
+          "puissance": 90,
           "categorie": "Physique",
           "type": "Ténèbres",
           "pp_max": 5,
@@ -115,7 +114,7 @@
         {
           "nom": "Cero Hollow Dévastateur",
           "description": "Vague d'énergie inspirée du Hollow intérieur, très puissante.",
-          "puissance": 90,
+          "puissance": 95,
           "categorie": "Spécial",
           "type": "Spectre",
           "pp_max": 5,
@@ -142,5 +141,5 @@
       ]
     }
   },
-  "images": []
+  "images": ["https://example.com/ichigo.png"]
 }
