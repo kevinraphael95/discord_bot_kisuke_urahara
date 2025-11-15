@@ -12,12 +12,11 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ui import View, Select
 import json
 import os
 import random
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_delete  
+from utils.discord_utils import safe_send
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Dossier contenant les JSON des personnages
@@ -47,8 +46,8 @@ class Perso(commands.Cog):
         self.bot = bot
 
     async def send_character(self, channel: discord.abc.Messageable, name: str = None):
+        # Choix aléatoire si aucun nom donné
         if not name:
-            # Choix aléatoire
             name = random.choice(list_characters())
 
         char = load_character(name)
@@ -56,41 +55,60 @@ class Perso(commands.Cog):
             await safe_send(channel, f"❌ Personnage `{name}` introuvable.")
             return
 
+        # ─────────────────────────────────────
+        # 📌 Embed principal
+        # ─────────────────────────────────────
         embed = discord.Embed(
             title=f"{char['nom']}",
             description=f"**Genre:** {char['genre']} | **Sexualité:** {char['sexualite']}",
             color=discord.Color.orange()
         )
+
         embed.add_field(name="Personnalité", value=", ".join(char["personnalite"]), inline=False)
         embed.add_field(name="Race(s)", value=", ".join(char["race"]), inline=False)
+
+        # ─────────────────────────────────────
+        # 📊 Stats (corrigé selon TON JSON)
+        # ─────────────────────────────────────
         stats = char["stats_base"]
         embed.add_field(
             name="Stats de base",
             value=(
+                f"• PV : {stats['pv']}\n"
                 f"• Attaque : {stats['attaque']}\n"
                 f"• Défense : {stats['defense']}\n"
-                f"• Pression : {stats['pression']}\n"
-                f"• Kidō : {stats['kido']}\n"
-                f"• Intelligence : {stats['intelligence']}\n"
+                f"• Spécial : {stats['special']}\n"
+                f"• Spécial Défense : {stats['special_def']}\n"
                 f"• Rapidité : {stats['rapidite']}\n"
                 f"• Total stats : {stats['total_stats']}"
             ),
             inline=False
         )
+
+        # ─────────────────────────────────────
+        # 🗡️ Formes + attaques
+        # ─────────────────────────────────────
         for forme_name, forme in char["formes"].items():
-            attaque_list = "\n".join(
-                f"• {atk['nom']} (Puissance: {atk['puissance']}, Coût: {atk['cout_endurance']})"
+            attaques_text = "\n".join(
+                f"• **{atk['nom']}** (Puissance: {atk['puissance']}, Coût: {atk['cout_endurance']}, Type: {atk['type']})"
                 for atk in forme["attaques"]
             )
+
             embed.add_field(
                 name=f"Forme: {forme_name}",
-                value=f"Activation: {forme.get('activation','N/A')}\n{attaque_list}",
+                value=(
+                    f"**Activation :** {forme.get('activation', 'N/A')}\n"
+                    f"{attaques_text}"
+                ),
                 inline=False
             )
 
-        # Gestion des images (locale ou défaut)
+        # ─────────────────────────────────────
+        # 🖼️ Gestion des images
+        # ─────────────────────────────────────
         image_path = None
-        if "images" in char and char["images"]:
+
+        if char.get("images"):
             image_path = char["images"][0]
         else:
             image_path = "data/images/image_par_defaut.jpg"
@@ -103,7 +121,7 @@ class Perso(commands.Cog):
             await safe_send(channel, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
+    # 🟦 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="perso",
@@ -117,7 +135,7 @@ class Perso(commands.Cog):
         await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
+    # 🟥 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="perso", help="Affiche la fiche d'un personnage Bleach.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
