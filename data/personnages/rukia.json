@@ -1,0 +1,136 @@
+{
+  "nom": "Rukia Kuchiki",
+  "type": ["Glace"],
+  "genre": "Femme",
+  "sexualite": "Hétéro",
+  "personnalite": ["Déterminée", "Courageuse", "Sérieuse", "Loyale", "Stoïque"],
+  "race": ["Shinigami"],
+  "stats_base": {
+    "pv": 100,
+    "attaque": 50,
+    "defense": 60,
+    "special": 80,
+    "special_def": 70,
+    "rapidite": 75
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Zanjutsu Expert",
+          "description": "Attaque au sabre basée sur son haut niveau de maîtrise.",
+          "puissance": 60,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 15
+        },
+        {
+          "nom": "Shunpo",
+          "description": "Déplacement ultra-rapide pour esquiver ou surprendre l'adversaire.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Glace",
+          "pp_max": 10,
+          "boosts": {"rapidite": 2}
+        },
+        {
+          "nom": "Hakuda",
+          "description": "Combat au corps-à-corps maîtrisé, même en Gigai dépouillé.",
+          "puissance": 50,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 10
+        },
+        {
+          "nom": "Esquive Agile",
+          "description": "Permet d’éviter automatiquement une attaque de l’adversaire.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Glace",
+          "pp_max": 5
+        }
+      ]
+    },
+    "Shikai": {
+      "bonus": {"special": 10, "attaque": 10},
+      "activation": "Shikai activé : Sode no Shirayuki !",
+      "attaques": [
+        {
+          "nom": "Some no Mai, Tsukishiro",
+          "description": "Gèle tout dans un cercle autour de l'adversaire, puis brise la glace.",
+          "puissance": 80,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 10
+        },
+        {
+          "nom": "Tsugi no Mai, Hakuren",
+          "description": "Vague glaciale massive qui encaisse et gèle tout sur son passage.",
+          "puissance": 100,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 5
+        },
+        {
+          "nom": "San no Mai, Shirafune",
+          "description": "Crée une lame de glace prolongée qui gèle la zone autour du contact.",
+          "puissance": 75,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 10
+        },
+        {
+          "nom": "Ice-Rope Connection",
+          "description": "Extension de glace pour attaquer à distance avec les pouvoirs du Shikai.",
+          "puissance": 60,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 10
+        }
+      ]
+    },
+    "Bankai": {
+      "bonus": {"special": 30, "attaque": 20},
+      "activation": "Bankai activé : Hakka no Togame !",
+      "attaques": [
+        {
+          "nom": "Hakka no Togame",
+          "description": "Vague glaciale à zéro absolu, gelant tout sur son passage.",
+          "puissance": 130,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 5
+        },
+        {
+          "nom": "Shunpo Expert",
+          "description": "Augmente fortement la rapidité, difficile à atteindre.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Glace",
+          "pp_max": 5,
+          "boosts": {"rapidite": 3}
+        },
+        {
+          "nom": "Sōten Kisshun",
+          "description": "Bouclier glacé renforcé, augmente fortement la défense.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Glace",
+          "pp_max": 5,
+          "boosts": {"defense": 2}
+        },
+        {
+          "nom": "Freeze Touch",
+          "description": "Le simple contact avec Rukia peut commencer à geler l'adversaire.",
+          "puissance": 70,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 10
+        }
+      ]
+    }
+  },
+  "images": []
+}
