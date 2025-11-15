@@ -90,9 +90,13 @@ class Perso(commands.Cog):
         # ─────────────────────────────────────
         for forme_name, forme in char["formes"].items():
             attaques_text = "\n".join(
-                f"• **{atk['nom']}** (Puissance: {atk['puissance']}, Coût: {atk['cout_endurance']}, Type: {atk['type']})"
+                f"• **{atk['nom']}**\n"
+                f"  ├ Puissance : {atk['puissance']}\n"
+                f"  ├ PP max : {atk['pp_max']}\n"
+                f"  └ Type : {atk['type']}"
                 for atk in forme["attaques"]
             )
+
 
             embed.add_field(
                 name=f"Forme: {forme_name}",
