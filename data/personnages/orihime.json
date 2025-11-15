@@ -1,18 +1,17 @@
 {
   "nom": "Orihime Inoue",
-  "type": "Fée",
+  "type": ["Fée"],
   "genre": "Femme",
   "sexualite": "Hétéro",
-  "personnalite": ["Bienveillant", "Protecteur", "Altruiste", "Amical", "Émotif"],
+  "personnalite": ["Bienveillante", "Protectrice", "Altruiste", "Amicale", "Émotive"],
   "race": ["Humain", "Fullbringer"],
   "stats_base": {
-    "pv": 100,
-    "attaque": 40,
-    "defense": 100,
-    "special": 65,
-    "special_def": 55,
-    "rapidite": 30,
-    "total_stats": 300
+    "pv": 120,
+    "attaque": 45,
+    "defense": 80,
+    "special": 75,
+    "special_def": 90,
+    "rapidite": 35
   },
   "formes": {
     "Normal": {
@@ -31,16 +30,16 @@
         {
           "nom": "Shun Shun Rikka : Sōten Kisshun",
           "description": "Guérison d'une partie ou d'une personne.",
-          "puissance": 50,
+          "puissance": 60,
           "categorie": "Soin",
           "type": "Fée",
-          "pp_max": 10,
+          "pp_max": 15,
           "statut": null
         },
         {
           "nom": "Hōchū",
           "description": "Attaque offensive avec les six petites fées de Shun Shun Rikka.",
-          "puissance": 45,
+          "puissance": 50,
           "categorie": "Spécial",
           "type": "Fée",
           "pp_max": 15,
@@ -49,7 +48,7 @@
         {
           "nom": "Kaze no Chikai",
           "description": "Attaque douce mais persistante qui peut perturber les mouvements ennemis.",
-          "puissance": 35,
+          "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 15,
@@ -58,5 +57,5 @@
       ]
     }
   },
-  "images": []
+  "images": ["https://example.com/orihime.png"]
 }
