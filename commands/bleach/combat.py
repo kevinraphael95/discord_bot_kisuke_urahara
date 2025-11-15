@@ -127,10 +127,10 @@ def calcul_degats(a, d, atk):
     return int(base * mult * rand * crit), mult, crit > 1
 
 def appliquer_attaque(a, d, atk, narratif):
-    """Applique une attaque (Soin / Statut / Dégâts / Antithèse)"""
+    """Applique une attaque (Soin / Statut / Dégâts / Antithèse / Boost)"""
 
     # ───────────────────────────────────────────────────────────
-    # 🟢 1. Attaque de SOIN (pas de dégâts)
+    # 🟢 1. Attaque de SOIN
     # ───────────────────────────────────────────────────────────
     if atk["categorie"] == "Soin":
         soin = atk["puissance"]
@@ -141,29 +141,31 @@ def appliquer_attaque(a, d, atk, narratif):
         return
 
     # ───────────────────────────────────────────────────────────
-    # 🌀 2. Attaque STATUT (aucun dégâts)
+    # 🌀 2. Attaque STATUT
     # ───────────────────────────────────────────────────────────
     if atk["categorie"] == "Statut" and atk.get("statut") != "Antithèse":
-        narratif.append(
-            f"{CATEGORIE_EMOJI['Statut']} **{a['nom']}** utilise *{atk['nom']}* !"
-        )
+        narratif.append(f"{CATEGORIE_EMOJI['Statut']} **{a['nom']}** utilise *{atk['nom']}* !")
 
         if atk.get("statut"):
             d["statut"] = atk["statut"]
             s = STATUTS[atk["statut"]]
-            narratif.append(
-                f"{s['emoji']} **{d['nom']}** est affecté par **{atk['statut']}** !"
-            )
+            narratif.append(f"{s['emoji']} **{d['nom']}** est affecté par **{atk['statut']}** !")
+
+        # ── Application des boosts style Pokémon ──
+        if atk.get("boosts"):
+            for stat, value in atk["boosts"].items():
+                target = a if value > 0 else d
+                target["boosts"][stat] += abs(value)
+                narratif.append(f"⚡ **{target['nom']}** voit sa statistique **{stat}** {'augmentée' if value>0 else 'diminuée'} !")
         return
 
     # ───────────────────────────────────────────────────────────
-    # 🔁 3. ANTITHÈSE (inversion totale)
+    # 🔁 3. ANTITHÈSE
     # ───────────────────────────────────────────────────────────
     if atk.get("statut") == "Antithèse":
         a["pv"], d["pv"] = d["pv"], a["pv"]
         a["boosts"], d["boosts"] = d["boosts"], a["boosts"]
         a["statut"], d["statut"] = d["statut"], a["statut"]
-
         narratif.append(
             f"🔁 **{a['nom']}** active *{atk['nom']}* ! Tous les effets subis entre "
             f"**{a['nom']}** et **{d['nom']}** sont inversés !"
@@ -171,33 +173,21 @@ def appliquer_attaque(a, d, atk, narratif):
         return
 
     # ───────────────────────────────────────────────────────────
-    # ⚔️ 4. Attaque OFFENSIVE (Physique ou Spéciale)
+    # ⚔️ 4. Attaque OFFENSIVE
     # ───────────────────────────────────────────────────────────
     degats, mult, crit = calcul_degats(a, d, atk)
     d["pv"] -= degats
 
     emoji_type = TYPE_EMOJI.get(atk["type"], "")
-
-    txt = (
-        f"{CATEGORIE_EMOJI.get(atk['categorie'], '⚔️')} "
-        f"**{a['nom']}** utilise *{atk['nom']}* {emoji_type} et inflige {degats} PV !"
-    )
-
-    if crit:
-        txt += " ⚡ Coup critique !"
-    if mult > 1:
-        txt += " 💥 Super efficace !"
-    elif mult < 1:
-        txt += " ⚠️ Peu efficace..."
-
+    txt = f"{CATEGORIE_EMOJI.get(atk['categorie'], '⚔️')} **{a['nom']}** utilise *{atk['nom']}* {emoji_type} et inflige {degats} PV !"
+    if crit: txt += " ⚡ Coup critique !"
+    if mult > 1: txt += " 💥 Super efficace !"
+    elif mult < 1: txt += " ⚠️ Peu efficace..."
     narratif.append(txt)
 
-    # ───────────────────────────────────────────────────────────
-    # 🧪 5. Application des statuts secondaires
-    # ───────────────────────────────────────────────────────────
+    # ── Application des statuts secondaires ──
     if atk.get("statut") and atk["statut"] not in ["Antithèse"]:
         d["statut"] = atk["statut"]
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Forme suivante (évolution en combat)
@@ -219,28 +209,16 @@ class CombatCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="combat",
-        description="⚔️ Combat style Pokémon entre 2 persos."
-    )
+    @app_commands.command(name="combat", description="⚔️ Combat style Pokémon entre 2 persos.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_combat(self, interaction: discord.Interaction):
         await self.run_combat(interaction.channel)
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="combat")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_combat(self, ctx: commands.Context):
         await self.run_combat(ctx.channel)
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔧 Fonction principale du combat
-    # ────────────────────────────────────────────────────────────────────────────
     async def run_combat(self, channel):
         try:
             persos = [load_character(n) for n in list_characters()]
@@ -288,11 +266,7 @@ class CombatCommand(commands.Cog):
             pages = [texte_combat[i:i + PAGINATION_TAILLE] for i in range(0, len(texte_combat), PAGINATION_TAILLE)]
             index = 0
 
-            embed = discord.Embed(
-                title=f"🗡️ {p1['nom']} vs {p2['nom']}",
-                description=pages[index],
-                color=discord.Color.red()
-            )
+            embed = discord.Embed(title=f"🗡️ {p1['nom']} vs {p2['nom']}", description=pages[index], color=discord.Color.red())
             embed.set_thumbnail(url=p1["image"])
             embed.set_image(url=p2["image"])
 
