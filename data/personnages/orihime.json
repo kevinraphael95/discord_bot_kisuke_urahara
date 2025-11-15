@@ -9,7 +9,7 @@
     "pv": 120,
     "attaque": 40,
     "defense": 85,
-    "special": 90,
+    "special": 90",
     "special_def": 100,
     "rapidite": 35
   },
@@ -20,40 +20,36 @@
       "attaques": [
         {
           "nom": "Santen Kesshun",
-          "description": "Bouclier défensif qui augmente la défense d'Orihime pour repousser les attaques.",
+          "description": "Bouclier triangulaire formé par Hinagiku, Lily et Baigon qui repousse les attaques.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 20,
-          "statut": null,
           "boosts": {"defense": 2}
         },
         {
           "nom": "Sōten Kisshun",
-          "description": "Guérison classique pour restaurer les PV d'un allié ou d'elle-même.",
+          "description": "Barrière de guérison invoquant Ayame et Shun'ō pour restaurer les PV.",
           "puissance": 30,
           "categorie": "Soin",
           "type": "Fée",
-          "pp_max": 15,
-          "statut": null
+          "pp_max": 15
         },
         {
           "nom": "Koten Zanshun",
-          "description": "Attaque offensive utilisant Tsubaki pour couper et repousser les ennemis ou objets.",
+          "description": "Attaque de Tsubaki rejetant la fusion de la matière pour trancher l’ennemi.",
           "puissance": 60,
           "categorie": "Physique",
           "type": "Fée",
-          "pp_max": 10,
-          "statut": null
+          "pp_max": 10
         },
         {
           "nom": "Shiten Kōshun",
-          "description": "Combine défense et attaque : absorbe l'impact et renvoie l’énergie sous forme d’explosion concentrée.",
+          "description": "Bouclier réactif : absorbe l’impact et renvoie l’énergie sous forme d’explosion.",
           "puissance": 75,
           "categorie": "Spécial",
           "type": "Fée",
-          "pp_max": 10,
-          "statut": null
+          "pp_max": 10
         }
       ]
     },
@@ -62,23 +58,38 @@
       "activation": "Fullbring activé !",
       "attaques": [
         {
-          "nom": "Sōten Kisshun (Fullbring)",
-          "description": "Guérison avancée qui restaure une grande quantité de PV à un allié ou à elle-même.",
+          "nom": "Sōten Kisshun (Perfect)",
+          "description": "Version avancée : restaure une grande quantité de PV et élimine les altérations.",
           "puissance": 60,
           "categorie": "Soin",
           "type": "Fée",
-          "pp_max": 10,
-          "statut": null
+          "pp_max": 10
         },
         {
-          "nom": "Santen Kesshun (Dôme)",
-          "description": "Bouclier amélioré qui augmente fortement la défense d'Orihime et des alliés à proximité.",
+          "nom": "Santen Kesshun (Dôme Sacré)",
+          "description": "Bouclier dôme amélioré protégeant tout le terrain allié.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 5,
-          "statut": null,
           "boosts": {"defense": 3}
+        },
+        {
+          "nom": "Tsubaki Burst",
+          "description": "Tsubaki attaque avec toute sa puissance rejetée, traversant la défense ennemie.",
+          "puissance": 90,
+          "categorie": "Spécial",
+          "type": "Fée",
+          "pp_max": 10
+        },
+        {
+          "nom": "Reject Reality",
+          "description": "Orihime nie un événement : réduit drastiquement les dégâts subis au prochain tour.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Fée",
+          "pp_max": 5,
+          "boosts": {"special_def": 3}
         }
       ]
     }
