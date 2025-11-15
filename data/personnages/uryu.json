@@ -43,7 +43,8 @@
           "categorie": "Statut",
           "type": "Électrik",
           "pp_max": 15,
-          "statut": "Augmente rapidite"
+          "statut": null,
+          "boosts": {"rapidite": 1}
         },
         {
           "nom": "Soin léger",
