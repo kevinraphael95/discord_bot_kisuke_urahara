@@ -20,75 +20,76 @@
       "attaques": [
         {
           "nom": "Chad Catapult",
-          "description": "Lance un allié dans les airs pour attaquer ou esquiver.",
+          "description": "Projette un allié pour le repositionner stratégiquement.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Combat",
+          "pp_max": 10
+        },
+        {
+          "nom": "Grua Tirar",
+          "description": "Projette un ennemi avec la force d'un seoi-nage surdimensionné.",
+          "puissance": 60,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 10
+        },
+        {
+          "nom": "Uppercut Blindé",
+          "description": "Coup ascendant puissant utilisant sa force et son endurance.",
+          "puissance": 70,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 15
+        },
+        {
+          "nom": "Stance du Géant",
+          "description": "Renforce sa posture pour réduire les dégâts reçus.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Combat",
           "pp_max": 10,
-          "statut": null
-        },
-        {
-          "nom": "Grua Tirar",
-          "description": "Projection de l’ennemi par-dessus l’épaule, inspirée du seoi-nage.",
-          "puissance": 60,
-          "categorie": "Physique",
-          "type": "Combat",
-          "pp_max": 10,
-          "statut": null
+          "boosts": { "defense": 1, "special_def": 1 }
         }
       ]
     },
-    "Brazo Derecha de Gigante": {
-      "bonus": {"attaque": 20, "defense": 15},
-      "activation": "Brazo Derecha de Gigante !",
+
+    "Fullbring Awakened": {
+      "bonus": { "attaque": 30, "defense": 20, "rapidite": 15 },
+      "activation": "Fullbring activé !",
       "attaques": [
         {
           "nom": "El Directo",
-          "description": "Coup de poing droit surpuissant, chargé en énergie spirituelle.",
+          "description": "Coup de poing droit surpuissant, pouvant aussi être projeté comme attaque à distance.",
           "puissance": 95,
           "categorie": "Physique",
           "type": "Combat",
-          "pp_max": 10,
-          "statut": null
+          "pp_max": 10
         },
         {
           "nom": "Défensive Shield Form",
-          "description": "Transforme le bras droit en bouclier puissant, peut aussi attaquer.",
+          "description": "Bras droit transformé en bouclier massif pour encaisser ou frapper.",
           "puissance": 70,
           "categorie": "Physique",
           "type": "Combat",
           "pp_max": 10,
-          "statut": null
-        }
-      ]
-    },
-    "Brazo Izquierda del Diablo": {
-      "bonus": {"attaque": 25, "rapidite": 10},
-      "activation": "Brazo Izquierda del Diablo !",
-      "attaques": [
+          "boosts": { "defense": 2 }
+        },
         {
           "nom": "La Muerte",
-          "description": "Coup de poing gauche dévastateur, utilisant les cinq doigts chargés de Reiryoku.",
-          "puissance": 100,
-          "categorie": "Physique",
-          "type": "Combat",
-          "pp_max": 5,
-          "statut": null
-        }
-      ]
-    },
-    "Fullbring Awakened": {
-      "bonus": {"attaque": 30, "defense": 20, "rapidite": 15},
-      "activation": "Fullbring activé !",
-      "attaques": [
-        {
-          "nom": "La Muerte (Awakened)",
-          "description": "Sado utilise ses deux bras en mode Fullbring pour infliger des dégâts immenses avec possibilité de coup critique fatal.",
+          "description": "Coup fatal du bras gauche, concentrant l’énergie des cinq doigts.",
           "puissance": 120,
           "categorie": "Physique",
           "type": "Combat",
-          "pp_max": 5,
-          "statut": null
+          "pp_max": 5
+        },
+        {
+          "nom": "Canon Gigante",
+          "description": "Décharge massive de Reiatsu à longue portée combinant les deux bras.",
+          "puissance": 110,
+          "categorie": "Spécial",
+          "type": "Combat",
+          "pp_max": 5
         }
       ]
     }
