@@ -59,28 +59,36 @@ class Perso(commands.Cog):
         # 📌 Embed principal
         # ─────────────────────────────────────
         embed = discord.Embed(
-            title=f"{char['nom']}",
-            description=f"**Genre:** {char['genre']} | **Sexualité:** {char['sexualite']}",
+            title=f"{char.get('nom','Inconnu')}",
+            description=f"**Genre:** {char.get('genre','N/A')} | **Sexualité:** {char.get('sexualite','N/A')}",
             color=discord.Color.orange()
         )
 
-        embed.add_field(name="Personnalité", value=", ".join(char["personnalite"]), inline=False)
-        embed.add_field(name="Race(s)", value=", ".join(char["race"]), inline=False)
+        embed.add_field(
+            name="Personnalité",
+            value=", ".join(char.get("personnalite", ["N/A"])),
+            inline=False
+        )
+        embed.add_field(
+            name="Race(s)",
+            value=", ".join(char.get("race", ["N/A"])),
+            inline=False
+        )
 
         # ─────────────────────────────────────
         # 📊 Stats
         # ─────────────────────────────────────
-        stats = char["stats_base"]
-        total_stats = sum(stats[k] for k in ["pv","attaque","defense","special","special_def","rapidite"])
+        stats = char.get("stats_base", {})
+        total_stats = sum(stats.get(k, 0) for k in ["pv","attaque","defense","special","special_def","rapidite"])
         embed.add_field(
             name="Stats de base",
             value=(
-                f"• PV : {stats['pv']}\n"
-                f"• Attaque : {stats['attaque']}\n"
-                f"• Défense : {stats['defense']}\n"
-                f"• Spécial : {stats['special']}\n"
-                f"• Spécial Défense : {stats['special_def']}\n"
-                f"• Rapidité : {stats['rapidite']}\n"
+                f"• PV : {stats.get('pv',0)}\n"
+                f"• Attaque : {stats.get('attaque',0)}\n"
+                f"• Défense : {stats.get('defense',0)}\n"
+                f"• Spécial : {stats.get('special',0)}\n"
+                f"• Spécial Défense : {stats.get('special_def',0)}\n"
+                f"• Rapidité : {stats.get('rapidite',0)}\n"
                 f"• Total stats : {total_stats}"
             ),
             inline=False
@@ -89,22 +97,28 @@ class Perso(commands.Cog):
         # ─────────────────────────────────────
         # 🗡️ Formes + attaques
         # ─────────────────────────────────────
-        for forme_name, forme in char["formes"].items():
-            attaques_text = "\n".join(
-                f"• **{atk['nom']}**\n"
-                f"  ├ Puissance : {atk['puissance']}\n"
-                f"  ├ PP max : {atk['pp_max']}\n"
-                f"  ├ Type : {atk['type']}\n"
-                + (
-                    f"  └ Effet : {atk['statut']}" if atk.get("statut") else
-                    (f"  └ Boost : {', '.join([f'{k} +{v}' for k,v in atk['boosts'].items()])}" if atk.get("boosts") else "")
+        for forme_name, forme in char.get("formes", {}).items():
+            attaques_text_list = []
+            for atk in forme.get("attaques", []):
+                effet_text = ""
+                if atk.get("statut"):
+                    effet_text = f"  └ Effet : {atk['statut']}"
+                elif atk.get("boosts"):
+                    effet_text = "  └ Boost : " + ", ".join(f"{k} +{v}" for k, v in atk["boosts"].items())
+
+                attaques_text_list.append(
+                    f"• **{atk.get('nom','Inconnu')}**\n"
+                    f"  ├ Puissance : {atk.get('puissance',0)}\n"
+                    f"  ├ PP max : {atk.get('pp_max',0)}\n"
+                    f"  ├ Type : {atk.get('type','Normal')}\n"
+                    f"{effet_text}"
                 )
-            )
+            attaques_text = "\n".join(attaques_text_list) or "Aucune attaque."
 
             embed.add_field(
                 name=f"Forme: {forme_name}",
                 value=(
-                    f"**Activation :** {forme.get('activation', 'N/A')}\n"
+                    f"**Activation :** {forme.get('activation') or 'N/A'}\n"
                     f"{attaques_text}"
                 ),
                 inline=False
@@ -113,7 +127,8 @@ class Perso(commands.Cog):
         # ─────────────────────────────────────
         # 🖼️ Gestion des images
         # ─────────────────────────────────────
-        image_path = char.get("images")[0] if char.get("images") else "data/images/image_par_defaut.jpg"
+        images = char.get("images") or []
+        image_path = images[0] if images else "data/images/image_par_defaut.jpg"
 
         if image_path.startswith("http"):
             embed.set_image(url=image_path)
