@@ -23,11 +23,6 @@ from utils.discord_utils import safe_send
 # ────────────────────────────────────────────────────────────────────────────────
 CHAR_DIR = os.path.join("data", "personnages")
 
-with open("data/config_types.json", "r", encoding="utf-8") as f:
-    CONFIG_TYPES = json.load(f)
-TYPES_EMOJI = CONFIG_TYPES["types_emoji"]
-CATEGORIES_EMOJI = CONFIG_TYPES["categories_emoji"]
-
 def load_character(name: str):
     """Charge la fiche JSON d'un personnage par nom."""
     path = os.path.join(CHAR_DIR, f"{name.lower()}.json")
@@ -50,7 +45,7 @@ class Perso(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    async def send_character(self, channel: discord.abc.Messageable, name: str = None, forme_name: str = "Normal"):
+    async def send_character(self, channel: discord.abc.Messageable, name: str = None):
         # Choix aléatoire si aucun nom donné
         if not name:
             name = random.choice(list_characters())
@@ -60,21 +55,12 @@ class Perso(commands.Cog):
             await safe_send(channel, f"❌ Personnage `{name}` introuvable.")
             return
 
-        await self.send_embed(channel, char, forme_name)
-
-    async def send_embed(self, channel, char, forme_name):
-        """Embed d'une seule forme avec menu déroulant pour changer de forme."""
-        forme = char.get("formes", {}).get(forme_name, {})
-        stats = char.get("stats_base", {})
-        total_stats = sum(stats.get(k,0) for k in ["pv","attaque","defense","special","special_def","rapidite"])
-        types_text = " | ".join(f"{TYPES_EMOJI.get(t,t)} {t}" for t in char.get("type",[]))
-
         # ─────────────────────────────────────
         # 📌 Embed principal
         # ─────────────────────────────────────
         embed = discord.Embed(
-            title=f"{char.get('nom','Inconnu')} — Forme : {forme_name}",
-            description=f"**Genre:** {char.get('genre','N/A')} | **Sexualité:** {char.get('sexualite','N/A')}\n**Type:** {types_text}",
+            title=f"{char.get('nom','Inconnu')}",
+            description=f"**Genre:** {char.get('genre','N/A')} | **Sexualité:** {char.get('sexualite','N/A')}",
             color=discord.Color.orange()
         )
 
@@ -92,6 +78,8 @@ class Perso(commands.Cog):
         # ─────────────────────────────────────
         # 📊 Stats
         # ─────────────────────────────────────
+        stats = char.get("stats_base", {})
+        total_stats = sum(stats.get(k, 0) for k in ["pv","attaque","defense","special","special_def","rapidite"])
         embed.add_field(
             name="Stats de base",
             value=(
@@ -107,29 +95,34 @@ class Perso(commands.Cog):
         )
 
         # ─────────────────────────────────────
-        # 🗡️ Attaques de la forme
+        # 🗡️ Formes + attaques
         # ─────────────────────────────────────
-        attaques_text_list = []
-        for atk in forme.get("attaques", []):
-            effet_text = ""
-            if atk.get("statut"):
-                effet_text = f"  └ Effet : {atk['statut']}"
-            elif atk.get("boosts"):
-                effet_text = "  └ Boost : " + ", ".join(f"{k} +{v}" for k,v in atk["boosts"].items())
-            attaques_text_list.append(
-                f"• **{atk.get('nom','Inconnu')}**\n"
-                f"  ├ Puissance : {atk.get('puissance',0)}\n"
-                f"  ├ PP max : {atk.get('pp_max',0)}\n"
-                f"  ├ Type : {atk.get('type','Normal')}\n"
-                f"{effet_text}"
-            )
-        attaques_text = "\n".join(attaques_text_list) or "Aucune attaque."
+        for forme_name, forme in char.get("formes", {}).items():
+            attaques_text_list = []
+            for atk in forme.get("attaques", []):
+                effet_text = ""
+                if atk.get("statut"):
+                    effet_text = f"  └ Effet : {atk['statut']}"
+                elif atk.get("boosts"):
+                    effet_text = "  └ Boost : " + ", ".join(f"{k} +{v}" for k, v in atk["boosts"].items())
 
-        embed.add_field(
-            name=f"Activation : {forme.get('activation') or 'N/A'}",
-            value=attaques_text,
-            inline=False
-        )
+                attaques_text_list.append(
+                    f"• **{atk.get('nom','Inconnu')}**\n"
+                    f"  ├ Puissance : {atk.get('puissance',0)}\n"
+                    f"  ├ PP max : {atk.get('pp_max',0)}\n"
+                    f"  ├ Type : {atk.get('type','Normal')}\n"
+                    f"{effet_text}"
+                )
+            attaques_text = "\n".join(attaques_text_list) or "Aucune attaque."
+
+            embed.add_field(
+                name=f"Forme: {forme_name}",
+                value=(
+                    f"**Activation :** {forme.get('activation') or 'N/A'}\n"
+                    f"{attaques_text}"
+                ),
+                inline=False
+            )
 
         # ─────────────────────────────────────
         # 🖼️ Gestion des images
@@ -139,40 +132,13 @@ class Perso(commands.Cog):
 
         if image_path.startswith("http"):
             embed.set_image(url=image_path)
+            await safe_send(channel, embed=embed)
         elif os.path.exists(image_path):
             file = discord.File(image_path, filename=os.path.basename(image_path))
             embed.set_image(url=f"attachment://{os.path.basename(image_path)}")
+            await safe_send(channel, embed=embed, file=file)
         else:
-            file = None
-
-        # ─────────────────────────────────────
-        # Menu déroulant pour changer de forme
-        # ─────────────────────────────────────
-        class FormeSelect(discord.ui.Select):
-            def __init__(self):
-                options = [
-                    discord.SelectOption(label=f, description=f"Voir la forme {f}", emoji=None)
-                    for f in char.get("formes", {})
-                ]
-                super().__init__(placeholder="Choisir une forme", min_values=1, max_values=1, options=options)
-
-            async def callback(self, interaction: discord.Interaction):
-                await self.view.message.delete()
-                await self.view.cog.send_embed(interaction.channel, char, self.values[0])
-
-        class FormeView(discord.ui.View):
-            def __init__(self, cog):
-                super().__init__(timeout=120)
-                self.cog = cog
-                self.message = None
-                self.add_item(FormeSelect())
-
-        view = FormeView(self)
-        if file:
-            msg = await safe_send(channel, embed=embed, file=file, view=view)
-        else:
-            msg = await safe_send(channel, embed=embed, view=view)
-        view.message = msg
+            await safe_send(channel, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🟦 Commande SLASH
