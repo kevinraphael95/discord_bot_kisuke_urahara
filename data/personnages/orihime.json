@@ -25,7 +25,8 @@
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 20,
-          "statut": "Augmente defense"
+          "statut": null,
+          "boosts": {"defense": 1}
         },
         {
           "nom": "Shun Shun Rikka : Sōten Kisshun",
@@ -52,7 +53,8 @@
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 15,
-          "statut": "Réduit rapidite ennemi"
+          "statut": null,
+          "boosts": {"rapidite": -1}
         }
       ]
     }
