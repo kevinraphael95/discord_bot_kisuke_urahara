@@ -3,7 +3,7 @@
   "type": ["Fée"],
   "genre": "Femme",
   "sexualite": "Hétéro",
-  "personnalite": ["Bienveillant", "Protecteur", "Altruiste", "Amical", "Émotif"],
+  "personnalite": ["Bienveillant", "Protecteur", "Altruiste", "Amical", "Émotif", "Courageux"],
   "race": ["Humain", "Fullbringer"],
   "stats_base": {
     "pv": 120,
