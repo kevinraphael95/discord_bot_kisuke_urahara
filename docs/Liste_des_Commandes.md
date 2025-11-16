@@ -21,6 +21,10 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **perso :** Affiche la fiche d'un personnage Bleach.
 - **pilote :** 📖 Lire le pilote de Bleach.
 - **ship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
+- **versus :** Pas de description.
+
+### 📂 Fun
+- **testtache :** Pas de description.
 
 ### 📂 Fun&Random
 - **calc :** Pas de description.
@@ -33,10 +37,10 @@ Usage: !say_as <mention|id|pseudo> <message>
 
 ### 📂 Général
 - **code :** Affiche un lien vers le code source du bot.
-- **emoji :** 😄 Affiche la liste des emojis des serveurss dans lesquels est le bot et permet d'en mmontrer un ou plusieurs.
+- **emoji :** Montre un ou plusieurs emojis du serveur ou de tous les serveurs.
 - **help :** Affiche la liste des commandes ou une commande spécifique.
 - **react :** Réagit à un message avec un ou plusieurs emojis.
-- **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am. Ex: !say *e *am Bonjour !
+- **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
 
 ### 📂 Jeux
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
@@ -46,6 +50,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
 - **drapeaux :** Pas de description.
 - **entrainementcerebral :** Entraînement cérébral composé de 5 mini-jeux.
+- **formes :** Pas de description.
 - **jardin :** Affiche ton jardin ou celui d'un autre utilisateur 🌱
 - **jardin2 :** Pas de description.
 - **lightsout :** Pas de description.
@@ -53,9 +58,9 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **mot_contraint :** Jeu : trouve un mot qui commence et finit par des lettres données.
 - **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
 - **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
-- **paires :** Jouer au Memory Game
 - **pendu :** Démarre une partie du jeu du pendu.
 - **portes :** Joue au Jeu des Portes et résous les énigmes.
+- **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
 - **tram_probleme :** Pas de description.
 
 ### 📂 Reiatsu
