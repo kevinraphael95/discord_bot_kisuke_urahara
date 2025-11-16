@@ -83,16 +83,18 @@ calcul_rapide.emoji = "🧮"
 calcul_rapide.prep_time = 0
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔹 🔢 Carré magique 3x3 fiable emoji
+# 🔹 🔢 Carré magique 3x3 fiable (boutons emoji)
 # ────────────────────────────────────────────────────────────────────────────────
-async def carre_magique(msg, embed, get_user, bot):
-    embed.title = "🧩 Carré magique"
-    embed.description = "Clique sur les **3 chiffres** qui donnent **15**."
-    await msg.edit(embed=embed)
-
+async def carre_magique(ctx, embed, get_user_id, bot):
     import random
     numbers = list(range(1, 10))
     random.shuffle(numbers)
+
+    embed.title = "🧩 Carré magique"
+    embed.description = "Clique sur **3 chiffres** dont la somme fait **15**."
+    embed.clear_fields()
+
+    msg = await ctx.edit(embed=embed)
 
     selected = []
 
@@ -100,41 +102,42 @@ async def carre_magique(msg, embed, get_user, bot):
         def __init__(self):
             super().__init__(timeout=20)
 
-            # Création des 9 boutons
             for n in numbers:
-                self.add_item(self.NumberButton(n))
+                self.add_item(NumberButton(n))
 
-        class NumberButton(discord.ui.Button):
-            def __init__(self, n):
-                super().__init__(label=str(n), style=discord.ButtonStyle.primary)
-                self.n = n
+    class NumberButton(discord.ui.Button):
+        def __init__(self, n):
+            super().__init__(label=str(n), style=discord.ButtonStyle.primary)
+            self.n = n
 
-            async def callback(self, interaction: discord.Interaction):
-                if interaction.user.id != get_user():
-                    return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
+        async def callback(self, interaction: discord.Interaction):
+            if interaction.user.id != get_user_id():
+                return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
 
-                selected.append(self.n)
-                await interaction.response.defer()
+            selected.append(self.n)
+            await interaction.response.defer()
 
-                if len(selected) == 3:
-                    for child in self.view.children:
-                        child.disabled = True
-                    await msg.edit(view=self.view)
+            # Si 3 boutons ont été cliqués → on bloque tout et on termine
+            if len(selected) == 3:
+                for child in self.view.children:
+                    child.disabled = True
 
-                    return self.view.stop()
+                await msg.edit(view=self.view)
+                self.view.stop()
 
     view = CarreView()
-    await msg.edit(view=view)
+    await msg.edit(embed=embed, view=view)
 
-    timeout = await view.wait()
-    if timeout:
+    # Attendre la fin ou le timeout
+    finished = await view.wait()
+    if finished:
         return False
 
     return sum(selected) == 15
 
-carre_magique_fiable_emoji.title = "Carré magique 3x3"
-carre_magique_fiable_emoji.emoji = "🔢"
-carre_magique_fiable_emoji.prep_time = 0
+carre_magique.title = "Carré magique 3x3"
+carre_magique.emoji = "🔢"
+carre_magique.prep_time = 0
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 👀 Compter les emojis
