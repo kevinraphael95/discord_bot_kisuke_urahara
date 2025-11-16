@@ -3,7 +3,7 @@
   "type": ["Ténèbres"],
   "genre": "Homme",
   "sexualite": "Hétéro",
-  "personnalite": ["Courageux", "Déterminé", "Protecteur", "Impulsif", "Bienveillant"],
+  "personnalite": ["Courageux", "Déterminé", "Protecteur", "Impulsif", "Bienveillant", "Altruiste"],
   "race": ["Humain", "Fullbring", "Shinigami", "Hollow", "Arrancar", "Vizard", "Quincy", "Transcendant"],
   "stats_base": {
     "pv": 130,
