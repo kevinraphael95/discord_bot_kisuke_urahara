@@ -27,7 +27,7 @@ GAME_TIMEOUT = 30  # secondes max pour répondre à un mini-jeu
 # ────────────────────────────────────────────────────────────────────────────────
 class TestKawashima(commands.Cog):
     """
-    Commande /testgame et !testgame — Tester n’importe quel mini-jeu Kawashima via numéro,
+    Commande /testgame et !testgame — Tester un mini-jeu Kawashima via numéro,
     ou tous les jeux via 'all', avec pagination si nécessaire.
     """
     def __init__(self, bot: commands.Bot):
@@ -37,7 +37,7 @@ class TestKawashima(commands.Cog):
             if not name.startswith("_"):
                 title = getattr(func, "title", func.__name__)
                 self.games[title] = func
-        self.sorted_titles = sorted(self.games.keys())
+        self.sorted_titles = sorted(self.games.keys())  # ordre alphabétique
 
     # ──────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -64,7 +64,6 @@ class TestKawashima(commands.Cog):
     # ──────────────────────────────────────────────────────────────
     async def run_game(self, ctx_or_interaction, choix: str | int = None):
         """Affiche la liste paginée, lance un mini-jeu ou tous les jeux ('all')."""
-        # Détermine l’envoi et l’utilisateur
         if isinstance(ctx_or_interaction, discord.Interaction):
             send = lambda *a, **kw: safe_send(ctx_or_interaction.channel, *a, **kw)
             user = ctx_or_interaction.user
@@ -84,26 +83,22 @@ class TestKawashima(commands.Cog):
                 )
                 game_msg = await send(embed=embed)
                 try:
-                    # Timeout intégré pour arrêter si pas de réponse
                     success = await asyncio.wait_for(
                         game_func(game_msg, embed, lambda: user.id, self.bot),
                         timeout=GAME_TIMEOUT
                     )
-                    if success is None:
-                        results.append(f"{i}. {title} — ❌ Pas fait, arrêt des tests")
-                        break  # arrêt immédiat si pas répondu
-                    elif success is False:
-                        results.append(f"{i}. {title} — ❌ Raté")
-                    else:
-                        results.append(f"{i}. {title} — ✅ Bien joué")
+                    if not success:  # None ou False = on arrête tout
+                        results.append(f"{i}. {title} — ⏱ Pas répondu ou annulé, arrêt immédiat")
+                        break
+                    results.append(f"{i}. {title} — ✅ Bien joué")
                 except asyncio.TimeoutError:
-                    results.append(f"{i}. {title} — ⏱ Pas répondu, arrêt des tests")
+                    results.append(f"{i}. {title} — ⏱ Pas répondu, arrêt immédiat")
                     break
                 except Exception as e:
                     results.append(f"{i}. {title} — ⚠️ Erreur : {e}")
                     break
                 await asyncio.sleep(1)
-        
+
             summary_embed = discord.Embed(
                 title="📊 Résultat de tous les mini-jeux",
                 description="\n".join(results),
@@ -156,14 +151,15 @@ class TestKawashima(commands.Cog):
             embed = discord.Embed(
                 title=f"🧪 Liste des mini-jeux — Page 1/{len(pages)}",
                 description=page_text,
-                color=discord.Color.blurple
+                color=discord.Color.blurple()
             )
             return await send(embed=embed, view=page_view)
 
-        # ─────────── Vérification du numéro ───────────
+        # ─────────── Vérification numéro ───────────
         if not str(choix).isdigit() or not 1 <= int(choix) <= len(self.sorted_titles):
             return await send(f"⚠️ Numéro invalide ! Choisis entre **1** et **{len(self.sorted_titles)}**, ou 'all'.")
 
+        # ─────────── Lancer le mini-jeu choisi ───────────
         game_name = self.sorted_titles[int(choix) - 1]
         game_func = self.games[game_name]
 
@@ -179,17 +175,17 @@ class TestKawashima(commands.Cog):
                 game_func(game_msg, embed, lambda: user.id, self.bot),
                 timeout=GAME_TIMEOUT
             )
-            if success is None:
+            if not success:
                 result_text = "⏱ Pas répondu, mini-jeu annulé"
                 color = discord.Color.orange()
             else:
-                result_text = "✅ Bien joué !" if success else "❌ Raté !"
-                color = discord.Color.green() if success else discord.Color.red()
+                result_text = "✅ Bien joué !"
+                color = discord.Color.green()
         except asyncio.TimeoutError:
             result_text = "⏱ Pas répondu, mini-jeu annulé"
             color = discord.Color.orange()
         except Exception as e:
-            result_text = f"⚠️ Erreur lors du test : {e}"
+            result_text = f"⚠️ Erreur : {e}"
             color = discord.Color.orange()
 
         result_embed = discord.Embed(
