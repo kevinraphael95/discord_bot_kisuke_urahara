@@ -83,18 +83,16 @@ calcul_rapide.emoji = "🧮"
 calcul_rapide.prep_time = 0
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔹 🔢 Carré magique 3x3 fiable (boutons emoji)
+# 🔹 🔢 Carré magique 3x3 fiable emoji (version boutons)
 # ────────────────────────────────────────────────────────────────────────────────
-async def carre_magique(ctx, embed, get_user_id, bot):
+async def carre_magique(msg, embed, get_user, bot):
     import random
     numbers = list(range(1, 10))
     random.shuffle(numbers)
 
     embed.title = "🧩 Carré magique"
-    embed.description = "Clique sur **3 chiffres** dont la somme fait **15**."
-    embed.clear_fields()
-
-    msg = await ctx.edit(embed=embed)
+    embed.description = "Clique sur les **3 chiffres** dont la somme fait **15**."
+    await msg.edit(embed=embed)
 
     selected = []
 
@@ -102,6 +100,7 @@ async def carre_magique(ctx, embed, get_user_id, bot):
         def __init__(self):
             super().__init__(timeout=20)
 
+            # Crée 9 boutons, un pour chaque chiffre
             for n in numbers:
                 self.add_item(NumberButton(n))
 
@@ -111,26 +110,25 @@ async def carre_magique(ctx, embed, get_user_id, bot):
             self.n = n
 
         async def callback(self, interaction: discord.Interaction):
-            if interaction.user.id != get_user_id():
+            if interaction.user.id != get_user():
                 return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
 
             selected.append(self.n)
             await interaction.response.defer()
 
-            # Si 3 boutons ont été cliqués → on bloque tout et on termine
+            # Si 3 boutons cliqués → on bloque tout et on stop
             if len(selected) == 3:
                 for child in self.view.children:
                     child.disabled = True
-
                 await msg.edit(view=self.view)
                 self.view.stop()
 
     view = CarreView()
-    await msg.edit(embed=embed, view=view)
+    await msg.edit(view=view)
 
-    # Attendre la fin ou le timeout
-    finished = await view.wait()
-    if finished:
+    # Attente de la fin ou timeout
+    timeout = await view.wait()
+    if timeout:
         return False
 
     return sum(selected) == 15
@@ -138,6 +136,7 @@ async def carre_magique(ctx, embed, get_user_id, bot):
 carre_magique.title = "Carré magique 3x3"
 carre_magique.emoji = "🔢"
 carre_magique.prep_time = 0
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 👀 Compter les emojis
