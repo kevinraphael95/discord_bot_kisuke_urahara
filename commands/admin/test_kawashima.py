@@ -84,17 +84,26 @@ class TestKawashima(commands.Cog):
                 game_msg = await send(embed=embed)
                 try:
                     success = await game_func(game_msg, embed, lambda: user.id, self.bot)
-                    results.append(f"{i}. {title} — {'✅ Bien joué' if success else '❌ Raté'}")
+                    if success is None:
+                        results.append(f"{i}. {title} — ❌ Pas fait, arrêt des tests")
+                        break  # arrêt si pas répondu
+                    elif success is False:
+                        results.append(f"{i}. {title} — ❌ Raté")
+                        # continue pour les autres mini-jeux
+                    else:
+                        results.append(f"{i}. {title} — ✅ Bien joué")
                 except Exception as e:
                     results.append(f"{i}. {title} — ⚠️ Erreur : {e}")
+                    break  # arrêt en cas d'erreur
                 await asyncio.sleep(1)  # pause pour éviter spam
-
+        
             summary_embed = discord.Embed(
                 title="📊 Résultat de tous les mini-jeux",
                 description="\n".join(results),
                 color=discord.Color.gold()
             )
             return await send(embed=summary_embed)
+
 
         # ─────────── Pagination si aucun choix ───────────
         if choix is None:
