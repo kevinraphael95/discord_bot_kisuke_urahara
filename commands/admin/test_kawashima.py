@@ -20,6 +20,7 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond
 # ⚙️ Constantes
 # ────────────────────────────────────────────────────────────────────────────────
 PAGE_SIZE = 10
+GAME_TIMEOUT = 30  # secondes max pour répondre à un mini-jeu
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -83,19 +84,25 @@ class TestKawashima(commands.Cog):
                 )
                 game_msg = await send(embed=embed)
                 try:
-                    success = await game_func(game_msg, embed, lambda: user.id, self.bot)
+                    # Timeout intégré pour arrêter si pas de réponse
+                    success = await asyncio.wait_for(
+                        game_func(game_msg, embed, lambda: user.id, self.bot),
+                        timeout=GAME_TIMEOUT
+                    )
                     if success is None:
                         results.append(f"{i}. {title} — ❌ Pas fait, arrêt des tests")
-                        break  # arrêt si pas répondu
+                        break  # arrêt immédiat si pas répondu
                     elif success is False:
                         results.append(f"{i}. {title} — ❌ Raté")
-                        # continue pour les autres mini-jeux
                     else:
                         results.append(f"{i}. {title} — ✅ Bien joué")
+                except asyncio.TimeoutError:
+                    results.append(f"{i}. {title} — ⏱ Pas répondu, arrêt des tests")
+                    break
                 except Exception as e:
                     results.append(f"{i}. {title} — ⚠️ Erreur : {e}")
-                    break  # arrêt en cas d'erreur
-                await asyncio.sleep(1)  # pause pour éviter spam
+                    break
+                await asyncio.sleep(1)
         
             summary_embed = discord.Embed(
                 title="📊 Résultat de tous les mini-jeux",
@@ -103,7 +110,6 @@ class TestKawashima(commands.Cog):
                 color=discord.Color.gold()
             )
             return await send(embed=summary_embed)
-
 
         # ─────────── Pagination si aucun choix ───────────
         if choix is None:
@@ -150,7 +156,7 @@ class TestKawashima(commands.Cog):
             embed = discord.Embed(
                 title=f"🧪 Liste des mini-jeux — Page 1/{len(pages)}",
                 description=page_text,
-                color=discord.Color.blurple()
+                color=discord.Color.blurple
             )
             return await send(embed=embed, view=page_view)
 
@@ -169,9 +175,19 @@ class TestKawashima(commands.Cog):
         game_msg = await send(embed=embed)
 
         try:
-            success = await game_func(game_msg, embed, lambda: user.id, self.bot)
-            result_text = "✅ Bien joué !" if success else "❌ Raté !"
-            color = discord.Color.green() if success else discord.Color.red()
+            success = await asyncio.wait_for(
+                game_func(game_msg, embed, lambda: user.id, self.bot),
+                timeout=GAME_TIMEOUT
+            )
+            if success is None:
+                result_text = "⏱ Pas répondu, mini-jeu annulé"
+                color = discord.Color.orange()
+            else:
+                result_text = "✅ Bien joué !" if success else "❌ Raté !"
+                color = discord.Color.green() if success else discord.Color.red()
+        except asyncio.TimeoutError:
+            result_text = "⏱ Pas répondu, mini-jeu annulé"
+            color = discord.Color.orange()
         except Exception as e:
             result_text = f"⚠️ Erreur lors du test : {e}"
             color = discord.Color.orange()
