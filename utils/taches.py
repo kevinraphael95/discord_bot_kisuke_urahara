@@ -1,5 +1,5 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 📌 utils/taches.py — Mini-jeux (tâches) pour le bot
+# 📌 utils/taches.py — Mini-jeux interactifs pour le bot
 # Objectif : Mini-jeux interactifs affichés dynamiquement dans un embed unique
 # ────────────────────────────────────────────────────────────────────────────────
 
@@ -9,7 +9,6 @@
 import discord
 import random
 import asyncio
-import os
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 Mini-jeux interactifs
@@ -44,11 +43,10 @@ async def lancer_emoji(interaction, embed, update_embed, num):
     for e in mix:
         view.add_item(EmojiButton(e))
 
-    # Ajouter le champ si pas encore créé
-    if not embed.fields:
-        embed.add_field(name=f"Épreuve {num}", value=f"🔁 Reproduis : {' → '.join(sequence)}", inline=False)
-    else:
-        embed.set_field_at(0, name=f"Épreuve {num}", value=f"🔁 Reproduis : {' → '.join(sequence)}", inline=False)
+    embed.set_field_at(0 if embed.fields else None,
+                       name=f"Épreuve {num}",
+                       value=f"🔁 Reproduis : {' → '.join(sequence)}",
+                       inline=False)
 
     await update_embed(embed)
     await interaction.edit_original_response(embed=embed, view=view)
@@ -85,10 +83,10 @@ async def lancer_reflexe(interaction, embed, update_embed, num):
     for e in compte:
         view.add_item(ReflexeButton(e))
 
-    if not embed.fields:
-        embed.add_field(name=f"Épreuve {num}", value="🕒 Clique dans l’ordre : `5️⃣ 4️⃣ 3️⃣ 2️⃣ 1️⃣`", inline=False)
-    else:
-        embed.set_field_at(0, name=f"Épreuve {num}", value="🕒 Clique dans l’ordre : `5️⃣ 4️⃣ 3️⃣ 2️⃣ 1️⃣`", inline=False)
+    embed.set_field_at(0 if embed.fields else None,
+                       name=f"Épreuve {num}",
+                       value="🕒 Clique dans l’ordre : `5️⃣ 4️⃣ 3️⃣ 2️⃣ 1️⃣`",
+                       inline=False)
 
     await update_embed(embed)
     await interaction.edit_original_response(embed=embed, view=view)
@@ -104,11 +102,10 @@ async def lancer_fleche(interaction, embed, update_embed, num):
     fleches = ["⬅️", "⬆️", "⬇️", "➡️"]
     sequence = [random.choice(fleches) for _ in range(5)]
 
-    if not embed.fields:
-        embed.add_field(name=f"Épreuve {num}", value=f"🧭 Mémorise : `{' '.join(sequence)}` (5 s)", inline=False)
-    else:
-        embed.set_field_at(0, name=f"Épreuve {num}", value=f"🧭 Mémorise : `{' '.join(sequence)}` (5 s)", inline=False)
-
+    embed.set_field_at(0 if embed.fields else None,
+                       name=f"Épreuve {num}",
+                       value=f"🧭 Mémorise : `{' '.join(sequence)}` (5 s)",
+                       inline=False)
     await update_embed(embed)
     await asyncio.sleep(5)
 
@@ -146,7 +143,7 @@ async def lancer_fleche(interaction, embed, update_embed, num):
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔁 Lancer 3 épreuves aléatoires avec vraie interaction
+# 🔁 Lancer 3 épreuves aléatoires
 # ────────────────────────────────────────────────────────────────────────────────
 TACHES = [lancer_emoji, lancer_reflexe, lancer_fleche]
 
@@ -168,7 +165,6 @@ async def lancer_3_taches(interaction, embed, update_embed):
             result = False
 
         success_global = success_global and result
-
         embed.set_field_at(0, name=field_name, value="✅ Réussie" if result else "❌ Échec", inline=False)
         await update_embed(embed)
         await asyncio.sleep(1)
