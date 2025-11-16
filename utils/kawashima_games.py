@@ -83,59 +83,71 @@ calcul_rapide.emoji = "🧮"
 calcul_rapide.prep_time = 0
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔹 🔢 Carré magique 3x3 fiable emoji (version boutons)
+# 🔹 🔢 Carré magique 3x3 fiable emoji (avec boutons)
 # ────────────────────────────────────────────────────────────────────────────────
-async def carre_magique(msg, embed, get_user, bot):
-    import random
-    numbers = list(range(1, 10))
-    random.shuffle(numbers)
+async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot):
+    base = [
+        [8, 1, 6],
+        [3, 5, 7],
+        [4, 9, 2]
+    ]
 
-    embed.title = "🧩 Carré magique"
-    embed.description = "Clique sur les **3 chiffres** dont la somme fait **15**."
-    await msg.edit(embed=embed)
+    def rotate(square):
+        return [list(x) for x in zip(*square[::-1])]
 
-    selected = []
+    def flip(square):
+        return [row[::-1] for row in square]
 
+    for _ in range(random.randint(0, 3)):
+        base = rotate(base)
+    if random.choice([True, False]):
+        base = flip(base)
+
+    row, col = random.randint(0, 2), random.randint(0, 2)
+    answer = base[row][col]
+    base[row][col] = "❓"
+
+    num_to_emoji = {i: f"{i}\u20e3" for i in range(1, 10)}
+    display = "\n".join("|".join(num_to_emoji.get(x, x) for x in r) for r in base)
+
+    embed.clear_fields()
+    embed.add_field(
+        name="🔢 Carré magique",
+        value=f"Complète le carré magique pour que toutes les lignes, colonnes et diagonales fassent 15 :\n{display}",
+        inline=False
+    )
+    msg = await ctx.edit(embed=embed)
+
+    # ────── Vue avec boutons ──────
     class CarreView(discord.ui.View):
         def __init__(self):
-            super().__init__(timeout=20)
-
-            # Crée 9 boutons, un pour chaque chiffre
-            for n in numbers:
-                self.add_item(NumberButton(n))
-
-    class NumberButton(discord.ui.Button):
-        def __init__(self, n):
-            super().__init__(label=str(n), style=discord.ButtonStyle.primary)
-            self.n = n
-
-        async def callback(self, interaction: discord.Interaction):
-            if interaction.user.id != get_user():
-                return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
-
-            selected.append(self.n)
-            await interaction.response.defer()
-
-            # Si 3 boutons cliqués → on bloque tout et on stop
-            if len(selected) == 3:
-                for child in self.view.children:
-                    child.disabled = True
-                await msg.edit(view=self.view)
-                self.view.stop()
+            super().__init__(timeout=TIMEOUT)
+            self.selected = None
+            # Ajout des boutons 1 à 9
+            for n in range(1, 10):
+                button = discord.ui.Button(label=str(n), style=discord.ButtonStyle.primary)
+                async def callback(interaction, n=n):
+                    if interaction.user.id != get_user_id():
+                        await interaction.response.send_message("🚫 Pas pour toi.", ephemeral=True)
+                        return
+                    self.selected = n
+                    for child in self.children:
+                        child.disabled = True
+                    await interaction.response.edit_message(view=self)
+                    self.stop()
+                button.callback = callback
+                self.add_item(button)
 
     view = CarreView()
     await msg.edit(view=view)
+    await view.wait()
 
-    # Attente de la fin ou timeout
-    timeout = await view.wait()
-    if timeout:
-        return False
+    return view.selected == answer if view.selected is not None else None
 
-    return sum(selected) == 15
+carre_magique_fiable_emoji.title = "Carré magique 3x3"
+carre_magique_fiable_emoji.emoji = "🔢"
+carre_magique_fiable_emoji.prep_time = 0
 
-carre_magique.title = "Carré magique 3x3"
-carre_magique.emoji = "🔢"
-carre_magique.prep_time = 0
 
 
 # ────────────────────────────────────────────────────────────────────────────────
