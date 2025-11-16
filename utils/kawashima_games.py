@@ -85,45 +85,52 @@ calcul_rapide.prep_time = 0
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 🔢 Carré magique 3x3 fiable emoji
 # ────────────────────────────────────────────────────────────────────────────────
-async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot):
-    base = [
-        [8, 1, 6],
-        [3, 5, 7],
-        [4, 9, 2]
-    ]
+async def carre_magique(msg, embed, get_user, bot):
+    embed.title = "🧩 Carré magique"
+    embed.description = "Clique sur les **3 chiffres** qui donnent **15**."
+    await msg.edit(embed=embed)
 
-    def rotate(square):
-        return [list(x) for x in zip(*square[::-1])]
+    import random
+    numbers = list(range(1, 10))
+    random.shuffle(numbers)
 
-    def flip(square):
-        return [row[::-1] for row in square]
+    selected = []
 
-    for _ in range(random.randint(0, 3)):
-        base = rotate(base)
-    if random.choice([True, False]):
-        base = flip(base)
+    class CarreView(discord.ui.View):
+        def __init__(self):
+            super().__init__(timeout=20)
 
-    row, col = random.randint(0, 2), random.randint(0, 2)
-    answer = base[row][col]
-    base[row][col] = "❓"
+            # Création des 9 boutons
+            for n in numbers:
+                self.add_item(self.NumberButton(n))
 
-    num_to_emoji = {i: f"{i}\u20e3" for i in range(1, 10)}
+        class NumberButton(discord.ui.Button):
+            def __init__(self, n):
+                super().__init__(label=str(n), style=discord.ButtonStyle.primary)
+                self.n = n
 
-    display = "\n".join("|".join(num_to_emoji.get(x, x) for x in r) for r in base)
+            async def callback(self, interaction: discord.Interaction):
+                if interaction.user.id != get_user():
+                    return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
 
-    embed.clear_fields()
-    embed.add_field(
-        name="🔢 Carré magique",
-        value=f"Complète le carré magique pour que toutes les lignes, colonnes et diagonales fassent 15 :\n{display}",
-        inline=False
-    )
-    await ctx.edit(embed=embed)
+                selected.append(self.n)
+                await interaction.response.defer()
 
-    try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return int(msg.content) == answer
-    except:
+                if len(selected) == 3:
+                    for child in self.view.children:
+                        child.disabled = True
+                    await msg.edit(view=self.view)
+
+                    return self.view.stop()
+
+    view = CarreView()
+    await msg.edit(view=view)
+
+    timeout = await view.wait()
+    if timeout:
         return False
+
+    return sum(selected) == 15
 
 carre_magique_fiable_emoji.title = "Carré magique 3x3"
 carre_magique_fiable_emoji.emoji = "🔢"
@@ -227,15 +234,17 @@ couleurs.emoji = "🎨"
 couleurs.prep_time = 0.5
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔹 📅 Datation
+# 🔹 📅 Datation (Version boutons)
 # ────────────────────────────────────────────────────────────────────────────────
-async def datation(ctx, embed, get_user_id, bot):
-    import datetime
+async def datation(msg, embed, get_user_id, bot):
+    import datetime, random
+    user_id = get_user_id()
 
+    # Générer une date autour d'aujourd'hui
     today = datetime.date.today()
     delta_days = random.randint(-7, 7)
     date = today + datetime.timedelta(days=delta_days)
-    
+
     jours_fr = {
         "Monday": "lundi",
         "Tuesday": "mardi",
@@ -245,27 +254,44 @@ async def datation(ctx, embed, get_user_id, bot):
         "Saturday": "samedi",
         "Sunday": "dimanche"
     }
-    jour_complet = jours_fr[date.strftime("%A")]
-    jour_abr = jour_complet[:3]
+    jour_correct = jours_fr[date.strftime("%A")]
 
+    # Affichage
     embed.clear_fields()
-    embed.add_field(
-        name="📅 Datation",
-        value=f"Quel jour de la semaine était le {date.day}/{date.month}/{date.year} ?",
-        inline=False
-    )
-    await ctx.edit(embed=embed)
+    embed.title = "📅 Datation"
+    embed.description = f"Quel jour était le **{date.day}/{date.month}/{date.year}** ?"
+    await msg.edit(embed=embed)
 
-    try:
-        msg = await bot.wait_for(
-            "message",
-            check=lambda m: m.author.id == get_user_id(),
-            timeout=TIMEOUT
-        )
-        reponse = msg.content.lower().strip()
-        return reponse == jour_complet or reponse == jour_abr
-    except:
+    # Vue de 7 boutons
+    class DayView(discord.ui.View):
+        def __init__(self):
+            super().__init__(timeout=15)
+            jours = ["lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche"]
+            for j in jours:
+                self.add_item(self.DayButton(j))
+
+        class DayButton(discord.ui.Button):
+            def __init__(self, jour):
+                super().__init__(label=jour.capitalize(), style=discord.ButtonStyle.blurple)
+                self.jour = jour
+
+            async def callback(self, interaction: discord.Interaction):
+                if interaction.user.id != user_id:
+                    return await interaction.response.send_message("❌ Ce n'est pas ta partie.", ephemeral=True)
+                
+                self.view.answer = self.jour
+                self.view.stop()
+                await interaction.response.defer()
+
+    view = DayView()
+    await msg.edit(view=view)
+
+    timeout = await view.wait()
+    if timeout:
         return False
+
+    # Vérifier la bonne réponse
+    return view.answer == jour_correct
 
 datation.title = "Datation"
 datation.emoji = "📅"
@@ -562,54 +588,100 @@ pagaille.prep_time = 2
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 ⚖️ Pair ou impair
 # ────────────────────────────────────────────────────────────────────────────────
-async def pair_ou_impair(ctx, embed, get_user_id, bot):
-    prep_time = 1.5
-    nombre = random.randint(10, 99)
+async def pair_ou_impair(msg, embed, get_user, bot):
+    import random
 
-    embed.clear_fields()
-    embed.add_field(
-        name="⚖️ Pair ou impair",
-        value=f"Le nombre est **{nombre}**.\n➡️ Tape `pair` ou `impair` !",
-        inline=False
-    )
-    await ctx.edit(embed=embed)
-    await asyncio.sleep(prep_time)
+    number = random.randint(1, 100)
+    correct = "Pair" if number % 2 == 0 else "Impair"
 
-    try:
-        msg = await bot.wait_for(
-            "message",
-            check=lambda m: m.author.id == get_user_id(),
-            timeout=TIMEOUT
-        )
-        reponse = msg.content.lower().strip()
-        if reponse not in ["pair", "impair"]:
-            return False
-        return (nombre % 2 == 0 and reponse == "pair") or (nombre % 2 == 1 and reponse == "impair")
-    except:
+    embed.title = "⚖️ Pair ou impair ?"
+    embed.description = f"Le nombre est : **{number}**"
+    await msg.edit(embed=embed)
+
+    class POIView(discord.ui.View):
+        def __init__(self):
+            super().__init__(timeout=10)
+
+        @discord.ui.button(label="Pair", style=discord.ButtonStyle.blurple)
+        async def pair(self, interaction: discord.Interaction, button):
+            if interaction.user.id != get_user():
+                return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
+            self.answer = "Pair"
+            self.stop()
+
+        @discord.ui.button(label="Impair", style=discord.ButtonStyle.green)
+        async def impair(self, interaction: discord.Interaction, button):
+            if interaction.user.id != get_user():
+                return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
+            self.answer = "Impair"
+            self.stop()
+
+    view = POIView()
+    await msg.edit(view=view)
+
+    timeout = await view.wait()
+    if timeout:
         return False
+
+    return view.answer == correct
 
 pair_ou_impair.title = "Pair ou impair"
 pair_ou_impair.emoji = "⚖️"
 pair_ou_impair.prep_time = 1.5
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🔹 ⚡ Rapidité
-# ────────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
+# 🔹 ⚡ Rapidité (version boutons)
+# ────────────────────────────────────────────────────────────────
 async def rapidite(ctx, embed, get_user_id, bot):
     prep_time = 2
     nums = random.sample(range(10, 99), 5)
     mode = random.choice(["grand", "petit"])
+    
     embed.clear_fields()
-    embed.add_field(name="⚡ Rapidité", value=f"Trouve le plus {mode} : {', '.join(map(str, nums))}", inline=False)
+    embed.add_field(
+        name="⚡ Rapidité",
+        value=f"Trouve le plus **{mode}** : {', '.join(map(str, nums))}",
+        inline=False
+    )
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
     correct = max(nums) if mode == "grand" else min(nums)
-    try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return int(msg.content) == correct
-    except:
-        return False
+
+    # ----- Vue + Boutons -----
+    class QuickView(View):
+        def __init__(self):
+            super().__init__(timeout=10)
+            self.success = False
+            for n in nums:
+                self.add_item(QuickButton(n))
+
+        async def interaction_check(self, inter):
+            return inter.user.id == get_user_id()
+
+    class QuickButton(Button):
+        def __init__(self, value):
+            super().__init__(label=str(value), style=discord.ButtonStyle.primary)
+            self.value = value
+
+        async def callback(self, inter):
+            if self.value == correct:
+                view.success = True
+                await inter.response.edit_message(
+                    content=f"✅ Correct ! ({self.value})", view=None, embed=None
+                )
+            else:
+                await inter.response.edit_message(
+                    content=f"❌ Mauvaise réponse ({self.value})", view=None, embed=None
+                )
+            view.stop()
+
+    view = QuickView()
+    view_msg = await ctx.edit(embed=embed, view=view)
+
+    await view.wait()
+    return view.success
+
 
 rapidite.title = "Rapidité"
 rapidite.emoji = "⚡"
