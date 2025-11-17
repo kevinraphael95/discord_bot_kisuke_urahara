@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 📌 anagramme.py — Jeu de l'anagramme avec embed, tentatives limitées et feedback
-# Objectif : Un seul jeu actif à la fois, messages . ou *, timeout 3 min, embed avec instructions
+# 📌 anagramme.py — Jeu de l'anagramme basé sur GameView
+# Objectif : Jeu interactif solo/multi avec embed, tentatives, timeout et messages ./*
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
@@ -9,12 +9,12 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
-import discord
+import discord, random, unicodedata, asyncio, aiohttp
 from discord import app_commands
 from discord.ext import commands
-import random, aiohttp, unicodedata, asyncio
 from spellchecker import SpellChecker
 from utils.discord_utils import safe_send, safe_edit
+from utils.game_view import GameView
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Initialisation du spellchecker français
@@ -46,33 +46,26 @@ def is_valid_word(word: str) -> bool:
     return word.lower() in spell.word_frequency
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎮 Vue principale du jeu Anagramme
+# 🎮 Vue Anagramme basée sur GameView
 # ────────────────────────────────────────────────────────────────────────────────
-class AnagrammeView:
-    """Classe représentant une partie d'Anagramme"""
-
+class AnagrammeView(GameView):
     TIMEOUT = 180  # 3 minutes
 
-    def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False):
+    def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False, channel: discord.TextChannel | None = None):
+        super().__init__(author_id=author_id, multi=multi, channel=channel, timeout=self.TIMEOUT)
         normalized = target_word.replace("Œ", "OE").replace("œ", "oe")
         self.target_word = normalized.upper()
         self.display_word = ''.join(random.sample(self.target_word, len(self.target_word)))
         self.display_length = len([c for c in self.target_word if c.isalpha()])
-        self.author_id = author_id
-        self.multi = multi
         self.max_attempts = None if multi else max(self.display_length, 5)
-        self.attempts: list[dict] = []  # {'word': str, 'author': str}
-        self.message = None
-        self.finished = False
-        self.start_time = asyncio.get_event_loop().time()
 
     def remove_accents(self, text: str) -> str:
         return ''.join(c for c in unicodedata.normalize('NFD', text)
                        if unicodedata.category(c) != 'Mn').upper()
 
     def build_embed(self) -> discord.Embed:
-        """Construit l'embed avec instructions, essais et statut"""
-        mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
+        """Embed dynamique avec instructions et tentatives"""
+        mode_text = "Multi 🌍" if self.multi else "Solo 🧍‍♂️"
         embed = discord.Embed(
             title=f"🔀 Anagramme - {mode_text}",
             description=f"Mot mélangé : **{' '.join(self.display_word)}**",
@@ -82,26 +75,25 @@ class AnagrammeView:
         # Instructions
         if self.multi:
             instructions = (
-                "💡 **Comment jouer en mode Multi :**\n"
-                "1️⃣ Tout le monde peut participer.\n"
-                f"2️⃣ Envoyez un mot avec `.` ou `*`.\n"
-                f"3️⃣ Le mot doit faire {self.display_length} lettres.\n"
-                "4️⃣ Tentatives illimitées.\n"
-                "5️⃣ Durée max : 3 minutes ou quand le mot est trouvé."
+                "💡 **Mode Multi :** Tout le monde peut participer.\n"
+                "Envoyez un mot avec `.` ou `*`.\n"
+                f"Le mot doit faire {self.display_length} lettres.\n"
+                "Tentatives illimitées.\n"
+                "Durée max : 3 minutes ou quand le mot est trouvé."
             )
         else:
             instructions = (
-                "💡 **Comment jouer en mode Solo :**\n"
-                f"1️⃣ Envoyez un mot avec `.` ou `*`.\n"
-                f"2️⃣ Le mot doit faire {self.display_length} lettres.\n"
-                f"3️⃣ Vous avez {self.max_attempts} essais maximum.\n"
-                "4️⃣ Partie terminée si mot trouvé ou après 3 minutes."
+                "💡 **Mode Solo :**\n"
+                f"Envoyez un mot avec `.` ou `*`.\n"
+                f"Le mot doit faire {self.display_length} lettres.\n"
+                f"Vous avez {self.max_attempts} essais maximum.\n"
+                "Partie terminée si mot trouvé ou après 3 minutes."
             )
         embed.add_field(name="📝 Instructions", value=instructions, inline=False)
 
         # Essais
         if self.attempts:
-            tries_text = "\n".join(f"{entry['author']}: {entry['word']}" for entry in self.attempts)
+            tries_text = "\n".join(f"{entry['user']}: {entry['value']}" for entry in self.attempts)
             field_name = f"Essais ({len(self.attempts)})" if self.multi else f"Essais ({len(self.attempts)}/{self.max_attempts})"
             embed.add_field(name=field_name, value=tries_text, inline=False)
         else:
@@ -109,7 +101,7 @@ class AnagrammeView:
 
         # Footer
         if self.finished:
-            last_word = self.attempts[-1]['word'] if self.attempts else ""
+            last_word = self.attempts[-1]['value'] if self.attempts else ""
             if self.remove_accents(last_word) == self.remove_accents(self.target_word):
                 embed.color = discord.Color.green()
                 embed.set_footer(text="🎉 Bravo ! Le mot a été trouvé.")
@@ -118,24 +110,25 @@ class AnagrammeView:
                 embed.set_footer(text=f"💀 Partie terminée. Le mot était {self.target_word}.")
         else:
             elapsed = int(asyncio.get_event_loop().time() - self.start_time)
-            remaining = max(0, self.TIMEOUT - elapsed)
+            remaining = max(0, self.timeout - elapsed)
             embed.set_footer(text=f"⏳ Temps restant : {remaining} secondes")
 
         return embed
 
-    async def process_guess(self, channel: discord.abc.Messageable, guess: str, author_name: str, author_id: int):
+    async def process_guess(self, user: discord.User, guess: str) -> tuple[bool, str]:
+        """Traite une tentative"""
         if self.finished:
-            return await safe_send(channel, f"⚠️ La partie {self.target_word} est terminée.")
-        if not self.multi and author_id != self.author_id:
-            return
+            return False, "⚠️ La partie est terminée."
+        if not self.can_play(user.id):
+            return False, "❌ Vous ne pouvez pas jouer en solo."
 
         filtered = guess.strip(".* ").upper()
         if len(filtered) != self.display_length:
-            return await safe_send(channel, f"⚠️ Le mot doit faire {self.display_length} lettres.")
+            return False, f"⚠️ Le mot doit faire {self.display_length} lettres."
         if not is_valid_word(filtered):
-            return await safe_send(channel, f"❌ `{filtered}` n’est pas reconnu comme un mot valide.")
+            return False, f"❌ `{filtered}` n’est pas reconnu comme un mot valide."
 
-        self.attempts.append({'word': filtered, 'author': author_name})
+        self.add_attempt(user, filtered)
 
         if self.remove_accents(filtered) == self.remove_accents(self.target_word):
             self.finished = True
@@ -145,18 +138,7 @@ class AnagrammeView:
         if self.message:
             await safe_edit(self.message, embed=self.build_embed())
 
-    async def check_timeout(self, remove_callback=None):
-        """Arrête la partie après TIMEOUT secondes"""
-        while not self.finished:
-            await asyncio.sleep(5)
-            elapsed = asyncio.get_event_loop().time() - self.start_time
-            if elapsed >= self.TIMEOUT:
-                self.finished = True
-                if self.message:
-                    await safe_edit(self.message, embed=self.build_embed())
-                if remove_callback:
-                    remove_callback()
-                break
+        return True, f"{user} a joué `{filtered}`"
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -175,10 +157,10 @@ class Anagramme(commands.Cog):
         target_word = await get_random_french_word(length=length)
         multi = mode.lower() in ("multi", "m")
         author_filter = None if multi else author_id
-        view = AnagrammeView(target_word, author_id=author_filter, multi=multi)
-        view.message = await safe_send(channel, embed=view.build_embed())
+        view = AnagrammeView(target_word, author_id=author_filter, multi=multi, channel=channel)
+        await view.send_message(embed=view.build_embed())
         self.active_games[channel.id] = view
-        asyncio.create_task(view.check_timeout(remove_callback=lambda: self.active_games.pop(channel.id, None)))
+        asyncio.create_task(view.start_timer(remove_callback=lambda: self.active_games.pop(channel.id, None)))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -189,7 +171,7 @@ class Anagramme(commands.Cog):
         content = message.content.strip()
         if content.startswith((".", "*")):
             view = self.active_games[message.channel.id]
-            await view.process_guess(message.channel, content, message.author.display_name, message.author.id)
+            await view.process_guess(message.author, content)
             try:
                 await message.delete()
             except:
