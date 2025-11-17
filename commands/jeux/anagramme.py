@@ -191,6 +191,7 @@ class Anagramme(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, mode: str = "solo"):
         if channel.id in self.active_games:
+            await safe_send(channel, "⚠️ Une partie est déjà en cours dans ce canal !")
             return
 
         length = random.choice(range(5, 9))
