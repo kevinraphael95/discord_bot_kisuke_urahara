@@ -12,16 +12,9 @@
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
-import random, unicodedata, asyncio
+import random, aiohttp, unicodedata, asyncio
 from spellchecker import SpellChecker
 from utils.discord_utils import safe_send, safe_edit
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 📦 Lexique français pour mots aléatoires
-# ────────────────────────────────────────────────────────────────────────────────
-from lexique_fr import Lexique
-
-lexique = Lexique()
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Initialisation du spellchecker français
@@ -32,18 +25,19 @@ spell = SpellChecker(language='fr')
 # 🌐 Fonction pour récupérer un mot français aléatoire
 # ────────────────────────────────────────────────────────────────────────────────
 async def get_random_french_word(length: int | None = None) -> str:
-    """
-    Retourne un mot français aléatoire depuis Lexique.
-    Si length est spécifié, essaie de choisir un mot de cette longueur.
-    """
+    url = "https://trouve-mot.fr/api/random"
+    if length:
+        url += f"?size={length}"
     try:
-        candidates = lexique.words
-        if length:
-            candidates = [w for w in candidates if len(w) == length]
-        return random.choice(candidates).upper() if candidates else "PYTHON"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=5) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if isinstance(data, list) and len(data) > 0:
+                        return data[0]["name"].upper()
     except Exception as e:
-        print(f"[ERREUR Lexique] {e}")
-        return "PYTHON"
+        print(f"[ERREUR API Anagramme] {e}")
+    return "PYTHON"
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Vérification d’un mot via SpellChecker
@@ -55,6 +49,8 @@ def is_valid_word(word: str) -> bool:
 # 🎮 Vue principale du jeu
 # ────────────────────────────────────────────────────────────────────────────────
 class AnagrammeView:
+    """Classe représentant une partie d'Anagramme"""
+
     def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False):
         normalized = target_word.replace("Œ", "OE").replace("œ", "oe")
         self.target_word = normalized.upper()
@@ -63,7 +59,7 @@ class AnagrammeView:
         self.author_id = author_id
         self.multi = multi
         self.max_attempts = None if multi else max(self.display_length, 5)
-        self.attempts: list[dict] = []
+        self.attempts: list[dict] = []  # {'word': str, 'author': str}
         self.message = None
         self.finished = False
         self.start_time = asyncio.get_event_loop().time()
@@ -82,22 +78,28 @@ class AnagrammeView:
             color=discord.Color.orange()
         )
 
-        instructions = (
-            "💡 **Comment jouer en mode Multi :**\n"
-            "1️⃣ Tout le monde peut participer.\n"
-            f"2️⃣ Proposez un mot avec `.` ou `*` suivi de votre essai.\n"
-            f"3️⃣ Le mot doit faire {self.display_length} lettres.\n"
-            "4️⃣ Il n’y a **aucune limite d’essais**.\n"
-            "5️⃣ La partie se termine automatiquement après 3 minutes ou quand le mot est trouvé."
-            if self.multi else
-            "💡 **Comment jouer en mode Solo :**\n"
-            f"1️⃣ Proposez un mot avec `.` ou `*` suivi de votre essai.\n"
-            f"2️⃣ Le mot doit faire {self.display_length} lettres.\n"
-            f"3️⃣ Vous avez {self.max_attempts} essais maximum.\n"
-            "4️⃣ La partie se termine quand le mot est trouvé ou après 3 minutes."
-        )
+        # Instructions adaptées au mode
+        if self.multi:
+            instructions = (
+                "💡 **Comment jouer en mode Multi :**\n"
+                "1️⃣ Tout le monde peut participer.\n"
+                f"2️⃣ Proposez un mot avec `.` ou `*` suivi de votre essai.\n"
+                f"3️⃣ Le mot doit faire {self.display_length} lettres.\n"
+                "4️⃣ Il n’y a **aucune limite d’essais**.\n"
+                "5️⃣ La partie se termine automatiquement après 3 minutes ou quand le mot est trouvé."
+            )
+        else:
+            instructions = (
+                "💡 **Comment jouer en mode Solo :**\n"
+                f"1️⃣ Proposez un mot avec `.` ou `*` suivi de votre essai.\n"
+                f"2️⃣ Le mot doit faire {self.display_length} lettres.\n"
+                f"3️⃣ Vous avez {self.max_attempts} essais maximum.\n"
+                "4️⃣ La partie se termine quand le mot est trouvé ou après 3 minutes."
+            )
+
         embed.add_field(name="📝 Instructions", value=instructions, inline=False)
 
+        # Essais
         if self.attempts:
             tries_text = "\n".join(f"{entry['author']}: {entry['word']}" for entry in self.attempts)
             field_name = f"Essais ({len(self.attempts)})" if self.multi else f"Essais ({len(self.attempts)}/{self.max_attempts})"
@@ -105,6 +107,7 @@ class AnagrammeView:
         else:
             embed.add_field(name="Essais", value="*(Aucun essai pour l’instant)*", inline=False)
 
+        # Fin de partie
         if self.finished:
             last_word = self.attempts[-1]['word'] if self.attempts else ""
             if self.remove_accents(last_word) == self.remove_accents(self.target_word):
@@ -121,11 +124,16 @@ class AnagrammeView:
         return embed
 
     async def process_guess(self, channel: discord.abc.Messageable, guess: str, author_name: str, author_id: int):
-        if self.finished: return await safe_send(channel, "⚠️ La partie est terminée.")
-        if not self.multi and author_id != self.author_id: return
+        if self.finished:
+            return await safe_send(channel, "⚠️ La partie est terminée.")
+
+        # Solo → bloquer les autres joueurs
+        if not self.multi and author_id != self.author_id:
+            return
 
         filtered_guess = guess.strip(".* ").upper()
 
+        # Vérification
         if len(filtered_guess) != self.display_length:
             return await safe_send(channel, f"⚠️ Le mot doit faire {self.display_length} lettres.")
         if not is_valid_word(filtered_guess):
@@ -133,6 +141,7 @@ class AnagrammeView:
 
         self.attempts.append({'word': filtered_guess, 'author': author_name})
 
+        # Fin si trouvé ou max essais (solo)
         if self.remove_accents(filtered_guess) == self.remove_accents(self.target_word):
             self.finished = True
         elif not self.multi and len(self.attempts) >= self.max_attempts:
@@ -142,9 +151,11 @@ class AnagrammeView:
             await safe_edit(self.message, embed=self.build_embed())
 
     async def check_timeout(self):
+        """Arrête la partie après 3 minutes"""
         while not self.finished:
             await asyncio.sleep(5)
-            if asyncio.get_event_loop().time() - self.start_time >= 180:
+            elapsed = asyncio.get_event_loop().time() - self.start_time
+            if elapsed >= 180:
                 self.finished = True
                 if self.message:
                     await safe_edit(self.message, embed=self.build_embed())
@@ -156,7 +167,7 @@ class AnagrammeView:
 class Anagramme(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.active_games: dict[int, AnagrammeView] = {}
+        self.active_games: dict[int, AnagrammeView] = {}  # channel_id -> vue de jeu
 
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, mode: str = "solo"):
         length = random.choice(range(5, 9))
@@ -164,21 +175,22 @@ class Anagramme(commands.Cog):
         multi = mode.lower() in ("multi", "m")
         author_filter = None if multi else author_id
         view = AnagrammeView(target_word, author_id=author_filter, multi=multi)
-        view.message = await safe_send(channel, embed=view.build_embed())
+        embed = view.build_embed()
+        view.message = await safe_send(channel, embed=embed)
         self.active_games[channel.id] = view
-        asyncio.create_task(view.check_timeout())
+        asyncio.create_task(view.check_timeout())  # arrête après 3 minutes
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.bot: return
-        if message.channel.id not in self.active_games: return
-        if message.content.strip().startswith((".", "*")):
+        if message.author.bot:
+            return
+        if message.channel.id not in self.active_games:
+            return
+        content = message.content.strip()
+        if content.startswith((".", "*")):
             view = self.active_games[message.channel.id]
-            await view.process_guess(message.channel, message.content, message.author.display_name, message.author.id)
+            await view.process_guess(message.channel, content, message.author.display_name, message.author.id)
 
-    # ────────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="anagramme", description="Lance une partie d'Anagramme (multi = tout le monde peut jouer)")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
     async def slash_anagramme(self, interaction: discord.Interaction, mode: str = "solo"):
@@ -186,9 +198,6 @@ class Anagramme(commands.Cog):
         await self._start_game(interaction.channel, author_id=interaction.user.id, mode=mode)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────────
     @commands.command(name="anagramme", help="Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.")
     async def prefix_anagramme(self, ctx: commands.Context, mode: str = "solo"):
         await self._start_game(ctx.channel, author_id=ctx.author.id, mode=mode)
