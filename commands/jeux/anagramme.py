@@ -22,22 +22,60 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond
 spell = SpellChecker(language='fr')
 
 # ────────────────────────────────────────────────────────────────────────────────
+# 🌐 Dictionnaire local fallback
+# ────────────────────────────────────────────────────────────────────────────────
+LOCAL_FRENCH_WORDS = [
+    "PYTHON", "ANAGRAMME", "DISCORD", "BOT", "JEUX",
+    "FRANCE", "PROGRAMME", "ORDINATEUR", "COMMANDE", "CHALLENGE"
+]
+
+# ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Fonction pour récupérer un mot français aléatoire
 # ────────────────────────────────────────────────────────────────────────────────
 async def get_random_french_word(length: int | None = None) -> str:
-    url = "https://trouve-mot.fr/api/random"
-    if length:
-        url += f"?size={length}"
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=5) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    if isinstance(data, list) and len(data) > 0:
-                        return data[0]["name"].upper()
-    except Exception as e:
-        print(f"[ERREUR API Anagramme] {e}")
-    return "PYTHON"
+    """Récupère un mot français aléatoire via plusieurs APIs avec fallback local."""
+
+    async def api_dicolink(length: int | None = None):
+        url = "https://api.dicolink.com/v1/mots/random"
+        if length:
+            url += f"?longueur={length}"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=5) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        word = data.get("word")
+                        if word:
+                            return word.upper()
+        except Exception:
+            return None
+        return None
+
+    async def api_puissance_lexicale(length: int | None = None):
+        url = "https://api-puissance-lexicale.vercel.app/randomWord"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=5) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        word = data.get("word")
+                        if word and (not length or len(word) == length):
+                            return word.upper()
+                        elif length:
+                            return await api_puissance_lexicale(length)
+        except Exception:
+            return None
+        return None
+
+    # Essayer les APIs
+    for api_func in [api_dicolink, api_puissance_lexicale]:
+        word = await api_func(length)
+        if word:
+            return word
+
+    # Fallback local
+    words = [w for w in LOCAL_FRENCH_WORDS if not length or len(w) == length]
+    return random.choice(words).upper() if words else "PYTHON"
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Vérification d’un mot via SpellChecker
