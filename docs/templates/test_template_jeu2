@@ -8,7 +8,8 @@
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────import discord
+# ────────────────────────────────────────────────────────────────────────────────
+import discord
 from discord import app_commands
 from discord.ext import commands
 import asyncio
@@ -40,12 +41,14 @@ class GameView:
             color=discord.Color.orange()
         )
 
+        # Historique
         if self.attempts:
             tries_text = "\n".join(f"{entry['author']}: {entry['content']}" for entry in self.attempts)
             embed.add_field(name=f"Essais ({len(self.attempts)})", value=tries_text, inline=False)
         else:
             embed.add_field(name="Essais", value="*(Aucun essai pour l’instant)*", inline=False)
 
+        # Footer
         if self.finished:
             embed.color = discord.Color.green()
             embed.set_footer(text=f"🎉 Partie terminée pour {self.name}.")
@@ -57,28 +60,33 @@ class GameView:
         return embed
 
     async def process_guess(self, channel, guess: str, author_name: str, author_id: int):
+        """Traite un essai"""
         if self.finished:
-            return await safe_send(channel, f"⚠️ La partie {self.name} est terminée.")
+            return
         if not self.multi and author_id != self.author_id:
             return
-        self.attempts.append({"author": author_name, "content": guess})
-        await safe_edit(self.message, embed=self.build_embed())
 
-    async def check_timeout(self):
-        """Arrête la partie après 3 minutes"""
+        self.attempts.append({"author": author_name, "content": guess})
+        if self.message:
+            await safe_edit(self.message, embed=self.build_embed())
+
+    async def check_timeout(self, remove_callback=None):
+        """Arrête la partie après TIMEOUT secondes"""
         while not self.finished:
             await asyncio.sleep(5)
             if asyncio.get_event_loop().time() - self.start_time >= self.TIMEOUT:
                 self.finished = True
                 if self.message:
                     await safe_edit(self.message, embed=self.build_embed())
+                if remove_callback:
+                    remove_callback()
                 break
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class GameTemplate(commands.Cog):
-    """Template universel pour jeux interactifs avec message . ou *"""
+    """Template universel pour jeux interactifs avec messages . ou *"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -86,11 +94,12 @@ class GameTemplate(commands.Cog):
 
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, name: str = "Mini-Jeu", multi: bool = False):
         if channel.id in self.active_games and not self.active_games[channel.id].finished:
-            return await safe_send(channel, f"⚠️ Il y a déjà un jeu en cours : **{self.active_games[channel.id].name}**")
+            return  # silence si jeu déjà en cours
+
         view = GameView(name=name, author_id=None if multi else author_id, multi=multi)
         view.message = await safe_send(channel, embed=view.build_embed())
         self.active_games[channel.id] = view
-        asyncio.create_task(view.check_timeout())
+        asyncio.create_task(view.check_timeout(remove_callback=lambda: self.active_games.pop(channel.id, None)))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -100,8 +109,14 @@ class GameTemplate(commands.Cog):
             return
         if not message.content.strip().startswith((".", "*")):
             return
+
         view = self.active_games[message.channel.id]
         await view.process_guess(message.channel, message.content.strip(), message.author.display_name, message.author.id)
+
+        try:
+            await message.delete()
+        except:
+            pass
 
     @app_commands.command(name="jeu", description="Lance un mini-jeu universel")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
@@ -109,7 +124,10 @@ class GameTemplate(commands.Cog):
         await interaction.response.defer()
         multi = mode.lower() in ("multi", "m")
         await self._start_game(interaction.channel, interaction.user.id, name="Mini-Jeu", multi=multi)
-        await interaction.delete_original_response()
+        try:
+            await interaction.delete_original_response()
+        except:
+            pass
 
     @commands.command(name="jeu", help="Lance un mini-jeu universel")
     async def prefix_jeu(self, ctx: commands.Context, mode: str = "solo"):
