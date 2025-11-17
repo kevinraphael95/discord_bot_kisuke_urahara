@@ -6,6 +6,6 @@ psutil
 pyspellchecker[fr]
 python-dateutil
 python-dotenv>=1.0.0
+random_words_generator
 requests
 supabase
-wordlist-fr
