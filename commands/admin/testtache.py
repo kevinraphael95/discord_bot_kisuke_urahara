@@ -1,6 +1,9 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 📌 testtache.py — Commandes /testtache et !testtache
-# Objectif : Tester automatiquement **toutes** les épreuves définies dans utils/taches.py
+# 📌 testtache.py — Commande simple /testtache et !testtache
+# Objectif : Tester les 3 épreuves interactives (mini-jeux)
+# Catégorie : Admin
+# Accès : Tous
+# Cooldown : 1 utilisation / 10 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -136,7 +139,7 @@ async def setup(bot: commands.Bot):
     cog = TestTache(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun"
+            command.category = "Admin"
     await bot.add_cog(cog)
 
 
