@@ -90,6 +90,27 @@ class AnagrammeView:
             color=discord.Color.orange()
         )
 
+        # ─ Instructions du jeu ─
+        if self.multi:
+            instructions = (
+                "💡 **Mode Multi :**\n"
+                "• Tout le monde peut participer.\n"
+                "• Proposez un mot avec `.mot` ou `*mot`.\n"
+                f"• Le mot doit faire **{self.display_length} lettres**.\n"
+                "• Tentatives illimitées.\n"
+                "• Durée maximale : 3 minutes."
+            )
+        else:
+            instructions = (
+                "💡 **Mode Solo :**\n"
+                "• Proposez un mot avec `.mot` ou `*mot`.\n"
+                f"• Le mot doit faire **{self.display_length} lettres**.\n"
+                f"• Vous avez **{self.max_attempts} essais**.\n"
+                "• Durée maximale : 3 minutes."
+            )
+        embed.add_field(name="📝 Instructions", value=instructions, inline=False)
+
+        # ─ Historique des essais ─
         if self.attempts:
             tries_text = "\n".join(f"{entry['author']}: {entry['word']}" for entry in self.attempts)
             field_name = (
@@ -100,6 +121,7 @@ class AnagrammeView:
         else:
             embed.add_field(name="Essais", value="*(Aucun essai pour l’instant)*", inline=False)
 
+        # ─ Footer : temps ou résultat ─
         if self.finished:
             last_word = self.attempts[-1]['word'] if self.attempts else ""
             if self.remove_accents(last_word) == self.remove_accents(self.target_word):
