@@ -16,8 +16,12 @@ import random, unicodedata, asyncio
 from spellchecker import SpellChecker
 from utils.discord_utils import safe_send, safe_edit
 
-# Nouveau module pour générer des mots français aléatoires
-from random_words_generator.words import generate_random_words
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Lexique français pour mots aléatoires
+# ────────────────────────────────────────────────────────────────────────────────
+from lexique_fr import Lexique
+
+lexique = Lexique()
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Initialisation du spellchecker français
@@ -29,20 +33,17 @@ spell = SpellChecker(language='fr')
 # ────────────────────────────────────────────────────────────────────────────────
 async def get_random_french_word(length: int | None = None) -> str:
     """
-    Retourne un mot français aléatoire.
+    Retourne un mot français aléatoire depuis Lexique.
     Si length est spécifié, essaie de choisir un mot de cette longueur.
     """
     try:
-        # Génère jusqu'à 20 mots aléatoires
-        candidates = generate_random_words(20)
-        # Filtrer par longueur si demandé
+        candidates = lexique.words
         if length:
             candidates = [w for w in candidates if len(w) == length]
-        if candidates:
-            return random.choice(candidates).upper()
+        return random.choice(candidates).upper() if candidates else "PYTHON"
     except Exception as e:
-        print(f"[ERREUR random_words_generator] {e}")
-    return "PYTHON"
+        print(f"[ERREUR Lexique] {e}")
+        return "PYTHON"
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Vérification d’un mot via SpellChecker
@@ -54,7 +55,6 @@ def is_valid_word(word: str) -> bool:
 # 🎮 Vue principale du jeu
 # ────────────────────────────────────────────────────────────────────────────────
 class AnagrammeView:
-    """Classe représentant une partie d'Anagramme"""
     def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False):
         normalized = target_word.replace("Œ", "OE").replace("œ", "oe")
         self.target_word = normalized.upper()
