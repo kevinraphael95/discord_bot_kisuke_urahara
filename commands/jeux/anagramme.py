@@ -11,94 +11,52 @@
 # ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord import app_commands
-from discord.ext import commands
-import random, aiohttp, unicodedata
+from discord.ext import commands, tasks
+import random, unicodedata, asyncio
 from spellchecker import SpellChecker
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+import enchant  # Librairie pour dictionnaire français
+from utils.discord_utils import safe_send, safe_edit
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Initialisation du spellchecker français
 # ────────────────────────────────────────────────────────────────────────────────
 spell = SpellChecker(language='fr')
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 🌐 Dictionnaire local fallback
-# ────────────────────────────────────────────────────────────────────────────────
-LOCAL_FRENCH_WORDS = [
-    "PYTHON", "ANAGRAMME", "DISCORD", "BOT", "JEUX",
-    "FRANCE", "PROGRAMME", "ORDINATEUR", "COMMANDE", "CHALLENGE"
-]
+french_dict = enchant.Dict("fr_FR")  # dictionnaire français offline
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Fonction pour récupérer un mot français aléatoire
 # ────────────────────────────────────────────────────────────────────────────────
-async def get_random_french_word(length: int | None = None) -> str:
-    """Récupère un mot français aléatoire via plusieurs APIs avec fallback local."""
-
-    async def api_dicolink(length: int | None = None):
-        url = "https://api.dicolink.com/v1/mots/random"
-        if length:
-            url += f"?longueur={length}"
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=5) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        word = data.get("word")
-                        if word:
-                            return word.upper()
-        except Exception:
-            return None
-        return None
-
-    async def api_puissance_lexicale(length: int | None = None):
-        url = "https://api-puissance-lexicale.vercel.app/randomWord"
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=5) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        word = data.get("word")
-                        if word and (not length or len(word) == length):
-                            return word.upper()
-                        elif length:
-                            return await api_puissance_lexicale(length)
-        except Exception:
-            return None
-        return None
-
-    # Essayer les APIs
-    for api_func in [api_dicolink, api_puissance_lexicale]:
-        word = await api_func(length)
-        if word:
-            return word
-
-    # Fallback local
-    words = [w for w in LOCAL_FRENCH_WORDS if not length or len(w) == length]
-    return random.choice(words).upper() if words else "PYTHON"
+def get_random_french_word(length: int | None = None) -> str:
+    """Récupère un mot français aléatoire en utilisant pyenchant et SpellChecker."""
+    words = [w.upper() for w in spell.word_frequency.keys() if french_dict.check(w)]
+    if length:
+        words = [w for w in words if len(w) == length]
+    return random.choice(words) if words else "PYTHON"
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🌐 Vérification d’un mot via SpellChecker
+# 🌐 Vérification d’un mot via SpellChecker + pyenchant
 # ────────────────────────────────────────────────────────────────────────────────
 def is_valid_word(word: str) -> bool:
-    return word.lower() in spell.word_frequency
+    return french_dict.check(word) and word.lower() in spell.word_frequency
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎮 Vue principale du jeu
 # ────────────────────────────────────────────────────────────────────────────────
 class AnagrammeView:
-    def __init__(self, target_word: str, max_attempts: int | None = None, author_id: int | None = None):
+    """Classe représentant une partie d'Anagramme"""
+
+    def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False):
         normalized = target_word.replace("Œ", "OE").replace("œ", "oe")
         self.target_word = normalized.upper()
         self.display_word = ''.join(random.sample(self.target_word, len(self.target_word)))
         self.display_length = len([c for c in self.target_word if c.isalpha()])
-        base_attempts = max(self.display_length, 5)
-        self.max_attempts = max_attempts if max_attempts else base_attempts
+        self.author_id = author_id
+        self.multi = multi
+        self.max_attempts = None if multi else max(self.display_length, 5)
         self.attempts: list[dict] = []
         self.message = None
         self.finished = False
-        self.author_id = author_id
-        self.hinted_indices: set[int] = set()
+        self.start_time = asyncio.get_event_loop().time()
 
     def remove_accents(self, text: str) -> str:
         return ''.join(
@@ -106,25 +64,38 @@ class AnagrammeView:
             if unicodedata.category(c) != 'Mn'
         ).upper()
 
-    def create_feedback_line(self, entry: dict) -> str:
-        word = entry['word']
-        letters = " ".join(
-            c if i >= len(self.target_word) or self.remove_accents(c) != self.remove_accents(self.target_word[i])
-            else c
-            for i, c in enumerate(word)
-        )
-        return letters
-
     def build_embed(self) -> discord.Embed:
-        mode_text = "Solo 🧍‍♂️" if self.author_id else "Multi 🌍"
+        mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
         embed = discord.Embed(
             title=f"🔀 Anagramme - {mode_text}",
             description=f"Mot mélangé : **{' '.join(self.display_word)}**",
             color=discord.Color.orange()
         )
+
+        if self.multi:
+            instructions = (
+                "💡 **Comment jouer en mode Multi :**\n"
+                "1️⃣ Tout le monde peut participer.\n"
+                f"2️⃣ Proposez un mot avec `.` ou `*` suivi de votre essai.\n"
+                f"3️⃣ Le mot doit faire {self.display_length} lettres.\n"
+                "4️⃣ Il n’y a **aucune limite d’essais**.\n"
+                "5️⃣ La partie se termine automatiquement après 3 minutes ou quand le mot est trouvé."
+            )
+        else:
+            instructions = (
+                "💡 **Comment jouer en mode Solo :**\n"
+                f"1️⃣ Proposez un mot avec `.` ou `*` suivi de votre essai.\n"
+                f"2️⃣ Le mot doit faire {self.display_length} lettres.\n"
+                f"3️⃣ Vous avez {self.max_attempts} essais maximum.\n"
+                "4️⃣ La partie se termine quand le mot est trouvé ou après 3 minutes."
+            )
+
+        embed.add_field(name="📝 Instructions", value=instructions, inline=False)
+
         if self.attempts:
-            tries_text = "\n".join(entry['word'] for entry in self.attempts)
-            embed.add_field(name=f"Essais ({len(self.attempts)}/{self.max_attempts})", value=tries_text, inline=False)
+            tries_text = "\n".join(f"{entry['author']}: {entry['word']}" for entry in self.attempts)
+            field_name = f"Essais ({len(self.attempts)})" if self.multi else f"Essais ({len(self.attempts)}/{self.max_attempts})"
+            embed.add_field(name=field_name, value=tries_text, inline=False)
         else:
             embed.add_field(name="Essais", value="*(Aucun essai pour l’instant)*", inline=False)
 
@@ -132,27 +103,44 @@ class AnagrammeView:
             last_word = self.attempts[-1]['word'] if self.attempts else ""
             if self.remove_accents(last_word) == self.remove_accents(self.target_word):
                 embed.color = discord.Color.green()
-                embed.set_footer(text="🎉 Bravo ! Tu as trouvé le mot.")
+                embed.set_footer(text="🎉 Bravo ! Le mot a été trouvé.")
             else:
                 embed.color = discord.Color.red()
                 embed.set_footer(text=f"💀 Partie terminée. Le mot était {self.target_word}.")
         else:
-            embed.set_footer(text=f"⏳ Temps restant : 180 secondes")
+            elapsed = int(asyncio.get_event_loop().time() - self.start_time)
+            remaining = max(0, 180 - elapsed)
+            embed.set_footer(text=f"⏳ Temps restant : {remaining} secondes")
+
         return embed
 
-    async def process_guess(self, channel: discord.abc.Messageable, guess: str):
+    async def process_guess(self, channel: discord.abc.Messageable, guess: str, author_name: str, author_id: int):
         if self.finished:
             return await safe_send(channel, "⚠️ La partie est terminée.")
+        if not self.multi and author_id != self.author_id:
+            return
         filtered_guess = guess.strip(".* ").upper()
         if len(filtered_guess) != self.display_length:
             return await safe_send(channel, f"⚠️ Le mot doit faire {self.display_length} lettres.")
         if not is_valid_word(filtered_guess):
             return await safe_send(channel, f"❌ `{filtered_guess}` n’est pas reconnu comme un mot valide.")
-        self.attempts.append({'word': filtered_guess})
-        if self.remove_accents(filtered_guess) == self.remove_accents(self.target_word) or len(self.attempts) >= self.max_attempts:
+        self.attempts.append({'word': filtered_guess, 'author': author_name})
+        if self.remove_accents(filtered_guess) == self.remove_accents(self.target_word):
+            self.finished = True
+        elif not self.multi and len(self.attempts) >= self.max_attempts:
             self.finished = True
         if self.message:
             await safe_edit(self.message, embed=self.build_embed())
+
+    async def check_timeout(self):
+        while not self.finished:
+            await asyncio.sleep(5)
+            elapsed = asyncio.get_event_loop().time() - self.start_time
+            if elapsed >= 180:
+                self.finished = True
+                if self.message:
+                    await safe_edit(self.message, embed=self.build_embed())
+                break
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -160,16 +148,18 @@ class AnagrammeView:
 class Anagramme(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.active_games: dict[int, AnagrammeView] = {}  # channel_id -> view
+        self.active_games: dict[int, AnagrammeView] = {}
 
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, mode: str = "solo"):
         length = random.choice(range(5, 9))
-        target_word = await get_random_french_word(length=length)
-        author_filter = None if mode.lower() in ("multi", "m") else author_id
-        view = AnagrammeView(target_word, author_id=author_filter)
+        target_word = get_random_french_word(length=length)
+        multi = mode.lower() in ("multi", "m")
+        author_filter = None if multi else author_id
+        view = AnagrammeView(target_word, author_id=author_filter, multi=multi)
         embed = view.build_embed()
         view.message = await safe_send(channel, embed=embed)
         self.active_games[channel.id] = view
+        asyncio.create_task(view.check_timeout())
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -180,7 +170,7 @@ class Anagramme(commands.Cog):
         content = message.content.strip()
         if content.startswith((".", "*")):
             view = self.active_games[message.channel.id]
-            await view.process_guess(message.channel, content)
+            await view.process_guess(message.channel, content, message.author.display_name, message.author.id)
 
     @app_commands.command(name="anagramme", description="Lance une partie d'Anagramme (multi = tout le monde peut jouer)")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
