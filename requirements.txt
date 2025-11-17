@@ -1,10 +1,11 @@
 discord.py>=2.0.0
-python-dotenv>=1.0.0
-supabase
 flask
+numpy
+openai
+psutil
+pyenchant
 pyspellchecker[fr]
 python-dateutil
-psutil
-openai
+python-dotenv>=1.0.0
 requests
-numpy
+supabase
