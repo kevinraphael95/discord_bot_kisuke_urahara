@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 compte_est_bon.py — Jeu interactif /compte_est_bon et !compte_est_bon
-# Objectif : Reproduire le jeu "Le Compte est Bon" avec calculs et proposition
+# Objectif : Un seul jeu actif à la fois, propositions via modal, timeout 90s
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
@@ -39,14 +39,51 @@ def safe_eval(expr: str):
         return None
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ Interface — Modal & Bouton
+# 🎮 Vue principale du jeu Compte est Bon
 # ────────────────────────────────────────────────────────────────────────────────
-class PropositionModal(Modal):
-    def __init__(self, parent_view: "CompteBonView", numbers: list, target: int):
-        super().__init__(title="🧮 Proposer un calcul")
-        self.parent_view = parent_view
+class CompteBonView(View):
+    """Classe représentant une partie de Compte est Bon"""
+
+    TIMEOUT = 90  # secondes
+
+    def __init__(self, numbers: list, target: int, author: discord.User = None, multi: bool = False):
+        super().__init__(timeout=self.TIMEOUT)
         self.numbers = numbers
         self.target = target
+        self.author = author
+        self.multi = multi
+        self.finished = False
+        self.message = None
+        self.start_time = asyncio.get_event_loop().time()
+        self.add_item(ProposerButton(self))
+
+    async def on_timeout(self):
+        self.finished = True
+        for c in self.children:
+            c.disabled = True
+        if self.message:
+            try:
+                await safe_send(self.message.channel, "⏱️ Temps écoulé ! Personne n’a trouvé la solution exacte.")
+                await safe_edit(self.message, view=self)
+            except:
+                pass
+
+class ProposerButton(Button):
+    def __init__(self, parent_view: CompteBonView):
+        super().__init__(label="🧮 Proposer un calcul", style=discord.ButtonStyle.primary)
+        self.parent_view = parent_view
+
+    async def callback(self, interaction: discord.Interaction):
+        if not self.parent_view.multi and self.parent_view.author:
+            if interaction.user.id != self.parent_view.author.id:
+                await safe_respond(interaction, "❌ En mode solo, seul le joueur ayant lancé la partie peut proposer.", ephemeral=True)
+                return
+        await interaction.response.send_modal(PropositionModal(self.parent_view))
+
+class PropositionModal(Modal):
+    def __init__(self, parent_view: CompteBonView):
+        super().__init__(title="🧮 Proposer un calcul")
+        self.parent_view = parent_view
         self.expression = TextInput(
             label="Ton calcul (ex: (100-25)*3)",
             placeholder="Utilise uniquement les nombres affichés et + - * /",
@@ -59,94 +96,54 @@ class PropositionModal(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         expr_raw = self.expression.value.strip()
         if not expr_raw:
-            await safe_respond(interaction, "❌ Expression vide.", ephemeral=True)
-            return
+            return await safe_respond(interaction, "❌ Expression vide.", ephemeral=True)
 
+        # Vérifier que les nombres utilisés existent
         found_numbers = [int(x) for x in re.findall(r"\d+", expr_raw)]
-        pool = self.numbers.copy()
-
+        pool = self.parent_view.numbers.copy()
         for n in found_numbers:
             if n in pool:
                 pool.remove(n)
             else:
-                await safe_respond(interaction, "❌ Nombre non disponible ou utilisé trop de fois.", ephemeral=True)
-                return
+                return await safe_respond(interaction, "❌ Nombre non disponible ou utilisé trop de fois.", ephemeral=True)
 
+        # Calcul
         result = safe_eval(expr_raw)
         if result is None:
-            await safe_respond(interaction, "❌ Calcul invalide ou caractères interdits.", ephemeral=True)
-            return
+            return await safe_respond(interaction, "❌ Calcul invalide ou caractères interdits.", ephemeral=True)
 
-        diff = abs(self.target - result)
+        diff = abs(self.parent_view.target - result)
         short_msg = f"🧠 **{interaction.user.display_name}** → `{expr_raw}` = **{result}** (écart : {diff})"
+        await safe_send(interaction.channel, short_msg)
 
         if diff == 0:
-            self.parent_view.stop_game = True
+            self.parent_view.finished = True
             winner_embed = discord.Embed(
                 title="🎉 Le compte est bon !",
-                description=f"🏆 {interaction.user.mention} a trouvé la cible **{self.target}**\n\n"
+                description=f"🏆 {interaction.user.mention} a trouvé la cible **{self.parent_view.target}**\n\n"
                             f"**Proposition :** `{expr_raw}` = **{result}**",
                 color=discord.Color.green()
             )
-            winner_embed.add_field(name="Nombres", value=" ".join(map(str, self.numbers)), inline=False)
-            await safe_send(interaction.channel, short_msg + "\n🎉 **Le compte est bon !**")
-            if getattr(self.parent_view, "message", None):
+            winner_embed.add_field(name="Nombres", value=" ".join(map(str, self.parent_view.numbers)), inline=False)
+            if self.parent_view.message:
                 try:
                     await safe_edit(self.parent_view.message, embed=winner_embed, view=None)
-                except Exception:
+                except:
                     pass
             try:
                 self.parent_view.stop()
-            except Exception:
+            except:
                 pass
-            await safe_respond(interaction, "✅ Tu as trouvé la cible !", ephemeral=True)
-            return
-
-        await safe_send(interaction.channel, short_msg)
-        await safe_respond(interaction, f"✅ Proposition enregistrée — écart {diff}.", ephemeral=True)
-
-class ProposerButton(Button):
-    def __init__(self, parent_view: "CompteBonView"):
-        super().__init__(label="🧮 Proposer un calcul", style=discord.ButtonStyle.primary)
-        self.parent_view = parent_view
-
-    async def callback(self, interaction: discord.Interaction):
-        if not self.parent_view.is_multi and self.parent_view.author:
-            if interaction.user.id != self.parent_view.author.id:
-                await safe_respond(interaction, "❌ En mode solo, seul le joueur ayant lancé la partie peut proposer.", ephemeral=True)
-                return
-        await interaction.response.send_modal(PropositionModal(self.parent_view, self.parent_view.numbers, self.parent_view.target))
-
-class CompteBonView(View):
-    def __init__(self, numbers: list, target: int, is_multi: bool = False, author: discord.User = None, timeout: int = 90):
-        super().__init__(timeout=timeout)
-        self.numbers = numbers
-        self.target = target
-        self.is_multi = is_multi
-        self.author = author
-        self.stop_game = False
-        self.add_item(ProposerButton(self))
-
-    async def on_timeout(self):
-        for c in self.children:
-            c.disabled = True
-        if not self.stop_game:
-            try:
-                await safe_send(self.message.channel, "⏱️ Temps écoulé ! Personne n’a trouvé la solution exacte.")
-            except Exception:
-                pass
-        try:
-            await safe_edit(self.message, view=self)
-        except Exception:
-            pass
+            return await safe_respond(interaction, "✅ Tu as trouvé la cible !", ephemeral=True)
+        else:
+            await safe_respond(interaction, f"✅ Proposition enregistrée — écart {diff}.", ephemeral=True)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class CompteEstBon(commands.Cog):
-    """
-    Commande /compte_est_bon et !compte_est_bon — Reproduit le jeu "Le Compte est Bon"
-    """
+    """Commande /compte_est_bon et !compte_est_bon — jeu interactif"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.active_games: dict[int, CompteBonView] = {}
@@ -166,18 +163,19 @@ class CompteEstBon(commands.Cog):
             ),
             color=discord.Color.gold()
         )
-        embed.set_footer(text="Tu as 90 secondes pour proposer ton calcul.")
-        view = CompteBonView(numbers, target, is_multi=multi, author=author, timeout=90)
+        embed.set_footer(text=f"Tu as {CompteBonView.TIMEOUT} secondes pour proposer ton calcul.")
+
+        view = CompteBonView(numbers, target, author=author, multi=multi)
         view.message = await safe_send(channel, embed=embed, view=view)
         self.active_games[channel.id] = view
 
-        await view.wait()
+        await view.wait()  # attend fin de partie ou timeout
 
         for c in view.children:
             c.disabled = True
         try:
             await safe_edit(view.message, view=view)
-        except Exception:
+        except:
             pass
         self.active_games.pop(channel.id, None)
 
