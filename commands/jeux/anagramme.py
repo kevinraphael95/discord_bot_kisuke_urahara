@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 anagramme.py — Commande interactive /anagramme et !anagramme
-# Objectif : Jeu de l'anagramme avec embed, solo et multi, fin auto au bout de 3 minutes
+# Objectif : Jeu de l'anagramme avec embed, mode solo/multi, fin auto au bout de 3 minutes
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
@@ -12,9 +12,9 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import random, asyncio, unicodedata, aiohttp
+import asyncio, random, unicodedata, aiohttp
 from spellchecker import SpellChecker
-from utils.discord_utils import safe_send, safe_edit
+from utils.discord_utils import safe_send, safe_edit, safe_respond
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🌐 Spellchecker français
@@ -54,7 +54,7 @@ class AnagrammeView:
         self.author_id = author_id
         self.multi = multi
         self.attempts: list[str] = []
-        self.message = None
+        self.message: discord.Message | None = None
         self.finished = False
         self.start_time = asyncio.get_event_loop().time()
 
@@ -79,21 +79,25 @@ class AnagrammeView:
             "4️⃣ Mode multi : tout le monde peut jouer."
         )
         embed.add_field(name="📝 Instructions", value=instructions, inline=False)
+        if self.attempts:
+            embed.add_field(name=f"Essais ({len(self.attempts)})", value="\n".join(self.attempts), inline=False)
+        else:
+            embed.add_field(name="Essais", value="*(Aucun essai pour l’instant)*", inline=False)
+        if self.finished:
+            embed.color = discord.Color.green()
+            embed.set_footer(text=f"🎉 Partie terminée ! Le mot était {self.target_word}")
+        else:
+            remaining = max(0, 180 - int(asyncio.get_event_loop().time() - self.start_time))
+            embed.set_footer(text=f"⏳ Temps restant : {remaining} secondes")
         return embed
 
     async def process_guess(self, channel: discord.abc.Messageable, guess: str, author_id: int):
         if self.finished or (not self.multi and author_id != self.author_id):
             return
         filtered = guess.strip(".* ").upper()
+        self.attempts.append(filtered)
         if self.remove_accents(filtered) == self.remove_accents(self.target_word):
             self.finished = True
-            if self.message:
-                embed = self.build_embed()
-                embed.color = discord.Color.green()
-                embed.set_footer(text=f"🎉 Bravo ! Le mot était {self.target_word}")
-                await safe_edit(self.message, embed=embed)
-            return
-        self.attempts.append(filtered)
         if self.message:
             await safe_edit(self.message, embed=self.build_embed())
 
@@ -116,34 +120,49 @@ class Anagramme(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.active_games: dict[int, AnagrammeView] = {}
+        self.active_games: dict[int, AnagrammeView] = {}  # guild_id -> vue active
 
-    async def _start_game(self, channel: discord.abc.Messageable, user_id: int, multi: bool = False):
-        if channel.id in self.active_games and not self.active_games[channel.id].finished:
-            return await safe_send(channel, "⚠️ Une partie est déjà en cours dans ce salon.")
+    async def _start_game(self, channel: discord.abc.Messageable, user_id: int, guild_id: int, multi: bool = False):
+        # Vérifie si une partie est déjà en cours sur le serveur
+        if guild_id in self.active_games and not self.active_games[guild_id].finished:
+            return await safe_respond(channel, "⚠️ Une partie est déjà en cours sur ce serveur !", ephemeral=True)
+
         word = await get_random_french_word(random.randint(5, 8))
         view = AnagrammeView(word, author_id=None if multi else user_id, multi=multi)
         view.message = await safe_send(channel, embed=view.build_embed())
-        self.active_games[channel.id] = view
+        self.active_games[guild_id] = view
         asyncio.create_task(view.check_timeout())
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+        guild_id = message.guild.id if message.guild else None
+        if guild_id not in self.active_games:
+            return
+        content = message.content.strip()
+        if content.startswith((".", "*")):
+            view = self.active_games[guild_id]
+            await view.process_guess(message.channel, content, message.author.id)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="anagramme", description="Joue à l'Anagramme (ajoute 'm' ou 'multi' pour le mode multi)")
-    async def slash_anagramme(self, interaction: discord.Interaction, mode: str = None):
-        multi = mode and mode.lower() in ("m", "multi")
+    @app_commands.describe(mode="Mode de jeu : solo ou multi (m)")
+    async def slash_anagramme(self, interaction: discord.Interaction, mode: str = "solo"):
+        multi = mode.lower() in ("m", "multi")
         await interaction.response.defer()
-        await self._start_game(interaction.channel, user_id=interaction.user.id, multi=multi)
+        await self._start_game(interaction.channel, user_id=interaction.user.id, guild_id=interaction.guild.id, multi=multi)
         await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="anagramme")
-    async def prefix_anagramme(self, ctx: commands.Context, mode: str = None):
-        multi = mode and mode.lower() in ("m", "multi")
-        await self._start_game(ctx.channel, user_id=ctx.author.id, multi=multi)
+    @commands.command(name="anagramme", help="Joue à l'Anagramme. Utilisez 'multi' ou 'm' pour jouer à plusieurs.")
+    async def prefix_anagramme(self, ctx: commands.Context, mode: str = "solo"):
+        multi = mode.lower() in ("m", "multi")
+        await self._start_game(ctx.channel, user_id=ctx.author.id, guild_id=ctx.guild.id, multi=multi)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
