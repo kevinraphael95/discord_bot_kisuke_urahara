@@ -239,7 +239,7 @@ class Anagramme(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="anagramme")
+    @commands.command(name="anagramme", help="Lance une partie d'Anagramme.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_anagramme(self, ctx: commands.Context, mode: str = "solo"):
         await self._start_game(ctx.channel, author_id=ctx.author.id, mode=mode)
