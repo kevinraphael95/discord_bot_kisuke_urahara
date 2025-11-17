@@ -30,12 +30,13 @@ class DevinelenombreView:
         self.attempts: list[dict] = []
         self.message: discord.Message | None = None
         self.finished = False
+        self.start_time = asyncio.get_event_loop().time()
 
     def build_embed(self) -> discord.Embed:
         mode_text = "Multi 🌍" if self.multi else "Solo 🧍‍♂️"
         embed = discord.Embed(
             title=f"🎯 Devinelenombre - {mode_text}",
-            description="Devine le nombre entre 0 et 100\nPropose ton nombre avec la commande `/devinelenombre <nombre>` ou `!devinelenombre <nombre>`",
+            description="Devine le nombre entre 0 et 100\nPropose ton nombre avec `/devinelenombre <nombre>` ou `!devinelenombre <nombre>`",
             color=discord.Color.orange()
         )
 
@@ -63,7 +64,9 @@ class DevinelenombreView:
                 embed.color = discord.Color.red()
                 embed.set_footer(text=f"💀 Partie terminée. Le nombre était {self.target}.")
         else:
-            embed.set_footer(text=f"⏳ Temps restant : {self.SOLO_TIME if not self.multi else self.MULTI_TIME} secondes")
+            elapsed = int(asyncio.get_event_loop().time() - self.start_time)
+            remaining = max(0, (self.MULTI_TIME if self.multi else self.SOLO_TIME) - elapsed)
+            embed.set_footer(text=f"⏳ Temps restant : {remaining} secondes")
 
         return embed
 
@@ -72,22 +75,18 @@ class DevinelenombreView:
             return False, "⚠️ La partie est terminée."
         if not (0 <= guess <= 100):
             return False, "⚠️ Le nombre doit être entre 0 et 100."
-        # Solo check
         if not self.multi and self.author_id and user.id != self.author_id:
             return False, "❌ Seul le lanceur peut proposer un nombre en solo."
 
-        # enregistrement
         self.attempts.append({"guess": guess, "user": user.display_name})
+        if self.message:
+            await safe_edit(self.message, embed=self.build_embed())
 
-        # update embed
-        await safe_edit(self.message, embed=self.build_embed())
-
-        # fin si exact
         if guess == self.target:
             self.finished = True
             return True, f"🎉 Bravo ! {user.mention} a trouvé le nombre **{self.target}** !"
 
-        return True, f"{user.display_name} a proposé **{guess}**. Ecart : {abs(self.target - guess)}"
+        return True, f"{user.display_name} a proposé **{guess}**. Écart : {abs(self.target - guess)}"
 
     async def start_timer(self):
         await asyncio.sleep(self.MULTI_TIME if self.multi else self.SOLO_TIME)
@@ -96,7 +95,8 @@ class DevinelenombreView:
             embed = self.build_embed()
             embed.color = discord.Color.red()
             embed.set_footer(text=f"⏳ Temps écoulé ! Le nombre était {self.target}.")
-            await safe_edit(self.message, embed=embed)
+            if self.message:
+                await safe_edit(self.message, embed=embed)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -110,8 +110,7 @@ class Devinelenombre(commands.Cog):
 
     async def _start_game(self, channel: discord.TextChannel, user_id: int, multi: bool = False):
         if channel.id in self.active_games:
-            return await safe_send(channel, "⚠️ Une partie est déjà en cours dans ce salon.")
-
+            return
         target = random.randint(0, 100)
         author_filter = None if multi else user_id
         view = DevinelenombreView(target, multi=multi, author_id=author_filter, channel=channel)
@@ -126,7 +125,6 @@ class Devinelenombre(commands.Cog):
         view = self.active_games[channel_id]
         user = ctx_or_interaction.user if hasattr(ctx_or_interaction, "user") else ctx_or_interaction.author
         ok, msg = await view.process_guess(user, guess)
-        # suppression message spam (si context prefix)
         if isinstance(ctx_or_interaction, commands.Context):
             try: await ctx_or_interaction.message.delete()
             except: pass
@@ -140,15 +138,14 @@ class Devinelenombre(commands.Cog):
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_devinelenombre(self, interaction: discord.Interaction, nombre: int, mode: str = None):
         multi = bool(mode and mode.lower() in ("m", "multi"))
-        if interaction.guild.id not in self.active_games:
-            await safe_respond(interaction, "🎮 Jeu lancé !", ephemeral=True)
+        if interaction.channel.id not in self.active_games:
             await self._start_game(interaction.channel, user_id=interaction.user.id, multi=multi)
         await self.guess_number(interaction, nombre)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="devinelenombre", help="Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)")
+    @commands.command(name="devinelenombre", aliases=["dln"], help="Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_devinelenombre(self, ctx: commands.Context, nombre: int, mode: str = None):
         multi = bool(mode and mode.lower() in ("m", "multi"))
