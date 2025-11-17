@@ -3,7 +3,6 @@ flask
 numpy
 openai
 psutil
-pyenchant
 pyspellchecker[fr]
 python-dateutil
 python-dotenv>=1.0.0
