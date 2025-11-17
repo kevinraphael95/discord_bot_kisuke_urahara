@@ -1,0 +1,129 @@
+ok donc voila le template
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 📌 game_template.py — Template universel pour jeux interactifs Discord
+# Objectif : Un seul jeu actif à la fois, messages . ou *, timeout 3 min, embed avec instructions
+# Catégorie : Jeux
+# Accès : Tous
+# Cooldown : 1 utilisation / 5 secondes / utilisateur
+# ────────────────────────────────────────────────────────────────────────────────
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────import discord
+from discord import app_commands
+from discord.ext import commands
+import asyncio
+from utils.discord_utils import safe_send, safe_edit
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🎮 Vue principale d’un jeu universel
+# ────────────────────────────────────────────────────────────────────────────────
+class GameView:
+    """Classe représentant une partie universelle."""
+
+    TIMEOUT = 180  # 3 minutes
+
+    def __init__(self, name: str, author_id: int | None = None, multi: bool = False):
+        self.name = name
+        self.author_id = author_id
+        self.multi = multi
+        self.finished = False
+        self.attempts: list[dict] = []  # {'author': str, 'content': str}
+        self.message = None
+        self.start_time = asyncio.get_event_loop().time()
+
+    def build_embed(self) -> discord.Embed:
+        """Construit l'embed du jeu avec instructions et historique des essais"""
+        mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
+        embed = discord.Embed(
+            title=f"🎮 {self.name} - {mode_text}",
+            description=f"💡 Instructions :\n• Envoyez vos essais avec `.` ou `*`.\n• Mode {'multi' if self.multi else 'solo'}.\n• Durée max : {self.TIMEOUT} secondes.",
+            color=discord.Color.orange()
+        )
+
+        if self.attempts:
+            tries_text = "\n".join(f"{entry['author']}: {entry['content']}" for entry in self.attempts)
+            embed.add_field(name=f"Essais ({len(self.attempts)})", value=tries_text, inline=False)
+        else:
+            embed.add_field(name="Essais", value="*(Aucun essai pour l’instant)*", inline=False)
+
+        if self.finished:
+            embed.color = discord.Color.green()
+            embed.set_footer(text=f"🎉 Partie terminée pour {self.name}.")
+        else:
+            elapsed = int(asyncio.get_event_loop().time() - self.start_time)
+            remaining = max(0, self.TIMEOUT - elapsed)
+            embed.set_footer(text=f"⏳ Temps restant : {remaining} secondes")
+
+        return embed
+
+    async def process_guess(self, channel, guess: str, author_name: str, author_id: int):
+        if self.finished:
+            return await safe_send(channel, f"⚠️ La partie {self.name} est terminée.")
+        if not self.multi and author_id != self.author_id:
+            return
+        self.attempts.append({"author": author_name, "content": guess})
+        await safe_edit(self.message, embed=self.build_embed())
+
+    async def check_timeout(self):
+        """Arrête la partie après 3 minutes"""
+        while not self.finished:
+            await asyncio.sleep(5)
+            if asyncio.get_event_loop().time() - self.start_time >= self.TIMEOUT:
+                self.finished = True
+                if self.message:
+                    await safe_edit(self.message, embed=self.build_embed())
+                break
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🧠 Cog principal
+# ────────────────────────────────────────────────────────────────────────────────
+class GameTemplate(commands.Cog):
+    """Template universel pour jeux interactifs avec message . ou *"""
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.active_games: dict[int, GameView] = {}  # channel.id -> GameView
+
+    async def _start_game(self, channel: discord.abc.Messageable, author_id: int, name: str = "Mini-Jeu", multi: bool = False):
+        if channel.id in self.active_games and not self.active_games[channel.id].finished:
+            return await safe_send(channel, f"⚠️ Il y a déjà un jeu en cours : **{self.active_games[channel.id].name}**")
+        view = GameView(name=name, author_id=None if multi else author_id, multi=multi)
+        view.message = await safe_send(channel, embed=view.build_embed())
+        self.active_games[channel.id] = view
+        asyncio.create_task(view.check_timeout())
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+        if message.channel.id not in self.active_games:
+            return
+        if not message.content.strip().startswith((".", "*")):
+            return
+        view = self.active_games[message.channel.id]
+        await view.process_guess(message.channel, message.content.strip(), message.author.display_name, message.author.id)
+
+    @app_commands.command(name="jeu", description="Lance un mini-jeu universel")
+    @app_commands.describe(mode="Mode de jeu : solo ou multi")
+    async def slash_jeu(self, interaction: discord.Interaction, mode: str = "solo"):
+        await interaction.response.defer()
+        multi = mode.lower() in ("multi", "m")
+        await self._start_game(interaction.channel, interaction.user.id, name="Mini-Jeu", multi=multi)
+        await interaction.delete_original_response()
+
+    @commands.command(name="jeu", help="Lance un mini-jeu universel")
+    async def prefix_jeu(self, ctx: commands.Context, mode: str = "solo"):
+        multi = mode.lower() in ("multi", "m")
+        await self._start_game(ctx.channel, ctx.author.id, name="Mini-Jeu", multi=multi)
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔌 Setup du Cog
+# ────────────────────────────────────────────────────────────────────────────────
+async def setup(bot: commands.Bot):
+    cog = GameTemplate(bot)
+    for command in cog.get_commands():
+        if not hasattr(command, "category"):
+            command.category = "Jeux"
+    await bot.add_cog(cog)
