@@ -1,5 +1,3 @@
-ok donc voila le template
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 game_template.py — Template universel pour jeux interactifs Discord
 # Objectif : Un seul jeu actif à la fois, messages . ou *, timeout 3 min, embed avec instructions
