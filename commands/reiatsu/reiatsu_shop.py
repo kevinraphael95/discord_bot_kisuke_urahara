@@ -15,7 +15,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from utils.discord_utils import safe_send, safe_respond
 from utils.supabase_client import supabase
-from utils.reiatsu_utils import ensure_profile
+from utils.reiatsu_utils import ensure_profile  # ⚡ Utilisation du util centralisé
 import datetime
 import json
 
@@ -131,8 +131,23 @@ class ReiatsuShop(commands.Cog):
             await safe_send(ctx.channel, "❌ Effet invalide. Choisis `zomb`, `mute` ou `rename`.")
             return
 
+        # ⚡ Utiliser ensure_profile pour sécuriser le profil
+        profile = ensure_profile(ctx.author.id, ctx.author.display_name)
+        item_key = {"zomb":"zombification","mute":"mute_temp","rename":"rename_7d"}[effect]
+        item = self.shop_items[item_key]
+
+        # Vérifier les points
+        if profile.get("points", 0) < item["price"]:
+            await safe_send(ctx.channel, f"❌ Tu n'as pas assez de reiatsu pour acheter **{item['name']}** !")
+            return
+
+        # Déduire les points
+        profile["points"] -= item["price"]
+        supabase.table("reiatsu").update({"points": profile["points"]}).eq("user_id", ctx.author.id).execute()
+
+        # Appliquer l'effet
         await self.apply_effect(member, effect)
-        await safe_send(ctx.channel, f"✅ {member.mention} est affecté par **{effect}** pour la durée correspondante !")
+        await safe_send(ctx.channel, f"✅ {member.mention} est affecté par **{item['name']}** pour la durée correspondante !\n💰 Points restants : `{profile['points']}`")
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Appliquer un effet et stocker en DB
@@ -143,7 +158,7 @@ class ReiatsuShop(commands.Cog):
         start_time = datetime.datetime.utcnow()
         end_time = start_time + datetime.timedelta(seconds=item["duration"])
 
-        # ⚡ S'assurer que le profil existe et récupérer shop_effets
+        # ⚡ Récupérer le profil via ensure_profile
         profile = ensure_profile(member.id, member.display_name)
         effects = profile.get("shop_effets") or []
 
@@ -170,7 +185,7 @@ class ReiatsuShop(commands.Cog):
             self.active_zombie.discard(member.id)
             self.active_rename.pop(member.id, None)
 
-            # ⚡ S'assurer que le profil existe avant nettoyage
+            # Supprimer l'effet expiré en JSON
             profile = ensure_profile(member.id, member.display_name)
             effects = profile.get("shop_effets") or []
             effects = [e for e in effects if e["effect_key"] != effect or datetime.datetime.fromisoformat(e["end_time"]) > datetime.datetime.utcnow()]
