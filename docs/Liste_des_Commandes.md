@@ -10,7 +10,8 @@ Liste des Commandes
 Usage: !say_as <mention|id|pseudo> <message>
 - **stats :** Pas de description.
 - **sync :** Commande préfixe pour synchroniser les commandes (guild ou global).
-- **testgame :** Tester un mini-jeu de l'entraînement cérébral via son numéro ou afficher la liste.
+- **testgame :** Tester un mini-jeu via son numéro ou 'all'.
+- **testtache :** Pas de description.
 
 ### 📂 Bleach
 - **bmoji :** Devine quel personnage Bleach se cache derrière ces emojis.
@@ -22,9 +23,6 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **pilote :** 📖 Lire le pilote de Bleach.
 - **ship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
 - **versus :** Pas de description.
-
-### 📂 Fun
-- **testtache :** Pas de description.
 
 ### 📂 Fun&Random
 - **calc :** Pas de description.
@@ -71,6 +69,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **reiatsu :** 💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.
 - **reiatsudaily :** Réclame tes 30 Reiatsu quotidien gratuit.
 - **reiatsuprofil :** 💠 Affiche ton profil Reiatsu détaillé.
+- **reiatsushop :** Pas de description.
 - **reiatsuvol :** 💠 Tente de voler 10% du Reiatsu d’un autre membre. 25% de réussite. Cooldown : 24h.
 - **skill :** Active la compétence de ta classe Reiatsu.
 - **tutoreiatsu :** Affiche le tutoriel complet pour les nouveaux joueurs.
