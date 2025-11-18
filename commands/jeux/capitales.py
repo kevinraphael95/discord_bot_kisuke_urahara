@@ -334,7 +334,9 @@ class Capitales(commands.Cog):
             child.disabled = True
         await quiz_msg.edit(embed=embed, view=view)
 
+    # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="capitales", description="Devine la capitale d'un pays")
     @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
@@ -348,8 +350,11 @@ class Capitales(commands.Cog):
             print(f"[ERREUR /capitales] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
+
+    # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
-    @commands.command(name="capitales")
+    # ────────────────────────────────────────────────────────────────────────────────
+    @commands.command(name="capitales",k help="Devine la capitale d'un pays")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_capitales(self, ctx: commands.Context, *, arg: str = None):
         try:
