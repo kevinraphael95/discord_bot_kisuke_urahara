@@ -15,6 +15,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from utils.discord_utils import safe_send, safe_respond
 from utils.supabase_client import supabase
+from utils.reiatsu_utils import ensure_profile
 import datetime
 import json
 
@@ -142,9 +143,8 @@ class ReiatsuShop(commands.Cog):
         start_time = datetime.datetime.utcnow()
         end_time = start_time + datetime.timedelta(seconds=item["duration"])
 
-        # Récupérer le profil du joueur
-        profile_res = supabase.table("reiatsu").select("shop_effets").eq("user_id", member.id).execute()
-        profile = profile_res.data[0] if profile_res.data else {"shop_effets": []}
+        # ⚡ S'assurer que le profil existe et récupérer shop_effets
+        profile = ensure_profile(member.id, member.display_name)
         effects = profile.get("shop_effets") or []
 
         # Ajouter l'effet au JSON
@@ -170,9 +170,8 @@ class ReiatsuShop(commands.Cog):
             self.active_zombie.discard(member.id)
             self.active_rename.pop(member.id, None)
 
-            # Supprimer l'effet expiré en JSON
-            profile_res = supabase.table("reiatsu").select("shop_effets").eq("user_id", member.id).execute()
-            profile = profile_res.data[0] if profile_res.data else {"shop_effets": []}
+            # ⚡ S'assurer que le profil existe avant nettoyage
+            profile = ensure_profile(member.id, member.display_name)
             effects = profile.get("shop_effets") or []
             effects = [e for e in effects if e["effect_key"] != effect or datetime.datetime.fromisoformat(e["end_time"]) > datetime.datetime.utcnow()]
             supabase.table("reiatsu").update({"shop_effets": effects}).eq("user_id", member.id).execute()
