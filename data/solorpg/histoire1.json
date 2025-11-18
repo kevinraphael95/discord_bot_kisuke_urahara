@@ -122,7 +122,7 @@
       "texte": "La gargouille te donne la clé : « Elle ouvre la chambre du Comte. Tu es prêt… contrairement aux autres. »",
       "options": [
         {"texte": "Retourner au hall", "suivant": 2},
-        {"texte": "Aller directement à la tour", "suivant": 27}
+        {"texte": "Aller directement à la chambre du Comte", "suivant": 27}
       ]
     },
     {
@@ -135,9 +135,9 @@
     },
     {
       "page": 20,
-      "texte": "Tu trouves une trappe menant à une cave rituelle. Des symboles identiques à ceux des portraits y sont gravés.\nUne faible lumière pulse, comme un cœur.",
+      "texte": "Tu trouves une trappe menant à une cave rituelle. Des symboles identiques à ceux des portraits y sont gravés.\nUne faible lumière pulse, comme un cœur.\n(Seul l’aide d’Éléonore permet de découvrir ce passage correctement.)",
       "options": [
-        {"texte": "Descendre", "suivant": 24},
+        {"texte": "Descendre", "suivant": 15},
         {"texte": "Revenir au hall", "suivant": 7}
       ]
     },
@@ -145,8 +145,8 @@
       "page": 21,
       "texte": "Le journal explique que les trois visiteurs… ne sont pas morts.\nIls ont été absorbés par le rituel et errent entre les pièces, sous des formes altérées.\nLe troisième, note le journal… avait le même nom que toi.",
       "options": [
-        {"texte": "Chercher la vérité dans la crypte", "suivant": 15},
-        {"texte": "Chercher la vérité dans la cave", "suivant": 24}
+        {"texte": "Chercher la vérité dans la crypte", "suivant": 8},
+        {"texte": "Chercher la vérité dans la cave", "suivant": 20}
       ]
     },
     {
