@@ -25,7 +25,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **versus :** Pas de description.
 
 ### 📂 Fun&Random
-- **calc :** Pas de description.
+- **calc :** Calculatrice scientifique interactive
 - **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
 - **gay :** 🌈 Calcule ton taux de gaytitude.
 - **gpt :** ChatGPT mais en nul et qui ne fonctionne presque pas.
@@ -42,8 +42,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 
 ### 📂 Jeux
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
-- **capitales :** Pas de description.
-- **compte_est_bon :** Pas de description.
+- **compte_est_bon :** Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)
 - **course_animal :** Pas de description.
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
 - **drapeaux :** Pas de description.
@@ -59,7 +58,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **pendu :** Démarre une partie du jeu du pendu.
 - **portes :** Joue au Jeu des Portes et résous les énigmes.
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
-- **tram_probleme :** Pas de description.
+- **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
 
 ### 📂 Reiatsu
 - **classe :** Choisir sa classe Reiatsu
