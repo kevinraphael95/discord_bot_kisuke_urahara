@@ -10,6 +10,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 from utils.supabase_client import supabase
 import datetime
+import json
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 Création d’un profil joueur si inexistant
@@ -25,7 +26,12 @@ def ensure_profile(user_id: int, username: str) -> dict:
     res = supabase.table("reiatsu").select("*").eq("user_id", user_id).execute()
 
     if res.data:
-        return res.data[0]
+        profile = res.data[0]
+        # S'assurer que la colonne shop_effets existe
+        if "shop_effets" not in profile:
+            profile["shop_effets"] = []
+            supabase.table("reiatsu").update({"shop_effets": []}).eq("user_id", user_id).execute()
+        return profile
 
     # Création automatique
     now_iso = datetime.datetime.utcnow().isoformat()
@@ -39,7 +45,8 @@ def ensure_profile(user_id: int, username: str) -> dict:
         "last_steal_attempt": None,
         "steal_cd": 24,
         "niveau": 0,
-        "quetes": []
+        "quetes": [],
+        "shop_effets": []  # ⚡ Nouvelle colonne pour les effets du shop
     }
     supabase.table("reiatsu").insert(profile).execute()
     return profile
@@ -64,9 +71,8 @@ def get_skill_cooldown(profile: dict, classe_config: dict) -> float:
     if not last_skill:
         return 0
 
-    import datetime
-    now = datetime.datetime.utcnow()
     try:
+        now = datetime.datetime.utcnow()
         last_dt = datetime.datetime.fromisoformat(last_skill)
         elapsed = (now - last_dt).total_seconds() / 3600
         remaining = max(0, cooldown_h - elapsed)
