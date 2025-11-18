@@ -213,7 +213,7 @@ class CompteEstBon(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="compte_est_bon", aliases=["lceb", "lecompteestbon"])
+    @commands.command(name="compte_est_bon", aliases=["lceb", "lecompteestbon"], help="Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_compte(self, ctx: commands.Context, mode: str = None):
         multi = bool(mode and mode.lower() in ["multi", "m"])
