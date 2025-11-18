@@ -54,7 +54,7 @@ class TramProbleme(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="tram_probleme", aliases=["tp"])
+    @commands.command(name="tram_probleme", aliases=["tp"], help="Teste ta morale dans un quiz absurde du dilemme du tramway.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_tram_probleme(self, ctx: commands.Context, *args):
         story = any(arg.lower() in ["story", "histoire", "mode_story"] for arg in args)
