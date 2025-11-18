@@ -108,13 +108,15 @@ class ReiatsuShop(commands.Cog):
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_reiatsushop(self, ctx: commands.Context, effect: str = None, member: discord.Member = None):
         """
-        Utilisation : !!reiatsushop <zomb|mute|rename> @membre
-        Active immédiatement l'effet sur le membre mentionné
+        Utilisation :
+          !!reiatsushop                  → affiche le shop
+          !!reiatsushop <zomb|mute|rename> @membre → achète et applique l'effet
         """
+        # ─ Afficher le shop si aucun argument fourni
         if effect is None or member is None:
             embed = discord.Embed(
                 title="💸 ReiatsuShop",
-                description="Voici les objets disponibles :",
+                description="Voici les objets disponibles :\n💡 Pour acheter : `!!reiatsushop <zomb|mute|rename> @membre`",
                 color=discord.Color.gold()
             )
             for key, item in self.shop_items.items():
