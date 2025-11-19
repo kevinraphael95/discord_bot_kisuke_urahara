@@ -229,7 +229,7 @@ class ReiatsuShop(commands.Cog):
         guild_id = self.active_zombie.get(message.author.id)
         if guild_id and guild_id == message.guild.id:
             # Ne zombifie pas si message commence par !!, $ ou dun
-            if message.content.startswith(("!!", "$", "dun")):
+            if message.content.startswith(("!!", "$", "dun", "Dun")):
                 return
             # 1 message sur 3 seulement
             if random.randint(1, 3) != 1:
