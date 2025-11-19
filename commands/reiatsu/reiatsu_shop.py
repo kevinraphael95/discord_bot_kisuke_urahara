@@ -18,6 +18,7 @@ from utils.supabase_client import supabase
 from utils.reiatsu_utils import ensure_profile
 import datetime
 import json
+import random
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -227,6 +228,12 @@ class ReiatsuShop(commands.Cog):
             return
         guild_id = self.active_zombie.get(message.author.id)
         if guild_id and guild_id == message.guild.id:
+            # Ne zombifie pas si message commence par !!, $ ou dun
+            if message.content.startswith(("!!", "$", "dun")):
+                return
+            # 1 message sur 3 seulement
+            if random.randint(1, 3) != 1:
+                return
             webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
             try:
                 await webhook.send(username=message.author.display_name,
