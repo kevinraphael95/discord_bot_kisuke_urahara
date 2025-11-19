@@ -31,7 +31,7 @@ class ReiatsuShop(commands.Cog):
 
         # Effets actifs en mémoire
         self.active_zombie = {}  # {user_id: guild_id}
-        self.active_rename = {}  # {user_id: guild_id}
+        self.active_rename = {}  # {user_id: {"guild_id": int, "nick": str}}
 
         # Shop items
         self.shop_items = {
@@ -78,13 +78,13 @@ class ReiatsuShop(commands.Cog):
                     if eff["effect_key"] == "zomb":
                         self.active_zombie[int(profile["user_id"])] = guild_id
                     elif eff["effect_key"] == "rename":
-                        self.active_rename[int(profile["user_id"])] = guild_id
+                        self.active_rename[int(profile["user_id"])] = {"guild_id": guild_id, "nick": eff.get("forced_nick")}
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH complète
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="reiatsushop", description="Affiche le shop et achète des effets")
-    async def slash_reiatsushop(self, interaction: discord.Interaction, effect: str = None, member: discord.Member = None):
+    async def slash_reiatsushop(self, interaction: discord.Interaction, effect: str = None, member: discord.Member = None, new_nick: str = None):
         await interaction.response.defer()
         if effect is None or member is None:
             embed = discord.Embed(title="💸 ReiatsuShop",
@@ -102,6 +102,10 @@ class ReiatsuShop(commands.Cog):
             await safe_respond(interaction, "❌ Effet invalide. Choisis `zomb`, `mute` ou `rename`.", ephemeral=True)
             return
 
+        if effect == "rename" and not new_nick:
+            await safe_respond(interaction, "❌ Pour rename, tu dois indiquer le nouveau pseudo.", ephemeral=True)
+            return
+
         profile = ensure_profile(interaction.user.id, interaction.user.display_name)
         item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_7d"}[effect]
         item = self.shop_items[item_key]
@@ -113,7 +117,7 @@ class ReiatsuShop(commands.Cog):
         profile["points"] -= item["price"]
         supabase.table("reiatsu").update({"points": profile["points"]}).eq("user_id", interaction.user.id).execute()
 
-        await self.apply_effect(member, effect, interaction.guild.id)
+        await self.apply_effect(member, effect, interaction.guild.id, new_nick=new_nick)
 
         embed = discord.Embed(
             description=f"✅ **{member.display_name}** est affecté par **{item['name']}** !\n💰 Points restants : `{profile['points']}`",
@@ -126,10 +130,10 @@ class ReiatsuShop(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="reiatsushop", aliases=["rtsshop"])
     @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_reiatsushop(self, ctx: commands.Context, effect: str = None, member: discord.Member = None):
+    async def prefix_reiatsushop(self, ctx: commands.Context, effect: str = None, member: discord.Member = None, *, new_nick: str = None):
         if effect is None or member is None:
             embed = discord.Embed(title="💸 ReiatsuShop",
-                                  description="Voici les objets disponibles :\n💡 Pour acheter : `!!reiatsushop <zomb|mute|rename> @membre`",
+                                  description="Voici les objets disponibles :\n💡 Pour acheter : `!!reiatsushop <zomb|mute|rename> @membre [nouveau pseudo]`",
                                   color=discord.Color.gold())
             for key, item in self.shop_items.items():
                 embed.add_field(name=f"{item['emoji']} **{item['name']}** — `{item['price']} reiatsu`",
@@ -143,6 +147,10 @@ class ReiatsuShop(commands.Cog):
             await safe_send(ctx.channel, "❌ Effet invalide. Choisis `zomb`, `mute` ou `rename`.")
             return
 
+        if effect == "rename" and not new_nick:
+            await safe_send(ctx.channel, "❌ Pour rename, tu dois indiquer le nouveau pseudo après le @membre.")
+            return
+
         profile = ensure_profile(ctx.author.id, ctx.author.display_name)
         item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_7d"}[effect]
         item = self.shop_items[item_key]
@@ -154,7 +162,7 @@ class ReiatsuShop(commands.Cog):
         profile["points"] -= item["price"]
         supabase.table("reiatsu").update({"points": profile["points"]}).eq("user_id", ctx.author.id).execute()
 
-        await self.apply_effect(member, effect, ctx.guild.id)
+        await self.apply_effect(member, effect, ctx.guild.id, new_nick=new_nick)
 
         embed = discord.Embed(
             description=f"✅ **{member.display_name}** est affecté par **{item['name']}** !\n💰 Points restants : `{profile['points']}`",
@@ -165,7 +173,7 @@ class ReiatsuShop(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Appliquer un effet et stocker en DB
     # ────────────────────────────────────────────────────────────────────────────
-    async def apply_effect(self, member: discord.Member, effect: str, guild_id: int):
+    async def apply_effect(self, member: discord.Member, effect: str, guild_id: int, new_nick: str = None):
         item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_7d"}[effect]
         item = self.shop_items[item_key]
         start_time = datetime.datetime.utcnow()
@@ -174,18 +182,26 @@ class ReiatsuShop(commands.Cog):
         profile = ensure_profile(member.id, member.display_name)
         effects = profile.get("shop_effets") or []
 
-        effects.append({
+        effect_data = {
             "effect_key": effect,
             "start_time": start_time.isoformat(),
             "end_time": end_time.isoformat(),
             "guild_id": guild_id
-        })
+        }
+        if effect == "rename":
+            effect_data["forced_nick"] = new_nick
+
+        effects.append(effect_data)
         supabase.table("reiatsu").update({"shop_effets": effects}).eq("user_id", member.id).execute()
 
         if effect == "zomb":
             self.active_zombie[member.id] = guild_id
-        elif effect == "rename":
-            self.active_rename[member.id] = guild_id
+        elif effect == "rename" and new_nick:
+            self.active_rename[member.id] = {"guild_id": guild_id, "nick": new_nick}
+            try:
+                await member.edit(nick=new_nick)
+            except:
+                pass
         elif effect == "mute":
             if member.guild.me.guild_permissions.moderate_members:
                 await member.timeout(item["duration"])
@@ -222,10 +238,10 @@ class ReiatsuShop(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        guild_id = self.active_rename.get(after.id)
-        if guild_id and guild_id == after.guild.id:
-            forced_nick = self.active_rename.get(after.id)
-            if forced_nick and after.display_name != forced_nick:
+        data = self.active_rename.get(after.id)
+        if data and data["guild_id"] == after.guild.id:
+            forced_nick = data["nick"]
+            if after.display_name != forced_nick:
                 try:
                     await after.edit(nick=forced_nick)
                 except:
