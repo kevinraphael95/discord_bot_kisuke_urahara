@@ -27,6 +27,9 @@ class TramProbleme(commands.Cog):
         self.bot = bot
         self.questions_path = os.path.join("data", "tram_questions.json")
 
+        # ⚡ Charge le JSON une fois au démarrage
+        self.questions = self.load_questions()
+
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Chargement du JSON
     # ────────────────────────────────────────────────────────────────────────────
@@ -68,7 +71,7 @@ class TramProbleme(commands.Cog):
         send = safe_respond if is_inter else safe_send
         edit = safe_edit
 
-        questions = self.load_questions()
+        questions = list(self.questions)
         if not questions:
             await send(ctx_or_inter, "❌ Aucune question trouvée dans le JSON.")
             return
@@ -101,7 +104,10 @@ class TramProbleme(commands.Cog):
         async def start_callback(interaction):
             nonlocal started
             started = True
-            await interaction.response.defer()
+            try:
+                await interaction.response.defer()
+            except:
+                pass
             view_start.stop()
 
         start_button = discord.ui.Button(label="▶️ Commencer", style=discord.ButtonStyle.green)
@@ -118,7 +124,7 @@ class TramProbleme(commands.Cog):
             return
 
         # ──────────────────────────────────────────────────────────────
-        # Boucle des questions avec timeout pour tous les modes
+        # Boucle des questions
         # ──────────────────────────────────────────────────────────────
         total_q = len(questions) if story else min(5, len(questions))
 
@@ -129,51 +135,70 @@ class TramProbleme(commands.Cog):
             embed.color = discord.Color.orange()
             embed.set_footer(text="Fais ton choix moral... ou pas 😈")
 
-            view = discord.ui.View(timeout=60)
             answered = False
-            next_question = False
+            view = discord.ui.View(timeout=60)
 
-            for option in question["options"]:
-                button = discord.ui.Button(label=option["text"], style=discord.ButtonStyle.primary)
+            for opt in question["options"]:
+                button = discord.ui.Button(label=opt["text"], style=discord.ButtonStyle.primary)
 
-                async def button_callback(interaction, choice=option):
-                    nonlocal utilitarisme, deontologie, answered, next_question
+                async def callback(interaction, choice=opt):
+                    nonlocal utilitarisme, deontologie, answered
+                    if answered:
+                        return
                     answered = True
 
-                    result = choice.get("result", "🤔 Choix étrange...")
-                    ethics = choice.get("ethics")
+                    # Désactive les boutons
+                    for b in view.children:
+                        b.disabled = True
 
+                    try:
+                        await interaction.response.defer()
+                    except:
+                        pass
+
+                    # Score moral
+                    ethics = choice.get("ethics")
                     if ethics == "utilitarisme":
                         utilitarisme += 1
                     elif ethics == "déontologie":
                         deontologie += 1
 
+                    # Sauvé / tué
                     for key in total_saved:
                         total_saved[key] += choice.get("saved", {}).get(key, 0)
                         total_killed[key] += choice.get("killed", {}).get(key, 0)
 
-                    embed.add_field(name="🧠 Ton choix", value=f"**{choice['text']}**\n{result}", inline=False)
-                    embed.set_footer(text="Appuie sur ➡️ Continuer pour passer à la suite.")
-                    await edit(msg, embed=embed, view=None)
-                    await interaction.response.defer()
+                    # Ajout du texte du choix
+                    result = choice.get("result", "🤔 Choix étrange...")
+                    embed.add_field(
+                        name="🧠 Ton choix",
+                        value=f"**{choice['text']}**\n{result}",
+                        inline=False
+                    )
 
-                    # Bouton "Continuer"
-                    view_continue = discord.ui.View(timeout=60)
+                    # Bouton "Continuer" immédiatement
+                    continue_view = discord.ui.View(timeout=60)
+                    next_question = False
 
                     async def continue_callback(inter2):
                         nonlocal next_question
                         next_question = True
-                        await inter2.response.defer()
-                        view_continue.stop()
+                        try:
+                            await inter2.response.defer()
+                        except:
+                            pass
+                        continue_view.stop()
 
                     cont_btn = discord.ui.Button(label="➡️ Continuer", style=discord.ButtonStyle.green)
                     cont_btn.callback = continue_callback
-                    view_continue.add_item(cont_btn)
-                    await edit(msg, embed=embed, view=view_continue)
-                    await view_continue.wait()
+                    continue_view.add_item(cont_btn)
+
+                    embed.set_footer(text="Appuie sur ➡️ Continuer pour passer à la suite.")
+                    await edit(msg, embed=embed, view=continue_view)
+                    await continue_view.wait()
                     view.stop()
 
-                button.callback = button_callback
+                button.callback = callback
                 view.add_item(button)
 
             await edit(msg, embed=embed, view=view)
@@ -181,12 +206,6 @@ class TramProbleme(commands.Cog):
 
             if not answered:
                 embed.description = "⛔ Le tram s’arrête... tu n’as pas répondu à temps."
-                embed.color = discord.Color.red()
-                await edit(msg, embed=embed, view=None)
-                return
-
-            if not next_question:
-                embed.description = "🚋 Le tram s’arrête... tu n’as pas continué à temps."
                 embed.color = discord.Color.red()
                 await edit(msg, embed=embed, view=None)
                 return
