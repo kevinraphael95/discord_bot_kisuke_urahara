@@ -16,6 +16,7 @@ from discord.ext import commands
 from discord.ui import View, Button
 import json
 import os
+from datetime import datetime, timezone
 
 from utils.supabase_client import supabase
 from utils.discord_utils import safe_send, safe_respond, safe_edit
@@ -44,7 +45,23 @@ class ClasseSelectView(View):
     def __init__(self, user_id: int):
         super().__init__(timeout=60)
         self.user_id = user_id
+        self.skill_actif = False
+        self.skill_remaining = 0
         self.create_buttons()
+
+    async def check_active_skill(self):
+        """Vérifie si le joueur a un skill actif et calcule le temps restant."""
+        try:
+            res = supabase.table("reiatsu").select("active_skill", "last_skilled_at", "steal_cd").eq("user_id", str(self.user_id)).execute()
+            if res.data and res.data[0].get("active_skill"):
+                self.skill_actif = True
+                last_skilled = res.data[0].get("last_skilled_at")
+                cd = res.data[0].get("steal_cd") or 0
+                if last_skilled:
+                    elapsed = (datetime.now(timezone.utc) - datetime.fromisoformat(last_skilled)).total_seconds()
+                    self.skill_remaining = max(0, int(cd - elapsed))
+        except Exception as e:
+            print(f"[ERREUR] Impossible de vérifier active_skill : {e}")
 
     def create_buttons(self):
         """Crée un bouton pour chaque classe définie dans la config Reiatsu."""
@@ -60,6 +77,17 @@ class ClasseSelectView(View):
                 await safe_respond(interaction, "❌ Tu ne peux pas choisir pour un autre joueur.", ephemeral=True)
                 return
 
+            # Vérifier si le skill est actif
+            try:
+                res = supabase.table("reiatsu").select("active_skill").eq("user_id", str(self.user_id)).execute()
+                if res.data and res.data[0].get("active_skill"):
+                    await safe_respond(interaction, "❌ Tu ne peux pas changer de classe pendant qu’un skill est actif.", ephemeral=True)
+                    return
+            except Exception as e:
+                await safe_respond(interaction, f"❌ Erreur lors de la vérification du skill actif : {e}", ephemeral=True)
+                return
+
+            # Changement de classe
             try:
                 nouveau_cd = 19 if nom == "Voleur" else 24
                 supabase.table("reiatsu").update({
@@ -77,6 +105,7 @@ class ClasseSelectView(View):
 
             except Exception as e:
                 await safe_respond(interaction, f"❌ Erreur lors de l'enregistrement : {e}", ephemeral=True)
+
         return callback
 
     async def on_timeout(self):
@@ -104,6 +133,13 @@ class ChoisirClasse(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────
     async def _send_menu(self, channel: discord.abc.Messageable, user_id: int):
         view = ClasseSelectView(user_id)
+        await view.check_active_skill()
+
+        # Si le skill est actif, désactiver les boutons
+        if view.skill_actif:
+            for item in view.children:
+                item.disabled = True
+
         description = "\n\n".join(
             [
                 f"{data.get('Symbole', '🌀')} **{nom}**\n"
@@ -118,7 +154,11 @@ class ChoisirClasse(commands.Cog):
             description=description,
             color=discord.Color.purple()
         )
-        embed.set_footer(text="Clique sur le bouton correspondant à la classe que tu veux choisir.")
+
+        if view.skill_actif:
+            embed.set_footer(text=f"❌ Impossible de changer de classe : un skill est actif ! Temps restant : {view.skill_remaining}s")
+        else:
+            embed.set_footer(text="Clique sur le bouton correspondant à la classe que tu veux choisir.")
 
         message = await safe_send(channel, embed=embed, view=view)
         view.message = message
