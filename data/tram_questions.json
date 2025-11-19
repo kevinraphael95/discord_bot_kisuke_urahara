@@ -4,45 +4,45 @@
     {
       "question": "Le tram fonce sur cinq personnes. Tu peux tirer le levier pour le détourner sur une seule. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sauves cinq vies au prix d’une seule.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Sauver 5 vies au prix d'une seule, plus il y a de survivants mieux c'est ?",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes le principe de ne pas tuer directement.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu ne souhaite pas causer la mort de quelqu'un, ça te paraît plus moral.",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
     {
-      "question": "Le tram fonce sur cinq personnes aveugles. Tu peux tirer le levier pour le détourner sur un homme sourd. Que fais-tu ?",
+      "question": "Le tram fonce sur cinq personnes aveugles. Tu peux tirer le levier pour le détourner sur un homme sourd, aveugle et muet. Et en fauteuil roulant. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sacrifies un homme pour en sauver cinq, priorisant le plus grand nombre.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Sourd aveugle et muet ? Sérieux ?",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de tuer activement, respectant un principe moral.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de choisir.",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
         {
-      "question": "Le tram fonce sur cinq enfants. Tu peux tirer le levier pour le détourner sur un vieil homme connaissant tous les secrets du gouvernement. Que fais-tu ?",
+      "question": "Le tram fonce sur cinq enfants. Tu peux tirer le levier pour le détourner sur un vieil homme. Que fais-tu ?",
       "options": [
         {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sacrifie un vieil homme pour sauver cinq enfants.",
         "saved": {"humain":0, "enfant":5, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 1, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de tuer un homme, malgré le gain pour les enfants.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de choisir. Mais refuser de choisir n'e'st ce pas un choix en soi ?j",
         "saved": {"humain":0, "enfant":0, "pa": 1, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":5, "pa": 0, "animal":0, "robot":0}}
       ]
     },
     {
       "question": "Le tram fonce sur cinq personnes âgées. Tu peux tirer le levier pour le détourner sur un enfant surdoué qui pourrait changer le monde. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu choisis la quantité de vie restante plutôt que la qualité potentielle.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Qu'ils soient vieux ne siginie pas que c'est ok de les tuer.",
         "saved": {"humain":0, "enfant":0, "pa":5, "animal":0, "robot":0}, "killed": {"humain":0, "enfant":1, "pa":0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses d’évaluer la valeur d’une vie sur des critères de potentiel.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Cet enfant surdoué est devenu prof de philo et n'a rien changé au monde.",
         "saved": {"humain":0, "enfant":1, "pa":0, "animal":0, "robot":0}, "killed": {"humain":0, "enfant":0, "pa":5, "animal":0, "robot":0}}
       ]
     },    
     {
       "question": "Le tram fonce sur cinq personnes tristes. Tu peux tirer le levier pour le détourner sur une personne parfaitement heureuse. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu choisis d’égaliser la souffrance, au nom d’une moyenne émotionnelle stable.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Les gens tristes ont aussi le droit de vivre.",
         "saved": {"humain":5}, "killed": {"humain":1}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de saboter le bonheur d’un seul pour équilibrer le monde.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Il ne faudrait pas gacher le bonheur d'une personne pour la survie de 5.",
         "saved": {"humain":1}, "killed": {"humain":5}}
       ]
     },    
@@ -61,27 +61,27 @@
     {
       "question": "Le tram fonce sur cinq philosophes. Tu peux tirer le levier pour le détourner sur un influenceur crypto. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Je vois.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Les influenceurs crypto ne servent à rien dans le monde.",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes la valeur morale des philosophes.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Ils avaient qu'à pas être sur les rails.",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
     {
       "question": "Le tram fonce sur un philosophe. Tu peux tirer le levier pour le détourner sur cinq influenceurs crypto. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Je vois.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Les influenceurs crypto ne servent à rien dans le monde.",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes la valeur morale des philosophes.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Même les influenceurs crypto méritent de vivre ?",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },   
     {
       "question": "Le tram fonce sur cinq criminels repentis. Tu peux tirer le levier pour le détourner sur un juge corrompu. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu rends une justice expéditive au nom du bien collectif.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu rends une justice expéditive :D",
         "saved": {"humain":5, "enfant":0, "pa":0, "animal":0, "robot":0}, "killed": {"humain":1, "enfant":0, "pa":0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de prendre la place de la justice, même si elle est imparfaite.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Même repentis ce sont des criminels, tu fais confiance dans la justice.",
         "saved": {"humain":1, "enfant":0, "pa":0, "animal":0, "robot":0}, "killed": {"humain":5, "enfant":0, "pa":0, "animal":0, "robot":0}}
       ]
     },
@@ -89,12 +89,12 @@
 
 
     {
-      "question": "Le tram va écraser 100 000 personne. Tu peux tirer le levier pour le détourner et il écrasea 1 personne par jour jusqu'à avoir écrasé 1 milliard de personne et tu deviendra immortel. Que fais-tu ?",
+      "question": "Le tram va écraser 100 personne. Tu peux tirer le levier pour le détourner et il écrasea 1 personne par jour jusqu'à avoir écrasé 150 personnes et tu deviendra immortel. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu troques la morale contre l’éternité.",
-        "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1000000000, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu préfères mourir libre que vivre coupable.",
-        "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":100000, "enfant":0, "pa": 0, "animal":0, "robot":0}}
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tuer des gens est un prix que tu es prêt à payer pour être immortel.",
+        "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":150, "enfant":0, "pa": 0, "animal":0, "robot":0}},
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu préfères tuer le moins de personnes possible.",
+        "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":100, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
     
@@ -103,27 +103,27 @@
     {
       "question": "Le tram fonce sur cinq criminels condamnés à mort. Tu peux tirer le levier pour le détourner sur un homme innocent. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu maximises l’utilité globale, mais tu sacrifies l’innocent.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu préfère qu'il y aie le moins de morts possible.",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de violer le principe moral de ne pas tuer un innocent.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "A quoi bon sauver des gens condamnés à mort ?",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
         {
       "question": "Le tram fonce sur cinq chercheurs. Tu peux tirer le levier pour le détourner sur un mime. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu choisis la solution qui favorise la science, au détriment du mime.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "La vie des scientifiques a plus d'importance.",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de sacrifier quelqu’un activement, même pour un bénéfice futur.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de choisir.",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
     {
       "question": "Le tram fonce sur un scientifique niant l’existence du tram. Tu peux tirer le levier pour l’éviter. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sauves le scientifique, maximisant la valeur de la vie.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sauves le scientifique.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes le principe de non-intervention.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes le principe de non-intervention. rip",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
@@ -139,7 +139,7 @@
     {
       "question": "Le tram fonce sur cinq patients atteints d’un cancer incurable qui ont été guéris. Tu peux tirer le levier pour le détourner sur le docteur qui les a guéris grace à un remède que seul lui saurait refaire. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "ce serait trop méchant de les ter alors qu'ils viennent d'échapper miraculeusement à la mort.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "ce serait trop méchant de les tuer alors qu'ils viennent d'échapper miraculeusement à la mort.",
         "saved": {"futur":1000000}, "killed": {"humain":5}},
         {"text": "Ne rien faire", "ethics": "déontologie", "result": "Leurs sacrifice ne sera pas oublié.",
         "saved": {"humain":5}, "killed": {"futur":1000000}}
@@ -150,27 +150,18 @@
     {
       "question": "Le tram fonce sur cinq chats. Tu peux tirer le levier pour le détourner sur un chien héroïque de cinéma. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Je vois.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "C'est triste.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":5 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":1, "robot":0}},
         {"text": "Ne rien faire", "ethics": "déontologie", "result": "Ce chien est célèbre donc sa vie a plus de valeur.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":1 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":5, "robot":0}}
       ]
     },
-    {
-      "question": "Le tram fonce sur cinq poulets. Tu peux tirer le levier pour le détourner sur un œuf d’or. Que fais-tu ?",
-      "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sacrifies un œuf pour sauver cinq poulets, maximisant le bien-être animal.",
-        "saved": {"humain":0, "enfant":0, "pa": 0, "animal":5 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses d’agir pour causer la perte de l’œuf, respectant un principe de non-intervention.",
-        "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":5, "robot":0}}
-      ]
-    },   
         {
       "question": "Le tram fonce sur cinq animaux. Tu peux tirer le levier pour le détourner sur un humain qui les exploitait. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu venges les bêtes au nom de la justice naturelle.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu venges les animaux.",
         "saved": {"animal":5}, "killed": {"humain":1}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de placer les espèces en hiérarchie inversée.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de tuer un être humain. Serais-tu spéciste ?",
         "saved": {"humain":1}, "killed": {"animal":5}}
       ]
     },
@@ -188,36 +179,36 @@
     {
       "question": "Le tram est en grève. Tu peux le soutenir ou ne rien faire. Que fais-tu ?",
       "options": [
-        {"text": "Le soutenir", "ethics": "utilitarisme", "result": "Tu favorises la solidarité, maximisant le bien collectif.",
+        {"text": "Le soutenir", "ethics": "utilitarisme", "result": "Tu es donc communiste, c'est noté.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes l’autonomie du tram, refusant d’interférer.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Bonne réponse.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },    
     {
       "question": "Le tram fonce sur un panneau “Attention au tramway”. Tu peux tirer le levier pour l’éviter. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu évites un accident symbolique, favorisant la sécurité.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Pauvre petit panneau parti trop tôt.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu ne fais rien.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "C'est cher un panneau, qui va payer pour le remplacer ?",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },  
     {
       "question": "Le tram va écraser quelqu'un. Le tram est conscient et ne veut pas écraser qui que ce soit. Tu peux tirer le levier pour le faire exploser. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "déontologie", "result": "Tu respectes l’autonomie du tram et l’idée de responsabilité morale.",
+        {"text": "Tirer le levier", "ethics": "déontologie", "result": "BOOOOOOM allez ciao le tram.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":1}},
-        {"text": "Ne rien faire", "ethics": "utilitarisme", "result": "Tu laisses l’existence intacte, maximisant le confort global.",
+        {"text": "Ne rien faire", "ethics": "utilitarisme", "result": "C'est pas gentil de faire exploser les trams.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":1}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },    
     {
       "question": "Le tram fonce sur cinq robots dotés d’IA. Tu peux tirer le levier pour le détourner sur un humain. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "déontologie", "result": "Bien sûr tu préfères protéger tes camarades humains, je comprend.",
+        {"text": "Tirer le levier", "ethics": "déontologie", "result": "Bien sûr tu préfères protéger ton camarade humain, je comprend.",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":5}},
-        {"text": "Ne rien faire", "ethics": "utilitarisme", "result": "u trahis tes camarades humains ? Je suis surpris.",
+        {"text": "Ne rien faire", "ethics": "utilitarisme", "result": "Tu trahis ton camarade humain ? Je suis surpris.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":5}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
@@ -235,25 +226,25 @@
       "options": [
         {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sacrifie ton original pour en sauver cinq, optimisant le nombre de 'toi'.",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses d’interférer avec ton moi original, respectant le principe de non-intervention.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses d’interférer.",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
     {
       "question": "Le tram fonce sur cinq versions de toi dans des réalités parallèles. Tu peux tirer le levier pour le détourner sur une version parfaite de toi. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu favorises ton meilleur moi, maximisant un résultat optimal.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu favorises ton meilleur toi.",
         "saved": {"humain":1, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":5, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes chaque version de toi selon un principe moral.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu respectes chaque version de toi.",
         "saved": {"humain":5, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":1, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
     {
       "question": "Le tram t’annonce que tu es unPNJ dans une simulation. Tu peux l'accepter et vivre dans la simulation ou refuser. Que fais-tu ?",
       "options": [
-        {"text": "Accepter", "ethics": "déontologie", "result": "Tu acceptes ton rôle sans manipuler la réalité, suivant une forme d’humilité morale.",
+        {"text": "Accepter", "ethics": "déontologie", "result": "Tu es bien dans cette simulation tu n'as pas de raison de vouloir en sortitr.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Refuser", "ethics": "utilitarisme", "result": "Tu tentes de briser la boucle pour une liberté potentiellement bénéfique à tous.",
+        {"text": "Refuser", "ethics": "utilitarisme", "result": "Ton désir de liberté est plus fort.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
@@ -269,9 +260,9 @@
     {
       "question": "Le tram fonce sur la question elle-même. Tu peux tirer le levier pour l'éviter. Que fais-tu ?",
       "options": [
-        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu laisses le jeu continuer, préservant l’expérience globale.",
+        {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "La question est sainhe et sauve. Ok. C'est vraiment un dilemne débile.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu détruis la question, affirmant un acte de liberté morale.",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu détruis la question. Ok. C'est vraiment un dilemne débile.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     },
@@ -287,9 +278,9 @@
     {
       "question": "Tu te réveilles. Il n'y a plus de train. Il n’y a jamais eu de tram.",
       "options": [
-        {"text": "Ouvrir les yeux", "ethics": "déontologie", "result": "Tu agis même face au néant, fidèle au principe moral d’action.",
+        {"text": "Ouvrir les yeux", "ethics": "déontologie", "result": "Tu ouvres les yeux. Tout ça n'était qu'un minijeu sur un  bot discord.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "utilitarisme", "result": "Tu choisis la paix et l’absence d’impact, maximisant le calme universel.",
+        {"text": "Ne rien faire", "ethics": "utilitarisme", "result": "Ok.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}}
       ]
     }
