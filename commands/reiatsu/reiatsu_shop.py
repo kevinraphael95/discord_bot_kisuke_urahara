@@ -50,12 +50,12 @@ class ReiatsuShop(commands.Cog):
                 "duration": 3600,
                 "description": "Timeout le joueur pendant X temps."
             },
-            "rename_7d": {
+            "rename_2j": {
                 "emoji": "🪞",
-                "name": "Rename 7J",
+                "name": "Rename 2J",
                 "price": 800,
-                "duration": 604800,
-                "description": "Force le pseudo et empêche de le changer pendant 7 jours."
+                "duration": 172800,  # 2 jours
+                "description": "Force le pseudo et empêche de le changer pendant 2 jours."
             }
         }
 
@@ -108,7 +108,7 @@ class ReiatsuShop(commands.Cog):
             return
 
         profile = ensure_profile(interaction.user.id, interaction.user.display_name)
-        item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_7d"}[effect]
+        item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_2j"}[effect]
         item = self.shop_items[item_key]
 
         if profile.get("points", 0) < item["price"]:
@@ -153,7 +153,7 @@ class ReiatsuShop(commands.Cog):
             return
 
         profile = ensure_profile(ctx.author.id, ctx.author.display_name)
-        item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_7d"}[effect]
+        item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_2j"}[effect]
         item = self.shop_items[item_key]
 
         if profile.get("points", 0) < item["price"]:
@@ -175,7 +175,7 @@ class ReiatsuShop(commands.Cog):
     # 🔹 Appliquer un effet et stocker en DB
     # ────────────────────────────────────────────────────────────────────────────
     async def apply_effect(self, member: discord.Member, effect: str, guild_id: int, new_nick: str = None):
-        item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_7d"}[effect]
+        item_key = {"zomb": "zombification", "mute": "mute_temp", "rename": "rename_2j"}[effect]
         item = self.shop_items[item_key]
         start_time = datetime.datetime.utcnow()
         end_time = start_time + datetime.timedelta(seconds=item["duration"])
@@ -220,7 +220,7 @@ class ReiatsuShop(commands.Cog):
         asyncio.create_task(remove_effect())
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Listeners style "as me"
+    # 🔹 Listeners
     # ────────────────────────────────────────────────────────────────────────────
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -228,10 +228,8 @@ class ReiatsuShop(commands.Cog):
             return
         guild_id = self.active_zombie.get(message.author.id)
         if guild_id and guild_id == message.guild.id:
-            # Ne zombifie pas si message commence par !!, $ ou dun
             if message.content.startswith(("!!", "$", "dun", "Dun")):
                 return
-            # 1 message sur 3 seulement
             if random.randint(1, 3) != 1:
                 return
             webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
