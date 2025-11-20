@@ -57,19 +57,14 @@ def compatibilite_amoureuse(p1, p2):
             return True
         return True
 
-    # Cas logique : si l'un ne peut pas aimer l'autre → compatibilité amoureuse faible
     if not (peut_aimer(p1, p2) and peut_aimer(p2, p1)):
-        return 0.2  # faible compatibilité mais pas forcément 0 (amitié, lien spirituel)
-    # Les deux bi → très ouverts
+        return 0.2
     if s1 == "bi" and s2 == "bi":
         return 1.0
-    # Hétéro compatibles → bonne base
     if s1 == "hétéro" and s2 == "hétéro" and g1 != g2:
         return 0.9
-    # Homos compatibles → excellente alchimie
     if s1 == "homo" and s2 == "homo" and g1 == g2:
         return 0.95
-    # Un bi + un homo/hétéro → très bon équilibre
     if (s1 == "bi" and s2 in ["homo", "hétéro"]) or (s2 == "bi" and s1 in ["homo", "hétéro"]):
         return 0.85
     return 0.5
@@ -78,18 +73,14 @@ def compatibilite_amoureuse(p1, p2):
 def calculer_score(p1, p2):
     """Calcule un score de compatibilité détaillé entre deux personnages."""
     score = 50
-
-    # Compatibilité amoureuse / sexuelle
     coeff = compatibilite_amoureuse(p1, p2)
     score *= coeff
 
-    # Points pour les races communes
     races1 = set(p1.get("race", []))
     races2 = set(p2.get("race", []))
     commun_races = races1 & races2
     score += 10 * len(commun_races)
 
-    # Points pour les traits de personnalité similaires
     traits1 = set(p1.get("personnalite", []))
     traits2 = set(p2.get("personnalite", []))
     commun_traits = traits1 & traits2
@@ -100,7 +91,6 @@ def calculer_score(p1, p2):
     elif len(commun_traits) == 1:
         score += 5
 
-    # Compatibilité des statistiques
     stats1 = p1.get("stats_base", {})
     stats2 = p2.get("stats_base", {})
     compte_proches = sum(
@@ -210,11 +200,15 @@ class ShipCommand(commands.Cog):
         embed.add_field(name="🔢 Taux d’affinité", value=f"`{score}%`", inline=True)
         embed.add_field(name="💬 Verdict", value=f"*{reaction}*", inline=False)
         embed.set_thumbnail(url=p1["image"])
-        embed.set_image(url=p2["image"])
+        embed.set_image(url+p2["image"])
 
-        message = await safe_send(channel, embed=embed)
-        view = ShipView(persos, message)
-        await message.edit(view=view)
+        # ────────────────────────────────────────────────
+        # 🔧 FIX : bouton visible immédiatement
+        # ────────────────────────────────────────────────
+        view = ShipView(persos, None)
+        message = await safe_send(channel, embed=embed, view=view)
+        view.message = message
+        # ────────────────────────────────────────────────
 
     # 🔹 Commande SLASH
     @app_commands.command(name="ship", description="💘 Teste la compatibilité entre deux personnages de Bleach.")
@@ -239,4 +233,3 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Bleach"
     await bot.add_cog(cog)
-
