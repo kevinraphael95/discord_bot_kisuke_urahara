@@ -259,10 +259,11 @@ centrifugal_sort.desc = "Tri par triplets, le nombre du milieu est replacé entr
 async def flashy_sort(data):
     """Tri rapide et visuellement spectaculaire."""
     n = len(data)
+
     # Étape 1 : Heapify
-    def heapify(n, i):
+    async def heapify(n, i):
         largest = i
-        l, r = 2*i+1, 2*i+2
+        l, r = 2*i + 1, 2*i + 2
         if l < n and data[l] > data[largest]:
             largest = l
         if r < n and data[r] > data[largest]:
@@ -270,19 +271,23 @@ async def flashy_sort(data):
         if largest != i:
             data[i], data[largest] = data[largest], data[i]
             yield data, [i, largest]
-            async for _ in heapify(n, largest):
-                yield _, [i, largest]
+            async for step, highlight in heapify(n, largest):
+                yield step, highlight
 
-    for i in range(n//2 -1, -1, -1):
+    # Construction du heap
+    for i in range(n//2 - 1, -1, -1):
         async for step, highlight in heapify(n, i):
             yield step, highlight
 
-    # Étape 2 : Extraction du heap
-    for i in range(n-1, 0, -1):
+    # Extraction du heap (tri final)
+    for i in range(n - 1, 0, -1):
         data[i], data[0] = data[0], data[i]
         yield data, [0, i]
         async for step, highlight in heapify(i, 0):
             yield step, highlight
+
+flashy_sort.desc = "Tri rapide basé sur Heap Sort avec des échanges spectaculaires pour un effet visuel maximal."
+
 
 
 
