@@ -62,7 +62,7 @@ class Skill(commands.Cog):
             niveau = data.data[0].get("niveau", 1)
 
             if "skill" in quetes:
-                return  # Quête déjà accomplie
+                return
 
             quetes.append("skill")
             new_lvl = niveau + 1
@@ -88,17 +88,16 @@ class Skill(commands.Cog):
             self.skill_locks[user.id] = asyncio.Lock()
 
         async with self.skill_locks[user.id]:
-            # ✅ Création automatique du profil
+
             player = ensure_profile(user.id, user.name)
 
-            # ❌ Si pas de classe
             if not has_class(player):
                 await safe_send(channel, "❌ Tu n’as pas encore choisi de classe Reiatsu. Utilise `!!classe` pour choisir une classe.")
                 return
 
             classe = player["classe"]
 
-            # 🔸 Suppression automatique du message pour Illusionniste
+            # 🔸 Suppression du message de la commande pour Illusionniste
             if classe == "Illusionniste" and isinstance(channel, discord.TextChannel):
                 try:
                     async for msg in channel.history(limit=5):
@@ -111,8 +110,7 @@ class Skill(commands.Cog):
             classe_data = self.config["CLASSES"].get(classe, {})
             base_cd = classe_data.get("Cooldown", 12)
 
-            # 🔹 Récupération du timestamp
-            res = supabase.table("reiatsu").select("last_skilled_at, active_skill, fake_spawn_id").eq("user_id", user.id).execute()
+            res = supabase.table("reiatsu").select("last_skilled_at, active_skill, fake_spawn_id, points").eq("user_id", user.id).execute()
             data = res.data[0] if res.data else {}
             last_skill = data.get("last_skilled_at")
             active_skill = data.get("active_skill", False)
@@ -120,7 +118,6 @@ class Skill(commands.Cog):
 
             cooldown_text = "✅ Disponible"
 
-            # 🔹 Calcul du cooldown
             if last_skill:
                 try:
                     last_dt = parser.parse(last_skill)
@@ -128,17 +125,19 @@ class Skill(commands.Cog):
                         last_dt = last_dt.replace(tzinfo=timezone.utc)
                     next_cd = last_dt + timedelta(hours=8 if classe == "Illusionniste" else base_cd)
                     now_dt = datetime.now(timezone.utc)
+
                     if now_dt < next_cd:
                         restant = next_cd - now_dt
                         h, m = divmod(int(restant.total_seconds() // 60), 60)
                         cooldown_text = f"⏳ {restant.days}j {h}h{m}m" if restant.days else f"⏳ {h}h{m}m"
+
                 except:
                     pass
 
             if active_skill:
                 cooldown_text = "🌀 En cours"
 
-            # ⛔ Si en cooldown → affichage
+            # 🔸 Retour d'info si le skill n'est pas dispo
             if cooldown_text != "✅ Disponible":
                 embed = discord.Embed(
                     title=f"🎴 Skill de {player.get('username', user.name)}",
@@ -148,9 +147,7 @@ class Skill(commands.Cog):
                 await safe_send(channel, embed=embed)
                 return
 
-            # 🔹 Activation du skill
             update_data = {"last_skilled_at": datetime.utcnow().isoformat()}
-            msg = ""
 
             # ───────────── Illusionniste ─────────────
             if classe == "Illusionniste":
@@ -177,21 +174,42 @@ class Skill(commands.Cog):
                     description="Un faux Reiatsu est apparu dans le serveur…\nTu ne peux pas l’absorber toi-même.",
                     color=discord.Color.green()
                 )
-                await safe_send(channel, embed=embed, ephemeral=True)
+                await safe_send(channel, embed=embed)
+
+                await self.valider_quete_skill(user, channel)
+                return
 
             # ───────────── Voleur ─────────────
             elif classe == "Voleur":
                 update_data["active_skill"] = True
-                msg = "🥷 **Vol garanti activé !** Ton prochain vol réussira à coup sûr."
+                embed = discord.Embed(
+                    title="🥷 Skill Voleur activé !",
+                    description="Ton prochain vol sera automatiquement **réussi**.",
+                    color=discord.Color.purple()
+                )
+                await safe_send(channel, embed=embed)
+
+                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
+                await self.valider_quete_skill(user, channel)
+                return
 
             # ───────────── Absorbeur ─────────────
             elif classe == "Absorbeur":
                 update_data["active_skill"] = True
-                msg = "🌀 **Super Absorption !** Le prochain Reiatsu sera forcément un Super Reiatsu."
-                
-            # ───────────── Parieur (nouvelle version 🎰) ─────────────
+                embed = discord.Embed(
+                    title="🌀 Skill Absorbeur activé !",
+                    description="Ton prochain Reiatsu sera automatiquement un **Super Reiatsu**.",
+                    color=discord.Color.blue()
+                )
+                await safe_send(channel, embed=embed)
+
+                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
+                await self.valider_quete_skill(user, channel)
+                return
+
+            # ───────────── Parieur (Machine à Sous) ─────────────
             elif classe == "Parieur":
-                points = player.get("points", 0)
+                points = data.get("points", 0)
                 mise = 30
 
                 if points < mise:
@@ -200,56 +218,48 @@ class Skill(commands.Cog):
 
                 symbols = ["💎", "🍀", "🔥", "💀", "🎴", "🌸", "🪙"]
 
-                # ───────────── Embed initial ─────────────
                 slots = [random.choice(symbols) for _ in range(3)]
                 embed = discord.Embed(
                     title="🎰 Machine à Sous Reiatsu",
-                    description=f"{slots[0]} | {slots[1]} | {slots[2]}\n\nLancement de la machine à sous...",
+                    description=f"{slots[0]} | {slots[1]} | {slots[2]}\n\nLancement...",
                     color=discord.Color.gold()
                 )
-                embed.set_footer(text=f"Mise : {mise} Reiatsu • Solde actuel : {points}")
+                embed.set_footer(text=f"Mise : {mise} Reiatsu • Solde : {points}")
                 message = await safe_send(channel, embed=embed)
 
                 await asyncio.sleep(1.2)
 
-                # ───────────── Animation courte ─────────────
                 for _ in range(3):
                     slots = [random.choice(symbols) for _ in range(3)]
-                    embed.description = f"{slots[0]} | {slots[1]} | {slots[2]}\n\nLancement de la machine à sous..."
+                    embed.description = f"{slots[0]} | {slots[1]} | {slots[2]}\n\nLancement..."
                     await message.edit(embed=embed)
                     await asyncio.sleep(0.5)
 
-                # ───────────── Tirage final ─────────────
                 slots = [random.choice(symbols) for _ in range(3)]
+
                 if len(set(slots)) == 1:
-                    result_text = "💥 **JACKPOT ! Trois symboles identiques ! Tu gagnes +160 Reiatsu !**"
+                    result_text = "💥 **JACKPOT ! Trois symboles identiques ! +160 Reiatsu !**"
                     gain = 160
                 elif len(set(slots)) == 2:
-                    result_text = "✨ **Deux symboles identiques ! Tu gagnes +100 Reiatsu !**"
+                    result_text = "✨ **Deux symboles identiques ! +100 Reiatsu !**"
                     gain = 100
                 else:
-                    result_text = "❌ **Perdu !** Tu perds ta mise de 30 Reiatsu."
+                    result_text = "❌ **Perdu !** -30 Reiatsu."
                     gain = -mise
 
-                new_points = points + gain if gain > 0 else points - mise
-                update_data = {
-                    "points": max(0, new_points),
+                new_points = max(0, points + gain)
+                supabase.table("reiatsu").update({
+                    "points": new_points,
                     "last_skilled_at": datetime.utcnow().isoformat()
-                }
-                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
+                }).eq("user_id", user.id).execute()
 
-                # ───────────── Mise à jour de l'embed final ─────────────
                 embed.description = f"{slots[0]} | {slots[1]} | {slots[2]}\n\n{result_text}"
                 embed.color = discord.Color.gold() if gain > 0 else discord.Color.red()
-                embed.set_footer(text=f"Mise : {mise} Reiatsu • Solde actuel : {max(0, new_points)}")
+                embed.set_footer(text=f"Mise : {mise} Reiatsu • Solde : {new_points}")
                 await message.edit(embed=embed)
 
-                # Empêche l'affichage du message "En cours"
+                await self.valider_quete_skill(user, channel)
                 return
-
-            # ───────────── Validation de la quête ─────────────
-            await self.valider_quete_skill(user, channel)
-            supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
 
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
