@@ -17,19 +17,20 @@ async def bubble_sort(data):
 bubble_sort.desc = "Compare chaque élément avec le suivant et fait remonter les plus grands."
 
 async def insertion_sort(data):
-    """Insère chaque élément dans la partie déjà triée avec highlight même pour valeurs égales."""
     for i in range(1, len(data)):
         key = data[i]
         j = i - 1
+        moved = False
         moved_indices = []
         while j >= 0 and data[j] > key:
             data[j + 1] = data[j]
             moved_indices.append(j + 1)
             moved_indices.append(j)
             j -= 1
-            yield data, moved_indices
+            moved = True
         data[j + 1] = key
-        yield data, moved_indices + [j + 1, i]
+        if moved:  # yield uniquement si qqch a bougé
+            yield data, moved_indices + [j + 1, i]
 insertion_sort.desc = "Insère chaque élément dans la partie déjà triée."
 
 
@@ -114,22 +115,23 @@ async def heap_sort(data):
 heap_sort.desc = "Tri utilisant un tas binaire."
 
 async def shell_sort(data):
-    """Améliore Insertion Sort avec des gaps et highlight correct pour barres égales."""
     n = len(data)
     gap = n // 2
     while gap > 0:
         for i in range(gap, n):
             temp = data[i]
             j = i
+            moved = False
             moved_indices = []
             while j >= gap and data[j - gap] > temp:
                 data[j] = data[j - gap]
                 moved_indices.append(j)
                 moved_indices.append(j - gap)
                 j -= gap
-                yield data, moved_indices  # yield avec surbrillance même si valeurs identiques
+                moved = True
             data[j] = temp
-            yield data, moved_indices + [j, i]
+            if moved:  # yield uniquement si qqch a bougé
+                yield data, moved_indices + [j, i]
         gap //= 2
 shell_sort.desc = "Améliore Insertion Sort avec des gaps."
 
