@@ -17,17 +17,21 @@ async def bubble_sort(data):
 bubble_sort.desc = "Compare chaque élément avec le suivant et fait remonter les plus grands."
 
 async def insertion_sort(data):
-    """Insère chaque élément dans la partie déjà triée."""
+    """Insère chaque élément dans la partie déjà triée avec highlight même pour valeurs égales."""
     for i in range(1, len(data)):
         key = data[i]
         j = i - 1
+        moved_indices = []
         while j >= 0 and data[j] > key:
             data[j + 1] = data[j]
+            moved_indices.append(j + 1)
+            moved_indices.append(j)
             j -= 1
-            yield data, [j + 1, j + 2]
+            yield data, moved_indices
         data[j + 1] = key
-        yield data, [j + 1, i]
+        yield data, moved_indices + [j + 1, i]
 insertion_sort.desc = "Insère chaque élément dans la partie déjà triée."
+
 
 async def selection_sort(data):
     """Sélectionne le plus petit élément restant et le place au bon endroit."""
@@ -110,19 +114,22 @@ async def heap_sort(data):
 heap_sort.desc = "Tri utilisant un tas binaire."
 
 async def shell_sort(data):
-    """Améliore Insertion Sort avec des gaps."""
+    """Améliore Insertion Sort avec des gaps et highlight correct pour barres égales."""
     n = len(data)
     gap = n // 2
     while gap > 0:
         for i in range(gap, n):
             temp = data[i]
             j = i
+            moved_indices = []
             while j >= gap and data[j - gap] > temp:
                 data[j] = data[j - gap]
+                moved_indices.append(j)
+                moved_indices.append(j - gap)
                 j -= gap
-                yield data, [j, j + gap]
+                yield data, moved_indices  # yield avec surbrillance même si valeurs identiques
             data[j] = temp
-            yield data, [j, i]
+            yield data, moved_indices + [j, i]
         gap //= 2
 shell_sort.desc = "Améliore Insertion Sort avec des gaps."
 
