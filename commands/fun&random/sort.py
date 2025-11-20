@@ -20,18 +20,22 @@ from utils.algorithms import algorithms as all_algos  # ✅ Import des algorithm
 # ────────────────────────────────────────────────────────────────────────────────
 # Visualisation des barres
 # ────────────────────────────────────────────────────────────────────────────────
-def render_bars(data, highlight_indices=None, max_length=12):
+def render_bars(data, highlight_indices=None, max_length=None):
     """
     Génère une représentation visuelle des barres pour Discord.
     highlight_indices : liste des indices des colonnes en cours de déplacement (orange)
     """
     if highlight_indices is None:
         highlight_indices = []
+    if max_length is None:
+        max_length = len(data)  # 12 pour ton cas, au moins autant que de barres
     max_val = max(data)
     lines = []
     for i, n in enumerate(data):
-        height = int((n / max_val) * max_length)
-        # barre normale : blanc, barre en surbrillance : orange
+        # utilisation de round pour éviter les doublons visuels
+        height = round((n / max_val) * max_length)
+        if height < 1:
+            height = 1  # au moins 1 bloc pour les petites valeurs
         if i in highlight_indices:
             bar = "🟥" * height
         else:
