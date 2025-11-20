@@ -256,31 +256,34 @@ async def centrifugal_sort(data):
                 yield data, list(range(i, i + 3))
 centrifugal_sort.desc = "Tri par triplets, le nombre du milieu est replacé entre les deux autres."
 
-async def soul_resonance_sort(data):
-    """Tri par résonance locale."""
+async def flashy_sort(data):
+    """Tri rapide et visuellement spectaculaire."""
     n = len(data)
-    changed = True
-    while changed:
-        changed = False
-        for i in range(n):
-            neighbors = data[max(i-1,0):min(i+2,n)]
-            avg = sum(neighbors)/len(neighbors)
-            if data[i] > avg:
-                # échange avec le plus proche plus petit
-                candidates = [j for j in range(i+1,n) if data[j] < data[i]]
-                if candidates:
-                    j = min(candidates, key=lambda x: abs(data[i]-data[x]))
-                    data[i], data[j] = data[j], data[i]
-                    changed = True
-                    yield data, [i,j]
-            elif data[i] < avg:
-                # échange avec le plus proche plus grand
-                candidates = [j for j in range(i+1,n) if data[j] > data[i]]
-                if candidates:
-                    j = min(candidates, key=lambda x: abs(data[i]-data[x]))
-                    data[i], data[j] = data[j], data[i]
-                    changed = True
-                    yield data, [i,j]
+    # Étape 1 : Heapify
+    def heapify(n, i):
+        largest = i
+        l, r = 2*i+1, 2*i+2
+        if l < n and data[l] > data[largest]:
+            largest = l
+        if r < n and data[r] > data[largest]:
+            largest = r
+        if largest != i:
+            data[i], data[largest] = data[largest], data[i]
+            yield data, [i, largest]
+            async for _ in heapify(n, largest):
+                yield _, [i, largest]
+
+    for i in range(n//2 -1, -1, -1):
+        async for step, highlight in heapify(n, i):
+            yield step, highlight
+
+    # Étape 2 : Extraction du heap
+    for i in range(n-1, 0, -1):
+        data[i], data[0] = data[0], data[i]
+        yield data, [0, i]
+        async for step, highlight in heapify(i, 0):
+            yield step, highlight
+
 
 
 # ────────────────────────────────────────────────────────────────
@@ -299,5 +302,5 @@ algorithms = {
     "Pair Sum Sort": pair_sum_sort,
     "Pair Shift Sort": pair_shift_sort,
     "Centrifugal Sort": centrifugal_sort,
-    "Tri par résonance locale.": soul_resonance_sort
+    "Tri test cool": flashy_sort
 }
