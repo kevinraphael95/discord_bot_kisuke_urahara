@@ -24,7 +24,7 @@
       "options": [
         {"text": "Tirer le levier", "ethics": "utilitarisme", "result": "Tu sacrifie un vieil homme pour sauver cinq enfants.",
         "saved": {"humain":0, "enfant":5, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 1, "animal":0, "robot":0}},
-        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de choisir. Mais refuser de choisir n'e'st ce pas un choix en soi ?j",
+        {"text": "Ne rien faire", "ethics": "déontologie", "result": "Tu refuses de choisir. Mais refuser de choisir n'e'st ce pas un choix en soi ?",
         "saved": {"humain":0, "enfant":0, "pa": 1, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":5, "pa": 0, "animal":0, "robot":0}}
       ]
     },
