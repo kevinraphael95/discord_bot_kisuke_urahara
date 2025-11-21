@@ -56,7 +56,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
 - **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
 - **pendu :** Démarre une partie du jeu du pendu.
-- **portes :** Joue au Jeu des Portes et résous les énigmes.
+- **portes :** Pas de description.
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
 - **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
 
