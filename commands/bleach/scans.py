@@ -163,7 +163,7 @@ class ScansBleach(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="scans",
-        description="📖 Lire un dossier de scans (ex: pilote, chapitre_enfer...)."
+        description="📖 Lire un scan de Bleach."
     )
     @app_commands.describe(
         dossier="Nom du dossier dans data/images/scans/",
@@ -184,12 +184,12 @@ class ScansBleach(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="scans", help="📖 Lire un dossier de scans.")
+    @commands.command(name="scans", help="📖 Lire un scan de Bleach.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_scans(self, ctx: commands.Context, dossier: str | None = None, page: int = 1):
         if dossier is None:
             view = FolderSelectView(self, ctx.author)
-            msg = await safe_send(ctx.channel, "📁 Choisis un dossier :", view=view)
+            msg = await safe_send(ctx.channel, "📁 Choisis un scan à lire :", view=view)
             view.message = msg
             return
         await self._start_scan(ctx.channel, ctx.author, dossier, start_page=page)
