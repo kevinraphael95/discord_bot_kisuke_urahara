@@ -20,7 +20,8 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **kido :** Affiche un Kido précis, aléatoire ou la liste paginée.
 - **kluboutside :** Affiche une question de la FAQ du Klub Outside.
 - **perso :** Affiche la fiche d'un personnage Bleach.
-- **pilote :** 📖 Lire le pilote de Bleach.
+- **scans :** 📖 Lire un scan de Bleach.
+- **shifumi :** Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.
 - **ship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
 - **versus :** Pas de description.
 
