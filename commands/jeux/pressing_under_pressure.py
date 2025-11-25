@@ -19,7 +19,7 @@ from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécu
 
 # Chargement des énigmes
 try:
-    with open("pressing_puzzles.json", "r", encoding="utf-8") as f:
+    with open("data/pressing_puzzles.json", "r", encoding="utf-8") as f:
         PUZZLES = json.load(f)
 except FileNotFoundError:
     PUZZLES = []
