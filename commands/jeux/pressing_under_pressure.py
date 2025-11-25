@@ -27,10 +27,10 @@ except FileNotFoundError:
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
+
 class PressingUnderPressure(commands.Cog):
-    """
-    Commande /pressing et !pressing — Jeu troll Pressing Under Pressure
-    """
+    """Commande /pressing et !pressing — Jeu troll Pressing Under Pressure"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.progress = {}  # stock progression par utilisateur
@@ -47,13 +47,6 @@ class PressingUnderPressure(commands.Cog):
         valid = [p for p in PUZZLES if p.get("difficulty", 1) <= stage]
         return random.choice(valid) if valid else random.choice(PUZZLES)
 
-    # Vérification du bouton
-    async def check_button(self, puzzle, pressed: bool):
-        # On suppose que puzzle["type"]=="button" et puzzle["action"]=="press"
-        if puzzle.get("type") == "button" and puzzle.get("action") == "press":
-            return pressed
-        return False
-
     async def send_puzzle_embed(self, channel, puzzle, user):
         question = puzzle.get("question", "Énigme inconnue…")
         total_time = 10
@@ -67,7 +60,7 @@ class PressingUnderPressure(commands.Cog):
         )
         embed.set_footer(text=f"Joueur : {user.display_name}")
 
-        # Bouton pour “appuyer”
+        # ──────────── Bouton ────────────
         class PressButton(discord.ui.View):
             def __init__(self):
                 super().__init__(timeout=total_time)
@@ -79,7 +72,7 @@ class PressingUnderPressure(commands.Cog):
                     await interaction_.response.send_message("❌ Ce n'est pas ton bouton !", ephemeral=True)
                     return
                 self.pressed = True
-                await interaction_.response.defer()  # Pas de message, interaction silencieuse
+                await interaction_.response.send_message("✅ Bouton pressé !", ephemeral=True)
 
         view = PressButton()
         msg = await channel.send(embed=embed, view=view)
@@ -91,21 +84,21 @@ class PressingUnderPressure(commands.Cog):
             embed.description = f"**Énigme :** {question}\n\n⏳ **Temps restant :**\n{self.generate_timer(total_time, remaining)}"
             await msg.edit(embed=embed, view=view)
 
-        # Vérification après 10 secondes
-        if await self.check_button(puzzle, view.pressed):
+        # Vérification finale après 10 secondes
+        if view.pressed:
             embed.color = discord.Color.green()
             embed.description += "\n\n🎉 **Bravo ! Tu as respecté l’énigme !**"
-            await msg.edit(embed=embed, view=None)
-            return True
         else:
             embed.color = discord.Color.red()
             embed.description += "\n\n❌ **Trop lent ou mauvaise action ! Tu as échoué…**"
-            await msg.edit(embed=embed, view=None)
-            return False
+
+        await msg.edit(embed=embed, view=None)
+        return view.pressed
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
+
     @app_commands.command(
         name="pressing",
         description="Lance le jeu Pressing Under Pressure !"
@@ -124,6 +117,7 @@ class PressingUnderPressure(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
+
     @commands.command(name="pressing", aliases=["pup"])
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_pressing(self, ctx: commands.Context):
@@ -144,7 +138,5 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Jeux"
     await bot.add_cog(cog)
-
-
 
 
