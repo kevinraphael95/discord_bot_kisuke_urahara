@@ -54,62 +54,114 @@ class MemoryFormes(commands.Cog):
     # 🔹 Fonction principale du jeu
     # ────────────────────────────────────────────────────────────────────────────
     async def start_game(self, ctx_or_interaction):
-        user_id = ctx_or_interaction.user.id if isinstance(ctx_or_interaction, discord.Interaction) else ctx_or_interaction.author.id
+        user = ctx_or_interaction.user if isinstance(ctx_or_interaction, discord.Interaction) else ctx_or_interaction.author
+        channel = ctx_or_interaction.channel if hasattr(ctx_or_interaction, "channel") else ctx_or_interaction
+
+        user_id = user.id
 
         # Choix aléatoire de 4 à 6 formes
-        sequence = random.sample(self.FORMS, random.randint(4,6))
+        sequence = random.sample(self.FORMS, random.randint(4, 6))
         sequence_str = " ".join([f"{s[0]}" for s in sequence])
-        # Affiche la série à mémoriser
-        msg = await safe_send(ctx_or_interaction.channel if hasattr(ctx_or_interaction, "channel") else ctx_or_interaction, f"🔹 Retenez cette série :\n{sequence_str}")
-        await discord.utils.sleep_until(discord.utils.utcnow() + discord.utils.timedelta(seconds=5))  # pause 5s
 
-        # Supprime la série
+        # Message d’apprentissage
+        msg = await safe_send(channel, f"🔹 Retenez cette série et rien d'autre :\n{sequence_str}")
+
+        # Attente 5 secondes
+        await discord.utils.sleep_until(discord.utils.utcnow() + discord.utils.timedelta(seconds=5))
+
+        # Suppression du message
         try:
             await msg.delete()
         except:
             pass
 
         # ── Création de la gridView
-        view = discord.ui.View(timeout=30)
+        view = MemoryView(self.FORMS, sequence, user_id)
 
-        # On garde l'ordre des boutons mélangé
-        buttons = random.sample(self.FORMS, len(self.FORMS))
-        for symbol, color in buttons:
-            view.add_item(MemoryButton(symbol, color, sequence, user_id))
+        # Message final
+        await safe_send(channel, "🔹 Sélectionnez les formes dans le bon ordre !", view=view)
 
-        # Message final avec les boutons
-        await safe_send(ctx_or_interaction.channel if hasattr(ctx_or_interaction, "channel") else ctx_or_interaction, 
-                        "🔹 Sélectionnez les formes dans le bon ordre !", view=view)
 
 # ────────────────────────────────────────────────────────────────
-# 🔹 Bouton mémoire
+# 🔹 View personnalisée avec bouton “supprimer”
 # ────────────────────────────────────────────────────────────────
-class MemoryButton(discord.ui.Button):
-    def __init__(self, symbol, color, sequence, user_id):
-        super().__init__(label=symbol, style=discord.ButtonStyle.secondary)
-        self.symbol = symbol
-        self.color = color
+class MemoryView(discord.ui.View):
+    def __init__(self, forms, sequence, user_id):
+        super().__init__(timeout=30)
         self.sequence = sequence
         self.user_id = user_id
         self.user_sequence = []
 
-    async def callback(self, interaction: discord.Interaction):
-        if interaction.user.id != self.user_id:
-            await interaction.response.send_message("❌ Ce n'est pas votre partie !", ephemeral=True)
-            return
+        # Mélange des formes
+        shuffled = random.sample(forms, len(forms))
 
-        self.user_sequence.append((self.symbol, self.color))
+        # Ajout des boutons des formes
+        for symbol, color in shuffled:
+            self.add_item(MemoryButton(symbol, color))
+
+        # Ajout du bouton supprimer
+        self.add_item(DeleteLastButton())
+
+    async def update_state(self, interaction: discord.Interaction):
+        # Vérification de longueur
+        if len(self.user_sequence) == len(self.sequence):
+
+            correct = self.user_sequence == self.sequence
+            good = " ".join([s[0] for s in self.sequence])
+
+            msg = (
+                f"✅ Correct ! La série était : {good}"
+                if correct else
+                f"❌ Incorrect ! La bonne série était : {good}"
+            )
+
+            # Désactiver tous les boutons
+            for item in self.children:
+                item.disabled = True
+
+            await interaction.message.edit(content=msg, view=self)
+            self.stop()
+
+
+# ────────────────────────────────────────────────────────────────
+# 🔹 Bouton mémoire — ajouter une forme
+# ────────────────────────────────────────────────────────────────
+class MemoryButton(discord.ui.Button):
+    def __init__(self, symbol, color):
+        super().__init__(label=symbol, style=discord.ButtonStyle.secondary)
+        self.symbol = symbol
+        self.color = color
+
+    async def callback(self, interaction: discord.Interaction):
+        view: MemoryView = self.view
+
+        if interaction.user.id != view.user_id:
+            return await interaction.response.send_message("❌ Ce n'est pas votre partie !", ephemeral=True)
+
+        view.user_sequence.append((self.symbol, self.color))
         await interaction.response.defer()
 
-        # Vérifie si l'utilisateur a terminé la série
-        if len(self.user_sequence) == len(self.sequence):
-            correct = self.user_sequence == self.sequence
-            msg = "✅ Correct !" if correct else f"❌ Incorrect ! La bonne série était : {' '.join([s[0] for s in self.sequence])}"
-            # Désactive tous les boutons
-            for item in self.view.children:
-                item.disabled = True
-            await interaction.message.edit(content=msg, view=self.view)
-            self.view.stop()
+        await view.update_state(interaction)
+
+
+# ────────────────────────────────────────────────────────────────
+# 🔹 Bouton supprimer la dernière forme
+# ────────────────────────────────────────────────────────────────
+class DeleteLastButton(discord.ui.Button):
+    def __init__(self):
+        super().__init__(label="⬅️ Supprimer", style=discord.ButtonStyle.danger)
+
+    async def callback(self, interaction: discord.Interaction):
+        view: MemoryView = self.view
+
+        if interaction.user.id != view.user_id:
+            return await interaction.response.send_message("❌ Ce n'est pas votre partie !", ephemeral=True)
+
+        if view.user_sequence:
+            view.user_sequence.pop()
+
+        await interaction.response.defer()
+
 
 # ────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
