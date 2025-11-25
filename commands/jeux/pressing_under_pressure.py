@@ -30,7 +30,6 @@ except FileNotFoundError:
 
 class PressingUnderPressure(commands.Cog):
     """Commande /pressing et !pressing — Jeu troll Pressing Under Pressure"""
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.progress = {}  # stock progression par utilisateur
@@ -49,13 +48,14 @@ class PressingUnderPressure(commands.Cog):
 
     async def send_puzzle_embed(self, channel, puzzle, user):
         question = puzzle.get("question", "Énigme inconnue…")
+        required_presses = puzzle.get("press_count", 1)  # nombre de fois que le joueur doit appuyer
         total_time = 10
         remaining = total_time
 
         # Embed initial
         embed = discord.Embed(
             title="🧠 Pressing Under Pressure !",
-            description=f"**Énigme :** {question}\n\n⏳ **Temps restant :**\n{self.generate_timer(total_time, remaining)}",
+            description=f"**Énigme :** {question}\n\n⏳ **Temps restant :**\n{self.generate_timer(total_time, remaining)}\n\nAppuie {required_presses} fois sur le bouton !",
             color=discord.Color.orange()
         )
         embed.set_footer(text=f"Joueur : {user.display_name}")
@@ -64,15 +64,15 @@ class PressingUnderPressure(commands.Cog):
         class PressButton(discord.ui.View):
             def __init__(self):
                 super().__init__(timeout=total_time)
-                self.pressed = False
+                self.press_count = 0
 
             @discord.ui.button(label="Appuie ici !", style=discord.ButtonStyle.green)
             async def press(self, button: discord.ui.Button, interaction_: discord.Interaction):
                 if interaction_.user.id != user.id:
                     await interaction_.response.send_message("❌ Ce n'est pas ton bouton !", ephemeral=True)
                     return
-                self.pressed = True
-                await interaction_.response.send_message("✅ Bouton pressé !", ephemeral=True)
+                self.press_count += 1
+                await interaction_.response.send_message(f"✅ Bouton pressé ! ({self.press_count}/{required_presses})", ephemeral=True)
 
         view = PressButton()
         msg = await channel.send(embed=embed, view=view)
@@ -81,24 +81,25 @@ class PressingUnderPressure(commands.Cog):
         while remaining > 0:
             await asyncio.sleep(1)
             remaining -= 1
-            embed.description = f"**Énigme :** {question}\n\n⏳ **Temps restant :**\n{self.generate_timer(total_time, remaining)}"
+            embed.description = f"**Énigme :** {question}\n\n⏳ **Temps restant :**\n{self.generate_timer(total_time, remaining)}\n\nAppuie {required_presses} fois sur le bouton !"
             await msg.edit(embed=embed, view=view)
 
         # Vérification finale après 10 secondes
-        if view.pressed:
+        if view.press_count >= required_presses:
             embed.color = discord.Color.green()
-            embed.description += "\n\n🎉 **Bravo ! Tu as respecté l’énigme !**"
+            embed.description += f"\n\n🎉 **Bravo ! Tu as appuyé {view.press_count} fois et réussi l’énigme !**"
+            success = True
         else:
             embed.color = discord.Color.red()
-            embed.description += "\n\n❌ **Trop lent ou mauvaise action ! Tu as échoué…**"
+            embed.description += f"\n\n❌ **Trop peu de pressions ({view.press_count}/{required_presses}) ! Tu as échoué…**"
+            success = False
 
         await msg.edit(embed=embed, view=None)
-        return view.pressed
+        return success
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-
     @app_commands.command(
         name="pressing",
         description="Lance le jeu Pressing Under Pressure !"
@@ -117,7 +118,6 @@ class PressingUnderPressure(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-
     @commands.command(name="pressing", aliases=["pup"])
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_pressing(self, ctx: commands.Context):
@@ -138,5 +138,6 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Jeux"
     await bot.add_cog(cog)
+
 
 
