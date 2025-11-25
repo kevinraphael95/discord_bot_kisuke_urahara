@@ -354,7 +354,7 @@ class Capitales(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="capitales",k help="Devine la capitale d'un pays")
+    @commands.command(name="capitales", help="Devine la capitale d'un pays")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_capitales(self, ctx: commands.Context, *, arg: str = None):
         try:
