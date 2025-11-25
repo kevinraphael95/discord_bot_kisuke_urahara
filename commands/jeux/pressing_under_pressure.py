@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 pressing_under_pressure.py — Jeu Pressing Under Pressure (slash + préfixe)
 # Objectif : Mini-jeu troll inspiré de The Impossible Quiz, progressif avec timer visuel + vraie validation
-# Catégorie : Autre
+# Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
@@ -186,5 +186,5 @@ async def setup(bot: commands.Bot):
     cog = PressingUnderPressure(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Autre"
+            command.category = "Jeux"
     await bot.add_cog(cog)
