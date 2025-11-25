@@ -1,0 +1,138 @@
+[
+    {
+        "id": 1,
+        "difficulty": 1,
+        "type": "click_once",
+        "value": 1,
+        "question": "👉 Appuie UNE fois. Juste une. Pas deux."
+    },
+    {
+        "id": 2,
+        "difficulty": 1,
+        "type": "wait_then_click",
+        "value": 1,
+        "question": "👉 Appuie… mais ATTENDS 1 seconde avant."
+    },
+    {
+        "id": 3,
+        "difficulty": 1,
+        "type": "no_click",
+        "question": "👉 Ne clique PAS. (Non vraiment.)"
+    },
+    {
+        "id": 4,
+        "difficulty": 1,
+        "type": "click_if_true",
+        "value": true,
+        "question": "👉 Appuie si 2+2=4."
+    },
+
+    {
+        "id": 5,
+        "difficulty": 2,
+        "type": "multi_click",
+        "value": 3,
+        "question": "👉 Appuie EXACTEMENT 3 fois."
+    },
+    {
+        "id": 6,
+        "difficulty": 2,
+        "type": "no_click",
+        "question": "👉 Appuie seulement si tu vois un carré rouge… (Il n’y en a pas.)"
+    },
+    {
+        "id": 7,
+        "difficulty": 2,
+        "type": "wait_then_click",
+        "value": 5,
+        "question": "👉 Appuie après avoir compté mentalement jusqu'à 5."
+    },
+    {
+        "id": 8,
+        "difficulty": 2,
+        "type": "logic_invert",
+        "question": "👉 N’appuie que si tu n’as PAS appuyé à l’énigme précédente."
+    },
+    {
+        "id": 9,
+        "difficulty": 2,
+        "type": "multi_click",
+        "value": 3,
+        "question": "👉 Appuie pour chaque coin d’un triangle. (3.)"
+    },
+
+    {
+        "id": 10,
+        "difficulty": 2,
+        "type": "multi_click",
+        "value": 0,
+        "question": "👉 Appuie UNE fois pour chaque chat aperçu avant… (Réponse : 0)"
+    },
+
+    {
+        "id": 11,
+        "difficulty": 3,
+        "type": "multi_click",
+        "value": 10,
+        "question": "👉 Appuie UNE fois pour chaque coin d'une étoile (10)."
+    },
+    {
+        "id": 12,
+        "difficulty": 3,
+        "type": "no_click_time",
+        "value": 3,
+        "question": "👉 N’appuie SURTOUT PAS dans les 3 prochaines secondes."
+    },
+    {
+        "id": 13,
+        "difficulty": 3,
+        "type": "timed_click",
+        "time_target": 5,
+        "question": "👉 Appuie au moment où il reste exactement 5 blocs au timer."
+    },
+    {
+        "id": 14,
+        "difficulty": 3,
+        "type": "logic_troll",
+        "question": "👉 Appuie si tu n’as pas menti au puzzle précédent."
+    },
+    {
+        "id": 15,
+        "difficulty": 3,
+        "type": "click_any",
+        "question": "👉 Appuie quand tu te sens observé…"
+    },
+    {
+        "id": 16,
+        "difficulty": 3,
+        "type": "click_once",
+        "value": 1,
+        "question": "👉 Clique… puis REGRETTE-LE."
+    },
+    {
+        "id": 17,
+        "difficulty": 3,
+        "type": "multi_click",
+        "value": 7,
+        "question": "👉 Appuie 7 fois. Pas 6. Pas 8."
+    },
+    {
+        "id": 18,
+        "difficulty": 3,
+        "type": "click_if_confused",
+        "question": "👉 Appuie seulement si tu ne sais pas quoi répondre."
+    },
+    {
+        "id": 19,
+        "difficulty": 3,
+        "type": "click_once",
+        "value": 1,
+        "question": "👉 Appuie si tu te souviens du nombre du début… (Il servait à rien.)"
+    },
+    {
+        "id": 20,
+        "difficulty": 3,
+        "type": "click_any",
+        "question": "👉 Dernière épreuve : appuie… et espère."
+    }
+]
