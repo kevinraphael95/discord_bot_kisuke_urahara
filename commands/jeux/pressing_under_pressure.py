@@ -33,15 +33,15 @@ class PressingUnderPressure(commands.Cog):
 
     # Génération d’un timer visuel
     def generate_timer(self, total=10, remaining=10):
-        green = "🟩" * remaining
-        white = "⬜" * (total - remaining)
+        green = "🟩" * max(0, int(remaining))
+        white = "⬜" * max(0, int(total - remaining))
         return green + white
 
     # Sélection d'une énigme progressive
     def pick_puzzle(self, user_id: int):
         stage = self.progress.get(user_id, 1)
         valid = [p for p in PUZZLES if p.get("difficulty", 1) <= stage]
-        return random.choice(valid) if valid else random.choice(PUZZLES)
+        return random.choice(valid) if valid else random.choice(PUZZLES) if PUZZLES else {}
 
     async def send_puzzle_embed(self, channel, puzzle, user):
         question = puzzle.get("question", "Énigme inconnue…")
@@ -64,47 +64,93 @@ class PressingUnderPressure(commands.Cog):
                 self.press_count = 0
 
             @discord.ui.button(label="Appuie ici !", style=discord.ButtonStyle.green)
-            async def press(self, button: discord.ui.Button, interaction_: discord.Interaction):
-                if interaction_.user.id != user.id:
-                    await interaction_.response.send_message("❌ Ce n'est pas ton bouton !", ephemeral=True)
+            async def press(self, interaction: discord.Interaction, button: discord.ui.Button):
+                # Vérification d'auteur
+                if interaction.user.id != user.id:
+                    try:
+                        await interaction.response.send_message("❌ Ce n'est pas ton bouton !", ephemeral=True)
+                    except:
+                        pass
                     return
+
+                # Si la vue est déjà terminée
+                if self.is_finished():
+                    try:
+                        await interaction.response.send_message("⏳ Trop tard — le temps est écoulé.", ephemeral=True)
+                    except:
+                        pass
+                    return
+
+                # Incrément et retour à l'utilisateur
                 self.press_count += 1
-                await interaction_.response.send_message(f"✅ Bouton pressé ! ({self.press_count})", ephemeral=True)
+                try:
+                    await interaction.response.send_message(f"✅ Bouton pressé ! ({self.press_count})", ephemeral=True)
+                except:
+                    pass
 
         view = PressButton()
-        msg = await channel.send(embed=embed, view=view)
 
-        # Timer visuel animé
-        while remaining > 0:
+        # Envoi du message via safe_send (sécurisé)
+        try:
+            msg = await safe_send(channel, embed=embed, view=view)
+        except Exception:
+            # Ne pas planter si envoi impossible
+            return False
+
+        # Timer visuel animé (sécurisé)
+        while remaining > 0 and not view.is_finished():
             await asyncio.sleep(1)
             remaining -= 1
-            embed.description = f"**Énigme :** {question}\n\n⏳ **Temps restant :**\n{self.generate_timer(total_time, remaining)}"
-            await msg.edit(embed=embed, view=view)
 
+            embed.description = f"**Énigme :** {question}\n\n⏳ **Temps restant :**\n{self.generate_timer(total_time, remaining)}"
+
+            try:
+                await msg.edit(embed=embed, view=view)
+            except discord.NotFound:
+                # Message supprimé -> on abandonne proprement
+                return False
+            except Exception:
+                # Autre erreur d'édition -> on sort proprement
+                break
+
+        # Arrêt propre de la view pour éviter les interactions concurrentes
+        try:
+            view.stop()
+        except:
+            pass
+
+        # Désactivation des boutons (pour montrer que c'est fini)
+        for child in view.children:
+            child.disabled = True
+
+        # ────────────────────────────────────────────────────────────────────────────
         # Vérification finale après 10 secondes
-        if puzzle.get("type") in ["multi_click", "click_once", "click_if_true", "click_if_confused", "timed_click", "click_any"]:
-            if view.press_count == required_presses:
-                embed.color = discord.Color.green()
-                embed.description += f"\n\n🎉 **Bravo ! Tu as appuyé {view.press_count} fois et réussi l’énigme !**"
-                success = True
-            else:
-                embed.color = discord.Color.red()
-                embed.description += f"\n\n❌ **Nombre de pressions incorrect ({view.press_count}/{required_presses}) ! Tu as échoué…**"
-                success = False
-        elif puzzle.get("type") in ["no_click", "no_click_time"]:
-            if view.press_count == 0:
-                embed.color = discord.Color.green()
-                embed.description += f"\n\n🎉 **Bravo ! Tu n’as pas appuyé et réussi l’énigme !**"
-                success = True
-            else:
-                embed.color = discord.Color.red()
-                embed.description += f"\n\n❌ **Tu as appuyé ({view.press_count}) alors que ce n’était pas permis !**"
-                success = False
+        # ────────────────────────────────────────────────────────────────────────────
+        ptype = puzzle.get("type", "")
+
+        if ptype in ["multi_click", "click_once", "click_if_true", "click_if_confused", "timed_click", "click_any"]:
+            success = (view.press_count == int(required_presses))
+        elif ptype in ["no_click", "no_click_time"]:
+            success = (view.press_count == 0)
         else:
-            # Cas par défaut : on accepte tout
+            # Cas par défaut : accepter (ou traiter selon ton JSON)
             success = True
 
-        await msg.edit(embed=embed, view=None)
+        # Mise à jour finale de l'embed
+        if success:
+            embed.color = discord.Color.green()
+            embed.description += f"\n\n🎉 **Bravo ! Tu as appuyé {view.press_count} fois (objectif : {required_presses})**"
+        else:
+            embed.color = discord.Color.red()
+            embed.description += f"\n\n❌ **Échec — pressions : {view.press_count} / {required_presses}**"
+
+        try:
+            await msg.edit(embed=embed, view=view)
+        except discord.NotFound:
+            return success
+        except Exception:
+            pass
+
         return success
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -141,14 +187,10 @@ class PressingUnderPressure(commands.Cog):
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = PressingUnderPressure(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
             command.category = "Jeux"
     await bot.add_cog(cog)
-
-
-
-
