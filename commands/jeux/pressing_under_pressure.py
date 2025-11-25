@@ -48,10 +48,10 @@ class PressingUnderPressure(commands.Cog):
         return random.choice(valid) if valid else random.choice(PUZZLES)
 
     # Vérification du bouton
-    async def check_button(self, interaction: discord.Interaction, puzzle):
-        # Pour ce type, on suppose que puzzle["type"]=="button" et puzzle["action"]=="press"
+    async def check_button(self, puzzle, pressed: bool):
+        # On suppose que puzzle["type"]=="button" et puzzle["action"]=="press"
         if puzzle.get("type") == "button" and puzzle.get("action") == "press":
-            return True
+            return pressed
         return False
 
     async def send_puzzle_embed(self, channel, puzzle, user):
@@ -79,7 +79,7 @@ class PressingUnderPressure(commands.Cog):
                     await interaction_.response.send_message("❌ Ce n'est pas ton bouton !", ephemeral=True)
                     return
                 self.pressed = True
-                await interaction_.response.send_message("✅ Bouton pressé !", ephemeral=True)
+                await interaction_.response.defer()  # Pas de message, interaction silencieuse
 
         view = PressButton()
         msg = await channel.send(embed=embed, view=view)
@@ -92,11 +92,15 @@ class PressingUnderPressure(commands.Cog):
             await msg.edit(embed=embed, view=view)
 
         # Vérification après 10 secondes
-        if await self.check_button(None, puzzle) and view.pressed:
-            await channel.send("🎉 **Bravo ! Tu as respecté l’énigme !**")
+        if await self.check_button(puzzle, view.pressed):
+            embed.color = discord.Color.green()
+            embed.description += "\n\n🎉 **Bravo ! Tu as respecté l’énigme !**"
+            await msg.edit(embed=embed, view=None)
             return True
         else:
-            await channel.send("❌ **Trop lent ou mauvaise action ! Tu as échoué…**")
+            embed.color = discord.Color.red()
+            embed.description += "\n\n❌ **Trop lent ou mauvaise action ! Tu as échoué…**"
+            await msg.edit(embed=embed, view=None)
             return False
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -112,7 +116,7 @@ class PressingUnderPressure(commands.Cog):
         if not PUZZLES:
             return await safe_respond(interaction, "❌ Aucune énigme trouvée dans le JSON.")
         puzzle = self.pick_puzzle(user_id)
-        await safe_respond(interaction, "🎮 **L'énigme arrive !**")
+        await interaction.response.defer()  # Pas de message immédiat
         result = await self.send_puzzle_embed(interaction.channel, puzzle, interaction.user)
         if result:
             self.progress[user_id] = self.progress.get(user_id, 1) + 1
@@ -127,7 +131,6 @@ class PressingUnderPressure(commands.Cog):
         if not PUZZLES:
             return await safe_send(ctx.channel, "❌ Aucune énigme trouvée dans le JSON.")
         puzzle = self.pick_puzzle(user_id)
-        await safe_send(ctx.channel, "🎮 **L'énigme arrive !**")
         result = await self.send_puzzle_embed(ctx.channel, puzzle, ctx.author)
         if result:
             self.progress[user_id] = self.progress.get(user_id, 1) + 1
@@ -141,6 +144,7 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Jeux"
     await bot.add_cog(cog)
+
 
 
 
