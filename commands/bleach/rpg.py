@@ -14,7 +14,7 @@ from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_respond
 from utils.rpg_utils import create_profile_if_not_exists
-from supabase_client import supabase
+from utils.supabase_client import supabase
 import json
 import random
 
