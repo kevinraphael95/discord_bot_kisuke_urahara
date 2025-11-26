@@ -1,10 +1,11 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 rpg.py — Commande simple /rpg et !rpg
-# Objectif : Présenter le RPG Soul Society avec combat et boss
+# Objectif : RPG Soul Society (profil, combat et boss)
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
@@ -12,22 +13,25 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond
-from utils.rpg_utils import create_profile_if_not_exists
-from utils.supabase_client import supabase
 import json
 import random
 
-with open("data/enemies.json", "r") as f:
+from utils.rpg_utils import create_profile_if_not_exists
+from utils.supabase_client import supabase
+from utils.discord_utils import safe_send, safe_respond
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 📂 Chargement des ennemis depuis JSON
+# ────────────────────────────────────────────────────────────────────────────────
+with open("data/enemies.json", "r", encoding="utf-8") as f:
     ENEMIES = json.load(f)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class RPG(commands.Cog):
-    """
-    Commande /rpg et !rpg — RPG Soul Society
-    """
+    """Commande /rpg et !rpg — RPG Soul Society"""
+    
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -54,30 +58,31 @@ class RPG(commands.Cog):
     # 🔹 Fonction principale du RPG
     # ────────────────────────────────────────────────────────────────────────────
     async def process_rpg(self, user_id, ctx, action, is_slash=False):
+        # ✅ Création du profil si inexistant
         await create_profile_if_not_exists(user_id)
 
-        player_data = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute().data[0]
-        zone = str(player_data["zone"])
+        # Récupération des données du joueur
+        res = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
+        if not res.data:
+            return await (safe_respond(ctx, "❌ Impossible de charger ton profil.") if is_slash else safe_send(ctx.channel, "❌ Impossible de charger ton profil."))
+        player_data = res.data[0]
+
+        zone = str(player_data.get("zone", "1"))
         defeated = player_data.get("defeated_bosses", [])
 
+        # Fonction interne d'envoi
         def send(msg):
             return safe_respond(ctx, msg) if is_slash else safe_send(ctx.channel, msg)
 
+        # ─ Affichage d'accueil si aucune action ─
         if not action:
             msg = (
                 "🗡️ **Bienvenue dans le RPG Soul Society !**\n\n"
                 "Votre objectif : envahir les divisions de la Soul Society et affronter les capitaines !\n\n"
-                "**Système de stats :**\n"
-                "- Niveau / XP : gagnez de l'expérience pour monter de niveau\n"
-                "- HP / SP : points de vie et points de compétence\n"
-                "- ATK / DEF / DEX : Force, défense, agilité\n"
-                "- Crit / EVA : chance de coup critique et esquive\n\n"
-                "**Combat minions :** affrontez des Shinigami de la division actuelle.\n"
-                "**Combat boss :** affrontez Boss1 (vice-capitaine) puis Boss2 (capitaine) si non vaincu.\n\n"
-                "Commandes : `!rpg profil`, `!rpg combat`, `!rpg boss`"
+                "**Stats :** Niveau/XP, HP/SP, ATK/DEF/DEX, Crit/EVA\n"
+                "**Commandes :** `!rpg profil`, `!rpg combat`, `!rpg boss`"
             )
-            await send(msg)
-            return
+            return await send(msg)
 
         action = action.lower()
         if action == "profil":
@@ -90,92 +95,81 @@ class RPG(commands.Cog):
                 f"Équipement: {player_data['equipment']}"
             )
             await send(msg)
+            return
 
-        elif action in ["combat", "boss"]:
-            is_boss = action == "boss"
-            if is_boss:
-                boss_data = ENEMIES[zone]["boss1"] if ENEMIES[zone]["boss1"]["name"] not in defeated else ENEMIES[zone]["boss2"]
-                if not boss_data:
-                    await send("✅ Vous avez déjà vaincu tous les boss de cette division !")
-                    return
-                enemy = boss_data
+        # ─ Combat (minions ou boss) ─
+        is_boss = action == "boss"
+        if is_boss:
+            boss1 = ENEMIES[zone]["boss1"]
+            boss2 = ENEMIES[zone]["boss2"]
+            enemy = boss1 if boss1["name"] not in defeated else boss2
+            if not enemy:
+                return await send("✅ Tous les boss de cette division ont été vaincus !")
+        else:
+            enemy = ENEMIES[zone]["minions"][0]
+
+        # ─ Stats combat ─
+        e_hp, e_atk, e_def, e_dex, e_crit = enemy["hp"], enemy["atk"], enemy["def"], enemy.get("dex", 5), enemy.get("crit", 2)
+        p_hp, p_atk, p_def, p_dex, p_crit = player_data["hp"], player_data["atk"], player_data["def"], player_data["dex"], player_data["crit"]
+
+        turn = 1
+        combat_log = []
+
+        while p_hp > 0 and e_hp > 0:
+            # Joueur attaque
+            if random.randint(1, 100) <= p_dex * 5:
+                dmg = max(0, p_atk - e_def)
+                if random.randint(1, 100) <= p_crit * 5:
+                    dmg *= 2
+                    combat_log.append(f"Tour {turn}: Coup critique ! Vous infligez {dmg} dégâts.")
+                else:
+                    combat_log.append(f"Tour {turn}: Vous infligez {dmg} dégâts.")
+                e_hp -= dmg
             else:
-                enemy = ENEMIES[zone]["minions"][0]
+                combat_log.append(f"Tour {turn}: Vous avez manqué votre attaque !")
+            if e_hp <= 0:
+                break
 
-            # Stats de l'ennemi
-            e_hp = enemy["hp"]
-            e_atk = enemy["atk"]
-            e_def = enemy["def"]
-            e_dex = enemy.get("dex", 5)
-            e_crit = enemy.get("crit", 2)
-
-            # Stats du joueur
-            p_hp = player_data["hp"]
-            p_atk = player_data["atk"]
-            p_def = player_data["def"]
-            p_dex = player_data["dex"]
-            p_crit = player_data["crit"]
-
-            turn = 1
-            combat_log = []
-
-            while p_hp > 0 and e_hp > 0:
-                # ─ Joueur attaque ─
-                hit_chance = random.randint(1, 100)
-                if hit_chance <= p_dex * 5:
-                    damage = max(0, p_atk - e_def)
-                    if random.randint(1, 100) <= p_crit * 5:
-                        damage *= 2
-                        combat_log.append(f"Tour {turn}: Coup critique ! Vous infligez {damage} dégâts.")
-                    else:
-                        combat_log.append(f"Tour {turn}: Vous infligez {damage} dégâts.")
-                    e_hp -= damage
+            # Ennemi attaque
+            if random.randint(1, 100) <= e_dex * 5:
+                dmg = max(0, e_atk - p_def)
+                if random.randint(1, 100) <= e_crit * 5:
+                    dmg *= 2
+                    combat_log.append(f"Tour {turn}: {enemy['name']} critique ! Vous subissez {dmg} dégâts.")
                 else:
-                    combat_log.append(f"Tour {turn}: Vous avez manqué votre attaque !")
+                    combat_log.append(f"Tour {turn}: {enemy['name']} attaque et inflige {dmg} dégâts.")
+                p_hp -= dmg
+            else:
+                combat_log.append(f"Tour {turn}: {enemy['name']} a manqué son attaque !")
 
-                if e_hp <= 0:
-                    break
+            turn += 1
 
-                # ─ Ennemi attaque ─
-                hit_chance = random.randint(1, 100)
-                if hit_chance <= e_dex * 5:
-                    damage = max(0, e_atk - p_def)
-                    if random.randint(1, 100) <= e_crit * 5:
-                        damage *= 2
-                        combat_log.append(f"Tour {turn}: {enemy['name']} critique ! Vous subissez {damage} dégâts.")
-                    else:
-                        combat_log.append(f"Tour {turn}: {enemy['name']} attaque et inflige {damage} dégâts.")
-                    p_hp -= damage
-                else:
-                    combat_log.append(f"Tour {turn}: {enemy['name']} a manqué son attaque !")
+        # ─ Résultat ─
+        result = "🎉 Vous avez vaincu l'ennemi !" if p_hp > 0 else "💀 Vous avez été vaincu..."
+        combat_log.append(f"\nRésultat : {result}")
+        combat_log.append(f"PV restants : {max(0, p_hp)}")
+        combat_log.append(f"Nombre de tours : {turn-1}")
 
-                turn += 1
+        # Mise à jour joueur
+        if p_hp > 0:
+            gain_xp = 200 if is_boss else 50
+            player_data["xp"] += gain_xp
+            if is_boss:
+                defeated.append(enemy["name"])
+                supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
 
-            # Résumé du combat
-            result = "🎉 Vous avez vaincu l'ennemi !" if p_hp > 0 else "💀 Vous avez été vaincu..."
-            combat_log.append(f"\nRésultat : {result}")
-            combat_log.append(f"PV restants : {p_hp if p_hp>0 else 0}")
-            combat_log.append(f"Nombre de tours : {turn-1}")
+            # Montée de niveau simple
+            if player_data["xp"] >= player_data["xp_next"]:
+                player_data["level"] += 1
+                player_data["xp"] -= player_data["xp_next"]
+                player_data["xp_next"] = int(player_data["xp_next"] * 1.5)
+            player_data["hp"] = p_hp
+            supabase.table("rpg_players").update(player_data).eq("user_id", user_id).execute()
 
-            # Mise à jour joueur
-            if p_hp > 0:
-                gain_xp = 50 if not is_boss else 200
-                player_data["xp"] += gain_xp
-                if is_boss:
-                    defeated.append(enemy["name"])
-                    supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
-                # Montée de niveau simple
-                if player_data["xp"] >= player_data["xp_next"]:
-                    player_data["level"] += 1
-                    player_data["xp"] = player_data["xp"] - player_data["xp_next"]
-                    player_data["xp_next"] = int(player_data["xp_next"] * 1.5)
-                player_data["hp"] = p_hp
-                supabase.table("rpg_players").update(player_data).eq("user_id", user_id).execute()
-
-            await send("\n".join(combat_log))
+        await send("\n".join(combat_log))
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔌 Setup du Cog
+# 🔌 Setup Cog
 # ────────────────────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = RPG(bot)
