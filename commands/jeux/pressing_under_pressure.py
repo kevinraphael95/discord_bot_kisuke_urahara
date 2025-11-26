@@ -6,9 +6,6 @@
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -30,19 +27,42 @@ except FileNotFoundError:
 
 class PressingUnderPressure(commands.Cog):
     """Commande /pressing et !pressing — Jeu troll Pressing Under Pressure"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.progress = {}
 
     def generate_timer(self, total=10, remaining=10):
         green = "🟩" * max(0, int(remaining))
         white = "⬜" * max(0, int(total - remaining))
         return green + white
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # Envoi d’une énigme avec bouton
-    # ────────────────────────────────────────────────────────────────────────────
-    async def send_puzzle_embed(self, channel, puzzle, user):
+    # Ajouter un peu d’aléatoire automatique
+    def randomize_puzzle(self, puzzle):
+        p = puzzle.copy()
+
+        # Randomisation du nombre de clics pour certains types
+        if p["type"] in ["click_once", "multi_click"]:
+            p["value"] = max(1, p.get("value", 1) + random.choice([-1, 0, 1]))
+
+        # Variation aléatoire de la question
+        variations = [
+            " (tu crois être prêt ?)",
+            " (j'espère que tu lis bien...)",
+            " (ne rate pas ça.)",
+            " (facile... ou pas.)",
+            " (je te surveille 👀)",
+        ]
+        p["question"] += random.choice(variations)
+
+        return p
+
+    # ────────────────────────────────────────────────────────────────────────
+    # Envoi + gestion d’une énigme avec embed unique
+    # ────────────────────────────────────────────────────────────────────────
+    async def send_puzzle_embed(self, channel, base_puzzle, user):
+
+        puzzle = self.randomize_puzzle(base_puzzle)
+
         question = puzzle.get("question", "Énigme inconnue…")
         required_presses = puzzle.get("value", 0)
         total_time = 10
@@ -50,10 +70,11 @@ class PressingUnderPressure(commands.Cog):
 
         embed = discord.Embed(
             title="🧠 Pressing Under Pressure !",
-            description=f"**Énigme :** {question}\n\n⏳ Temps restant :\n{self.generate_timer(total_time, remaining)}",
+            description=f"**Énigme :** {question}\n\n"
+                        f"⏳ Temps restant :\n{self.generate_timer(total_time, remaining)}",
             color=discord.Color.orange()
         )
-        embed.set_footer(text=f"Joueur : {user.display_name}")
+        embed.set_footer(text=f"Énigme #{puzzle.get('id')} — Joueur : {user.display_name}")
 
         class PressButton(discord.ui.View):
             def __init__(self):
@@ -62,100 +83,100 @@ class PressingUnderPressure(commands.Cog):
 
             @discord.ui.button(label="Appuie ici !", style=discord.ButtonStyle.green)
             async def press(self, interaction: discord.Interaction, button: discord.ui.Button):
+
                 if interaction.user.id != user.id:
-                    try:
-                        await interaction.response.send_message("❌ Ce n'est pas ton bouton !", ephemeral=True)
-                    except: pass
                     return
-                if self.is_finished():
-                    try:
-                        await interaction.response.send_message("⏳ Trop tard — le temps est écoulé.", ephemeral=True)
-                    except: pass
-                    return
+
                 self.press_count += 1
+
+                # MAJ embed direct
+                embed.description = (
+                    f"**Énigme :** {question}\n\n"
+                    f"👉 Pressions actuelles : **{self.press_count}**\n\n"
+                    f"⏳ Temps restant :\n{self.generate_timer(total_time, remaining)}"
+                )
                 try:
-                    await interaction.response.send_message(f"✅ Bouton pressé ! ({self.press_count})", ephemeral=True)
-                except: pass
+                    await msg.edit(embed=embed, view=self)
+                except:
+                    pass
 
         view = PressButton()
-        try:
-            msg = await safe_send(channel, embed=embed, view=view)
-        except: return False
+        msg = await safe_send(channel, embed=embed, view=view)
 
+        # TIMER LIVE
         while remaining > 0 and not view.is_finished():
             await asyncio.sleep(1)
             remaining -= 1
-            embed.description = f"**Énigme :** {question}\n\n⏳ Temps restant :\n{self.generate_timer(total_time, remaining)}"
+
+            embed.description = (
+                f"**Énigme :** {question}\n\n"
+                f"👉 Pressions actuelles : **{view.press_count}**\n\n"
+                f"⏳ Temps restant :\n{self.generate_timer(total_time, remaining)}"
+            )
+
             try:
                 await msg.edit(embed=embed, view=view)
-            except: break
+            except:
+                break
 
-        try:
-            view.stop()
-            for child in view.children:
-                child.disabled = True
-        except: pass
+        # Fin timer
+        view.stop()
+        for child in view.children:
+            child.disabled = True
 
         # Vérification finale
         ptype = puzzle.get("type", "")
-        if ptype in ["multi_click", "click_once", "click_if_true", "click_if_confused", "timed_click", "click_any"]:
-            success = (view.press_count == int(required_presses))
+        presses = view.press_count
+
+        if ptype in ["multi_click", "click_once"]:
+            success = (presses == required_presses)
+
         elif ptype in ["no_click", "no_click_time"]:
-            success = (view.press_count == 0)
+            success = (presses == 0)
+
+        elif ptype == "click_any":
+            success = True
+
+        elif ptype == "click_if_true":
+            success = bool(puzzle.get("value", True))
+
+        elif ptype == "click_if_confused":
+            success = random.choice([True, False])  # troll
+
         else:
             success = True
 
+        # Résultat final
         if success:
             embed.color = discord.Color.green()
-            embed.description += f"\n\n🎉 Bravo ! Pressions : {view.press_count} (objectif : {required_presses})"
+            embed.add_field(name="🎉 Succès !", value=f"Pressions : **{presses}** / {required_presses}")
         else:
             embed.color = discord.Color.red()
-            embed.description += f"\n\n❌ Échec — pressions : {view.press_count} / {required_presses}"
+            embed.add_field(name="❌ Échec", value=f"Pressions : **{presses}** / {required_presses}")
 
-        try:
-            await msg.edit(embed=embed, view=view)
-        except: pass
-
+        await msg.edit(embed=embed, view=view)
         return success
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # Jouer plusieurs énigmes à la suite avec ordre aléatoire
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────
+    # Jeu complet : plusieurs énigmes
+    # ────────────────────────────────────────────────────────────────────────
     async def run_full_game(self, channel, user):
-        # Regrouper les énigmes par difficulté
-        puzzles_by_diff = {1: [], 2: [], 3: []}
-        for p in PUZZLES:
-            diff = p.get("difficulty", 1)
-            if diff in puzzles_by_diff:
-                puzzles_by_diff[diff].append(p)
 
-        # Prendre la moitié des énigmes par difficulté
-        selected = []
-        for diff, puzzles in puzzles_by_diff.items():
-            count = max(1, len(puzzles)//2)
-            selected += random.sample(puzzles, count)  # tirage aléatoire
+        puzzles = PUZZLES.copy()
+        random.shuffle(puzzles)
 
-        # Mélanger toutes les énigmes sélectionnées
-        random.shuffle(selected)
-
-        # Enchaînement des énigmes
-        for puzzle in selected:
+        for puzzle in puzzles:
             success = await self.send_puzzle_embed(channel, puzzle, user)
             if not success:
-                await safe_send(channel, f"❌ Tu as échoué à l’énigme {puzzle.get('id')}… Jeu terminé !")
-                return False
+                await safe_send(channel, f"❌ Tu as échoué à l’énigme {puzzle['id']}…")
+                return
 
-        # Toutes réussies
-        await safe_send(channel, f"🏆 Félicitations {user.display_name} ! Tu as réussi toutes les énigmes !")
-        return True
+        await safe_send(channel, f"🏆 **Félicitations {user.display_name} !** Tu as réussi toutes les énigmes !")
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="pressing",
-        description="Lance le jeu Pressing Under Pressure !"
-    )
+    # ────────────────────────────────────────────────────────────────────────
+    # Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────
+    @app_commands.command(name="pressing", description="Lance le jeu Pressing Under Pressure !")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_pressing(self, interaction: discord.Interaction):
         if not PUZZLES:
@@ -163,9 +184,9 @@ class PressingUnderPressure(commands.Cog):
         await interaction.response.defer()
         await self.run_full_game(interaction.channel, interaction.user)
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────
+    # Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────
     @commands.command(name="pressing", aliases=["pup"])
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_pressing(self, ctx: commands.Context):
@@ -176,12 +197,14 @@ class PressingUnderPressure(commands.Cog):
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
 # ────────────────────────────────────────────────────────────────────────────────
+
 async def setup(bot: commands.Bot):
     cog = PressingUnderPressure(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
             command.category = "Jeux"
     await bot.add_cog(cog)
+
 
 
 
