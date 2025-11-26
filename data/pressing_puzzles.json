@@ -1,138 +1,30 @@
 [
-    {
-        "id": 1,
-        "difficulty": 1,
-        "type": "click_once",
-        "value": 1,
-        "question": "👉 Appuie UNE fois. Juste une."
-    },
-    {
-        "id": 2,
-        "difficulty": 1,
-        "type": "wait_then_click",
-        "value": 1,
-        "question": "👉 Attends 1 seconde… puis appuie."
-    },
-    {
-        "id": 3,
-        "difficulty": 1,
-        "type": "no_click",
-        "question": "👉 Ne clique PAS. (Facile.)"
-    },
-    {
-        "id": 4,
-        "difficulty": 1,
-        "type": "click_if_true",
-        "value": true,
-        "question": "👉 Appuie si 2+2=4."
-    },
+    { "id": 1, "difficulty": 1, "type": "click_once", "value": 1, "question": "👉 Appuie UNE fois." },
+    { "id": 2, "difficulty": 1, "type": "wait_then_click", "value": 1, "question": "👉 Attends 1 seconde puis appuie." },
+    { "id": 3, "difficulty": 1, "type": "no_click", "question": "👉 Ne clique PAS." },
+    { "id": 4, "difficulty": 1, "type": "click_if_true", "value": true, "question": "👉 Appuie si 2+2=4." },
 
-    {
-        "id": 5,
-        "difficulty": 2,
-        "type": "multi_click",
-        "value": 3,
-        "question": "👉 Appuie EXACTEMENT 3 fois."
-    },
-    {
-        "id": 6,
-        "difficulty": 2,
-        "type": "no_click",
-        "question": "👉 Appuie seulement si tu vois un carré rouge… (Tu n’en vois pas.)"
-    },
-    {
-        "id": 7,
-        "difficulty": 2,
-        "type": "wait_then_click",
-        "value": 3,
-        "question": "👉 Attends mentalement 3 secondes puis appuie."
-    },
-    {
-        "id": 8,
-        "difficulty": 2,
-        "type": "logic_invert",
-        "question": "👉 Appuie seulement si tu n’as PAS appuyé juste avant."
-    },
-    {
-        "id": 9,
-        "difficulty": 2,
-        "type": "multi_click",
-        "value": 3,
-        "question": "👉 Appuie une fois pour chaque coin d’un triangle (3)."
-    },
+    { "id": 5, "difficulty": 2, "type": "multi_click", "value": 3, "question": "👉 Appuie exactement 3 fois." },
+    { "id": 6, "difficulty": 2, "type": "no_click", "question": "👉 N’appuie pas si tu ne vois pas de carré rouge." },
+    { "id": 7, "difficulty": 2, "type": "wait_then_click", "value": 3, "question": "👉 Attends mentalement 3 secondes puis appuie." },
+    { "id": 8, "difficulty": 2, "type": "logic_invert", "question": "👉 Appuie seulement si tu n’as PAS appuyé juste avant." },
+    { "id": 9, "difficulty": 2, "type": "multi_click", "value": 3, "question": "👉 Appuie pour chaque coin d’un triangle (3)." },
+    { "id": 10, "difficulty": 2, "type": "multi_click", "value": 0, "question": "👉 Appuie pour chaque chat aperçu avant." },
 
-    {
-        "id": 10,
-        "difficulty": 2,
-        "type": "multi_click",
-        "value": 0,
-        "question": "👉 Appuie une fois pour chaque chat aperçu avant… (0 donc tu n’appuies pas.)"
-    },
-
-    {
-        "id": 11,
-        "difficulty": 3,
-        "type": "multi_click",
-        "value": 5,
-        "question": "👉 Appuie une fois pour chaque branche d’une étoile simple (5)."
-    },
-    {
-        "id": 12,
-        "difficulty": 3,
-        "type": "no_click_time",
-        "value": 3,
-        "question": "👉 Ne clique SURTOUT PAS pendant les 3 prochaines secondes."
-    },
-    {
-        "id": 13,
-        "difficulty": 3,
-        "type": "timed_click",
-        "time_target": 3,
-        "question": "👉 Appuie quand il reste exactement 3 blocs au timer."
-    },
-    {
-        "id": 14,
-        "difficulty": 3,
-        "type": "logic_troll",
-        "question": "👉 Appuie seulement si tu penses que tu n’aurais pas dû appuyer avant."
-    },
-    {
-        "id": 15,
-        "difficulty": 3,
-        "type": "click_any",
-        "question": "👉 Appuie quand tu sens que c’est le bon moment."
-    },
-    {
-        "id": 16,
-        "difficulty": 3,
-        "type": "click_once",
-        "value": 1,
-        "question": "👉 Clique… puis assume."
-    },
-    {
-        "id": 17,
-        "difficulty": 3,
-        "type": "multi_click",
-        "value": 4,
-        "question": "👉 Appuie 4 fois. Pas 3. Pas 5."
-    },
-    {
-        "id": 18,
-        "difficulty": 3,
-        "type": "click_if_confused",
-        "question": "👉 Appuie seulement si tu n’es pas sûr de comprendre cette règle."
-    },
-    {
-        "id": 19,
-        "difficulty": 3,
-        "type": "click_once",
-        "value": 1,
-        "question": "👉 Appuie si tu te souviens du nombre du début… (C’est un piège.)"
-    },
-    {
-        "id": 20,
-        "difficulty": 3,
-        "type": "click_any",
-        "question": "👉 Dernière épreuve : appuie si tu veux finir vivant."
-    }
+    { "id": 11, "difficulty": 3, "type": "multi_click", "value": 5, "question": "👉 Appuie une fois par branche d’une étoile (5)." },
+    { "id": 12, "difficulty": 3, "type": "no_click_time", "value": 3, "question": "👉 Ne clique PAS pendant les 3 prochaines secondes." },
+    { "id": 13, "difficulty": 3, "type": "timed_click", "time_target": 3, "question": "👉 Appuie quand il reste exactement 3 blocs." },
+    { "id": 14, "difficulty": 3, "type": "logic_troll", "question": "👉 Appuie seulement si tu crois que tu n’aurais pas dû appuyer avant." },
+    { "id": 15, "difficulty": 3, "type": "click_any", "question": "👉 Appuie quand tu le sens." },
+    { "id": 16, "difficulty": 3, "type": "click_once", "value": 1, "question": "👉 Clique… puis assume." },
+    { "id": 17, "difficulty": 3, "type": "multi_click", "value": 4, "question": "👉 Appuie 4 fois. Pas 3. Pas 5." },
+    { "id": 18, "difficulty": 3, "type": "click_if_confused", "question": "👉 Appuie si tu n’es pas sûr de comprendre." },
+    { "id": 19, "difficulty": 3, "type": "click_once", "value": 1, "question": "👉 Appuie si tu te souviens du nombre du début." },
+    { "id": 20, "difficulty": 3, "type": "click_any", "question": "👉 Dernière épreuve : appuie si tu veux survivre." }
+    
 ]
+
+
+
+
+
