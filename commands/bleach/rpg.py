@@ -18,7 +18,7 @@ from supabase_client import supabase
 import json
 import random
 
-with open("enemies.json", "r") as f:
+with open("data/enemies.json", "r") as f:
     ENEMIES = json.load(f)
 
 # ────────────────────────────────────────────────────────────────────────────────
