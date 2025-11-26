@@ -1,11 +1,47 @@
-# utils/rpg_utils.py
-import asyncio
-from supabase_client import supabase
+# ────────────────────────────────────────────────────────────────────────────────
+# 📌 rpg_utils.py — Utilitaires RPG pour le bot
+# Objectif : Créer et gérer les profils des joueurs dans la table Supabase
+# ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────
+import asyncio
+from utils.supabase_client import supabase  # ✅ Utilisation du package utils
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔹 Création / Vérification de profil
+# ────────────────────────────────────────────────────────────────────────────────
 async def create_profile_if_not_exists(user_id: int):
-    """Crée un profil si le joueur n'existe pas encore"""
-    data = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
-    if not data.data:
-        supabase.table("rpg_players").insert({
-            "user_id": user_id,
-        }).execute()
+    """
+    Crée un profil RPG si le joueur n'existe pas encore.
+    
+    Args:
+        user_id (int): ID Discord du joueur
+    """
+    try:
+        # Vérification si l'utilisateur existe déjà
+        data = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
+        if not data.data:
+            # Création d'un profil de base
+            supabase.table("rpg_players").insert({
+                "user_id": user_id,
+                "level": 1,
+                "xp": 0,
+                "xp_next": 100,
+                "hp": 100,
+                "sp": 50,
+                "atk": 10,
+                "def": 5,
+                "dex": 5,
+                "crit": 5,
+                "eva": 5,
+                "equipment": {},
+                "zone": "1",
+                "defeated_bosses": []
+            }).execute()
+            print(f"✅ Profil créé pour l'utilisateur {user_id}")
+        else:
+            print(f"ℹ️ Profil déjà existant pour l'utilisateur {user_id}")
+    except Exception as e:
+        print(f"⚠️ Erreur lors de la création du profil pour {user_id} : {e}")
