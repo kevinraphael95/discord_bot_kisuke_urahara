@@ -276,7 +276,7 @@
       ]
     },
     {
-      "question": "Tu te réveilles. Il n'y a plus de train. Il n’y a jamais eu de tram.",
+      "question": "Tu te réveilles. Il n'y a plus de tram. Il n’y a jamais eu de tram.",
       "options": [
         {"text": "Ouvrir les yeux", "ethics": "déontologie", "result": "Tu ouvres les yeux. Tout ça n'était qu'un minijeu sur un  bot discord.",
         "saved": {"humain":0, "enfant":0, "pa": 0, "animal":0 ,"robot":0}, "killed": {"humain":0, "enfant":0, "pa": 0, "animal":0, "robot":0}},
