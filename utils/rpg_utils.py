@@ -7,7 +7,7 @@
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
 import asyncio
-from utils.supabase_client import supabase  # ✅ Utilisation du package utils
+from utils.supabase_client import supabase  # ✅ Correct comme dans reiatsuprofil.py
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 Création / Vérification de profil
@@ -45,3 +45,5 @@ async def create_profile_if_not_exists(user_id: int):
             print(f"ℹ️ Profil déjà existant pour l'utilisateur {user_id}")
     except Exception as e:
         print(f"⚠️ Erreur lors de la création du profil pour {user_id} : {e}")
+
+
