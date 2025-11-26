@@ -6,6 +6,7 @@
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
+
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
@@ -70,8 +71,8 @@ class RPG(commands.Cog):
         defeated = player_data.get("defeated_bosses", [])
 
         # Fonction interne d'envoi
-        async def send(msg):
-            return await safe_respond(ctx, msg) if is_slash else await safe_send(ctx.channel, msg)
+        def send(msg):
+            return safe_respond(ctx, msg) if is_slash else safe_send(ctx.channel, msg)
 
         # ─ Affichage d'accueil si aucune action ─
         if not action:
@@ -84,26 +85,19 @@ class RPG(commands.Cog):
             return await send(msg)
 
         action = action.lower()
-        # ─ Profil ─
         if action == "profil":
-            embed = discord.Embed(
-                title=f"{ctx.author.display_name}'s Profile",
-                color=discord.Color.blurple()
-            )
-            # Général
-            embed.add_field(name="🗡️ Stats", value=(
+            msg = (
+                f"**Profil de <@{user_id}>**\n"
                 f"Niveau: {player_data['level']} | XP: {player_data['xp']}/{player_data['xp_next']}\n"
                 f"HP: {player_data['hp']} | SP: {player_data['sp']}\n"
                 f"ATK: {player_data['atk']} | DEF: {player_data['def']} | DEX: {player_data['dex']}\n"
-                f"Crit: {player_data['crit']} | EVA: {player_data['eva']}"
-            ), inline=False)
-            # Équipement
-            embed.add_field(name="🛡️ Équipement", value=str(player_data.get("equipment", {})) or "Aucun", inline=False)
-            # Zone et boss
-            embed.add_field(name="🌍 Localisation", value=f"Zone: {player_data.get('zone', '1')}\nBoss vaincus: {len(defeated)}", inline=False)
-            return await send(embed)
+                f"Crit: {player_data['crit']} | EVA: {player_data['eva']}\n"
+                f"Équipement: {player_data['equipment']}"
+            )
+            await send(msg)
+            return
 
-        # ─ Combat (minion ou boss) ─
+        # ─ Combat (minions ou boss) ─
         is_boss = action == "boss"
         if is_boss:
             boss1 = ENEMIES[zone]["boss1"]
@@ -118,41 +112,61 @@ class RPG(commands.Cog):
         e_hp, e_atk, e_def, e_dex, e_crit = enemy["hp"], enemy["atk"], enemy["def"], enemy.get("dex", 5), enemy.get("crit", 2)
         p_hp, p_atk, p_def, p_dex, p_crit = player_data["hp"], player_data["atk"], player_data["def"], player_data["dex"], player_data["crit"]
 
-        # Combat rapide, calcul résultat
-        player_hits = max(0, p_atk - e_def)
-        enemy_hits = max(0, e_atk - p_def)
-        p_hp -= enemy_hits
-        e_hp -= player_hits
+        turn = 1
+        combat_log = []
 
-        result_text = ""
-        if p_hp > 0 and e_hp <= 0:
-            result_text = f"🎉 Vous avez vaincu {enemy['name']} !"
+        while p_hp > 0 and e_hp > 0:
+            # Joueur attaque
+            if random.randint(1, 100) <= p_dex * 5:
+                dmg = max(0, p_atk - e_def)
+                if random.randint(1, 100) <= p_crit * 5:
+                    dmg *= 2
+                    combat_log.append(f"Tour {turn}: Coup critique ! Vous infligez {dmg} dégâts.")
+                else:
+                    combat_log.append(f"Tour {turn}: Vous infligez {dmg} dégâts.")
+                e_hp -= dmg
+            else:
+                combat_log.append(f"Tour {turn}: Vous avez manqué votre attaque !")
+            if e_hp <= 0:
+                break
+
+            # Ennemi attaque
+            if random.randint(1, 100) <= e_dex * 5:
+                dmg = max(0, e_atk - p_def)
+                if random.randint(1, 100) <= e_crit * 5:
+                    dmg *= 2
+                    combat_log.append(f"Tour {turn}: {enemy['name']} critique ! Vous subissez {dmg} dégâts.")
+                else:
+                    combat_log.append(f"Tour {turn}: {enemy['name']} attaque et inflige {dmg} dégâts.")
+                p_hp -= dmg
+            else:
+                combat_log.append(f"Tour {turn}: {enemy['name']} a manqué son attaque !")
+
+            turn += 1
+
+        # ─ Résultat ─
+        result = "🎉 Vous avez vaincu l'ennemi !" if p_hp > 0 else "💀 Vous avez été vaincu..."
+        combat_log.append(f"\nRésultat : {result}")
+        combat_log.append(f"PV restants : {max(0, p_hp)}")
+        combat_log.append(f"Nombre de tours : {turn-1}")
+
+        # Mise à jour joueur
+        if p_hp > 0:
             gain_xp = 200 if is_boss else 50
             player_data["xp"] += gain_xp
             if is_boss:
                 defeated.append(enemy["name"])
                 supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
-        else:
-            result_text = f"💀 Vous avez été vaincu par {enemy['name']}..."
-        
-        # Montée de niveau simple
-        if player_data["xp"] >= player_data["xp_next"]:
-            player_data["level"] += 1
-            player_data["xp"] -= player_data["xp_next"]
-            player_data["xp_next"] = int(player_data["xp_next"] * 1.5)
-        player_data["hp"] = max(p_hp, 0)
-        supabase.table("rpg_players").update(player_data).eq("user_id", user_id).execute()
 
-        # ─ Embed combat ─
-        embed = discord.Embed(
-            title="⚔️ Combat Résultat",
-            description=result_text,
-            color=discord.Color.green() if p_hp > 0 else discord.Color.red()
-        )
-        embed.add_field(name="Votre HP restant", value=max(p_hp, 0))
-        embed.add_field(name=f"{enemy['name']} HP restant", value=max(e_hp, 0))
-        embed.add_field(name="XP gagné", value=gain_xp if p_hp > 0 else 0)
-        return await send(embed)
+            # Montée de niveau simple
+            if player_data["xp"] >= player_data["xp_next"]:
+                player_data["level"] += 1
+                player_data["xp"] -= player_data["xp_next"]
+                player_data["xp_next"] = int(player_data["xp_next"] * 1.5)
+            player_data["hp"] = p_hp
+            supabase.table("rpg_players").update(player_data).eq("user_id", user_id).execute()
+
+        await send("\n".join(combat_log))
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup Cog
