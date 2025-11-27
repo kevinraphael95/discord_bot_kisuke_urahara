@@ -251,8 +251,7 @@ class RPG(commands.Cog):
                 description=(
                     f"💀 Vous avez été vaincu par {enemy['name']}...\n"
                     f"💖 PV restants : {p_hp}/{stats.get('hp',100)}\n"
-                    f"⏳ Combats terminés en {turn} tours.\n"
-                    f"⚠️ Vous perdez 20% de progression et êtes affaibli temporairement."
+                    f"⏳ Combats terminés en {turn} tours."
                 ),
                 color=discord.Color.red()
             )
