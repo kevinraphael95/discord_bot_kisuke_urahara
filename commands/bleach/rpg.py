@@ -150,14 +150,20 @@ class RPG(commands.Cog):
             embed.add_field(name="✨ Effets actifs", value=effects_text, inline=False)
         
             # Cooldowns
+            CD_DURATIONS = {
+                "combat": 300,  # 5 minutes
+                "boss": 3600    # 1 heure
+            }
             now = datetime.utcnow()
             cd_text = ""
             for cmd, dt_str in cooldowns.items():
                 dt = datetime.fromisoformat(dt_str)
-                remaining = (dt - now).total_seconds()
+                elapsed = (now - dt).total_seconds()
+                remaining = max(0, CD_DURATIONS.get(cmd, 0) - elapsed)
                 ready = "✅ ready" if remaining <= 0 else str(timedelta(seconds=int(remaining)))
                 cd_text += f"{cmd.upper()}: {ready}\n"
             embed.add_field(name="⏱️ Cooldowns", value=cd_text or "Aucun", inline=False)
+
         
             # Boss vaincus
             defeated_text = ", ".join(defeated) if defeated else "Aucun"
