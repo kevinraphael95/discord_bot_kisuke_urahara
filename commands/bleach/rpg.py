@@ -43,21 +43,21 @@ class RPG(commands.Cog):
         description="Affiche le RPG Soul Society, profil, combat et boss"
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_rpg(self, interaction: discord.Interaction, action: str = None):
-        await self.process_rpg(interaction.user.id, interaction, action, is_slash=True)
+    async def slash_rpg(self, interaction: discord.Interaction, action: str = None, zone_target: str = None):
+        await self.process_rpg(interaction.user.id, interaction, action, zone_target, is_slash=True)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="rpg")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_rpg(self, ctx: commands.Context, action: str = None):
-        await self.process_rpg(ctx.author.id, ctx, action, is_slash=False)
+    async def prefix_rpg(self, ctx: commands.Context, action: str = None, zone_target: str = None):
+        await self.process_rpg(ctx.author.id, ctx, action, zone_target, is_slash=False)
 
     # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction principale du RPG
     # ────────────────────────────────────────────────────────────────────────────────
-    async def process_rpg(self, user_id, ctx, action, is_slash=False):
+    async def process_rpg(self, user_id, ctx, action, zone_target=None, is_slash=False):
         # Création profil
         await create_profile_if_not_exists(user_id)
 
@@ -71,7 +71,7 @@ class RPG(commands.Cog):
         stats = player_data.get("stats", {})
         cooldowns = player_data.get("cooldowns", {})
         zone = str(player_data.get("zone", "1"))
-        defeated = player_data.get("defeated_bosses", [])
+        unlocked_zones = player_data.get("unlocked_zones", ["1"])
 
         # ────────────────────────────────────────────────────────────
         # 🆕 Fonction send
@@ -89,11 +89,12 @@ class RPG(commands.Cog):
             embed = discord.Embed(
                 title="🗡️ RPG Bleach",
                 description=(
-                    "Bienvenue dans le RPG inspiré de Bleach ! Tu es un shinigami rebelle ton but est de détruire la Soul Society. Tu affrontes toutes les divisions de la 12e à la 1ere.\n\n"
+                    "Bienvenue dans le RPG inspiré de Bleach ! Tu es un shinigami rebelle et ton but est de détruire la Soul Society.\n\n"
                     "**Commandes disponibles :**\n"
                     "`!rpg profil` — Statistiques et équipement\n"
                     "`!rpg combat` — Combat contre un shinigami de base\n"
-                    "`!rpg boss` — Affronter un vice-capitaine puis un capitaine"
+                    "`!rpg boss` — Affronter un vice-capitaine puis un capitaine\n"
+                    "`!rpg zone` — Voir les zones débloquées et se déplacer"
                 ),
                 color=discord.Color.red()
             )
@@ -136,8 +137,8 @@ class RPG(commands.Cog):
                 name="📊 Stats",
                 value=(
                     f"Niveau: {stats.get('level',1)} (XP: {stats.get('xp',0)}/{stats.get('xp_next',100)})\n"
-                    f"💖 HP : {stats.get('hp',0)} / {stats.get('hp_max',100)}\n"  # HP max
-                    f"🔮 SP : {stats.get('sp',0)}\n"  # SP sans max
+                    f"💖 HP : {stats.get('hp',0)} / {stats.get('hp_max',100)}\n"
+                    f"🔮 SP : {stats.get('sp',0)}\n"
                     f"⚔️ ATK : {stats.get('atk',0)} / 🛡️ DEF: {stats.get('def',0)}\n"
                     f"🤺 DEX : {stats.get('dex',0)} / 🏃 EVA: {stats.get('eva',0)}\n"
                     f"🎯 Crit: {stats.get('crit',0)}"
@@ -145,17 +146,15 @@ class RPG(commands.Cog):
                 inline=False
             )
 
-        
             # Effets actuels
             effects_text = ", ".join(stats.get("effects", {}).keys()) or "Aucun"
             embed.add_field(name="✨ Effets actifs", value=effects_text, inline=False)
-        
+
             # Cooldowns
             CD_DURATIONS = {
                 "combat": 300,  # 5 minutes
                 "boss": 3600    # 1 heure
             }
-            now = datetime.utcnow()
             cd_text = ""
             for cmd, dt_str in cooldowns.items():
                 dt = datetime.fromisoformat(dt_str)
@@ -165,25 +164,45 @@ class RPG(commands.Cog):
                 cd_text += f"{cmd.upper()}: {ready}\n"
             embed.add_field(name="⏱️ Cooldowns", value=cd_text or "Aucun", inline=False)
 
-        
-            # Boss vaincus
-            defeated_text = ", ".join(defeated) if defeated else "Aucun"
-            embed.add_field(name="🏆 Boss vaincus", value=defeated_text, inline=False)
-        
+            # Zones débloquées
+            unlocked_text = ", ".join(unlocked_zones)
+            embed.add_field(name="🗺️ Zones débloquées", value=unlocked_text, inline=False)
+
             # Zone actuelle
             embed.add_field(name="📍 Zone actuelle", value=f"{zone}", inline=False)
-        
+
             return await send(embed)
 
+        # ────────────────────────────────────────────────────────────
+        # ZONE / MAP
+        # ────────────────────────────────────────────────────────────
+        if action in ["zone", "map"]:
+            if zone_target:
+                # Déplacement vers zone déjà débloquée
+                if zone_target in unlocked_zones:
+                    zone = zone_target
+                    supabase.table("rpg_players").update({"zone": zone}).eq("user_id", user_id).execute()
+                    return await send(f"📍 Vous vous déplacez vers la zone {zone}.")
+                else:
+                    return await send(f"❌ Vous ne pouvez pas accéder à la zone {zone_target}, elle n'est pas débloquée.")
+            else:
+                # Affiche zones débloquées
+                embed = discord.Embed(
+                    title="🗺️ Zones débloquées",
+                    description=", ".join(unlocked_zones),
+                    color=discord.Color.orange()
+                )
+                embed.add_field(name="Zone actuelle", value=zone)
+                return await send(embed)
 
         # ────────────────────────────────────────────────────────────
-        # COMBAT / BOSS — RÉSUMÉ CORRIGÉ
+        # COMBAT / BOSS
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
         if is_boss:
             boss1 = ENEMIES[zone]["boss1"]
             boss2 = ENEMIES[zone]["boss2"]
-            enemy = boss1 if boss1["name"] not in defeated else boss2
+            enemy = boss1 if boss1["name"] not in unlocked_zones else boss2
             if not enemy:
                 embed = discord.Embed(
                     title="🎉 Division nettoyée",
@@ -193,17 +212,17 @@ class RPG(commands.Cog):
                 return await send(embed)
         else:
             enemy = ENEMIES[zone]["minions"][0]
-        
+
         # Stats joueur
         p_hp_current = stats.get("hp", 100)
         p_hp_max = stats.get("hp_max", 100)
         p_atk, p_def, p_dex, p_crit = stats.get("atk",10), stats.get("def",5), stats.get("dex",5), stats.get("crit",5)
-        
+
         # Stats ennemi
         e_hp_current = enemy["hp"]
         e_hp_max = enemy["hp"]
         e_atk, e_def, e_dex, e_crit = enemy["atk"], enemy["def"], enemy.get("dex",5), enemy.get("crit",2)
-        
+
         turn = 0
         while p_hp_current > 0 and e_hp_current > 0:
             turn += 1
@@ -216,23 +235,24 @@ class RPG(commands.Cog):
             dmg = max(1, e_atk - p_def)
             if random.randint(1,100) <= e_crit*5: dmg *= 2
             p_hp_current -= dmg
-        
-                # ────────────────────────────────────────────────────────────
-                # Résultat résumé
-                # ────────────────────────────────────────────────────────────
+
+        # Résultat résumé
         if p_hp_current > 0:
             gain_xp = 200 if is_boss else 50
             stats["xp"] = stats.get("xp",0) + gain_xp
             stats["hp"] = p_hp_current  # sauvegarde HP actuel
             if is_boss:
-                defeated.append(enemy["name"])
-                supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
+                # Débloquer la zone suivante
+                next_zone = str(int(zone) + 1)
+                if next_zone not in unlocked_zones and next_zone in ENEMIES:
+                    unlocked_zones.append(next_zone)
+                    supabase.table("rpg_players").update({"unlocked_zones": unlocked_zones}).eq("user_id", user_id).execute()
             if stats["xp"] >= stats.get("xp_next",100):
                 stats["level"] = stats.get("level",1) + 1
                 stats["xp"] -= stats.get("xp_next",100)
                 stats["xp_next"] = int(stats.get("xp_next",100) * 1.5)
-            supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
-        
+            supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns, "zone": zone}).eq("user_id", user_id).execute()
+
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
@@ -248,7 +268,7 @@ class RPG(commands.Cog):
             # Réduction HP joueur après défaite
             stats["hp"] = max(1, int(p_hp_max*0.5))
             supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
-        
+
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
@@ -259,12 +279,12 @@ class RPG(commands.Cog):
                 ),
                 color=discord.Color.red()
             )
-        
+
         return await send(embed)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = RPG(bot)
     for command in cog.get_commands():
