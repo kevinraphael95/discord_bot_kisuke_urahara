@@ -7,6 +7,7 @@
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
 import asyncio
+from datetime import datetime, timedelta
 from utils.supabase_client import supabase  # ✅ Correct comme dans reiatsuprofil.py
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -14,18 +15,16 @@ from utils.supabase_client import supabase  # ✅ Correct comme dans reiatsuprof
 # ────────────────────────────────────────────────────────────────────────────────
 async def create_profile_if_not_exists(user_id: int):
     """
-    Crée un profil RPG si le joueur n'existe pas encore.
+    Crée un profil RPG si le joueur n'existe pas encore avec stats et cooldowns.
     
     Args:
         user_id (int): ID Discord du joueur
     """
     try:
-        # Vérification si l'utilisateur existe déjà
         data = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
         if not data.data:
-            # Création d'un profil de base
-            supabase.table("rpg_players").insert({
-                "user_id": user_id,
+            now = datetime.utcnow()
+            stats = {
                 "level": 1,
                 "xp": 0,
                 "xp_next": 100,
@@ -37,7 +36,17 @@ async def create_profile_if_not_exists(user_id: int):
                 "crit": 5,
                 "eva": 5,
                 "equipment": {},
+                "effects": {}
+            }
+            cooldowns = {
+                "combat": (now - timedelta(minutes=5)).isoformat(),  # prêt immédiatement
+                "boss": (now - timedelta(hours=1)).isoformat()       # prêt immédiatement
+            }
+            supabase.table("rpg_players").insert({
+                "user_id": user_id,
                 "zone": "1",
+                "stats": stats,
+                "cooldowns": cooldowns,
                 "defeated_bosses": []
             }).execute()
             print(f"✅ Profil créé pour l'utilisateur {user_id}")
@@ -45,5 +54,3 @@ async def create_profile_if_not_exists(user_id: int):
             print(f"ℹ️ Profil déjà existant pour l'utilisateur {user_id}")
     except Exception as e:
         print(f"⚠️ Erreur lors de la création du profil pour {user_id} : {e}")
-
-
