@@ -85,13 +85,13 @@ class RPG(commands.Cog):
         # ────────────────────────────────────────────────────────────
         if not action:
             embed = discord.Embed(
-                title="🗡️ RPG Soul Society",
+                title="🗡️ RPG Bleach",
                 description=(
-                    "Bienvenue dans le RPG Soul Society !\n\n"
+                    "Bienvenue dans le RPG inspiré de Bleach ! Tu es un shinigami rebelle ton but est de détruire la Soul Society.\n\n"
                     "**Commandes disponibles :**\n"
-                    "`!rpg profil` — Statistiques\n"
-                    "`!rpg combat` — Combat contre un ennemi\n"
-                    "`!rpg boss` — Affronter un capitaine"
+                    "`!rpg profil` — Statistiques et équipement\n"
+                    "`!rpg combat` — Combat contre un shinigami de base\n"
+                    "`!rpg boss` — Affronter un vice-capitaine puis un capitaine"
                 ),
                 color=discord.Color.red()
             )
