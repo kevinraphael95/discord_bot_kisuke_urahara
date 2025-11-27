@@ -14,6 +14,7 @@ from discord import app_commands
 from discord.ext import commands
 import json
 import random
+from datetime import datetime, timedelta
 
 from utils.rpg_utils import create_profile_if_not_exists
 from utils.supabase_client import supabase
@@ -53,27 +54,25 @@ class RPG(commands.Cog):
     async def prefix_rpg(self, ctx: commands.Context, action: str = None):
         await self.process_rpg(ctx.author.id, ctx, action, is_slash=False)
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction principale du RPG
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────
     async def process_rpg(self, user_id, ctx, action, is_slash=False):
-    
         # Création profil
         await create_profile_if_not_exists(user_id)
-    
+
         # Récupération joueur
         res = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
         if not res.data:
             error = "❌ Impossible de charger ton profil."
             return await (safe_respond(ctx, error) if is_slash else safe_send(ctx.channel, error))
         player_data = res.data[0]
-    
-        stats = player_data["stats"]
+
+        stats = player_data.get("stats", {})
         cooldowns = player_data.get("cooldowns", {})
-    
         zone = str(player_data.get("zone", "1"))
         defeated = player_data.get("defeated_bosses", [])
-    
+
         # ────────────────────────────────────────────────────────────
         # 🆕 Fonction send
         # ────────────────────────────────────────────────────────────
@@ -82,7 +81,7 @@ class RPG(commands.Cog):
                 return await (safe_respond(ctx, embed=content) if is_slash else safe_send(ctx.channel, embed=content))
             else:
                 return await (safe_respond(ctx, content) if is_slash else safe_send(ctx.channel, content))
-    
+
         # ────────────────────────────────────────────────────────────
         # AUCUNE ACTION → MENU
         # ────────────────────────────────────────────────────────────
@@ -99,27 +98,27 @@ class RPG(commands.Cog):
                 color=discord.Color.red()
             )
             return await send(embed)
-    
+
         action = action.lower()
         now = datetime.utcnow()
-    
+
         # ────────────────────────────────────────────────────────────
         # VÉRIFICATION COOLDOWNS
         # ────────────────────────────────────────────────────────────
         if action == "combat":
             last = datetime.fromisoformat(cooldowns.get("combat", "1970-01-01T00:00:00"))
-            if (now - last).total_seconds() < 300:  # 5 min
+            if (now - last).total_seconds() < 300:
                 remaining = int(300 - (now - last).total_seconds())
                 return await send(f"⏳ Combat en cooldown. Patiente {remaining} secondes.")
             cooldowns["combat"] = now.isoformat()
-    
+
         if action == "boss":
             last = datetime.fromisoformat(cooldowns.get("boss", "1970-01-01T00:00:00"))
-            if (now - last).total_seconds() < 3600:  # 1 h
+            if (now - last).total_seconds() < 3600:
                 remaining = int(3600 - (now - last).total_seconds())
                 return await send(f"⏳ Boss en cooldown. Patiente {remaining} secondes.")
             cooldowns["boss"] = now.isoformat()
-    
+
         # Met à jour les cooldowns dans la DB
         supabase.table("rpg_players").update({"cooldowns": cooldowns}).eq("user_id", user_id).execute()
 
@@ -131,13 +130,13 @@ class RPG(commands.Cog):
                 title=f"📘 Profil de {ctx.user.name if is_slash else ctx.author.name}",
                 color=discord.Color.blue()
             )
-            embed.add_field(name="Niveau", value=player_data["level"], inline=True)
-            embed.add_field(name="XP", value=f"{player_data['xp']}/{player_data['xp_next']}", inline=True)
-            embed.add_field(name="HP / SP", value=f"{player_data['hp']} / {player_data['sp']}", inline=True)
-            embed.add_field(name="ATK / DEF", value=f"{player_data['atk']} / {player_data['def']}", inline=True)
-            embed.add_field(name="DEX", value=player_data["dex"], inline=True)
-            embed.add_field(name="Crit / EVA", value=f"{player_data['crit']} / {player_data['eva']}", inline=True)
-            embed.add_field(name="Équipement", value=player_data["equipment"], inline=False)
+            embed.add_field(name="Niveau", value=stats.get("level", 1), inline=True)
+            embed.add_field(name="XP", value=f"{stats.get('xp',0)}/{stats.get('xp_next',100)}", inline=True)
+            embed.add_field(name="HP / SP", value=f"{stats.get('hp',100)} / {stats.get('sp',50)}", inline=True)
+            embed.add_field(name="ATK / DEF", value=f"{stats.get('atk',10)} / {stats.get('def',5)}", inline=True)
+            embed.add_field(name="DEX", value=stats.get("dex",5), inline=True)
+            embed.add_field(name="Crit / EVA", value=f"{stats.get('crit',5)} / {stats.get('eva',5)}", inline=True)
+            embed.add_field(name="Équipement", value=stats.get("equipment",{}), inline=False)
             return await send(embed)
 
         # ────────────────────────────────────────────────────────────
@@ -149,7 +148,6 @@ class RPG(commands.Cog):
             boss1 = ENEMIES[zone]["boss1"]
             boss2 = ENEMIES[zone]["boss2"]
             enemy = boss1 if boss1["name"] not in defeated else boss2
-
             if not enemy:
                 embed = discord.Embed(
                     title="🎉 Division nettoyée",
@@ -157,7 +155,6 @@ class RPG(commands.Cog):
                     color=discord.Color.green()
                 )
                 return await send(embed)
-
         else:
             enemy = ENEMIES[zone]["minions"][0]
 
@@ -167,8 +164,8 @@ class RPG(commands.Cog):
             enemy.get("dex", 5), enemy.get("crit", 2)
         )
         p_hp, p_atk, p_def, p_dex, p_crit = (
-            player_data["hp"], player_data["atk"], player_data["def"],
-            player_data["dex"], player_data["crit"]
+            stats.get("hp",100), stats.get("atk",10), stats.get("def",5),
+            stats.get("dex",5), stats.get("crit",5)
         )
 
         turn = 1
@@ -197,24 +194,16 @@ class RPG(commands.Cog):
 
         # Boucle
         while p_hp > 0 and e_hp > 0:
-
             player_attack()
-
-            # Double attaque DEX joueur
             if e_hp > 0 and random.randint(1, 100) <= p_dex * 5:
                 combat_log.append(f"Tour {turn}: ⚡ Votre DEX déclenche une **attaque supplémentaire !**")
                 player_attack()
-
             if e_hp <= 0:
                 break
-
             enemy_attack()
-
-            # Double attaque ennemi
             if p_hp > 0 and random.randint(1, 100) <= e_dex * 5:
                 combat_log.append(f"Tour {turn}: ⚠️ {enemy['name']} attaque **une deuxième fois !**")
                 enemy_attack()
-
             turn += 1
 
         # Résultat
@@ -226,7 +215,6 @@ class RPG(commands.Cog):
         embed.add_field(name="PV restants", value=max(0, p_hp), inline=True)
         embed.add_field(name="Tours", value=turn - 1, inline=True)
 
-        # Log
         log_text = "\n".join(combat_log)
         if len(log_text) > 1024:
             log_text = log_text[-1024:]
@@ -235,24 +223,18 @@ class RPG(commands.Cog):
         # Gains
         if p_hp > 0:
             gain_xp = 200 if is_boss else 50
-            player_data["xp"] += gain_xp
-
+            stats["xp"] = stats.get("xp",0) + gain_xp
             if is_boss:
                 defeated.append(enemy["name"])
-                supabase.table("rpg_players").update({
-                    "defeated_bosses": defeated
-                }).eq("user_id", user_id).execute()
-
-            if player_data["xp"] >= player_data["xp_next"]:
-                player_data["level"] += 1
-                player_data["xp"] -= player_data["xp_next"]
-                player_data["xp_next"] = int(player_data["xp_next"] * 1.5)
-
-            player_data["hp"] = p_hp
-            supabase.table("rpg_players").update(player_data).eq("user_id", user_id).execute()
+                supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
+            if stats["xp"] >= stats.get("xp_next",100):
+                stats["level"] = stats.get("level",1) + 1
+                stats["xp"] -= stats.get("xp_next",100)
+                stats["xp_next"] = int(stats.get("xp_next",100) * 1.5)
+            stats["hp"] = p_hp
+            supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
 
         return await send(embed)
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup Cog
