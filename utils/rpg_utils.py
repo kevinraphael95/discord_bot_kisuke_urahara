@@ -29,6 +29,7 @@ async def create_profile_if_not_exists(user_id: int):
                 "xp": 0,
                 "xp_next": 100,
                 "hp": 100,
+                "hp_max": 100,  # 🆕 Valeur max des PV
                 "sp": 50,
                 "atk": 10,
                 "def": 5,
@@ -38,6 +39,7 @@ async def create_profile_if_not_exists(user_id: int):
                 "equipment": {},
                 "effects": {}
             }
+
             cooldowns = {
                 "combat": (now - timedelta(minutes=5)).isoformat(),  # prêt immédiatement
                 "boss": (now - timedelta(hours=1)).isoformat()       # prêt immédiatement
