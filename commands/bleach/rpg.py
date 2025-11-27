@@ -53,33 +53,36 @@ class RPG(commands.Cog):
     async def prefix_rpg(self, ctx: commands.Context, action: str = None):
         await self.process_rpg(ctx.author.id, ctx, action, is_slash=False)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction principale du RPG
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────────
     async def process_rpg(self, user_id, ctx, action, is_slash=False):
-
+    
         # Création profil
         await create_profile_if_not_exists(user_id)
-
+    
         # Récupération joueur
         res = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
         if not res.data:
             error = "❌ Impossible de charger ton profil."
             return await (safe_respond(ctx, error) if is_slash else safe_send(ctx.channel, error))
         player_data = res.data[0]
-
+    
+        stats = player_data["stats"]
+        cooldowns = player_data.get("cooldowns", {})
+    
         zone = str(player_data.get("zone", "1"))
         defeated = player_data.get("defeated_bosses", [])
-
+    
         # ────────────────────────────────────────────────────────────
-        # 🆕 FONCTION SEND FIXÉE
+        # 🆕 Fonction send
         # ────────────────────────────────────────────────────────────
         async def send(content):
             if isinstance(content, discord.Embed):
                 return await (safe_respond(ctx, embed=content) if is_slash else safe_send(ctx.channel, embed=content))
             else:
                 return await (safe_respond(ctx, content) if is_slash else safe_send(ctx.channel, content))
-
+    
         # ────────────────────────────────────────────────────────────
         # AUCUNE ACTION → MENU
         # ────────────────────────────────────────────────────────────
@@ -96,8 +99,29 @@ class RPG(commands.Cog):
                 color=discord.Color.red()
             )
             return await send(embed)
-
+    
         action = action.lower()
+        now = datetime.utcnow()
+    
+        # ────────────────────────────────────────────────────────────
+        # VÉRIFICATION COOLDOWNS
+        # ────────────────────────────────────────────────────────────
+        if action == "combat":
+            last = datetime.fromisoformat(cooldowns.get("combat", "1970-01-01T00:00:00"))
+            if (now - last).total_seconds() < 300:  # 5 min
+                remaining = int(300 - (now - last).total_seconds())
+                return await send(f"⏳ Combat en cooldown. Patiente {remaining} secondes.")
+            cooldowns["combat"] = now.isoformat()
+    
+        if action == "boss":
+            last = datetime.fromisoformat(cooldowns.get("boss", "1970-01-01T00:00:00"))
+            if (now - last).total_seconds() < 3600:  # 1 h
+                remaining = int(3600 - (now - last).total_seconds())
+                return await send(f"⏳ Boss en cooldown. Patiente {remaining} secondes.")
+            cooldowns["boss"] = now.isoformat()
+    
+        # Met à jour les cooldowns dans la DB
+        supabase.table("rpg_players").update({"cooldowns": cooldowns}).eq("user_id", user_id).execute()
 
         # ────────────────────────────────────────────────────────────
         # PROFIL
