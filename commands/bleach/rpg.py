@@ -130,14 +130,44 @@ class RPG(commands.Cog):
                 title=f"📘 Profil de {ctx.user.name if is_slash else ctx.author.name}",
                 color=discord.Color.blue()
             )
-            embed.add_field(name="Niveau", value=stats.get("level", 1), inline=True)
-            embed.add_field(name="XP", value=f"{stats.get('xp',0)}/{stats.get('xp_next',100)}", inline=True)
-            embed.add_field(name="HP / SP", value=f"{stats.get('hp',100)} / {stats.get('sp',50)}", inline=True)
-            embed.add_field(name="ATK / DEF", value=f"{stats.get('atk',10)} / {stats.get('def',5)}", inline=True)
-            embed.add_field(name="DEX", value=stats.get("dex",5), inline=True)
-            embed.add_field(name="Crit / EVA", value=f"{stats.get('crit',5)} / {stats.get('eva',5)}", inline=True)
-            embed.add_field(name="Équipement", value=stats.get("equipment",{}), inline=False)
+        
+            # Stats principales
+            embed.add_field(
+                name="📊 Stats",
+                value=(
+                    f"Niveau: {stats.get('level',1)}\n"
+                    f"XP: {stats.get('xp',0)}/{stats.get('xp_next',100)}\n"
+                    f"HP / SP: {stats.get('hp',0)} / {stats.get('sp',0)}\n"
+                    f"ATK / DEF: {stats.get('atk',0)} / {stats.get('def',0)}\n"
+                    f"DEX / EVA: {stats.get('dex',0)} / {stats.get('eva',0)}\n"
+                    f"Crit: {stats.get('crit',0)}"
+                ),
+                inline=False
+            )
+        
+            # Effets actuels
+            effects_text = ", ".join(stats.get("effects", {}).keys()) or "Aucun"
+            embed.add_field(name="✨ Effets actifs", value=effects_text, inline=False)
+        
+            # Cooldowns
+            now = datetime.utcnow()
+            cd_text = ""
+            for cmd, dt_str in cooldowns.items():
+                dt = datetime.fromisoformat(dt_str)
+                remaining = (dt - now).total_seconds()
+                ready = "✅ ready" if remaining <= 0 else str(timedelta(seconds=int(remaining)))
+                cd_text += f"{cmd.upper()}: {ready}\n"
+            embed.add_field(name="⏱️ Cooldowns", value=cd_text or "Aucun", inline=False)
+        
+            # Boss vaincus
+            defeated_text = ", ".join(defeated) if defeated else "Aucun"
+            embed.add_field(name="🏆 Boss vaincus", value=defeated_text, inline=False)
+        
+            # Zone actuelle
+            embed.add_field(name="📍 Zone actuelle", value=f"{zone}", inline=False)
+        
             return await send(embed)
+
 
         # ────────────────────────────────────────────────────────────
         # COMBAT / BOSS — RÉSUMÉ
