@@ -135,8 +135,7 @@ class RPG(commands.Cog):
             embed.add_field(
                 name="📊 Stats",
                 value=(
-                    f"Niveau: {stats.get('level',1)}\n"
-                    f"XP: {stats.get('xp',0)}/{stats.get('xp_next',100)}\n"
+                    f"Niveau: {stats.get('level',1)} (XP: {stats.get('xp',0)}/{stats.get('xp_next',100)})\n"
                     f"💖 HP : {stats.get('hp',0)} / {stats.get('hp_max',100)}\n"  # HP max
                     f"🔮 SP : {stats.get('sp',0)}\n"  # SP sans max
                     f"⚔️ ATK : {stats.get('atk',0)} / 🛡️ DEF: {stats.get('def',0)}\n"
