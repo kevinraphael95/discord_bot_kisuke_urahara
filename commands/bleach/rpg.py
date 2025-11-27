@@ -6,7 +6,6 @@
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
@@ -31,7 +30,7 @@ with open("data/enemies.json", "r", encoding="utf-8") as f:
 # ────────────────────────────────────────────────────────────────────────────────
 class RPG(commands.Cog):
     """Commande /rpg et !rpg — RPG Soul Society"""
-    
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -59,29 +58,36 @@ class RPG(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     async def process_rpg(self, user_id, ctx, action, is_slash=False):
 
-        # ✅ Création du profil si inexistant
+        # Création profil
         await create_profile_if_not_exists(user_id)
 
-        # Récupération des données du joueur
+        # Récupération joueur
         res = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
         if not res.data:
-            return await (safe_respond(ctx, "❌ Impossible de charger ton profil.") if is_slash else safe_send(ctx.channel, "❌ Impossible de charger ton profil."))
+            error = "❌ Impossible de charger ton profil."
+            return await (safe_respond(ctx, error) if is_slash else safe_send(ctx.channel, error))
         player_data = res.data[0]
 
         zone = str(player_data.get("zone", "1"))
         defeated = player_data.get("defeated_bosses", [])
 
-        # Fonction interne d'envoi
-        def send(msg):
-            return safe_respond(ctx, msg) if is_slash else safe_send(ctx.channel, msg)
+        # ────────────────────────────────────────────────────────────
+        # 🆕 FONCTION SEND FIXÉE
+        # ────────────────────────────────────────────────────────────
+        async def send(content):
+            if isinstance(content, discord.Embed):
+                return await (safe_respond(ctx, embed=content) if is_slash else safe_send(ctx.channel, embed=content))
+            else:
+                return await (safe_respond(ctx, content) if is_slash else safe_send(ctx.channel, content))
 
-        # ─ Affichage d'accueil si aucune action ─
+        # ────────────────────────────────────────────────────────────
+        # AUCUNE ACTION → MENU
+        # ────────────────────────────────────────────────────────────
         if not action:
             embed = discord.Embed(
                 title="🗡️ RPG Soul Society",
                 description=(
                     "Bienvenue dans le RPG Soul Society !\n\n"
-                    "Votre objectif : envahir les divisions de la Soul Society et affronter les capitaines.\n\n"
                     "**Commandes disponibles :**\n"
                     "`!rpg profil` — Statistiques\n"
                     "`!rpg combat` — Combat contre un ennemi\n"
@@ -93,9 +99,9 @@ class RPG(commands.Cog):
 
         action = action.lower()
 
-        # ────────────────────────────────────────────────────────────────────────────
-        # 📊 PROFIL — Embed propre
-        # ────────────────────────────────────────────────────────────────────────────
+        # ────────────────────────────────────────────────────────────
+        # PROFIL
+        # ────────────────────────────────────────────────────────────
         if action == "profil":
             embed = discord.Embed(
                 title=f"📘 Profil de {ctx.user.name if is_slash else ctx.author.name}",
@@ -110,14 +116,16 @@ class RPG(commands.Cog):
             embed.add_field(name="Équipement", value=player_data["equipment"], inline=False)
             return await send(embed)
 
-        # ────────────────────────────────────────────────────────────────────────
-        # ⚔️ Combat (minions ou boss)
-        # ────────────────────────────────────────────────────────────────────────
+        # ────────────────────────────────────────────────────────────
+        # COMBAT
+        # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
+
         if is_boss:
             boss1 = ENEMIES[zone]["boss1"]
             boss2 = ENEMIES[zone]["boss2"]
             enemy = boss1 if boss1["name"] not in defeated else boss2
+
             if not enemy:
                 embed = discord.Embed(
                     title="🎉 Division nettoyée",
@@ -125,100 +133,92 @@ class RPG(commands.Cog):
                     color=discord.Color.green()
                 )
                 return await send(embed)
+
         else:
             enemy = ENEMIES[zone]["minions"][0]
 
-        # ─ Stats combat ─
+        # Stats
         e_hp, e_atk, e_def, e_dex, e_crit = (
-            enemy["hp"], enemy["atk"], enemy["def"], enemy.get("dex", 5), enemy.get("crit", 2)
+            enemy["hp"], enemy["atk"], enemy["def"],
+            enemy.get("dex", 5), enemy.get("crit", 2)
         )
         p_hp, p_atk, p_def, p_dex, p_crit = (
-            player_data["hp"], player_data["atk"], player_data["def"], player_data["dex"], player_data["crit"]
+            player_data["hp"], player_data["atk"], player_data["def"],
+            player_data["dex"], player_data["crit"]
         )
 
         turn = 1
         combat_log = []
 
-        # ────────────────────────────────────────────────────────────────────────
-        # ⚔️ Nouvelle mécanique : DEX = attaque une deuxième fois
-        # ────────────────────────────────────────────────────────────────────────
+        # Attaques
         def player_attack():
             nonlocal e_hp
             dmg = max(1, p_atk - e_def)
-
             if random.randint(1, 100) <= p_crit * 5:
                 dmg *= 2
-                combat_log.append(f"Tour {turn}: 🎯 **Coup critique !** Vous infligez {dmg} dégâts.")
+                combat_log.append(f"Tour {turn}: 🎯 **Critique !** {dmg} dégâts.")
             else:
                 combat_log.append(f"Tour {turn}: Vous infligez {dmg} dégâts.")
-
             e_hp -= dmg
 
         def enemy_attack():
             nonlocal p_hp
             dmg = max(1, e_atk - p_def)
-
             if random.randint(1, 100) <= e_crit * 5:
                 dmg *= 2
-                combat_log.append(f"Tour {turn}: ⚠️ **{enemy['name']} critique !** Vous subissez {dmg} dégâts.")
+                combat_log.append(f"Tour {turn}: ⚠️ **{enemy['name']} critique !** {dmg} dégâts.")
             else:
-                combat_log.append(f"Tour {turn}: {enemy['name']} attaque et inflige {dmg} dégâts.")
-
+                combat_log.append(f"Tour {turn}: {enemy['name']} inflige {dmg} dégâts.")
             p_hp -= dmg
 
+        # Boucle
         while p_hp > 0 and e_hp > 0:
 
-            # ───── Joueur ─────
             player_attack()
 
-            # Double attaque joueur (DEX)
-            if e_hp > 0:
-                if random.randint(1, 100) <= p_dex * 5:
-                    combat_log.append(f"Tour {turn}: ⚡ Votre DEX vous permet d'attaquer une **deuxième fois !**")
-                    player_attack()
+            # Double attaque DEX joueur
+            if e_hp > 0 and random.randint(1, 100) <= p_dex * 5:
+                combat_log.append(f"Tour {turn}: ⚡ Votre DEX déclenche une **attaque supplémentaire !**")
+                player_attack()
 
             if e_hp <= 0:
                 break
 
-            # ───── Ennemi ─────
             enemy_attack()
 
             # Double attaque ennemi
-            if p_hp > 0:
-                if random.randint(1, 100) <= e_dex * 5:
-                    combat_log.append(f"Tour {turn}: ⚠️ {enemy['name']} attaque une **deuxième fois !**")
-                    enemy_attack()
+            if p_hp > 0 and random.randint(1, 100) <= e_dex * 5:
+                combat_log.append(f"Tour {turn}: ⚠️ {enemy['name']} attaque **une deuxième fois !**")
+                enemy_attack()
 
             turn += 1
 
-        # ─ Résultat ─
-        result_text = "🎉 Victoire !" if p_hp > 0 else "💀 Défaite..."
-
+        # Résultat
         embed = discord.Embed(
             title=f"⚔️ Combat contre {enemy['name']}",
-            description=f"**Résultat :** {result_text}",
+            description="🎉 Victoire !" if p_hp > 0 else "💀 Défaite...",
             color=discord.Color.orange()
         )
-
         embed.add_field(name="PV restants", value=max(0, p_hp), inline=True)
         embed.add_field(name="Tours", value=turn - 1, inline=True)
 
-        # Combat log
+        # Log
         log_text = "\n".join(combat_log)
         if len(log_text) > 1024:
             log_text = log_text[-1024:]
         embed.add_field(name="Journal de combat", value=log_text, inline=False)
 
-        # Mise à jour joueur
+        # Gains
         if p_hp > 0:
             gain_xp = 200 if is_boss else 50
             player_data["xp"] += gain_xp
 
             if is_boss:
                 defeated.append(enemy["name"])
-                supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
+                supabase.table("rpg_players").update({
+                    "defeated_bosses": defeated
+                }).eq("user_id", user_id).execute()
 
-            # Level up
             if player_data["xp"] >= player_data["xp_next"]:
                 player_data["level"] += 1
                 player_data["xp"] -= player_data["xp_next"]
@@ -228,6 +228,7 @@ class RPG(commands.Cog):
             supabase.table("rpg_players").update(player_data).eq("user_id", user_id).execute()
 
         return await send(embed)
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup Cog
