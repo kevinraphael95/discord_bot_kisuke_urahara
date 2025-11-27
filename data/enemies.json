@@ -1,118 +1,80 @@
 {
   "1": {
     "name": "13e Division",
-    "minions": [
-      {"name": "Shinigami 13e", "hp": 25, "atk": 3, "def": 1, "dex": 1, "crit": 1}
-    ],
-    "boss1": {"name": "Kiyone & Sentarō", "hp": 80, "atk": 7, "def": 3, "dex": 2, "crit": 2},
-    "boss2": {"name": "Jūshirō Ukitake", "hp": 150, "atk": 12, "def": 6, "dex": 3, "crit": 3}
+    "minions": [{"name": "Shinigami 13e", "hp": 25, "atk": 3, "def": 1, "dex": 1, "crit": 1}],
+    "boss1": {"name": "Kiyone & Sentarō", "hp": 120, "atk": 12, "def": 5, "dex": 3, "crit": 3},
+    "boss2": {"name": "Jūshirō Ukitake", "hp": 180, "atk": 15, "def": 7, "dex": 4, "crit": 3}
   },
-
   "2": {
     "name": "12e Division",
-    "minions": [
-      {"name": "Shinigami 12e", "hp": 30, "atk": 4, "def": 1, "dex": 1, "crit": 1}
-    ],
-    "boss1": {"name": "Nemu Kurotsuchi", "hp": 90, "atk": 8, "def": 3, "dex": 2, "crit": 2},
-    "boss2": {"name": "Mayuri Kurotsuchi", "hp": 160, "atk": 13, "def": 6, "dex": 3, "crit": 3}
+    "minions": [{"name": "Shinigami 12e", "hp": 30, "atk": 4, "def": 1, "dex": 1, "crit": 1}],
+    "boss1": {"name": "Nemu Kurotsuchi", "hp": 140, "atk": 12, "def": 5, "dex": 3, "crit": 3},
+    "boss2": {"name": "Mayuri Kurotsuchi", "hp": 220, "atk": 18, "def": 9, "dex": 4, "crit": 3}
   },
-
   "3": {
     "name": "11e Division",
-    "minions": [
-      {"name": "Shinigami 11e", "hp": 35, "atk": 5, "def": 1, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Yachiru", "hp": 100, "atk": 9, "def": 4, "dex": 3, "crit": 2},
-    "boss2": {"name": "Kenpachi Zaraki", "hp": 170, "atk": 15, "def": 7, "dex": 4, "crit": 3}
+    "minions": [{"name": "Shinigami 11e", "hp": 36, "atk": 5, "def": 1, "dex": 2, "crit": 1}],
+    "boss1": {"name": "Yachiru", "hp": 160, "atk": 14, "def": 6, "dex": 4, "crit": 3},
+    "boss2": {"name": "Kenpachi Zaraki", "hp": 240, "atk": 20, "def": 10, "dex": 5, "crit": 4}
   },
-
   "4": {
     "name": "10e Division",
-    "minions": [
-      {"name": "Shinigami 10e", "hp": 40, "atk": 6, "def": 2, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Rangiku", "hp": 110, "atk": 10, "def": 4, "dex": 3, "crit": 2},
-    "boss2": {"name": "Tōshirō Hitsugaya", "hp": 180, "atk": 16, "def": 7, "dex": 4, "crit": 3}
+    "minions": [{"name": "Shinigami 10e", "hp": 43, "atk": 6, "def": 2, "dex": 2, "crit": 1}],
+    "boss1": {"name": "Rangiku", "hp": 180, "atk": 12, "def": 6, "dex": 4, "crit": 3},
+    "boss2": {"name": "Tōshirō Hitsugaya", "hp": 260, "atk": 22, "def": 11, "dex": 5, "crit": 4}
   },
-
   "5": {
     "name": "9e Division",
-    "minions": [
-      {"name": "Shinigami 9e", "hp": 45, "atk": 7, "def": 2, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Hisagi", "hp": 120, "atk": 11, "def": 5, "dex": 3, "crit": 2},
-    "boss2": {"name": "Kaname Tōsen", "hp": 190, "atk": 17, "def": 8, "dex": 4, "crit": 3}
+    "minions": [{"name": "Shinigami 9e", "hp": 52, "atk": 7, "def": 2, "dex": 2, "crit": 1}],
+    "boss1": {"name": "Hisagi", "hp": 200, "atk": 14, "def": 7, "dex": 4, "crit": 3},
+    "boss2": {"name": "Kaname Tōsen", "hp": 280, "atk": 20, "def": 10, "dex": 5, "crit": 3}
   },
-
   "6": {
     "name": "8e Division",
-    "minions": [
-      {"name": "Shinigami 8e", "hp": 50, "atk": 7, "def": 3, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Nanao Ise", "hp": 130, "atk": 12, "def": 5, "dex": 3, "crit": 2},
-    "boss2": {"name": "Kyōraku", "hp": 200, "atk": 18, "def": 8, "dex": 4, "crit": 3}
+    "minions": [{"name": "Shinigami 8e", "hp": 62, "atk": 8, "def": 3, "dex": 2, "crit": 1}],
+    "boss1": {"name": "Nanao Ise", "hp": 220, "atk": 16, "def": 8, "dex": 4, "crit": 3},
+    "boss2": {"name": "Kyōraku", "hp": 300, "atk": 22, "def": 11, "dex": 5, "crit": 3}
   },
-
   "7": {
     "name": "7e Division",
-    "minions": [
-      {"name": "Shinigami 7e", "hp": 55, "atk": 8, "def": 3, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Iba", "hp": 140, "atk": 13, "def": 6, "dex": 4, "crit": 2},
-    "boss2": {"name": "Komamura", "hp": 210, "atk": 19, "def": 9, "dex": 5, "crit": 3}
+    "minions": [{"name": "Shinigami 7e", "hp": 74, "atk": 9, "def": 3, "dex": 2, "crit": 1}],
+    "boss1": {"name": "Iba", "hp": 240, "atk": 18, "def": 9, "dex": 5, "crit": 3},
+    "boss2": {"name": "Komamura", "hp": 340, "atk": 24, "def": 12, "dex": 6, "crit": 3}
   },
-
   "8": {
     "name": "6e Division",
-    "minions": [
-      {"name": "Shinigami 6e", "hp": 60, "atk": 9, "def": 3, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Renji", "hp": 150, "atk": 14, "def": 6, "dex": 4, "crit": 2},
-    "boss2": {"name": "Byakuya", "hp": 220, "atk": 20, "def": 9, "dex": 5, "crit": 3}
+    "minions": [{"name": "Shinigami 6e", "hp": 87, "atk": 10, "def": 3, "dex": 3, "crit": 1}],
+    "boss1": {"name": "Renji", "hp": 260, "atk": 18, "def": 9, "dex": 5, "crit": 3},
+    "boss2": {"name": "Byakuya", "hp": 380, "atk": 26, "def": 13, "dex": 6, "crit": 3}
   },
-
   "9": {
     "name": "5e Division",
-    "minions": [
-      {"name": "Shinigami 5e", "hp": 65, "atk": 9, "def": 3, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Hinamori", "hp": 160, "atk": 15, "def": 6, "dex": 4, "crit": 2},
-    "boss2": {"name": "Aizen", "hp": 230, "atk": 22, "def": 10, "dex": 5, "crit": 3}
+    "minions": [{"name": "Shinigami 5e", "hp": 102, "atk": 11, "def": 4, "dex": 3, "crit": 1}],
+    "boss1": {"name": "Hinamori", "hp": 280, "atk": 20, "def": 10, "dex": 5, "crit": 3},
+    "boss2": {"name": "Aizen", "hp": 420, "atk": 28, "def": 14, "dex": 6, "crit": 3}
   },
-
   "10": {
     "name": "4e Division",
-    "minions": [
-      {"name": "Shinigami 4e", "hp": 70, "atk": 10, "def": 3, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Isane", "hp": 170, "atk": 16, "def": 7, "dex": 4, "crit": 2},
-    "boss2": {"name": "Unohana", "hp": 240, "atk": 23, "def": 10, "dex": 5, "crit": 3}
+    "minions": [{"name": "Shinigami 4e", "hp": 120, "atk": 12, "def": 4, "dex": 3, "crit": 1}],
+    "boss1": {"name": "Isane", "hp": 300, "atk": 22, "def": 12, "dex": 5, "crit": 3},
+    "boss2": {"name": "Unohana", "hp": 460, "atk": 30, "def": 15, "dex": 7, "crit": 3}
   },
-
   "11": {
     "name": "3e Division",
-    "minions": [
-      {"name": "Shinigami 3e", "hp": 75, "atk": 11, "def": 3, "dex": 2, "crit": 1}
-    ],
-    "boss1": {"name": "Kira", "hp": 180, "atk": 17, "def": 7, "dex": 4, "crit": 2},
-    "boss2": {"name": "Gin", "hp": 250, "atk": 24, "def": 11, "dex": 5, "crit": 3}
+    "minions": [{"name": "Shinigami 3e", "hp": 140, "atk": 13, "def": 4, "dex": 3, "crit": 1}],
+    "boss1": {"name": "Kira", "hp": 320, "atk": 24, "def": 12, "dex": 5, "crit": 3},
+    "boss2": {"name": "Gin", "hp": 500, "atk": 32, "def": 16, "dex": 7, "crit": 3}
   },
-
   "12": {
     "name": "2e Division",
-    "minions": [
-      {"name": "Shinigami 2e", "hp": 80, "atk": 12, "def": 4, "dex": 3, "crit": 1}
-    ],
-    "boss1": {"name": "Ōmaeda", "hp": 190, "atk": 18, "def": 7, "dex": 4, "crit": 2},
-    "boss2": {"name": "Soi Fon", "hp": 260, "atk": 25, "def": 12, "dex": 6, "crit": 3}
+    "minions": [{"name": "Shinigami 2e", "hp": 160, "atk": 14, "def": 4, "dex": 4, "crit": 1}],
+    "boss1": {"name": "Ōmaeda", "hp": 340, "atk": 26, "def": 14, "dex": 6, "crit": 3},
+    "boss2": {"name": "Soi Fon", "hp": 540, "atk": 34, "def": 18, "dex": 8, "crit": 3}
   },
-
   "13": {
     "name": "1ère Division",
-    "minions": [
-      {"name": "Shinigami 1ère", "hp": 90, "atk": 13, "def": 4, "dex": 3, "crit": 2}
-    ],
-    "boss1": {"name": "Sasakibe", "hp": 200, "atk": 19, "def": 8, "dex": 5, "crit": 3},
-    "boss2": {"name": "Yamamoto", "hp": 300, "atk": 30, "def": 15, "dex": 7, "crit": 4}
+    "minions": [{"name": "Shinigami 1ère", "hp": 180, "atk": 15, "def": 5, "dex": 4, "crit": 2}],
+    "boss1": {"name": "Sasakibe", "hp": 360, "atk": 24, "def": 14, "dex": 6, "crit": 4},
+    "boss2": {"name": "Yamamoto", "hp": 600, "atk": 40, "def": 20, "dex": 10, "crit": 5}
   }
 }
