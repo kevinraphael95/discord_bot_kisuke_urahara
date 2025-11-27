@@ -54,9 +54,9 @@ class RPG(commands.Cog):
     async def prefix_rpg(self, ctx: commands.Context, action: str = None):
         await self.process_rpg(ctx.author.id, ctx, action, is_slash=False)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction principale du RPG
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────────
     async def process_rpg(self, user_id, ctx, action, is_slash=False):
         # Création profil
         await create_profile_if_not_exists(user_id)
@@ -140,10 +140,9 @@ class RPG(commands.Cog):
             return await send(embed)
 
         # ────────────────────────────────────────────────────────────
-        # COMBAT
+        # COMBAT / BOSS — RÉSUMÉ
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
-
         if is_boss:
             boss1 = ENEMIES[zone]["boss1"]
             boss2 = ENEMIES[zone]["boss2"]
@@ -168,62 +167,26 @@ class RPG(commands.Cog):
             stats.get("dex",5), stats.get("crit",5)
         )
 
-        turn = 1
-        combat_log = []
-
-        # Attaques
-        def player_attack():
-            nonlocal e_hp
+        turn = 0
+        while p_hp > 0 and e_hp > 0:
+            turn += 1
+            # Player attacks
             dmg = max(1, p_atk - e_def)
-            if random.randint(1, 100) <= p_crit * 5:
-                dmg *= 2
-                combat_log.append(f"Tour {turn}: 🎯 **Critique !** {dmg} dégâts.")
-            else:
-                combat_log.append(f"Tour {turn}: Vous infligez {dmg} dégâts.")
+            if random.randint(1,100) <= p_crit*5: dmg *= 2
             e_hp -= dmg
-
-        def enemy_attack():
-            nonlocal p_hp
+            if e_hp <= 0: break
+            # Enemy attacks
             dmg = max(1, e_atk - p_def)
-            if random.randint(1, 100) <= e_crit * 5:
-                dmg *= 2
-                combat_log.append(f"Tour {turn}: ⚠️ **{enemy['name']} critique !** {dmg} dégâts.")
-            else:
-                combat_log.append(f"Tour {turn}: {enemy['name']} inflige {dmg} dégâts.")
+            if random.randint(1,100) <= e_crit*5: dmg *= 2
             p_hp -= dmg
 
-        # Boucle
-        while p_hp > 0 and e_hp > 0:
-            player_attack()
-            if e_hp > 0 and random.randint(1, 100) <= p_dex * 5:
-                combat_log.append(f"Tour {turn}: ⚡ Votre DEX déclenche une **attaque supplémentaire !**")
-                player_attack()
-            if e_hp <= 0:
-                break
-            enemy_attack()
-            if p_hp > 0 and random.randint(1, 100) <= e_dex * 5:
-                combat_log.append(f"Tour {turn}: ⚠️ {enemy['name']} attaque **une deuxième fois !**")
-                enemy_attack()
-            turn += 1
-
-        # Résultat
-        embed = discord.Embed(
-            title=f"⚔️ Combat contre {enemy['name']}",
-            description="🎉 Victoire !" if p_hp > 0 else "💀 Défaite...",
-            color=discord.Color.orange()
-        )
-        embed.add_field(name="PV restants", value=max(0, p_hp), inline=True)
-        embed.add_field(name="Tours", value=turn - 1, inline=True)
-
-        log_text = "\n".join(combat_log)
-        if len(log_text) > 1024:
-            log_text = log_text[-1024:]
-        embed.add_field(name="Journal de combat", value=log_text, inline=False)
-
-        # Gains
+        # ────────────────────────────────────────────────────────────
+        # Résultat résumé
+        # ────────────────────────────────────────────────────────────
         if p_hp > 0:
             gain_xp = 200 if is_boss else 50
             stats["xp"] = stats.get("xp",0) + gain_xp
+            stats["hp"] = p_hp
             if is_boss:
                 defeated.append(enemy["name"])
                 supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
@@ -231,8 +194,32 @@ class RPG(commands.Cog):
                 stats["level"] = stats.get("level",1) + 1
                 stats["xp"] -= stats.get("xp_next",100)
                 stats["xp_next"] = int(stats.get("xp_next",100) * 1.5)
-            stats["hp"] = p_hp
             supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
+
+            embed = discord.Embed(
+                title=f"⚔️ Combat contre {enemy['name']}",
+                description=(
+                    f"🏆 Vous avez vaincu {enemy['name']} !\n"
+                    f"💖 PV restants : {p_hp}/{stats.get('hp',100)}\n"
+                    f"⏳ Combats terminés en {turn} tours.\n"
+                    f"💰 Vous gagnez {gain_xp} XP !"
+                ),
+                color=discord.Color.green()
+            )
+        else:
+            stats["hp"] = max(1, int(stats.get("hp",100)*0.5))
+            supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
+
+            embed = discord.Embed(
+                title=f"⚔️ Combat contre {enemy['name']}",
+                description=(
+                    f"💀 Vous avez été vaincu par {enemy['name']}...\n"
+                    f"💖 PV restants : {p_hp}/{stats.get('hp',100)}\n"
+                    f"⏳ Combats terminés en {turn} tours.\n"
+                    f"⚠️ Vous perdez 20% de progression et êtes affaibli temporairement."
+                ),
+                color=discord.Color.red()
+            )
 
         return await send(embed)
 
