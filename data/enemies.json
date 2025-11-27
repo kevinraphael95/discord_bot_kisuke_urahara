@@ -4,7 +4,7 @@
     "minions": [
       {"name": "Shinigami de la 13e Division", "hp": 35, "atk": 3, "def": 1, "dex": 1, "crit": 1}
     ],
-    "boss1": {"name": "Kiyone & Sentō", "hp": 90, "atk": 6, "def": 3, "dex": 2, "crit": 2},
+    "boss1": {"name": "Kiyone & Sentarō", "hp": 90, "atk": 6, "def": 3, "dex": 2, "crit": 2},
     "boss2": {"name": "Jūshirō Ukitake", "hp": 130, "atk": 8, "def": 4, "dex": 3, "crit": 3}
   },
   "2": {
