@@ -139,7 +139,7 @@ class RPG(commands.Cog):
                     f"XP: {stats.get('xp',0)}/{stats.get('xp_next',100)}\n"
                     f"💖 HP : {stats.get('hp',0)} / {stats.get('hp_max',100)}\n"  # HP max
                     f"🔮 SP : {stats.get('sp',0)}\n"  # SP sans max
-                    f"ATK / DEF: {stats.get('atk',0)} / {stats.get('def',0)}\n"
+                    f"⚔️ ATK : {stats.get('atk',0)} / 🛡️ DEF: {stats.get('def',0)}\n"
                     f"DEX / EVA: {stats.get('dex',0)} / {stats.get('eva',0)}\n"
                     f"Crit: {stats.get('crit',0)}"
                 ),
