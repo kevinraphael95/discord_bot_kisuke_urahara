@@ -52,8 +52,7 @@ async def create_profile_if_not_exists(user_id: int, username: str = None):
                 "zone": "1",
                 "stats": stats,
                 "cooldowns": cooldowns,
-                "unlocked_zones": ["1"],  # 🆕 liste des zones débloquées
-                "defeated_bosses": []
+                "unlocked_zones": ["1"]
             }).execute()
 
             print(f"✅ Profil créé pour l'utilisateur {user_id} ({username})")
