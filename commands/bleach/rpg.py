@@ -178,7 +178,7 @@ class RPG(commands.Cog):
 
 
         # ────────────────────────────────────────────────────────────
-        # COMBAT / BOSS — RÉSUMÉ
+        # COMBAT / BOSS — RÉSUMÉ CORRIGÉ
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
         if is_boss:
@@ -194,37 +194,37 @@ class RPG(commands.Cog):
                 return await send(embed)
         else:
             enemy = ENEMIES[zone]["minions"][0]
-
-        # Stats
-        e_hp, e_atk, e_def, e_dex, e_crit = (
-            enemy["hp"], enemy["atk"], enemy["def"],
-            enemy.get("dex", 5), enemy.get("crit", 2)
-        )
-        p_hp, p_atk, p_def, p_dex, p_crit = (
-            stats.get("hp",100), stats.get("atk",10), stats.get("def",5),
-            stats.get("dex",5), stats.get("crit",5)
-        )
-
+        
+        # Stats joueur
+        p_hp_current = stats.get("hp", 100)
+        p_hp_max = stats.get("hp_max", 100)
+        p_atk, p_def, p_dex, p_crit = stats.get("atk",10), stats.get("def",5), stats.get("dex",5), stats.get("crit",5)
+        
+        # Stats ennemi
+        e_hp_current = enemy["hp"]
+        e_hp_max = enemy["hp"]
+        e_atk, e_def, e_dex, e_crit = enemy["atk"], enemy["def"], enemy.get("dex",5), enemy.get("crit",2)
+        
         turn = 0
-        while p_hp > 0 and e_hp > 0:
+        while p_hp_current > 0 and e_hp_current > 0:
             turn += 1
             # Player attacks
             dmg = max(1, p_atk - e_def)
             if random.randint(1,100) <= p_crit*5: dmg *= 2
-            e_hp -= dmg
-            if e_hp <= 0: break
+            e_hp_current -= dmg
+            if e_hp_current <= 0: break
             # Enemy attacks
             dmg = max(1, e_atk - p_def)
             if random.randint(1,100) <= e_crit*5: dmg *= 2
-            p_hp -= dmg
-
-        # ────────────────────────────────────────────────────────────
-        # Résultat résumé
-        # ────────────────────────────────────────────────────────────
-        if p_hp > 0:
+            p_hp_current -= dmg
+        
+                # ────────────────────────────────────────────────────────────
+                # Résultat résumé
+                # ────────────────────────────────────────────────────────────
+        if p_hp_current > 0:
             gain_xp = 200 if is_boss else 50
             stats["xp"] = stats.get("xp",0) + gain_xp
-            stats["hp"] = p_hp
+            stats["hp"] = p_hp_current  # sauvegarde HP actuel
             if is_boss:
                 defeated.append(enemy["name"])
                 supabase.table("rpg_players").update({"defeated_bosses": defeated}).eq("user_id", user_id).execute()
@@ -233,31 +233,34 @@ class RPG(commands.Cog):
                 stats["xp"] -= stats.get("xp_next",100)
                 stats["xp_next"] = int(stats.get("xp_next",100) * 1.5)
             supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
-
+        
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
                     f"🏆 Vous avez vaincu {enemy['name']} !\n"
-                    f"💖 PV restants : {p_hp}/{stats.get('hp',100)}\n"
+                    f"💖 Vos PV : {p_hp_current}/{p_hp_max}\n"
+                    f"💀 PV ennemi : 0/{e_hp_max}\n"
                     f"⏳ Combats terminés en {turn} tours.\n"
                     f"💰 Vous gagnez {gain_xp} XP !"
                 ),
                 color=discord.Color.green()
             )
         else:
-            stats["hp"] = max(1, int(stats.get("hp",100)*0.5))
+            # Réduction HP joueur après défaite
+            stats["hp"] = max(1, int(p_hp_max*0.5))
             supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
-
+        
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
                     f"💀 Vous avez été vaincu par {enemy['name']}...\n"
-                    f"💖 PV restants : {p_hp}/{stats.get('hp',100)}\n"
+                    f"💖 Vos PV : 0/{p_hp_max}\n"
+                    f"💀 PV ennemi : {max(0,e_hp_current)}/{e_hp_max}\n"
                     f"⏳ Combats terminés en {turn} tours."
                 ),
                 color=discord.Color.red()
             )
-
+        
         return await send(embed)
 
 # ────────────────────────────────────────────────────────────────────────────────
