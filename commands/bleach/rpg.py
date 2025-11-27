@@ -89,7 +89,7 @@ class RPG(commands.Cog):
             embed = discord.Embed(
                 title="🗡️ RPG Bleach",
                 description=(
-                    "Bienvenue dans le RPG inspiré de Bleach ! Tu es un shinigami rebelle ton but est de détruire la Soul Society.\n\n"
+                    "Bienvenue dans le RPG inspiré de Bleach ! Tu es un shinigami rebelle ton but est de détruire la Soul Society. Tu affrontes toutes les divisions de la 12e à la 1ere.\n\n"
                     "**Commandes disponibles :**\n"
                     "`!rpg profil` — Statistiques et équipement\n"
                     "`!rpg combat` — Combat contre un shinigami de base\n"
