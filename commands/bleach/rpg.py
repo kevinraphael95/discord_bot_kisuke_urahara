@@ -203,11 +203,11 @@ class RPG(commands.Cog):
                 return await send(embed)
 
         # ────────────────────────────────────────────────────────────
-        # COMBAT / BOSS (avec logs et bouton)
+        # COMBAT / BOSS (avec logs détaillés et boutons)
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
         
-        # Sélection ennemi
+        # Sélection de l'ennemi
         if is_boss:
             boss1 = ENEMIES[zone]["boss1"]
             boss2 = ENEMIES[zone]["boss2"]
@@ -221,73 +221,80 @@ class RPG(commands.Cog):
         else:
             enemy = ENEMIES[zone]["minions"][0]
         
-        # Raccourcis stats joueur
-        p_hp_current = stats.get("hp", 100)
+        # Stats joueur
+        p_hp = stats.get("hp", 100)
         p_hp_max = stats.get("hp_max", 100)
         p_atk = stats.get("atk", 10)
         p_def = stats.get("def", 5)
         p_dex = stats.get("dex", 5)
         p_eva = stats.get("eva", 5)
-        p_crit = stats.get("crit", 5) * 5    # conversion → %
+        p_crit = stats.get("crit", 5) * 5
         
-        # Raccourcis stats ennemi
-        e_hp_current = enemy["hp"]
+        # Stats ennemi
+        e_hp = enemy["hp"]
         e_hp_max = enemy["hp"]
         e_atk = enemy["atk"]
         e_def = enemy["def"]
         e_dex = enemy.get("dex", 5)
         e_eva = enemy.get("eva", 5)
-        e_crit = enemy.get("crit", 2) * 5    # conversion → %
+        e_crit = enemy.get("crit", 2) * 5
         
-        # Fonction d’attaque
+        # Fonction attaque avec critique
         def attempt_attack(atk, defense, crit_chance):
             dmg = max(1, atk - defense)
             if random.randint(1, 100) <= crit_chance:
                 dmg = int(dmg * 1.2)
             return dmg
         
-        # Logs du combat
         combat_log = []
         turn = 0
         
-        while p_hp_current > 0 and e_hp_current > 0:
+        while p_hp > 0 and e_hp > 0:
             turn += 1
         
-            # Attaque joueur
-            dmg = 0
+            # --- Tour joueur ---
+            # Attaque principale
             if random.randint(1, 100) > e_eva:
                 dmg = attempt_attack(p_atk, e_def, p_crit)
-                e_hp_current -= dmg
-                combat_log.append(f"Tour {turn} — Vous infligez {dmg} dmg à {enemy['name']} (PV restant: {max(0,e_hp_current)})")
+                e_hp -= dmg
+                combat_log.append(f"Tour {turn} — Vous attaquez {enemy['name']} et infligez {dmg} dmg (PV restants: {max(0,e_hp)})")
+            else:
+                combat_log.append(f"Tour {turn} — {enemy['name']} a esquivé votre attaque !")
         
-            # Double-attaque joueur (DEX)
+            # Double-attaque joueur
             if random.randint(1, 100) <= p_dex:
                 if random.randint(1, 100) > e_eva:
                     dmg = attempt_attack(p_atk, e_def, p_crit)
-                    e_hp_current -= dmg
-                    combat_log.append(f"Tour {turn} — Double attaque ! Vous infligez {dmg} dmg à {enemy['name']} (PV restant: {max(0,e_hp_current)})")
-            if e_hp_current <= 0:
+                    e_hp -= dmg
+                    combat_log.append(f"Tour {turn} — Double attaque ! Vous infligez {dmg} dmg à {enemy['name']} (PV restants: {max(0,e_hp)})")
+                else:
+                    combat_log.append(f"Tour {turn} — {enemy['name']} a esquivé votre double attaque !")
+        
+            if e_hp <= 0:
                 break
         
-            # Attaque ennemi
-            dmg = 0
+            # --- Tour ennemi ---
             if random.randint(1, 100) > p_eva:
                 dmg = attempt_attack(e_atk, p_def, e_crit)
-                p_hp_current -= dmg
-                combat_log.append(f"Tour {turn} — {enemy['name']} vous inflige {dmg} dmg (Vos PV restants: {max(0,p_hp_current)})")
+                p_hp -= dmg
+                combat_log.append(f"Tour {turn} — {enemy['name']} vous attaque et inflige {dmg} dmg (Vos PV: {max(0,p_hp)})")
+            else:
+                combat_log.append(f"Tour {turn} — Vous avez esquivé l'attaque de {enemy['name']} !")
         
-            # Double-attaque ennemi (DEX)
+            # Double-attaque ennemi
             if random.randint(1, 100) <= e_dex:
                 if random.randint(1, 100) > p_eva:
                     dmg = attempt_attack(e_atk, p_def, e_crit)
-                    p_hp_current -= dmg
-                    combat_log.append(f"Tour {turn} — Double attaque de {enemy['name']} ! {dmg} dmg (Vos PV restants: {max(0,p_hp_current)})")
+                    p_hp -= dmg
+                    combat_log.append(f"Tour {turn} — Double attaque de {enemy['name']} ! {dmg} dmg (Vos PV: {max(0,p_hp)})")
+                else:
+                    combat_log.append(f"Tour {turn} — Vous avez esquivé la double attaque de {enemy['name']} !")
         
-        # Mise à jour stats et cooldowns
-        if p_hp_current > 0:
+        # --- Fin combat : mise à jour stats ---
+        if p_hp > 0:
             gain_xp = 200 if is_boss else 50
             stats["xp"] = stats.get("xp", 0) + gain_xp
-            stats["hp"] = p_hp_current
+            stats["hp"] = p_hp
         
             if is_boss:
                 next_zone = str(int(zone) + 1)
@@ -307,12 +314,11 @@ class RPG(commands.Cog):
                 "zone": zone
             }).eq("user_id", user_id).execute()
         
-            # Embed victoire
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
                     f"🏆 Vous avez vaincu {enemy['name']} !\n"
-                    f"💖 Vos PV : {p_hp_current}/{p_hp_max}\n"
+                    f"💖 Vos PV : {p_hp}/{p_hp_max}\n"
                     f"💀 PV ennemi : 0/{e_hp_max}\n"
                     f"⏳ Combats terminés en {turn} tours.\n"
                     f"💰 Vous gagnez {gain_xp} XP !"
@@ -323,47 +329,37 @@ class RPG(commands.Cog):
             stats["hp"] = max(1, int(p_hp_max * 0.5))
             supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
         
-            # Embed défaite
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
                     f"💀 Vous avez été vaincu par {enemy['name']}...\n"
                     f"💖 Vos PV : 0/{p_hp_max}\n"
-                    f"💀 PV ennemi : {max(0, e_hp_current)}/{e_hp_max}\n"
+                    f"💀 PV ennemi : {max(0, e_hp)}/{e_hp_max}\n"
                     f"⏳ Combats terminés en {turn} tours."
                 ),
                 color=discord.Color.red()
             )
         
-        # ───────────────────────────────────────────────
-        # 📜 Bouton "Voir les logs" en éphémère + pagination
-        # ───────────────────────────────────────────────
+        # --- Affichage des logs via bouton ---
         from discord.ui import View, Button
         
         class CombatLogView(View):
             def __init__(self, log):
                 super().__init__(timeout=None)
-        
-                # On coupe les logs en morceaux de 15 lignes
                 self.pages = [log[i:i+15] for i in range(0, len(log), 15)]
                 self.current_page = 0
         
             def get_embed(self):
                 page = self.pages[self.current_page]
-                embed = discord.Embed(
+                return discord.Embed(
                     title=f"📜 Logs du combat ({self.current_page+1}/{len(self.pages)})",
                     description="\n".join(page),
                     color=discord.Color.blurple()
                 )
-                return embed
         
             @discord.ui.button(label="Voir les logs", style=discord.ButtonStyle.blurple)
             async def show_log(self, interaction: discord.Interaction, button: Button):
-                await interaction.response.send_message(
-                    embed=self.get_embed(),
-                    ephemeral=True,
-                    view=self  # On affiche aussi les boutons de pagination
-                )
+                await interaction.response.send_message(embed=self.get_embed(), ephemeral=True, view=self)
         
             @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
             async def previous(self, interaction: discord.Interaction, button: Button):
@@ -377,16 +373,14 @@ class RPG(commands.Cog):
                     self.current_page += 1
                 await interaction.response.edit_message(embed=self.get_embed(), view=self)
         
-        
-        # Envoi du message final de combat
         view = CombatLogView(combat_log)
         
         if not is_slash:
             await ctx.send(embed=embed, view=view)
         else:
             await ctx.followup.send(embed=embed, view=view)
-
-
+        
+        
 
 
 # ────────────────────────────────────────────────────────────────────────────────
