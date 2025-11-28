@@ -58,10 +58,9 @@ class RPG(commands.Cog):
     # 🔹 Fonction principale du RPG
     # ────────────────────────────────────────────────────────────────────────────────
     async def process_rpg(self, user_id, ctx, action, zone_target=None, is_slash=False):
-        # Création profil
+        # Création profil si inexistant
         username = ctx.user.name if is_slash else ctx.author.name
         await create_profile_if_not_exists(user_id, username)
-
 
         # Récupération joueur
         res = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
@@ -76,13 +75,14 @@ class RPG(commands.Cog):
         unlocked_zones = player_data.get("unlocked_zones", ["1"])
 
         # ────────────────────────────────────────────────────────────
-        # 🆕 Fonction send
+        # 🆕 Fonction send simplifiée
         # ────────────────────────────────────────────────────────────
         async def send(content):
             if isinstance(content, discord.Embed):
                 return await (safe_respond(ctx, embed=content) if is_slash else safe_send(ctx.channel, embed=content))
-            else:
-                return await (safe_respond(ctx, content) if is_slash else safe_send(ctx.channel, content))
+            return await (safe_respond(ctx, content) if is_slash else safe_send(ctx.channel, content))
+
+        now = datetime.utcnow()
 
         # ────────────────────────────────────────────────────────────
         # AUCUNE ACTION → MENU
@@ -103,46 +103,30 @@ class RPG(commands.Cog):
             return await send(embed)
 
         action = action.lower()
-        now = datetime.utcnow()
 
         # ────────────────────────────────────────────────────────────
-        # 📌 Vérification & formatage des cooldowns (combat / boss)
+        # 📌 Cooldowns combat / boss
         # ────────────────────────────────────────────────────────────
-        CD_DURATIONS = {
-            "combat": 300,   # 5 min
-            "boss": 3600     # 1h
-        }
-
-        def format_cd(remaining):
-            """Retourne le format timedelta propre : HH:MM:SS"""
-            return str(timedelta(seconds=int(remaining)))
+        CD_DURATIONS = {"combat": 300, "boss": 3600}
 
         if action in ["combat", "boss"]:
-            cd_name = action
-            last_str = cooldowns.get(cd_name, "1970-01-01T00:00:00")
+            last_str = cooldowns.get(action, "1970-01-01T00:00:00")
             last = datetime.fromisoformat(last_str)
-
             elapsed = (now - last).total_seconds()
-            duration = CD_DURATIONS[cd_name]
-
-            if elapsed < duration:
-                remaining = duration - elapsed
-                return await send(f"⏳ **{cd_name.upper()}** en cooldown — reviens dans `{format_cd(remaining)}`.")
-
-            cooldowns[cd_name] = now.isoformat()
+            if elapsed < CD_DURATIONS[action]:
+                remaining = CD_DURATIONS[action] - elapsed
+                return await send(f"⏳ **{action.upper()}** en cooldown — reviens dans `{str(timedelta(seconds=int(remaining)))}`.")
+            cooldowns[action] = now.isoformat()
             supabase.table("rpg_players").update({"cooldowns": cooldowns}).eq("user_id", user_id).execute()
-
 
         # ────────────────────────────────────────────────────────────
         # PROFIL
         # ────────────────────────────────────────────────────────────
         if action == "profil":
             embed = discord.Embed(
-                title=f"📘 Profil de {player_data.get('username', ctx.user.name if is_slash else ctx.author.name)}",
+                title=f"📘 Profil de {player_data.get('username', username)}",
                 color=discord.Color.blue()
             )
-        
-            # Stats principales
             embed.add_field(
                 name="📊 Stats",
                 value=(
@@ -155,33 +139,18 @@ class RPG(commands.Cog):
                 ),
                 inline=False
             )
+            embed.add_field(name="✨ Effets actifs", value=", ".join(stats.get("effects", {}).keys()) or "Aucun", inline=False)
 
-            # Effets actuels
-            effects_text = ", ".join(stats.get("effects", {}).keys()) or "Aucun"
-            embed.add_field(name="✨ Effets actifs", value=effects_text, inline=False)
-
-            # Cooldowns
-            CD_DURATIONS = {
-                "combat": 300,
-                "boss": 3600
-            }
             cd_text = ""
             for cmd, dt_str in cooldowns.items():
                 dt = datetime.fromisoformat(dt_str)
                 elapsed = (now - dt).total_seconds()
                 remaining = max(0, CD_DURATIONS.get(cmd, 0) - elapsed)
-                ready = "✅ ready" if remaining <= 0 else str(timedelta(seconds=int(remaining)))
-                cd_text += f"{cmd.upper()}: {ready}\n"
-
+                cd_text += f"{cmd.upper()}: {'✅ ready' if remaining <= 0 else str(timedelta(seconds=int(remaining)))}\n"
             embed.add_field(name="⏱️ Cooldowns", value=cd_text or "Aucun", inline=False)
 
-            # Zones débloquées
-            unlocked_text = ", ".join(unlocked_zones)
-            embed.add_field(name="🗺️ Zones débloquées", value=unlocked_text, inline=False)
-
-            # Zone actuelle
-            embed.add_field(name="📍 Zone actuelle", value=f"{zone}", inline=False)
-
+            embed.add_field(name="🗺️ Zones débloquées", value=", ".join(unlocked_zones), inline=False)
+            embed.add_field(name="📍 Zone actuelle", value=zone, inline=False)
             return await send(embed)
 
         # ────────────────────────────────────────────────────────────
@@ -193,26 +162,21 @@ class RPG(commands.Cog):
                     zone = zone_target
                     supabase.table("rpg_players").update({"zone": zone}).eq("user_id", user_id).execute()
                     return await send(f"📍 Vous vous déplacez vers la zone {zone}.")
-                else:
-                    return await send(f"❌ Vous ne pouvez pas accéder à la zone {zone_target}, elle n'est pas débloquée.")
-            else:
-                embed = discord.Embed(
-                    title="🗺️ Zones débloquées",
-                    description=", ".join(unlocked_zones),
-                    color=discord.Color.orange()
-                )
-                embed.add_field(name="Zone actuelle", value=zone)
-                return await send(embed)
+                return await send(f"❌ Vous ne pouvez pas accéder à la zone {zone_target}, elle n'est pas débloquée.")
+            embed = discord.Embed(
+                title="🗺️ Zones débloquées",
+                description=", ".join(unlocked_zones),
+                color=discord.Color.orange()
+            )
+            embed.add_field(name="Zone actuelle", value=zone)
+            return await send(embed)
 
         # ────────────────────────────────────────────────────────────
-        # COMBAT / BOSS (avec logs détaillés et boutons)
+        # COMBAT / BOSS
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
-        
-        # Sélection de l'ennemi
         if is_boss:
-            boss1 = ENEMIES[zone]["boss1"]
-            boss2 = ENEMIES[zone]["boss2"]
+            boss1, boss2 = ENEMIES[zone]["boss1"], ENEMIES[zone]["boss2"]
             enemy = boss1 if boss1["name"] not in unlocked_zones else boss2
             if not enemy:
                 return await send(discord.Embed(
@@ -222,135 +186,112 @@ class RPG(commands.Cog):
                 ))
         else:
             enemy = ENEMIES[zone]["minions"][0]
-        
+
         # Stats joueur
-        p_hp = stats.get("hp", 100)
-        p_hp_max = stats.get("hp_max", 100)
-        p_atk = stats.get("atk", 10)
-        p_def = stats.get("def", 5)
-        p_dex = stats.get("dex", 5)
-        p_eva = stats.get("eva", 5)
-        p_crit = stats.get("crit", 5) * 5
-        
+        p_stats = {k: stats.get(k, default) for k, default in [("hp", 100), ("hp_max",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",5)]}
         # Stats ennemi
-        e_hp = enemy["hp"]
-        e_hp_max = enemy["hp"]
-        e_atk = enemy["atk"]
-        e_def = enemy["def"]
-        e_dex = enemy.get("dex", 5)
-        e_eva = enemy.get("eva", 5)
-        e_crit = enemy.get("crit", 2) * 5
-        
-        # Fonction attaque avec critique
+        e_stats = {k: enemy.get(k, default) for k, default in [("hp",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",2)]}
+        e_stats["crit"] *= 5
+        p_stats["crit"] *= 5
+
         def attempt_attack(atk, defense, crit_chance):
             dmg = max(1, atk - defense)
             if random.randint(1, 100) <= crit_chance:
                 dmg = int(dmg * 1.2)
             return dmg
-        
-        combat_log = []
-        turn = 0
-        
-        while p_hp > 0 and e_hp > 0:
+
+        combat_log, turn = [], 0
+        while p_stats["hp"] > 0 and e_stats["hp"] > 0:
             turn += 1
-        
-            # --- Tour joueur ---
-            # Attaque principale
-            if random.randint(1, 100) > e_eva:
-                dmg = attempt_attack(p_atk, e_def, p_crit)
-                e_hp -= dmg
-                combat_log.append(f"Tour {turn} — Vous attaquez {enemy['name']} et infligez {dmg} dmg (PV restants: {max(0,e_hp)})")
+            # Tour joueur
+            if random.randint(1, 100) > e_stats["eva"]:
+                dmg = attempt_attack(p_stats["atk"], e_stats["def"], p_stats["crit"])
+                e_stats["hp"] -= dmg
+                combat_log.append(f"Tour {turn} — Vous attaquez {enemy['name']} et infligez {dmg} dmg (PV restants: {max(0,e_stats['hp'])})")
             else:
                 combat_log.append(f"Tour {turn} — {enemy['name']} a esquivé votre attaque !")
-        
-            # Double-attaque joueur
-            if random.randint(1, 100) <= p_dex:
-                if random.randint(1, 100) > e_eva:
-                    dmg = attempt_attack(p_atk, e_def, p_crit)
-                    e_hp -= dmg
-                    combat_log.append(f"Tour {turn} — Double attaque ! Vous infligez {dmg} dmg à {enemy['name']} (PV restants: {max(0,e_hp)})")
+
+            if random.randint(1, 100) <= p_stats["dex"]:
+                if random.randint(1, 100) > e_stats["eva"]:
+                    dmg = attempt_attack(p_stats["atk"], e_stats["def"], p_stats["crit"])
+                    e_stats["hp"] -= dmg
+                    combat_log.append(f"Tour {turn} — Double attaque ! Vous infligez {dmg} dmg à {enemy['name']} (PV restants: {max(0,e_stats['hp'])})")
                 else:
                     combat_log.append(f"Tour {turn} — {enemy['name']} a esquivé votre double attaque !")
-        
-            if e_hp <= 0:
-                break
-        
-            # --- Tour ennemi ---
-            if random.randint(1, 100) > p_eva:
-                dmg = attempt_attack(e_atk, p_def, e_crit)
-                p_hp -= dmg
-                combat_log.append(f"Tour {turn} — {enemy['name']} vous attaque et inflige {dmg} dmg (Vos PV: {max(0,p_hp)})")
+            if e_stats["hp"] <= 0: break
+
+            # Tour ennemi
+            if random.randint(1, 100) > p_stats["eva"]:
+                dmg = attempt_attack(e_stats["atk"], p_stats["def"], e_stats["crit"])
+                p_stats["hp"] -= dmg
+                combat_log.append(f"Tour {turn} — {enemy['name']} vous attaque et inflige {dmg} dmg (Vos PV: {max(0,p_stats['hp'])})")
             else:
                 combat_log.append(f"Tour {turn} — Vous avez esquivé l'attaque de {enemy['name']} !")
-        
-            # Double-attaque ennemi
-            if random.randint(1, 100) <= e_dex:
-                if random.randint(1, 100) > p_eva:
-                    dmg = attempt_attack(e_atk, p_def, e_crit)
-                    p_hp -= dmg
-                    combat_log.append(f"Tour {turn} — Double attaque de {enemy['name']} ! {dmg} dmg (Vos PV: {max(0,p_hp)})")
+
+            if random.randint(1, 100) <= e_stats["dex"]:
+                if random.randint(1, 100) > p_stats["eva"]:
+                    dmg = attempt_attack(e_stats["atk"], p_stats["def"], e_stats["crit"])
+                    p_stats["hp"] -= dmg
+                    combat_log.append(f"Tour {turn} — Double attaque de {enemy['name']} ! {dmg} dmg (Vos PV: {max(0,p_stats['hp'])})")
                 else:
                     combat_log.append(f"Tour {turn} — Vous avez esquivé la double attaque de {enemy['name']} !")
-        
-        # --- Fin combat : mise à jour stats ---
-        if p_hp > 0:
+
+        # ────────────────────────────────────────────────────────────
+        # Fin combat — mise à jour stats
+        # ────────────────────────────────────────────────────────────
+        if p_stats["hp"] > 0:
             gain_xp = 200 if is_boss else 50
-            stats["xp"] = stats.get("xp", 0) + gain_xp
-            stats["hp"] = p_hp
-        
+            stats["xp"] = stats.get("xp",0) + gain_xp
+            stats["hp"] = p_stats["hp"]
             if is_boss:
-                next_zone = str(int(zone) + 1)
+                next_zone = str(int(zone)+1)
                 if next_zone not in unlocked_zones and next_zone in ENEMIES:
                     unlocked_zones.append(next_zone)
                     supabase.table("rpg_players").update({"unlocked_zones": unlocked_zones}).eq("user_id", user_id).execute()
-        
-            # Level up
-            if stats["xp"] >= stats.get("xp_next", 100):
-                stats["level"] = stats.get("level", 1) + 1
-                stats["xp"] -= stats.get("xp_next", 100)
-                stats["xp_next"] = int(stats.get("xp_next", 100) * 1.5)
-        
-            supabase.table("rpg_players").update({
-                "stats": stats,
-                "cooldowns": cooldowns,
-                "zone": zone
-            }).eq("user_id", user_id).execute()
-        
+            if stats["xp"] >= stats.get("xp_next",100):
+                stats["level"] = stats.get("level",1)+1
+                stats["xp"] -= stats.get("xp_next",100)
+                stats["xp_next"] = int(stats.get("xp_next",100)*1.5)
+
+            supabase.table("rpg_players").update({"stats": stats,"cooldowns": cooldowns,"zone": zone}).eq("user_id", user_id).execute()
+
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
                     f"🏆 Vous avez vaincu {enemy['name']} !\n"
-                    f"💖 Vos PV : {p_hp}/{p_hp_max}\n"
-                    f"💀 PV ennemi : 0/{e_hp_max}\n"
+                    f"💖 Vos PV : {p_stats['hp']}/{p_stats['hp_max']}\n"
+                    f"💀 PV ennemi : 0/{e_stats['hp']}\n"
                     f"⏳ Combats terminés en {turn} tours.\n"
                     f"💰 Vous gagnez {gain_xp} XP !"
                 ),
                 color=discord.Color.green()
             )
         else:
-            stats["hp"] = max(1, int(p_hp_max * 0.5))
-            supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
-        
+            stats["hp"] = max(1, int(p_stats["hp_max"]*0.5))
+            supabase.table("rpg_players").update({"stats": stats,"cooldowns": cooldowns}).eq("user_id", user_id).execute()
+
             embed = discord.Embed(
                 title=f"⚔️ Combat contre {enemy['name']}",
                 description=(
                     f"💀 Vous avez été vaincu par {enemy['name']}...\n"
-                    f"💖 Vos PV : 0/{p_hp_max}\n"
-                    f"💀 PV ennemi : {max(0, e_hp)}/{e_hp_max}\n"
+                    f"💖 Vos PV : 0/{p_stats['hp_max']}\n"
+                    f"💀 PV ennemi : {max(0,e_stats['hp'])}/{e_stats['hp']}\n"
                     f"⏳ Combats terminés en {turn} tours."
                 ),
                 color=discord.Color.red()
             )
-        
-        # --- Affichage des logs via bouton ---
+
+        # ────────────────────────────────────────────────────────────
+        # Logs interactifs
+        # ────────────────────────────────────────────────────────────
         from discord.ui import View, Button
-        
+
         class CombatLogView(View):
             def __init__(self, log):
                 super().__init__(timeout=None)
-                self.pages = [log[i:i+15] for i in range(0, len(log), 15)]
+                self.pages = [log[i:i+15] for i in range(0,len(log),15)]
                 self.current_page = 0
-        
+
             def get_embed(self):
                 page = self.pages[self.current_page]
                 return discord.Embed(
@@ -358,36 +299,31 @@ class RPG(commands.Cog):
                     description="\n".join(page),
                     color=discord.Color.blurple()
                 )
-        
+
             @discord.ui.button(label="Voir les logs", style=discord.ButtonStyle.blurple)
             async def show_log(self, interaction: discord.Interaction, button: Button):
                 await interaction.response.send_message(embed=self.get_embed(), ephemeral=True, view=self)
-        
+
             @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
             async def previous(self, interaction: discord.Interaction, button: Button):
-                if self.current_page > 0:
-                    self.current_page -= 1
+                if self.current_page > 0: self.current_page -= 1
                 await interaction.response.edit_message(embed=self.get_embed(), view=self)
-        
+
             @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
             async def next(self, interaction: discord.Interaction, button: Button):
-                if self.current_page < len(self.pages) - 1:
-                    self.current_page += 1
+                if self.current_page < len(self.pages)-1: self.current_page += 1
                 await interaction.response.edit_message(embed=self.get_embed(), view=self)
-        
+
         view = CombatLogView(combat_log)
-        
-        if not is_slash:
-            await ctx.send(embed=embed, view=view)
-        else:
+        if is_slash:
             await ctx.followup.send(embed=embed, view=view)
-        
-        
+        else:
+            await ctx.send(embed=embed, view=view)
 
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = RPG(bot)
     for command in cog.get_commands():
