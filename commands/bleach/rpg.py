@@ -203,7 +203,7 @@ class RPG(commands.Cog):
                 return await send(embed)
 
         # ────────────────────────────────────────────────────────────
-        # COMBAT / BOSS
+        # COMBAT / BOSS (avec logs et bouton)
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
         
@@ -239,69 +239,68 @@ class RPG(commands.Cog):
         e_eva = enemy.get("eva", 5)
         e_crit = enemy.get("crit", 2) * 5    # conversion → %
         
-        # Fonction générique d’attaque
+        # Fonction d’attaque
         def attempt_attack(atk, defense, crit_chance):
-            """Effectue une attaque normalisée avec dégâts mini 1 + crit +20%"""
             dmg = max(1, atk - defense)
             if random.randint(1, 100) <= crit_chance:
                 dmg = int(dmg * 1.2)
             return dmg
         
+        # Logs du combat
+        combat_log = []
         turn = 0
+        
         while p_hp_current > 0 and e_hp_current > 0:
             turn += 1
         
-            # ────────────────────────────────
-            # 🔹 ATTAQUE JOUEUR
-            # ────────────────────────────────
+            # Attaque joueur
+            dmg = 0
             if random.randint(1, 100) > e_eva:
-                e_hp_current -= attempt_attack(p_atk, e_def, p_crit)
-            if e_hp_current <= 0:
-                break
+                dmg = attempt_attack(p_atk, e_def, p_crit)
+                e_hp_current -= dmg
+                combat_log.append(f"Tour {turn} — Vous infligez {dmg} dmg à {enemy['name']} (PV restant: {max(0,e_hp_current)})")
         
             # Double-attaque joueur (DEX)
             if random.randint(1, 100) <= p_dex:
                 if random.randint(1, 100) > e_eva:
-                    e_hp_current -= attempt_attack(p_atk, e_def, p_crit)
+                    dmg = attempt_attack(p_atk, e_def, p_crit)
+                    e_hp_current -= dmg
+                    combat_log.append(f"Tour {turn} — Double attaque ! Vous infligez {dmg} dmg à {enemy['name']} (PV restant: {max(0,e_hp_current)})")
             if e_hp_current <= 0:
                 break
         
-            # ────────────────────────────────
-            # 🔹 ATTAQUE ENNEMI
-            # ────────────────────────────────
+            # Attaque ennemi
+            dmg = 0
             if random.randint(1, 100) > p_eva:
-                p_hp_current -= attempt_attack(e_atk, p_def, e_crit)
-            if p_hp_current <= 0:
-                break
+                dmg = attempt_attack(e_atk, p_def, e_crit)
+                p_hp_current -= dmg
+                combat_log.append(f"Tour {turn} — {enemy['name']} vous inflige {dmg} dmg (Vos PV restants: {max(0,p_hp_current)})")
         
             # Double-attaque ennemi (DEX)
             if random.randint(1, 100) <= e_dex:
                 if random.randint(1, 100) > p_eva:
-                    p_hp_current -= attempt_attack(e_atk, p_def, e_crit)
+                    dmg = attempt_attack(e_atk, p_def, e_crit)
+                    p_hp_current -= dmg
+                    combat_log.append(f"Tour {turn} — Double attaque de {enemy['name']} ! {dmg} dmg (Vos PV restants: {max(0,p_hp_current)})")
         
-        # ────────────────────────────────
-        # 🔹 RÉSULTAT DU COMBAT / MISE À JOUR STATS
-        # ────────────────────────────────
+        # Mise à jour stats et cooldowns
         if p_hp_current > 0:
-            # Joueur vainqueur
             gain_xp = 200 if is_boss else 50
             stats["xp"] = stats.get("xp", 0) + gain_xp
             stats["hp"] = p_hp_current
         
             if is_boss:
-                # Débloquer la zone suivante
                 next_zone = str(int(zone) + 1)
                 if next_zone not in unlocked_zones and next_zone in ENEMIES:
                     unlocked_zones.append(next_zone)
                     supabase.table("rpg_players").update({"unlocked_zones": unlocked_zones}).eq("user_id", user_id).execute()
         
-            # Level up si nécessaire
+            # Level up
             if stats["xp"] >= stats.get("xp_next", 100):
                 stats["level"] = stats.get("level", 1) + 1
                 stats["xp"] -= stats.get("xp_next", 100)
                 stats["xp_next"] = int(stats.get("xp_next", 100) * 1.5)
         
-            # Sauvegarde stats + cooldowns
             supabase.table("rpg_players").update({
                 "stats": stats,
                 "cooldowns": cooldowns,
@@ -321,7 +320,6 @@ class RPG(commands.Cog):
                 color=discord.Color.green()
             )
         else:
-            # Joueur vaincu
             stats["hp"] = max(1, int(p_hp_max * 0.5))
             supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
         
@@ -337,8 +335,23 @@ class RPG(commands.Cog):
                 color=discord.Color.red()
             )
         
-        # Envoi du résultat
-        await send(embed)
+        # Bouton pour voir le log
+        from discord.ui import View, Button
+        class CombatLogView(View):
+            def __init__(self, log):
+                super().__init__(timeout=None)
+                self.log = log
+        
+            @discord.ui.button(label="Voir tous les tours", style=discord.ButtonStyle.blurple)
+            async def show_log(self, interaction: discord.Interaction, button: Button):
+                try:
+                    await interaction.user.send(f"📜 **Logs du combat contre {enemy['name']} :**\n" + "\n".join(self.log))
+                    await interaction.response.send_message("✅ Logs envoyés en DM !", ephemeral=True)
+                except discord.Forbidden:
+                    await interaction.response.send_message("❌ Impossible de t'envoyer les logs en DM.", ephemeral=True)
+        
+        view = CombatLogView(combat_log)
+        await (ctx.send(embed=embed, view=view) if not is_slash else ctx.followup.send(embed=embed, view=view))
 
 
 
