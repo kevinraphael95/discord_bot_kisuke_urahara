@@ -206,7 +206,7 @@ class RPG(commands.Cog):
         # COMBAT / BOSS
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
-
+        
         # Sélection ennemi
         if is_boss:
             boss1 = ENEMIES[zone]["boss1"]
@@ -220,7 +220,7 @@ class RPG(commands.Cog):
                 ))
         else:
             enemy = ENEMIES[zone]["minions"][0]
-
+        
         # Raccourcis stats joueur
         p_hp_current = stats.get("hp", 100)
         p_hp_max = stats.get("hp_max", 100)
@@ -238,7 +238,7 @@ class RPG(commands.Cog):
         e_dex = enemy.get("dex", 5)
         e_eva = enemy.get("eva", 5)
         e_crit = enemy.get("crit", 2) * 5    # conversion → %
-
+        
         # Fonction générique d’attaque
         def attempt_attack(atk, defense, crit_chance):
             """Effectue une attaque normalisée avec dégâts mini 1 + crit +20%"""
@@ -246,11 +246,11 @@ class RPG(commands.Cog):
             if random.randint(1, 100) <= crit_chance:
                 dmg = int(dmg * 1.2)
             return dmg
-
+        
         turn = 0
         while p_hp_current > 0 and e_hp_current > 0:
             turn += 1
-
+        
             # ────────────────────────────────
             # 🔹 ATTAQUE JOUEUR
             # ────────────────────────────────
@@ -258,14 +258,14 @@ class RPG(commands.Cog):
                 e_hp_current -= attempt_attack(p_atk, e_def, p_crit)
             if e_hp_current <= 0:
                 break
-
+        
             # Double-attaque joueur (DEX)
             if random.randint(1, 100) <= p_dex:
                 if random.randint(1, 100) > e_eva:
                     e_hp_current -= attempt_attack(p_atk, e_def, p_crit)
             if e_hp_current <= 0:
                 break
-
+        
             # ────────────────────────────────
             # 🔹 ATTAQUE ENNEMI
             # ────────────────────────────────
@@ -273,11 +273,73 @@ class RPG(commands.Cog):
                 p_hp_current -= attempt_attack(e_atk, p_def, e_crit)
             if p_hp_current <= 0:
                 break
-
+        
             # Double-attaque ennemi (DEX)
             if random.randint(1, 100) <= e_dex:
                 if random.randint(1, 100) > p_eva:
                     p_hp_current -= attempt_attack(e_atk, p_def, e_crit)
+        
+        # ────────────────────────────────
+        # 🔹 RÉSULTAT DU COMBAT / MISE À JOUR STATS
+        # ────────────────────────────────
+        if p_hp_current > 0:
+            # Joueur vainqueur
+            gain_xp = 200 if is_boss else 50
+            stats["xp"] = stats.get("xp", 0) + gain_xp
+            stats["hp"] = p_hp_current
+        
+            if is_boss:
+                # Débloquer la zone suivante
+                next_zone = str(int(zone) + 1)
+                if next_zone not in unlocked_zones and next_zone in ENEMIES:
+                    unlocked_zones.append(next_zone)
+                    supabase.table("rpg_players").update({"unlocked_zones": unlocked_zones}).eq("user_id", user_id).execute()
+        
+            # Level up si nécessaire
+            if stats["xp"] >= stats.get("xp_next", 100):
+                stats["level"] = stats.get("level", 1) + 1
+                stats["xp"] -= stats.get("xp_next", 100)
+                stats["xp_next"] = int(stats.get("xp_next", 100) * 1.5)
+        
+            # Sauvegarde stats + cooldowns
+            supabase.table("rpg_players").update({
+                "stats": stats,
+                "cooldowns": cooldowns,
+                "zone": zone
+            }).eq("user_id", user_id).execute()
+        
+            # Embed victoire
+            embed = discord.Embed(
+                title=f"⚔️ Combat contre {enemy['name']}",
+                description=(
+                    f"🏆 Vous avez vaincu {enemy['name']} !\n"
+                    f"💖 Vos PV : {p_hp_current}/{p_hp_max}\n"
+                    f"💀 PV ennemi : 0/{e_hp_max}\n"
+                    f"⏳ Combats terminés en {turn} tours.\n"
+                    f"💰 Vous gagnez {gain_xp} XP !"
+                ),
+                color=discord.Color.green()
+            )
+        else:
+            # Joueur vaincu
+            stats["hp"] = max(1, int(p_hp_max * 0.5))
+            supabase.table("rpg_players").update({"stats": stats, "cooldowns": cooldowns}).eq("user_id", user_id).execute()
+        
+            # Embed défaite
+            embed = discord.Embed(
+                title=f"⚔️ Combat contre {enemy['name']}",
+                description=(
+                    f"💀 Vous avez été vaincu par {enemy['name']}...\n"
+                    f"💖 Vos PV : 0/{p_hp_max}\n"
+                    f"💀 PV ennemi : {max(0, e_hp_current)}/{e_hp_max}\n"
+                    f"⏳ Combats terminés en {turn} tours."
+                ),
+                color=discord.Color.red()
+            )
+        
+        # Envoi du résultat
+        await send(embed)
+
 
 
 # ────────────────────────────────────────────────────────────────────────────────
