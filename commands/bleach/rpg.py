@@ -104,25 +104,32 @@ class RPG(commands.Cog):
         now = datetime.utcnow()
 
         # ────────────────────────────────────────────────────────────
-        # VÉRIFICATION COOLDOWNS
+        # 📌 Vérification & formatage des cooldowns (combat / boss)
         # ────────────────────────────────────────────────────────────
-        if action == "combat":
-            last = datetime.fromisoformat(cooldowns.get("combat", "1970-01-01T00:00:00"))
-            if (now - last).total_seconds() < 300:
-                remaining = int(300 - (now - last).total_seconds())
-                return await send(f"⏳ Combat en cooldown. Patiente {remaining} secondes.")
-            cooldowns["combat"] = now.isoformat()
+        CD_DURATIONS = {
+            "combat": 300,   # 5 min
+            "boss": 3600     # 1h
+        }
 
-        if action == "boss":
-            last = datetime.fromisoformat(cooldowns.get("boss", "1970-01-01T00:00:00"))
-            if (now - last).total_seconds() < 3600:
-                remaining = int(3600 - (now - last).total_seconds())
-                return await send(f"⏳ Boss en cooldown. Patiente {remaining} secondes.")
-            cooldowns["boss"] = now.isoformat()
+        def format_cd(remaining):
+            """Retourne le format timedelta propre : HH:MM:SS"""
+            return str(timedelta(seconds=int(remaining)))
 
-        # Met à jour les cooldowns dans la DB
-        supabase_table = supabase.table("rpg_players")
-        supabase_table.update({"cooldowns": cooldowns}).eq("user_id", user_id).execute()
+        if action in ["combat", "boss"]:
+            cd_name = action
+            last_str = cooldowns.get(cd_name, "1970-01-01T00:00:00")
+            last = datetime.fromisoformat(last_str)
+
+            elapsed = (now - last).total_seconds()
+            duration = CD_DURATIONS[cd_name]
+
+            if elapsed < duration:
+                remaining = duration - elapsed
+                return await send(f"⏳ **{cd_name.upper()}** en cooldown — reviens dans `{format_cd(remaining)}`.")
+
+            cooldowns[cd_name] = now.isoformat()
+            supabase.table("rpg_players").update({"cooldowns": cooldowns}).eq("user_id", user_id).execute()
+
 
         # ────────────────────────────────────────────────────────────
         # PROFIL
