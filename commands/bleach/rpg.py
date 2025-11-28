@@ -335,23 +335,57 @@ class RPG(commands.Cog):
                 color=discord.Color.red()
             )
         
-        # Bouton pour voir le log
+        # ───────────────────────────────────────────────
+        # 📜 Bouton "Voir les logs" en éphémère + pagination
+        # ───────────────────────────────────────────────
         from discord.ui import View, Button
+        
         class CombatLogView(View):
             def __init__(self, log):
                 super().__init__(timeout=None)
-                self.log = log
         
-            @discord.ui.button(label="Voir tous les tours", style=discord.ButtonStyle.blurple)
+                # On coupe les logs en morceaux de 15 lignes
+                self.pages = [log[i:i+15] for i in range(0, len(log), 15)]
+                self.current_page = 0
+        
+            def get_embed(self):
+                page = self.pages[self.current_page]
+                embed = discord.Embed(
+                    title=f"📜 Logs du combat ({self.current_page+1}/{len(self.pages)})",
+                    description="\n".join(page),
+                    color=discord.Color.blurple()
+                )
+                return embed
+        
+            @discord.ui.button(label="Voir les logs", style=discord.ButtonStyle.blurple)
             async def show_log(self, interaction: discord.Interaction, button: Button):
-                try:
-                    await interaction.user.send(f"📜 **Logs du combat contre {enemy['name']} :**\n" + "\n".join(self.log))
-                    await interaction.response.send_message("✅ Logs envoyés en DM !", ephemeral=True)
-                except discord.Forbidden:
-                    await interaction.response.send_message("❌ Impossible de t'envoyer les logs en DM.", ephemeral=True)
+                await interaction.response.send_message(
+                    embed=self.get_embed(),
+                    ephemeral=True,
+                    view=self  # On affiche aussi les boutons de pagination
+                )
         
+            @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
+            async def previous(self, interaction: discord.Interaction, button: Button):
+                if self.current_page > 0:
+                    self.current_page -= 1
+                await interaction.response.edit_message(embed=self.get_embed(), view=self)
+        
+            @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
+            async def next(self, interaction: discord.Interaction, button: Button):
+                if self.current_page < len(self.pages) - 1:
+                    self.current_page += 1
+                await interaction.response.edit_message(embed=self.get_embed(), view=self)
+        
+        
+        # Envoi du message final de combat
         view = CombatLogView(combat_log)
-        await (ctx.send(embed=embed, view=view) if not is_slash else ctx.followup.send(embed=embed, view=view))
+        
+        if not is_slash:
+            await ctx.send(embed=embed, view=view)
+        else:
+            await ctx.followup.send(embed=embed, view=view)
+
 
 
 
