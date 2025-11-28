@@ -59,7 +59,9 @@ class RPG(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────────
     async def process_rpg(self, user_id, ctx, action, zone_target=None, is_slash=False):
         # Création profil
-        await create_profile_if_not_exists(user_id)
+        username = ctx.user.name if is_slash else ctx.author.name
+        await create_profile_if_not_exists(user_id, username)
+
 
         # Récupération joueur
         res = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
@@ -136,7 +138,7 @@ class RPG(commands.Cog):
         # ────────────────────────────────────────────────────────────
         if action == "profil":
             embed = discord.Embed(
-                title=f"📘 Profil de {ctx.user.name if is_slash else ctx.author.name}",
+                title=f"📘 Profil de {player_data.get('username', ctx.user.name if is_slash else ctx.author.name)}",
                 color=discord.Color.blue()
             )
         
@@ -189,7 +191,7 @@ class RPG(commands.Cog):
             if zone_target:
                 if zone_target in unlocked_zones:
                     zone = zone_target
-                    supabase_table.update({"zone": zone}).eq("user_id", user_id).execute()
+                    supabase.table("rpg_players").update({"zone": zone}).eq("user_id", user_id).execute()
                     return await send(f"📍 Vous vous déplacez vers la zone {zone}.")
                 else:
                     return await send(f"❌ Vous ne pouvez pas accéder à la zone {zone_target}, elle n'est pas débloquée.")
