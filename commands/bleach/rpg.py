@@ -96,7 +96,9 @@ class RPG(commands.Cog):
                     "`!rpg profil` — Statistiques et équipement\n"
                     "`!rpg combat` — Combat contre un shinigami de base\n"
                     "`!rpg boss` — Affronter un vice-capitaine puis un capitaine\n"
-                    "`!rpg zone` — Voir les zones débloquées et se déplacer"
+                    "`!rpg zone` — Voir les zones débloquées et se déplacer\n\n"
+                    "**Comment Jouer :**\n"
+                    "Affronter les 13 Divisions des 13 armées de la cour, faire des combhat pour monter les stats puis battre les 2 boss de chaque zone pour passer à la suivante avec rpg zone."
                 ),
                 color=discord.Color.red()
             )
