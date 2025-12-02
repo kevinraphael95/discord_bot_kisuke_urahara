@@ -121,7 +121,7 @@ class RPG(commands.Cog):
         # Combat / boss
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
-        await run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES)
+        await run_combat(user_id, is_boss, zone, stats, cooldowns, ctx, is_slash, ENEMIES)
 
 # ────────────────────────────────────────────────────────────
 # Setup Cog
