@@ -8,7 +8,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 import asyncio
 from datetime import datetime, timedelta
-from utils.supabase_client import supabase  # ✅ Correct comme dans reiatsuprofil.py
+from utils.supabase_client import supabase
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 Création / Vérification de profil
@@ -17,18 +17,13 @@ async def create_profile_if_not_exists(user_id: int, username: str):
     """
     Crée un profil RPG si le joueur n'existe pas encore.
     Met à jour le pseudo Discord si nécessaire.
-    
-    Args:
-        user_id (int): ID Discord du joueur
-        username (str): pseudo Discord
     """
     try:
-        user_id = int(user_id)  # Force le type
+        user_id = int(user_id)
         res = supabase.table("rpg_players").select("*").eq("user_id", user_id).execute()
         now = datetime.utcnow()
 
         if not res.data:
-            # Profil inexistant → création
             stats = {
                 "level": 1,
                 "xp": 0,
@@ -53,7 +48,7 @@ async def create_profile_if_not_exists(user_id: int, username: str):
             supabase.table("rpg_players").insert({
                 "user_id": user_id,
                 "username": username,
-                "zone": 1,  # zone en integer
+                "zone": 1,
                 "stats": stats,
                 "cooldowns": cooldowns,
                 "effects": {},
@@ -63,7 +58,6 @@ async def create_profile_if_not_exists(user_id: int, username: str):
             print(f"✅ Profil créé pour {user_id} ({username})")
 
         else:
-            # Profil existant → mise à jour du pseudo si changé
             player = res.data[0]
             if player.get("username") != username:
                 supabase.table("rpg_players").update({"username": username}).eq("user_id", user_id).execute()
@@ -71,3 +65,16 @@ async def create_profile_if_not_exists(user_id: int, username: str):
 
     except Exception as e:
         print(f"⚠️ Erreur lors de la création ou mise à jour du profil pour {user_id} : {e}")
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔹 Mise à jour des stats
+# ────────────────────────────────────────────────────────────────────────────────
+async def update_player_stats(user_id: int, stats: dict, cooldowns: dict):
+    """Met à jour les stats et cooldowns du joueur dans Supabase"""
+    try:
+        supabase.table("rpg_players").update({
+            "stats": stats,
+            "cooldowns": cooldowns
+        }).eq("user_id", user_id).execute()
+    except Exception as e:
+        print(f"⚠️ Impossible de mettre à jour les stats pour {user_id} : {e}")
