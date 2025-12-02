@@ -20,23 +20,14 @@ def attempt_attack(atk, defense, crit_chance):
 # ────────────────────────────────────────────────────────────
 # Fonction principale du combat
 # ────────────────────────────────────────────────────────────
-async def run_combat(user_id, is_boss, zone, stats, cooldowns, ctx, is_slash, ENEMIES):
+async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, player_data=None):
     now = datetime.utcnow()
-
-    # Fonction send adaptée slash / prefix
-    async def send(content, view=None):
-        if isinstance(content, discord.Embed):
-            if is_slash:
-                return await ctx.followup.send(embed=content, view=view)
-            return await ctx.send(embed=content, view=view)
-        if is_slash:
-            return await ctx.followup.send(content=content)
-        return await ctx.send(content=content)
 
     # Choix de l'ennemi
     if is_boss:
         boss1, boss2 = ENEMIES[zone]["boss1"], ENEMIES[zone]["boss2"]
-        enemy = boss1 if boss1["name"] not in stats.get("unlocked_zones", []) else boss2
+        unlocked = player_data.get("unlocked_zones", []) if player_data else []
+        enemy = boss1 if boss1["name"] not in unlocked else boss2
         if not enemy:
             return await send(discord.Embed(
                 title="🎉 Division nettoyée",
@@ -99,7 +90,6 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, ctx, is_slash, EN
     stats["xp"] = stats.get("xp",0) + gain_xp
     stats["hp"] = max(1, p_stats["hp"])
 
-    # Level up
     if stats["xp"] >= stats.get("xp_next",100):
         stats["level"] = stats.get("level",1)+1
         stats["xp"] -= stats.get("xp_next",100)
