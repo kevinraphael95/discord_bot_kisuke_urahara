@@ -1,0 +1,156 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# 📌 rpg_combat.py — Gestion des combats RPG
+# ────────────────────────────────────────────────────────────────────────────────
+import random
+from datetime import datetime
+from utils.supabase_client import supabase
+import discord
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 📌 Fonction d'attaque
+# ────────────────────────────────────────────────────────────────────────────────
+def attempt_attack(atk, defense, crit_chance):
+    dmg = max(1, atk - defense)
+    if random.randint(1, 100) <= crit_chance:
+        dmg = int(dmg * 1.2)
+    return dmg
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 📌 Fonction principale du combat
+# ────────────────────────────────────────────────────────────────────────────────
+async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES):
+    now = datetime.utcnow()
+
+    # Choix ennemi
+    if is_boss:
+        boss1, boss2 = ENEMIES[zone]["boss1"], ENEMIES[zone]["boss2"]
+        enemy = boss1 if boss1["name"] not in stats.get("unlocked_zones", []) else boss2
+        if not enemy:
+            return await send(discord.Embed(
+                title="🎉 Division nettoyée",
+                description="Tous les capitaines ont été vaincus !",
+                color=discord.Color.green()
+            ))
+    else:
+        enemy = ENEMIES[zone]["minions"][0]
+
+    # Stats joueur / ennemi
+    p_stats = {k: stats.get(k, default) for k, default in [("hp", 100), ("hp_max",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",5)]}
+    e_stats = {k: enemy.get(k, default) for k, default in [("hp",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",2)]}
+    e_stats["crit"] *= 5
+    p_stats["crit"] *= 5
+
+    combat_log, turn = [], 0
+
+    while p_stats["hp"] > 0 and e_stats["hp"] > 0:
+        turn += 1
+        # Tour joueur
+        if random.randint(1, 100) > e_stats["eva"]:
+            dmg = attempt_attack(p_stats["atk"], e_stats["def"], p_stats["crit"])
+            e_stats["hp"] -= dmg
+            combat_log.append(f"Tour {turn} — Vous attaquez {enemy['name']} et infligez {dmg} dmg (PV restants: {max(0,e_stats['hp'])})")
+        else:
+            combat_log.append(f"Tour {turn} — {enemy['name']} a esquivé votre attaque !")
+
+        if random.randint(1, 100) <= p_stats["dex"]:
+            if random.randint(1, 100) > e_stats["eva"]:
+                dmg = attempt_attack(p_stats["atk"], e_stats["def"], p_stats["crit"])
+                e_stats["hp"] -= dmg
+                combat_log.append(f"Tour {turn} — Double attaque ! Vous infligez {dmg} dmg à {enemy['name']} (PV restants: {max(0,e_stats['hp'])})")
+            else:
+                combat_log.append(f"Tour {turn} — {enemy['name']} a esquivé votre double attaque !")
+        if e_stats["hp"] <= 0: break
+
+        # Tour ennemi
+        if random.randint(1, 100) > p_stats["eva"]:
+            dmg = attempt_attack(e_stats["atk"], p_stats["def"], e_stats["crit"])
+            p_stats["hp"] -= dmg
+            combat_log.append(f"Tour {turn} — {enemy['name']} vous attaque et inflige {dmg} dmg (Vos PV: {max(0,p_stats['hp'])})")
+        else:
+            combat_log.append(f"Tour {turn} — Vous avez esquivé l'attaque de {enemy['name']} !")
+
+        if random.randint(1, 100) <= e_stats["dex"]:
+            if random.randint(1, 100) > p_stats["eva"]:
+                dmg = attempt_attack(e_stats["atk"], p_stats["def"], e_stats["crit"])
+                p_stats["hp"] -= dmg
+                combat_log.append(f"Tour {turn} — Double attaque de {enemy['name']} ! {dmg} dmg (Vos PV: {max(0,p_stats['hp'])})")
+            else:
+                combat_log.append(f"Tour {turn} — Vous avez esquivé la double attaque de {enemy['name']} !")
+
+    # ────────────────────────────────────────────────────────────
+    # Mise à jour stats
+    # ────────────────────────────────────────────────────────────
+    from utils.rpg_utils import update_player_stats
+
+    gain_xp = 200 if is_boss else 50
+    stats["xp"] = stats.get("xp",0) + gain_xp
+    stats["hp"] = max(1, p_stats["hp"])
+
+    # Level up
+    if stats["xp"] >= stats.get("xp_next",100):
+        stats["level"] = stats.get("level",1)+1
+        stats["xp"] -= stats.get("xp_next",100)
+        stats["xp_next"] = int(stats.get("xp_next",100)*1.5)
+
+    await update_player_stats(user_id, stats, cooldowns)
+
+    # Embed combat
+    if p_stats["hp"] > 0:
+        embed = discord.Embed(
+            title=f"⚔️ Combat contre {enemy['name']}",
+            description=(
+                f"🏆 Vous avez vaincu {enemy['name']} !\n"
+                f"💖 Vos PV : {p_stats['hp']}/{p_stats['hp_max']}\n"
+                f"💀 PV ennemi : 0/{e_stats['hp']}\n"
+                f"⏳ Combats terminés en {turn} tours.\n"
+                f"💰 Vous gagnez {gain_xp} XP !"
+            ),
+            color=discord.Color.green()
+        )
+    else:
+        embed = discord.Embed(
+            title=f"⚔️ Combat contre {enemy['name']}",
+            description=(
+                f"💀 Vous avez été vaincu par {enemy['name']}...\n"
+                f"💖 Vos PV : 0/{p_stats['hp_max']}\n"
+                f"💀 PV ennemi : {max(0,e_stats['hp'])}/{e_stats['hp']}\n"
+                f"⏳ Combats terminés en {turn} tours."
+            ),
+            color=discord.Color.red()
+        )
+
+    # ────────────────────────────────────────────────────────────
+    # Logs interactifs
+    # ────────────────────────────────────────────────────────────
+    from discord.ui import View, Button
+
+    class CombatLogView(View):
+        def __init__(self, log):
+            super().__init__(timeout=None)
+            self.pages = [log[i:i+15] for i in range(0,len(log),15)]
+            self.current_page = 0
+
+        def get_embed(self):
+            page = self.pages[self.current_page]
+            return discord.Embed(
+                title=f"📜 Logs du combat ({self.current_page+1}/{len(self.pages)})",
+                description="\n".join(page),
+                color=discord.Color.blurple()
+            )
+
+        @discord.ui.button(label="Voir les logs", style=discord.ButtonStyle.blurple)
+        async def show_log(self, interaction: discord.Interaction, button: Button):
+            await interaction.response.send_message(embed=self.get_embed(), ephemeral=True, view=self)
+
+        @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
+        async def previous(self, interaction: discord.Interaction, button: Button):
+            if self.current_page > 0: self.current_page -= 1
+            await interaction.response.edit_message(embed=self.get_embed(), view=self)
+
+        @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
+        async def next(self, interaction: discord.Interaction, button: Button):
+            if self.current_page < len(self.pages)-1: self.current_page += 1
+            await interaction.response.edit_message(embed=self.get_embed(), view=self)
+
+    view = CombatLogView(combat_log)
+    await send(embed, view=view)
