@@ -12,7 +12,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from utils.rpg_utils import create_profile_if_not_exists
 from utils.rpg_zones import change_zone
@@ -121,7 +121,7 @@ class RPG(commands.Cog):
         # Combat / boss
         # ────────────────────────────────────────────────────────────
         is_boss = action == "boss"
-        await run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES)
+        await run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, player_data)
 
 # ────────────────────────────────────────────────────────────
 # Setup Cog
