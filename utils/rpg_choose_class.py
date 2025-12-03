@@ -2,6 +2,9 @@
 # 📌 rpg_choose_class.py — Choix interactif de classe RPG avec boutons
 # ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord.ui import View, Button
 from utils.supabase_client import supabase
@@ -84,8 +87,8 @@ async def choose_class(ctx, user_id, is_slash=False):
             super().__init__(timeout=None)
 
         async def choose_class(self, interaction, class_name):
-            # Ici tu peux sauvegarder la classe choisie dans la DB
-            await supabase.table("players").update({"class": class_name}).eq("id", user_id)
+            # Sauvegarde la classe choisie dans Supabase
+            await supabase.table("rpg_players").update({"class": class_name}).eq("user_id", user_id)
             await interaction.response.edit_message(
                 embed=discord.Embed(
                     title="✅ Classe choisie !",
