@@ -48,6 +48,7 @@ def profile_embed(player_data, stats, cooldowns, now):
         ),
         inline=False
     )
+    embed.add_field(name="🧙 Classe", value=", ".join(stats.get("class", "Inconnue"), inline=False)
     embed.add_field(name="✨ Effets actifs", value=", ".join(stats.get("effects", {}).keys()) or "Aucun", inline=False)
 
     cd_text = ""
