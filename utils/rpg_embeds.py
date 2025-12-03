@@ -32,10 +32,13 @@ def menu_embed():
 # ────────────────────────────────────────────────────────────
 def profile_embed(player_data, stats, cooldowns, now):
     CD_DURATIONS = {"combat": 300, "boss": 3600}
+    
     embed = discord.Embed(
         title=f"📘 Profil de {player_data.get('username', 'Joueur')}",
         color=discord.Color.blue()
     )
+
+    # 📊 Stats principales
     embed.add_field(
         name="📊 Stats",
         value=(
@@ -48,9 +51,16 @@ def profile_embed(player_data, stats, cooldowns, now):
         ),
         inline=False
     )
-    embed.add_field(name="🧙 Classe", value=", ".join(stats.get("class", "Inconnue"), inline=False)
-    embed.add_field(name="✨ Effets actifs", value=", ".join(stats.get("effects", {}).keys()) or "Aucun", inline=False)
 
+    # 🏷️ Classe
+    player_class = player_data.get("class") or "Aucun"
+    embed.add_field(name="🏷️ Classe", value=player_class, inline=False)
+
+    # ✨ Effets actifs
+    active_effects = ", ".join(stats.get("effects", {}).keys()) or "Aucun"
+    embed.add_field(name="✨ Effets actifs", value=active_effects, inline=False)
+
+    # ⏱️ Cooldowns
     cd_text = ""
     for cmd, dt_str in cooldowns.items():
         dt = datetime.fromisoformat(dt_str)
@@ -59,6 +69,8 @@ def profile_embed(player_data, stats, cooldowns, now):
         cd_text += f"{cmd.upper()}: {'✅ ready' if remaining <= 0 else str(timedelta(seconds=int(remaining)))}\n"
     embed.add_field(name="⏱️ Cooldowns", value=cd_text or "Aucun", inline=False)
 
+    # 🗺️ Zones
     embed.add_field(name="🗺️ Zones débloquées", value=", ".join(player_data.get("unlocked_zones", ["1"])), inline=False)
     embed.add_field(name="📍 Zone actuelle", value=str(player_data.get("zone", "1")), inline=False)
+
     return embed
