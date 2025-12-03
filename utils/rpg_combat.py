@@ -2,11 +2,15 @@
 # 📌 rpg_combat.py — Gestion des combats RPG (compatible slash + prefix)
 # ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────
 import random
 from datetime import datetime
 import discord
 from utils.supabase_client import supabase
 from utils.rpg_utils import update_player_stats
+from utils.rpg_leveling import BASE_STATS, apply_class_levelup
 
 # ────────────────────────────────────────────────────────────
 # Fonction d'attaque
@@ -38,8 +42,13 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
         enemy = ENEMIES[zone]["minions"][0]
 
     # Stats joueur / ennemi
-    p_stats = {k: stats.get(k, default) for k, default in [("hp", 100), ("hp_max",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",5)]}
-    e_stats = {k: enemy.get(k, default) for k, default in [("hp",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",2)]}
+    p_stats = {k: stats.get(k, default) for k, default in [
+        ("hp", 100), ("hp_max",100), ("atk",10), ("def",5),
+        ("dex",5), ("eva",5), ("crit",5)
+    ]}
+    e_stats = {k: enemy.get(k, default) for k, default in [
+        ("hp",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",2)
+    ]}
     e_stats["crit"] *= 5
     p_stats["crit"] *= 5
 
@@ -86,14 +95,28 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
     # ────────────────────────────────────────────────────────────
     # Mise à jour stats joueur
     # ────────────────────────────────────────────────────────────
-    gain_xp = 200 if is_boss else 50
-    stats["xp"] = stats.get("xp",0) + gain_xp
-    stats["hp"] = max(1, p_stats["hp"])
+    stats["hp"] = max(1, p_stats["hp"])  # au moins 1 PV
 
-    if stats["xp"] >= stats.get("xp_next",100):
-        stats["level"] = stats.get("level",1)+1
-        stats["xp"] -= stats.get("xp_next",100)
-        stats["xp_next"] = int(stats.get("xp_next",100)*1.5)
+    combat_xp_msg = ""
+    if p_stats["hp"] > 0:  # XP et level up uniquement si victoire
+        gain_xp = 100 if is_boss else 25  # réduit pour ralentir
+        stats["xp"] = stats.get("xp",0) + gain_xp
+
+        level = stats.get("level",1)
+        xp_next = stats.get("xp_next",100)
+        while level < 10 and stats["xp"] >= xp_next:
+            stats["xp"] -= xp_next
+            level += 1
+            xp_next = int(xp_next * 1.3)  # scaling plus lent
+            stats["xp_next"] = xp_next
+            stats["level"] = level
+
+            # Mettre à jour stats de base et classe
+            for stat in ["hp_max","atk","def","dex","eva","crit","sp"]:
+                stats[stat] = BASE_STATS[stat][min(level-1, len(BASE_STATS[stat])-1)]
+            stats = apply_class_levelup(stats, player_data.get("class"))
+
+        combat_xp_msg = f"\n💰 Vous gagnez {gain_xp} XP !"
 
     await update_player_stats(user_id, stats, cooldowns)
 
@@ -107,8 +130,8 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
                 f"🏆 Vous avez vaincu {enemy['name']} !\n"
                 f"💖 Vos PV : {p_stats['hp']}/{p_stats['hp_max']}\n"
                 f"💀 PV ennemi : 0/{e_stats['hp']}\n"
-                f"⏳ Combats terminés en {turn} tours.\n"
-                f"💰 Vous gagnez {gain_xp} XP !"
+                f"⏳ Combats terminés en {turn} tours."
+                f"{combat_xp_msg}"
             ),
             color=discord.Color.green()
         )
@@ -140,7 +163,7 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
             return discord.Embed(
                 title=f"📜 Logs du combat ({self.current_page+1}/{len(self.pages)})",
                 description="\n".join(page),
-                color=discord.Color.blurple()
+                color=discord.Color.blurple
             )
 
         @discord.ui.button(label="Voir les logs", style=discord.ButtonStyle.blurple)
