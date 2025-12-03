@@ -7,6 +7,7 @@ from datetime import datetime
 import discord
 from utils.supabase_client import supabase
 from utils.rpg_utils import update_player_stats
+from utils.rpg_leveling import level_up_player
 
 # ────────────────────────────────────────────────────────────
 # Fonction d'attaque
@@ -18,12 +19,12 @@ def attempt_attack(atk, defense, crit_chance):
     return dmg
 
 # ────────────────────────────────────────────────────────────
-# Fonction principale du combat
+# Fonction principale du combat avec leveling
 # ────────────────────────────────────────────────────────────
 async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, player_data=None):
     now = datetime.utcnow()
 
-    # Choix de l'ennemi
+    # ── Choix de l'ennemi ──
     if is_boss:
         boss1, boss2 = ENEMIES[zone]["boss1"], ENEMIES[zone]["boss2"]
         unlocked = player_data.get("unlocked_zones", []) if player_data else []
@@ -37,7 +38,7 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
     else:
         enemy = ENEMIES[zone]["minions"][0]
 
-    # Stats joueur / ennemi
+    # ── Stats joueur / ennemi ──
     p_stats = {k: stats.get(k, default) for k, default in [("hp", 100), ("hp_max",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",5)]}
     e_stats = {k: enemy.get(k, default) for k, default in [("hp",100), ("atk",10), ("def",5), ("dex",5), ("eva",5), ("crit",2)]}
     e_stats["crit"] *= 5
@@ -45,11 +46,10 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
 
     combat_log, turn = [], 0
 
-    # ────────────────────────────────────────────────────────────
-    # Boucle combat
-    # ────────────────────────────────────────────────────────────
+    # ── Boucle combat ──
     while p_stats["hp"] > 0 and e_stats["hp"] > 0:
         turn += 1
+
         # Tour joueur
         if random.randint(1, 100) > e_stats["eva"]:
             dmg = attempt_attack(p_stats["atk"], e_stats["def"], p_stats["crit"])
@@ -83,29 +83,24 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
             else:
                 combat_log.append(f"Tour {turn} — Vous avez esquivé la double attaque de {enemy['name']} !")
 
-    # ────────────────────────────────────────────────────────────
-    # Mise à jour stats joueur
-    # ────────────────────────────────────────────────────────────
+    # ── Gain XP et leveling ──
     gain_xp = 200 if is_boss else 50
     stats["xp"] = stats.get("xp",0) + gain_xp
-    stats["hp"] = max(1, p_stats["hp"])
+    stats["hp"] = max(1, p_stats["hp"])  # garder au moins 1 PV si le joueur est vivant
 
-    if stats["xp"] >= stats.get("xp_next",100):
-        stats["level"] = stats.get("level",1)+1
-        stats["xp"] -= stats.get("xp_next",100)
-        stats["xp_next"] = int(stats.get("xp_next",100)*1.5)
+    # Level up + stats augmentent correctement
+    stats = level_up_player(stats, player_data.get("class_name", "Novice"))
 
+    # ── Mise à jour base ──
     await update_player_stats(user_id, stats, cooldowns)
 
-    # ────────────────────────────────────────────────────────────
-    # Embed combat final
-    # ────────────────────────────────────────────────────────────
+    # ── Embed combat final ──
     if p_stats["hp"] > 0:
         embed = discord.Embed(
             title=f"⚔️ Combat contre {enemy['name']}",
             description=(
                 f"🏆 Vous avez vaincu {enemy['name']} !\n"
-                f"💖 Vos PV : {p_stats['hp']}/{p_stats['hp_max']}\n"
+                f"💖 Vos PV : {stats['hp']}/{stats['hp_max']}\n"
                 f"💀 PV ennemi : 0/{e_stats['hp']}\n"
                 f"⏳ Combats terminés en {turn} tours.\n"
                 f"💰 Vous gagnez {gain_xp} XP !"
@@ -117,16 +112,14 @@ async def run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, pl
             title=f"⚔️ Combat contre {enemy['name']}",
             description=(
                 f"💀 Vous avez été vaincu par {enemy['name']}...\n"
-                f"💖 Vos PV : 0/{p_stats['hp_max']}\n"
+                f"💖 Vos PV : 0/{stats['hp_max']}\n"
                 f"💀 PV ennemi : {max(0,e_stats['hp'])}/{e_stats['hp']}\n"
                 f"⏳ Combats terminés en {turn} tours."
             ),
             color=discord.Color.red()
         )
 
-    # ────────────────────────────────────────────────────────────
-    # Logs interactifs
-    # ────────────────────────────────────────────────────────────
+    # ── Logs interactifs ──
     from discord.ui import View, Button
 
     class CombatLogView(View):
