@@ -48,6 +48,7 @@ async def create_profile_if_not_exists(user_id: int, username: str):
             supabase.table("rpg_players").insert({
                 "user_id": user_id,
                 "username": username,
+                "class": default_class,
                 "zone": 1,
                 "stats": stats,
                 "cooldowns": cooldowns,
