@@ -48,7 +48,7 @@ def profile_embed(player_data, stats, cooldowns, now):
             f"⚔️ ATK : {stats.get('atk',0)} / 🛡️ DEF: {stats.get('def',0)}\n"
             f"🤺 DEX : {stats.get('dex',0)} / 🏃 EVA: {stats.get('eva',0)}\n"
             f"🎯 Crit: {stats.get('crit',0)}"
-        ),
+        )
         inline=False
     )
 
