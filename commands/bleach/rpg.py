@@ -123,6 +123,13 @@ class RPG(commands.Cog):
         is_boss = action == "boss"
         await run_combat(user_id, is_boss, zone, stats, cooldowns, send, ENEMIES, player_data)
 
+        # ────────────────────────────────────────────────────────────
+        # Choix de classe
+        # ────────────────────────────────────────────────────────────
+        if action == "classe":
+            from utils.rpg_choose_class import choose_class
+            return await choose_class(ctx, user_id, is_slash=is_slash)
+
 # ────────────────────────────────────────────────────────────
 # Setup Cog
 # ────────────────────────────────────────────────────────────
