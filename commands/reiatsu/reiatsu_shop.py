@@ -24,13 +24,16 @@ import random
 # ────────────────────────────────────────────────────────────────────────────────
 class ReiatsuShop(commands.Cog):
     """Commande /reiatsushop et !reiatsushop — Affiche le shop et applique les effets"""
+    
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
         # Effets actifs en mémoire
-        self.active_zombie = {}  # {user_id: guild_id}
-        self.active_rename = {}  # {user_id: {"guild_id": int, "nick": str, "use_webhook": bool}}
-        self.active_mute = {}    # {user_id: {"guild_id": int, "end_time": datetime}}
+        self.active_effects = {
+            "zomb": {},   # {user_id: guild_id}
+            "rename": {}, # {user_id: {"guild_id": int, "nick": str, "use_webhook": bool}}
+            "mute": {}    # {user_id: {"guild_id": int, "end_time": datetime}}
+        }
 
         # Shop items
         self.shop_items = {
@@ -42,39 +45,40 @@ class ReiatsuShop(commands.Cog):
                           "description": "Force le pseudo et empêche de le changer pendant 2 jours."}
         }
 
-        self.clean_expired_effects.start()
         self.load_effects_from_db()
+        self.clean_expired_effects.start()
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Charger les effets actifs depuis la DB
+    # 🔹 Chargement des effets depuis la DB
     # ────────────────────────────────────────────────────────────────────────────
     def load_effects_from_db(self):
         res = supabase.table("reiatsu").select("user_id, shop_effets").execute()
         now = datetime.datetime.utcnow()
+
         for profile in res.data:
             user_id = int(profile["user_id"])
             for eff in profile.get("shop_effets") or []:
                 end_time = datetime.datetime.fromisoformat(eff["end_time"])
                 guild_id = eff.get("guild_id")
                 if end_time > now and guild_id:
-                    if eff["effect_key"] == "zomb":
-                        self.active_zombie[user_id] = guild_id
-                    elif eff["effect_key"] == "rename":
-                        self.active_rename[user_id] = {"guild_id": guild_id, "nick": eff.get("forced_nick"), "use_webhook": False}
-                    elif eff["effect_key"] == "mute":
-                        self.active_mute[user_id] = {"guild_id": guild_id, "end_time": end_time}
+                    key = eff["effect_key"]
+                    if key == "zomb":
+                        self.active_effects["zomb"][user_id] = guild_id
+                    elif key == "rename":
+                        self.active_effects["rename"][user_id] = {"guild_id": guild_id,
+                                                                  "nick": eff.get("forced_nick"),
+                                                                  "use_webhook": False}
+                    elif key == "mute":
+                        self.active_effects["mute"][user_id] = {"guild_id": guild_id, "end_time": end_time}
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
+    # 🔹 Commandes
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="reiatsushop", description="Affiche le shop et achète des effets")
     async def slash_reiatsushop(self, interaction: discord.Interaction, effect: str = None,
                                  member: discord.Member = None, new_nick: str = None):
         await self.handle_shop(interaction, effect, member, new_nick, is_slash=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="reiatsushop", aliases=["rtsshop"])
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_reiatsushop(self, ctx: commands.Context, effect: str = None,
@@ -82,33 +86,37 @@ class ReiatsuShop(commands.Cog):
         await self.handle_shop(ctx, effect, member, new_nick, is_slash=False)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Handler commun pour slash et prefix
+    # 🔹 Handler commun
     # ────────────────────────────────────────────────────────────────────────────
     async def handle_shop(self, ctx_or_inter, effect, member, new_nick, is_slash: bool):
         send_func = safe_respond if is_slash else safe_send
         user = ctx_or_inter.user if is_slash else ctx_or_inter.author
 
+        # Affichage du shop
         if not effect or not member:
-            embed = discord.Embed(title="💸 ReiatsuShop",
-                                  description="Voici les objets disponibles :" if is_slash else
-                                  "Voici les objets disponibles :\n💡 Pour acheter : `!!reiatsushop <zomb|mute|rename> @membre [nouveau pseudo]`",
-                                  color=discord.Color.gold())
+            embed = discord.Embed(
+                title="💸 ReiatsuShop",
+                description="Voici les objets disponibles :" if is_slash else
+                            "Voici les objets disponibles :\n💡 Pour acheter : `!!reiatsushop <zomb|mute|rename> @membre [nouveau pseudo]`",
+                color=discord.Color.gold()
+            )
             for item in self.shop_items.values():
-                embed.add_field(name=f"{item['emoji']} **{item['name']}** — `{item['price']} reiatsu`",
-                                value=f"🕒 Durée : `{self.format_duration(item['duration'])}`\n💬 {item['description']}",
-                                inline=False)
+                embed.add_field(
+                    name=f"{item['emoji']} **{item['name']}** — `{item['price']} reiatsu`",
+                    value=f"🕒 Durée : `{self.format_duration(item['duration'])}`\n💬 {item['description']}",
+                    inline=False
+                )
             await send_func(ctx_or_inter, embed=embed)
             return
 
+        # Validation
         effect = effect.lower()
         if effect not in ["zomb", "mute", "rename"]:
             await send_func(ctx_or_inter, "❌ Effet invalide. Choisis `zomb`, `mute` ou `rename`.",
-                            ephemeral=is_slash if is_slash else False)
+                            ephemeral=is_slash)
             return
-
         if effect == "rename" and not new_nick:
-            await send_func(ctx_or_inter, "❌ Pour rename, indique le nouveau pseudo.",
-                            ephemeral=is_slash if is_slash else False)
+            await send_func(ctx_or_inter, "❌ Pour rename, indique le nouveau pseudo.", ephemeral=is_slash)
             return
 
         profile = ensure_profile(user.id, user.display_name)
@@ -116,8 +124,7 @@ class ReiatsuShop(commands.Cog):
         item = self.shop_items[item_key]
 
         if profile.get("points", 0) < item["price"]:
-            await send_func(ctx_or_inter, f"❌ Pas assez de reiatsu pour **{item['name']}** !",
-                            ephemeral=is_slash if is_slash else False)
+            await send_func(ctx_or_inter, f"❌ Pas assez de reiatsu pour **{item['name']}** !", ephemeral=is_slash)
             return
 
         # Débit des points
@@ -134,7 +141,7 @@ class ReiatsuShop(commands.Cog):
         await send_func(ctx_or_inter, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Appliquer un effet et stocker en DB
+    # 🔹 Application des effets
     # ────────────────────────────────────────────────────────────────────────────
     async def apply_effect(self, member: discord.Member, effect: str, guild_id: int, new_nick: str = None):
         item = self.shop_items[{"zomb": "zombification", "mute": "mute_temp", "rename": "rename_2j"}[effect]]
@@ -152,110 +159,117 @@ class ReiatsuShop(commands.Cog):
         effects.append(effect_data)
         supabase.table("reiatsu").update({"shop_effets": effects}).eq("user_id", member.id).execute()
 
-        # Mise à jour mémoire
+        # Application en mémoire et Discord
         if effect == "zomb":
-            self.active_zombie[member.id] = guild_id
-        elif effect == "rename" and new_nick:
-            self.active_rename[member.id] = {"guild_id": guild_id, "nick": new_nick, "use_webhook": False}
-            try:
-                await member.edit(nick=new_nick)
-            except:
-                self.active_rename[member.id]["use_webhook"] = True
+            self.active_effects["zomb"][member.id] = guild_id
+        elif effect == "rename":
+            self.active_effects["rename"][member.id] = {"guild_id": guild_id, "nick": new_nick, "use_webhook": False}
+            await self._apply_rename(member, new_nick)
         elif effect == "mute":
-            if member.guild.me.guild_permissions.moderate_members:
-                try:
-                    await member.timeout(item["duration"])
-                except discord.Forbidden:
-                    # fallback
-                    self.active_mute[member.id] = {"guild_id": guild_id, "end_time": end_time}
-            else:
-                # fallback
-                self.active_mute[member.id] = {"guild_id": guild_id, "end_time": end_time}
+            await self._apply_mute(member, item["duration"], guild_id, end_time)
 
-        async def remove_effect():
-            await asyncio.sleep(item["duration"])
-            self.active_zombie.pop(member.id, None)
-            self.active_rename.pop(member.id, None)
-            self.active_mute.pop(member.id, None)
-
-            profile = ensure_profile(member.id, member.display_name)
-            effects = profile.get("shop_effets") or []
-            effects = [e for e in effects if e["effect_key"] != effect or datetime.datetime.fromisoformat(e["end_time"]) > datetime.datetime.utcnow()]
-            supabase.table("reiatsu").update({"shop_effets": effects}).eq("user_id", member.id).execute()
-
-        asyncio.create_task(remove_effect())
+        # Supprimer automatiquement après la durée
+        asyncio.create_task(self._remove_effect_after(member.id, effect, item["duration"]))
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Listener unique pour messages et fallback
+    # 🔹 Helpers internes pour effets
+    # ────────────────────────────────────────────────────────────────────────────
+    async def _apply_rename(self, member: discord.Member, new_nick: str):
+        try:
+            await member.edit(nick=new_nick)
+        except discord.Forbidden:
+            self.active_effects["rename"][member.id]["use_webhook"] = True
+
+    async def _apply_mute(self, member: discord.Member, duration: int, guild_id: int, end_time: datetime.datetime):
+        if member.guild.me.guild_permissions.moderate_members:
+            try:
+                await member.timeout(datetime.timedelta(seconds=duration))
+            except discord.Forbidden:
+                self.active_effects["mute"][member.id] = {"guild_id": guild_id, "end_time": end_time}
+        else:
+            self.active_effects["mute"][member.id] = {"guild_id": guild_id, "end_time": end_time}
+
+    async def _remove_effect_after(self, user_id: int, effect: str, duration: int):
+        await asyncio.sleep(duration)
+        self.active_effects["zomb"].pop(user_id, None)
+        self.active_effects["rename"].pop(user_id, None)
+        self.active_effects["mute"].pop(user_id, None)
+
+        profile = ensure_profile(user_id, "")
+        effects = profile.get("shop_effets") or []
+        now = datetime.datetime.utcnow()
+        effects = [e for e in effects if e["effect_key"] != effect or datetime.datetime.fromisoformat(e["end_time"]) > now]
+        supabase.table("reiatsu").update({"shop_effets": effects}).eq("user_id", user_id).execute()
+
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Listeners pour fallback et effets actifs
     # ────────────────────────────────────────────────────────────────────────────
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
 
+        guild_id = message.guild.id
+        user_id = message.author.id
+
         # Mute fallback
-        mute_data = self.active_mute.get(message.author.id)
-        if mute_data and mute_data["guild_id"] == message.guild.id:
+        mute_data = self.active_effects["mute"].get(user_id)
+        if mute_data and mute_data["guild_id"] == guild_id:
             await message.delete()
             return
 
-        # Zomb effect
-        if self.active_zombie.get(message.author.id) == message.guild.id:
+        # Zombification
+        if self.active_effects["zomb"].get(user_id) == guild_id:
             if not message.content.startswith(("!!", "$", "dun", "Dun")) and random.randint(1, 3) == 1:
-                webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
-                try:
-                    await webhook.send(username=message.author.display_name,
-                                       avatar_url=message.author.display_avatar.url,
-                                       content=message.content + " arrrg cerveau...")
-                finally:
-                    await webhook.delete()
+                await self._send_webhook(message, message.content + " arrrg cerveau...")
                 await message.delete()
-                return
 
-        # Rename fallback via webhook
-        data = self.active_rename.get(message.author.id)
-        if data and data["guild_id"] == message.guild.id and data.get("use_webhook"):
-            webhook = await message.channel.create_webhook(name=data["nick"])
-            try:
-                await webhook.send(username=data["nick"],
-                                   avatar_url=message.author.display_avatar.url,
-                                   content=message.content)
-            finally:
-                await webhook.delete()
+        # Rename fallback
+        rename_data = self.active_effects["rename"].get(user_id)
+        if rename_data and rename_data["guild_id"] == guild_id and rename_data.get("use_webhook"):
+            await self._send_webhook(message, message.content, username=rename_data["nick"])
             await message.delete()
 
     @commands.Cog.listener()
-    async def on_member_update(self, before, after):
-        data = self.active_rename.get(after.id)
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        data = self.active_effects["rename"].get(after.id)
         if data and data["guild_id"] == after.guild.id and after.display_name != data["nick"]:
             if not data.get("use_webhook"):
                 try:
                     await after.edit(nick=data["nick"])
                 except:
-                    self.active_rename[after.id]["use_webhook"] = True
+                    self.active_effects["rename"][after.id]["use_webhook"] = True
+
+    async def _send_webhook(self, message: discord.Message, content: str, username: str = None):
+        webhook = await message.channel.create_webhook(name=username or f"tmp-{message.author.name}")
+        try:
+            await webhook.send(username=username or message.author.display_name,
+                               avatar_url=message.author.display_avatar.url,
+                               content=content)
+        finally:
+            await webhook.delete()
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Nettoyer les effets expirés périodiquement
+    # 🔹 Nettoyage périodique
     # ────────────────────────────────────────────────────────────────────────────
     @tasks.loop(minutes=5)
     async def clean_expired_effects(self):
         now = datetime.datetime.utcnow()
         res = supabase.table("reiatsu").select("user_id, shop_effets").execute()
+
         for profile in res.data:
             user_id = int(profile["user_id"])
             effects = profile.get("shop_effets") or []
             new_effects = []
+
             for e in effects:
                 end_time = datetime.datetime.fromisoformat(e["end_time"])
                 if end_time > now:
                     new_effects.append(e)
                 else:
-                    if e["effect_key"] == "zomb":
-                        self.active_zombie.pop(user_id, None)
-                    elif e["effect_key"] == "rename":
-                        self.active_rename.pop(user_id, None)
-                    elif e["effect_key"] == "mute":
-                        self.active_mute.pop(user_id, None)
+                    key = e["effect_key"]
+                    self.active_effects[key].pop(user_id, None)
+
             if len(new_effects) != len(effects):
                 supabase.table("reiatsu").update({"shop_effets": new_effects}).eq("user_id", user_id).execute()
 
@@ -266,11 +280,10 @@ class ReiatsuShop(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Helper pour formater la durée
     # ────────────────────────────────────────────────────────────────────────────
-    def format_duration(self, seconds):
+    def format_duration(self, seconds: int) -> str:
         days, remainder = divmod(seconds, 86400)
         hours, _ = divmod(remainder, 3600)
-        parts = [f"{days}j" if days else "", f"{hours}h" if hours else ""]
-        return " ".join(filter(None, parts)) or "0h"
+        return " ".join(filter(None, [f"{days}j" if days else "", f"{hours}h" if hours else ""])) or "0h"
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
