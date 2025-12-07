@@ -30,6 +30,7 @@ class ReiatsuShop(commands.Cog):
         # Effets actifs en mémoire
         self.active_zombie = {}  # {user_id: guild_id}
         self.active_rename = {}  # {user_id: {"guild_id": int, "nick": str, "use_webhook": bool}}
+        self.active_mute = {}    # {user_id: {"guild_id": int, "end_time": datetime}}
 
         # Shop items
         self.shop_items = {
@@ -60,6 +61,8 @@ class ReiatsuShop(commands.Cog):
                         self.active_zombie[user_id] = guild_id
                     elif eff["effect_key"] == "rename":
                         self.active_rename[user_id] = {"guild_id": guild_id, "nick": eff.get("forced_nick"), "use_webhook": False}
+                    elif eff["effect_key"] == "mute":
+                        self.active_mute[user_id] = {"guild_id": guild_id, "end_time": end_time}
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -160,12 +163,20 @@ class ReiatsuShop(commands.Cog):
                 self.active_rename[member.id]["use_webhook"] = True
         elif effect == "mute":
             if member.guild.me.guild_permissions.moderate_members:
-                await member.timeout(item["duration"])
+                try:
+                    await member.timeout(item["duration"])
+                except discord.Forbidden:
+                    # fallback
+                    self.active_mute[member.id] = {"guild_id": guild_id, "end_time": end_time}
+            else:
+                # fallback
+                self.active_mute[member.id] = {"guild_id": guild_id, "end_time": end_time}
 
         async def remove_effect():
             await asyncio.sleep(item["duration"])
             self.active_zombie.pop(member.id, None)
             self.active_rename.pop(member.id, None)
+            self.active_mute.pop(member.id, None)
 
             profile = ensure_profile(member.id, member.display_name)
             effects = profile.get("shop_effets") or []
@@ -175,11 +186,17 @@ class ReiatsuShop(commands.Cog):
         asyncio.create_task(remove_effect())
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Listener unique pour messages et rename fallback
+    # 🔹 Listener unique pour messages et fallback
     # ────────────────────────────────────────────────────────────────────────────
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
+            return
+
+        # Mute fallback
+        mute_data = self.active_mute.get(message.author.id)
+        if mute_data and mute_data["guild_id"] == message.guild.id:
+            await message.delete()
             return
 
         # Zomb effect
@@ -237,6 +254,8 @@ class ReiatsuShop(commands.Cog):
                         self.active_zombie.pop(user_id, None)
                     elif e["effect_key"] == "rename":
                         self.active_rename.pop(user_id, None)
+                    elif e["effect_key"] == "mute":
+                        self.active_mute.pop(user_id, None)
             if len(new_effects) != len(effects):
                 supabase.table("reiatsu").update({"shop_effets": new_effects}).eq("user_id", user_id).execute()
 
