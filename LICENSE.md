@@ -1,7 +1,7 @@
 Creative Commons Attribution-NonCommercial 4.0 International  
 (CC BY-NC 4.0)
 
-Copyright (c) 2025 KevinRaphael95
+Copyright (c) 2025 kevinraphael95
 
 # You are free to:
 • Share — copy and redistribute the material in any medium or format.  
