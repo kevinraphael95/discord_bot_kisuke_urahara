@@ -1,8 +1,6 @@
 # Installer avec Render, Supabase et Self-Ping
 
----
-
-## 1️⃣ Discord
+# 1️⃣ Discord
 
 1. [Discord Developer Portal](https://discord.com/developers/applications) → **New Application**
 2. Note **APPLICATION ID**
@@ -12,7 +10,7 @@
 
 ---
 
-## 2️⃣ Supabase
+# 2️⃣ Supabase
 
 1. Crée un projet sur [Supabase](https://supabase.com/)
 2. Crée les tables via [LES SCRIPTS SQL](SQL_des_tables_supabase.md)
@@ -23,7 +21,7 @@
 
 ---
 
-## 3️⃣ Webhook de redeploy Render
+# 3️⃣ Webhook de redeploy Render
 
 1. Render → ton service → **Settings → Build & Deploy → Deploy Hooks → Create Deploy Hook**
 2. Copie l’URL → ce sera `RENDER_REDEPLOY_WEBHOOK` dans le `.env`
@@ -32,7 +30,7 @@
 
 ---
 
-## 4️⃣ Fichier `.env`
+# 4️⃣ Fichier `.env`
 
 ```env
 # --- Discord ---
@@ -59,7 +57,7 @@ RENDER_REDEPLOY_WEBHOOK=https://api.render.com/deploy/srv-xxxxxx?key=yyyyyyyy
 
 ---
 
-## 5️⃣ Déployer sur Render
+# 5️⃣ Déployer sur Render
 
 1. Render → **New → Web Service** → dépôt GitHub
 2. Plan gratuit
