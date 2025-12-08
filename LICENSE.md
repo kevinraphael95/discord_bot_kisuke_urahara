@@ -1,4 +1,4 @@
-# Creative Commons Attribution-NonCommercial 4.0 International  
+Creative Commons Attribution-NonCommercial 4.0 International  
 (CC BY-NC 4.0)
 
 Copyright (c) 2025 KevinRaphael95
