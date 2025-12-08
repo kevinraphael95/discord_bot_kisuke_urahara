@@ -17,5 +17,3 @@ Il propose des jeux, des commandes utilitaires, un système de collecte de Reiat
 Ce projet est sous licence **[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/)**.
 > Exemple d’attribution :  
 > « Matériel par kevinraphael95, sous licence CC BY-NC-SA 4.0 »
-
-Le matériel est fourni « TEL QUEL », sans aucune garantie.
