@@ -1,4 +1,4 @@
-data/images/kisuke.jpg
+![Kisuke](data/images/kisuke.jpg)
 
 # ⚡ Kisuke Urahara : Bot Discord
 
