@@ -15,7 +15,7 @@ Il propose des jeux, des commandes utilitaires, un système de collecte de Reiat
 - **Reiatsu** : minijeu de collecte de Reiatsu  
 - **Voiture** : mini-jeux avec des voitures
 
-La liste complète des commandes est disponible dans :  
+La liste complète des commandes est disponible ici :  
 [docs/Liste_des_Commandes.md](docs/Liste_des_Commandes.md)
 
 ## ⚙️ Installation
