@@ -2,9 +2,7 @@
 
 Copier-coller le code ci-dessous dans SQL Editor pour créer toutes les tables nécessaires.
 
----
-
-## 1️⃣ Table `bot_lock`
+# 1️⃣ Table `bot_lock`
 
 ```sql
 CREATE TABLE public.bot_lock (
@@ -17,7 +15,7 @@ CREATE TABLE public.bot_lock (
 
 ---
 
-## 2️⃣ Table `bot_settings`
+# 2️⃣ Table `bot_settings`
 
 ```sql
 CREATE TABLE public.bot_settings (
@@ -29,7 +27,7 @@ CREATE TABLE public.bot_settings (
 
 ---
 
-## 3️⃣ Table `reiatsu`
+# 3️⃣ Table `reiatsu`
 
 ```sql
 CREATE TABLE public.reiatsu (
@@ -48,7 +46,7 @@ CREATE TABLE public.reiatsu (
 
 ---
 
-## 4️⃣ Table `reiatsu_config`
+# 4️⃣ Table `reiatsu_config`
 
 ```sql
 CREATE TABLE public.reiatsu_config (
@@ -64,7 +62,7 @@ CREATE TABLE public.reiatsu_config (
 
 ---
 
-## 5️⃣ Table `steam_keys`
+# 5️⃣ Table `steam_keys`
 
 ```sql
 CREATE TABLE public.steam_keys (
@@ -78,7 +76,7 @@ CREATE TABLE public.steam_keys (
 
 ---
 
-## 6️⃣ Table `gardens`
+# 6️⃣ Table `gardens`
 
 ```sql
 CREATE TABLE public.gardens (
