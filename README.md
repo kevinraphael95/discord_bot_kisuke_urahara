@@ -14,6 +14,13 @@ Il propose des jeux, des commandes utilitaires, un système de collecte de Reiat
 - **Jeux** : minijeux random  
 - **Reiatsu** : minijeu de collecte de Reiatsu  
 - **Voiture** : mini-jeux avec des voitures
+
+## ⚙️ Installation
+
+Ce bot est conçu pour être installé et exécuté avec **Render** et **Supabase**.  
+Pour les instructions complètes d’installation, configuration et déploiement, consultez le fichier :  
+[docs/Installation avec Render et Supabase.md](docs/Installation%20avec%20Render%20et%20Supabase.md)
+
 ## Licence
 
 Ce projet est sous licence **[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/)**.
