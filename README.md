@@ -1,6 +1,6 @@
 ![Kisuke](data/images/kisuke.jpg)
 
-# ⚡ Kisuke Urahara : Bot Discord
+# ⚡ Kisuke Urahara
 
 **Kisuke Urahara** est un bot Discord multifonction inspiré de Bleach.  
 Il propose des jeux, des commandes utilitaires, un système de collecte de Reiatsu et d'autres choses !
