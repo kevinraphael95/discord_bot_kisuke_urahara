@@ -20,7 +20,7 @@ La liste complète des commandes est disponible ici :
 
 ## ⚙️ Installation
 
-Ce bot est conçu pour être installé et exécuté avec **Render** et **Supabase**.  
+Ce bot est conçu pour être déplkoyé et utilisé avec **Render** et **Supabase**.  
 Pour les instructions complètes d’installation, configuration et déploiement, consultez le fichier :  
 [docs/Installation avec Render et Supabase.md](docs/Installation%20avec%20Render%20et%20Supabase.md)
 
