@@ -1,4 +1,4 @@
-Creative Commons Attribution-NonCommercial 4.0 International  
+# Creative Commons Attribution-NonCommercial 4.0 International  
 (CC BY-NC 4.0)
 
 Copyright (c) 2025 KevinRaphael95
@@ -20,7 +20,7 @@ Copyright (c) 2025 KevinRaphael95
    You may not apply legal terms or technological measures that legally 
    restrict others from doing anything the license permits.
 
-Disclaimer:  
+# Disclaimer:  
 The material is provided “AS IS”, without warranty of any kind, express or 
 implied. The licensor shall not be liable for any damages arising from the 
 use of the material.
