@@ -13,8 +13,6 @@ CREATE TABLE public.bot_lock (
 ) TABLESPACE pg_default;
 ```
 
----
-
 # 2️⃣ Table `bot_settings`
 
 ```sql
@@ -24,8 +22,6 @@ CREATE TABLE public.bot_settings (
     CONSTRAINT bot_settings_pkey PRIMARY KEY (key)
 ) TABLESPACE pg_default;
 ```
-
----
 
 # 3️⃣ Table `reiatsu`
 
@@ -44,8 +40,6 @@ CREATE TABLE public.reiatsu (
 ) TABLESPACE pg_default;
 ```
 
----
-
 # 4️⃣ Table `reiatsu_config`
 
 ```sql
@@ -60,8 +54,6 @@ CREATE TABLE public.reiatsu_config (
 ) TABLESPACE pg_default;
 ```
 
----
-
 # 5️⃣ Table `steam_keys`
 
 ```sql
@@ -73,8 +65,6 @@ CREATE TABLE public.steam_keys (
     CONSTRAINT steam_keys_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 ```
-
----
 
 # 6️⃣ Table `gardens`
 
