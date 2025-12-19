@@ -20,6 +20,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **kido :** Affiche un Kido précis, aléatoire ou la liste paginée.
 - **kluboutside :** Affiche une question de la FAQ du Klub Outside.
 - **perso :** Affiche la fiche d'un personnage Bleach.
+- **rpg :** Pas de description.
 - **scans :** 📖 Lire un scan de Bleach.
 - **shifumi :** Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.
 - **ship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
@@ -43,6 +44,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 
 ### 📂 Jeux
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
+- **capitales :** Devine la capitale d'un pays
 - **compte_est_bon :** Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)
 - **course_animal :** Pas de description.
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
@@ -57,7 +59,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
 - **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
 - **pendu :** Démarre une partie du jeu du pendu.
-- **portes :** Pas de description.
+- **pressing :** Pas de description.
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
 - **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
 
