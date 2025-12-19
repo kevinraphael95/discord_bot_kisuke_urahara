@@ -32,7 +32,7 @@ class TestTache(commands.Cog):
     # ───────────────────────────────────────────────────────────────
     @app_commands.command(
         name="testtache",
-        description="🕹️ Teste toutes les tâches interactives dynamiquement."
+        description="🕹️ Teste toutes les épreuves pour la commandes hollow."
     )
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_testtache(self, interaction: discord.Interaction):
@@ -87,7 +87,7 @@ class TestTache(commands.Cog):
     # ───────────────────────────────────────────────────────────────
     # 🔹 PREFIX COMMAND
     # ───────────────────────────────────────────────────────────────
-    @commands.command(name="testtache")
+    @commands.command(name="testtache", help = "🕹️ Teste toutes les épreuves pour la commandes hollow.")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_testtache(self, ctx: commands.Context):
 
