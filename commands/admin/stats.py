@@ -90,7 +90,7 @@ class Stats(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="stats")
+    @commands.command(name="stats", help="Affiche les statistiques du bot (admin uniquement).")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_stats(self, ctx: commands.Context):
         if not ctx.author.guild_permissions.administrator:
