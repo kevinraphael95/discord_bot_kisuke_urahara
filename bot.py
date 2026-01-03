@@ -103,11 +103,12 @@ async def verify_lock_loop():
         try:
             lock = supabase.table("bot_lock").select("instance_id").eq("id", "bot_lock").execute()
             if lock.data and lock.data[0]["instance_id"] != INSTANCE_ID:
-                print("🔴 Cette instance n'est plus maître. Déconnexion...")
-                await bot.close()
-                os._exit(0)
+                print("🔴 Cette instance n'est plus maître. Fermeture propre du bot...")
+                await bot.close()  # Ferme le bot correctement
+                break  # Quitte la boucle sans tuer Python brutalement
         except Exception as e:
             print(f"⚠️ Erreur dans la vérification du verrou (ignorée) : {e}")
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔔 On Ready : présence + verrouillage + surveillance
@@ -201,6 +202,7 @@ if __name__ == "__main__":
         await bot.start(TOKEN)
 
     asyncio.run(start())
+
 
 
 
