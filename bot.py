@@ -6,18 +6,9 @@
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🟢 Serveur Keep-Alive (Render)
-# ────────────────────────────────────────────────────────────────────────────────
-from tasks.keep_alive import keep_alive
-
-# ────────────────────────────────────────────────────────────────────────────────
 # 📦 Modules standards
 # ────────────────────────────────────────────────────────────────────────────────
 import os
-import json
-import uuid
-import random
-from datetime import datetime, timezone
 import asyncio
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -26,7 +17,6 @@ import asyncio
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from dateutil import parser
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Modules internes
@@ -42,10 +32,6 @@ load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
-INSTANCE_ID = str(uuid.uuid4())
-
-with open("instance_id.txt", "w") as f:
-    f.write(INSTANCE_ID)
 
 def get_prefix(bot, message):
     return COMMAND_PREFIX
@@ -60,9 +46,12 @@ intents.members = True
 intents.guild_reactions = True
 intents.dm_reactions = True
 
-bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=None)
-bot.is_main_instance = False
-bot.INSTANCE_ID = INSTANCE_ID
+bot = commands.Bot(
+    command_prefix=get_prefix,
+    intents=intents,
+    help_command=None
+)
+
 bot.supabase = supabase
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -86,7 +75,7 @@ async def load_commands():
 # ────────────────────────────────────────────────────────────────────────────────
 async def load_tasks():
     for filename in os.listdir("tasks"):
-        if filename.endswith(".py") and filename != "keep_alive.py":
+        if filename.endswith(".py"):
             path = f"tasks.{filename[:-3]}"
             try:
                 await bot.load_extension(path)
@@ -95,43 +84,17 @@ async def load_tasks():
                 print(f"❌ Failed to load task {path}: {e}")
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔁 Tâche de vérification continue du verrou
-# ────────────────────────────────────────────────────────────────────────────────
-async def verify_lock_loop():
-    while True:
-        await asyncio.sleep(10)
-        try:
-            lock = supabase.table("bot_lock").select("instance_id").eq("id", "bot_lock").execute()
-            if lock.data and lock.data[0]["instance_id"] != INSTANCE_ID:
-                print("🔴 Cette instance n'est plus maître. Déconnexion...")
-                await bot.close()
-                os._exit(0)
-        except Exception as e:
-            print(f"⚠️ Erreur dans la vérification du verrou (ignorée) : {e}")
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 🔔 On Ready : présence + verrouillage + surveillance
+# 🔔 On Ready : présence
 # ────────────────────────────────────────────────────────────────────────────────
 @bot.event
 async def on_ready():
     print(f"✅ Connecté en tant que {bot.user.name}")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Bleach"))
-
-    try:
-        now = datetime.now(timezone.utc).isoformat()
-        supabase.table("bot_lock").upsert({
-            "id": "bot_lock",
-            "instance_id": INSTANCE_ID,
-            "updated_at": now
-        }).execute()
-
-        print(f"🔐 Verrou mis à jour pour cette instance : {INSTANCE_ID}")
-        bot.is_main_instance = True
-        bot.loop.create_task(verify_lock_loop())
-    except Exception as e:
-        print(f"⚠️ Impossible de se connecter à Supabase : {e}")
-        print("🔓 Aucune gestion de verrou — le bot démarre quand même.")
-        bot.is_main_instance = True
+    await bot.change_presence(
+        activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name="Bleach"
+        )
+    )
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📩 Message reçu : réagir aux mots-clés et lancer les commandes
@@ -141,26 +104,17 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    try:
-        lock = supabase.table("bot_lock").select("instance_id").eq("id", "bot_lock").execute()
-        if lock.data and isinstance(lock.data, list):
-            if lock.data and lock.data[0].get("instance_id") != INSTANCE_ID:
-                return
-    except Exception as e:
-        print(f"⚠️ Erreur lors de la vérification du lock (ignorée) : {e}")
-
-    if message.content.strip() in [f"<@!{bot.user.id}>", f"<@{bot.user.id}>"]:
+    if message.content.strip() in (f"<@{bot.user.id}>", f"<@!{bot.user.id}>"):
         prefix = get_prefix(bot, message)
         embed = discord.Embed(
             title="Coucou !",
             description=(
                 f"Bonjour ! Je suis **Kisuke Urahara**, un bot discord inspiré du manga Bleach.\n"
                 f"• Utilise la commande `{prefix}help` pour avoir la liste des commandes du bot "
-                f"ou `{prefix}help + le nom d'une commande` pour en avoir une description."
+                f"ou `{prefix}help <commande>` pour en avoir une description."
             ),
             color=discord.Color.red()
         )
-        embed.set_footer(text="123")
 
         if bot.user.avatar:
             embed.set_thumbnail(url=bot.user.avatar.url)
@@ -193,7 +147,6 @@ async def on_command_error(ctx, error):
 # 🚀 Lancement
 # ────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    keep_alive()  # lance Flask + self-ping
 
     async def start():
         await load_commands()
@@ -201,5 +154,3 @@ if __name__ == "__main__":
         await bot.start(TOKEN)
 
     asyncio.run(start())
-
-
