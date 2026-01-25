@@ -2,16 +2,13 @@ Liste des Commandes
 
 ### 📂 Admin
 - **commandslist :** Génère un .md avec toutes les commandes et les envoie en fichier.
-- **heartbeat :** (Admin) Gère le heartbeat : pause, resume, status, set, unset.
 - **kisukevol :** 🌀 Kisuke vole 10% du Reiatsu d’un membre comme un joueur normal.
-- **re :** (Admin) Préviens les membres et redémarre le bot via Render.
 - **reiatsuadmin :** (Admin) Gère le Reiatsu : set, unset, change, spawn, speed.
 - **say_as :** (Admin) Fait répéter un message par le bot comme si c'était un autre membre.
 Usage: !say_as <mention|id|pseudo> <message>
-- **stats :** Pas de description.
-- **sync :** Commande préfixe pour synchroniser les commandes (guild ou global).
+- **sync :** Synchronise les commandes slash (serveur ou global).
 - **testgame :** Tester un mini-jeu via son numéro ou 'all'.
-- **testtache :** Pas de description.
+- **testtache :** 🕹️ Teste toutes les épreuves pour la commandes hollow.
 
 ### 📂 Bleach
 - **bmoji :** Devine quel personnage Bleach se cache derrière ces emojis.
@@ -30,7 +27,6 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **calc :** Calculatrice scientifique interactive
 - **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
 - **gay :** 🌈 Calcule ton taux de gaytitude.
-- **gpt :** ChatGPT mais en nul et qui ne fonctionne presque pas.
 - **pizza :** 🍕 Génère une pizza aléatoire.
 - **sorting :** Trie 12 barres en longueurs différentes selon un algorithme.
 - **tortues :** Participe à une course de tortues avec tes amis ! 🐢
@@ -38,12 +34,11 @@ Usage: !say_as <mention|id|pseudo> <message>
 ### 📂 Général
 - **code :** Affiche un lien vers le code source du bot.
 - **emoji :** Montre un ou plusieurs emojis du serveur ou de tous les serveurs.
-- **help :** Affiche la liste des commandes ou une commande spécifique.
+- **help :** Affiche l’aide du bot.
 - **react :** Réagit à un message avec un ou plusieurs emojis.
 - **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
 
 ### 📂 Jeux
-- **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
 - **capitales :** Devine la capitale d'un pays
 - **compte_est_bon :** Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)
 - **course_animal :** Pas de description.
@@ -55,9 +50,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **jardin2 :** Pas de description.
 - **lightsout :** Pas de description.
 - **mastermind :** Jouer au Mastermind interactif.
-- **mot_contraint :** Jeu : trouve un mot qui commence et finit par des lettres données.
 - **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
-- **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
 - **pendu :** Démarre une partie du jeu du pendu.
 - **pressing :** Pas de description.
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
