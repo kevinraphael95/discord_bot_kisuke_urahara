@@ -16,15 +16,19 @@ from discord.ext import commands
 from discord.ui import View, Button
 import json
 import os
+import sqlite3
 from datetime import datetime, timezone
 
-from utils.supabase_client import supabase
 from utils.discord_utils import safe_send, safe_respond, safe_edit
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Chargement de la configuration Reiatsu
 # ────────────────────────────────────────────────────────────────────────────────
 REIATSU_CONFIG_PATH = os.path.join("data", "reiatsu_config.json")
+DB_PATH = os.path.join("database", "reiatsu.db")
+
+def get_conn():
+    return sqlite3.connect(DB_PATH)
 
 def load_reiatsu_config():
     """Charge la configuration Reiatsu depuis le fichier JSON."""
@@ -52,13 +56,23 @@ class ClasseSelectView(View):
     async def check_active_skill(self):
         """Vérifie si le joueur a un skill actif et calcule le temps restant."""
         try:
-            res = supabase.table("reiatsu").select("active_skill", "last_skilled_at", "steal_cd").eq("user_id", str(self.user_id)).execute()
-            if res.data and res.data[0].get("active_skill"):
+            with get_conn() as conn:
+                cur = conn.cursor()
+                cur.execute(
+                    "SELECT active_skill, last_skilled_at, steal_cd FROM reiatsu WHERE user_id = ?",
+                    (self.user_id,)
+                )
+                row = cur.fetchone()
+
+            if row and row[0]:
                 self.skill_actif = True
-                last_skilled = res.data[0].get("last_skilled_at")
-                cd = res.data[0].get("steal_cd") or 0
+                last_skilled = row[1]
+                cd = row[2] or 0
                 if last_skilled:
-                    elapsed = (datetime.now(timezone.utc) - datetime.fromisoformat(last_skilled)).total_seconds()
+                    elapsed = (
+                        datetime.now(timezone.utc) -
+                        datetime.fromisoformat(last_skilled)
+                    ).total_seconds()
                     self.skill_remaining = max(0, int(cd - elapsed))
         except Exception as e:
             print(f"[ERREUR] Impossible de vérifier active_skill : {e}")
@@ -79,10 +93,18 @@ class ClasseSelectView(View):
 
             # Vérifier si le skill est actif
             try:
-                res = supabase.table("reiatsu").select("active_skill").eq("user_id", str(self.user_id)).execute()
-                if res.data and res.data[0].get("active_skill"):
+                with get_conn() as conn:
+                    cur = conn.cursor()
+                    cur.execute(
+                        "SELECT active_skill FROM reiatsu WHERE user_id = ?",
+                        (self.user_id,)
+                    )
+                    row = cur.fetchone()
+
+                if row and row[0]:
                     await safe_respond(interaction, "❌ Tu ne peux pas changer de classe pendant qu’un skill est actif.", ephemeral=True)
                     return
+
             except Exception as e:
                 await safe_respond(interaction, f"❌ Erreur lors de la vérification du skill actif : {e}", ephemeral=True)
                 return
@@ -90,10 +112,14 @@ class ClasseSelectView(View):
             # Changement de classe
             try:
                 nouveau_cd = 19 if nom == "Voleur" else 24
-                supabase.table("reiatsu").update({
-                    "classe": nom,
-                    "steal_cd": nouveau_cd
-                }).eq("user_id", str(self.user_id)).execute()
+
+                with get_conn() as conn:
+                    cur = conn.cursor()
+                    cur.execute(
+                        "UPDATE reiatsu SET classe = ?, steal_cd = ? WHERE user_id = ?",
+                        (nom, nouveau_cd, self.user_id)
+                    )
+                    conn.commit()
 
                 symbole = data.get("Symbole", "🌀")
                 embed = discord.Embed(
@@ -135,7 +161,6 @@ class ChoisirClasse(commands.Cog):
         view = ClasseSelectView(user_id)
         await view.check_active_skill()
 
-        # Si le skill est actif, désactiver les boutons
         if view.skill_actif:
             for item in view.children:
                 item.disabled = True
