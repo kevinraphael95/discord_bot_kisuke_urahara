@@ -16,8 +16,8 @@ from dateutil import parser
 from datetime import datetime, timedelta, timezone
 import os
 import json
+import sqlite3
 
-from utils.supabase_client import supabase
 from utils.discord_utils import safe_send, safe_respond
 from utils.reiatsu_utils import ensure_profile  # ✅ Ajout pour auto-création profil
 
@@ -25,6 +25,10 @@ from utils.reiatsu_utils import ensure_profile  # ✅ Ajout pour auto-création 
 # 📂 Chargement des classes depuis JSON
 # ────────────────────────────────────────────────────────────────────────────────
 CONFIG_JSON_PATH = os.path.join("data", "reiatsu_config.json")
+DB_PATH = os.path.join("database", "reiatsu.db")
+
+def get_conn():
+    return sqlite3.connect(DB_PATH)
 
 def load_classes():
     try:
@@ -54,29 +58,27 @@ class ReiatsuProfil(commands.Cog):
         # ✅ Création automatique du profil si inexistant
         ensure_profile(user_id, user.name)
 
-        # Récupération des données Reiatsu
+        # Récupération des données Reiatsu depuis SQLite
         try:
-            res = supabase.table("reiatsu").select(
-                "username, points, bonus5, classe, last_steal_attempt, steal_cd, last_skilled_at, active_skill, niveau"
-            ).eq("user_id", user_id).execute()
+            with get_conn() as conn:
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT username, points, bonus5, classe, last_steal_attempt,
+                           steal_cd, last_skilled_at, active_skill, niveau
+                    FROM reiatsu WHERE user_id = ?
+                """, (user_id,))
+                row = cur.fetchone()
         except Exception as e:
             print(f"[ERREUR DB] Lecture Reiatsu échouée : {e}")
             return await safe_send(channel_or_interaction, "❌ Impossible de récupérer ton profil.")
-        
-        data = res.data[0] if res.data else {}
-        if not data:
-            return await safe_send(channel_or_interaction, "⚠️ Impossible de créer ton profil Reiatsu.")
-        
-        points = data.get("points", 0)
-        classe_nom = data.get("classe", None)
-        bonus = data.get("bonus5", 0)
-        last_steal = data.get("last_steal_attempt")
-        steal_cd = data.get("steal_cd")
-        last_skill = data.get("last_skilled_at")
-        active_skill = data.get("active_skill", False)
-        points = data.get("points", 0)
-        niveau = data.get("niveau", 0)
 
+        if not row:
+            return await safe_send(channel_or_interaction, "⚠️ Impossible de créer ton profil Reiatsu.")
+
+        username, points, bonus, classe_nom, last_steal, steal_cd, last_skill, active_skill, niveau = row
+        points = points or 0
+        bonus = bonus or 0
+        niveau = niveau or 0
 
         # Gestion des classes
         CLASSES = load_classes()
@@ -87,7 +89,7 @@ class ReiatsuProfil(commands.Cog):
             for key, value in CLASSES.items():
                 if key.strip().lower() == classe_nom_clean:
                     classe_data = value
-                    classe_nom = key  # Nom formaté du JSON
+                    classe_nom = key
                     classe_symbole = value.get("Symbole", "")
                     break
 
@@ -122,11 +124,7 @@ class ReiatsuProfil(commands.Cog):
                 if now_dt < next_cd:
                     restant = next_cd - now_dt
                     h, m = divmod(int(restant.total_seconds() // 60), 60)
-                    cooldown_skill = (
-                        f"⏳ {restant.days}j {h}h{m}m"
-                        if restant.days
-                        else f"⏳ {h}h{m}m"
-                    )
+                    cooldown_skill = f"⏳ {restant.days}j {h}h{m}m" if restant.days else f"⏳ {h}h{m}m"
             except:
                 pass
 
@@ -176,9 +174,9 @@ class ReiatsuProfil(commands.Cog):
         else:
             await safe_send(channel_or_interaction, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────
     @app_commands.command(
         name="reiatsuprofil",
         description="💠 Affiche ton profil Reiatsu détaillé."
@@ -188,9 +186,9 @@ class ReiatsuProfil(commands.Cog):
     async def slash_profil(self, interaction: discord.Interaction, member: discord.Member = None):
         await self._send_profil(interaction, interaction.user, member)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────
     @commands.command(
         name="reiatsuprofil",
         aliases=["rtsp", "rtsprofil", "profil", "p"],
@@ -200,14 +198,12 @@ class ReiatsuProfil(commands.Cog):
     async def prefix_profil(self, ctx: commands.Context, member: discord.Member = None):
         await self._send_profil(ctx.channel, ctx.author, member)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = ReiatsuProfil(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
             command.category = "Reiatsu"
     await bot.add_cog(cog)
-
-
