@@ -107,6 +107,7 @@ async def on_message(message):
         embed = discord.Embed(
             title="Coucou !",
             description=(
+                f"⚠ BOT EN TRAVAUX pour ne plus utiliser supabase mais une base de données locale.\n"
                 f"Bonjour ! Je suis **Kisuke Urahara**, un bot discord inspiré du manga Bleach.\n"
                 f"• Utilise la commande `{prefix}help` pour avoir la liste des commandes du bot "
                 f"ou `{prefix}help <commande>` pour en avoir une description."
@@ -153,6 +154,7 @@ if __name__ == "__main__":
         await bot.start(TOKEN)
 
     asyncio.run(start())
+
 
 
 
