@@ -8,9 +8,21 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
-from utils.supabase_client import supabase
+import sqlite3
+import os
 import datetime
 import json
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🗄️ Configuration SQLite
+# ────────────────────────────────────────────────────────────────────────────────
+DB_PATH = os.path.join("database", "reiatsu.db")
+
+
+def get_conn():
+    """Retourne une connexion SQLite vers reiatsu.db"""
+    return sqlite3.connect(DB_PATH)
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 Création d’un profil joueur si inexistant
@@ -23,40 +35,74 @@ def ensure_profile(user_id: int, username: str) -> dict:
     Returns:
         dict : Profil joueur
     """
-    res = supabase.table("reiatsu").select("*").eq("user_id", user_id).execute()
 
-    if res.data:
-        profile = res.data[0]
-        # S'assurer que la colonne shop_effets existe
-        if "shop_effets" not in profile:
-            profile["shop_effets"] = []
-            supabase.table("reiatsu").update({"shop_effets": []}).eq("user_id", user_id).execute()
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM reiatsu WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+
+    # ─── Profil existant ───────────────────────────
+    if row:
+        columns = [column[0] for column in cursor.description]
+        profile = dict(zip(columns, row))
+
+        # Conversion JSON stocké en TEXT
+        profile["quetes"] = json.loads(profile.get("quetes") or "[]")
+        profile["shop_effets"] = json.loads(profile.get("shop_effets") or "[]")
+
+        conn.close()
         return profile
 
-    # Création automatique
-    now_iso = datetime.datetime.utcnow().isoformat()
-    profile = {
+    # ─── Création automatique ──────────────────────
+    cursor.execute("""
+        INSERT INTO reiatsu (
+            user_id,
+            username,
+            points,
+            bonus5,
+            last_steal_attempt,
+            steal_cd,
+            classe,
+            last_skilled_at,
+            active_skill,
+            fake_spawn_id,
+            fake_spawn_guild_id,
+            niveau,
+            quetes,
+            shop_effets
+        )
+        VALUES (?, ?, 0, 0, NULL, 24, '', NULL, 0, NULL, NULL, 0, '[]', '[]')
+    """, (user_id, username))
+
+    conn.commit()
+    conn.close()
+
+    return {
         "user_id": user_id,
         "username": username,
         "points": 0,
-        "classe": None,
-        "active_skill": False,
+        "bonus5": 0,
+        "classe": "",
+        "active_skill": 0,
         "last_skilled_at": None,
         "last_steal_attempt": None,
         "steal_cd": 24,
+        "fake_spawn_id": None,
+        "fake_spawn_guild_id": None,
         "niveau": 0,
         "quetes": [],
-        "shop_effets": []  # ⚡ Nouvelle colonne pour les effets du shop
+        "shop_effets": []
     }
-    supabase.table("reiatsu").insert(profile).execute()
-    return profile
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 Vérifie si le joueur a choisi une classe
 # ────────────────────────────────────────────────────────────────────────────────
 def has_class(profile: dict) -> bool:
     """Retourne True si le joueur a choisi une classe Reiatsu."""
-    return profile.get("classe") is not None
+    return bool(profile.get("classe"))
+
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔹 Récupère le cooldown restant d’un skill
@@ -66,8 +112,10 @@ def get_skill_cooldown(profile: dict, classe_config: dict) -> float:
     Calcule le cooldown restant en heures pour le skill du joueur.
     Retourne 0 si le skill est prêt.
     """
+
     cooldown_h = classe_config.get("Cooldown", 12)
     last_skill = profile.get("last_skilled_at")
+
     if not last_skill:
         return 0
 
