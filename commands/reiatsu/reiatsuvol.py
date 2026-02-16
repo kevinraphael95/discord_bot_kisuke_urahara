@@ -19,7 +19,7 @@ import sqlite3
 from utils.reiatsu_utils import ensure_profile
 from utils.discord_utils import safe_send, safe_respond
 
-DB_PATH = "database.sqlite3"
+DB_PATH = "database/reiatsu.db"
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
