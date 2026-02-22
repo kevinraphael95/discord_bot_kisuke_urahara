@@ -29,7 +29,6 @@
     overflow-x: hidden;
   }
 
-  /* Background */
   body::before {
     content: '';
     position: fixed;
@@ -41,7 +40,6 @@
     z-index: 0;
   }
 
-  /* Kanji watermark */
   body::after {
     content: '浦原';
     position: fixed;
@@ -56,7 +54,6 @@
     z-index: 0;
   }
 
-  /* Nav */
   nav {
     position: fixed;
     top: 0;
@@ -80,11 +77,7 @@
     letter-spacing: 0.15em;
   }
 
-  .nav-links {
-    display: flex;
-    gap: 2.5rem;
-    list-style: none;
-  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
 
   .nav-links a {
     font-family: 'Cinzel', serif;
@@ -100,10 +93,8 @@
   .nav-links a::after {
     content: '';
     position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 1px;
+    bottom: -4px; left: 0;
+    width: 0; height: 1px;
     background: var(--gold);
     transition: width 0.3s;
   }
@@ -112,7 +103,6 @@
   .nav-links a:hover::after { width: 100%; }
   .nav-links a.active { color: var(--gold-light); }
 
-  /* Hero */
   .hero {
     position: relative;
     z-index: 1;
@@ -139,15 +129,35 @@
     animation: fadeUp 0.8s 0.2s forwards;
   }
 
+  .hero-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    object-fit: cover;
+    object-position: top center;
+    box-shadow: 0 0 0 5px rgba(201,168,76,0.12), 0 0 40px rgba(201,168,76,0.18);
+    flex-shrink: 0;
+  }
+
   .hero-title {
     font-family: 'Cinzel', serif;
     font-weight: 900;
     font-size: clamp(3rem, 8vw, 7rem);
     line-height: 0.9;
     letter-spacing: -0.02em;
-    margin-bottom: 1.5rem;
-    opacity: 0;
-    animation: fadeUp 0.8s 0.4s forwards;
+    text-align: left;
   }
 
   .hero-title .line1 { display: block; color: var(--white); }
@@ -191,67 +201,33 @@
     border: 1px solid;
   }
 
-  .btn-primary {
-    background: var(--gold);
-    color: var(--black);
-    border-color: var(--gold);
-  }
-  .btn-primary:hover {
-    background: var(--gold-light);
-    box-shadow: 0 0 30px rgba(201,168,76,0.3);
-    transform: translateY(-2px);
-  }
+  .btn-primary { background: var(--gold); color: var(--black); border-color: var(--gold); }
+  .btn-primary:hover { background: var(--gold-light); box-shadow: 0 0 30px rgba(201,168,76,0.3); transform: translateY(-2px); }
+  .btn-ghost { background: transparent; color: var(--silver); border-color: rgba(138,143,168,0.3); }
+  .btn-ghost:hover { color: var(--white); border-color: var(--white); transform: translateY(-2px); }
 
-  .btn-ghost {
-    background: transparent;
-    color: var(--silver);
-    border-color: rgba(138,143,168,0.3);
-  }
-  .btn-ghost:hover {
-    color: var(--white);
-    border-color: var(--white);
-    transform: translateY(-2px);
-  }
-
-  /* Divider */
   .divider {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 0 3rem;
-    margin: 2rem 0;
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 0 3rem; margin: 2rem 0;
   }
   .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
+    content: ''; flex: 1; height: 1px;
     background: linear-gradient(to right, transparent, rgba(201,168,76,0.3), transparent);
   }
-  .divider-symbol {
-    color: var(--gold);
-    font-size: 1.2rem;
-    opacity: 0.6;
-  }
+  .divider-symbol { color: var(--gold); font-size: 1.2rem; opacity: 0.6; }
 
-  /* Features */
   .features {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     padding: 5rem 3rem 8rem;
-    max-width: 1100px;
-    margin: 0 auto;
+    max-width: 1100px; margin: 0 auto;
   }
 
   .section-title {
     font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.4em;
-    color: var(--gold);
-    text-transform: uppercase;
-    text-align: center;
-    margin-bottom: 3rem;
+    font-size: 0.7rem; letter-spacing: 0.4em;
+    color: var(--gold); text-transform: uppercase;
+    text-align: center; margin-bottom: 3rem;
   }
 
   .features-grid {
@@ -265,70 +241,34 @@
     background: var(--ink);
     padding: 2.5rem 2rem;
     border: 1px solid rgba(201,168,76,0.08);
-    transition: all 0.3s;
-    cursor: default;
+    transition: all 0.3s; cursor: default;
   }
 
-  .feature-card:hover {
-    background: rgba(107,63,160,0.08);
-    border-color: rgba(201,168,76,0.2);
-  }
-
-  .feature-icon {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-    display: block;
-  }
+  .feature-card:hover { background: rgba(107,63,160,0.08); border-color: rgba(201,168,76,0.2); }
+  .feature-icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; }
 
   .feature-name {
     font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    color: var(--gold-light);
-    margin-bottom: 0.8rem;
-    text-transform: uppercase;
+    font-size: 0.85rem; letter-spacing: 0.15em;
+    color: var(--gold-light); margin-bottom: 0.8rem; text-transform: uppercase;
   }
 
-  .feature-desc {
-    font-size: 1rem;
-    color: var(--silver);
-    line-height: 1.6;
-  }
+  .feature-desc { font-size: 1rem; color: var(--silver); line-height: 1.6; }
 
-  /* Footer */
   footer {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     border-top: 1px solid rgba(201,168,76,0.1);
     padding: 2.5rem 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
   }
 
-  .footer-copy {
-    font-size: 0.85rem;
-    color: rgba(138,143,168,0.5);
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-  }
-
+  .footer-copy { font-size: 0.85rem; color: rgba(138,143,168,0.5); }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
   .footer-links a {
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: rgba(138,143,168,0.5);
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color 0.3s;
+    font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.2em;
+    color: rgba(138,143,168,0.5); text-decoration: none; text-transform: uppercase; transition: color 0.3s;
   }
-
   .footer-links a:hover { color: var(--gold); }
 
   @keyframes fadeUp {
@@ -340,6 +280,8 @@
     nav { padding: 1rem 1.5rem; }
     .nav-links { gap: 1.2rem; }
     .hero { padding: 7rem 1.5rem 4rem; }
+    .hero-top { gap: 1.5rem; }
+    .hero-title { text-align: center; }
     .features { padding: 3rem 1.5rem 5rem; }
     footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
   }
@@ -360,10 +302,17 @@
 <section class="hero">
   <div class="hero-inner">
     <p class="hero-eyebrow">Bot Discord · Bleach</p>
-    <h1 class="hero-title">
-      <span class="line1">Kisuke</span>
-      <span class="line2">Urahara</span>
-    </h1>
+    <div class="hero-top">
+      <img
+        class="hero-avatar"
+        src="https://raw.githubusercontent.com/kevinraphael95/discord_bot_kisuke_urahara/main/data/images/kisuke.jpg"
+        alt="Kisuke Urahara"
+      >
+      <h1 class="hero-title">
+        <span class="line1">Kisuke</span>
+        <span class="line2">Urahara</span>
+      </h1>
+    </div>
     <p class="hero-desc">
       Un bot Discord multifonction inspiré de l'univers Bleach — commandes basiques, commandes divertissantes, minijeux, système de Reiatsu à collecter.
     </p>
