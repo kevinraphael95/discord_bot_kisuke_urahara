@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commandes — Kisuke Urahara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #050508;
+    --void: #0a0a10;
+    --ink: #12121a;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --silver: #8a8fa8;
+    --white: #eeeaf0;
+    --reiatsu: #6b3fa0;
+    --reiatsu-glow: #9b6fd0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(107,63,160,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(5,5,8,0.95) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    backdrop-filter: blur(4px);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--silver);
+    text-decoration: none;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--gold);
+    transition: width 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active { color: var(--gold-light); }
+
+  /* Page header */
+  .page-header {
+    position: relative;
+    z-index: 1;
+    padding: 10rem 3rem 4rem;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+
+  .page-header-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .page-header-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .page-header-sub {
+    margin-top: 1rem;
+    color: var(--silver);
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+
+  /* Filter tabs */
+  .filters {
+    position: relative;
+    z-index: 1;
+    padding: 2.5rem 3rem 0;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.4rem;
+    background: transparent;
+    color: var(--silver);
+    border: 1px solid rgba(138,143,168,0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-btn.active {
+    background: var(--gold);
+    color: var(--black);
+    border-color: var(--gold);
+  }
+
+  /* Commands list */
+  .commands-container {
+    position: relative;
+    z-index: 1;
+    padding: 2rem 3rem 6rem;
+    max-width: 1100px;
+  }
+
+  .category-section { margin-bottom: 3rem; }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .category-icon { font-size: 1.2rem; }
+
+  .category-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .category-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(138,143,168,0.4);
+    margin-left: auto;
+  }
+
+  .command-item {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 1.5rem;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+    align-items: start;
+  }
+
+  .command-item:hover {
+    background: rgba(201,168,76,0.03);
+    margin: 0 -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .command-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .command-prefix {
+    color: rgba(201,168,76,0.4);
+    font-size: 0.75rem;
+  }
+
+  .command-desc {
+    font-size: 1rem;
+    color: var(--silver);
+    line-height: 1.5;
+  }
+
+  .command-usage {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: rgba(107,63,160,0.8);
+    margin-top: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    background: rgba(107,63,160,0.1);
+    border-left: 2px solid rgba(107,63,160,0.4);
+    display: inline-block;
+  }
+
+  .badge-admin {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: #e05050;
+    border: 1px solid rgba(224,80,80,0.4);
+    padding: 0.1rem 0.4rem;
+    letter-spacing: 0.1em;
+    vertical-align: middle;
+  }
+
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding: 2.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-copy { font-size: 0.85rem; color: rgba(138,143,168,0.5); }
+
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
+  .footer-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: rgba(138,143,168,0.5);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+
+  @media (max-width: 640px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.2rem; }
+    .page-header { padding: 8rem 1.5rem 3rem; }
+    .filters { padding: 2rem 1.5rem 0; }
+    .commands-container { padding: 1.5rem 1.5rem 5rem; }
+    .command-item { grid-template-columns: 1fr; gap: 0.4rem; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">⚡ KISUKE</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="commandes.html" class="active">Commandes</a></li>
+    <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="install.html">Installation</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <p class="page-header-eyebrow">Documentation complète</p>
+  <h1 class="page-header-title">Liste des Commandes</h1>
+  <p class="page-header-sub">Toutes les commandes disponibles, organisées par catégorie.</p>
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" onclick="filterCategory('all', this)">Tout</button>
+  <button class="filter-btn" onclick="filterCategory('admin', this)">Admin</button>
+  <button class="filter-btn" onclick="filterCategory('bleach', this)">Bleach</button>
+  <button class="filter-btn" onclick="filterCategory('fun', this)">Fun & Random</button>
+  <button class="filter-btn" onclick="filterCategory('general', this)">Général</button>
+  <button class="filter-btn" onclick="filterCategory('jeux', this)">Jeux</button>
+  <button class="filter-btn" onclick="filterCategory('reiatsu', this)">Reiatsu</button>
+</div>
+
+<div class="commands-container">
+
+  <div class="category-section" data-cat="admin">
+    <div class="category-header">
+      <span class="category-icon">⚙️</span>
+      <span class="category-name">Admin</span>
+      <span class="category-count">6 commandes</span>
+    </div>
+
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>commandslist</div>
+      <div><div class="command-desc">Génère un fichier .md avec toutes les commandes et l'envoie en pièce jointe.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>kisukevol</div>
+      <div><div class="command-desc">🌀 Kisuke vole 10% du Reiatsu d'un membre comme un joueur normal.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>reiatsuadmin <span class="badge-admin">ADMIN</span></div>
+      <div><div class="command-desc">Gère le Reiatsu : set, unset, change, spawn, speed.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>say_as <span class="badge-admin">ADMIN</span></div>
+      <div>
+        <div class="command-desc">Fait répéter un message par le bot comme si c'était un autre membre.</div>
+        <div class="command-usage">!say_as &lt;mention|id|pseudo&gt; &lt;message&gt;</div>
+      </div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>sync</div>
+      <div><div class="command-desc">Synchronise les commandes slash (serveur ou global).</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>testgame</div>
+      <div><div class="command-desc">Tester un mini-jeu via son numéro ou 'all'.</div></div>
+    </div>
+  </div>
+
+  <div class="category-section" data-cat="bleach">
+    <div class="category-header">
+      <span class="category-icon">⚔️</span>
+      <span class="category-name">Bleach</span>
+      <span class="category-count">11 commandes</span>
+    </div>
+
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>bmoji</div>
+      <div><div class="command-desc">Devine quel personnage Bleach se cache derrière des emojis.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>combat</div>
+      <div><div class="command-desc">Système de combat entre personnages.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>division</div>
+      <div><div class="command-desc">Détermine ta division dans le Gotei 13.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>kido</div>
+      <div><div class="command-desc">Affiche un Kidō précis, aléatoire ou la liste paginée.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>kluboutside</div>
+      <div><div class="command-desc">Affiche une question de la FAQ du Klub Outside.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>perso</div>
+      <div><div class="command-desc">Affiche la fiche d'un personnage Bleach.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>scans</div>
+      <div><div class="command-desc">📖 Lire un scan de Bleach directement sur Discord.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>shifumi</div>
+      <div><div class="command-desc">Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>ship</div>
+      <div><div class="command-desc">💘 Teste la compatibilité entre deux personnages de Bleach.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>versus</div>
+      <div><div class="command-desc">Affronte deux personnages dans un versus.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>rpg</div>
+      <div><div class="command-desc">Mode RPG textuel dans l'univers Bleach.</div></div>
+    </div>
+  </div>
+
+  <div class="category-section" data-cat="fun">
+    <div class="category-header">
+      <span class="category-icon">🎲</span>
+      <span class="category-name">Fun & Random</span>
+      <span class="category-count">6 commandes</span>
+    </div>
+
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>calc</div>
+      <div><div class="command-desc">Calculatrice scientifique interactive.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>couleur</div>
+      <div><div class="command-desc">🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>gay</div>
+      <div><div class="command-desc">🌈 Calcule ton taux de gaytitude.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>pizza</div>
+      <div><div class="command-desc">🍕 Génère une pizza complètement aléatoire.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>sorting</div>
+      <div><div class="command-desc">Trie 12 barres en longueurs différentes selon un algorithme de tri.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>tortues</div>
+      <div><div class="command-desc">Participe à une course de tortues avec tes amis ! 🐢</div></div>
+    </div>
+  </div>
+
+  <div class="category-section" data-cat="general">
+    <div class="category-header">
+      <span class="category-icon">📋</span>
+      <span class="category-name">Général</span>
+      <span class="category-count">5 commandes</span>
+    </div>
+
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>code</div>
+      <div><div class="command-desc">Affiche un lien vers le code source du bot.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>emoji</div>
+      <div><div class="command-desc">Montre un ou plusieurs emojis du serveur ou de tous les serveurs.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>help</div>
+      <div><div class="command-desc">Affiche l'aide du bot.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>react</div>
+      <div><div class="command-desc">Réagit à un message avec un ou plusieurs emojis.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>say</div>
+      <div>
+        <div class="command-desc">Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch.</div>
+        <div class="command-usage">!say *e *am Bonjour !</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-section" data-cat="jeux">
+    <div class="category-header">
+      <span class="category-icon">🕹️</span>
+      <span class="category-name">Jeux</span>
+      <span class="category-count">14 commandes</span>
+    </div>
+
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>capitales</div>
+      <div><div class="command-desc">Devine la capitale d'un pays.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>compte_est_bon</div>
+      <div><div class="command-desc">Lance le jeu du Compte est Bon. Ajoute 'multi' pour jouer à plusieurs.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>devinelenombre</div>
+      <div><div class="command-desc">Devine un nombre entre 0 et 100 (multi = plusieurs joueurs).</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>drapeaux</div>
+      <div><div class="command-desc">Identifie des drapeaux de pays.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>entrainementcerebral</div>
+      <div><div class="command-desc">Entraînement cérébral composé de 5 mini-jeux.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>jardin</div>
+      <div><div class="command-desc">Affiche ton jardin ou celui d'un autre utilisateur 🌱</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>mastermind</div>
+      <div><div class="command-desc">Jouer au Mastermind interactif.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>motsecret</div>
+      <div><div class="command-desc">Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>pendu</div>
+      <div><div class="command-desc">Démarre une partie du jeu du pendu.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>tram_probleme</div>
+      <div><div class="command-desc">Teste ta morale dans un quiz absurde du dilemme du tramway.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>formes</div>
+      <div><div class="command-desc">Jeu de reconnaissance de formes géométriques.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>course_animal</div>
+      <div><div class="command-desc">Course d'animaux multijoueur.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>pressing</div>
+      <div><div class="command-desc">Mini-jeu de pressing.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>solorpg</div>
+      <div><div class="command-desc">Mode RPG solo avec menu déroulant.</div></div>
+    </div>
+  </div>
+
+  <div class="category-section" data-cat="reiatsu">
+    <div class="category-header">
+      <span class="category-icon">💠</span>
+      <span class="category-name">Reiatsu</span>
+      <span class="category-count">9 commandes</span>
+    </div>
+
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>classe</div>
+      <div><div class="command-desc">Choisir sa classe Reiatsu.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>hollow</div>
+      <div><div class="command-desc">👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>keylottery</div>
+      <div><div class="command-desc">Ticket à gratter : tente ta chance pour gagner des clés ou du Reiatsu.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>quetes</div>
+      <div><div class="command-desc">🎮 Affiche la liste des quêtes et ton niveau actuel.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>reiatsu</div>
+      <div><div class="command-desc">💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>reiatsudaily</div>
+      <div><div class="command-desc">Réclame tes 30 Reiatsu quotidiens gratuits.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>reiatsuprofil</div>
+      <div><div class="command-desc">💠 Affiche ton profil Reiatsu détaillé.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>reiatsuvol</div>
+      <div><div class="command-desc">💠 Tente de voler 10% du Reiatsu d'un autre membre. 25% de réussite. Cooldown : 24h.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>skill</div>
+      <div><div class="command-desc">Active la compétence de ta classe Reiatsu.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>tutoreiatsu</div>
+      <div><div class="command-desc">Affiche le tutoriel complet pour les nouveaux joueurs.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p class="footer-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
+  <ul class="footer-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="install.html">Installation</a></li>
+    <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
+  </ul>
+</footer>
+
+<script>
+function filterCategory(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.category-section').forEach(section => {
+    if (cat === 'all' || section.dataset.cat === cat) {
+      section.style.display = '';
+    } else {
+      section.style.display = 'none';
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reiatsu — Kisuke Urahara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #050508;
+    --ink: #12121a;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --silver: #8a8fa8;
+    --white: #eeeaf0;
+    --reiatsu: #6b3fa0;
+    --reiatsu-light: #9b6fd0;
+    --reiatsu-dim: rgba(107,63,160,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 30%, rgba(107,63,160,0.2) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(5,5,8,0.95) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    backdrop-filter: blur(4px);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--silver);
+    text-decoration: none;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--gold);
+    transition: width 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active { color: var(--gold-light); }
+
+  .page-header {
+    position: relative;
+    z-index: 1;
+    padding: 10rem 3rem 5rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(107,63,160,0.2);
+  }
+
+  .glow-diamond {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 20px rgba(155,111,208,0.8));
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(155,111,208,0.8)); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 40px rgba(155,111,208,1)); transform: scale(1.05); }
+  }
+
+  .page-header-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--reiatsu-light);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .page-header-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(3rem, 6vw, 5rem);
+    color: var(--white);
+    margin-bottom: 1.2rem;
+  }
+
+  .page-header-sub {
+    color: var(--silver);
+    font-style: italic;
+    font-size: 1.15rem;
+    max-width: 550px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* Content */
+  .content {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 5rem 3rem 7rem;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+
+  /* Steps */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 5rem;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 48px;
+    bottom: 48px;
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(107,63,160,0.6), rgba(201,168,76,0.2));
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 2rem;
+    padding: 2rem 0;
+  }
+
+  .step-num {
+    width: 50px;
+    height: 50px;
+    border: 1px solid var(--reiatsu-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--reiatsu-light);
+    background: rgba(107,63,160,0.1);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-body h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    color: var(--gold-light);
+    margin-bottom: 0.6rem;
+    padding-top: 0.8rem;
+  }
+
+  .step-body p {
+    color: var(--silver);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  /* Classes grid */
+  .classes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    border: 1px solid rgba(107,63,160,0.2);
+    margin-bottom: 5rem;
+  }
+
+  .class-card {
+    background: var(--ink);
+    padding: 2rem 1.5rem;
+    border: 1px solid rgba(107,63,160,0.08);
+    transition: all 0.3s;
+  }
+
+  .class-card:hover {
+    background: rgba(107,63,160,0.12);
+    border-color: rgba(107,63,160,0.3);
+  }
+
+  .class-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+  .class-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    color: var(--reiatsu-light);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .class-desc { font-size: 0.95rem; color: var(--silver); line-height: 1.5; }
+
+  /* Commands quick ref */
+  .quick-commands {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .quick-cmd {
+    background: rgba(107,63,160,0.07);
+    border: 1px solid rgba(107,63,160,0.15);
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .quick-cmd-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--gold-light);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .quick-cmd-desc {
+    font-size: 0.9rem;
+    color: var(--silver);
+  }
+
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding: 2.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-copy { font-size: 0.85rem; color: rgba(138,143,168,0.5); }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
+  .footer-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: rgba(138,143,168,0.5);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+
+  @media (max-width: 640px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.2rem; }
+    .page-header { padding: 8rem 1.5rem 4rem; }
+    .content { padding: 3rem 1.5rem 5rem; }
+    .steps::before { display: none; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">⚡ KISUKE</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="commandes.html">Commandes</a></li>
+    <li><a href="reiatsu.html" class="active">Reiatsu</a></li>
+    <li><a href="install.html">Installation</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <span class="glow-diamond">💠</span>
+  <p class="page-header-eyebrow">Système de jeu</p>
+  <h1 class="page-header-title">Le Reiatsu</h1>
+  <p class="page-header-sub">
+    Une énergie spirituelle qui se collecte, se vole, et se combat. 
+    Choisis ta classe, maîtrise ton pouvoir.
+  </p>
+</header>
+
+<div class="content">
+
+  <p class="section-label">Comment commencer</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h3>Lire le tutoriel</h3>
+        <p>Lance <strong>!tutoreiatsu</strong> pour découvrir toutes les règles du système. Indispensable pour les nouveaux arrivants.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h3>Choisir ta classe</h3>
+        <p>Avec <strong>!classe</strong>, choisis ton chemin : Shinigami, Quincy, Hollow ou Fullbring. Chaque classe a une compétence unique.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <h3>Collecter du Reiatsu</h3>
+        <p>Le bot fait spawner du Reiatsu dans les salons. Réagis à temps pour le récupérer ! Tu peux aussi utiliser <strong>!reiatsudaily</strong> pour 30 Reiatsu gratuits chaque jour.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <h3>Affronter des Hollows</h3>
+        <p>Lance <strong>!hollow</strong> pour faire apparaître un Hollow. Réussis l'épreuve pour gagner du Reiatsu — ou perdre si tu échoues.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-body">
+        <h3>Voler et progresser</h3>
+        <p>Tente <strong>!reiatsuvol</strong> pour dérober 10% du Reiatsu d'un rival (25% de chance, cooldown 24h). Remplis tes <strong>!quetes</strong> pour des bonus supplémentaires.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-label">Choisir ta classe</p>
+  <div class="classes-grid">
+    <div class="class-card">
+      <span class="class-icon">⚔️</span>
+      <p class="class-name">Shinigami</p>
+      <p class="class-desc">Les gardiens des âmes. Maîtres du Kidō et du Zanpakutō.</p>
+    </div>
+    <div class="class-card">
+      <span class="class-icon">🏹</span>
+      <p class="class-name">Quincy</p>
+      <p class="class-desc">Archers spirituels capables d'absorber et de réutiliser le Reiatsu.</p>
+    </div>
+    <div class="class-card">
+      <span class="class-icon">👹</span>
+      <p class="class-name">Hollow</p>
+      <p class="class-desc">Prédateurs de l'ombre, affamés de Reiatsu adverse.</p>
+    </div>
+    <div class="class-card">
+      <span class="class-icon">🌀</span>
+      <p class="class-name">Fullbring</p>
+      <p class="class-desc">Humains dotés de pouvoirs hybrides, maîtres de l'imprévisible.</p>
+    </div>
+  </div>
+
+  <p class="section-label">Commandes Reiatsu</p>
+  <div class="quick-commands">
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!reiatsuprofil</span>
+        <span class="quick-cmd-desc">Consulter son profil Reiatsu détaillé.</span>
+      </div>
+    </div>
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!reiatsudaily</span>
+        <span class="quick-cmd-desc">30 Reiatsu gratuits par jour.</span>
+      </div>
+    </div>
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!hollow</span>
+        <span class="quick-cmd-desc">Invoquer un Hollow pour tenter de gagner du Reiatsu.</span>
+      </div>
+    </div>
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!reiatsuvol</span>
+        <span class="quick-cmd-desc">Voler 10% du Reiatsu d'un autre (cooldown 24h).</span>
+      </div>
+    </div>
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!skill</span>
+        <span class="quick-cmd-desc">Activer la compétence de ta classe.</span>
+      </div>
+    </div>
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!quetes</span>
+        <span class="quick-cmd-desc">Voir la liste des quêtes et progresser.</span>
+      </div>
+    </div>
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!keylottery</span>
+        <span class="quick-cmd-desc">Gratter un ticket pour tenter de gagner gros.</span>
+      </div>
+    </div>
+    <div class="quick-cmd">
+      <div>
+        <span class="quick-cmd-name">!reiatsu</span>
+        <span class="quick-cmd-desc">Classement global et infos de spawn.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p class="footer-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
+  <ul class="footer-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="commandes.html">Commandes</a></li>
+    <li><a href="install.html">Installation</a></li>
+    <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
+  </ul>
+</footer>
+
+</body>
+</html>

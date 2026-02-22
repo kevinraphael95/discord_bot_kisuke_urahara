@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installation — Kisuke Urahara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #050508;
+    --ink: #12121a;
+    --ink2: #0e0e16;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --silver: #8a8fa8;
+    --white: #eeeaf0;
+    --reiatsu: #6b3fa0;
+    --reiatsu-light: #9b6fd0;
+    --green: #4caf7a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 50% 40% at 10% 30%, rgba(76,175,122,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 90% 70%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(5,5,8,0.95) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    backdrop-filter: blur(4px);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--silver);
+    text-decoration: none;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--gold);
+    transition: width 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active { color: var(--gold-light); }
+
+  .page-header {
+    position: relative;
+    z-index: 1;
+    padding: 10rem 3rem 4rem;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+
+  .page-header-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .page-header-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 1rem;
+  }
+
+  .page-header-sub {
+    color: var(--silver);
+    font-style: italic;
+    font-size: 1.1rem;
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  /* Content layout */
+  .content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    padding: 5rem 3rem 7rem;
+  }
+
+  .step-block {
+    margin-bottom: 4rem;
+  }
+
+  .step-title {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-num-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--black);
+    background: var(--gold);
+    padding: 0.3rem 0.8rem;
+  }
+
+  .step-block h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+  }
+
+  .step-block p {
+    color: var(--silver);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+
+  .step-block a {
+    color: var(--gold-light);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s;
+  }
+
+  .step-block a:hover { opacity: 0.7; }
+
+  /* Code block */
+  .code-block {
+    background: var(--ink2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-left: 3px solid var(--gold);
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+    white-space: pre;
+  }
+
+  .code-block .comment {
+    color: rgba(138,143,168,0.5);
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--silver);
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* Note */
+  .note {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-left: 3px solid var(--gold);
+    padding: 1.2rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    color: var(--silver);
+    line-height: 1.6;
+  }
+
+  .note strong { color: var(--gold-light); }
+
+  /* Licence */
+  .licence-box {
+    background: var(--ink);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+
+  .licence-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .licence-text {
+    color: var(--silver);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .licence-text a {
+    color: var(--gold-light);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding: 2.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-copy { font-size: 0.85rem; color: rgba(138,143,168,0.5); }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
+  .footer-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: rgba(138,143,168,0.5);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+
+  @media (max-width: 640px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.2rem; }
+    .page-header { padding: 8rem 1.5rem 3rem; }
+    .content { padding: 3rem 1.5rem 5rem; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">⚡ KISUKE</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="commandes.html">Commandes</a></li>
+    <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="install.html" class="active">Installation</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <p class="page-header-eyebrow">Guide de déploiement</p>
+  <h1 class="page-header-title">Installation</h1>
+  <p class="page-header-sub">Tout ce qu'il faut pour faire tourner Kisuke sur ton propre serveur Discord.</p>
+</header>
+
+<div class="content">
+
+  <div class="step-block">
+    <div class="step-title">
+      <span class="step-num-badge">01</span>
+      <h2>Prérequis</h2>
+    </div>
+    <p>Avant de commencer, assure-toi d'avoir :</p>
+    <p>— <strong>Python 3.10+</strong> installé sur ta machine.</p>
+    <p>— Un <strong>bot Discord</strong> créé sur le <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a>, avec les intentions <em>Message Content</em> et <em>Server Members</em> activées.</p>
+    <p>— Ton <strong>token de bot</strong> prêt à être utilisé.</p>
+  </div>
+
+  <div class="step-block">
+    <div class="step-title">
+      <span class="step-num-badge">02</span>
+      <h2>Cloner le dépôt</h2>
+    </div>
+    <p>Récupère le code source depuis GitHub :</p>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this, 'git clone https://github.com/kevinraphael95/discord_bot_kisuke_urahara.git\ncd discord_bot_kisuke_urahara')">Copier</button>
+      <code>git clone https://github.com/kevinraphael95/discord_bot_kisuke_urahara.git
+cd discord_bot_kisuke_urahara</code>
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-title">
+      <span class="step-num-badge">03</span>
+      <h2>Installer les dépendances</h2>
+    </div>
+    <p>Installe toutes les bibliothèques Python requises :</p>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this, 'pip install -r requirements.txt')">Copier</button>
+      <code>pip install -r requirements.txt</code>
+    </div>
+    <div class="note">
+      <strong>Conseil :</strong> Il est recommandé d'utiliser un environnement virtuel Python (<code>python -m venv venv</code>) pour isoler les dépendances.
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-title">
+      <span class="step-num-badge">04</span>
+      <h2>Configurer le token</h2>
+    </div>
+    <p>Crée un fichier <code>.env</code> à la racine du projet et ajoutes-y ton token Discord :</p>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this, 'DISCORD_TOKEN=ton_token_ici')">Copier</button>
+      <code><span class="comment"># .env</span>
+DISCORD_TOKEN=ton_token_ici</code>
+    </div>
+    <div class="note">
+      <strong>Important :</strong> Ne partage jamais ton token. Ajoute <code>.env</code> à ton <code>.gitignore</code>.
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-title">
+      <span class="step-num-badge">05</span>
+      <h2>Lancer le bot</h2>
+    </div>
+    <p>Démarre Kisuke avec :</p>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this, 'python bot.py')">Copier</button>
+      <code>python bot.py</code>
+    </div>
+    <p>Si tout est correct, le bot apparaîtra en ligne sur ton serveur Discord. Tu peux tester avec <code>!help</code>.</p>
+  </div>
+
+  <div class="step-block">
+    <div class="step-title">
+      <span class="step-num-badge">06</span>
+      <h2>Synchroniser les commandes slash</h2>
+    </div>
+    <p>Pour activer les commandes slash Discord, lance dans un salon Discord :</p>
+    <div class="code-block">
+      <code>!sync</code>
+    </div>
+    <p>Les commandes slash seront disponibles après quelques secondes (ou minutes pour le global).</p>
+  </div>
+
+  <div class="licence-box">
+    <p class="licence-title">Licence</p>
+    <p class="licence-text">
+      Ce projet est distribué sous licence 
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</a>.<br><br>
+      Attribution requise : <em>« Matériel par kevinraphael95, sous licence CC BY-NC-SA 4.0 »</em>
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  <p class="footer-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
+  <ul class="footer-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="commandes.html">Commandes</a></li>
+    <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
+  </ul>
+</footer>
+
+<script>
+function copyCode(btn, text) {
+  const code = text || btn.closest('.code-block').querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copié !';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copier';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
