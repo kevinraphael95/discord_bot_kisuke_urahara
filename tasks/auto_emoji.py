@@ -20,7 +20,6 @@ class AutoEmoji(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.webhooks_cache = {}  # cache des webhooks par channel
 
     # ──────────────────────────────────────────────────────────
     # 🔹 Fonction pour remplacer les emojis custom (identique à say.py)
@@ -58,33 +57,24 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
-        print(f"[AutoEmoji] Reçu: {repr(content)}")
-
         # Remplacement des emojis custom
         new_content = self._replace_custom_emojis(message.channel, content)
-
-        print(f"[AutoEmoji] Résultat: {repr(new_content)} | Modifié: {new_content != content}")
 
         # Si rien n'a changé, aucun emoji à corriger → on ne repost pas
         if new_content == content:
             return
 
-        # Récupère ou crée un webhook pour ce canal
-        webhook = self.webhooks_cache.get(message.channel.id)
-        if webhook is None:
-            webhooks = await message.channel.webhooks()
-            webhook = discord.utils.get(webhooks, name="AutoEmojiWebhook")
-            if webhook is None:
-                webhook = await message.channel.create_webhook(name="AutoEmojiWebhook")
-            self.webhooks_cache[message.channel.id] = webhook
-
-        # Reposte le message via webhook
-        await webhook.send(
-            content=new_content,
-            username=message.author.display_name,
-            avatar_url=message.author.display_avatar.url,
-            allowed_mentions=discord.AllowedMentions.all()
-        )
+        # Identique à _say_as_user dans say.py : webhook temporaire créé puis supprimé
+        webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
+        try:
+            await webhook.send(
+                content=new_content,
+                username=message.author.display_name,
+                avatar_url=message.author.display_avatar.url,
+                allowed_mentions=discord.AllowedMentions.all()
+            )
+        finally:
+            await webhook.delete()
 
         # Supprime le message original
         await message.delete()
