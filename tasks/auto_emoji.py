@@ -25,65 +25,24 @@ class AutoEmoji(commands.Cog):
     # ──────────────────────────────────────────────────────────
     # 🔹 Fonction pour remplacer les emojis custom
     # ──────────────────────────────────────────────────────────
-    def _replace_custom_emojis(self, channel, message: str) -> tuple[str, bool]:
-        """
-        Retourne (nouveau_contenu, a_été_modifié).
-        Gère deux formats :
-          - <a:nom:id> / <:nom:id>  → emoji déjà résolu par Discord (utilisateurs Nitro)
-          - :nom:                   → texte brut envoyé par les non-Nitro (Discord ne le convertit PAS)
-        """
-        # Construit le dictionnaire de tous les emojis accessibles
+    def _replace_custom_emojis(self, channel, message: str) -> str:
+        # Supprime l'affichage en texte brut des emojis existants (<:nom:id> et <a:nom:id>)
+        message = re.sub(r"<a?:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
+
+        # Remplace par des emojis valides si trouvés dans les serveurs du bot
         all_emojis = {}
-        guild_emoji_ids = set()
-
         if hasattr(channel, "guild"):
-            for e in channel.guild.emojis:
-                all_emojis[e.name.lower()] = str(e)
-                # Seuls les emojis STATIQUES du serveur courant sont déjà affichables par tous
-                # Les animés nécessitent Nitro → on les traite aussi
-                if not e.animated:
-                    guild_emoji_ids.add(e.id)
-
+            all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
             for g in self.bot.guilds:
                 if g.id != channel.guild.id:
-                    for e in g.emojis:
-                        all_emojis.setdefault(e.name.lower(), str(e))
+                    all_emojis.update({e.name.lower(): str(e) for e in g.emojis})
 
-        modified = False
-
-        # ── Format 1 : <a:nom:id> ou <:nom:id> (envoyé par les utilisateurs Nitro) ──
-        def replace_full(match):
-            nonlocal modified
-            emoji_id = int(match.group(3))
-            name = match.group(2)
-
-            # Emoji statique du serveur courant → tout le monde peut le voir, on ne touche pas
-            if emoji_id in guild_emoji_ids:
-                return match.group(0)
-
-            # Emoji animé du serveur courant ou emoji d'un autre serveur → on remplace
-            replacement = all_emojis.get(name.lower())
-            if replacement:
-                modified = True
-                return replacement
-
-            return match.group(0)
-
-        new_content = re.sub(r"<(a?):([a-zA-Z0-9_]+):(\d+)>", replace_full, message)
-
-        # ── Format 2 : :nom: (envoyé par les non-Nitro, Discord NE convertit PAS ce texte) ──
-        def replace_short(match):
-            nonlocal modified
-            name = match.group(1)
-            replacement = all_emojis.get(name.lower())
-            if replacement:
-                modified = True
-                return replacement
-            return match.group(0)
-
-        new_content = re.sub(r":([a-zA-Z0-9_]+):", replace_short, new_content)
-
-        return new_content, modified
+        return re.sub(
+            r":([a-zA-Z0-9_]+):",
+            lambda m: all_emojis.get(m.group(1).lower(), m.group(0)),
+            message,
+            flags=re.IGNORECASE
+        )
 
     # ──────────────────────────────────────────────────────────
     # 🔹 Listener sur tous les messages
@@ -97,10 +56,11 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
-        new_content, was_modified = self._replace_custom_emojis(message.channel, content)
+        # Remplacement des emojis custom
+        new_content = self._replace_custom_emojis(message.channel, content)
 
-        # On reposte UNIQUEMENT si un emoji a réellement été remplacé
-        if not was_modified:
+        # Si rien n’a changé, aucun emoji à corriger → on ne repost pas
+        if new_content == content:
             return
 
         # Récupère ou crée un webhook pour ce canal
