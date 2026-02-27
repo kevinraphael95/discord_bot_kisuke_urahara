@@ -23,23 +23,25 @@ class AutoEmoji(commands.Cog):
         self.webhooks_cache = {}  # cache des webhooks par channel
 
     # ──────────────────────────────────────────────────────────
-    # 🔹 Fonction pour remplacer les emojis custom
+    # 🔹 Fonction pour remplacer les emojis custom (identique à say.py)
     # ──────────────────────────────────────────────────────────
     def _replace_custom_emojis(self, channel, message: str) -> str:
-        """
-        Cherche les :nom: dans le message et les remplace par le vrai emoji
-        (<a:nom:id> ou <:nom:id>) s'il existe sur le serveur.
-        """
-        # Index des emojis du serveur courant : nom (lowercase) -> objet emoji
-        emoji_map = {}
+        # Supprime l'affichage en texte brut des emojis non animés (<:nom:id>)
+        message = re.sub(r"<:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
+        # Supprime aussi les emojis animés (<a:nom:id>)
+        message = re.sub(r"<a:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
+
+        # Remplace par des emojis valides si trouvés dans les serveurs du bot
+        all_emojis = {}
         if hasattr(channel, "guild"):
-            emoji_map = {e.name.lower(): e for e in channel.guild.emojis}
+            all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
+            for g in self.bot.guilds:
+                if g.id != channel.guild.id:
+                    all_emojis.update({e.name.lower(): str(e) for e in g.emojis})
 
         return re.sub(
             r":([a-zA-Z0-9_]+):",
-            lambda m: str(emoji_map[m.group(1).lower()])
-                      if m.group(1).lower() in emoji_map
-                      else m.group(0),
+            lambda m: all_emojis.get(m.group(1).lower(), m.group(0)),
             message,
             flags=re.IGNORECASE
         )
@@ -56,7 +58,7 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
-        # Remplacement des :nom: par les vrais emojis du serveur
+        # Remplacement des emojis custom
         new_content = self._replace_custom_emojis(message.channel, content)
 
         # Si rien n'a changé, aucun emoji à corriger → on ne repost pas
