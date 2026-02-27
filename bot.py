@@ -1,128 +1,159 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 📌 auto_say.py — Reposter automatiquement les messages avec emojis non accessibles
-# Objectif : Simuler un "say *me" automatique pour les emojis non affichables
-# Catégorie : Fun
-# Accès : Tous
+# 📌 bot.py — Script principal du bot Discord
+# Objectif : Initialisation, gestion des commandes et événements du bot
+# Catégorie : Général
+# Accès : Public
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 📦 Imports nécessaires
+# 📦 Modules standards
+# ────────────────────────────────────────────────────────────────────────────────
+import os
+import asyncio
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Modules tiers
 # ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord.ext import commands
-import re
+from dotenv import load_dotenv
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 Cog principal
+# 📦 Modules internes
 # ────────────────────────────────────────────────────────────────────────────────
-class AutoEmoji(commands.Cog):
-    """Reposte automatiquement les messages contenant des emojis non accessibles"""
+from utils.discord_utils import safe_send  # ✅ Utilitaires anti-429
+from utils.init_db import init_db
 
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.webhooks_cache = {}  # cache des webhooks par channel
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔧 Initialisation de l’environnement
+# ────────────────────────────────────────────────────────────────────────────────
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv()
 
-    # ──────────────────────────────────────────────────────────
-    # 🔹 Fonction pour remplacer les emojis custom
-    # ──────────────────────────────────────────────────────────
-    def _replace_custom_emojis(self, channel, message: str) -> tuple[str, bool]:
-        """
-        Retourne (nouveau_contenu, a_été_modifié).
-        FIX : on sépare les emojis animés (<a:nom:id>) des statiques (<:nom:id>)
-        pour ne pas perdre l'information d'animation lors du remplacement.
-        """
-        # Construit le dictionnaire AVANT toute modification du message
-        all_emojis = {}
-        guild_emoji_ids = set()
+TOKEN = os.getenv("DISCORD_TOKEN")
+COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
 
-        if hasattr(channel, "guild"):
-            # Emojis du serveur courant
-            for e in channel.guild.emojis:
-                all_emojis[e.name.lower()] = str(e)
-                # FIX : on n'exclut que les emojis STATIQUES du serveur courant
-                # Les animés doivent être repostés via webhook (sinon les non-Nitro ne peuvent pas les utiliser)
-                if not e.animated:
-                    guild_emoji_ids.add(e.id)
+def get_prefix(bot, message):
+    return COMMAND_PREFIX
 
-            # Emojis des autres serveurs
-            for g in self.bot.guilds:
-                if g.id != channel.guild.id:
-                    for e in g.emojis:
-                        all_emojis.setdefault(e.name.lower(), str(e))
+# ────────────────────────────────────────────────────────────────────────────────
+# ⚙️ Intents & Création du bot
+# ────────────────────────────────────────────────────────────────────────────────
+intents = discord.Intents.default()
+intents.message_content = True
+intents.guilds = True
+intents.members = True
+intents.guild_reactions = True
+intents.dm_reactions = True
 
-        modified = False
+bot = commands.Bot(
+    command_prefix=get_prefix,
+    intents=intents,
+    help_command=None
+)
 
-        def replace_emoji(match):
-            nonlocal modified
-            is_animated = match.group(1) == "a"  # "a" si animé, "" si statique
-            name = match.group(2)
-            emoji_id = int(match.group(3))
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔌 Chargement dynamique des commandes depuis /commands/*
+# ────────────────────────────────────────────────────────────────────────────────
+async def load_commands():
+    for category in os.listdir("commands"):
+        cat_path = os.path.join("commands", category)
+        if os.path.isdir(cat_path):
+            for filename in os.listdir(cat_path):
+                if filename.endswith(".py"):
+                    path = f"commands.{category}.{filename[:-3]}"
+                    try:
+                        await bot.load_extension(path)
+                        print(f"✅ Loaded {path}")
+                    except Exception as e:
+                        print(f"❌ Failed to load {path}: {e}")
 
-            # Si l'emoji appartient déjà au serveur courant, Discord l'affiche → on ne touche pas
-            if emoji_id in guild_emoji_ids:
-                return match.group(0)
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔌 Chargement dynamique des tasks depuis /tasks/*
+# ────────────────────────────────────────────────────────────────────────────────
+async def load_tasks():
+    for filename in os.listdir("tasks"):
+        if filename.endswith(".py"):
+            path = f"tasks.{filename[:-3]}"
+            try:
+                await bot.load_extension(path)
+                print(f"✅ Task loaded: {path}")
+            except Exception as e:
+                print(f"❌ Failed to load task {path}: {e}")
 
-            # Cherche un remplacement dans les autres serveurs
-            replacement = all_emojis.get(name.lower())
-            if replacement:
-                modified = True
-                return replacement
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔔 On Ready : présence
+# ────────────────────────────────────────────────────────────────────────────────
+@bot.event
+async def on_ready():
+    print(f"✅ Connecté en tant que {bot.user.name}")
+    await bot.change_presence(
+        activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name="Bleach"
+        )
+    )
 
-            # Emoji introuvable ailleurs → on laisse tel quel (sera affiché comme indispo)
-            return match.group(0)
+# ────────────────────────────────────────────────────────────────────────────────
+# 📩 Message reçu : réagir aux mots-clés et lancer les commandes
+# ────────────────────────────────────────────────────────────────────────────────
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
 
-        # Regex qui capture séparément : animé/statique, nom, id
-        new_content = re.sub(
-            r"<(a?):([a-zA-Z0-9_]+):(\d+)>",
-            replace_emoji,
-            message
+    if message.content.strip() in (f"<@{bot.user.id}>", f"<@!{bot.user.id}>"):
+        prefix = get_prefix(bot, message)
+        embed = discord.Embed(
+            title="Coucou !",
+            description=(
+                f"⚠ BOT EN TRAVAUX pour ne plus utiliser supabase mais une base de données locale.\n"
+                f"Bonjour ! Je suis **Kisuke Urahara**, un bot discord inspiré du manga Bleach.\n"
+                f"• Utilise la commande `{prefix}help` pour avoir la liste des commandes du bot "
+                f"ou `{prefix}help <commande>` pour en avoir une description."
+            ),
+            color=discord.Color.red()
         )
 
-        return new_content, modified
+        if bot.user.avatar:
+            embed.set_thumbnail(url=bot.user.avatar.url)
+        else:
+            embed.set_thumbnail(url=bot.user.default_avatar.url)
 
-    # ──────────────────────────────────────────────────────────
-    # 🔹 Listener sur tous les messages
-    # ──────────────────────────────────────────────────────────
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        if message.author.bot or not hasattr(message.channel, "guild"):
-            return
+        await safe_send(message.channel, embed=embed)
+        return
 
-        content = message.content
-        if not content:
-            return
-
-        new_content, was_modified = self._replace_custom_emojis(message.channel, content)
-
-        # FIX : on reposte UNIQUEMENT si un emoji a réellement été remplacé
-        if not was_modified:
-            return
-
-        # Récupère ou crée un webhook pour ce canal
-        webhook = self.webhooks_cache.get(message.channel.id)
-        if webhook is None:
-            webhooks = await message.channel.webhooks()
-            webhook = discord.utils.get(webhooks, name="AutoEmojiWebhook")
-            if webhook is None:
-                webhook = await message.channel.create_webhook(name="AutoEmojiWebhook")
-            self.webhooks_cache[message.channel.id] = webhook
-
-        # Reposte le message via webhook
-        await webhook.send(
-            content=new_content,
-            username=message.author.display_name,
-            avatar_url=message.author.display_avatar.url,
-            allowed_mentions=discord.AllowedMentions.all()
-        )
-
-        # Supprime le message original
-        await message.delete()
-
-        # Permettre aux autres cogs/commands de traiter le message
-        await self.bot.process_commands(message)
+    await bot.process_commands(message)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔌 Setup
+# ❗ Gestion des erreurs de commandes
 # ────────────────────────────────────────────────────────────────────────────────
-async def setup(bot: commands.Bot):
-    await bot.add_cog(AutoEmoji(bot))
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        retry = round(error.retry_after, 1)
+        await safe_send(ctx.channel, f"⏳ Cette commande est en cooldown. Réessaie dans `{retry}` secondes.")
+    elif isinstance(error, commands.MissingPermissions):
+        await safe_send(ctx.channel, "❌ Tu n'as pas les permissions pour cette commande.")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await safe_send(ctx.channel, "⚠️ Il manque un argument à cette commande.")
+    elif isinstance(error, commands.CommandNotFound):
+        return
+    else:
+        raise error
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🚀 Lancement
+# ────────────────────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+
+    async def start():
+        init_db()  # ✅ Création automatique des tables SQLite
+        await load_commands()
+        await load_tasks()
+        await bot.start(TOKEN)
+
+    asyncio.run(start())
+
+
+
