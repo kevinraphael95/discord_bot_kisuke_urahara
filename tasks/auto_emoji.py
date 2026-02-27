@@ -58,8 +58,12 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
+        print(f"[AutoEmoji] Reçu: {repr(content)}")
+
         # Remplacement des emojis custom
         new_content = self._replace_custom_emojis(message.channel, content)
+
+        print(f"[AutoEmoji] Résultat: {repr(new_content)} | Modifié: {new_content != content}")
 
         # Si rien n'a changé, aucun emoji à corriger → on ne repost pas
         if new_content == content:
