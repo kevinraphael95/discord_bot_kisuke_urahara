@@ -22,6 +22,14 @@ class AutoEmoji(commands.Cog):
         self.bot = bot
 
     # ──────────────────────────────────────────────────────────
+    # 🔹 Vérifie si le message est une commande bot
+    # ──────────────────────────────────────────────────────────
+    async def _is_command(self, message: discord.Message) -> bool:
+        """Retourne True si le message est une commande du bot."""
+        ctx = await self.bot.get_context(message)
+        return ctx.valid
+
+    # ──────────────────────────────────────────────────────────
     # 🔹 Fonction pour remplacer les emojis custom (identique à say.py)
     # ──────────────────────────────────────────────────────────
     def _replace_custom_emojis(self, channel, message: str) -> str:
@@ -57,15 +65,8 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
-        # Ignore les commandes (messages commençant par le préfixe du bot)
-        prefix = self.bot.command_prefix
-        if callable(prefix):
-            prefixes = await prefix(self.bot, message)
-            prefixes = [prefixes] if isinstance(prefixes, str) else list(prefixes)
-        else:
-            prefixes = [prefix] if isinstance(prefix, str) else list(prefix)
-
-        if any(content.startswith(p) for p in prefixes):
+        # Ignore les commandes du bot
+        if await self._is_command(message):
             return
 
         # Remplacement des emojis custom
