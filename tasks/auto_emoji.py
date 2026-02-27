@@ -25,24 +25,57 @@ class AutoEmoji(commands.Cog):
     # ──────────────────────────────────────────────────────────
     # 🔹 Fonction pour remplacer les emojis custom
     # ──────────────────────────────────────────────────────────
-    def _replace_custom_emojis(self, channel, message: str) -> str:
-        # Supprime l'affichage en texte brut des emojis existants (<:nom:id> et <a:nom:id>)
-        message = re.sub(r"<a?:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
-
-        # Remplace par des emojis valides si trouvés dans les serveurs du bot
+    def _replace_custom_emojis(self, channel, message: str) -> tuple[str, bool]:
+        """
+        Retourne (nouveau_contenu, a_été_modifié).
+        FIX : on sépare les emojis animés (<a:nom:id>) des statiques (<:nom:id>)
+        pour ne pas perdre l'information d'animation lors du remplacement.
+        """
+        # Construit le dictionnaire AVANT toute modification du message
         all_emojis = {}
+        guild_emoji_ids = set()
+
         if hasattr(channel, "guild"):
-            all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
+            # Emojis du serveur courant — on retient leurs IDs
+            for e in channel.guild.emojis:
+                all_emojis[e.name.lower()] = str(e)
+                guild_emoji_ids.add(e.id)
+
+            # Emojis des autres serveurs
             for g in self.bot.guilds:
                 if g.id != channel.guild.id:
-                    all_emojis.update({e.name.lower(): str(e) for e in g.emojis})
+                    for e in g.emojis:
+                        all_emojis.setdefault(e.name.lower(), str(e))
 
-        return re.sub(
-            r":([a-zA-Z0-9_]+):",
-            lambda m: all_emojis.get(m.group(1).lower(), m.group(0)),
-            message,
-            flags=re.IGNORECASE
+        modified = False
+
+        def replace_emoji(match):
+            nonlocal modified
+            is_animated = match.group(1) == "a"  # "a" si animé, "" si statique
+            name = match.group(2)
+            emoji_id = int(match.group(3))
+
+            # Si l'emoji appartient déjà au serveur courant, Discord l'affiche → on ne touche pas
+            if emoji_id in guild_emoji_ids:
+                return match.group(0)
+
+            # Cherche un remplacement dans les autres serveurs
+            replacement = all_emojis.get(name.lower())
+            if replacement:
+                modified = True
+                return replacement
+
+            # Emoji introuvable ailleurs → on laisse tel quel (sera affiché comme indispo)
+            return match.group(0)
+
+        # Regex qui capture séparément : animé/statique, nom, id
+        new_content = re.sub(
+            r"<(a?):([a-zA-Z0-9_]+):(\d+)>",
+            replace_emoji,
+            message
         )
+
+        return new_content, modified
 
     # ──────────────────────────────────────────────────────────
     # 🔹 Listener sur tous les messages
@@ -56,11 +89,10 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
-        # Remplacement des emojis custom
-        new_content = self._replace_custom_emojis(message.channel, content)
+        new_content, was_modified = self._replace_custom_emojis(message.channel, content)
 
-        # Si rien n’a changé, aucun emoji à corriger → on ne repost pas
-        if new_content == content:
+        # FIX : on reposte UNIQUEMENT si un emoji a réellement été remplacé
+        if not was_modified:
             return
 
         # Récupère ou crée un webhook pour ce canal
