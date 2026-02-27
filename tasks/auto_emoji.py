@@ -36,10 +36,13 @@ class AutoEmoji(commands.Cog):
         guild_emoji_ids = set()
 
         if hasattr(channel, "guild"):
-            # Emojis du serveur courant — on retient leurs IDs
+            # Emojis du serveur courant
             for e in channel.guild.emojis:
                 all_emojis[e.name.lower()] = str(e)
-                guild_emoji_ids.add(e.id)
+                # FIX : on n'exclut que les emojis STATIQUES du serveur courant
+                # Les animés doivent être repostés via webhook (sinon les non-Nitro ne peuvent pas les utiliser)
+                if not e.animated:
+                    guild_emoji_ids.add(e.id)
 
             # Emojis des autres serveurs
             for g in self.bot.guilds:
