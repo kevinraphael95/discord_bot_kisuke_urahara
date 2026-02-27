@@ -26,20 +26,20 @@ class AutoEmoji(commands.Cog):
     # 🔹 Fonction pour remplacer les emojis custom
     # ──────────────────────────────────────────────────────────
     def _replace_custom_emojis(self, channel, message: str) -> str:
-        # Supprime l'affichage en texte brut des emojis existants (<:nom:id> et <a:nom:id>)
-        message = re.sub(r"<a?:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
-
-        # Remplace par des emojis valides si trouvés dans les serveurs du bot
-        all_emojis = {}
+        """
+        Cherche les :nom: dans le message et les remplace par le vrai emoji
+        (<a:nom:id> ou <:nom:id>) s'il existe sur le serveur.
+        """
+        # Index des emojis du serveur courant : nom (lowercase) -> objet emoji
+        emoji_map = {}
         if hasattr(channel, "guild"):
-            all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
-            for g in self.bot.guilds:
-                if g.id != channel.guild.id:
-                    all_emojis.update({e.name.lower(): str(e) for e in g.emojis})
+            emoji_map = {e.name.lower(): e for e in channel.guild.emojis}
 
         return re.sub(
             r":([a-zA-Z0-9_]+):",
-            lambda m: all_emojis.get(m.group(1).lower(), m.group(0)),
+            lambda m: str(emoji_map[m.group(1).lower()])
+                      if m.group(1).lower() in emoji_map
+                      else m.group(0),
             message,
             flags=re.IGNORECASE
         )
@@ -56,10 +56,10 @@ class AutoEmoji(commands.Cog):
         if not content:
             return
 
-        # Remplacement des emojis custom
+        # Remplacement des :nom: par les vrais emojis du serveur
         new_content = self._replace_custom_emojis(message.channel, content)
 
-        # Si rien n’a changé, aucun emoji à corriger → on ne repost pas
+        # Si rien n'a changé, aucun emoji à corriger → on ne repost pas
         if new_content == content:
             return
 
