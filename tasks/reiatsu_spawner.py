@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 reiatsu_spawner.py — Gestion du spawn des Reiatsu
-# Objectif : Gérer l’apparition et la capture des Reiatsu sur les serveurs
+# Objectif : Gérer l'apparition et la capture des Reiatsu sur les serveurs
 # Catégorie : Reiatsu / RPG
 # Accès : Tous
 # Cooldown : Spawn auto toutes les X minutes (configurable par serveur)
@@ -297,9 +297,112 @@ class ReiatsuSpawner(commands.Cog):
             await safe_send(channel, f"🌟 {user.mention} a absorbé un **Super Reiatsu** et gagné **+{gain}** reiatsu !")
         else:
             if classe == "Parieur" and gain == 0:
-                await safe_send(channel, f"🎲 {user.mention} a tenté d’absorber un reiatsu mais a raté (passif Parieur) !")
+                await safe_send(channel, f"🎲 {user.mention} a tenté d'absorber un reiatsu mais a raté (passif Parieur) !")
             else:
                 await safe_send(channel, f"💠 {user.mention} a absorbé le Reiatsu et gagné **+{gain}** reiatsu !")
+
+    # ──────────────────────────────────────────────────────────────
+    # 🔹 Listener réaction — capture du Reiatsu
+    # ──────────────────────────────────────────────────────────────
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        # Ignore les bots
+        if payload.user_id == self.bot.user.id:
+            return
+
+        # Ignore les réactions autres que 💠
+        if str(payload.emoji) != "💠":
+            return
+
+        guild_id = payload.guild_id
+        message_id = payload.message_id
+        user_id = payload.user_id
+
+        # ── Vérifie si c'est un vrai Reiatsu ──────────────────────
+        self.cursor.execute("""
+            SELECT * FROM reiatsu_config
+            WHERE guild_id = ? AND message_id = ? AND is_spawn = 1
+        """, (guild_id, message_id))
+        conf = self.cursor.fetchone()
+
+        # ── Vérifie si c'est un faux Reiatsu (Illusionniste) ──────
+        self.cursor.execute("""
+            SELECT user_id FROM reiatsu
+            WHERE fake_spawn_id = ?
+        """, (message_id,))
+        fake_row = self.cursor.fetchone()
+
+        if not conf and not fake_row:
+            return
+
+        # ── Verrou anti-double capture ─────────────────────────────
+        lock_key = f"{guild_id}-{message_id}"
+        if lock_key not in self.locks:
+            self.locks[lock_key] = asyncio.Lock()
+
+        async with self.locks[lock_key]:
+
+            # Re-vérifie que le reiatsu est toujours disponible (pas déjà capturé)
+            if conf:
+                self.cursor.execute("""
+                    SELECT is_spawn FROM reiatsu_config
+                    WHERE guild_id = ? AND message_id = ?
+                """, (guild_id, message_id))
+                current = self.cursor.fetchone()
+                if not current or not current["is_spawn"]:
+                    return
+            else:
+                self.cursor.execute("""
+                    SELECT fake_spawn_id FROM reiatsu WHERE fake_spawn_id = ?
+                """, (message_id,))
+                if not self.cursor.fetchone():
+                    return
+
+            # ── Récupère le channel et le user ────────────────────
+            channel = self.bot.get_channel(payload.channel_id)
+            if not channel:
+                return
+
+            guild = self.bot.get_guild(guild_id)
+            if not guild:
+                return
+
+            user = guild.get_member(user_id) or await guild.fetch_member(user_id)
+            if not user:
+                return
+
+            # ── Calcul du gain ────────────────────────────────────
+            gain, is_super, classe = self._calculate_gain(user_id)
+
+            # ── Supprime le message de spawn ──────────────────────
+            try:
+                msg = await channel.fetch_message(message_id)
+                await safe_delete(msg)
+            except Exception:
+                pass
+
+            # ── Reset dans la DB ──────────────────────────────────
+            if conf:
+                self.cursor.execute("""
+                    UPDATE reiatsu_config
+                    SET is_spawn = 0, message_id = NULL, spawn_delay = NULL
+                    WHERE guild_id = ?
+                """, (guild_id,))
+            else:
+                self.cursor.execute("""
+                    UPDATE reiatsu
+                    SET fake_spawn_id = NULL, active_skill = 0
+                    WHERE fake_spawn_id = ?
+                """, (message_id,))
+
+            self.conn.commit()
+
+            # Libère le verrou de ce message
+            if lock_key in self.locks:
+                del self.locks[lock_key]
+
+            # ── Feedback au joueur ────────────────────────────────
+            await self._send_feedback(channel, user, gain, is_super, classe)
 
 # ───────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
