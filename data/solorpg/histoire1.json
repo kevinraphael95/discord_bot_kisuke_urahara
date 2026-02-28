@@ -1,132 +1,190 @@
 {
-  "titre": "Le Château Hanté : Les Ombres du Passé",
+  "titre": "Le Château des Âmes Perdues",
   "contenu": [
-    {"page":1,"texte":"Vous arrivez devant le château, imposant et silencieux. La porte principale est entrouverte.","options":[{"texte":"Entrer par la porte","suivant":2},{"texte":"Contourner le château","suivant":3}]},
-    {"page":2,"texte":"Le hall est froid et silencieux. Les portraits des ancêtres semblent vous suivre du regard.","options":[{"texte":"Explorer le couloir gauche","suivant":4},{"texte":"Monter l'escalier","suivant":5}]},
-    {"page":3,"texte":"Dans le jardin, la brume est épaisse et des statues semblent vous observer.","options":[{"texte":"Avancer vers la fontaine","suivant":6},{"texte":"Revenir à la porte principale","suivant":2}]},
-    {"page":4,"texte":"Le couloir sombre mène à une porte entrouverte d'où s'échappe un souffle glacial.","options":[{"texte":"Ouvrir la porte","suivant":7},{"texte":"Continuer le couloir","suivant":8}]},
-    {"page":5,"texte":"À l'étage, un long couloir mène à plusieurs portes.","options":[{"texte":"Ouvrir la première porte","suivant":9},{"texte":"Ouvrir la deuxième porte","suivant":10}]},
-    {"page":6,"texte":"La fontaine est asséchée. Vous trouvez un coffret ancien.","options":[{"texte":"Ouvrir le coffret","suivant":11},{"texte":"Le laisser fermé","suivant":12}]},
-    {"page":7,"texte":"Une silhouette fantomatique apparaît, vous tend un parchemin ancien.","options":[{"texte":"Lire le parchemin","suivant":13},{"texte":"Ignorer et passer","suivant":8}]},
-    {"page":8,"texte":"Vous continuez et trouvez une bibliothèque poussiéreuse.","options":[{"texte":"Lire un manuscrit","suivant":14},{"texte":"Fouiller les étagères","suivant":15}]},
-    {"page":9,"texte":"La première chambre contient des meubles recouverts de draps blancs et un portrait.","options":[{"texte":"Examiner le portrait","suivant":16},{"texte":"Chercher dans les tiroirs","suivant":17}]},
-    {"page":10,"texte":"La deuxième chambre est vide, sauf pour une fenêtre donnant sur le jardin brumeux.","options":[{"texte":"Observer le jardin","suivant":6},{"texte":"Continuer le couloir","suivant":18}]},
-    {"page":11,"texte":"Dans le coffret, vous trouvez une clé ancienne et un parchemin froissé.","options":[{"texte":"Prendre la clé et le parchemin","suivant":19},{"texte":"Ne rien prendre","suivant":12}]},
-    {"page":12,"texte":"De retour dans le jardin, vous sentez une présence derrière vous.","options":[{"texte":"Se retourner","suivant":7},{"texte":"Ignorer et continuer vers la tour","suivant":20}]},
-    {"page":13,"texte":"Le parchemin décrit un rituel pour libérer les âmes piégées.","options":[{"texte":"Essayer le rituel","suivant":21},{"texte":"Chercher plus d'informations","suivant":15}]},
-    {"page":14,"texte":"Le manuscrit révèle un passage secret vers la crypte.","options":[{"texte":"Descendre dans la crypte","suivant":22},{"texte":"Ignorer et explorer le grenier","suivant":23}]},
-    {"page":15,"texte":"Les étagères contiennent un carnet d'un ancien explorateur du château.","options":[{"texte":"Lire le carnet","suivant":24},{"texte":"Ignorer et continuer","suivant":18}]},
-    {"page":16,"texte":"Le portrait cache une clé derrière le cadre.","options":[{"texte":"Prendre la clé","suivant":25},{"texte":"Ne rien faire","suivant":17}]},
-    {"page":17,"texte":"Les tiroirs sont vides mais un bruit derrière vous vous fait sursauter.","options":[{"texte":"Se retourner","suivant":7},{"texte":"Ignorer et quitter la chambre","suivant":18}]},
-    {"page":18,"texte":"Le couloir mène à une pièce effondrée avec un miroir fissuré.","options":[{"texte":"Examiner le miroir","suivant":26},{"texte":"Continuer vers l'escalier","suivant":5}]},
-    {"page":19,"texte":"Le parchemin contient un avertissement : le rituel est dangereux.","options":[{"texte":"Suivre les instructions","suivant":21},{"texte":"Ignorer et explorer plus loin","suivant":18}]},
-    {"page":20,"texte":"La tour révèle un escalier en colimaçon menant à un grenier.","options":[{"texte":"Monter l'escalier","suivant":27},{"texte":"Descendre et explorer le château","suivant":2}]},
-    {"page":21,"texte":"Le rituel partiel libère une âme mais réveille une force sombre.","options":[{"texte":"Accepter les conséquences","suivant":28},{"texte":"Interrompre le rituel","suivant":15}]},
-    {"page":22,"texte":"Dans la crypte, des inscriptions anciennes révèlent le rituel complet.","options":[{"texte":"Essayer le rituel complet","suivant":28},{"texte":"Sortir de la crypte","suivant":3}]},
-    {"page":23,"texte":"Le grenier contient des objets rituels et des anciens écrits.","options":[{"texte":"Prendre des objets","suivant":29},{"texte":"Ignorer et descendre","suivant":5}]},
-    {"page":24,"texte":"Le carnet révèle la clé de la chambre du Comte est cachée dans la tour.","options":[{"texte":"Aller à la tour","suivant":20},{"texte":"Chercher d'autres indices","suivant":18}]},
-    {"page":25,"texte":"Le coffre contient un talisman mystérieux.","options":[{"texte":"Prendre le talisman","suivant":19},{"texte":"Le laisser","suivant":18}]},
-    {"page":26,"texte":"Le miroir fissuré reflète un visage inconnu derrière vous.","options":[{"texte":"Toucher le miroir","suivant":7},{"texte":"Fuir la pièce","suivant":5}]},
-    {"page":27,"texte":"Du grenier, vous voyez la chambre verrouillée du Comte.","options":[{"texte":"Descendre vers la chambre","suivant":30},{"texte":"Observer le paysage","suivant":20}]},
-    {"page":28,"texte":"FIN — Selon vos choix, certaines âmes sont libérées, d'autres restent piégées. Le château est hanté ou partiellement apaisé.","options":[]},
-    {"page":29,"texte":"Vous prenez les objets rituels qui pourraient aider à compléter le rituel plus tard.","options":[{"texte":"Aller à la chambre du Comte","suivant":30},{"texte":"Continuer à explorer","suivant":18}]},
-    {"page":30,"texte":"Vous entrez dans la chambre du Comte. L'autel est prêt pour le rituel final.","options":[{"texte":"Effectuer le rituel avec prudence","suivant":28},{"texte":"Fuir sans agir","suivant":12}]},
 
-    {"page":31,"texte":"Vous explorez le grenier et trouvez une trappe secrète.","options":[{"texte":"Ouvrir la trappe","suivant":32},{"texte":"Ignorer et descendre","suivant":5}]},
-    {"page":32,"texte":"La trappe mène à un tunnel étroit sous le château.","options":[{"texte":"S’avancer dans le tunnel","suivant":33},{"texte":"Revenir au grenier","suivant":31}]},
-    {"page":33,"texte":"Dans le tunnel, vous entendez des murmures inquiétants.","options":[{"texte":"Suivre les murmures","suivant":34},{"texte":"Faire demi-tour","suivant":32}]},
-    {"page":34,"texte":"Vous arrivez dans une salle secrète remplie de reliques anciennes.","options":[{"texte":"Examiner les reliques","suivant":35},{"texte":"Ignorer et continuer","suivant":36}]},
-    {"page":35,"texte":"Une relique libère une vision des événements passés du château.","options":[{"texte":"Explorer la vision","suivant":37},{"texte":"Quitter la salle","suivant":36}]},
-    {"page":36,"texte":"Vous continuez dans le tunnel et trouvez une porte scellée.","options":[{"texte":"Ouvrir la porte","suivant":38},{"texte":"Revenir","suivant":32}]},
-    {"page":37,"texte":"La vision vous montre le Comte en train de sceller les âmes.","options":[{"texte":"Chercher des indices pour inverser le rituel","suivant":39},{"texte":"Quitter la vision","suivant":36}]},
-    {"page":38,"texte":"La porte scellée mène à un petit sanctuaire avec un autel ancien.","options":[{"texte":"Examiner l'autel","suivant":40},{"texte":"Revenir","suivant":36}]},
-    {"page":39,"texte":"Vous découvrez un symbole qui pourrait inverser le rituel.","options":[{"texte":"Prendre note du symbole","suivant":41},{"texte":"Ignorer","suivant":36}]},
-    {"page":40,"texte":"L'autel contient un livre relié de cuir noir.","options":[{"texte":"Ouvrir le livre","suivant":42},{"texte":"Ignorer le livre","suivant":36}]},
-    {"page":41,"texte":"Vous prenez le symbole et vous sentez une énergie étrange.","options":[{"texte":"Utiliser le symbole dans le rituel final","suivant":28},{"texte":"Le garder pour plus tard","suivant":30}]},
-    {"page":42,"texte":"Le livre révèle des détails pour compléter le rituel en toute sécurité.","options":[{"texte":"Mémoriser le rituel","suivant":28},{"texte":"Ignorer et descendre","suivant":5}]},
-    
-    {"page":43,"texte":"Vous trouvez une petite clé sur le sol du hall.","options":[{"texte":"Prendre la clé","suivant":44},{"texte":"La laisser","suivant":5}]},
-    {"page":44,"texte":"La clé ouvre une porte cachée vers une salle mystérieuse.","options":[{"texte":"Entrer dans la salle","suivant":45},{"texte":"Ignorer et continuer","suivant":5}]},
-    {"page":45,"texte":"La salle contient un vieux coffre avec un rituel partiel tracé.","options":[{"texte":"Lire le rituel","suivant":46},{"texte":"Ouvrir le coffre","suivant":47}]},
-    {"page":46,"texte":"Le rituel partiel pourrait libérer certaines âmes mais éveiller d'autres esprits.","options":[{"texte":"Tenter le rituel","suivant":28},{"texte":"Ne pas tenter","suivant":47}]},
-    {"page":47,"texte":"Le coffre contient des parchemins et un objet mystérieux.","options":[{"texte":"Prendre l'objet","suivant":29},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 1,
+      "texte": "🌑 La nuit est tombée sur le domaine Valdris. Vous êtes détective du paranormal, mandaté pour enquêter sur les disparitions inexpliquées qui frappent ce château depuis des siècles. La grille rouillée grince derrière vous. Devant vous : une façade de pierre noire, des fenêtres aveuglées, et une unique lumière vacillante à l'étage. Dans votre sacoche : une lampe, un carnet, et le dossier du dernier disparu — Émile Castor, 32 ans, chercheur en histoire.",
+      "options": [
+        {"texte": "🚪 Entrer par la grande porte principale", "suivant": 2},
+        {"texte": "🌿 Longer le mur pour trouver une entrée dérobée", "suivant": 3}
+      ]
+    },
 
-    {"page":48,"texte":"Vous montez le grand escalier et entendez des voix.","options":[{"texte":"Suivre les voix","suivant":49},{"texte":"Ignorer et continuer","suivant":5}]},
-    {"page":49,"texte":"Les voix mènent à un fantôme perdu qui cherche son repos.","options":[{"texte":"L'aider","suivant":50},{"texte":"L'ignorer","suivant":5}]},
-    {"page":50,"texte":"En aidant le fantôme, vous obtenez un indice sur le rituel final.","options":[{"texte":"Noter l'indice","suivant":41},{"texte":"L'ignorer","suivant":5}]},
+    {
+      "page": 2,
+      "texte": "🏛️ Le hall d'entrée est vaste et glacial. Un escalier monumental s'élève face à vous. Sur le sol : des traces de pas dans la poussière — récentes, qui mènent vers la gauche. Au mur, une carte du château encadrée. Vous la consultez : sous-sol (crypte), rez-de-chaussée (bibliothèque, salon, cuisine), étage (chambres, bureau du Comte). Une inscription au bas de la carte, griffonnée à l'encre rouge : *'Ne descendez pas avant d'avoir compris.'*",
+      "options": [
+        {"texte": "👣 Suivre les traces de pas vers la gauche", "suivant": 4},
+        {"texte": "📚 Explorer la bibliothèque d'abord", "suivant": 5},
+        {"texte": "🪜 Monter l'escalier vers les chambres", "suivant": 6}
+      ]
+    },
 
-    {"page":51,"texte":"Vous trouvez une pièce secrète derrière un tableau.","options":[{"texte":"Entrer","suivant":52},{"texte":"Continuer le couloir","suivant":5}]},
-    {"page":52,"texte":"La pièce contient des symboles gravés au sol.","options":[{"texte":"Examiner les symboles","suivant":39},{"texte":"Ignorer et sortir","suivant":5}]},
+    {
+      "page": 3,
+      "texte": "🌿 En longeant le mur ouest, vous découvrez une porte de service dissimulée par du lierre. Elle est déverrouillée. À l'intérieur : une ancienne cuisine. Sur la table, un repas à moitié mangé — encore chaud. Quelqu'un était là il y a moins d'une heure. Un couteau de cuisine est planté dans la table, retenant un billet : *'Partez. Il ne reste rien à sauver ici.'* La signature : E.C. — les initiales d'Émile Castor.",
+      "options": [
+        {"texte": "🔍 Fouiller la cuisine pour trouver d'autres indices", "suivant": 7},
+        {"texte": "🚶 Rejoindre le hall principal par la porte intérieure", "suivant": 2}
+      ]
+    },
 
-    {"page":53,"texte":"Vous descendez dans la crypte et découvrez une fresque ancienne.","options":[{"texte":"Examiner la fresque","suivant":54},{"texte":"Passer sans toucher","suivant":36}]},
-    {"page":54,"texte":"La fresque raconte la tragédie du Comte et de sa famille.","options":[{"texte":"Mémoriser l'histoire","suivant":28},{"texte":"Ignorer","suivant":36}]},
+    {
+      "page": 4,
+      "texte": "👣 Les traces mènent à une petite pièce : l'office du majordome. Un bureau renversé, des papiers éparpillés. Parmi eux, vous ramassez un registre des événements du château. La dernière entrée, datée d'hier soir : *'Le Comte s'est réveillé. J'ai vu ses yeux s'ouvrir dans le portrait. Émile a tenté le rituel de l'Aube sans avoir les trois sceaux. Il est maintenant prisonnier entre les deux mondes. Dieu nous pardonne.'*\n\nVous comprenez : il faut trouver les **trois sceaux** pour aider Émile.",
+      "options": [
+        {"texte": "📚 Aller chercher le premier sceau en bibliothèque", "suivant": 5},
+        {"texte": "⬇️ Descendre immédiatement à la crypte", "suivant": 8}
+      ]
+    },
 
-    {"page":55,"texte":"Vous trouvez un escalier étroit vers une tour oubliée.","options":[{"texte":"Monter","suivant":56},{"texte":"Ignorer","suivant":5}]},
-    {"page":56,"texte":"Dans la tour, vous trouvez des objets rituels et des notes.","options":[{"texte":"Lire les notes","suivant":42},{"texte":"Prendre les objets","suivant":29}]},
+    {
+      "page": 5,
+      "texte": "📚 La bibliothèque sent l'encre et la cire froide. Des milliers de volumes s'étendent du sol au plafond. Sur le bureau central, un livre est ouvert : *Traité des Âmes Scellées, Tome III*. Vous lisez : *'Le rituel de l'Aube requiert trois sceaux : le Sceau du Sang (crypte), le Sceau du Temps (bureau du Comte), le Sceau de la Mémoire (jardin des statues). Sans les trois, celui qui tente le passage reste suspendu — ni vivant, ni mort.'*\n\nEn refermant le livre, vous trouvez glissé entre les pages un **médaillon brisé** — la moitié d'un sceau.",
+      "options": [
+        {"texte": "⬇️ Descendre à la crypte chercher le Sceau du Sang", "suivant": 8},
+        {"texte": "🪜 Monter au bureau du Comte chercher le Sceau du Temps", "suivant": 9},
+        {"texte": "🌿 Sortir dans le jardin chercher le Sceau de la Mémoire", "suivant": 10}
+      ]
+    },
 
-    {"page":57,"texte":"Vous explorez un passage derrière la bibliothèque.","options":[{"texte":"Entrer dans le passage","suivant":58},{"texte":"Ignorer","suivant":8}]},
-    {"page":58,"texte":"Le passage mène à un laboratoire secret avec un autel ancien.","options":[{"texte":"Examiner l'autel","suivant":40},{"texte":"Ignorer et revenir","suivant":8}]},
+    {
+      "page": 6,
+      "texte": "🪜 L'escalier craque à chaque marche. À l'étage, un long couloir s'étire, bordé de portraits de la famille Valdris. Vous les examinez : chaque portrait montre le même visage à des époques différentes — le Comte Valdris. Une obsession de l'immortalité gravée dans la toile. Devant la dernière porte au fond du couloir, une lumière filtre. En approchant, vous entendez une voix qui murmure en boucle : *'Les sceaux... les trois sceaux... il faut les trois...'*",
+      "options": [
+        {"texte": "🚪 Ouvrir la porte d'où vient la voix", "suivant": 11},
+        {"texte": "📚 Descendre d'abord chercher des informations en bibliothèque", "suivant": 5}
+      ]
+    },
 
-    {"page":59,"texte":"Vous trouvez un vieux journal d’un ancien gardien.","options":[{"texte":"Lire le journal","suivant":24},{"texte":"Ignorer","suivant":8}]},
-    {"page":60,"texte":"Le hall du château émet des sons étranges la nuit.","options":[{"texte":"Suivre les sons","suivant":49},{"texte":"Ignorer et monter","suivant":5}]},
+    {
+      "page": 7,
+      "texte": "🔍 En fouillant la cuisine, vous trouvez sous une latte du plancher une boîte en fer. À l'intérieur : le journal intime d'Émile Castor, ses dernières notes. Il avait tout compris sur le Comte et les sceaux, mais a agi trop vite, sans le troisième sceau. La dernière page, tracée d'une main tremblante : *'Si quelqu'un lit ceci — le Sceau de la Mémoire est dans le jardin, sous la statue sans visage. Ne faites pas mon erreur. Prenez les trois. Et surtout... ne regardez pas le portrait du Comte dans les yeux.'*\n\nVous notez tout et vous sentez mieux préparé.",
+      "options": [
+        {"texte": "📚 Aller en bibliothèque comprendre le rituel complet", "suivant": 5},
+        {"texte": "🌿 Aller directement au jardin chercher le Sceau de la Mémoire", "suivant": 10}
+      ]
+    },
 
-    {"page":61,"texte":"Vous découvrez une trappe menant à une cave oubliée.","options":[{"texte":"Descendre","suivant":62},{"texte":"Ignorer","suivant":5}]},
-    {"page":62,"texte":"Dans la cave, des pierres gravées contiennent des instructions anciennes.","options":[{"texte":"Lire les instructions","suivant":42},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 8,
+      "texte": "⬇️ La crypte est humide et basse de plafond. Des sarcophages alignés portent tous le nom Valdris. Au centre de la pièce, un autel de pierre. Dessus : une coupe de sang séché et, serti dans la pierre, un **disque de bronze gravé** — le Sceau du Sang. En le prenant, les murs vibrent. Une ombre se matérialise devant vous : le spectre d'une femme en robe de deuil.\n\n*'Vous cherchez à libérer l'âme piégée. Bien. Mais sachez : le Comte résistera. Il se nourrit des âmes qu'il capture. Émile est encore en vie — pour l'instant.'*\n\nElle disparaît, vous laissant avec le sceau et une certitude : il faut faire vite.",
+      "options": [
+        {"texte": "🪜 Monter au bureau du Comte chercher le Sceau du Temps", "suivant": 9},
+        {"texte": "🌿 Aller au jardin chercher le Sceau de la Mémoire", "suivant": 10}
+      ]
+    },
 
-    {"page":63,"texte":"Vous entendez un cri dans le grenier.","options":[{"texte":"Monter et enquêter","suivant":27},{"texte":"Ignorer","suivant":5}]},
-    {"page":64,"texte":"Un fantôme figé en boucle répète ses derniers gestes.","options":[{"texte":"L'aider à rompre la boucle","suivant":50},{"texte":"L'ignorer","suivant":5}]},
+    {
+      "page": 9,
+      "texte": "🖋️ Le bureau du Comte est au bout du couloir de l'étage. La porte est verrouillée, mais la serrure est ancienne — votre canif suffit. À l'intérieur : un chaos de parchemins, d'instruments astronomiques et d'horloges arrêtées. Sur le mur : une immense carte du ciel nocturne, annotée en latin. Au centre du bureau, une horloge à gousset brisée, les aiguilles arrachées. Dans le mécanisme : le **Sceau du Temps**, un cadran d'argent gravé de symboles.\n\nEn le prenant, toutes les horloges de la pièce se remettent à sonner en même temps. Et dans le miroir au fond de la pièce, vous voyez un reflet qui n'est pas le vôtre — les yeux du Comte vous regardent.",
+      "options": [
+        {"texte": "🏃 Quitter rapidement le bureau sans croiser son regard", "suivant": 12},
+        {"texte": "👁️ Soutenir le regard du Comte dans le miroir", "suivant": 13}
+      ]
+    },
 
-    {"page":65,"texte":"Vous trouvez un passage secret derrière la fontaine.","options":[{"texte":"Explorer le passage","suivant":32},{"texte":"Ignorer","suivant":3}]},
-    {"page":66,"texte":"Vous découvrez un objet brillant sur le sol du couloir.","options":[{"texte":"Prendre l'objet","suivant":29},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 10,
+      "texte": "🌿 Le jardin est envahi par la brume. Des statues de pierre vous encerclent — toutes ont le même corps, mais des visages brisés, comme effacés. Sauf une, au centre, qui n'a jamais eu de visage : un simple ovale lisse. À ses pieds, une cavité dans le socle. Vous y glissez la main et saisissez un **cristal noir taillé** — le Sceau de la Mémoire.\n\nAu moment où vous vous relevez, la statue sans visage tourne lentement la tête vers vous. Puis une voix sort de nulle part — la voix d'Émile, distante, épuisée : *'Je suis dans le miroir du bureau... au dernier étage... dépêchez-vous...'*",
+      "options": [
+        {"texte": "🏃 Rentrer immédiatement récupérer les autres sceaux manquants", "suivant": 14},
+        {"texte": "🪜 Monter directement au bureau si vous avez déjà les autres sceaux", "suivant": 15}
+      ]
+    },
 
-    {"page":67,"texte":"Une porte scellée demande un mot de passe.","options":[{"texte":"Chercher le mot de passe","suivant":39},{"texte":"Forcer la porte","suivant":36}]},
-    {"page":68,"texte":"Vous trouvez un talisman dans la bibliothèque.","options":[{"texte":"Prendre le talisman","suivant":41},{"texte":"Ignorer","suivant":8}]},
+    {
+      "page": 11,
+      "texte": "🚪 La porte s'ouvre sur une chambre dévastée. Assis dans un fauteuil, le regard vide, se trouve Émile Castor. Il est vivant — mais il ne réagit pas à votre présence. Sa main serre un parchemin. Vous le lisez : le rituel de l'Aube, griffonné en entier. Il lui manquait le Sceau de la Mémoire au moment où il l'a tenté.\n\nSes lèvres bougent enfin : *'Les... sceaux... trois... apportez-les ici...'* Son corps est présent mais son âme est piégée à mi-chemin. Vous avez compris ce qu'il faut faire.",
+      "options": [
+        {"texte": "🔍 Partir rassembler les trois sceaux avant de revenir", "suivant": 14},
+        {"texte": "⚠️ Tenter le rituel maintenant avec ce que vous avez", "suivant": 16}
+      ]
+    },
 
-    {"page":69,"texte":"Une fenêtre donne sur le jardin obscur.","options":[{"texte":"Regarder dehors","suivant":3},{"texte":"Continuer le couloir","suivant":5}]},
-    {"page":70,"texte":"Vous tombez sur un ancien portrait du Comte.","options":[{"texte":"Examiner le portrait","suivant":16},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 12,
+      "texte": "🏃 Vous quittez le bureau rapidement, les deux sceaux en poche. Dans le couloir, l'atmosphère a changé — l'air est plus lourd, les portraits semblent vous suivre du regard. Vous entendez des pas lents derrière vous, mais en vous retournant : personne. Le château commence à réagir à votre présence.\n\nVous avez le Sceau du Temps. Il vous reste le Sceau de la Mémoire (jardin) ou le Sceau du Sang (crypte) si vous ne les avez pas encore.",
+      "options": [
+        {"texte": "🌿 Descendre au jardin chercher le Sceau de la Mémoire", "suivant": 10},
+        {"texte": "⬇️ Descendre à la crypte chercher le Sceau du Sang", "suivant": 8}
+      ]
+    },
 
-    {"page":71,"texte":"Un vieux lustre s'effondre devant vous.","options":[{"texte":"Sauter de côté","suivant":5},{"texte":"Rester et regarder","suivant":7}]},
-    {"page":72,"texte":"Une bibliothèque secrète s'ouvre derrière un mur.","options":[{"texte":"Entrer","suivant":14},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 13,
+      "texte": "👁️ Vous soutenez le regard du reflet. Les yeux du Comte sont froids, calculateurs — et puis quelque chose se passe. Une voix résonne dans votre crâne, non dans la pièce : *'Un autre détective. Combien faudra-t-il que vous soyez, avant que vous compreniez ? Cette maison est la mienne. Ces âmes sont les miennes. Posez les sceaux. Partez. Et vivez.'*\n\nLa vision se brise. Vous êtes à genoux, le nez qui saigne. Mais vous tenez toujours le Sceau du Temps — et vous savez maintenant que le Comte est conscient de chacun de vos gestes.",
+      "options": [
+        {"texte": "💪 Continuer malgré tout — aller chercher les sceaux restants", "suivant": 14},
+        {"texte": "🚪 Obéir au Comte et fuir le château immédiatement", "suivant": 17}
+      ]
+    },
 
-    {"page":73,"texte":"Un miroir dans la tour reflète des événements passés.","options":[{"texte":"Toucher le miroir","suivant":37},{"texte":"Ignorer","suivant":27}]},
-    {"page":74,"texte":"Vous trouvez une porte derrière un rideau.","options":[{"texte":"Ouvrir la porte","suivant":45},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 14,
+      "texte": "🎒 Vous faites le point sur votre situation. Selon ce que vous avez trouvé jusqu'ici, il vous reste à rassembler les sceaux manquants avant de pouvoir aider Émile. Chaque minute compte — vous sentez la présence du Comte se renforcer à mesure que la nuit avance.",
+      "options": [
+        {"texte": "⬇️ Aller à la crypte (Sceau du Sang)", "suivant": 8},
+        {"texte": "🖋️ Aller au bureau du Comte (Sceau du Temps)", "suivant": 9},
+        {"texte": "🌿 Aller au jardin (Sceau de la Mémoire)", "suivant": 10}
+      ]
+    },
 
-    {"page":75,"texte":"Une brume étrange envahit le hall.","options":[{"texte":"Suivre la brume","suivant":58},{"texte":"Rester sur place","suivant":2}]},
-    {"page":76,"texte":"Vous trouvez un objet ancien sur un bureau poussiéreux.","options":[{"texte":"Prendre l'objet","suivant":29},{"texte":"Ignorer","suivant":8}]},
+    {
+      "page": 15,
+      "texte": "✨ Vous avez les trois sceaux. Vous montez au bureau du Comte. Émile est là, toujours figé dans son fauteuil. Vous disposez les trois sceaux selon le schéma du parchemin : bronze au nord, argent à l'est, cristal au sud. Vous récitez les mots latins notés dans le Traité.\n\nLa pièce tremble. Le miroir explose en milliers d'éclats lumineux. Émile reprend sa respiration normalement, ses yeux s'ouvrent — vraiment ouverts cette fois. *'Vous... vous avez réussi,'* souffle-t-il.\n\nMais le travail n'est pas terminé. Le Comte est libre lui aussi, maintenant que le verrou rituel est brisé.",
+      "options": [
+        {"texte": "⚔️ Affronter le Comte avec le savoir accumulé", "suivant": 18},
+        {"texte": "🏃 Fuir le château immédiatement avec Émile", "suivant": 19}
+      ]
+    },
 
-    {"page":77,"texte":"Des escaliers cachés mènent à une tour oubliée.","options":[{"texte":"Monter","suivant":56},{"texte":"Ignorer","suivant":5}]},
-    {"page":78,"texte":"Un tableau bouge légèrement.","options":[{"texte":"Pousser le tableau","suivant":52},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 16,
+      "texte": "⚠️ Vous tentez le rituel sans avoir les trois sceaux. Les mots latins résonnent, la pièce vibre — et soudain tout s'arrête. Un rire froid emplit la chambre. Le Comte apparaît, une silhouette noire aux yeux d'ambre.\n\n*'Merci,'* dit-il simplement.\n\nEn tentant un rituel incomplet, vous avez ouvert une brèche que vous ne pouviez pas contrôler. Le Comte aspirera maintenant votre énergie pour maintenir son emprise sur Émile. Vous êtes piégé à votre tour.\n\n💀 **FIN 1 — La Mauvaise Hâte** : En agissant sans préparation, vous avez renforcé le Comte et condamné Émile. Deux âmes perdues, là où il n'y en avait qu'une.",
+      "options": []
+    },
 
-    {"page":79,"texte":"Un portrait vous suit du regard.","options":[{"texte":"Toucher le portrait","suivant":16},{"texte":"Ignorer","suivant":5}]},
-    {"page":80,"texte":"Vous trouvez un vieux coffre verrouillé.","options":[{"texte":"Ouvrir le coffre","suivant":47},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 17,
+      "texte": "🚪 Vous posez les sceaux sur le bureau et quittez le château en courant. La grille se referme derrière vous avec un claquement final. Au matin, vous rédigez votre rapport : 'Bâtiment dangereux, évacuation conseillée.'\n\nÉmile Castor ne sera jamais retrouvé. Son dossier rejoindra les dizaines d'autres classés 'disparus inexpliqués'. Le château reste debout, silencieux, attendant le prochain curieux.\n\n🌫️ **FIN 2 — La Fuite Raisonnable** : Vous avez survécu. C'est déjà quelque chose. Mais Émile est perdu pour toujours, prisonnier entre deux mondes, et le Comte continue de régner sur ses âmes.",
+      "options": []
+    },
 
-    {"page":81,"texte":"Vous explorez un couloir oublié.","options":[{"texte":"Continuer","suivant":4},{"texte":"Revenir","suivant":2}]},
-    {"page":82,"texte":"Une chandelle s'allume seule.","options":[{"texte":"Suivre la lumière","suivant":49},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 18,
+      "texte": "⚔️ Vous faites face au Comte, armé de vos connaissances. Vous avez lu le Traité : le Comte ne peut exister que si au moins une âme lui est liée. Vous brisez le médaillon trouvé dans la bibliothèque — la moitié du sceau originel — sur l'autel. Une lumière aveuglante emplit la pièce.\n\nLe Comte pousse un cri qui fait vibrer les murs. Les portraits se décrochent. Les sarcophages de la crypte s'ouvrent tous en même temps. Et puis — silence.\n\nLes âmes captives depuis des siècles s'élèvent en spirales lumineuses à travers le plafond. Le château commence à s'effriter, pierre par pierre.\n\n🌟 **FIN 3 — La Délivrance Totale** : Vous avez libéré Émile et toutes les âmes piégées. Le Comte est dissous. Le château s'effondre derrière vous deux, dans un nuage de poussière et de lumière. Un sacrifice de pierre pour une liberté d'éternité.",
+      "options": []
+    },
 
-    {"page":83,"texte":"Un fantôme murmure votre nom.","options":[{"texte":"Suivre le fantôme","suivant":50},{"texte":"Ignorer","suivant":5}]},
-    {"page":84,"texte":"Vous découvrez un manuscrit interdit.","options":[{"texte":"Lire le manuscrit","suivant":42},{"texte":"Ignorer","suivant":8}]},
+    {
+      "page": 19,
+      "texte": "🏃 Vous prenez Émile par le bras et dévalez l'escalier. Le château gémit autour de vous — des lézardes apparaissent dans les murs, les lustres se balancent. Vous traversez le hall en courant, franchissez la grande porte, traversez le jardin.\n\nDernier regard en arrière : dans chaque fenêtre du château, une silhouette noire vous regarde partir. Le Comte.\n\nVous avez sauvé Émile. Mais le château est toujours debout.\n\n🌅 **FIN 4 — L'Évasion** : Émile est sauf et témoignera de ce qu'il a vécu. Mais le Comte est libre de ses mouvements, les autres âmes restent prisonnières, et le château attendra patiemment sa prochaine victime.",
+      "options": []
+    },
 
-    {"page":85,"texte":"Un escalier mène à une tour abandonnée.","options":[{"texte":"Monter l'escalier","suivant":56},{"texte":"Ignorer","suivant":5}]},
-    {"page":86,"texte":"Vous trouvez une clé cachée sous une pierre.","options":[{"texte":"Prendre la clé","suivant":25},{"texte":"Ignorer","suivant":5}]},
+    {
+      "page": 20,
+      "texte": "📖 En explorant plus avant la bibliothèque, vous trouvez un volume caché derrière un faux dos de livre : *Journal du Comte Aldric Valdris, 1887*. Vous le parcourez fiévreusement. Le Comte n'était pas un monstre au départ — c'était un homme qui avait perdu sa femme et son fils dans une épidémie. Il a cherché un moyen de les ramener. Le rituel des sceaux était censé ouvrir un passage. Ça a fonctionné — mais dans le mauvais sens. Ce sont les morts qui ont traversé, pas lui qui est allé vers eux.\n\nIl est piégé ici depuis 136 ans. Prisonnier de sa propre obsession.\n\nCette information change tout.",
+      "options": [
+        {"texte": "💔 Chercher un moyen de libérer aussi le Comte", "suivant": 21},
+        {"texte": "🎯 Se concentrer uniquement sur la libération d'Émile", "suivant": 14}
+      ]
+    },
 
-    {"page":87,"texte":"Une porte secrète est révélée par un souffle de vent.","options":[{"texte":"Entrer","suivant":45},{"texte":"Ignorer","suivant":5}]},
-    {"page":88,"texte":"Une ancienne fresque raconte l'histoire du château.","options":[{"texte":"Lire la fresque","suivant":54},{"texte":"Ignorer","suivant":36}]},
+    {
+      "page": 21,
+      "texte": "💔 En croisant les informations du journal et du Traité, vous comprenez : le Comte peut être libéré si quelqu'un prononce son vrai nom — son nom de baptême, pas son titre — pendant le rituel de l'Aube. Son nom est gravé dans la crypte, sur le premier sarcophage.\n\nVous descendez. Vous lisez : *Aldric, fils de Marek et Soline.* Vous notez ce nom.\n\nMunis des trois sceaux et de cette connaissance, vous remontez vers le bureau. Émile est là, à mi-chemin entre les mondes. Vous disposez les sceaux, entamez le rituel — et au moment décisif, vous prononcez : *'Aldric, fils de Marek et Soline, tu es libre.'*",
+      "options": [
+        {"texte": "✨ Terminer le rituel jusqu'au bout", "suivant": 22}
+      ]
+    },
 
-    {"page":89,"texte":"Un fantôme bloque le passage.","options":[{"texte":"Parler au fantôme","suivant":50},{"texte":"Fuir","suivant":5}]},
-    {"page":90,"texte":"Vous trouvez un parchemin dans la bibliothèque.","options":[{"texte":"Lire le parchemin","suivant":13},{"texte":"Ignorer","suivant":8}]},
-
-    {"page":91,"texte":"Une trappe s'ouvre sous vos pieds.","options":[{"texte":"Descendre","suivant":32},{"texte":"Ignorer","suivant":5}]},
-    {"page":92,"texte":"Un fantôme agressif apparaît dans la chambre.","options":[{"texte":"Combattre le fantôme","suivant":28},{"texte":"Fuir","suivant":5}]},
-
-    {"page":93,"texte":"Vous trouvez un rituel incomplet sur un pupitre.","options":[{"texte":"Lire le rituel","suivant":46},{"texte":"Ignorer","suivant":5}]},
-    {"page":94,"texte":"Vous entendez des pas derrière une porte fermée.","options":[{"texte":"Ouvrir la porte","suivant":7},{"texte":"Ignorer","suivant":5}]},
-
-    {"page":95,"texte":"Une pièce contient un autel ancien avec des bougies.","options":[{"texte":"Examiner l'autel","suivant":40},{"texte":"Ignorer","suivant":5}]},
-    {"page":96,"texte":"Vous tombez sur un parchemin dans le grenier.","options":[{"texte":"Lire le parchemin","suivant":42},{"texte":"Ignorer","suivant":27}]},
-
-    {"page":97,"texte":"Un couloir secret mène à une salle obscure.","options":[{"texte":"Entrer","suivant":58},{"texte":"Ignorer","suivant":5}]},
-    {"page":98,"texte":"Vous trouvez un objet brillant sur un pupitre.","options":[{"texte":"Prendre l'objet","suivant":29},{"texte":"Ignorer","suivant":5}]},
-    {"page":99,"texte":"Une lumière étrange guide vos pas vers un autel.","options":[{"texte":"Suivre la lumière","suivant":40},{"texte":"Ignorer","suivant":5}]},
-    {"page":100,"texte":"FIN — Selon vos choix, toutes les âmes peuvent être libérées, certaines restent piégées, ou le château reste hanté.","options":[]}
+    {
+      "page": 22,
+      "texte": "✨ La pièce explose de lumière. Émile reprend vie. Et dans le miroir, vous voyez pour la dernière fois le Comte — mais cette fois, son visage n'est plus une grimace de colère. C'est l'expression d'un homme qui, après 136 ans, peut enfin pleurer.\n\nUne silhouette lumineuse se forme à ses côtés — puis une autre, plus petite. Sa femme. Son fils. Ils étaient là depuis le début, piégés avec lui de l'autre côté du miroir.\n\nLes trois silhouettes s'élèvent ensemble et disparaissent.\n\nLe château reste debout — mais vide, pour de vrai.\n\n⭐ **FIN 5 — La Rédemption** : Vous n'avez pas seulement sauvé Émile. Vous avez compris qu'il n'y avait pas de monstre ici — seulement un père éperdu d'amour, prisonnier d'un deuil impossible. En lui rendant son nom et sa famille, vous avez accompli ce qu'aucun autre enquêteur n'avait su faire.",
+      "options": []
+    }
   ]
 }
