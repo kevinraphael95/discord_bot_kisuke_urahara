@@ -34,7 +34,7 @@ class Feur(commands.Cog):
     )
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_feur(self, interaction: discord.Interaction):
-        await safe_respond(interaction, "feur")
+        await safe_respond(interaction, "feur!")
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
@@ -42,7 +42,7 @@ class Feur(commands.Cog):
     @commands.command(name="quoi")
     @commands.cooldown(1, 3.0, commands.BucketType.user)
     async def prefix_feur(self, ctx: commands.Context):
-        await safe_send(ctx.channel, "feur")
+        await safe_send(ctx.channel, "feur!")
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
