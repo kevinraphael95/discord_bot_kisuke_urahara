@@ -55,22 +55,24 @@ class KisukeVol(commands.Cog):
             cursor.execute("SELECT * FROM reiatsu WHERE points > 0")
             rows = cursor.fetchall()
 
-            membres_db = [row for row in rows if guild.get_member(int(row[0]))]
-
+            # ✅ Kisuke = le bot (défini avant le filtre pour l'exclure des cibles)
+            kisuke_member = self.bot.user
+            kisuke_id = int(kisuke_member.id)
+            
+            membres_db = [
+                row for row in rows
+                if guild.get_member(int(row[0])) and int(row[0]) != kisuke_id
+            ]
+            
             if not membres_db:
                 await safe_send(channel, "⚠️ Aucun membre valide trouvé avec du Reiatsu.")
                 conn.close()
                 return
-
+            
             # 🎯 Choisit une cible aléatoire
             cible_row = random.choice(membres_db)
             cible_id = int(cible_row[0])
             cible = guild.get_member(cible_id)
-
-            # ✅ Kisuke = le bot
-            kisuke_member = self.bot.user
-            kisuke_id = int(kisuke_member.id)
-            ensure_profile(kisuke_id, "Kisuke")
 
             # 📥 Récupération des données Kisuke
             cursor.execute("SELECT * FROM reiatsu WHERE user_id = ?", (kisuke_id,))
