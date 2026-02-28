@@ -500,9 +500,9 @@ HTML_MAIN = """
       </div>
 
       <div class="action-card">
-        <div class="action-title">♻️ GIT PULL + RESTART</div>
-        <div class="action-desc">Pull les mises à jour puis redémarre complètement le bot. ~5 secondes d'interruption.</div>
-        <button class="btn btn-danger" onclick="doAction('git_pull_restart', this)">PULL + REDÉMARRER</button>
+        <div class="action-title">♻️ GIT PULL + RELOAD</div>
+        <div class="action-desc">Pull les mises à jour puis recharge tous les cogs sans interruption.</div>
+        <button class="btn btn-info" onclick="doAction('git_pull_restart', this)">PULL + RELOAD COGS</button>
         <div class="result-box" id="res-git_pull_restart"></div>
       </div>
 
@@ -939,8 +939,22 @@ def api_action(action):
     elif action == "git_pull_restart":
         result = subprocess.run(["git", "pull"], capture_output=True, text=True, timeout=30)
         output = result.stdout + result.stderr
-        threading.Timer(1.5, restart_bot_process).start()
-        return jsonify({"ok": True, "output": output + "\n⏳ Redémarrage dans 2s..."})
+        if _bot_ref is None:
+            return jsonify({"ok": False, "output": output + "\n❌ Bot non disponible pour le reload"})
+        import asyncio
+        output_lines = [output]
+    
+        async def do_reload():
+            extensions = list(_bot_ref.extensions.keys())
+            for ext in extensions:
+                try:
+                    await _bot_ref.reload_extension(ext)
+                    output_lines.append(f"✅ {ext}")
+                except Exception as e:
+                    output_lines.append(f"❌ {ext}: {e}")
+    
+        asyncio.run_coroutine_threadsafe(do_reload(), _bot_ref.loop).result(timeout=15)
+        return jsonify({"ok": True, "output": "\n".join(output_lines)})
 
     elif action == "reload_cogs":
         if _bot_ref is None:
