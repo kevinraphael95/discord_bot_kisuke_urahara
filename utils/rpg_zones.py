@@ -2,29 +2,47 @@
 # 📌 rpg_zones.py — Gestion des zones RPG
 # ────────────────────────────────────────────────────────────────────────────────
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
-from utils.supabase_client import supabase
+import sqlite3
+import json
+import os
 import discord
 
-# ────────────────────────────────────────────────────────────
-# Déplacement et affichage zones
-# ────────────────────────────────────────────────────────────
+DB_PATH = os.path.join("database", "reiatsu.db")
+
+def get_conn():
+    return sqlite3.connect(DB_PATH)
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔹 Déplacement et affichage des zones
+# ────────────────────────────────────────────────────────────────────────────────
 async def change_zone(zone_target, unlocked_zones, current_zone, user_id, send):
     if zone_target:
         if zone_target in unlocked_zones:
-            current_zone = zone_target
-            supabase.table("rpg_players").update({"zone": current_zone}).eq("user_id", user_id).execute()
-            return await send(f"📍 Vous vous déplacez vers la zone {current_zone}.")
-        return await send(f"❌ Vous ne pouvez pas accéder à la zone {zone_target}, elle n'est pas débloquée.")
-    return await get_zone_info(unlocked_zones, current_zone, send)
+            conn = get_conn()
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE rpg_players SET zone = ? WHERE user_id = ?",
+                (zone_target, user_id)
+            )
+            conn.commit()
+            conn.close()
+            return await send(f"📍 Vous vous déplacez vers la zone **{zone_target}**.")
+        return await send(f"❌ Zone **{zone_target}** non débloquée. Battez les boss de la zone actuelle d'abord.")
 
-async def get_zone_info(unlocked_zones, current_zone, send):
+    return await _get_zone_info(unlocked_zones, current_zone, send)
+
+
+async def _get_zone_info(unlocked_zones, current_zone, send):
     embed = discord.Embed(
-        title="🗺️ Zones débloquées",
-        description=", ".join(unlocked_zones),
+        title="🗺️ Zones",
         color=discord.Color.orange()
     )
-    embed.add_field(name="Zone actuelle", value=current_zone)
+    zones_display = []
+    for z in unlocked_zones:
+        prefix = "📍 " if z == current_zone else "✅ "
+        zones_display.append(f"{prefix}Zone {z}")
+
+    embed.add_field(name="Zones débloquées", value="\n".join(zones_display) or "Aucune", inline=False)
+    embed.add_field(name="Zone actuelle", value=f"Zone {current_zone}", inline=False)
+    embed.set_footer(text="Utilisez !rpg zone <numéro> pour vous déplacer")
     return await send(embed)
