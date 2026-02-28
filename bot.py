@@ -10,6 +10,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 import os
 import asyncio
+import threading
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Modules tiers
@@ -23,15 +24,17 @@ from dotenv import load_dotenv
 # ────────────────────────────────────────────────────────────────────────────────
 from utils.discord_utils import safe_send  # ✅ Utilitaires anti-429
 from utils.init_db import init_db
+from utils.logger import init_logger       # ✅ Capture des print()
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔧 Initialisation de l’environnement
+# 🔧 Initialisation de l'environnement
 # ────────────────────────────────────────────────────────────────────────────────
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
+ADMIN_PORT = int(os.getenv("ADMIN_PORT", "5050"))
 
 def get_prefix(bot, message):
     return COMMAND_PREFIX
@@ -147,13 +150,23 @@ async def on_command_error(ctx, error):
 # ────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
 
+    # ✅ Capture des print() pour le panel admin
+    init_logger()
+
+    # ✅ Lancement du panel admin dans un thread séparé
+    from admin_panel import run_admin, set_bot
+    admin_thread = threading.Thread(target=run_admin, args=(ADMIN_PORT,), daemon=True)
+    admin_thread.start()
+    print(f"🌐 Panel admin lancé sur http://localhost:{ADMIN_PORT}")
+
     async def start():
         init_db()  # ✅ Création automatique des tables SQLite
         await load_commands()
         await load_tasks()
+
+        # ✅ Injecter la référence bot dans le panel admin
+        set_bot(bot)
+
         await bot.start(TOKEN)
 
     asyncio.run(start())
-
-
-
