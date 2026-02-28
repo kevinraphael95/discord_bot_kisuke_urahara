@@ -792,11 +792,27 @@ def api_edit():
         return jsonify({"ok": False, "error": "Impossible de modifier la clé primaire"})
 
     try:
+        # Convertir pk_val en int (les IDs Discord sont INTEGER dans SQLite)
+        try:
+            pk_val = int(pk_val)
+        except (ValueError, TypeError):
+            pass
+
+        # Convertir value en int si c'est un nombre pur
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            pass
+
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
         cur.execute(f"UPDATE {table} SET {col} = ? WHERE {pk} = ?", (value, pk_val))
+        rows_affected = cur.rowcount
         conn.commit()
         conn.close()
+
+        if rows_affected == 0:
+            return jsonify({"ok": False, "error": f"Aucune ligne trouvée avec {pk} = {pk_val}"})
         return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)})
