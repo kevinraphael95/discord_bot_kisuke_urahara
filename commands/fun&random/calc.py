@@ -6,9 +6,6 @@
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -25,7 +22,6 @@ log = logging.getLogger(__name__)
 # 🧮 Moteur de calcul sécurisé
 # ────────────────────────────────────────────────────────────────────────────────
 
-# Tokens autorisés : chiffres, opérateurs, fonctions math, constantes
 _SAFE_TOKEN_RE = re.compile(
     r"""
     \d+\.?\d*           |   # nombres (entiers ou décimaux)
@@ -42,7 +38,7 @@ _SAFE_TOKEN_RE = re.compile(
 _SAFE_MATH = {
     "sqrt":      math.sqrt,
     "log10":     math.log10,
-    "log":       math.log10,   # alias pour "log" bouton
+    "log":       math.log10,
     "ln":        math.log,
     "sin":       lambda x: math.sin(math.radians(x)),
     "cos":       lambda x: math.cos(math.radians(x)),
@@ -58,38 +54,30 @@ def safe_eval(expression: str) -> float | str:
     Évalue une expression mathématique de façon sécurisée.
     Retourne le résultat (float/int) ou la chaîne "Erreur".
     """
-    # Vérification de la longueur pour éviter les abus
     if len(expression) > 200:
         return "Erreur"
 
-    # Reconstruction tokenisée : on rejette tout token non reconnu
     tokens = _SAFE_TOKEN_RE.findall(expression)
     reconstructed = "".join(tokens)
     if reconstructed.replace(" ", "") != expression.replace(" ", ""):
         return "Erreur"
 
     try:
-        # Conversions syntaxiques
         expr = (
             expression
             .replace("^", "**")
             .replace("π", "pi")
-            # Factorielle : transformer "5!" → "factorial(5)" via regex
         )
-
-        # Gérer la notation postfixe "N!" → "factorial(N)"
         expr = re.sub(r"(\d+)!", r"factorial(\1)", expr)
 
-        # Équilibrer les parenthèses manquantes (côté droit uniquement)
         open_count  = expr.count("(")
         close_count = expr.count(")")
         if open_count < close_count:
-            return "Erreur"  # parenthèse fermante sans ouvrante → expression invalide
+            return "Erreur"
         expr += ")" * (open_count - close_count)
 
         result = eval(expr, {"__builtins__": {}}, _SAFE_MATH)  # noqa: S307
 
-        # Arrondi propre pour éviter les 0.9999999999
         if isinstance(result, float):
             rounded = round(result, 10)
             if rounded == int(rounded):
@@ -106,10 +94,9 @@ def safe_eval(expression: str) -> float | str:
 # 🖥️ Affichage
 # ────────────────────────────────────────────────────────────────────────────────
 
-MAX_EXPR_LEN = 24  # largeur de l'écran ASCII
+MAX_EXPR_LEN = 24
 
 def build_display(expression: str, result) -> str:
-    """Construit l'écran ASCII de la calculatrice."""
     expr_line   = expression[-MAX_EXPR_LEN:] if len(expression) > MAX_EXPR_LEN else expression
     result_line = str(result) if result is not None else ""
     result_line = result_line[:MAX_EXPR_LEN]
@@ -125,44 +112,39 @@ def build_display(expression: str, result) -> str:
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ UI — Mini-clavier interactif
+# 🎛️ UI — Mini-clavier interactif (25 boutons max — limite Discord)
 # ────────────────────────────────────────────────────────────────────────────────
 
 class CalculatorView(View):
     def __init__(self):
         super().__init__(timeout=180)
-        self.expression: str       = ""
-        self.result:     object    = None
+        self.expression: str    = ""
+        self.result:     object = None
         self._add_buttons()
 
     def _add_buttons(self):
-        # Disposition du clavier
+        # 5 rangées × 5 colonnes = 25 boutons exactement
         rows = [
-            ["7",   "8",   "9",   "/",   "sqrt"],
-            ["4",   "5",   "6",   "*",   "^"],
-            ["1",   "2",   "3",   "-",   "ln"],
-            ["0",   ".",   "C",   "+",   "log"],
-            ["(",   ")",   "⌫",   "!",   "="],
-            ["sin", "cos", "tan", "π",   ""],
+            ["sin", "cos", "tan", "sqrt", "^"],
+            ["7",   "8",   "9",   "/",    "ln"],
+            ["4",   "5",   "6",   "*",    "π"],
+            ["1",   "2",   "3",   "-",    "⌫"],
+            ["C",   "0",   ".",   "+",    "="],
         ]
         styles = {
-            "=":   discord.ButtonStyle.success,
-            "C":   discord.ButtonStyle.danger,
-            "⌫":   discord.ButtonStyle.danger,
+            "=": discord.ButtonStyle.success,
+            "C": discord.ButtonStyle.danger,
+            "⌫": discord.ButtonStyle.danger,
         }
         for row in rows:
             for label in row:
-                if label == "":
-                    continue  # case vide → pas de bouton
                 style = styles.get(label, discord.ButtonStyle.secondary)
                 self.add_item(CalcButton(label, self, style))
 
 
 class CalcButton(Button):
-    # Fonctions qui nécessitent une parenthèse ouvrante
     _FUNCTIONS = {"sin", "cos", "tan", "sqrt", "log", "ln"}
-    # Opérateurs binaires
-    _OPERATORS = {"+", "-", "*", "/", "^"}
+    _OPERATORS  = {"+", "-", "*", "/", "^"}
 
     def __init__(self, label: str, parent_view: CalculatorView, style):
         super().__init__(label=label, style=style)
@@ -174,18 +156,14 @@ class CalcButton(Button):
         label = self.label
 
         if label == "C":
-            # Réinitialisation complète
             view.expression = ""
             view.result = None
 
         elif label == "⌫":
-            # Suppression du dernier caractère (ou token de fonction)
             if view.result is not None:
-                # Backspace après un résultat → efface le résultat
                 view.result = None
                 view.expression = ""
             elif view.expression:
-                # Retirer le dernier token (fonction multi-char ou caractère)
                 view.expression = re.sub(r"(sin|cos|tan|sqrt|log|ln|\()$|.$", "", view.expression)
 
         elif label == "=":
@@ -193,19 +171,14 @@ class CalcButton(Button):
                 view.result = safe_eval(view.expression)
 
         elif label in self._OPERATORS:
-            # Opérateur : on continue depuis le résultat précédent si disponible
             if view.result not in (None, "Erreur"):
                 view.expression = str(view.result) + label
                 view.result = None
-            elif view.result == "Erreur":
-                pass  # on ignore, l'utilisateur doit faire C d'abord
-            else:
+            elif view.result != "Erreur":
                 view.expression += label
 
         else:
-            # Chiffre, fonction, constante, parenthèse, "!"
             if view.result not in (None, "Erreur"):
-                # Nouveau calcul : on repart de zéro
                 view.expression = ""
                 view.result = None
 
@@ -213,9 +186,6 @@ class CalcButton(Button):
                 view.expression += label + "("
             elif label == "π":
                 view.expression += "pi"
-            elif label == "!":
-                # Factorielle postfixe : on l'ajoute directement
-                view.expression += "!"
             else:
                 view.expression += label
 
@@ -223,7 +193,7 @@ class CalcButton(Button):
         try:
             await safe_edit(interaction.message, content=display, view=view)
         except Exception as exc:
-            log.exception("Erreur lors de la mise à jour de l'affichage : %s", exc)
+            log.exception("Erreur affichage calculatrice : %s", exc)
 
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -231,14 +201,11 @@ class CalcButton(Button):
 # ────────────────────────────────────────────────────────────────────────────────
 
 class ScientificCalculator(commands.Cog):
-    """
-    Commandes /calc et !calc — Calculatrice scientifique interactive avec mini-clavier.
-    """
+    """Commandes /calc et !calc — Calculatrice scientifique interactive."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ── Méthode partagée ────────────────────────────────────────────────────────
     async def _send_calculator(self, channel: discord.abc.Messageable) -> discord.Message:
         view    = CalculatorView()
         display = build_display("", None)
@@ -246,11 +213,7 @@ class ScientificCalculator(commands.Cog):
         view.message = message
         return message
 
-    # ── Commande SLASH ──────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="calc",
-        description="Calculatrice scientifique interactive",
-    )
+    @app_commands.command(name="calc", description="Calculatrice scientifique interactive")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_calc(self, interaction: discord.Interaction):
         try:
@@ -264,16 +227,11 @@ class ScientificCalculator(commands.Cog):
     @slash_calc.error
     async def slash_calc_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await safe_respond(
-                interaction,
-                f"⏳ Attends encore {error.retry_after:.1f}s.",
-                ephemeral=True,
-            )
+            await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
         else:
             log.exception("[/calc] Erreur non gérée : %s", error)
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
-    # ── Commande PREFIX ─────────────────────────────────────────────────────────
     @commands.command(name="calc", help="Calculatrice scientifique interactive")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_calc(self, ctx: commands.Context):
@@ -295,6 +253,7 @@ class ScientificCalculator(commands.Cog):
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
 # ────────────────────────────────────────────────────────────────────────────────
+
 async def setup(bot: commands.Bot):
     cog = ScientificCalculator(bot)
     for command in cog.get_commands():
