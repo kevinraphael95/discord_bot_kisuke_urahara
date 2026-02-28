@@ -10,21 +10,58 @@
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
 import asyncio
+import sqlite3
+import json
+import os
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 from utils.discord_utils import safe_send, safe_respond
-from utils.supabase_client import supabase
 from utils.reiatsu_utils import ensure_profile
 import datetime
 import random
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🗄️ SQLite
+# ────────────────────────────────────────────────────────────────────────────────
+DB_PATH = os.path.join("database", "reiatsu.db")
+
+def get_conn():
+    return sqlite3.connect(DB_PATH)
+
+def db_get_shop_effets(user_id: int) -> list:
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT shop_effets FROM reiatsu WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return []
+    return json.loads(row[0] or "[]")
+
+def db_set_shop_effets(user_id: int, effects: list):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE reiatsu SET shop_effets = ? WHERE user_id = ?",
+        (json.dumps(effects), user_id)
+    )
+    conn.commit()
+    conn.close()
+
+def db_update_points(user_id: int, points: int):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE reiatsu SET points = ? WHERE user_id = ?", (points, user_id))
+    conn.commit()
+    conn.close()
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class ReiatsuShop(commands.Cog):
     """Commande /reiatsushop et !reiatsushop — Affiche le shop et applique les effets"""
-    
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -52,12 +89,18 @@ class ReiatsuShop(commands.Cog):
     # 🔹 Chargement des effets depuis la DB
     # ────────────────────────────────────────────────────────────────────────────
     def load_effects_from_db(self):
-        res = supabase.table("reiatsu").select("user_id, shop_effets").execute()
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id, shop_effets FROM reiatsu")
+        rows = cursor.fetchall()
+        conn.close()
+
         now = datetime.datetime.utcnow()
 
-        for profile in res.data:
-            user_id = int(profile["user_id"])
-            for eff in profile.get("shop_effets") or []:
+        for row in rows:
+            user_id = int(row[0])
+            effects = json.loads(row[1] or "[]")
+            for eff in effects:
                 end_time = datetime.datetime.fromisoformat(eff["end_time"])
                 guild_id = eff.get("guild_id")
                 if end_time > now and guild_id:
@@ -65,9 +108,11 @@ class ReiatsuShop(commands.Cog):
                     if key == "zomb":
                         self.active_effects["zomb"][user_id] = guild_id
                     elif key == "rename":
-                        self.active_effects["rename"][user_id] = {"guild_id": guild_id,
-                                                                  "nick": eff.get("forced_nick"),
-                                                                  "use_webhook": False}
+                        self.active_effects["rename"][user_id] = {
+                            "guild_id": guild_id,
+                            "nick": eff.get("forced_nick"),
+                            "use_webhook": False
+                        }
                     elif key == "mute":
                         self.active_effects["mute"][user_id] = {"guild_id": guild_id, "end_time": end_time}
 
@@ -128,14 +173,15 @@ class ReiatsuShop(commands.Cog):
             return
 
         # Débit des points
-        profile["points"] -= item["price"]
-        supabase.table("reiatsu").update({"points": profile["points"]}).eq("user_id", user.id).execute()
+        new_points = profile["points"] - item["price"]
+        db_update_points(user.id, new_points)
+        profile["points"] = new_points
 
         # Application de l'effet
         await self.apply_effect(member, effect, ctx_or_inter.guild.id, new_nick=new_nick)
 
         embed = discord.Embed(
-            description=f"✅ **{member.display_name}** affecté par **{item['name']}** !\n💰 Points restants : `{profile['points']}`",
+            description=f"✅ **{member.display_name}** affecté par **{item['name']}** !\n💰 Points restants : `{new_points}`",
             color=discord.Color.green()
         )
         await send_func(ctx_or_inter, embed=embed)
@@ -148,16 +194,20 @@ class ReiatsuShop(commands.Cog):
         start_time = datetime.datetime.utcnow()
         end_time = start_time + datetime.timedelta(seconds=item["duration"])
 
-        profile = ensure_profile(member.id, member.display_name)
-        effects = profile.get("shop_effets") or []
+        ensure_profile(member.id, member.display_name)
+        effects = db_get_shop_effets(member.id)
 
-        effect_data = {"effect_key": effect, "start_time": start_time.isoformat(),
-                       "end_time": end_time.isoformat(), "guild_id": guild_id}
+        effect_data = {
+            "effect_key": effect,
+            "start_time": start_time.isoformat(),
+            "end_time": end_time.isoformat(),
+            "guild_id": guild_id
+        }
         if effect == "rename":
             effect_data["forced_nick"] = new_nick
 
         effects.append(effect_data)
-        supabase.table("reiatsu").update({"shop_effets": effects}).eq("user_id", member.id).execute()
+        db_set_shop_effets(member.id, effects)
 
         # Application en mémoire et Discord
         if effect == "zomb":
@@ -195,11 +245,13 @@ class ReiatsuShop(commands.Cog):
         self.active_effects["rename"].pop(user_id, None)
         self.active_effects["mute"].pop(user_id, None)
 
-        profile = ensure_profile(user_id, "")
-        effects = profile.get("shop_effets") or []
         now = datetime.datetime.utcnow()
-        effects = [e for e in effects if e["effect_key"] != effect or datetime.datetime.fromisoformat(e["end_time"]) > now]
-        supabase.table("reiatsu").update({"shop_effets": effects}).eq("user_id", user_id).execute()
+        effects = db_get_shop_effets(user_id)
+        effects = [
+            e for e in effects
+            if e["effect_key"] != effect or datetime.datetime.fromisoformat(e["end_time"]) > now
+        ]
+        db_set_shop_effets(user_id, effects)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Listeners pour fallback et effets actifs
@@ -237,15 +289,17 @@ class ReiatsuShop(commands.Cog):
             if not data.get("use_webhook"):
                 try:
                     await after.edit(nick=data["nick"])
-                except:
+                except Exception:
                     self.active_effects["rename"][after.id]["use_webhook"] = True
 
     async def _send_webhook(self, message: discord.Message, content: str, username: str = None):
         webhook = await message.channel.create_webhook(name=username or f"tmp-{message.author.name}")
         try:
-            await webhook.send(username=username or message.author.display_name,
-                               avatar_url=message.author.display_avatar.url,
-                               content=content)
+            await webhook.send(
+                username=username or message.author.display_name,
+                avatar_url=message.author.display_avatar.url,
+                content=content
+            )
         finally:
             await webhook.delete()
 
@@ -255,11 +309,16 @@ class ReiatsuShop(commands.Cog):
     @tasks.loop(minutes=5)
     async def clean_expired_effects(self):
         now = datetime.datetime.utcnow()
-        res = supabase.table("reiatsu").select("user_id, shop_effets").execute()
 
-        for profile in res.data:
-            user_id = int(profile["user_id"])
-            effects = profile.get("shop_effets") or []
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id, shop_effets FROM reiatsu")
+        rows = cursor.fetchall()
+        conn.close()
+
+        for row in rows:
+            user_id = int(row[0])
+            effects = json.loads(row[1] or "[]")
             new_effects = []
 
             for e in effects:
@@ -271,7 +330,7 @@ class ReiatsuShop(commands.Cog):
                     self.active_effects[key].pop(user_id, None)
 
             if len(new_effects) != len(effects):
-                supabase.table("reiatsu").update({"shop_effets": new_effects}).eq("user_id", user_id).execute()
+                db_set_shop_effets(user_id, new_effects)
 
     @clean_expired_effects.before_loop
     async def before_clean_expired_effects(self):
