@@ -20,7 +20,7 @@ load_dotenv()
 # ─── Config ────────────────────────────────────────────────────────────────────
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin1234")
 SECRET_KEY     = os.getenv("FLASK_SECRET", "bleach_urahara_secret")
-DB_PATH        = os.path.join("database", "reiatsu.db")
+DB_PATH        = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database", "reiatsu.db")
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
