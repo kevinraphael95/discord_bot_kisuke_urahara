@@ -420,12 +420,7 @@ HTML_MAIN = """
       <div class="card-header">
         <span class="card-title">TABLES</span>
         <div class="row" style="margin-left: auto; gap: 12px;">
-          <select id="tableSelect" onchange="loadTable()">
-            <option value="reiatsu">reiatsu</option>
-            <option value="reiatsu_config">reiatsu_config</option>
-            <option value="mots_trouves">mots_trouves</option>
-            <option value="steam_keys">steam_keys</option>
-          </select>
+          <select id="tableSelect" onchange="loadTable()"></select>
           <input type="text" class="filter-input" id="filterInput" placeholder="Filtrer..." oninput="filterTable()">
           <span class="table-meta" id="tableCount"></span>
         </div>
@@ -464,6 +459,7 @@ HTML_MAIN = """
         <button class="btn btn-ghost" onclick="setSQL('SELECT user_id, username, last_found_at FROM mots_trouves ORDER BY last_found_at DESC LIMIT 20')">Derniers mots</button>
         <button class="btn btn-ghost" onclick="setSQL('SELECT COUNT(*) as total, SUM(points) as total_points FROM reiatsu')">Stats globales</button>
         <button class="btn btn-ghost" onclick="setSQL('SELECT classe, COUNT(*) as nb FROM reiatsu GROUP BY classe ORDER BY nb DESC')">Par classe</button>
+        <button class="btn btn-ghost" onclick="setSQL('SELECT * FROM steam_keys ORDER BY won ASC')">Clés Steam</button>
       </div>
     </div>
   </section>
@@ -576,8 +572,17 @@ let currentPk = '';
 let sortCol = null;
 let sortDir = 1;
 
+async function loadTableList() {
+  const res = await fetch('/api/tables');
+  const data = await res.json();
+  const select = document.getElementById('tableSelect');
+  select.innerHTML = data.tables.map(t => `<option value="${t}">${t}</option>`).join('');
+  loadTable();
+}
+
 async function loadTable() {
   const table = document.getElementById('tableSelect').value;
+  if (!table) return;
   const res = await fetch('/api/table/' + table);
   const data = await res.json();
   currentData = data.rows;
@@ -761,7 +766,7 @@ function escHtml(s) {
 }
 
 // ─── Init ───────────────────────────────────────────────────────────────────
-loadTable();
+loadTableList();
 autoRefreshInterval = setInterval(loadLogs, 2000);
 </script>
 </body>
@@ -793,21 +798,44 @@ def logout():
     return redirect(url_for("login"))
 
 
-# ─── API : Table ───────────────────────────────────────────────────────────────
-ALLOWED_TABLES = {"reiatsu", "reiatsu_config", "mots_trouves", "steam_keys"}
-PK_MAP = {"reiatsu": "user_id", "reiatsu_config": "guild_id", "mots_trouves": "user_id", "steam_keys": "id"}
+# ─── API : Tables (liste dynamique) ───────────────────────────────────────────
+def get_all_tables():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+    tables = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return tables
 
+def get_pk_for_table(table):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute(f"PRAGMA table_info({table})")
+    cols = cur.fetchall()
+    conn.close()
+    for col in cols:
+        if col[5] == 1:  # col[5] = pk flag
+            return col[1]
+    return cols[0][1]  # fallback : première colonne
+
+@app.route("/api/tables")
+@login_required
+def api_tables():
+    return jsonify({"tables": get_all_tables()})
+
+
+# ─── API : Table ───────────────────────────────────────────────────────────────
 @app.route("/api/table/<table_name>")
 @login_required
 def api_table(table_name):
-    if table_name not in ALLOWED_TABLES:
+    if table_name not in get_all_tables():
         return jsonify({"error": "Table non autorisée"}), 403
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM {table_name}")
     raw_rows = cur.fetchall()
     columns = [d[0] for d in cur.description]
-    pk_col = PK_MAP.get(table_name, columns[0])
+    pk_col = get_pk_for_table(table_name)
     pk_idx = columns.index(pk_col) if pk_col in columns else 0
     # Convertir les IDs en string pour éviter la perte de précision JS (Number.MAX_SAFE_INTEGER)
     rows = [
@@ -828,14 +856,12 @@ def api_edit():
     col   = data.get("col")
     value = data.get("value")
 
-    if table not in ALLOWED_TABLES:
+    if table not in get_all_tables():
         return jsonify({"ok": False, "error": "Table non autorisée"})
     if col == pk:
         return jsonify({"ok": False, "error": "Impossible de modifier la clé primaire"})
 
     try:
-        # Garder pk_val en STRING — les IDs Discord perdent de la précision en int JS
-        # On compare via CAST en SQL pour éviter le problème
         try:
             value = int(value)
         except (ValueError, TypeError):
@@ -843,7 +869,6 @@ def api_edit():
 
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
-        # pk_val est déjà une string exacte (envoyée telle quelle depuis le JS)
         cur.execute(f"UPDATE {table} SET {col} = ? WHERE CAST({pk} AS TEXT) = CAST(? AS TEXT)", (value, str(pk_val)))
         rows_affected = cur.rowcount
         conn.commit()
@@ -895,7 +920,6 @@ def api_logs_clear():
 
 
 # ─── API : Actions ─────────────────────────────────────────────────────────────
-# Référence vers le bot (injectée depuis bot.py)
 _bot_ref = None
 
 def set_bot(bot):
