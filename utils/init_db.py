@@ -112,6 +112,31 @@ def init_db():
     ON steam_keys(won)
     """)    
 
+
+
+    # ─── Table rpg_players ────────────────────────────────────────────────────
+    # Équivalent SQLite du schéma Supabase :
+    #   user_id BIGINT PK, zone INT default 13, stats JSONB, cooldowns JSONB,
+    #   effects JSONB, unlocked_zones JSONB default '["1"]',
+    #   username TEXT default 'Inconnu', class TEXT
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS rpg_players (
+        user_id         INTEGER PRIMARY KEY,
+        username        TEXT    NOT NULL DEFAULT 'Inconnu',
+        class           TEXT,
+        zone            INTEGER NOT NULL DEFAULT 13,
+        stats           TEXT    NOT NULL DEFAULT '{}',
+        cooldowns       TEXT    NOT NULL DEFAULT '{}',
+        effects         TEXT    NOT NULL DEFAULT '{}',
+        unlocked_zones  TEXT    NOT NULL DEFAULT '["1"]'
+    )
+    """)
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_rpg_players_user_id
+    ON rpg_players(user_id)
+    """)
+    
+
     conn.commit()
     conn.close()
 
