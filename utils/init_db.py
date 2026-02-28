@@ -135,6 +135,24 @@ def init_db():
     CREATE INDEX IF NOT EXISTS idx_rpg_players_user_id
     ON rpg_players(user_id)
     """)
+
+    # ─── Table gardens ────────────────────────────────────────────────────────
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS gardens (
+        user_id         INTEGER PRIMARY KEY,
+        username        TEXT    NOT NULL,
+        garden_grid     TEXT    NOT NULL DEFAULT '[]',
+        inventory       TEXT    NOT NULL DEFAULT '{}',
+        argent          INTEGER NOT NULL DEFAULT 0,
+        last_fertilize  TEXT
+    )
+    """)
+
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_gardens_user_id
+    ON gardens(user_id)
+    """)
+    
     
 
     conn.commit()
