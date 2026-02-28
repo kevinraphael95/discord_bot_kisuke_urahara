@@ -770,10 +770,17 @@ def api_table(table_name):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM {table_name}")
-    rows = cur.fetchall()
+    raw_rows = cur.fetchall()
     columns = [d[0] for d in cur.description]
+    pk_col = PK_MAP.get(table_name, columns[0])
+    pk_idx = columns.index(pk_col) if pk_col in columns else 0
+    # Convertir les IDs en string pour éviter la perte de précision JS (Number.MAX_SAFE_INTEGER)
+    rows = [
+        [str(cell) if i == pk_idx and cell is not None else cell for i, cell in enumerate(row)]
+        for row in raw_rows
+    ]
     conn.close()
-    return jsonify({"columns": columns, "rows": rows, "pk": PK_MAP.get(table_name, columns[0])})
+    return jsonify({"columns": columns, "rows": rows, "pk": pk_col})
 
 
 @app.route("/api/edit", methods=["POST"])
@@ -801,7 +808,8 @@ def api_edit():
 
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
-        cur.execute(f"UPDATE {table} SET {col} = ? WHERE CAST({pk} AS TEXT) = ?", (value, str(pk_val)))
+        # pk_val est déjà une string exacte (envoyée telle quelle depuis le JS)
+        cur.execute(f"UPDATE {table} SET {col} = ? WHERE CAST({pk} AS TEXT) = CAST(? AS TEXT)", (value, str(pk_val)))
         rows_affected = cur.rowcount
         conn.commit()
         conn.close()
