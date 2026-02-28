@@ -1,41 +1,33 @@
 # ────────────────────────────────────────────────────────────────
 # utils/algorithms.py — Tous les algorithmes de tri asynchrones
-# Chaque fonction yield les étapes pour la visualisation
+# Règle : UNIQUEMENT des swaps data[i], data[j] = data[j], data[i]
+#         Jamais de copie intermédiaire, jamais de insert/pop
 # ────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────
 # Tris classiques
 # ────────────────────────────────────────────────────────────────
 async def bubble_sort(data):
-    """Compare chaque élément avec le suivant et fait remonter les plus grands."""
     n = len(data)
     for i in range(n):
         for j in range(0, n - i - 1):
             if data[j] > data[j + 1]:
                 data[j], data[j + 1] = data[j + 1], data[j]
-                yield data, [j, j + 1]  # 🟥 surbrillance limitée aux éléments échangés
+                yield data, [j, j + 1]
 bubble_sort.desc = "Compare chaque élément avec le suivant et fait remonter les plus grands."
+
 
 async def insertion_sort(data):
     for i in range(1, len(data)):
-        key = data[i]
-        j = i - 1
-        moved = False
-        moved_indices = []
-        while j >= 0 and data[j] > key:
-            data[j + 1] = data[j]
-            moved_indices.append(j + 1)
-            moved_indices.append(j)
+        j = i
+        while j > 0 and data[j - 1] > data[j]:
+            data[j], data[j - 1] = data[j - 1], data[j]
+            yield data, [j, j - 1]
             j -= 1
-            moved = True
-        data[j + 1] = key
-        if moved:  # yield uniquement si qqch a bougé
-            yield data, moved_indices + [j + 1, i]
-insertion_sort.desc = "Insère chaque élément dans la partie déjà triée."
+insertion_sort.desc = "Insère chaque élément dans la partie déjà triée via des swaps successifs."
 
 
 async def selection_sort(data):
-    """Sélectionne le plus petit élément restant et le place au bon endroit."""
     n = len(data)
     for i in range(n):
         min_idx = i
@@ -47,8 +39,8 @@ async def selection_sort(data):
             yield data, [i, min_idx]
 selection_sort.desc = "Sélectionne le plus petit élément restant et le place au bon endroit."
 
+
 async def quick_sort(data, low=0, high=None):
-    """Choisit un pivot et partitionne récursivement la liste."""
     if high is None:
         high = len(data) - 1
     if low < high:
@@ -61,87 +53,88 @@ async def quick_sort(data, low=0, high=None):
                 left += 1
         data[left], data[high] = data[high], data[left]
         yield data, [left, high]
-        async for step, sorted_idx in quick_sort(data, low, left - 1):
-            yield step, sorted_idx
-        async for step, sorted_idx in quick_sort(data, left + 1, high):
-            yield step, sorted_idx
+        async for step, idx in quick_sort(data, low, left - 1):
+            yield step, idx
+        async for step, idx in quick_sort(data, left + 1, high):
+            yield step, idx
 quick_sort.desc = "Choisit un pivot et partitionne récursivement la liste."
 
+
 async def merge_sort(data, start=0, end=None):
-    """Divise et fusionne récursivement les sous-listes pour trier."""
     if end is None:
         end = len(data)
     if end - start > 1:
         mid = (start + end) // 2
-        async for step, sorted_idx in merge_sort(data, start, mid):
-            yield step, sorted_idx
-        async for step, sorted_idx in merge_sort(data, mid, end):
-            yield step, sorted_idx
-        left, right = data[start:mid], data[mid:end]
-        i = j = 0
-        for k in range(start, end):
-            if j >= len(right) or (i < len(left) and left[i] < right[j]):
-                data[k] = left[i]
+        async for step, idx in merge_sort(data, start, mid):
+            yield step, idx
+        async for step, idx in merge_sort(data, mid, end):
+            yield step, idx
+        # Fusion en place par rotations de swaps
+        i, j = start, mid
+        while i < j and j < end:
+            if data[i] <= data[j]:
                 i += 1
             else:
-                data[k] = right[j]
+                # Rotation : amène data[j] en position i par swaps successifs
+                k = j
+                while k > i:
+                    data[k], data[k - 1] = data[k - 1], data[k]
+                    yield data, [k, k - 1]
+                    k -= 1
+                i += 1
                 j += 1
-            yield data, [k]
-merge_sort.desc = "Divise et fusionne récursivement les sous-listes pour trier."
+merge_sort.desc = "Divise et fusionne récursivement les sous-listes pour trier (fusion par swaps)."
+
 
 async def heap_sort(data):
-    """Tri utilisant un tas binaire."""
     n = len(data)
 
-    def heapify(n, i):
-        largest = i
-        l, r = 2 * i + 1, 2 * i + 2
-        if l < n and data[l] > data[largest]:
-            largest = l
-        if r < n and data[r] > data[largest]:
-            largest = r
-        if largest != i:
+    async def heapify(size, i):
+        while True:
+            largest = i
+            l, r = 2 * i + 1, 2 * i + 2
+            if l < size and data[l] > data[largest]:
+                largest = l
+            if r < size and data[r] > data[largest]:
+                largest = r
+            if largest == i:
+                break
             data[i], data[largest] = data[largest], data[i]
-            heapify(n, largest)
+            yield data, [i, largest]
+            i = largest
 
+    # Construction du tas
     for i in range(n // 2 - 1, -1, -1):
-        heapify(n, i)
-        yield data, [i]
+        async for step, idx in heapify(n, i):
+            yield step, idx
 
+    # Extraction
     for i in range(n - 1, 0, -1):
         data[i], data[0] = data[0], data[i]
         yield data, [0, i]
-        heapify(i, 0)
-heap_sort.desc = "Tri utilisant un tas binaire."
+        async for step, idx in heapify(i, 0):
+            yield step, idx
+heap_sort.desc = "Tri utilisant un tas binaire (heapify entièrement async)."
+
 
 async def shell_sort(data):
     n = len(data)
     gap = n // 2
     while gap > 0:
         for i in range(gap, n):
-            temp = data[i]
             j = i
-            moved = False
-            moved_indices = []
-            while j >= gap and data[j - gap] > temp:
-                data[j] = data[j - gap]
-                moved_indices.append(j)
-                moved_indices.append(j - gap)
+            while j >= gap and data[j - gap] > data[j]:
+                data[j], data[j - gap] = data[j - gap], data[j]
+                yield data, [j, j - gap]
                 j -= gap
-                moved = True
-            data[j] = temp
-            if moved:  # yield uniquement si qqch a bougé
-                yield data, moved_indices + [j, i]
         gap //= 2
-shell_sort.desc = "Améliore Insertion Sort avec des gaps."
+shell_sort.desc = "Améliore Insertion Sort avec des gaps décroissants."
+
 
 async def cocktail_sort(data):
-    """Version bidirectionnelle de Bubble Sort."""
     n = len(data)
-    swapped = True
-    start = 0
-    end = n - 1
-    while swapped:
+    start, end = 0, n - 1
+    while True:
         swapped = False
         for i in range(start, end):
             if data[i] > data[i + 1]:
@@ -157,11 +150,13 @@ async def cocktail_sort(data):
                 data[i], data[i + 1] = data[i + 1], data[i]
                 swapped = True
                 yield data, [i, i + 1]
+        if not swapped:
+            break
         start += 1
 cocktail_sort.desc = "Version bidirectionnelle de Bubble Sort."
 
+
 async def comb_sort(data):
-    """Amélioration de Bubble Sort avec un gap variable."""
     n = len(data)
     gap = n
     shrink = 1.3
@@ -171,141 +166,133 @@ async def comb_sort(data):
         if gap <= 1:
             gap = 1
             sorted_ = True
-        i = 0
-        while i + gap < n:
+        for i in range(n - gap):
             if data[i] > data[i + gap]:
                 data[i], data[i + gap] = data[i + gap], data[i]
                 sorted_ = False
                 yield data, [i, i + gap]
-            i += 1
 comb_sort.desc = "Amélioration de Bubble Sort avec un gap variable."
 
+
 # ────────────────────────────────────────────────────────────────
-# Nouveaux / expérimentaux
+# Expérimentaux — réécrits en swaps purs
 # ────────────────────────────────────────────────────────────────
 async def pair_sum_sort(data):
-    """Tri par paires basé sur la somme des éléments."""
-    n = len(data)
-    swapped = True
-    while swapped:
-        swapped = False
-        pairs = [(i, i + 1) for i in range(0, n - 1, 2)]
-        sums = [data[i] + data[j] for i, j in pairs]
-        sorted_pairs = [pairs[i] for i in sorted(range(len(pairs)), key=lambda x: sums[x])]
-        new_data = []
-        for i, j in sorted_pairs:
-            new_data.extend([data[i], data[j]])
-        for k in range(len(new_data)):
-            if data[k] != new_data[k]:
-                data[k] = new_data[k]
-                swapped = True
-                yield data, [k]
-        pairs = [(i, i + 1) for i in range(1, n - 1, 2)]
-        sums = [data[i] + data[j] for i, j in pairs]
-        sorted_pairs = [pairs[i] for i in sorted(range(len(pairs)), key=lambda x: sums[x])]
-        new_data = data[:1]
-        for i, j in sorted_pairs:
-            new_data.extend([data[i], data[j]])
-        if len(new_data) < n:
-            new_data.append(data[-1])
-        for k in range(len(new_data)):
-            if data[k] != new_data[k]:
-                data[k] = new_data[k]
-                swapped = True
-                yield data, [k]
-pair_sum_sort.desc = "Tri par paires basé sur la somme des éléments."
-
-async def pair_shift_sort(data):
-    """Déplace le plus grand élément d'une paire vers la droite."""
-    n = len(data)
-    while True:
-        changed = False
-        i = 0
-        while i < n - 1:
-            a, b = data[i], data[i + 1]
-            if a > b:
-                gap = abs(a - b)
-                new_pos = min(i + gap, n - 1)
-                data.insert(new_pos, data.pop(i))
-                changed = True
-                yield data, [i, new_pos]
-            i += 1
-        if not changed:
-            break
-pair_shift_sort.desc = "Déplace le plus grand élément d'une paire vers la droite."
-
-async def centrifugal_sort(data):
-    """Tri par triplets, le nombre du milieu est replacé entre les deux autres."""
+    """
+    Odd-Even / Brick Sort : passe alternativement sur les paires (0,1),(2,3)...
+    puis (1,2),(3,4)... et swap si nécessaire. Converge vers un tri complet.
+    Remplace l'ancienne version qui utilisait des copies intermédiaires.
+    """
     n = len(data)
     changed = True
     while changed:
         changed = False
-        for i in range(0, n - 2, 3):
-            triplet = data[i:i + 3]
-            sorted_triplet = sorted(triplet)
-            if triplet != sorted_triplet:
-                data[i:i + 3] = sorted_triplet
+        # Paires paires : (0,1), (2,3), ...
+        for i in range(0, n - 1, 2):
+            if data[i] > data[i + 1]:
+                data[i], data[i + 1] = data[i + 1], data[i]
                 changed = True
-                yield data, list(range(i, i + 3))
-        for i in range(1, n - 2, 3):
-            triplet = data[i:i + 3]
-            sorted_triplet = sorted(triplet)
-            if triplet != sorted_triplet:
-                data[i:i + 3] = sorted_triplet
+                yield data, [i, i + 1]
+        # Paires impaires : (1,2), (3,4), ...
+        for i in range(1, n - 1, 2):
+            if data[i] > data[i + 1]:
+                data[i], data[i + 1] = data[i + 1], data[i]
                 changed = True
-                yield data, list(range(i, i + 3))
-centrifugal_sort.desc = "Tri par triplets, le nombre du milieu est replacé entre les deux autres."
+                yield data, [i, i + 1]
+pair_sum_sort.desc = "Odd-Even Sort : alterne les paires paires et impaires jusqu'au tri complet."
+
+
+async def pair_shift_sort(data):
+    """
+    Gnome Sort : si l'élément courant est mal placé, le swap vers la gauche
+    jusqu'à sa bonne position, puis repart en avant.
+    Remplace l'ancienne version avec insert/pop.
+    """
+    n = len(data)
+    i = 1
+    while i < n:
+        if i == 0 or data[i] >= data[i - 1]:
+            i += 1
+        else:
+            data[i], data[i - 1] = data[i - 1], data[i]
+            yield data, [i, i - 1]
+            i -= 1
+pair_shift_sort.desc = "Gnome Sort : swap l'élément vers la gauche jusqu'à sa bonne position."
+
+
+async def centrifugal_sort(data):
+    """
+    Tri par triplets via swaps directs (min au début, max à la fin du triplet).
+    Chaque triplet est trié avec au plus 3 swaps comparatifs.
+    """
+    n = len(data)
+    changed = True
+    while changed:
+        changed = False
+        for offset in (0, 1):
+            for i in range(offset, n - 2, 3):
+                a, b, c = i, i + 1, i + 2
+                # Tri réseau à 3 éléments : 3 comparaisons max, swaps directs
+                if data[a] > data[b]:
+                    data[a], data[b] = data[b], data[a]
+                    changed = True
+                    yield data, [a, b]
+                if data[b] > data[c]:
+                    data[b], data[c] = data[c], data[b]
+                    changed = True
+                    yield data, [b, c]
+                if data[a] > data[b]:
+                    data[a], data[b] = data[b], data[a]
+                    changed = True
+                    yield data, [a, b]
+centrifugal_sort.desc = "Tri par triplets avec swaps directs (réseau de tri à 3 éléments)."
+
 
 async def flashy_sort(data):
-    """Tri rapide et visuellement spectaculaire."""
+    """Heap Sort avec heapify async imbriquée — visuellement spectaculaire."""
     n = len(data)
 
-    # Étape 1 : Heapify
-    async def heapify(n, i):
-        largest = i
-        l, r = 2*i + 1, 2*i + 2
-        if l < n and data[l] > data[largest]:
-            largest = l
-        if r < n and data[r] > data[largest]:
-            largest = r
-        if largest != i:
+    async def heapify(size, i):
+        while True:
+            largest = i
+            l, r = 2 * i + 1, 2 * i + 2
+            if l < size and data[l] > data[largest]:
+                largest = l
+            if r < size and data[r] > data[largest]:
+                largest = r
+            if largest == i:
+                break
             data[i], data[largest] = data[largest], data[i]
             yield data, [i, largest]
-            async for step, highlight in heapify(n, largest):
-                yield step, highlight
+            i = largest
 
-    # Construction du heap
-    for i in range(n//2 - 1, -1, -1):
+    for i in range(n // 2 - 1, -1, -1):
         async for step, highlight in heapify(n, i):
             yield step, highlight
 
-    # Extraction du heap (tri final)
     for i in range(n - 1, 0, -1):
         data[i], data[0] = data[0], data[i]
         yield data, [0, i]
         async for step, highlight in heapify(i, 0):
             yield step, highlight
-
-flashy_sort.desc = "Tri rapide basé sur Heap Sort avec des échanges spectaculaires pour un effet visuel maximal."
-
-
+flashy_sort.desc = "Heap Sort visuellement spectaculaire avec heapify entièrement async."
 
 
 # ────────────────────────────────────────────────────────────────
 # Dictionnaire global pour import
 # ────────────────────────────────────────────────────────────────
 algorithms = {
-    "Bubble Sort": bubble_sort,
-    "Cocktail Sort": cocktail_sort,
-    "Comb Sort": comb_sort,
-    "Heap Sort": heap_sort,
-    "Insertion Sort": insertion_sort,
-    "Merge Sort": merge_sort,
-    "Quick Sort": quick_sort,
-    "Selection Sort": selection_sort,
-    "Shell Sort": shell_sort,
-    "Pair Sum Sort": pair_sum_sort,
-    "Pair Shift Sort": pair_shift_sort,
+    "Bubble Sort":      bubble_sort,
+    "Cocktail Sort":    cocktail_sort,
+    "Comb Sort":        comb_sort,
+    "Heap Sort":        heap_sort,
+    "Insertion Sort":   insertion_sort,
+    "Merge Sort":       merge_sort,
+    "Quick Sort":       quick_sort,
+    "Selection Sort":   selection_sort,
+    "Shell Sort":       shell_sort,
+    "Odd-Even Sort":    pair_sum_sort,
+    "Gnome Sort":       pair_shift_sort,
     "Centrifugal Sort": centrifugal_sort,
-    "Tri test cool": flashy_sort
+    "Flashy Sort":      flashy_sort,
 }
