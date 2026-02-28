@@ -95,6 +95,23 @@ def init_db():
     ON mots_trouves(user_id)
     """)
 
+    # ─── Table steam_keys ────────────────────────────
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS steam_keys (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        game_name TEXT NOT NULL,
+        steam_url TEXT NOT NULL,
+        steam_key TEXT NOT NULL,
+        won INTEGER NOT NULL DEFAULT 0,
+        winner TEXT
+    )
+    """)
+    
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_steam_keys_won
+    ON steam_keys(won)
+    """)    
+
     conn.commit()
     conn.close()
 
