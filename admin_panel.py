@@ -424,6 +424,7 @@ HTML_MAIN = """
             <option value="reiatsu">reiatsu</option>
             <option value="reiatsu_config">reiatsu_config</option>
             <option value="mots_trouves">mots_trouves</option>
+            <option value="steam_keys">steam_keys</option>
           </select>
           <input type="text" class="filter-input" id="filterInput" placeholder="Filtrer..." oninput="filterTable()">
           <span class="table-meta" id="tableCount"></span>
@@ -793,8 +794,8 @@ def logout():
 
 
 # ─── API : Table ───────────────────────────────────────────────────────────────
-ALLOWED_TABLES = {"reiatsu", "reiatsu_config", "mots_trouves"}
-PK_MAP = {"reiatsu": "user_id", "reiatsu_config": "guild_id", "mots_trouves": "user_id"}
+ALLOWED_TABLES = {"reiatsu", "reiatsu_config", "mots_trouves", "steam_keys"}
+PK_MAP = {"reiatsu": "user_id", "reiatsu_config": "guild_id", "mots_trouves": "user_id", "steam_keys": "id"}
 
 @app.route("/api/table/<table_name>")
 @login_required
