@@ -164,7 +164,7 @@ class ScratchKey(commands.Cog):
     async def _get_all_steam_keys(self):
         conn = get_conn()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, game_name, steam_url, steam_key FROM steam_keys WHERE won = 0")
+        cursor.execute("SELECT id, game_name, steam_url, steam_key FROM steam_keys WHERE won = 0 OR won = 'false' OR won IS NULL")
         rows = cursor.fetchall()
         conn.close()
 
@@ -182,7 +182,7 @@ class ScratchKey(commands.Cog):
         conn = get_conn()
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE steam_keys SET won = 1, winner = ? WHERE id = ? AND won = 0",
+            "UPDATE steam_keys SET won = 1, winner = ? WHERE id = ? AND (won = 0 OR won = 'false')",
             (winner, key_id)
         )
         conn.commit()
