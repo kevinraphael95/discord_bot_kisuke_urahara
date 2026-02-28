@@ -11,10 +11,36 @@
 # ────────────────────────────────────────────────────────────────────────────────
 import discord
 from discord.ext import commands
+import sqlite3
 import os
 import traceback
-from utils.supabase_client import supabase
 from utils.taches import lancer_3_taches
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🗄️ SQLite
+# ────────────────────────────────────────────────────────────────────────────────
+DB_PATH = os.path.join("database", "reiatsu.db")
+
+def get_conn():
+    return sqlite3.connect(DB_PATH)
+
+def get_points(user_id: int) -> int:
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT points FROM reiatsu WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else 0
+
+def remove_points(user_id: int, amount: int):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE reiatsu SET points = MAX(points - ?, 0) WHERE user_id = ?",
+        (amount, user_id)
+    )
+    conn.commit()
+    conn.close()
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Constantes
@@ -34,7 +60,7 @@ class Hollow(commands.Cog):
     @commands.command(name="hollow", help="👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def hollow_cmd(self, ctx: commands.Context):
-        user_id = str(ctx.author.id)
+        user_id = ctx.author.id
 
         # ───────── Vérif image ─────────
         if not os.path.isfile(HOLLOW_IMAGE_PATH):
@@ -42,8 +68,7 @@ class Hollow(commands.Cog):
 
         # ───────── Vérif reiatsu ─────────
         try:
-            res = supabase.table("reiatsu").select("points").eq("user_id", user_id).execute()
-            reiatsu = res.data[0]["points"] if res.data else 0
+            reiatsu = get_points(user_id)
         except Exception:
             traceback.print_exc()
             return await ctx.send("⚠️ Erreur lors de la vérification du reiatsu.")
@@ -55,8 +80,10 @@ class Hollow(commands.Cog):
         file = discord.File(HOLLOW_IMAGE_PATH, filename="hollow.jpg")
         embed = discord.Embed(
             title="👹 Un Hollow est apparu !",
-            description=f"{ctx.author.mention}, un Hollow approche... ⚠️\n"
-                        f"Clique sur **Attaquer** pour dépenser {REIATSU_COST} reiatsu et lancer le combat.",
+            description=(
+                f"{ctx.author.mention}, un Hollow approche... ⚠️\n"
+                f"Clique sur **Attaquer** pour dépenser {REIATSU_COST} reiatsu et lancer le combat."
+            ),
             color=discord.Color.dark_red()
         )
         embed.set_image(url="attachment://hollow.jpg")
@@ -71,16 +98,17 @@ class Hollow(commands.Cog):
 
             async def callback(self, interaction: discord.Interaction):
                 if interaction.user.id != ctx.author.id:
-                    return await interaction.response.send_message("❌ Ce combat ne t'appartient pas.", ephemeral=True)
+                    return await interaction.response.send_message(
+                        "❌ Ce combat ne t'appartient pas.", ephemeral=True
+                    )
 
-                self.disabled = True
                 for child in view.children:
                     child.disabled = True
                 await interaction.response.edit_message(view=view)
 
                 # Déduire le reiatsu
                 try:
-                    supabase.table("reiatsu").update({"points": reiatsu - REIATSU_COST}).eq("user_id", user_id).execute()
+                    remove_points(user_id, REIATSU_COST)
                 except Exception:
                     traceback.print_exc()
                     return await ctx.send("⚠️ Erreur de mise à jour du reiatsu.")
@@ -97,7 +125,6 @@ class Hollow(commands.Cog):
                 async def update_embed(e: discord.Embed):
                     await interaction.edit_original_response(embed=e)
 
-                # Préparation
                 embed.clear_fields()
                 embed.add_field(name="Préparation...", value="Les épreuves vont commencer...", inline=False)
                 await update_embed(embed)
@@ -114,7 +141,8 @@ class Hollow(commands.Cog):
                     title="🎯 Résultat du combat",
                     description=(
                         f"🎉 Tu as vaincu le Hollow ! Bravo, {ctx.author.mention} !"
-                        if victoire else f"💀 Le Hollow t’a vaincu... retente ta chance !"
+                        if victoire else
+                        f"💀 Le Hollow t'a vaincu... retente ta chance !"
                     ),
                     color=discord.Color.green() if victoire else discord.Color.red()
                 )
@@ -123,7 +151,6 @@ class Hollow(commands.Cog):
 
         view.add_item(AttackButton())
 
-        # ───────── Envoi du message ─────────
         msg = await ctx.send(embed=embed, file=file, view=view)
         view.message = msg
 
