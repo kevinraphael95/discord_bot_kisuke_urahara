@@ -19,9 +19,17 @@ from datetime import datetime, timedelta, timezone
 import os
 import json
 import random
+import sqlite3
 from utils.discord_utils import safe_send, safe_respond
-from utils.supabase_client import supabase
 from utils.reiatsu_utils import ensure_profile, has_class
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🗄️ SQLite
+# ────────────────────────────────────────────────────────────────────────────────
+DB_PATH = os.path.join("database", "reiatsu.db")
+
+def get_conn():
+    return sqlite3.connect(DB_PATH)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Chargement de la configuration Reiatsu
@@ -54,19 +62,30 @@ class Skill(commands.Cog):
     async def valider_quete_skill(self, user: discord.User, channel=None):
         """Valide la quête 'Première utilisation du skill'."""
         try:
-            data = supabase.table("reiatsu").select("quetes, niveau").eq("user_id", user.id).execute()
-            if not data.data:
+            conn = get_conn()
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT quetes, niveau FROM reiatsu WHERE user_id = ?", (user.id,))
+            row = cursor.fetchone()
+            if not row:
+                conn.close()
                 return
 
-            quetes = data.data[0].get("quetes", [])
-            niveau = data.data[0].get("niveau", 1)
+            quetes = json.loads(row[0] or "[]")
+            niveau = row[1] or 1
 
             if "skill" in quetes:
+                conn.close()
                 return
 
             quetes.append("skill")
             new_lvl = niveau + 1
-            supabase.table("reiatsu").update({"quetes": quetes, "niveau": new_lvl}).eq("user_id", user.id).execute()
+            cursor.execute(
+                "UPDATE reiatsu SET quetes = ?, niveau = ? WHERE user_id = ?",
+                (json.dumps(quetes), new_lvl, user.id)
+            )
+            conn.commit()
+            conn.close()
 
             embed = discord.Embed(
                 title="🎯 Quête accomplie !",
@@ -92,7 +111,7 @@ class Skill(commands.Cog):
             player = ensure_profile(user.id, user.name)
 
             if not has_class(player):
-                await safe_send(channel, "❌ Tu n’as pas encore choisi de classe Reiatsu. Utilise `!!classe` pour choisir une classe.")
+                await safe_send(channel, "❌ Tu n'as pas encore choisi de classe Reiatsu. Utilise `!!classe` pour choisir une classe.")
                 return
 
             classe = player["classe"]
@@ -110,11 +129,24 @@ class Skill(commands.Cog):
             classe_data = self.config["CLASSES"].get(classe, {})
             base_cd = classe_data.get("Cooldown", 12)
 
-            res = supabase.table("reiatsu").select("last_skilled_at, active_skill, fake_spawn_id, points").eq("user_id", user.id).execute()
-            data = res.data[0] if res.data else {}
-            last_skill = data.get("last_skilled_at")
-            active_skill = data.get("active_skill", False)
-            fake_spawn_id = data.get("fake_spawn_id")
+            # 📥 Récupération des données depuis SQLite
+            conn = get_conn()
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT last_skilled_at, active_skill, fake_spawn_id, points FROM reiatsu WHERE user_id = ?",
+                (user.id,)
+            )
+            row = cursor.fetchone()
+            conn.close()
+
+            if not row:
+                await safe_send(channel, "❌ Profil introuvable.")
+                return
+
+            last_skill = row[0]
+            active_skill = bool(row[1])
+            fake_spawn_id = row[2]
+            points = row[3] or 0
 
             cooldown_text = "✅ Disponible"
 
@@ -131,7 +163,7 @@ class Skill(commands.Cog):
                         h, m = divmod(int(restant.total_seconds() // 60), 60)
                         cooldown_text = f"⏳ {restant.days}j {h}h{m}m" if restant.days else f"⏳ {h}h{m}m"
 
-                except:
+                except Exception:
                     pass
 
             if active_skill:
@@ -147,7 +179,7 @@ class Skill(commands.Cog):
                 await safe_send(channel, embed=embed)
                 return
 
-            update_data = {"last_skilled_at": datetime.utcnow().isoformat()}
+            now_iso = datetime.utcnow().isoformat()
 
             # ───────────── Illusionniste ─────────────
             if classe == "Illusionniste":
@@ -155,15 +187,30 @@ class Skill(commands.Cog):
                     await safe_send(channel, "⚠️ Tu as déjà un faux Reiatsu actif !")
                     return
 
-                update_data["active_skill"] = True
-                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
+                conn = get_conn()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE reiatsu SET active_skill = 1, last_skilled_at = ? WHERE user_id = ?",
+                    (now_iso, user.id)
+                )
+                conn.commit()
+                conn.close()
 
-                conf_data = supabase.table("reiatsu_config").select("*").eq("guild_id", channel.guild.id).execute()
-                if not conf_data.data or not conf_data.data[0].get("channel_id"):
+                # Récupération du canal de spawn depuis SQLite
+                conn = get_conn()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT channel_id FROM reiatsu_config WHERE guild_id = ?",
+                    (channel.guild.id,)
+                )
+                conf_row = cursor.fetchone()
+                conn.close()
+
+                if not conf_row or not conf_row[0]:
                     await safe_send(channel, "❌ Aucun canal de spawn configuré pour ce serveur.")
                     return
 
-                spawn_channel = self.bot.get_channel(int(conf_data.data[0]["channel_id"]))
+                spawn_channel = self.bot.get_channel(int(conf_row[0]))
 
                 cog = self.bot.get_cog("ReiatsuSpawner")
                 if cog:
@@ -171,45 +218,55 @@ class Skill(commands.Cog):
 
                 embed = discord.Embed(
                     title="🎭 Skill Illusionniste activé !",
-                    description="Un faux Reiatsu est apparu dans le serveur…\nTu ne peux pas l’absorber toi-même.",
+                    description="Un faux Reiatsu est apparu dans le serveur…\nTu ne peux pas l'absorber toi-même.",
                     color=discord.Color.green()
                 )
                 await safe_send(channel, embed=embed)
-
                 await self.valider_quete_skill(user, channel)
                 return
 
             # ───────────── Voleur ─────────────
             elif classe == "Voleur":
-                update_data["active_skill"] = True
+                conn = get_conn()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE reiatsu SET active_skill = 1, last_skilled_at = ? WHERE user_id = ?",
+                    (now_iso, user.id)
+                )
+                conn.commit()
+                conn.close()
+
                 embed = discord.Embed(
                     title="🥷 Skill Voleur activé !",
                     description="Ton prochain vol sera automatiquement **réussi**.",
                     color=discord.Color.purple()
                 )
                 await safe_send(channel, embed=embed)
-
-                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
                 await self.valider_quete_skill(user, channel)
                 return
 
             # ───────────── Absorbeur ─────────────
             elif classe == "Absorbeur":
-                update_data["active_skill"] = True
+                conn = get_conn()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE reiatsu SET active_skill = 1, last_skilled_at = ? WHERE user_id = ?",
+                    (now_iso, user.id)
+                )
+                conn.commit()
+                conn.close()
+
                 embed = discord.Embed(
                     title="🌀 Skill Absorbeur activé !",
                     description="Ton prochain Reiatsu sera automatiquement un **Super Reiatsu**.",
                     color=discord.Color.blue()
                 )
                 await safe_send(channel, embed=embed)
-
-                supabase.table("reiatsu").update(update_data).eq("user_id", user.id).execute()
                 await self.valider_quete_skill(user, channel)
                 return
 
             # ───────────── Parieur (Machine à Sous) ─────────────
             elif classe == "Parieur":
-                points = data.get("points", 0)
                 mise = 30
 
                 if points < mise:
@@ -248,10 +305,15 @@ class Skill(commands.Cog):
                     gain = -mise
 
                 new_points = max(0, points + gain)
-                supabase.table("reiatsu").update({
-                    "points": new_points,
-                    "last_skilled_at": datetime.utcnow().isoformat()
-                }).eq("user_id", user.id).execute()
+
+                conn = get_conn()
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE reiatsu SET points = ?, last_skilled_at = ? WHERE user_id = ?",
+                    (new_points, now_iso, user.id)
+                )
+                conn.commit()
+                conn.close()
 
                 embed.description = f"{slots[0]} | {slots[1]} | {slots[2]}\n\n{result_text}"
                 embed.color = discord.Color.gold() if gain > 0 else discord.Color.red()
