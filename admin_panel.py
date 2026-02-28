@@ -277,6 +277,10 @@ HTML_MAIN = """
   tr:hover td { background: rgba(255,255,255,.02); }
   .edit-cell { cursor: pointer; }
   .edit-cell:hover { color: var(--accent); }
+  th { cursor: pointer; user-select: none; }
+  th:hover { color: var(--text); }
+  th.sort-asc::after { content: ' ↑'; color: var(--accent); }
+  th.sort-desc::after { content: ' ↓'; color: var(--accent); }
 
   /* ─── Forms ─── */
   .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
@@ -565,20 +569,50 @@ function toast(msg, isErr=false) {
 
 // ─── DB Table ───────────────────────────────────────────────────────────────
 let currentData = [];
+let currentCols = [];
+let currentTableName = '';
+let currentPk = '';
+let sortCol = null;
+let sortDir = 1;
 
 async function loadTable() {
   const table = document.getElementById('tableSelect').value;
   const res = await fetch('/api/table/' + table);
   const data = await res.json();
   currentData = data.rows;
+  currentCols = data.columns;
+  currentTableName = table;
+  currentPk = data.pk;
+  sortCol = null;
   renderTable(data.columns, data.rows, table, data.pk);
   document.getElementById('tableCount').textContent = data.rows.length + ' entrées';
+}
+
+function sortBy(colIndex) {
+  if (sortCol === colIndex) { sortDir *= -1; } else { sortCol = colIndex; sortDir = 1; }
+  const sorted = [...currentData].sort((a, b) => {
+    const va = a[colIndex] ?? '';
+    const vb = b[colIndex] ?? '';
+    const na = parseFloat(va), nb = parseFloat(vb);
+    if (!isNaN(na) && !isNaN(nb)) return (na - nb) * sortDir;
+    return String(va).localeCompare(String(vb), 'fr', {sensitivity: 'base'}) * sortDir;
+  });
+  renderTable(currentCols, sorted, currentTableName, currentPk);
 }
 
 function renderTable(cols, rows, tableName, pk) {
   const head = document.getElementById('tableHead');
   const body = document.getElementById('tableBody');
-  head.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+  const htr = document.createElement('tr');
+  cols.forEach((c, i) => {
+    const th = document.createElement('th');
+    th.textContent = c;
+    if (sortCol === i) th.className = sortDir === 1 ? 'sort-asc' : 'sort-desc';
+    th.addEventListener('click', () => sortBy(i));
+    htr.appendChild(th);
+  });
+  head.innerHTML = '';
+  head.appendChild(htr);
   body.innerHTML = '';
   rows.forEach(row => {
     const tr = document.createElement('tr');
