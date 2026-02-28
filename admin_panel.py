@@ -579,15 +579,30 @@ function renderTable(cols, rows, tableName, pk) {
   const head = document.getElementById('tableHead');
   const body = document.getElementById('tableBody');
   head.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
-  body.innerHTML = rows.map(row => {
-    return '<tr>' + cols.map((col, i) => {
+  body.innerHTML = '';
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    cols.forEach((col, i) => {
       const val = row[i] ?? '';
       const isPk = col === pk;
-      return `<td class="${isPk ? '' : 'edit-cell'}" title="${val}" 
-        ${isPk ? '' : `onclick="openEdit('${tableName}','${pk}','${row[0]}','${col}','${String(val).replace(/'/g,"\\'")}')"`}
-        >${val}</td>`;
-    }).join('') + '</tr>';
-  }).join('');
+      const td = document.createElement('td');
+      td.textContent = val;
+      td.title = String(val);
+      if (!isPk) {
+        td.className = 'edit-cell';
+        td.dataset.table = tableName;
+        td.dataset.pk = pk;
+        td.dataset.pkval = String(row[0]);
+        td.dataset.col = col;
+        td.dataset.val = String(val);
+        td.addEventListener('click', function() {
+          openEdit(this.dataset.table, this.dataset.pk, this.dataset.pkval, this.dataset.col, this.dataset.val);
+        });
+      }
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
 }
 
 function filterTable() {
