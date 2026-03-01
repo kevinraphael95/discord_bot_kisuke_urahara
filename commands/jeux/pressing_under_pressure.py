@@ -2,6 +2,7 @@
 # 📌 pressing_under_pressure.py — Jeu Pressing Under Pressure (slash + préfixe)
 # Objectif : Mini-jeu troll inspiré de The Impossible Quiz, énigmes aléatoires
 #            avec timer live, vies, streaks, combo, troll events, classement.
+#            Toute la partie se joue dans UN SEUL message édité en continu.
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
@@ -16,7 +17,6 @@ from discord.ext import commands
 import json
 import random
 import asyncio
-import time
 import os
 import logging
 
@@ -30,37 +30,41 @@ log = logging.getLogger(__name__)
 DATA_JSON_PATH   = os.path.join("data", "pressing_puzzles.json")
 SCORES_JSON_PATH = os.path.join("data", "pressing_scores.json")
 
-MAX_LIVES        = 3          # ❤️ Vies de départ
-TOTAL_TIME_BASE  = 10         # ⏱ Secondes de base par énigme
-COMBO_THRESHOLD  = 3          # 🔥 Nombre de succès consécutifs pour le combo
-MAX_PUZZLES      = 10         # 🧩 Nombre max d'énigmes par partie
+MAX_LIVES       = 3     # ❤️ Vies de départ
+TOTAL_TIME_BASE = 12    # ⏱ Secondes de base par énigme
+COMBO_THRESHOLD = 3     # 🔥 Succès consécutifs pour accélérer le timer
+MAX_PUZZLES     = 10    # 🧩 Nombre d'énigmes par partie
 
-# Variations de texte troll ajoutées à la question
+# Suffixes troll ajoutés aléatoirement aux questions
 TROLL_SUFFIXES = [
-    " (tu crois être prêt ?)",
-    " (j'espère que tu lis bien…)",
-    " (ne rate pas ça.)",
-    " (facile… ou pas.)",
-    " (je te surveille 👀)",
-    " (réfléchis bien avant d'agir.)",
-    " (ou alors… fais le contraire ?)",
-    " (ha. bonne chance.)",
-    " (la réponse est évidente. Enfin… presque.)",
+    " *(tu crois être prêt ?)*",
+    " *(j'espère que tu lis bien…)*",
+    " *(ne rate pas ça.)*",
+    " *(facile… ou pas.)*",
+    " *(je te surveille 👀)*",
+    " *(réfléchis bien avant d'agir.)*",
+    " *(ou alors… fais le contraire ?)*",
+    " *(ha. bonne chance.)*",
+    " *(la réponse est évidente. Enfin… presque.)*",
+    " *(lis jusqu'au bout avant d'agir.)*",
+    " *(ou peut-être que non.)*",
 ]
 
-# Events troll aléatoires (déclenchés aléatoirement en cours d'énigme)
+# Events troll déclenchés aléatoirement en cours d'énigme
 TROLL_EVENTS = [
-    {"msg": "⚠️ **FAUSSE ALERTE** : Il ne se passe rien. Continue.", "effect": None},
-    {"msg": "🔀 **LES RÈGLES ONT CHANGÉ.** Fais exactement le contraire de ce qui est demandé.", "effect": "invert"},
-    {"msg": "😴 **Rien à voir ici.** Passe ton tour… ou pas.", "effect": None},
+    {"msg": "⚠️ **FAUSSE ALERTE.** Il ne se passe rien. Continue.", "effect": None},
+    {"msg": "🔀 **LES RÈGLES ONT CHANGÉ.** Fais exactement le contraire.", "effect": "invert"},
+    {"msg": "😴 **Rien à voir ici.** Passe ton chemin… ou pas.", "effect": None},
     {"msg": "💥 **DOUBLE OU RIEN.** Le nombre de pressions requis vient de doubler.", "effect": "double"},
-    {"msg": "🎲 **CHANCE !** La réponse est maintenant aléatoire.", "effect": "random"},
-    {"msg": "⏩ **SPEED RUN !** Tu n'as plus que 5 secondes.", "effect": "halve_time"},
-    {"msg": "🔁 **RESET !** Le compteur de pressions vient d'être remis à zéro.", "effect": "reset_presses"},
+    {"msg": "🎲 **CHANCE !** La réponse est maintenant complètement aléatoire.", "effect": "random"},
+    {"msg": "⏩ **SPEED RUN !** Tu n'as plus que 4 secondes.", "effect": "halve_time"},
+    {"msg": "🔁 **RESET !** Ton compteur de pressions vient d'être remis à zéro.", "effect": "reset_presses"},
+    {"msg": "🙈 **DISTRACTION.** Ne lis pas ceci. Concentre-toi.", "effect": None},
+    {"msg": "📉 **MALUS.** Tu perdras 2 vies si tu te trompes maintenant.", "effect": "double_penalty"},
 ]
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 💾 Gestion du score persistant
+# 💾 Scores persistants
 # ────────────────────────────────────────────────────────────────────────────────
 def load_scores() -> dict:
     try:
@@ -76,15 +80,18 @@ def save_scores(data: dict) -> None:
 
 def update_score(user_id: int, username: str, puzzles_done: int, won: bool) -> None:
     scores = load_scores()
-    uid = str(user_id)
-    entry = scores.get(uid, {"username": username, "games": 0, "wins": 0, "best": 0, "total_puzzles": 0})
-    entry["username"]      = username
-    entry["games"]        += 1
+    uid    = str(user_id)
+    entry  = scores.get(uid, {
+        "username": username, "games": 0, "wins": 0,
+        "best": 0, "total_puzzles": 0,
+    })
+    entry["username"]       = username
+    entry["games"]         += 1
     if won:
-        entry["wins"]     += 1
+        entry["wins"]      += 1
     entry["total_puzzles"] += puzzles_done
     if puzzles_done > entry.get("best", 0):
-        entry["best"]      = puzzles_done
+        entry["best"]       = puzzles_done
     scores[uid] = entry
     save_scores(scores)
 
@@ -96,14 +103,14 @@ def load_puzzles() -> list:
         with open(DATA_JSON_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        log.warning(f"[PUP] Fichier {DATA_JSON_PATH} introuvable.")
+        log.warning("[PUP] Fichier %s introuvable.", DATA_JSON_PATH)
         return []
     except json.JSONDecodeError as e:
-        log.error(f"[PUP] JSON invalide : {e}")
+        log.error("[PUP] JSON invalide : %s", e)
         return []
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧩 Classe PuzzleState — état d'une énigme en cours
+# 🧩 PuzzleState — état d'une énigme en cours
 # ────────────────────────────────────────────────────────────────────────────────
 class PuzzleState:
     def __init__(self, puzzle: dict, total_time: int):
@@ -111,20 +118,35 @@ class PuzzleState:
         self.press_count    = 0
         self.total_time     = total_time
         self.remaining      = total_time
-        self.effect         = None          # Effet troll actif
-        self.troll_fired    = False         # Un seul troll par énigme
-        self.finished       = asyncio.Event()
+        self.effect         = None   # Effet troll actif
+        self.double_penalty = False  # Perd 2 vies si échec
+        self.troll_fired    = False  # Un seul troll event par énigme
+        self.troll_msg      = None   # Message troll affiché dans l'embed
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ Vue du bouton
+# 🎛️ Vue — bouton unique, recyclé pour toute la partie
 # ────────────────────────────────────────────────────────────────────────────────
 class PressView(discord.ui.View):
-    """Vue avec un unique bouton « Appuie ici ! » lié à un PuzzleState."""
+    """
+    Vue persistante réutilisée durant toute la partie.
+    On met à jour state entre chaque énigme via bind().
+    """
 
-    def __init__(self, state: PuzzleState, user: discord.User | discord.Member):
-        super().__init__(timeout=None)   # Le timeout est géré manuellement
-        self.state = state
+    def __init__(self, user: discord.User | discord.Member):
+        super().__init__(timeout=None)
         self.user  = user
+        self.state: PuzzleState | None = None
+
+    def bind(self, state: PuzzleState) -> None:
+        """Lie la vue à un nouveau PuzzleState pour l'énigme suivante."""
+        self.state = state
+        for child in self.children:
+            child.disabled = False   # type: ignore
+
+    def lock(self) -> None:
+        """Désactive le bouton."""
+        for child in self.children:
+            child.disabled = True    # type: ignore
 
     @discord.ui.button(label="Appuie ici !", style=discord.ButtonStyle.green, emoji="👆")
     async def press(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -135,8 +157,11 @@ class PressView(discord.ui.View):
             return
 
         s = self.state
+        if s is None:
+            await interaction.response.defer()
+            return
 
-        # Effet reset_presses
+        # Effet reset_presses : remet le compteur à 0 au premier clic post-event
         if s.effect == "reset_presses":
             s.press_count = 0
             s.effect      = None
@@ -152,285 +177,398 @@ class PressingUnderPressure(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot      = bot
-        self.sessions: set[int] = set()   # user_id des parties en cours
+        self.sessions: set[int] = set()   # user_id en cours de partie
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔧 Utilitaires
+    # 🔧 Helpers d'affichage
     # ────────────────────────────────────────────────────────────────────────────
-    def _generate_timer(self, total: int, remaining: int) -> str:
+    def _timer_bar(self, total: int, remaining: int) -> str:
         green = "🟩" * max(0, remaining)
         white = "⬜" * max(0, total - remaining)
         return green + white
 
-    def _lives_display(self, lives: int) -> str:
-        return "❤️" * lives + "🖤" * (MAX_LIVES - lives)
+    def _lives_bar(self, lives: int) -> str:
+        return "❤️" * max(0, lives) + "🖤" * max(0, MAX_LIVES - lives)
 
-    def _randomize_puzzle(self, puzzle: dict) -> dict:
-        p = puzzle.copy()
-        if p["type"] in ("click_once", "multi_click"):
-            p["value"] = max(1, p.get("value", 1) + random.choice([-1, 0, 0, 1]))
+    def _difficulty_stars(self, difficulty: int) -> str:
+        d = max(1, min(5, difficulty))
+        return "⭐" * d + "☆" * (5 - d)
+
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔧 Logique énigme
+    # ────────────────────────────────────────────────────────────────────────────
+    def _prepare_puzzle(self, base: dict) -> dict:
+        """Copie et randomise légèrement le puzzle."""
+        p     = base.copy()
+        ptype = p.get("type", "")
+
+        # Légère variation du nombre de clics
+        if ptype in ("multi_click", "click_once") and p.get("value", 1) > 0:
+            p["value"] = max(1, p["value"] + random.choice([-1, 0, 0, 0, 1]))
+
         p["question"] = p["question"] + random.choice(TROLL_SUFFIXES)
         return p
 
-    def _evaluate_success(self, state: PuzzleState) -> bool:
+    def _evaluate(self, state: PuzzleState) -> bool:
+        """Évalue si le joueur a réussi l'énigme."""
         ptype   = state.puzzle.get("type", "")
         presses = state.press_count
         req     = state.puzzle.get("value", 0)
         effect  = state.effect
 
-        # Effet invert : inverser la logique click / no_click
+        # Effets troll qui modifient la logique
         if effect == "invert":
-            if ptype in ("multi_click", "click_once"):
+            if ptype in ("multi_click", "click_once", "wait_then_click", "click_any"):
                 return presses == 0
             if ptype in ("no_click", "no_click_time"):
                 return presses >= 1
-        # Effet double
-        if effect == "double":
-            if ptype in ("multi_click", "click_once"):
-                req = req * 2
+        if effect == "double" and ptype in ("multi_click", "click_once", "wait_then_click"):
+            req = req * 2
 
+        # Types de base
         if ptype in ("multi_click", "click_once"):
             return presses == req
+
+        if ptype == "wait_then_click":
+            # Succès si le joueur a appuyé exactement 1 fois (le timing est honorifique)
+            return presses == 1
+
         if ptype in ("no_click", "no_click_time"):
             return presses == 0
+
         if ptype == "click_any":
-            return True
+            return presses >= 1
+
         if ptype == "click_if_true":
-            return bool(state.puzzle.get("value", True))
+            expected_click = bool(state.puzzle.get("value", True))
+            return (presses >= 1) == expected_click
+
         if ptype == "click_if_confused":
             return random.choice([True, False])   # 🎲 troll pur
+
+        if ptype == "logic_invert":
+            # La question dit d'appuyer → ne pas appuyer pour réussir
+            return presses == 0
+
+        if ptype == "logic_troll":
+            # Insoluble par design
+            return random.choice([True, False])
+
+        if ptype == "timed_click":
+            # Succès si le joueur a appuyé exactement 1 fois
+            return presses == 1
+
         if ptype == "random":
             return random.choice([True, False])
-        return True
 
+        return True   # Fallback : type inconnu → succès
+
+    def _instruction(self, puzzle: dict) -> str:
+        """Génère la ligne d'instruction visible sous la question."""
+        ptype = puzzle.get("type", "")
+        req   = puzzle.get("value", 0)
+
+        if ptype == "multi_click":
+            return f"👉 Appuie exactement **{req}** fois."
+        if ptype == "click_once":
+            return "👉 Appuie **une seule** fois."
+        if ptype == "wait_then_click":
+            return f"⏳ Attends **{req} seconde(s)** puis appuie **une fois**."
+        if ptype in ("no_click", "no_click_time"):
+            return "🚫 **N'appuie pas** sur le bouton."
+        if ptype == "click_any":
+            return "✅ Appuie **au moins une fois**."
+        if ptype == "click_if_true":
+            return "🤔 Appuie **si la phrase est vraie** — sinon ne fais rien."
+        if ptype == "click_if_confused":
+            return "😵 Appuie si tu es **confus**… ou pas. Va savoir."
+        if ptype == "logic_invert":
+            return "🔄 Fais le **contraire** de ce que tu ferais normalement."
+        if ptype == "logic_troll":
+            return "🎭 La logique ne s'applique pas ici. Bonne chance."
+        if ptype == "timed_click":
+            target = puzzle.get("time_target", "?")
+            return f"⏱️ Appuie quand il reste exactement **{target}** bloc(s) verts."
+        if ptype == "random":
+            return "🎲 La réponse est **aléatoire**. Tout ce que tu fais peut marcher… ou pas."
+        return "❓ Fais ce qui te semble logique."
+
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🖼️ Construction de l'embed
+    # ────────────────────────────────────────────────────────────────────────────
     def _build_embed(
         self,
-        state: PuzzleState,
-        lives: int,
-        combo: int,
-        puzzle_num: int,
+        state:         PuzzleState,
+        lives:         int,
+        combo:         int,
+        puzzle_num:    int,
         total_puzzles: int,
-        troll_msg: str | None = None,
+        phase:         str = "playing",
+        result_msg:    str = "",
     ) -> discord.Embed:
-        p       = state.puzzle
-        ptype   = p.get("type", "")
-        req     = p.get("value", 0)
+        p     = state.puzzle
+        diff  = p.get("difficulty", 1)
 
-        # Indice de ce qu'il faut faire
-        if ptype in ("multi_click", "click_once"):
-            instruction = f"👉 Appuie exactement **{req}** fois."
-        elif ptype in ("no_click", "no_click_time"):
-            instruction = "🚫 N'appuie **surtout pas** sur le bouton !"
-        elif ptype == "click_any":
-            instruction = "✅ Appuie **au moins une fois**."
-        elif ptype == "click_if_true":
-            instruction = "🤔 Appuie **si la phrase est vraie**, sinon ne fais rien."
-        elif ptype == "click_if_confused":
-            instruction = "😵 Appuie si tu es **confus**… ou pas. Va savoir."
-        elif ptype == "random":
-            instruction = "🎲 La réponse est **complètement aléatoire**. Bonne chance."
+        combo_str  = f"  🔥 Combo ×{combo}!" if combo >= COMBO_THRESHOLD else ""
+        troll_str  = f"\n\n⚡ **EVENT :** {state.troll_msg}" if state.troll_msg else ""
+        penalty_str = "\n⚠️ *MALUS actif — erreur = -2 vies !*" if state.double_penalty else ""
+
+        if phase == "playing":
+            color = discord.Color.orange()
+            desc  = (
+                f"**Énigme {puzzle_num}/{total_puzzles}** {self._difficulty_stars(diff)}\n\n"
+                f"📝 {p.get('question', '')}\n\n"
+                f"{self._instruction(p)}"
+                f"{troll_str}{penalty_str}\n\n"
+                f"👆 Pressions : **{state.press_count}**\n"
+                f"⏳ {self._timer_bar(state.total_time, state.remaining)}\n"
+                f"Vies : {self._lives_bar(lives)}{combo_str}"
+            )
+
+        elif phase == "success":
+            color = discord.Color.green()
+            desc  = (
+                f"**Énigme {puzzle_num}/{total_puzzles}** {self._difficulty_stars(diff)}\n\n"
+                f"📝 {p.get('question', '')}\n\n"
+                f"{self._instruction(p)}"
+                f"{troll_str}\n\n"
+                f"👆 Pressions : **{state.press_count}**\n"
+                f"⏳ {self._timer_bar(state.total_time, 0)}\n"
+                f"Vies : {self._lives_bar(lives)}{combo_str}\n\n"
+                f"✅ **{result_msg}**"
+            )
+
+        elif phase == "fail":
+            color = discord.Color.red()
+            desc  = (
+                f"**Énigme {puzzle_num}/{total_puzzles}** {self._difficulty_stars(diff)}\n\n"
+                f"📝 {p.get('question', '')}\n\n"
+                f"{self._instruction(p)}"
+                f"{troll_str}\n\n"
+                f"👆 Pressions : **{state.press_count}**\n"
+                f"⏳ {self._timer_bar(state.total_time, 0)}\n"
+                f"Vies : {self._lives_bar(lives)}{combo_str}\n\n"
+                f"❌ **{result_msg}**"
+            )
+
         else:
-            instruction = "❓ Fais ce qui te semble logique."
-
-        combo_display = f"🔥 Combo ×{combo} !" if combo >= COMBO_THRESHOLD else ""
-        troll_display = f"\n\n⚡ **EVENT :** {troll_msg}" if troll_msg else ""
+            # end_win / end_lose / intro
+            color_map = {
+                "end_win":  discord.Color.gold(),
+                "end_lose": discord.Color.dark_red(),
+                "intro":    discord.Color.blurple(),
+            }
+            color = color_map.get(phase, discord.Color.blurple())
+            desc  = result_msg
 
         embed = discord.Embed(
-            title="🧠 Pressing Under Pressure !",
-            description=(
-                f"**Énigme {puzzle_num}/{total_puzzles}** — `{p.get('id', '?')}`\n\n"
-                f"📝 {p['question']}\n\n"
-                f"{instruction}{troll_display}\n\n"
-                f"👆 Pressions : **{state.press_count}**\n"
-                f"⏳ Temps : {self._generate_timer(state.total_time, state.remaining)}\n"
-                f"Vies : {self._lives_display(lives)}  {combo_display}"
-            ),
-            color=discord.Color.orange(),
+            title="🧠 Pressing Under Pressure",
+            description=desc,
+            color=color,
         )
-        embed.set_footer(text="Pressing Under Pressure • Inspiré de Donitz/itch.io")
+        embed.set_footer(text="Pressing Under Pressure • Inspiré de Donitz / itch.io")
         return embed
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🎯 Résolution d'une énigme
+    # 🎯 Une énigme — édite le message existant, ne crée rien de nouveau
     # ────────────────────────────────────────────────────────────────────────────
     async def _run_puzzle(
         self,
-        channel: discord.abc.Messageable,
-        base_puzzle: dict,
-        user: discord.User | discord.Member,
-        lives: int,
-        combo: int,
-        puzzle_num: int,
+        msg:           discord.Message,
+        view:          PressView,
+        base_puzzle:   dict,
+        lives:         int,
+        combo:         int,
+        puzzle_num:    int,
         total_puzzles: int,
-    ) -> tuple[bool, int, int]:
-        """Lance une énigme. Retourne (success, lives, combo)."""
+    ) -> tuple[int, int]:
+        """Joue une énigme en éditant msg. Retourne (lives, combo) mis à jour."""
 
-        puzzle      = self._randomize_puzzle(base_puzzle)
-        total_time  = max(5, TOTAL_TIME_BASE - (combo // COMBO_THRESHOLD))   # accélère avec le combo
-        state       = PuzzleState(puzzle, total_time)
-        view        = PressView(state, user)
-        troll_msg   = None
+        puzzle     = self._prepare_puzzle(base_puzzle)
+        total_time = max(5, TOTAL_TIME_BASE - (combo // COMBO_THRESHOLD))
+        state      = PuzzleState(puzzle, total_time)
+
+        view.bind(state)
 
         embed = self._build_embed(state, lives, combo, puzzle_num, total_puzzles)
         try:
-            msg = await safe_send(channel, embed=embed, view=view)
-        except Exception as e:
-            log.error(f"[PUP] Impossible d'envoyer l'embed : {e}")
-            return False, lives, combo
+            await msg.edit(embed=embed, view=view)
+        except discord.NotFound:
+            return lives, combo
 
         # ── Timer live ──────────────────────────────────────────────────────
         while state.remaining > 0:
             await asyncio.sleep(1)
             state.remaining -= 1
 
-            # 🎲 Troll event aléatoire (une seule fois, entre 3s et 7s restantes)
+            # 🎲 Troll event (une seule fois par énigme, fenêtre 3–8s restantes)
             if (
                 not state.troll_fired
-                and 3 <= state.remaining <= 7
-                and random.random() < 0.35          # 35 % de chance
+                and 3 <= state.remaining <= 8
+                and random.random() < 0.30
             ):
-                troll        = random.choice(TROLL_EVENTS)
-                troll_msg    = troll["msg"]
-                effect       = troll["effect"]
+                troll             = random.choice(TROLL_EVENTS)
+                state.troll_msg   = troll["msg"]
                 state.troll_fired = True
+                effect            = troll["effect"]
 
                 if effect == "halve_time":
-                    state.remaining = min(state.remaining, 5)
-                    state.total_time = state.remaining + (state.total_time - state.remaining)
+                    state.remaining = min(state.remaining, 4)
                 elif effect == "double":
                     state.effect = "double"
                 elif effect == "invert":
                     state.effect = "invert"
                 elif effect == "random":
                     state.effect = "random"
-                    state.puzzle["type"] = "random"
+                    state.puzzle  = {**state.puzzle, "type": "random"}
                 elif effect == "reset_presses":
                     state.effect = "reset_presses"
+                elif effect == "double_penalty":
+                    state.double_penalty = True
 
-            embed = self._build_embed(state, lives, combo, puzzle_num, total_puzzles, troll_msg)
+            embed = self._build_embed(state, lives, combo, puzzle_num, total_puzzles)
             try:
                 await msg.edit(embed=embed, view=view)
             except discord.NotFound:
-                return False, lives, combo
+                return lives, combo
             except Exception:
                 pass
 
-        # ── Fin du timer — désactiver le bouton ─────────────────────────────
-        for child in view.children:
-            child.disabled = True  # type: ignore
+        # ── Fin timer — évaluation ──────────────────────────────────────────
+        view.lock()
+        success = self._evaluate(state)
 
-        success = self._evaluate_success(state)
-
-        # Résultat dans l'embed
-        req_display = state.puzzle.get("value", 0)
         if success:
-            embed.color = discord.Color.green()
-            embed.add_field(
-                name="🎉 Succès !",
-                value=f"Pressions : **{state.press_count}**",
-                inline=False,
-            )
-            combo += 1
+            combo     += 1
+            result_msg = f"Réussi ! ({state.press_count} pression(s))"
+            phase      = "success"
         else:
-            embed.color = discord.Color.red()
-            embed.add_field(
-                name="❌ Échec",
-                value=f"Pressions : **{state.press_count}** | Attendu : **{req_display}**",
-                inline=False,
-            )
-            lives -= 1
-            combo  = 0
+            penalty    = 2 if state.double_penalty else 1
+            lives     -= penalty
+            combo      = 0
+            req        = state.puzzle.get("value", "?")
+            result_msg = f"Raté… ({state.press_count} pression(s), attendu : {req})"
+            if state.double_penalty:
+                result_msg += " — **MALUS ×2 !**"
+            phase = "fail"
 
+        embed = self._build_embed(
+            state, max(0, lives), combo, puzzle_num, total_puzzles,
+            phase=phase, result_msg=result_msg,
+        )
         try:
             await msg.edit(embed=embed, view=view)
         except Exception:
             pass
 
-        await asyncio.sleep(1.5)   # Petite pause pour laisser le joueur lire
-        return success, lives, combo
+        await asyncio.sleep(2)
+        return lives, combo
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🏁 Partie complète
+    # 🏁 Partie complète — UN seul message édité du début à la fin
     # ────────────────────────────────────────────────────────────────────────────
     async def _run_full_game(
         self,
         channel: discord.abc.Messageable,
-        user: discord.User | discord.Member,
+        user:    discord.User | discord.Member,
     ) -> None:
         if user.id in self.sessions:
-            await safe_send(channel, "⏳ Tu as déjà une partie en cours !")
+            await safe_send(channel, "⏳ Tu as déjà une partie en cours !", delete_after=5)
             return
 
         PUZZLES = load_puzzles()
         if not PUZZLES:
-            await safe_send(channel, "❌ Aucune énigme trouvée dans le JSON.")
+            await safe_send(channel, "❌ Aucune énigme trouvée dans le fichier JSON.")
             return
 
         self.sessions.add(user.id)
 
         try:
-            puzzles        = random.sample(PUZZLES, min(MAX_PUZZLES, len(PUZZLES)))
-            lives          = MAX_LIVES
-            combo          = 0
-            puzzles_done   = 0
-            total_puzzles  = len(puzzles)
+            # Sélection et tri par difficulté croissante
+            pool    = random.sample(PUZZLES, min(MAX_PUZZLES, len(PUZZLES)))
+            puzzles = sorted(pool, key=lambda p: p.get("difficulty", 1))
 
-            # ── Intro ────────────────────────────────────────────────────────
-            intro = discord.Embed(
+            lives         = MAX_LIVES
+            combo         = 0
+            total_puzzles = len(puzzles)
+
+            # ── Création du message unique (intro) ───────────────────────────
+            view = PressView(user)
+            view.lock()   # Bouton désactivé pendant l'intro
+
+            intro_embed = discord.Embed(
                 title="🕹️ Pressing Under Pressure — DÉPART !",
                 description=(
                     f"Bienvenue **{user.display_name}** !\n\n"
-                    f"Tu vas affronter **{total_puzzles} énigmes** de plus en plus retorses.\n"
+                    f"Tu vas affronter **{total_puzzles} énigmes** triées par difficulté.\n"
                     f"Lis bien les consignes… ou pas.\n\n"
-                    f"❤️ Vies : **{MAX_LIVES}** | 🧩 Énigmes : **{total_puzzles}**\n\n"
-                    f"*(Chaque {COMBO_THRESHOLD} succès consécutifs = le timer s'accélère 🔥)*"
+                    f"❤️ Vies : {self._lives_bar(lives)}  "
+                    f"🧩 Énigmes : **{total_puzzles}**\n\n"
+                    f"*{COMBO_THRESHOLD} succès consécutifs = timer raccourci 🔥*\n"
+                    f"*Des events troll peuvent surgir à tout moment ⚡*\n\n"
+                    f"**Début dans 3 secondes…**"
                 ),
                 color=discord.Color.blurple(),
             )
-            intro.set_footer(text="Inspiré de Pressing Under Pressure • Donitz / itch.io")
-            await safe_send(channel, embed=intro)
+            intro_embed.set_footer(text="Pressing Under Pressure • Inspiré de Donitz / itch.io")
+
+            # Ce message est le SEUL de toute la partie
+            msg = await safe_send(channel, embed=intro_embed, view=view)
+            if msg is None:
+                return
+
             await asyncio.sleep(3)
 
             # ── Boucle énigmes ───────────────────────────────────────────────
+            puzzles_done = 0
             for i, puzzle in enumerate(puzzles, start=1):
-                _, lives, combo = await self._run_puzzle(
-                    channel, puzzle, user, lives, combo, i, total_puzzles
+                lives, combo = await self._run_puzzle(
+                    msg, view, puzzle, lives, combo, i, total_puzzles
                 )
                 puzzles_done += 1
-
                 if lives <= 0:
                     break
 
-            # ── Résultat final ───────────────────────────────────────────────
-            won = (lives > 0 and puzzles_done == total_puzzles)
+            # ── Écran de fin — édite toujours le même message ────────────────
+            won = lives > 0 and puzzles_done == total_puzzles
             update_score(user.id, user.display_name, puzzles_done, won)
+            view.lock()
 
             if won:
-                result = discord.Embed(
-                    title="🏆 VICTOIRE !",
-                    description=(
-                        f"**{user.display_name}** a survécu à toutes les énigmes !\n\n"
-                        f"Énigmes réussies : **{puzzles_done}/{total_puzzles}**\n"
-                        f"Vies restantes : {self._lives_display(lives)}"
-                    ),
-                    color=discord.Color.gold(),
+                phase    = "end_win"
+                end_desc = (
+                    f"🏆 **VICTOIRE !**\n\n"
+                    f"**{user.display_name}** a survécu à toutes les énigmes !\n\n"
+                    f"🧩 Énigmes : **{puzzles_done}/{total_puzzles}**\n"
+                    f"Vies restantes : {self._lives_bar(lives)}\n\n"
+                    f"*Utilise `!pressing top` pour voir le classement.*"
                 )
             else:
-                result = discord.Embed(
-                    title="💀 GAME OVER",
-                    description=(
-                        f"**{user.display_name}** s'est effondré à l'énigme **{puzzles_done}**.\n\n"
-                        f"Énigmes réussies : **{puzzles_done - 1}/{total_puzzles}**\n"
-                        f"Vies restantes : {self._lives_display(0)}"
-                    ),
-                    color=discord.Color.dark_red(),
+                phase    = "end_lose"
+                end_desc = (
+                    f"💀 **GAME OVER**\n\n"
+                    f"**{user.display_name}** s'est effondré à l'énigme **{puzzles_done}**.\n\n"
+                    f"🧩 Énigmes réussies : **{max(0, puzzles_done - 1)}/{total_puzzles}**\n"
+                    f"Vies restantes : {self._lives_bar(0)}\n\n"
+                    f"*Utilise `!pressing top` pour voir le classement.*"
                 )
-            result.set_footer(text="Utilise !pressing top pour voir le classement.")
-            await safe_send(channel, embed=result)
+
+            dummy = PuzzleState({}, 0)
+            end_embed = self._build_embed(
+                dummy, max(0, lives), combo, puzzles_done, total_puzzles,
+                phase=phase, result_msg=end_desc,
+            )
+            try:
+                await msg.edit(embed=end_embed, view=view)
+            except Exception:
+                pass
 
         except Exception as e:
-            log.error(f"[PUP] Erreur inattendue : {e}", exc_info=True)
-            await safe_send(channel, "❌ Une erreur inattendue a interrompu la partie.")
+            log.error("[PUP] Erreur inattendue : %s", e, exc_info=True)
+            try:
+                await safe_send(channel, "❌ Une erreur inattendue a interrompu la partie.")
+            except Exception:
+                pass
         finally:
             self.sessions.discard(user.id)
 
@@ -450,28 +588,28 @@ class PressingUnderPressure(commands.Cog):
         )[:10]
 
         medals = ["🥇", "🥈", "🥉"] + ["🔹"] * 7
-        lines  = []
-        for idx, entry in enumerate(ranked):
-            lines.append(
-                f"{medals[idx]} **{entry['username']}** — "
-                f"{entry.get('wins', 0)}W / {entry.get('games', 0)} parties | "
-                f"Best : {entry.get('best', 0)} énigmes"
-            )
+        lines  = [
+            f"{medals[i]} **{e['username']}** — "
+            f"{e.get('wins', 0)}V / {e.get('games', 0)} parties | "
+            f"Record : {e.get('best', 0)} énigmes"
+            for i, e in enumerate(ranked)
+        ]
 
         embed = discord.Embed(
             title="🏆 Classement — Pressing Under Pressure",
             description="\n".join(lines),
             color=discord.Color.gold(),
         )
+        embed.set_footer(text="Pressing Under Pressure • Inspiré de Donitz / itch.io")
         await safe_send(channel, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # ⚡ Commande SLASH — jeu
+    # ⚡ Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="pressing", description="Lance le jeu Pressing Under Pressure !")
     @app_commands.describe(action="Lancer une partie ou voir le classement")
     @app_commands.choices(action=[
-        app_commands.Choice(name="Jouer", value="play"),
+        app_commands.Choice(name="Jouer",      value="play"),
         app_commands.Choice(name="Classement", value="top"),
     ])
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
@@ -494,7 +632,7 @@ class PressingUnderPressure(commands.Cog):
             )
 
     # ────────────────────────────────────────────────────────────────────────────
-    # ⚡ Commande PREFIX — jeu
+    # ⚡ Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
     @commands.group(name="pressing", aliases=["pup"], invoke_without_command=True)
     @commands.cooldown(1, 10.0, commands.BucketType.user)
