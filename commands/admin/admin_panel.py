@@ -66,8 +66,7 @@ class AdminPanelCog(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     def _build_embed_and_view(self) -> tuple[discord.Embed, AdminPanelView | None]:
         """Construit l'embed et la view en lisant l'URL depuis la base."""
-        url = db_get_tunnel_url()
-
+        url   = db_get_tunnel_url()
         embed = discord.Embed(
             title="🔒 Panneau Admin",
             description="Clique sur le bouton ci-dessous pour accéder au panneau d'administration.",
