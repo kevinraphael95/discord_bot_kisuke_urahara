@@ -12,8 +12,12 @@ import subprocess
 import re
 import sys
 import time
+import os
 
-from database.init_db import get_conn
+# S'assurer que la racine du bot est dans le path Python
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from utils.init_db import get_conn
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🗄️ Accès base de données locale
@@ -38,7 +42,7 @@ def save_tunnel_url(url: str):
 def start_tunnel(port: int = 5050):
     """
     Lance cloudflared, capture l'URL trycloudflare.com en temps réel
-    et la sauvegarde en base. Retourne le PID du processus tunnel.
+    et la sauvegarde en base. Reste actif en arrière-plan.
     """
     process = subprocess.Popen(
         ["cloudflared", "tunnel", "--url", f"http://localhost:{port}", "--no-autoupdate"],
@@ -48,26 +52,29 @@ def start_tunnel(port: int = 5050):
     )
 
     url_pattern = re.compile(r"https://[a-zA-Z0-9\-]+\.trycloudflare\.com")
-    timeout     = 30  # secondes max pour trouver l'URL
+    timeout     = 30
     start_time  = time.time()
+    url_found   = False
 
     print(f"🌐 Démarrage du tunnel Cloudflare sur le port {port}...")
 
     for line in process.stdout:
-        print(line, end="")  # affiche les logs en temps réel
-        match = url_pattern.search(line)
-        if match:
-            save_tunnel_url(match.group(0))
-            break
-        if time.time() - start_time > timeout:
+        print(line, end="")
+        if not url_found:
+            match = url_pattern.search(line)
+            if match:
+                save_tunnel_url(match.group(0))
+                url_found = True
+        if not url_found and time.time() - start_time > timeout:
             print("⚠️  Timeout : URL du tunnel introuvable.")
             break
 
-    return process.pid
+    # Garde le processus vivant
+    process.wait()
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔹 Si lancé directement
+# 🔹 Point d'entrée
 # ────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5050
