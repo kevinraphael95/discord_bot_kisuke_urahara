@@ -16,7 +16,7 @@ from discord.ext import commands
 from discord.ui import View, Button
 
 from utils.discord_utils import safe_send, safe_respond
-from database.init_db import get_conn
+from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
