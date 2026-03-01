@@ -152,6 +152,15 @@ def init_db():
     CREATE INDEX IF NOT EXISTS idx_gardens_user_id
     ON gardens(user_id)
     """)
+
+
+    # ─── Table config ─────────────────────────────
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS config (
+        key   TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    )
+    """)    
     
     
 
