@@ -115,7 +115,7 @@ class ShipView(View):
                 "❌ Ce n'est pas ton ship !", ephemeral=True
             )
         embed = generate_ship_embed(self.u1, self.u2)
-        await safe_edit(interaction.message, embed=embed, view=self)
+        await interaction.response.edit_message(embed=embed, view=self)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -144,8 +144,8 @@ class ShipCommand(commands.Cog):
         if u1.id == u2.id:
             return await safe_send(channel, "❌ On ne peut pas se shipper avec soi-même... ou si ? 🤔")
 
-        embed      = generate_ship_embed(u1, u2)
-        view       = ShipView(u1, u2, author)
+        embed        = generate_ship_embed(u1, u2)
+        view         = ShipView(u1, u2, author)
         view.message = await safe_send(channel, embed=embed, view=view)
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -166,9 +166,12 @@ class ShipCommand(commands.Cog):
         membre1:     discord.Member,
         membre2:     discord.Member = None
     ):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         await self._send_ship(interaction.channel, interaction.user, membre1, membre2)
-        await interaction.delete_original_response()
+        try:
+            await interaction.delete_original_response()
+        except Exception:
+            pass
 
     @slash_ship.error
     async def slash_ship_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
@@ -204,6 +207,8 @@ class ShipCommand(commands.Cog):
     async def prefix_ship_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandOnCooldown):
             await safe_send(ctx.channel, f"⏳ Attends encore {error.retry_after:.1f}s.")
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await safe_send(ctx.channel, "❌ Mentionne au moins un membre ! Ex: `!ship @user`")
         else:
             log.exception("[!ship] Erreur non gérée : %s", error)
             await safe_send(ctx.channel, "❌ Une erreur est survenue.")
@@ -211,7 +216,6 @@ class ShipCommand(commands.Cog):
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
 # ────────────────────────────────────────────────────────────────────────────────
-
 async def setup(bot: commands.Bot):
     cog = ShipCommand(bot)
     for command in cog.get_commands():
