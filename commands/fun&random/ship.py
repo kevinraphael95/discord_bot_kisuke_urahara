@@ -188,7 +188,7 @@ class ShipCommand(commands.Cog):
         name="ship",
         help=(
             "💘 Ship deux membres du serveur.\n"
-            "  !ship @user → te ship avec @user. !ship @user1 @user2 → ship @user1 avec @user2"
+            "  !ship @user → te ship avec @user / !ship @user1 @user2 → ship @user1 avec @user2"
         )
     )
     @commands.cooldown(1, 3, commands.BucketType.user)
