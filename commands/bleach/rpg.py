@@ -17,11 +17,11 @@ import sqlite3
 import json
 import os
 
-from utils.rpg_utils import create_profile_if_not_exists
-from utils.rpg_zones import change_zone
-from utils.rpg_embeds import menu_embed, profile_embed
-from utils.discord_utils import safe_send, safe_respond
-from utils.rpg_combat import run_combat
+from utils.rpg.rpg_utils import create_profile_if_not_exists
+from utils.rpg.rpg_zones import change_zone
+from utils.rpg.rpg_embeds import menu_embed, profile_embed
+from utils.rpg.discord_utils import safe_send, safe_respond
+from utils.rpg.rpg_combat import run_combat
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🗄️ SQLite
