@@ -983,9 +983,23 @@ def api_action(action):
 
 
 def restart_bot_process():
-    """Relance le processus bot.py en remplaçant le processus actuel."""
-    print("🔄 Redémarrage du bot via admin panel...")
-    os.execv(sys.executable, [sys.executable, "bot.py"])
+    """Relance via start.sh pour que le tunnel soit aussi redémarré et l'URL recapturée."""
+    print("🔄 Redémarrage complet via start.sh...")
+    
+    start_sh = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start.sh")
+    
+    # Relance start.sh dans un nouveau processus indépendant
+    subprocess.Popen(
+        ["bash", start_sh],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        close_fds=True,
+        start_new_session=True  # détaché du processus actuel
+    )
+    
+    # Laisse le temps au nouveau processus de démarrer, puis quitte
+    time.sleep(1)
+    os.kill(os.getpid(), 9)  # kill brutal du processus actuel
 
 
 # ─── Lancement Flask (dans un thread) ─────────────────────────────────────────
