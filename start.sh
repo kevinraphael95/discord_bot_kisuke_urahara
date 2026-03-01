@@ -34,17 +34,23 @@ if ! command -v cloudflared &> /dev/null; then
 fi
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔗 Lancement du Tunnel Cloudflare
+# 🗄️ Initialisation de la base de données
+# ────────────────────────────────────────────────────────────────────────────────
+echo "🗄️  Initialisation de la base de données..."
+python -c "from database.init_db import init_db; init_db()"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔗 Lancement du Tunnel Cloudflare + sauvegarde URL en base
 # ────────────────────────────────────────────────────────────────────────────────
 echo "🌐 Lancement de Cloudflare Tunnel sur le port $ADMIN_PORT..."
-cloudflared tunnel --url http://localhost:$ADMIN_PORT --no-autoupdate 2>&1 | grep -E "https://" &
+python save_tunnel_url.py $ADMIN_PORT &
 TUNNEL_PID=$!
 
-# Attente du démarrage du tunnel
-sleep 3
+# Attente que l'URL soit capturée et sauvegardée
+sleep 5
 
 echo ""
-echo "✅ Tunnel actif — cherche l'URL https://*.trycloudflare.com ci-dessus"
+echo "✅ Tunnel actif — URL sauvegardée en base de données"
 echo ""
 
 # ────────────────────────────────────────────────────────────────────────────────
