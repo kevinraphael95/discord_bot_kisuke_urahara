@@ -12,11 +12,10 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ui import View, Button
 import hashlib
 import logging
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_utils import safe_send, safe_respond
 
 log = logging.getLogger(__name__)
 
@@ -88,36 +87,6 @@ def generate_ship_embed(
     return embed
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ UI — Bouton interactif
-# ────────────────────────────────────────────────────────────────────────────────
-
-class ShipView(View):
-    def __init__(self, u1, u2, author):
-        super().__init__(timeout=60)
-        self.u1      = u1
-        self.u2      = u2
-        self.author  = author
-        self.message = None
-
-    async def on_timeout(self):
-        for child in self.children:
-            child.disabled = True
-        if self.message:
-            try:
-                await safe_edit(self.message, view=self)
-            except Exception:
-                pass
-
-    @discord.ui.button(label="🔁 Afficher à nouveau", style=discord.ButtonStyle.blurple)
-    async def reafficher(self, interaction: discord.Interaction, button: Button):
-        if interaction.user != self.author:
-            return await interaction.response.send_message(
-                "❌ Ce n'est pas ton ship !", ephemeral=True
-            )
-        embed = generate_ship_embed(self.u1, self.u2)
-        await interaction.response.edit_message(embed=embed, view=self)
-
-# ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 
@@ -144,9 +113,8 @@ class ShipCommand(commands.Cog):
         if u1.id == u2.id:
             return await safe_send(channel, "❌ On ne peut pas se shipper avec soi-même... ou si ? 🤔")
 
-        embed        = generate_ship_embed(u1, u2)
-        view         = ShipView(u1, u2, author)
-        view.message = await safe_send(channel, embed=embed, view=view)
+        embed = generate_ship_embed(u1, u2)
+        await safe_send(channel, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -186,10 +154,7 @@ class ShipCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(
         name="ship",
-        help=(
-            "💘 Ship deux membres du serveur.\n"
-            "  !ship @user → te ship avec @user / !ship @user1 @user2 → ship @user1 avec @user2"
-        )
+        help="💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2"
     )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_ship(
