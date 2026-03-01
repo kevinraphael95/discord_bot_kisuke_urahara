@@ -19,7 +19,7 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_delete
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎛️ UI — View avec bouton
 # ────────────────────────────────────────────────────────────────────────────────
-ADMIN_PANEL_LINK = "https://observation-named-selected-clerk.trycloudflare.com/"
+ADMIN_PANEL_LINK = "https://syntax-ace-edgar-consolidation.trycloudflare.com"
 
 class AdminPanelView(View):
     """View contenant le bouton vers le panneau admin"""
