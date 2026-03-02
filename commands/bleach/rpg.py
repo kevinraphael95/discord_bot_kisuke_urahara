@@ -20,7 +20,7 @@ import os
 from utils.rpg.rpg_utils import create_profile_if_not_exists
 from utils.rpg.rpg_zones import change_zone
 from utils.rpg.rpg_embeds import menu_embed, profile_embed
-from utils.rpg.discord_utils import safe_send, safe_respond
+from utils.discord_utils import safe_send, safe_respond
 from utils.rpg.rpg_combat import run_combat
 
 # ────────────────────────────────────────────────────────────────────────────────
