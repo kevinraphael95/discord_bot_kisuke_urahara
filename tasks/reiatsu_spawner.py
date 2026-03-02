@@ -119,7 +119,14 @@ class ReiatsuSpawner(commands.Cog):
                 SPAWN_SPEED_RANGES[DEFAULT_SPAWN_SPEED]
             )
 
-            delay = conf["spawn_delay"] or random.randint(min_delay, max_delay)
+            delay = conf["spawn_delay"]
+            if not delay:
+                delay = random.randint(min_delay, max_delay)
+                self.cursor.execute(
+                    "UPDATE reiatsu_config SET spawn_delay = ? WHERE guild_id = ?",
+                    (delay, guild_id)
+                )
+                self.conn.commit()            
 
             should_spawn = (
                 not last_spawn_str or
