@@ -161,6 +161,18 @@ def init_db():
         value TEXT NOT NULL
     )
     """)    
+
+    # ─── Table top entrainement cererbral ─────────────────────────────
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS kawashima_scores (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id   INTEGER NOT NULL,
+        username  TEXT    NOT NULL,
+        score     INTEGER NOT NULL,
+        timestamp INTEGER NOT NULL
+    )
+    """)
+    
     
     
 
