@@ -80,11 +80,13 @@ class ReiatsuSpawner(commands.Cog):
             try:
                 await channel.fetch_message(conf["message_id"])
             except Exception:
+                
                 self.cursor.execute("""
                     UPDATE reiatsu_config
-                    SET is_spawn = 0, message_id = NULL
+                    SET is_spawn = 0, message_id = NULL, spawn_delay = NULL,
+                        last_spawn_at = ?
                     WHERE guild_id = ?
-                """, (conf["guild_id"],))
+                """, (datetime.utcnow().isoformat(timespec="seconds"), guild_id))
                 self.conn.commit()
                 print(f"[RESET] Reiatsu fantôme nettoyé pour guild {conf['guild_id']}")
 
