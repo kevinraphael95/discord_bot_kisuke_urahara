@@ -80,13 +80,11 @@ class ReiatsuSpawner(commands.Cog):
             try:
                 await channel.fetch_message(conf["message_id"])
             except Exception:
-                # ✅ FIX 1 : utiliser conf["guild_id"] et mettre à jour last_spawn_at
                 self.cursor.execute("""
                     UPDATE reiatsu_config
-                    SET is_spawn = 0, message_id = NULL, spawn_delay = NULL,
-                        last_spawn_at = ?
+                    SET is_spawn = 0, message_id = NULL
                     WHERE guild_id = ?
-                """, (datetime.utcnow().isoformat(timespec="seconds"), conf["guild_id"]))
+                """, (conf["guild_id"],))
                 self.conn.commit()
                 print(f"[RESET] Reiatsu fantôme nettoyé pour guild {conf['guild_id']}")
 
@@ -121,14 +119,7 @@ class ReiatsuSpawner(commands.Cog):
                 SPAWN_SPEED_RANGES[DEFAULT_SPAWN_SPEED]
             )
 
-            delay = conf["spawn_delay"]
-            if not delay:
-                delay = random.randint(min_delay, max_delay)
-                self.cursor.execute(
-                    "UPDATE reiatsu_config SET spawn_delay = ? WHERE guild_id = ?",
-                    (delay, guild_id)
-                )
-                self.conn.commit()
+            delay = conf["spawn_delay"] or random.randint(min_delay, max_delay)
 
             should_spawn = (
                 not last_spawn_str or
@@ -392,14 +383,11 @@ class ReiatsuSpawner(commands.Cog):
 
             # ── Reset dans la DB ──────────────────────────────────
             if conf:
-                # ✅ FIX 2 : mettre last_spawn_at à l'heure de la capture
-                # pour que le prochain spawn attende bien le délai configuré
                 self.cursor.execute("""
                     UPDATE reiatsu_config
-                    SET is_spawn = 0, message_id = NULL, spawn_delay = NULL,
-                        last_spawn_at = ?
+                    SET is_spawn = 0, message_id = NULL, spawn_delay = NULL
                     WHERE guild_id = ?
-                """, (datetime.utcnow().isoformat(timespec="seconds"), guild_id))
+                """, (guild_id,))
             else:
                 self.cursor.execute("""
                     UPDATE reiatsu
