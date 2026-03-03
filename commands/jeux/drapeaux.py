@@ -221,7 +221,7 @@ class Drapeaux(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────
-    @commands.command(name="drapeaux")
+    @commands.command(name="drapeaux", help="Devine le pays à partir d'un drapeau")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_drapeaux(self, ctx: commands.Context, *, arg: str = None):
         try:
