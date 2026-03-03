@@ -17,7 +17,6 @@ Il propose des mini-jeux, des commandes utilitaires, un système évolutif de co
 * **Général** : commandes utilitaires de base.
 * **Jeux** : mini-jeux interactifs solo ou multijoueur.
 * **Reiatsu** : système de progression avec collecte, classement, compétences et événements.
-* **Voiture** : mini-jeux spécifiques autour des voitures.
 
 La liste complète des commandes est disponible ici :
 📄 [docs/Liste_des_Commandes.md](docs/Liste_des_Commandes.md)
