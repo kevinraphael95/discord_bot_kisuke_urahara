@@ -209,16 +209,25 @@ class CombatCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────────    
     @app_commands.command(name="combat", description="⚔️ Combat style Pokémon entre 2 persos.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_combat(self, interaction: discord.Interaction):
         await self.run_combat(interaction.channel)
 
-    @commands.command(name="combat")
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────    
+    @commands.command(name="combat", help="⚔️ Combat style Pokémon entre 2 persos.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_combat(self, ctx: commands.Context):
         await self.run_combat(ctx.channel)
 
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction interne commune
+    # ────────────────────────────────────────────────────────────────────────────    
     async def run_combat(self, channel):
         try:
             persos = [load_character(n) for n in list_characters()]
