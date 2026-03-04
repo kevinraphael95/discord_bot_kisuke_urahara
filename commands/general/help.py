@@ -208,9 +208,6 @@ class HelpCommand(commands.Cog):
         )
         view.message = message  # ← lien View ↔ Message
 
-    def cog_load(self):
-        self.help_func.category = "Général"
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
 # ────────────────────────────────────────────────────────────────────────────────
@@ -220,4 +217,3 @@ async def setup(bot: commands.Bot):
         if not hasattr(command, "category"):
             command.category = "Général"
     await bot.add_cog(cog)
-    print("✅ Cog chargé : HelpCommand (boutons catégories persistants)")
