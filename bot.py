@@ -11,6 +11,7 @@
 import os
 import asyncio
 import threading
+import logging
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Modules tiers
@@ -18,19 +19,22 @@ import threading
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from discord import app_commands
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Modules internes
 # ────────────────────────────────────────────────────────────────────────────────
-from utils.discord_utils import safe_send  # ✅ Utilitaires anti-429
+from utils.discord_utils import safe_send, safe_respond
 from utils.init_db import init_db
-from utils.logger import init_logger       # ✅ Capture des print()
+from utils.logger import init_logger
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔧 Initialisation de l'environnement
 # ────────────────────────────────────────────────────────────────────────────────
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
+
+log = logging.getLogger(__name__)  # ✅ Ajout manquant
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
@@ -128,7 +132,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# ❗ Gestion des erreurs de commandes
+# ❗ Gestion des erreurs de commandes préfixe
 # ────────────────────────────────────────────────────────────────────────────────
 @bot.event
 async def on_command_error(ctx, error):
@@ -145,27 +149,35 @@ async def on_command_error(ctx, error):
         raise error
 
 # ────────────────────────────────────────────────────────────────────────────────
+# ❗ Gestion des erreurs slash commands
+# ────────────────────────────────────────────────────────────────────────────────
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.CommandOnCooldown):
+        await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
+    elif isinstance(error, app_commands.MissingPermissions):
+        await safe_respond(interaction, "❌ Tu n'as pas les permissions pour cette commande.", ephemeral=True)
+    else:
+        log.exception("[slash] Erreur non gérée : %s", error)
+        await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+
+# ────────────────────────────────────────────────────────────────────────────────
 # 🚀 Lancement
 # ────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
 
-    # ✅ Capture des print() pour le panel admin
     init_logger()
 
-    # ✅ Lancement du panel admin dans un thread séparé
     from admin_panel import run_admin, set_bot
     admin_thread = threading.Thread(target=run_admin, args=(ADMIN_PORT,), daemon=True)
     admin_thread.start()
     print(f"🌐 Panel admin lancé sur http://localhost:{ADMIN_PORT}")
 
     async def start():
-        init_db()  # ✅ Création automatique des tables SQLite
+        init_db()
         await load_commands()
         await load_tasks()
-
-        # ✅ Injecter la référence bot dans le panel admin
         set_bot(bot)
-
         await bot.start(TOKEN)
 
     asyncio.run(start())
