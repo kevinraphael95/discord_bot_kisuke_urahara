@@ -94,7 +94,6 @@
   .nav-links a:hover::after { width: 100%; }
   .nav-links a.active { color: var(--gold-light); }
 
-  /* Page header */
   .page-header {
     position: relative;
     z-index: 1;
@@ -126,7 +125,6 @@
     font-size: 1.1rem;
   }
 
-  /* Filter tabs */
   .filters {
     position: relative;
     z-index: 1;
@@ -156,7 +154,6 @@
     border-color: var(--gold);
   }
 
-  /* Commands list */
   .commands-container {
     position: relative;
     z-index: 1;
@@ -216,6 +213,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .command-prefix {
@@ -317,13 +315,17 @@
 
 <div class="commands-container">
 
+  <!-- ⚙️ ADMIN — 8 commandes -->
   <div class="category-section" data-cat="admin">
     <div class="category-header">
       <span class="category-icon">⚙️</span>
       <span class="category-name">Admin</span>
-      <span class="category-count">6 commandes</span>
+      <span class="category-count">8 commandes</span>
     </div>
-
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>adminpanel</div>
+      <div><div class="command-desc">🔒 Affiche le lien du panneau admin.</div></div>
+    </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>commandslist</div>
       <div><div class="command-desc">Génère un fichier .md avec toutes les commandes et l'envoie en pièce jointe.</div></div>
@@ -351,22 +353,30 @@
       <div class="command-name"><span class="command-prefix">!</span>testgame</div>
       <div><div class="command-desc">Tester un mini-jeu via son numéro ou 'all'.</div></div>
     </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>testtache</div>
+      <div><div class="command-desc">🕹️ Teste toutes les épreuves pour la commande hollow.</div></div>
+    </div>
   </div>
 
+  <!-- ⚔️ BLEACH — 10 commandes -->
   <div class="category-section" data-cat="bleach">
     <div class="category-header">
       <span class="category-icon">⚔️</span>
       <span class="category-name">Bleach</span>
-      <span class="category-count">11 commandes</span>
+      <span class="category-count">10 commandes</span>
     </div>
-
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>bleachship</div>
+      <div><div class="command-desc">💘 Teste la compatibilité entre deux personnages de Bleach.</div></div>
+    </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>bmoji</div>
       <div><div class="command-desc">Devine quel personnage Bleach se cache derrière des emojis.</div></div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>combat</div>
-      <div><div class="command-desc">Système de combat entre personnages.</div></div>
+      <div><div class="command-desc">⚔️ Combat style Pokémon entre 2 persos.</div></div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>division</div>
@@ -393,26 +403,18 @@
       <div><div class="command-desc">Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.</div></div>
     </div>
     <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>ship</div>
-      <div><div class="command-desc">💘 Teste la compatibilité entre deux personnages de Bleach.</div></div>
-    </div>
-    <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>versus</div>
-      <div><div class="command-desc">Affronte deux personnages dans un versus.</div></div>
-    </div>
-    <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>rpg</div>
-      <div><div class="command-desc">Mode RPG textuel dans l'univers Bleach.</div></div>
+      <div><div class="command-desc">⚔️ Lance un combat interactif contre le bot.</div></div>
     </div>
   </div>
 
+  <!-- 🎲 FUN & RANDOM — 6 commandes -->
   <div class="category-section" data-cat="fun">
     <div class="category-header">
       <span class="category-icon">🎲</span>
       <span class="category-name">Fun & Random</span>
       <span class="category-count">6 commandes</span>
     </div>
-
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>calc</div>
       <div><div class="command-desc">Calculatrice scientifique interactive.</div></div>
@@ -427,25 +429,28 @@
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>pizza</div>
-      <div><div class="command-desc">🍕 Génère une pizza complètement aléatoire.</div></div>
+      <div><div class="command-desc">🍕 Génère une pizza aléatoire.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>ship</div>
+      <div>
+        <div class="command-desc">💘 Ship deux membres.</div>
+        <div class="command-usage">!ship @user &nbsp;|&nbsp; !ship @user1 @user2</div>
+      </div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>sorting</div>
       <div><div class="command-desc">Trie 12 barres en longueurs différentes selon un algorithme de tri.</div></div>
     </div>
-    <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>tortues</div>
-      <div><div class="command-desc">Participe à une course de tortues avec tes amis ! 🐢</div></div>
-    </div>
   </div>
 
+  <!-- 📋 GÉNÉRAL — 6 commandes -->
   <div class="category-section" data-cat="general">
     <div class="category-header">
       <span class="category-icon">📋</span>
       <span class="category-name">Général</span>
-      <span class="category-count">5 commandes</span>
+      <span class="category-count">6 commandes</span>
     </div>
-
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>code</div>
       <div><div class="command-desc">Affiche un lien vers le code source du bot.</div></div>
@@ -457,6 +462,10 @@
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>help</div>
       <div><div class="command-desc">Affiche l'aide du bot.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>quoi</div>
+      <div><div class="command-desc">Répond feur.</div></div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>react</div>
@@ -471,13 +480,13 @@
     </div>
   </div>
 
+  <!-- 🕹️ JEUX — 13 commandes -->
   <div class="category-section" data-cat="jeux">
     <div class="category-header">
       <span class="category-icon">🕹️</span>
       <span class="category-name">Jeux</span>
-      <span class="category-count">14 commandes</span>
+      <span class="category-count">13 commandes</span>
     </div>
-
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>capitales</div>
       <div><div class="command-desc">Devine la capitale d'un pays.</div></div>
@@ -492,15 +501,15 @@
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>drapeaux</div>
-      <div><div class="command-desc">Identifie des drapeaux de pays.</div></div>
+      <div><div class="command-desc">Devine le pays à partir d'un drapeau.</div></div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>entrainementcerebral</div>
       <div><div class="command-desc">Entraînement cérébral composé de 5 mini-jeux.</div></div>
     </div>
     <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>jardin</div>
-      <div><div class="command-desc">Affiche ton jardin ou celui d'un autre utilisateur 🌱</div></div>
+      <div class="command-name"><span class="command-prefix">!</span>formes</div>
+      <div><div class="command-desc">Jouez au mini-jeu mémoire avec des formes et couleurs.</div></div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>mastermind</div>
@@ -515,34 +524,30 @@
       <div><div class="command-desc">Démarre une partie du jeu du pendu.</div></div>
     </div>
     <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>tram_probleme</div>
-      <div><div class="command-desc">Teste ta morale dans un quiz absurde du dilemme du tramway.</div></div>
-    </div>
-    <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>formes</div>
-      <div><div class="command-desc">Jeu de reconnaissance de formes géométriques.</div></div>
-    </div>
-    <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>course_animal</div>
-      <div><div class="command-desc">Course d'animaux multijoueur.</div></div>
-    </div>
-    <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>pressing</div>
-      <div><div class="command-desc">Mini-jeu de pressing.</div></div>
+      <div><div class="command-desc">Lance le jeu Pressing Under Pressure !</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>pressingtop</div>
+      <div><div class="command-desc">Voir le classement du jeu Pressing.</div></div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>solorpg</div>
       <div><div class="command-desc">Mode RPG solo avec menu déroulant.</div></div>
     </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>tram_probleme</div>
+      <div><div class="command-desc">Teste ta morale dans un quiz absurde du dilemme du tramway.</div></div>
+    </div>
   </div>
 
+  <!-- 💠 REIATSU — 11 commandes -->
   <div class="category-section" data-cat="reiatsu">
     <div class="category-header">
       <span class="category-icon">💠</span>
       <span class="category-name">Reiatsu</span>
-      <span class="category-count">9 commandes</span>
+      <span class="category-count">11 commandes</span>
     </div>
-
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>classe</div>
       <div><div class="command-desc">Choisir sa classe Reiatsu.</div></div>
@@ -564,16 +569,20 @@
       <div><div class="command-desc">💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.</div></div>
     </div>
     <div class="command-item">
-      <div class="command-name"><span class="command-prefix">!</span>reiatsudaily</div>
-      <div><div class="command-desc">Réclame tes 30 Reiatsu quotidiens gratuits.</div></div>
-    </div>
-    <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>reiatsuprofil</div>
       <div><div class="command-desc">💠 Affiche ton profil Reiatsu détaillé.</div></div>
     </div>
     <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>reiatsushop</div>
+      <div><div class="command-desc">Affiche le shop et achète des effets.</div></div>
+    </div>
+    <div class="command-item">
+      <div class="command-name"><span class="command-prefix">!</span>reiatsutop</div>
+      <div><div class="command-desc">📊 Affiche le Top 20 Reiatsu et ta position dans le classement global.</div></div>
+    </div>
+    <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>reiatsuvol</div>
-      <div><div class="command-desc">💠 Tente de voler 10% du Reiatsu d'un autre membre. 25% de réussite. Cooldown : 24h.</div></div>
+      <div><div class="command-desc">💠 Vole du Reiatsu à quelqu'un. 25% de réussite. Cooldown : 24h.</div></div>
     </div>
     <div class="command-item">
       <div class="command-name"><span class="command-prefix">!</span>skill</div>
@@ -601,7 +610,6 @@
 function filterCategory(cat, btn) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-
   document.querySelectorAll('.category-section').forEach(section => {
     if (cat === 'all' || section.dataset.cat === cat) {
       section.style.display = '';
