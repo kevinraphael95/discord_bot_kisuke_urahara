@@ -564,7 +564,7 @@ class PressingUnderPressure(commands.Cog):
     async def prefix_pressing(self, ctx: commands.Context):
         await self._run_full_game(ctx.channel, ctx.author)
 
-    @commands.command(name="pressingtop", aliases=["puptop", "puppodium"])
+    @commands.command(name="pressingtop", aliases=["puptop", "puppodium"], help="Voir le classement")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_pressing_top(self, ctx: commands.Context):
         await self._send_leaderboard(ctx.channel)
