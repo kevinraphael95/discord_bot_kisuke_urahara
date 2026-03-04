@@ -14,14 +14,14 @@ Usage: !say_as <mention|id|pseudo> <message>
 ### 📂 Bleach
 - **bleachship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
 - **bmoji :** Devine quel personnage Bleach se cache derrière ces emojis.
-- **combat :** Pas de description.
+- **combat :** ⚔️ Combat style Pokémon entre 2 persos.
 - **division :** Détermine ta division dans le Gotei 13.
 - **kido :** Affiche un Kido précis, aléatoire ou la liste paginée.
 - **kluboutside :** Affiche une question de la FAQ du Klub Outside.
 - **perso :** Affiche la fiche d'un personnage Bleach.
 - **scans :** 📖 Lire un scan de Bleach.
 - **shifumi :** Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.
-- **versus :** Pas de description.
+- **versus :** ⚔️ Lance un combat interactif contre le bot.
 
 ### 📂 Fun&Random
 - **calc :** Calculatrice scientifique interactive
@@ -35,7 +35,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **code :** Affiche un lien vers le code source du bot.
 - **emoji :** Montre un ou plusieurs emojis du serveur ou de tous les serveurs.
 - **help :** Affiche l’aide du bot.
-- **quoi :** Pas de description.
+- **quoi :** Répond feur.
 - **react :** Réagit à un message avec un ou plusieurs emojis.
 - **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
 
@@ -43,25 +43,26 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **capitales :** Devine la capitale d'un pays
 - **compte_est_bon :** Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
-- **drapeaux :** Pas de description.
+- **drapeaux :** Devine le pays à partir d'un drapeau
 - **entrainementcerebral :** Entraînement cérébral composé de 5 mini-jeux.
-- **formes :** Pas de description.
+- **formes :** Jouez au mini-jeu mémoire avec des formes et couleurs.
 - **mastermind :** Jouer au Mastermind interactif.
 - **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
 - **pendu :** Démarre une partie du jeu du pendu.
-- **pressing :** Pas de description.
+- **pressing :** Lance le jeu Pressing Under Pressure !
+- **pressingtop :** Voir le classement
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
 - **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
 
 ### 📂 Reiatsu
 - **classe :** Choisir sa classe Reiatsu
 - **hollow :** 👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).
-- **keylottery :** Pas de description.
+- **keylottery :** Ticket à gratter : tente ta chance
 - **quetes :** 🎮 Affiche la liste des quêtes et ton niveau actuel.
 - **reiatsu :** 💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.
 - **reiatsuprofil :** 💠 Affiche ton profil Reiatsu détaillé.
-- **reiatsushop :** Pas de description.
+- **reiatsushop :** Affiche le shop et achète des effets
 - **reiatsutop :** 📊 Affiche le Top 20 Reiatsu et ta position dans le classement global.
-- **reiatsuvol :** Pas de description.
+- **reiatsuvol :** 💠 Vole du Reiatsu à quelqu'un.
 - **skill :** Active la compétence de ta classe Reiatsu.
 - **tutoreiatsu :** Affiche le tutoriel complet pour les nouveaux joueurs.
