@@ -153,7 +153,7 @@ class ReiatsuVol(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="reiatsuvol",
-        description="💠 Vole 10% du Reiatsu d’un joueur."
+        description="💠 Vole du Reiatsu à quelqu'un."
     )
     async def slash_volreiatsu(
         self,
@@ -180,7 +180,7 @@ class ReiatsuVol(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Prefix
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="reiatsuvol", aliases=["rtsv", "volreiatsu", "vrts"])
+    @commands.command(name="reiatsuvol", aliases=["rtsv", "volreiatsu", "vrts"], help="💠 Vole du Reiatsu à quelqu'un.")
     async def prefix_volreiatsu(
         self,
         ctx: commands.Context,
