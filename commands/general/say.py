@@ -27,7 +27,7 @@ class SecretMessageView(discord.ui.View):
     @discord.ui.button(label="🔒 Voir le message", style=discord.ButtonStyle.blurple)
     async def reveal(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.target_user.id:
-            await interaction.response.send_message("❌ Ce message ne t’est pas destiné !", ephemeral=True)
+            await interaction.response.send_message("❌ Ce message ne t'est pas destiné !", ephemeral=True)
             return
         await interaction.response.send_message(f"💌 **Message secret :** {self.secret_message}", ephemeral=True)
 
@@ -101,12 +101,9 @@ class Say(commands.Cog):
     # 🔹 Remplacement emojis custom (avec affichage correct)
     # ──────────────────────────────────────────────────────────────
     def _replace_custom_emojis(self, channel, message: str) -> str:
-        # Supprime l'affichage en texte brut des emojis non animés (<:nom:id>)
         message = re.sub(r"<:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
-        # Supprime aussi les emojis animés (<a:nom:id>)
         message = re.sub(r"<a:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
 
-        # Remplace par des emojis valides si trouvés dans les serveurs du bot
         all_emojis = {}
         if hasattr(channel, "guild"):
             all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
@@ -135,25 +132,21 @@ class Say(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_say(self, interaction: discord.Interaction, message: str, embed: bool = False, as_user: bool = False):
-        try:
-            await interaction.response.defer()
-            options, clean_message = self.parse_options(message)
-            if options["chuchotte"]:
-                mention = next((m for m in interaction.message.mentions), None)
-                if not mention:
-                    await safe_respond(interaction, "❌ Tu dois mentionner une personne pour *chuchotte.", ephemeral=True)
-                    return
-                secret_text = clean_message.replace(mention.mention, "").strip()
-                view = SecretMessageView(mention, secret_text)
-                await interaction.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
+        await interaction.response.defer(ephemeral=True)
+        options, clean_message = self.parse_options(message)
+        if options["chuchotte"]:
+            mention = next((m for m in interaction.message.mentions), None)
+            if not mention:
+                await safe_respond(interaction, "❌ Tu dois mentionner une personne pour *chuchotte.", ephemeral=True)
                 return
-            if as_user:
-                await self._say_as_user(interaction.channel, interaction.user, clean_message, embed)
-            else:
-                await self._say_message(interaction.channel, clean_message, embed)
-        except Exception as e:
-            print(f"[ERREUR /say] {e}")
-            await safe_respond(interaction, "❌ Impossible d’envoyer le message.", ephemeral=True)
+            secret_text = clean_message.replace(mention.mention, "").strip()
+            view = SecretMessageView(mention, secret_text)
+            await interaction.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
+            return
+        if as_user:
+            await self._say_as_user(interaction.channel, interaction.user, clean_message, embed)
+        else:
+            await self._say_message(interaction.channel, clean_message, embed)
 
     # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
@@ -164,27 +157,20 @@ class Say(commands.Cog):
     )
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_say(self, ctx: commands.Context, *, message: str):
-        try:
-            options, clean_message = self.parse_options(message)
-            if options["chuchotte"]:
-                mention = next((m for m in ctx.message.mentions), None)
-                if not mention:
-                    await safe_send(ctx.channel, "❌ Tu dois mentionner une personne pour *chuchotte.")
-                    return
-                secret_text = clean_message.replace(mention.mention, "").strip()
-                view = SecretMessageView(mention, secret_text)
-                await ctx.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
+        options, clean_message = self.parse_options(message)
+        if options["chuchotte"]:
+            mention = next((m for m in ctx.message.mentions), None)
+            if not mention:
+                await safe_send(ctx.channel, "❌ Tu dois mentionner une personne pour *chuchotte.")
                 return
-            if options["as_user"]:
-                await self._say_as_user(ctx.channel, ctx.author, clean_message, options["embed"])
-            else:
-                await self._say_message(ctx.channel, clean_message, options["embed"])
-        except Exception as e:
-            print(f"[ERREUR !say] {e}")
-            await safe_send(ctx.channel, "❌ Impossible d’envoyer le message.")
-        finally:
-            await safe_delete(ctx.message)
-
+            secret_text = clean_message.replace(mention.mention, "").strip()
+            view = SecretMessageView(mention, secret_text)
+            await ctx.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
+        elif options["as_user"]:
+            await self._say_as_user(ctx.channel, ctx.author, clean_message, options["embed"])
+        else:
+            await self._say_message(ctx.channel, clean_message, options["embed"])
+        await safe_delete(ctx.message)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
