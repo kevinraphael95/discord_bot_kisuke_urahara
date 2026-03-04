@@ -24,7 +24,6 @@ log = logging.getLogger(__name__)
 # ────────────────────────────────────────────────────────────────────────────────
 # 🗄️ Accès base de données locale
 # ────────────────────────────────────────────────────────────────────────────────
-
 def db_valider_quete(user_id: int) -> int | None:
     """
     Vérifie si la quête 'couleur' est déjà validée pour l'utilisateur.
@@ -66,7 +65,6 @@ def db_valider_quete(user_id: int) -> int | None:
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎛️ Vue interactive avec bouton "Nouvelle couleur"
 # ────────────────────────────────────────────────────────────────────────────────
-
 class CouleurView(discord.ui.View):
     def __init__(self, author: discord.User | discord.Member):
         super().__init__(timeout=60)
@@ -99,15 +97,11 @@ class CouleurView(discord.ui.View):
         for child in self.children:
             child.disabled = True
         if self.message:
-            try:
-                await safe_edit(self.message, view=self)
-            except Exception:
-                pass
+            await safe_edit(self.message, view=self)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
-
 class CouleurCommand(commands.Cog):
     """Commandes /couleur et !couleur — Génère une couleur aléatoire avec codes HEX et RGB."""
 
@@ -137,18 +131,15 @@ class CouleurCommand(commands.Cog):
             color=0x00FF7F
         )
 
-        try:
-            if channel:
-                await safe_send(channel, embed=embed)
-            elif interaction:
-                if not interaction.response.is_done():
-                    await interaction.response.send_message(embed=embed)
-                else:
-                    await interaction.followup.send(embed=embed)
+        if channel:
+            await safe_send(channel, embed=embed)
+        elif interaction:
+            if not interaction.response.is_done():
+                await interaction.response.send_message(embed=embed)
             else:
-                await safe_send(user, embed=embed)
-        except Exception as e:
-            log.exception("[couleur] Erreur envoi embed quête : %s", e)
+                await interaction.followup.send(embed=embed)
+        else:
+            await safe_send(user, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -159,26 +150,13 @@ class CouleurCommand(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)
     async def slash_couleur(self, interaction: discord.Interaction):
-        try:
-            view  = CouleurView(interaction.user)
-            embed = view.generer_embed()
+        view  = CouleurView(interaction.user)
+        embed = view.generer_embed()
 
-            await safe_interact(interaction, embed=embed, view=view)
-            view.message = await interaction.original_response()
+        await safe_interact(interaction, embed=embed, view=view)
+        view.message = await interaction.original_response()
 
-            await self._valider_quete(interaction.user, channel=interaction.channel, interaction=interaction)
-
-        except Exception as e:
-            log.exception("[/couleur] Erreur inattendue : %s", e)
-            await safe_respond(interaction, content="❌ Une erreur est survenue.", ephemeral=True)
-
-    @slash_couleur.error
-    async def slash_couleur_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
-        else:
-            log.exception("[/couleur] Erreur non gérée : %s", error)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+        await self._valider_quete(interaction.user, channel=interaction.channel, interaction=interaction)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
@@ -189,24 +167,11 @@ class CouleurCommand(commands.Cog):
     )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_couleur(self, ctx: commands.Context):
-        try:
-            view         = CouleurView(ctx.author)
-            embed        = view.generer_embed()
-            view.message = await safe_send(ctx, embed=embed, view=view)
+        view         = CouleurView(ctx.author)
+        embed        = view.generer_embed()
+        view.message = await safe_send(ctx, embed=embed, view=view)
 
-            await self._valider_quete(ctx.author, channel=ctx.channel)
-
-        except Exception as e:
-            log.exception("[!couleur] Erreur inattendue : %s", e)
-            await safe_send(ctx, "❌ Une erreur est survenue.")
-
-    @prefix_couleur.error
-    async def prefix_couleur_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Attends encore {error.retry_after:.1f}s.")
-        else:
-            log.exception("[!couleur] Erreur non gérée : %s", error)
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
+        await self._valider_quete(ctx.author, channel=ctx.channel)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
