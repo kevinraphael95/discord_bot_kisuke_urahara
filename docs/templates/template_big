@@ -141,9 +141,8 @@ class NomDeLaCommande(commands.Cog):
     )
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_nom_de_la_commande(self, interaction: discord.Interaction):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         await self._send_menu(interaction.channel)
-        await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
