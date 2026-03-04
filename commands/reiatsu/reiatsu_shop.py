@@ -117,14 +117,17 @@ class ReiatsuShop(commands.Cog):
                         self.active_effects["mute"][user_id] = {"guild_id": guild_id, "end_time": end_time}
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commandes
-    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────────    
     @app_commands.command(name="reiatsushop", description="Affiche le shop et achète des effets")
     async def slash_reiatsushop(self, interaction: discord.Interaction, effect: str = None,
                                  member: discord.Member = None, new_nick: str = None):
         await self.handle_shop(interaction, effect, member, new_nick, is_slash=True)
 
-    @commands.command(name="reiatsushop", aliases=["rtsshop"])
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────      
+    @commands.command(name="reiatsushop", aliases=["rtsshop"], help="Affiche le shop et achète des effets")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_reiatsushop(self, ctx: commands.Context, effect: str = None,
                                   member: discord.Member = None, *, new_nick: str = None):
