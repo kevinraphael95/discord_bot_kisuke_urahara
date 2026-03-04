@@ -81,6 +81,9 @@ class VersusCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────────    
     @app_commands.command(
         name="versus",
         description="⚔️ Lance un combat interactif contre le bot."
@@ -89,11 +92,17 @@ class VersusCommand(commands.Cog):
     async def slash_versus(self, interaction: discord.Interaction):
         await self.run_combat(interaction)
 
-    @commands.command(name="versus")
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────    
+    @commands.command(name="versus", help="⚔️ Lance un combat interactif contre le bot.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_versus(self, ctx: commands.Context):
         await self.run_combat(ctx)
 
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction interne commune
+    # ────────────────────────────────────────────────────────────────────────────       
     async def run_combat(self, ctx_or_inter):
         try:
             persos = [load_character(n) for n in list_characters()]
