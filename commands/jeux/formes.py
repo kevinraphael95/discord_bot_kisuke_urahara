@@ -46,7 +46,7 @@ class MemoryFormes(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="formes")
+    @commands.command(name="formes", help="Jouez au mini-jeu mémoire avec des formes et couleurs.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_memory_formes(self, ctx: commands.Context):
         await self.start_game(ctx)
