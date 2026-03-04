@@ -132,7 +132,7 @@ class Say(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_say(self, interaction: discord.Interaction, message: str, embed: bool = False, as_user: bool = False):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
         options, clean_message = self.parse_options(message)
         if options["chuchotte"]:
             mention = next((m for m in interaction.message.mentions), None)
@@ -142,11 +142,13 @@ class Say(commands.Cog):
             secret_text = clean_message.replace(mention.mention, "").strip()
             view = SecretMessageView(mention, secret_text)
             await interaction.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
+            await interaction.delete_original_response()
             return
         if as_user:
             await self._say_as_user(interaction.channel, interaction.user, clean_message, embed)
         else:
             await self._say_message(interaction.channel, clean_message, embed)
+        await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
