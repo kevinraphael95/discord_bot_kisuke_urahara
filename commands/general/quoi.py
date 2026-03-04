@@ -39,7 +39,7 @@ class Feur(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="quoi")
+    @commands.command(name="quoi", help="Répond feur.")
     @commands.cooldown(1, 3.0, commands.BucketType.user)
     async def prefix_feur(self, ctx: commands.Context):
         await safe_send(ctx.channel, "feur!!")
