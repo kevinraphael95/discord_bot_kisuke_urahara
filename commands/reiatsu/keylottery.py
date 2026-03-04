@@ -238,7 +238,9 @@ class ScratchKey(commands.Cog):
             except discord.Forbidden:
                 await safe_send(interaction.channel, "⚠️ Impossible d'envoyer un DM.")
 
-    # ───────────── Commandes ─────────────
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────────       
     @app_commands.command(name="keylottery", description="Ticket à gratter : tente ta chance")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.user.id))
     async def slash_scratchkey(self, interaction: discord.Interaction):
@@ -248,7 +250,10 @@ class ScratchKey(commands.Cog):
         if view.value:
             await self._handle_result(view.last_interaction, view.value, interaction.user.id)
 
-    @commands.command(name="keylottery", aliases=["kl"])
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────     
+    @commands.command(name="keylottery", aliases=["kl"], help="Ticket à gratter : tente ta chance")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_scratchkey(self, ctx: commands.Context):
         view = await self._send_ticket(ctx.channel, ctx.author, ctx.author.id)
@@ -259,7 +264,6 @@ class ScratchKey(commands.Cog):
                     self.user = user
                     self.channel = channel
             await self._handle_result(Dummy(ctx.author, ctx.channel), view.value, ctx.author.id)
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
