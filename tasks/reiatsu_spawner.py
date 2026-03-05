@@ -393,7 +393,7 @@ class ReiatsuSpawner(commands.Cog):
         self.conn.commit()
 
     # ──────────────────────────────────────────────────────────────
-    # 🔹 Listener réaction — capture du Reiatsu
+    # 🔹 Listener réaction — capture du Reiatsu (corrigé)
     # ──────────────────────────────────────────────────────────────
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
@@ -419,6 +419,7 @@ class ReiatsuSpawner(commands.Cog):
         )
         fake_row = self.cursor.fetchone()
     
+        # Si ni vrai ni faux → rien à faire
         if not conf and not fake_row:
             return
     
@@ -441,7 +442,7 @@ class ReiatsuSpawner(commands.Cog):
                 current = self.cursor.fetchone()
                 if not current or not current["is_spawn"]:
                     return
-            else:
+            elif fake_row:
                 self.cursor.execute(
                     "SELECT fake_spawn_id, user_id AS owner_id FROM reiatsu WHERE fake_spawn_id = ?", (message_id,)
                 )
@@ -460,12 +461,24 @@ class ReiatsuSpawner(commands.Cog):
             if not user:
                 return
     
-            # Calcul du gain (0 si faux pour proprio)
-            gain, is_super, classe = (0, False, None)
-            if conf or (fake_row and fake_row["owner_id"] != user_id):
+            # Calcul du gain
+            gain, is_super, classe = 0, False, None
+            if conf:
+                # Vrai Reiatsu → calcule normalement
                 cog = self.bot.get_cog("ReiatsuSpawner")
                 if cog:
                     gain, is_super, classe = cog._calculate_gain(user_id)
+            elif fake_row:
+                # Faux Reiatsu → +50 au propriétaire
+                owner_id = fake_row["owner_id"]
+                cog = self.bot.get_cog("ReiatsuSpawner")
+                if cog:
+                    cog.cursor.execute(
+                        "UPDATE reiatsu SET points = points + 50, active_skill = 0 WHERE user_id = ?",
+                        (owner_id,)
+                    )
+                    cog.conn.commit()
+                    gain, is_super, classe = 0, False, None
     
             # Supprime le message
             try:
@@ -489,8 +502,11 @@ class ReiatsuSpawner(commands.Cog):
             del self.locks[lock_key]
     
             # Feedback
-            if gain > 0:
+            if conf and gain > 0:
                 await self._send_feedback(channel, user, gain, is_super, classe)
+            elif fake_row:
+                # optionnel : feedback pour le joueur qui clique sur un faux Reiatsu
+                await safe_send(channel, f"🎭 {user.mention} a cliqué sur un faux Reiatsu… rien ne se passe !")
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
