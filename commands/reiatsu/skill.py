@@ -102,7 +102,7 @@ class Skill(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction interne : activation du skill
     # ────────────────────────────────────────────────────────────────────────
-    async def _activate_skill(self, user: discord.User, channel: discord.abc.Messageable):
+    async def _activate_skill(self, user: discord.User, channel: discord.abc.Messageable, interaction: discord.Interaction = None):
         if user.id not in self.skill_locks:
             self.skill_locks[user.id] = asyncio.Lock()
 
@@ -129,7 +129,6 @@ class Skill(commands.Cog):
             classe_data = self.config["CLASSES"].get(classe, {})
             base_cd = classe_data.get("Cooldown", 12)
 
-            # 📥 Récupération des données depuis SQLite
             conn = get_conn()
             cursor = conn.cursor()
             cursor.execute(
@@ -169,7 +168,6 @@ class Skill(commands.Cog):
             if active_skill:
                 cooldown_text = "🌀 En cours"
 
-            # 🔸 Retour d'info si le skill n'est pas dispo
             if cooldown_text != "✅ Disponible":
                 embed = discord.Embed(
                     title=f"🎴 Skill de {player.get('username', user.name)}",
@@ -183,9 +181,6 @@ class Skill(commands.Cog):
 
             # ───────────── Illusionniste ─────────────
             if classe == "Illusionniste":
-                if fake_spawn_id:
-                    await safe_send(channel, "⚠️ Tu as déjà un faux Reiatsu actif !")
-                    return
 
                 conn = get_conn()
                 cursor = conn.cursor()
@@ -196,7 +191,6 @@ class Skill(commands.Cog):
                 conn.commit()
                 conn.close()
 
-                # Récupération du canal de spawn depuis SQLite
                 conn = get_conn()
                 cursor = conn.cursor()
                 cursor.execute(
@@ -221,12 +215,16 @@ class Skill(commands.Cog):
                     description="Un faux Reiatsu est apparu dans le serveur…\nTu ne peux pas l'absorber toi-même.",
                     color=discord.Color.green()
                 )
-                await safe_send(channel, embed=embed)
+
+                if interaction:
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+
                 await self.valider_quete_skill(user, channel)
                 return
 
             # ───────────── Voleur ─────────────
             elif classe == "Voleur":
+
                 conn = get_conn()
                 cursor = conn.cursor()
                 cursor.execute(
@@ -241,12 +239,14 @@ class Skill(commands.Cog):
                     description="Ton prochain vol sera automatiquement **réussi**.",
                     color=discord.Color.purple()
                 )
+
                 await safe_send(channel, embed=embed)
                 await self.valider_quete_skill(user, channel)
                 return
 
             # ───────────── Absorbeur ─────────────
             elif classe == "Absorbeur":
+
                 conn = get_conn()
                 cursor = conn.cursor()
                 cursor.execute(
@@ -261,12 +261,14 @@ class Skill(commands.Cog):
                     description="Ton prochain Reiatsu sera automatiquement un **Super Reiatsu**.",
                     color=discord.Color.blue()
                 )
+
                 await safe_send(channel, embed=embed)
                 await self.valider_quete_skill(user, channel)
                 return
 
-            # ───────────── Parieur (Machine à Sous) ─────────────
+            # ───────────── Parieur ─────────────
             elif classe == "Parieur":
+
                 mise = 30
 
                 if points < mise:
@@ -330,7 +332,7 @@ class Skill(commands.Cog):
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_skill(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        await self._activate_skill(interaction.user, interaction.channel)
+        await self._activate_skill(interaction.user, interaction.channel, interaction)
         await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────
