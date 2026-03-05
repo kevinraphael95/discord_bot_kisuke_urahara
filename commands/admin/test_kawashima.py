@@ -9,25 +9,29 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
+import asyncio
+import inspect
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-import inspect, asyncio
+
 from utils import kawashima_games
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_utils import safe_send, safe_edit, safe_interact
 
 # ────────────────────────────────────────────────────────────────────────────────
 # ⚙️ Constantes
 # ────────────────────────────────────────────────────────────────────────────────
-PAGE_SIZE = 10
-GAME_TIMEOUT = 30  # secondes max pour répondre à un mini-jeu
+PAGE_SIZE    = 10
+GAME_TIMEOUT = 30
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
+
 class TestKawashima(commands.Cog):
     """
-    Commande /testgame et !testgame — Tester un mini-jeu Kawashima via numéro,
+    Commandes /testgame et !testgame — Tester un mini-jeu Kawashima via numéro,
     ou tous les jeux via 'all', avec pagination si nécessaire.
     """
     def __init__(self, bot: commands.Bot):
@@ -37,31 +41,35 @@ class TestKawashima(commands.Cog):
             if not name.startswith("_"):
                 title = getattr(func, "title", func.__name__)
                 self.games[title] = func
-        self.sorted_titles = sorted(self.games.keys())  # ordre alphabétique
+        self.sorted_titles = sorted(self.games.keys())
 
-    # ──────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
-    # ──────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="testgame",
         description="Tester un mini-jeu via son numéro ou 'all' pour tous."
     )
-    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
+    @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_testgame(self, interaction: discord.Interaction, choix: str = None):
-        await safe_respond(interaction, "Chargement du quizz...", ephemeral=True)
+        await safe_interact(interaction, "Chargement du quizz...", ephemeral=True)
         await self.run_game(interaction, choix)
 
-    # ──────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
-    # ──────────────────────────────────────────────────────────────
-    @commands.command(name="testgame", aliases=["tg"], help="Tester un mini-jeu via son numéro ou 'all'.")
+    # ────────────────────────────────────────────────────────────────────────────
+    @commands.command(
+        name="testgame",
+        aliases=["tg"],
+        help="Tester un mini-jeu via son numéro ou 'all'."
+    )
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_testgame(self, ctx: commands.Context, choix: str = None):
         await self.run_game(ctx, choix)
 
-    # ──────────────────────────────────────────────────────────────
-    # 🎮 Lancer le mini-jeu ou afficher la liste
-    # ──────────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction interne commune
+    # ────────────────────────────────────────────────────────────────────────────
     async def run_game(self, ctx_or_interaction, choix: str | int = None):
         """Affiche la liste paginée, lance un mini-jeu ou tous les jeux ('all')."""
         if isinstance(ctx_or_interaction, discord.Interaction):
@@ -71,12 +79,12 @@ class TestKawashima(commands.Cog):
             send = lambda *a, **kw: safe_send(ctx_or_interaction, *a, **kw)
             user = ctx_or_interaction.author
 
-        # ─────────── Option ALL ───────────
+        # ─── Option ALL ───
         if isinstance(choix, str) and choix.lower() == "all":
             results = []
             for i, title in enumerate(self.sorted_titles, start=1):
                 game_func = self.games[title]
-                embed = discord.Embed(
+                embed     = discord.Embed(
                     title=f"🧪 Mini-jeu {i}/{len(self.sorted_titles)} : {title}",
                     description="Réponds dans le chat pour jouer !",
                     color=discord.Color.blurple()
@@ -87,7 +95,7 @@ class TestKawashima(commands.Cog):
                         game_func(game_msg, embed, lambda: user.id, self.bot),
                         timeout=GAME_TIMEOUT
                     )
-                    if not success:  # None ou False = on arrête tout
+                    if not success:
                         results.append(f"{i}. {title} — ⏱ Pas répondu ou annulé, arrêt immédiat")
                         break
                     results.append(f"{i}. {title} — ✅ Bien joué")
@@ -106,7 +114,7 @@ class TestKawashima(commands.Cog):
             )
             return await send(embed=summary_embed)
 
-        # ─────────── Pagination si aucun choix ───────────
+        # ─── Pagination si aucun choix ───
         if choix is None:
             pages = [
                 self.sorted_titles[i:i + PAGE_SIZE]
@@ -121,14 +129,14 @@ class TestKawashima(commands.Cog):
                 @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
                 async def prev(self, interaction: discord.Interaction, button: discord.ui.Button):
                     if interaction.user != user:
-                        return await interaction.response.send_message("❌ Ce menu ne t’est pas destiné.", ephemeral=True)
+                        return await safe_interact(interaction, "❌ Ce menu ne t'est pas destiné.", ephemeral=True)
                     self.page = (self.page - 1) % len(pages)
                     await self.update(interaction)
 
                 @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
                 async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
                     if interaction.user != user:
-                        return await interaction.response.send_message("❌ Ce menu ne t’est pas destiné.", ephemeral=True)
+                        return await safe_interact(interaction, "❌ Ce menu ne t'est pas destiné.", ephemeral=True)
                     self.page = (self.page + 1) % len(pages)
                     await self.update(interaction)
 
@@ -145,9 +153,7 @@ class TestKawashima(commands.Cog):
                     await safe_edit(interaction.message, embed=embed, view=self)
 
             page_view = PageView()
-            page_text = "\n".join(
-                f"{i + 1}. {title}" for i, title in enumerate(pages[0])
-            )
+            page_text = "\n".join(f"{i + 1}. {title}" for i, title in enumerate(pages[0]))
             embed = discord.Embed(
                 title=f"🧪 Liste des mini-jeux — Page 1/{len(pages)}",
                 description=page_text,
@@ -155,15 +161,15 @@ class TestKawashima(commands.Cog):
             )
             return await send(embed=embed, view=page_view)
 
-        # ─────────── Vérification numéro ───────────
+        # ─── Vérification numéro ───
         if not str(choix).isdigit() or not 1 <= int(choix) <= len(self.sorted_titles):
             return await send(f"⚠️ Numéro invalide ! Choisis entre **1** et **{len(self.sorted_titles)}**, ou 'all'.")
 
-        # ─────────── Lancer le mini-jeu choisi ───────────
+        # ─── Lancer le mini-jeu choisi ───
         game_name = self.sorted_titles[int(choix) - 1]
         game_func = self.games[game_name]
 
-        embed = discord.Embed(
+        embed    = discord.Embed(
             title=f"🧪 Mini-jeu : {game_name}",
             description="Réponds dans le chat pour jouer !",
             color=discord.Color.blurple()
@@ -177,16 +183,16 @@ class TestKawashima(commands.Cog):
             )
             if not success:
                 result_text = "⏱ Pas répondu, mini-jeu annulé"
-                color = discord.Color.orange()
+                color       = discord.Color.orange()
             else:
                 result_text = "✅ Bien joué !"
-                color = discord.Color.green()
+                color       = discord.Color.green()
         except asyncio.TimeoutError:
             result_text = "⏱ Pas répondu, mini-jeu annulé"
-            color = discord.Color.orange()
+            color       = discord.Color.orange()
         except Exception as e:
             result_text = f"⚠️ Erreur : {e}"
-            color = discord.Color.orange()
+            color       = discord.Color.orange()
 
         result_embed = discord.Embed(
             title=f"Résultat — {game_name}",
