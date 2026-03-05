@@ -4,20 +4,21 @@
 # Catégorie : Bleach
 # Accès : Public
 # Cooldown : 1 utilisation / 3 secondes / utilisateur
-# Version : ✅ Améliorée, bouton immédiat et régénération
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
+import json
+import os
+import random
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, button
-import os
-import json
-import random
-from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_interact
+
+from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followup, safe_interact
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Gestion des personnages
@@ -69,8 +70,8 @@ def calculer_score(p1, p2):
     elif len(commun_traits) == 1: score += 5
     stats1, stats2 = p1.get("stats_base", {}), p2.get("stats_base", {})
     compte_proches = sum(
-        1 for s in ["attaque","defense","pression","kido","intelligence","rapidite"]
-        if abs(stats1.get(s,0)-stats2.get(s,0)) < 20
+        1 for s in ["attaque", "defense", "pression", "kido", "intelligence", "rapidite"]
+        if abs(stats1.get(s, 0) - stats2.get(s, 0)) < 20
     )
     if compte_proches >= 4: score += 15
     elif compte_proches >= 2: score += 5
@@ -98,13 +99,14 @@ def generate_ship_embed(p1, p2):
     return embed
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ Vue interactive avec bouton
+# 🎛️ UI — View avec bouton régénération
 # ────────────────────────────────────────────────────────────────────────────────
+
 class BleachShipView(View):
-    def __init__(self, persos, author: discord.User | discord.Member):
+    def __init__(self, persos: list, author: discord.User | discord.Member):
         super().__init__(timeout=60)
-        self.persos = persos
-        self.author = author
+        self.persos  = persos
+        self.author  = author
         self.message: discord.Message | None = None
 
     async def on_timeout(self):
@@ -113,52 +115,73 @@ class BleachShipView(View):
         if self.message:
             try:
                 await safe_edit(self.message, view=self)
-            except:
+            except Exception:
                 pass
 
     @button(label="💘 Nouveau ship", style=discord.ButtonStyle.blurple)
     async def nouveau_ship(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user != self.author:
             return await safe_interact(interaction, content="❌ Ce n'est pas ton ship !", ephemeral=True)
-        p1, p2 = random.sample(self.persos, 2)
+        p1, p2    = random.sample(self.persos, 2)
         new_embed = generate_ship_embed(p1, p2)
         await safe_interact(interaction, edit=True, embed=new_embed, view=self)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
+
 class BleachShipCommand(commands.Cog):
-    def __init__(self, bot):
+    """Commandes /bleachship et !bleachship — Teste la compatibilité entre deux personnages de Bleach."""
+
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    async def _send_ship(self, channel: discord.abc.Messageable, author, p1_name=None, p2_name=None):
-        persos = [load_character(n) for n in list_characters()]
-        persos = [p for p in persos if p is not None]
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction interne commune
+    # ────────────────────────────────────────────────────────────────────────────
+    def _build_ship(self, p1_name: str | None, p2_name: str | None) -> tuple[discord.Embed, BleachShipView, list] | None:
+        """Charge les personnages, calcule le ship et retourne l'embed + la view."""
+        persos = [p for p in (load_character(n) for n in list_characters()) if p is not None]
         if len(persos) < 2:
-            return await safe_send(channel, "❌ Il faut au moins deux personnages pour créer un ship.")
+            return None
+        p1 = (load_character(p1_name) if p1_name else None) or random.choice(persos)
+        p2 = (load_character(p2_name) if p2_name else None) or random.choice(persos)
+        return generate_ship_embed(p1, p2), persos
 
-        if p1_name and p2_name:
-            p1 = load_character(p1_name) or random.choice(persos)
-            p2 = load_character(p2_name) or random.choice(persos)
-        else:
-            p1, p2 = random.sample(persos, 2)
-
-        embed = generate_ship_embed(p1, p2)
-        view = BleachShipView(persos, author)
-        view.message = await safe_send(channel, embed=embed, view=view)
-
+    # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
-    @app_commands.command(name="bleachship", description="💘 Teste la compatibilité entre deux personnages de Bleach.")
+    # ────────────────────────────────────────────────────────────────────────────
+    @app_commands.command(
+        name="bleachship",
+        description="💘 Teste la compatibilité entre deux personnages de Bleach."
+    )
     @app_commands.describe(p1="Nom du premier personnage", p2="Nom du second personnage")
-    @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)
+    @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_bleachship(self, interaction: discord.Interaction, p1: str = None, p2: str = None):
-        await self._send_ship(interaction.channel, interaction.user, p1_name=p1, p2_name=p2)
+        result = self._build_ship(p1, p2)
+        if result is None:
+            return await safe_respond(interaction, "❌ Il faut au moins deux personnages pour créer un ship.", ephemeral=True)
+        embed, persos = result
+        view          = BleachShipView(persos, interaction.user)
+        await safe_respond(interaction, embed=embed, view=view)
+        view.message  = await interaction.original_response()
 
-    # 🔹 Commande PREFIX (!bleachship et !bship)
-    @commands.command(name="bleachship", aliases=["bship"], help="💘 Teste la compatibilité entre deux personnages de Bleach.")
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────
+    @commands.command(
+        name="bleachship",
+        aliases=["bship"],
+        help="💘 Teste la compatibilité entre deux personnages de Bleach."
+    )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_bleachship(self, ctx: commands.Context, p1: str = None, p2: str = None):
-        await self._send_ship(ctx.channel, ctx.author, p1_name=p1, p2_name=p2)
+        result = self._build_ship(p1, p2)
+        if result is None:
+            return await safe_send(ctx.channel, "❌ Il faut au moins deux personnages pour créer un ship.")
+        embed, persos = result
+        view          = BleachShipView(persos, ctx.author)
+        view.message  = await safe_send(ctx.channel, embed=embed, view=view)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
