@@ -9,13 +9,14 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
-import discord
-from discord import app_commands
-from discord.ext import commands
 import hashlib
 import logging
 
-from utils.discord_utils import safe_send, safe_respond
+import discord
+from discord import app_commands
+from discord.ext import commands
+
+from utils.discord_utils import safe_send
 
 log = logging.getLogger(__name__)
 
@@ -63,21 +64,14 @@ def build_bar(score: int) -> str:
 # 🖼️ Génération de l'embed
 # ────────────────────────────────────────────────────────────────────────────────
 
-def generate_ship_embed(
-    u1: discord.Member | discord.User,
-    u2: discord.Member | discord.User
-) -> discord.Embed:
+def generate_ship_embed(u1: discord.Member | discord.User, u2: discord.Member | discord.User) -> discord.Embed:
     """Construit et retourne l'embed du ship entre u1 et u2."""
     score          = calculer_score(u1.id, u2.id)
     verdict, color = get_verdict(score)
     bar            = build_bar(score)
 
     embed = discord.Embed(title="💘 Ship Meter 💘", color=color)
-    embed.add_field(
-        name="💑 Le couple",
-        value=f"**{u1.display_name}** ❤️ **{u2.display_name}**",
-        inline=False
-    )
+    embed.add_field(name="💑 Le couple",    value=f"**{u1.display_name}** ❤️ **{u2.display_name}**", inline=False)
     embed.add_field(name="🔢 Compatibilité", value=f"`{score}%`",  inline=True)
     embed.add_field(name="📊 Score",         value=bar,            inline=True)
     embed.add_field(name="💬 Verdict",       value=f"*{verdict}*", inline=False)
@@ -106,15 +100,13 @@ class ShipCommand(commands.Cog):
         u1:      discord.Member | discord.User,
         u2:      discord.Member | discord.User | None = None,
     ):
-        # Si u2 non fourni → on ship l'auteur avec u1
         if u2 is None:
             u1, u2 = author, u1
 
         if u1.id == u2.id:
             return await safe_send(channel, "❌ On ne peut pas se shipper avec soi-même... ou si ? 🤔")
 
-        embed = generate_ship_embed(u1, u2)
-        await safe_send(channel, embed=embed)
+        await safe_send(channel, embed=generate_ship_embed(u1, u2))
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -128,26 +120,10 @@ class ShipCommand(commands.Cog):
         membre2="Second membre (optionnel)"
     )
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
-    async def slash_ship(
-        self,
-        interaction: discord.Interaction,
-        membre1:     discord.Member,
-        membre2:     discord.Member = None
-    ):
+    async def slash_ship(self, interaction: discord.Interaction, membre1: discord.Member, membre2: discord.Member = None):
         await interaction.response.defer(ephemeral=True)
         await self._send_ship(interaction.channel, interaction.user, membre1, membre2)
-        try:
-            await interaction.delete_original_response()
-        except Exception:
-            pass
-
-    @slash_ship.error
-    async def slash_ship_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
-        else:
-            log.exception("[/ship] Erreur non gérée : %s", error)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+        await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
@@ -157,23 +133,8 @@ class ShipCommand(commands.Cog):
         help="💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2"
     )
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def prefix_ship(
-        self,
-        ctx:     commands.Context,
-        membre1: discord.Member,
-        membre2: discord.Member = None
-    ):
+    async def prefix_ship(self, ctx: commands.Context, membre1: discord.Member, membre2: discord.Member = None):
         await self._send_ship(ctx.channel, ctx.author, membre1, membre2)
-
-    @prefix_ship.error
-    async def prefix_ship_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Attends encore {error.retry_after:.1f}s.")
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await safe_send(ctx.channel, "❌ Mentionne au moins un membre ! Ex: `!ship @user`")
-        else:
-            log.exception("[!ship] Erreur non gérée : %s", error)
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
