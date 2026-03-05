@@ -9,16 +9,17 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
+import json
+import logging
+import os
+import random
+from collections import Counter
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-import json
-import os
-import random
-import logging
-from collections import Counter
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_utils import safe_send, safe_edit, safe_interact
 from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
@@ -96,6 +97,7 @@ class QuizView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.author.id
 
+
 class QuizButton(discord.ui.Button):
     def __init__(self, emoji: str, traits: list):
         super().__init__(emoji=emoji, style=discord.ButtonStyle.primary)
@@ -106,7 +108,7 @@ class QuizButton(discord.ui.Button):
         view.selected_traits = self.traits
         for child in view.children:
             child.disabled = True
-        await interaction.response.edit_message(view=view)
+        await safe_interact(interaction, view=view, edit=True)
         view.stop()
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -120,13 +122,9 @@ class Division(commands.Cog):
         self.bot = bot
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Fonction interne — validation de la quête
+    # 🔹 Fonctions internes communes
     # ────────────────────────────────────────────────────────────────────────────
-    async def _valider_quete(
-        self,
-        user:    discord.User | discord.Member,
-        channel: discord.abc.Messageable | None = None
-    ):
+    async def _valider_quete(self, user: discord.User | discord.Member, channel: discord.abc.Messageable | None = None):
         """Valide la quête 'division' et envoie un embed de félicitations si nécessaire."""
         new_lvl = db_valider_quete(user.id)
         if new_lvl is None:
@@ -140,34 +138,21 @@ class Division(commands.Cog):
             ),
             color=0x1E90FF
         )
+        await safe_send(channel if channel else user, embed=embed)
 
-        try:
-            if channel:
-                await safe_send(channel, embed=embed)
-            else:
-                await safe_send(user, embed=embed)
-        except Exception as e:
-            log.exception("[division] Erreur envoi embed quête : %s", e)
-
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Fonction interne — déroulement du quiz
-    # ────────────────────────────────────────────────────────────────────────────
-    async def _run_quiz(
-        self,
-        channel: discord.abc.Messageable,
-        author:  discord.User | discord.Member
-    ):
+    async def _run_quiz(self, channel: discord.abc.Messageable, author: discord.User | discord.Member):
+        """Déroulement complet du quiz de division."""
         data = load_division_data()
         if not data:
             await safe_send(channel, "❌ Données introuvables.")
             return
 
-        all_questions        = data["questions"]
-        divisions            = data["divisions"]
-        personality_counter  = Counter()
-        questions            = random.sample(all_questions, k=10)
-        message              = None
-        emojis               = ["🇦", "🇧", "🇨", "🇩"]
+        all_questions       = data["questions"]
+        divisions           = data["divisions"]
+        personality_counter = Counter()
+        questions           = random.sample(all_questions, k=10)
+        message             = None
+        emojis              = ["🇦", "🇧", "🇨", "🇩"]
 
         for q_index, q in enumerate(questions, start=1):
             all_answers      = list(q["answers"].items())
@@ -180,7 +165,6 @@ class Division(commands.Cog):
                 ),
                 color=discord.Color.orange()
             )
-
             view = QuizView(selected_answers, author)
 
             if message is None:
@@ -196,7 +180,7 @@ class Division(commands.Cog):
 
             personality_counter.update(view.selected_traits)
 
-        # ─── Résultat final ───────────────────────────────────────────────────
+        # ─── Résultat final ───
         division_scores = {
             div: sum(personality_counter[trait] for trait in info["traits"])
             for div, info in divisions.items()
@@ -221,38 +205,22 @@ class Division(commands.Cog):
         name="division",
         description="Réponds à un QCM pour savoir dans quelle division du Gotei 13 tu serais."
     )
-    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
+    @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_division(self, interaction: discord.Interaction):
         await interaction.response.defer()
         await self._run_quiz(interaction.channel, interaction.user)
-        try:
-            await interaction.delete_original_response()
-        except Exception:
-            pass
-
-    @slash_division.error
-    async def slash_division_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
-        else:
-            log.exception("[/division] Erreur non gérée : %s", error)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+        await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="division", help="Détermine ta division dans le Gotei 13.")
+    @commands.command(
+        name="division",
+        help="Détermine ta division dans le Gotei 13."
+    )
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_division(self, ctx: commands.Context):
         await self._run_quiz(ctx.channel, ctx.author)
-
-    @prefix_division.error
-    async def prefix_division_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Attends encore {error.retry_after:.1f}s.")
-        else:
-            log.exception("[!division] Erreur non gérée : %s", error)
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
