@@ -6,15 +6,19 @@
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────
+import logging
+import math
+import re
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
-import math
-import logging
-import re
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_utils import safe_send, safe_edit
 
 log = logging.getLogger(__name__)
 
@@ -52,22 +56,18 @@ _SAFE_MATH = {
 def safe_eval(expression: str) -> float | str:
     """
     Évalue une expression mathématique de façon sécurisée.
-    Retourne le résultat (float/int) ou la chaîne "Erreur".
+    Retourne le résultat (float/int) ou la chaîne 'Erreur'.
     """
     if len(expression) > 200:
         return "Erreur"
 
-    tokens = _SAFE_TOKEN_RE.findall(expression)
+    tokens        = _SAFE_TOKEN_RE.findall(expression)
     reconstructed = "".join(tokens)
     if reconstructed.replace(" ", "") != expression.replace(" ", ""):
         return "Erreur"
 
     try:
-        expr = (
-            expression
-            .replace("^", "**")
-            .replace("π", "pi")
-        )
+        expr = expression.replace("^", "**").replace("π", "pi")
         expr = re.sub(r"(\d+)!", r"factorial(\1)", expr)
 
         open_count  = expr.count("(")
@@ -89,7 +89,6 @@ def safe_eval(expression: str) -> float | str:
     except Exception:
         return "Erreur"
 
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 🖥️ Affichage
 # ────────────────────────────────────────────────────────────────────────────────
@@ -98,9 +97,7 @@ MAX_EXPR_LEN = 24
 
 def build_display(expression: str, result) -> str:
     expr_line   = expression[-MAX_EXPR_LEN:] if len(expression) > MAX_EXPR_LEN else expression
-    result_line = str(result) if result is not None else ""
-    result_line = result_line[:MAX_EXPR_LEN]
-
+    result_line = (str(result) if result is not None else "")[:MAX_EXPR_LEN]
     return (
         "```\n"
         "╔══════════════════════════╗\n"
@@ -109,7 +106,6 @@ def build_display(expression: str, result) -> str:
         "╚══════════════════════════╝\n"
         "```"
     )
-
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎛️ UI — Mini-clavier interactif (25 boutons max — limite Discord)
@@ -123,7 +119,6 @@ class CalculatorView(View):
         self._add_buttons()
 
     def _add_buttons(self):
-        # 5 rangées × 5 colonnes = 25 boutons exactement
         rows = [
             ["sin", "cos", "tan", "sqrt", "^"],
             ["7",   "8",   "9",   "/",    "ln"],
@@ -138,8 +133,7 @@ class CalculatorView(View):
         }
         for row in rows:
             for label in row:
-                style = styles.get(label, discord.ButtonStyle.secondary)
-                self.add_item(CalcButton(label, self, style))
+                self.add_item(CalcButton(label, self, styles.get(label, discord.ButtonStyle.secondary)))
 
 
 class CalcButton(Button):
@@ -157,11 +151,11 @@ class CalcButton(Button):
 
         if label == "C":
             view.expression = ""
-            view.result = None
+            view.result     = None
 
         elif label == "⌫":
             if view.result is not None:
-                view.result = None
+                view.result     = None
                 view.expression = ""
             elif view.expression:
                 view.expression = re.sub(r"(sin|cos|tan|sqrt|log|ln|\()$|.$", "", view.expression)
@@ -173,15 +167,14 @@ class CalcButton(Button):
         elif label in self._OPERATORS:
             if view.result not in (None, "Erreur"):
                 view.expression = str(view.result) + label
-                view.result = None
+                view.result     = None
             elif view.result != "Erreur":
                 view.expression += label
 
         else:
             if view.result not in (None, "Erreur"):
                 view.expression = ""
-                view.result = None
-
+                view.result     = None
             if label in self._FUNCTIONS:
                 view.expression += label + "("
             elif label == "π":
@@ -189,12 +182,7 @@ class CalcButton(Button):
             else:
                 view.expression += label
 
-        display = build_display(view.expression, view.result)
-        try:
-            await safe_edit(interaction.message, content=display, view=view)
-        except Exception as exc:
-            log.exception("Erreur affichage calculatrice : %s", exc)
-
+        await safe_edit(interaction.message, content=build_display(view.expression, view.result), view=view)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -206,54 +194,40 @@ class ScientificCalculator(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    async def _send_calculator(self, channel: discord.abc.Messageable) -> discord.Message:
-        view    = CalculatorView()
-        display = build_display("", None)
-        message = await safe_send(channel, display, view=view)
-        view.message = message
-        return message
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction interne commune
+    # ────────────────────────────────────────────────────────────────────────────
+    async def _send_calculator(self, channel: discord.abc.Messageable):
+        view         = CalculatorView()
+        view.message = await safe_send(channel, build_display("", None), view=view)
 
-    @app_commands.command(name="calc", description="Calculatrice scientifique interactive")
-    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────────
+    @app_commands.command(
+        name="calc",
+        description="Calculatrice scientifique interactive."
+    )
+    @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_calc(self, interaction: discord.Interaction):
-        try:
-            await interaction.response.defer(ephemeral=True)
-            await self._send_calculator(interaction.channel)
-            await interaction.delete_original_response()
-        except Exception as exc:
-            log.exception("[/calc] Erreur inattendue : %s", exc)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
+        await self._send_calculator(interaction.channel)
+        await interaction.delete_original_response()
 
-    @slash_calc.error
-    async def slash_calc_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
-        else:
-            log.exception("[/calc] Erreur non gérée : %s", error)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
-
-    @commands.command(name="calc", help="Calculatrice scientifique interactive")
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────
+    @commands.command(
+        name="calc",
+        help="Calculatrice scientifique interactive."
+    )
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_calc(self, ctx: commands.Context):
-        try:
-            await self._send_calculator(ctx.channel)
-        except Exception as exc:
-            log.exception("[!calc] Erreur inattendue : %s", exc)
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
-
-    @prefix_calc.error
-    async def prefix_calc_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Attends encore {error.retry_after:.1f}s.")
-        else:
-            log.exception("[!calc] Erreur non gérée : %s", error)
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
-
+        await self._send_calculator(ctx.channel)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
 # ────────────────────────────────────────────────────────────────────────────────
-
 async def setup(bot: commands.Bot):
     cog = ScientificCalculator(bot)
     for command in cog.get_commands():
