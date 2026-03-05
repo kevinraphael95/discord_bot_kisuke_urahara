@@ -144,7 +144,26 @@ class ReiatsuSpawner(commands.Cog):
             # ── Faux reiatsu Illusionniste ─────────────────────────
             channel = self.bot.get_channel(channel_id)
             if channel:
-                await self._spawn_faux_reiatsu(channel, guild_id)
+                # ⚠️ Vérifie qu’aucun faux spawn actif pour ce joueur
+                self.cursor.execute("""
+                    SELECT user_id FROM reiatsu
+                    WHERE classe = 'Illusionniste' AND active_skill = 1 AND fake_spawn_id IS NULL
+                """)
+                players = self.cursor.fetchall()
+                for player in players:
+                    # Vérifie qu’il n’y a pas déjà de spawn existant dans le serveur
+                    self.cursor.execute("""
+                        SELECT 1 FROM reiatsu WHERE fake_spawn_guild_id = ?
+                        AND fake_spawn_id IS NOT NULL AND user_id = ?
+                    """, (guild_id, player["user_id"]))
+                    if self.cursor.fetchone():
+                        continue  # un faux spawn existe déjà
+                    await self._spawn_message(
+                        channel,
+                        guild_id=guild_id,
+                        is_fake=True,
+                        owner_id=player["user_id"]
+                    )
 
     # ──────────────────────────────────────────────────────────────
     # 🔹 Envoi d'un message de spawn (vrai ou faux)
@@ -177,8 +196,26 @@ class ReiatsuSpawner(commands.Cog):
                 (message.id, channel.guild.id, owner_id)
             )
         else:
-            # ── BUG CORRIGÉ : on génère immédiatement le prochain délai
-            # afin que le tick suivant ne respawne pas après seulement 60s ──
+            spawn_speed  = self._get_spawn_speed(guild_id)
+            min_d, max_d = SPAWN_SPEED_RANGES.get(spawn_speed, SPAWN_SPEED_RANGES[DEFAULT_SPAWN_SPEED])
+            next_delay   = random.randint(min_d, max_d)
+
+            self.cursor.execute("""
+                UPDATE reiatsu_config
+                SET is_spawn = 1,
+                    last_spawn_at = ?,
+                    message_id = ?,
+                    spawn_delay = ?
+                WHERE guild_id = ?
+            """, (_now_iso(), message.id, next_delay, guild_id))
+
+        self.conn.commit()
+
+        if is_fake:
+            asyncio.create_task(
+                self._delete_fake_after_delay(channel, message.id, owner_id)
+            )
+        else:
             spawn_speed  = self._get_spawn_speed(guild_id)
             min_d, max_d = SPAWN_SPEED_RANGES.get(spawn_speed, SPAWN_SPEED_RANGES[DEFAULT_SPAWN_SPEED])
             next_delay   = random.randint(min_d, max_d)
