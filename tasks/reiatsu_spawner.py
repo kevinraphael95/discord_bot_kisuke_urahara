@@ -505,8 +505,12 @@ class ReiatsuSpawner(commands.Cog):
             if conf and gain > 0:
                 await self._send_feedback(channel, user, gain, is_super, classe)
             elif fake_row:
-                # optionnel : feedback pour le joueur qui clique sur un faux Reiatsu
-                await safe_send(channel, f"🎭 {user.mention} a cliqué sur un faux Reiatsu… rien ne se passe !")
+                owner_id = fake_row["owner_id"]
+                owner = guild.get_member(owner_id) or await guild.fetch_member(owner_id)
+                await safe_send(
+                    channel,
+                    f"🎭 {user.mention} a absorbé un faux Reiatsu ! **{owner.display_name}** gagne **+50 Reiatsu** !"
+                )
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
