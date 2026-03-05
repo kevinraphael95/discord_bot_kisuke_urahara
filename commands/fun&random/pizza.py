@@ -9,14 +9,15 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
+import json
+import logging
+import os
+import random
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, button
-import json
-import os
-import random
-import logging
 
 from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_interact
 from utils.init_db import get_conn
@@ -85,22 +86,22 @@ def db_valider_quete(user_id: int) -> int | None:
 
 def generate_pizza_embed(data: dict) -> discord.Embed:
     """Génère un embed représentant une pizza aléatoire."""
-    pate       = random.choice(data.get("pates", ["Classique"]))
-    base       = random.choice(data.get("bases", ["Tomate"]))
-    fromage    = random.choice(data.get("fromages", ["Mozzarella"]))
-    garnitures = random.sample(data.get("garnitures", ["Champignons", "Jambon"]), k=min(2, len(data.get("garnitures", []))))
-    toppings   = random.sample(data.get("toppings_speciaux", ["Olives"]),          k=min(1, len(data.get("toppings_speciaux", []))))
+    pate       = random.choice(data.get("pates",             ["Classique"]))
+    base       = random.choice(data.get("bases",             ["Tomate"]))
+    fromage    = random.choice(data.get("fromages",          ["Mozzarella"]))
+    garnitures = random.sample(data.get("garnitures",        ["Champignons", "Jambon"]), k=min(2, len(data.get("garnitures", []))))
+    toppings   = random.sample(data.get("toppings_speciaux", ["Olives"]),                k=min(1, len(data.get("toppings_speciaux", []))))
 
     embed = discord.Embed(title="🍕 Ta pizza aléatoire", color=discord.Color.orange())
-    embed.add_field(name="Pâte",             value=pate,                   inline=False)
-    embed.add_field(name="Base (sauce)",     value=base,                   inline=False)
-    embed.add_field(name="Fromage",          value=fromage,                inline=False)
-    embed.add_field(name="Garnitures",       value=", ".join(garnitures),  inline=False)
-    embed.add_field(name="Toppings spéciaux",value=", ".join(toppings),    inline=False)
+    embed.add_field(name="Pâte",              value=pate,                  inline=False)
+    embed.add_field(name="Base (sauce)",      value=base,                  inline=False)
+    embed.add_field(name="Fromage",           value=fromage,               inline=False)
+    embed.add_field(name="Garnitures",        value=", ".join(garnitures), inline=False)
+    embed.add_field(name="Toppings spéciaux", value=", ".join(toppings),   inline=False)
     return embed
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ Vue interactive avec bouton
+# 🎛️ UI — Vue avec bouton régénération
 # ────────────────────────────────────────────────────────────────────────────────
 
 class PizzaView(View):
@@ -124,8 +125,7 @@ class PizzaView(View):
     async def nouvelle_pizza(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user != self.author:
             return await safe_interact(interaction, content="❌ Ce n'est pas ta pizza !", ephemeral=True)
-        new_embed = generate_pizza_embed(self.data)
-        await safe_interact(interaction, edit=True, embed=new_embed, view=self)
+        await safe_interact(interaction, edit=True, embed=generate_pizza_embed(self.data), view=self)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -138,18 +138,13 @@ class PizzaAleatoire(commands.Cog):
         self.bot = bot
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Fonction interne — validation de la quête
+    # 🔹 Fonctions internes communes
     # ────────────────────────────────────────────────────────────────────────────
-    async def _valider_quete(
-        self,
-        user:    discord.User | discord.Member,
-        channel: discord.abc.Messageable | None = None
-    ):
+    async def _valider_quete(self, user: discord.User | discord.Member, channel: discord.abc.Messageable | None = None):
         """Valide la quête 'pizza' et envoie un embed de félicitations si nécessaire."""
         new_lvl = db_valider_quete(user.id)
         if new_lvl is None:
             return
-
         embed = discord.Embed(
             title="🎉 Quête accomplie !",
             description=(
@@ -158,74 +153,44 @@ class PizzaAleatoire(commands.Cog):
             ),
             color=0xFFA500
         )
-
-        try:
-            if channel:
-                await safe_send(channel, embed=embed)
-            else:
-                await safe_send(user, embed=embed)
-        except Exception as e:
-            log.exception("[pizza] Erreur envoi embed quête : %s", e)
+        await safe_send(channel if channel else user, embed=embed)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(name="pizza", description="🍕 Génère une pizza aléatoire.")
-    @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)
+    @app_commands.command(
+        name="pizza",
+        description="🍕 Génère une pizza aléatoire."
+    )
+    @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_pizza(self, interaction: discord.Interaction):
-        try:
-            data = load_data()
-            if not data:
-                return await safe_respond(interaction, "❌ Impossible de charger les options de pizza.", ephemeral=True)
+        data = load_data()
+        if not data:
+            return await safe_respond(interaction, "❌ Impossible de charger les options de pizza.", ephemeral=True)
 
-            view  = PizzaView(data, interaction.user)
-            embed = generate_pizza_embed(data)
-
-            await safe_interact(interaction, embed=embed, view=view)
-            view.message = await interaction.original_response()
-
-            await self._valider_quete(interaction.user, channel=interaction.channel)
-
-        except Exception as e:
-            log.exception("[/pizza] Erreur inattendue : %s", e)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
-
-    @slash_pizza.error
-    async def slash_pizza_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
-        else:
-            log.exception("[/pizza] Erreur non gérée : %s", error)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+        view  = PizzaView(data, interaction.user)
+        embed = generate_pizza_embed(data)
+        await safe_respond(interaction, embed=embed, view=view)
+        view.message = await interaction.original_response()
+        await self._valider_quete(interaction.user, channel=interaction.channel)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="pizza", help="🍕 Génère une pizza aléatoire.")
+    @commands.command(
+        name="pizza",
+        help="🍕 Génère une pizza aléatoire."
+    )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_pizza(self, ctx: commands.Context):
-        try:
-            data = load_data()
-            if not data:
-                return await safe_send(ctx, "❌ Impossible de charger les options de pizza.")
+        data = load_data()
+        if not data:
+            return await safe_send(ctx, "❌ Impossible de charger les options de pizza.")
 
-            view         = PizzaView(data, ctx.author)
-            embed        = generate_pizza_embed(data)
-            view.message = await safe_send(ctx, embed=embed, view=view)
-
-            await self._valider_quete(ctx.author, channel=ctx.channel)
-
-        except Exception as e:
-            log.exception("[!pizza] Erreur inattendue : %s", e)
-            await safe_send(ctx, "❌ Une erreur est survenue.")
-
-    @prefix_pizza.error
-    async def prefix_pizza_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Attends encore {error.retry_after:.1f}s.")
-        else:
-            log.exception("[!pizza] Erreur non gérée : %s", error)
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
+        view         = PizzaView(data, ctx.author)
+        embed        = generate_pizza_embed(data)
+        view.message = await safe_send(ctx, embed=embed, view=view)
+        await self._valider_quete(ctx.author, channel=ctx.channel)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
