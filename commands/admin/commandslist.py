@@ -1,5 +1,5 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 📌 commandslist.py — Commande /readme et !readme
+# 📌 commandslist.py — Commande /commandslist et !commandslist
 # Objectif : Génère un README.md avec toutes les commandes triées et formatées
 # Catégorie : Admin
 # Accès : Administrateurs seulement
@@ -9,40 +9,39 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
+import io
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-import io
-from utils.discord_utils import safe_send, safe_respond  
+
+from utils.discord_utils import safe_send, safe_respond
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
+
 class CommandsList(commands.Cog):
     """
-    Commande /readme et !readme — Génère un README.md complet avec toutes les commandes.
+    Commande /commandslist et !commandslist — Génère un README.md complet avec toutes les commandes.
     Accessible uniquement aux administrateurs.
     """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Fonction interne pour générer le contenu Markdown
+    # 🔹 Fonction interne commune
     # ────────────────────────────────────────────────────────────────────────────
-    def build_markdown_content(self) -> str:
-        """Renvoie le contenu Markdown complet pour README.md avec format compact et lisible"""
+    def _build_markdown_content(self) -> str:
+        """Renvoie le contenu Markdown complet pour README.md avec format compact et lisible."""
         content = "Liste des Commandes\n\n"
 
-        # Regrouper les commandes par catégorie
         categories = {}
         for cmd in self.bot.commands:
             cat = getattr(cmd, "category", "Autre")
             desc = cmd.help if cmd.help else "Pas de description."
-            if cat not in categories:
-                categories[cat] = []
-            categories[cat].append((cmd.name, desc))
+            categories.setdefault(cat, []).append((cmd.name, desc))
 
-        # Trier les catégories par ordre alphabétique
         for cat in sorted(categories.keys(), key=lambda c: c.lower()):
             content += f"### 📂 {cat}\n"
             for name, desc in sorted(categories[cat], key=lambda x: x[0].lower()):
@@ -52,44 +51,30 @@ class CommandsList(commands.Cog):
         return content
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH (admin uniquement)
+    # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.command(
         name="commandslist",
         description="Génère un .md avec toutes les commandes et les envoie en fichier."
     )
-    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_readme(self, interaction: discord.Interaction):
-        try:
-            markdown_content = self.build_markdown_content()
-            file = discord.File(io.StringIO(markdown_content), filename="Liste des Commandes.md")
-            await safe_respond(interaction, "📄 Voici le Liste des Commandes.md avec toutes les commandes :", file=file)
-        except app_commands.CommandOnCooldown as e:
-            await safe_respond(interaction, f"⏳ Attends encore {e.retry_after:.1f}s.", ephemeral=True)
-        except Exception as e:
-            print(f"[ERREUR /readme] {e}")
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
+    async def slash_commandslist(self, interaction: discord.Interaction):
+        file = discord.File(io.StringIO(self._build_markdown_content()), filename="Liste des Commandes.md")
+        await safe_respond(interaction, "📄 Voici la liste des commandes :", file=file)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX (admin uniquement)
+    # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.has_permissions(administrator=True)
     @commands.command(
         name="commandslist",
         help="Génère un .md avec toutes les commandes et les envoie en fichier."
     )
+    @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_readme(self, ctx: commands.Context):
-        try:
-            markdown_content = self.build_markdown_content()
-            file = discord.File(io.StringIO(markdown_content), filename="Liste des Commandes.md")
-            await safe_send(ctx.channel, "📄 Voici le Liste des Commandes.md avec toutes les commandes :", file=file)
-        except commands.CommandOnCooldown as e:
-            await safe_send(ctx.channel, f"⏳ Attends encore {e.retry_after:.1f}s.")
-        except Exception as e:
-            print(f"[ERREUR !readme] {e}")
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
+    async def prefix_commandslist(self, ctx: commands.Context):
+        file = discord.File(io.StringIO(self._build_markdown_content()), filename="Liste des Commandes.md")
+        await safe_send(ctx.channel, "📄 Voici la liste des commandes :", file=file)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
