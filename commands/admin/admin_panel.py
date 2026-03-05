@@ -93,21 +93,15 @@ class AdminPanelCog(commands.Cog):
         description="Afficher le lien du panneau admin."
     )
     @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_admin_panel(self, interaction: discord.Interaction):
         embed, view = self._build_embed_and_view()
-        await interaction.response.send_message(
+        await safe_respond(
+            interaction,
             embed=embed,
             view=view if view else discord.utils.MISSING,
             ephemeral=True
         )
-
-    @slash_admin_panel.error
-    async def slash_admin_panel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.MissingPermissions):
-            await safe_respond(interaction, "❌ Tu n'as pas la permission.", ephemeral=True)
-        else:
-            log.exception("[/adminpanel] Erreur non gérée : %s", error)
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
@@ -121,16 +115,6 @@ class AdminPanelCog(commands.Cog):
     async def prefix_admin_panel(self, ctx: commands.Context):
         embed, view = self._build_embed_and_view()
         await safe_send(ctx.channel, embed=embed, view=view)
-
-    @prefix_admin_panel.error
-    async def prefix_admin_panel_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.MissingPermissions):
-            await safe_send(ctx.channel, "❌ Tu n'as pas la permission.")
-        elif isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Attends encore {error.retry_after:.1f}s.")
-        else:
-            log.exception("[!adminpanel] Erreur non gérée : %s", error)
-            await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
