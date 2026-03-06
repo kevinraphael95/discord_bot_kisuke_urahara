@@ -273,10 +273,7 @@ class QuincyHollowShinigami(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="shifumi",
-        description="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️ — précisez un adversaire pour défier."
-    )
+    @app_commands.command(name="shifumi",description="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️ — précisez un adversaire pour défier.")
     @app_commands.describe(opponent="Mentionner un membre pour le défier (optionnel).")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_quincy_hollow_shinigami(self, interaction: discord.Interaction, opponent: Optional[discord.Member] = None):
@@ -294,11 +291,7 @@ class QuincyHollowShinigami(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="shifumi",
-        aliases=["sfm", "pfc"],
-        help="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️."
-    )
+    @commands.command(name="shifumi",aliases=["sfm", "pfc"],help="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_quincy_hollow_shinigami(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         if member is None or member.bot:
