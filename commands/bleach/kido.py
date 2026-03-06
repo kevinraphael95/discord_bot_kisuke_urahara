@@ -196,10 +196,7 @@ class Kido(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="kido",
-        description="Affiche un Kido aléatoire, précis ou liste tous les Kido."
-    )
+    @app_commands.command(name="kido",description="Affiche un Kido aléatoire, précis ou liste tous les Kido.")
     @app_commands.describe(type="Type de Kido (hado, bakudo, autres) ou abrégé (h, b, a)", number="Numéro du Kido ou 'random'")
     @app_commands.autocomplete(type=type_autocomplete, number=number_autocomplete)
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
@@ -211,10 +208,7 @@ class Kido(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="kido",
-        help="Affiche un Kido précis, aléatoire ou la liste paginée."
-    )
+    @commands.command(name="kido",help="Affiche un Kido précis, aléatoire ou la liste paginée.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_kido(self, ctx: commands.Context, kido_type: str = None, number: str = None):
         await self._send_kido(ctx.channel, kido_type, number)
