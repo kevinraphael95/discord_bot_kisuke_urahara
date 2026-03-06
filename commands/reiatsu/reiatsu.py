@@ -9,79 +9,74 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
+from datetime import datetime, timedelta, timezone
+
 import discord
-import sqlite3
-import time
+from dateutil import parser
 from discord import app_commands
 from discord.ext import commands
-from discord.ui import View, Button
-from dateutil import parser
-from datetime import datetime, timedelta, timezone
-from utils.discord_utils import safe_send, safe_respond
+from discord.ui import Button, View
+
+from utils.discord_utils import safe_respond, safe_send
+from utils.init_db import get_conn
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🗄️ Configuration SQLite
-# ────────────────────────────────────────────────────────────────────────────────
-DB_PATH = "database/reiatsu.db"
-
-# ────────────────────────────────────────────────────────────────────────────────
-# Infos intervalles de vitesse de spawn
+# 📂 Constantes
 # ────────────────────────────────────────────────────────────────────────────────
 SPAWN_SPEED_INTERVALS = {
     "Ultra_Rapide": "1-5 minutes",
     "Rapide": "5-20 minutes",
     "Normal": "30-60 minutes",
-    "Lent": "5-10 heures"
+    "Lent": "5-10 heures",
 }
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ Vue interactive Reiatsu (Classement + Lien Spawn)
+# 🗄️ Helpers DB
+# ────────────────────────────────────────────────────────────────────────────────
+def get_server_config(guild_id: int):
+    conn = get_conn()
+    conn.row_factory = __import__("sqlite3").Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM reiatsu_config WHERE guild_id = ?", (guild_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row
+
+def get_classement():
+    conn = get_conn()
+    conn.row_factory = __import__("sqlite3").Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id, points FROM reiatsu ORDER BY points DESC LIMIT 10")
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🎛️ UI — Vue Reiatsu (bouton persistant + lien spawn)
 # ────────────────────────────────────────────────────────────────────────────────
 class ReiatsuView(View):
-
-    def __init__(self, db_cursor, author: discord.Member = None, spawn_link: str = None):
+    def __init__(self, author: discord.Member = None, spawn_link: str = None):
         super().__init__(timeout=None)
         self.author = author
-        self.cursor = db_cursor
 
         if spawn_link:
             self.add_item(
                 Button(
                     label="💠 Aller au spawn",
                     style=discord.ButtonStyle.link,
-                    url=spawn_link
+                    url=spawn_link,
                 )
             )
 
     @discord.ui.button(label="📊 Classement", style=discord.ButtonStyle.primary, custom_id="reiatsu:classement")
     async def classement_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-
         if self.author and interaction.user != self.author:
-            return await interaction.response.send_message(
-                "❌ Tu ne peux pas utiliser ce bouton.",
-                ephemeral=True
-            )
+            return await safe_respond(interaction, "❌ Tu ne peux pas utiliser ce bouton.", ephemeral=True)
 
-        try:
-            self.cursor.execute("""
-                SELECT user_id, points
-                FROM reiatsu
-                ORDER BY points DESC
-                LIMIT 10
-            """)
-            classement = self.cursor.fetchall()
-        except Exception as e:
-            print(f"[ERREUR DB] Impossible de récupérer le classement : {e}")
-            return await interaction.response.send_message(
-                "❌ Erreur lors du chargement du classement.",
-                ephemeral=True
-            )
+        classement = get_classement()
 
         if not classement:
-            return await interaction.response.send_message(
-                "⚠️ Aucun classement disponible pour le moment.",
-                ephemeral=True
-            )
+            return await safe_respond(interaction, "⚠️ Aucun classement disponible pour le moment.", ephemeral=True)
 
         description = ""
         for i, entry in enumerate(classement, start=1):
@@ -94,50 +89,25 @@ class ReiatsuView(View):
         embed = discord.Embed(
             title="📊 Classement Reiatsu",
             description=description,
-            color=discord.Color.purple()
+            color=discord.Color.purple(),
         )
-
-        await interaction.response.send_message(embed=embed)
+        await safe_respond(interaction, embed=embed)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
 class ReiatsuCommand(commands.Cog):
-    """Commande /reiatsu et !reiatsu — Affiche les informations de spawn du serveur et le classement"""
+    """Commande /reiatsu et !reiatsu — Affiche les infos de spawn du serveur et le classement"""
 
-    COOLDOWN = 3
-
-    # ──────────────────────────────────────────────────────────────
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-        self.conn.row_factory = sqlite3.Row
-        self.cursor = self.conn.cursor()
+        self.bot.add_view(ReiatsuView())  # enregistrement du bouton persistant
 
-        self.bot.add_view(ReiatsuView(self.cursor))
-        self.user_cooldowns = {}
-
-    # ──────────────────────────────────────────────────────────────
-    async def _check_cooldown(self, user_id: int):
-        now = time.time()
-        last = self.user_cooldowns.get(user_id, 0)
-        if now - last < self.COOLDOWN:
-            return self.COOLDOWN - (now - last)
-        self.user_cooldowns[user_id] = now
-        return 0
-
-    # ──────────────────────────────────────────────────────────────
-    async def _send_server_info(self, channel_or_interaction, author, guild):
-
-        guild_id = int(guild.id)
-
-        self.cursor.execute("""
-            SELECT *
-            FROM reiatsu_config
-            WHERE guild_id = ?
-        """, (guild_id,))
-
-        config = self.cursor.fetchone()
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔹 Fonction interne commune
+    # ────────────────────────────────────────────────────────────────────────────
+    async def _send_server_info(self, channel, author: discord.Member, guild: discord.Guild):
+        config = get_server_config(guild.id)
 
         salon_text = "❌"
         spawn_speed_text = "⚠️ Inconnu"
@@ -156,7 +126,7 @@ class ReiatsuCommand(commands.Cog):
                 temps_text = "💠 Un Reiatsu est **déjà apparu** !"
                 spawn_link = (
                     f"https://discord.com/channels/"
-                    f"{guild_id}/{config['channel_id']}/{config['message_id']}"
+                    f"{guild.id}/{config['channel_id']}/{config['message_id']}"
                 )
             else:
                 last_spawn = config["last_spawn_at"]
@@ -165,15 +135,12 @@ class ReiatsuCommand(commands.Cog):
                 if last_spawn:
                     try:
                         last_spawn_dt = parser.parse(last_spawn)
-
                         if not last_spawn_dt.tzinfo:
                             last_spawn_dt = last_spawn_dt.replace(tzinfo=timezone.utc)
 
                         remaining = int(
-                            (last_spawn_dt + timedelta(seconds=delay) -
-                             datetime.now(timezone.utc)).total_seconds()
+                            (last_spawn_dt + timedelta(seconds=delay) - datetime.now(timezone.utc)).total_seconds()
                         )
-
                         if remaining <= 0:
                             temps_text = "💠 Un Reiatsu peut apparaître **à tout moment** !"
                         else:
@@ -189,67 +156,37 @@ class ReiatsuCommand(commands.Cog):
                 f"⏱️ **Vitesse de spawn** : {spawn_speed_text}\n"
                 f"⏳ **Prochain spawn** : {temps_text}"
             ),
-            color=discord.Color.purple()
+            color=discord.Color.purple(),
         )
+        embed.set_footer(text="💠 Utilise `!!tutoreiatsu` ou `!!tutorts` pour en savoir plus sur le Reiatsu.")
 
-        embed.set_footer(
-            text="💠 Utilise `!!tutoreiatsu` ou `!!tutorts` pour en savoir plus sur le Reiatsu."
-        )
-
-        view = ReiatsuView(self.cursor, author, spawn_link=spawn_link)
-
-        if isinstance(channel_or_interaction, discord.Interaction):
-            await channel_or_interaction.response.send_message(embed=embed, view=view)
-        else:
-            await safe_send(channel_or_interaction, embed=embed, view=view)
+        view = ReiatsuView(author, spawn_link=spawn_link)
+        await safe_send(channel, embed=embed, view=view)
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commandes SLASH
+    # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(
         name="reiatsu",
-        description="💠 Affiche les informations de spawn Reiatsu du serveur et le classement global."
+        description="💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.",
     )
+    @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_reiatsu(self, interaction: discord.Interaction):
-
-        remaining = await self._check_cooldown(interaction.user.id)
-
-        if remaining > 0:
-            return await safe_respond(
-                interaction,
-                f"⏳ Attends encore {remaining:.1f}s.",
-                ephemeral=True
-            )
-
-        await self._send_server_info(
-            interaction,
-            interaction.user,
-            interaction.guild
-        )
+        await interaction.response.defer(ephemeral=True)
+        await self._send_server_info(interaction.channel, interaction.user, interaction.guild)
+        await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commandes PREFIX
+    # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(
         name="reiatsu",
         aliases=["rts"],
-        help="💠 Affiche les informations de spawn Reiatsu du serveur et le classement global."
+        help="💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.",
     )
+    @commands.cooldown(1, 3.0, commands.BucketType.user)
     async def prefix_reiatsu(self, ctx: commands.Context):
-
-        remaining = await self._check_cooldown(ctx.author.id)
-
-        if remaining > 0:
-            return await safe_send(
-                ctx.channel,
-                f"⏳ Attends encore {remaining:.1f}s."
-            )
-
-        await self._send_server_info(
-            ctx.channel,
-            ctx.author,
-            ctx.guild
-        )
+        await self._send_server_info(ctx.channel, ctx.author, ctx.guild)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
