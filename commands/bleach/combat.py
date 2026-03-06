@@ -273,10 +273,7 @@ class CombatCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="combat",
-        description="⚔️ Combat style Pokémon entre 2 persos."
-    )
+    @app_commands.command(name="combat",description="⚔️ Combat style Pokémon entre 2 persos.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_combat(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -286,10 +283,7 @@ class CombatCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="combat",
-        help="⚔️ Combat style Pokémon entre 2 persos."
-    )
+    @commands.command(name="combat",help="⚔️ Combat style Pokémon entre 2 persos.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_combat(self, ctx: commands.Context):
         await self._run_combat(ctx.channel)
