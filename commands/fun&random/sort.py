@@ -110,10 +110,7 @@ class Sorting(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="sorting",
-        description="Visualise un algorithme de tri en temps réel."
-    )
+    @app_commands.command(name="sorting",description="Visualise un algorithme de tri en temps réel.")
     @app_commands.describe(algorithme="Trie 12 barres en longueurs différentes selon un algorithme.")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_sorting(self, interaction: discord.Interaction, algorithme: str = None):
