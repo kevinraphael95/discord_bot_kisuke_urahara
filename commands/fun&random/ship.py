@@ -111,10 +111,7 @@ class ShipCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="ship",
-        description="💘 Calcule la compatibilité entre deux membres du serveur."
-    )
+    @app_commands.command(name="ship",description="💘 Calcule la compatibilité entre deux membres du serveur.")
     @app_commands.describe(
         membre1="Premier membre (toi par défaut si un seul membre fourni)",
         membre2="Second membre (optionnel)"
@@ -128,10 +125,7 @@ class ShipCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="ship",
-        help="💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2"
-    )
+    @commands.command(name="ship",help="💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_ship(self, ctx: commands.Context, membre1: discord.Member, membre2: discord.Member = None):
         await self._send_ship(ctx.channel, ctx.author, membre1, membre2)
