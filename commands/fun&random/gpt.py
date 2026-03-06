@@ -29,10 +29,7 @@ class GPTChat(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH : /gpt <message>
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="gpt",
-        description="Chat libre avec le modèle GPT-OSS (Cloud NVIDIA)"
-    )
+    @app_commands.command(name="gpt",description="Chat libre avec le modèle GPT-OSS (Cloud NVIDIA)")
     @app_commands.describe(prompt="Message ou question à envoyer au modèle.")
     @app_commands.checks.cooldown(1, 4.0, key=lambda i: i.user.id)
     async def slash_gpt(self, interaction: discord.Interaction, prompt: str):
@@ -42,7 +39,7 @@ class GPTChat(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX : !!gpt <message>
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="gpt", help="ChatGPT mais en nul et qui ne fonctionne presque pas.")
+    @commands.command(name="gpt", help="Chat libre avec le modèle GPT-OSS (Cloud NVIDIA)")
     @commands.cooldown(1, 4.0, commands.BucketType.user)
     async def prefix_gpt(self, ctx: commands.Context, *, prompt: str = None):
         """Commande préfixe — conversation libre avec GPT-OSS"""
