@@ -80,10 +80,7 @@ class SayAs(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="say_as",
-        description="(Admin) Fait répéter un message par le bot comme si c'était un autre membre."
-    )
+    @app_commands.command(name="say_as",description="(Admin) Fait répéter un message par le bot comme si c'était un autre membre.")
     @app_commands.describe(user="Membre ciblé (mention, ID ou pseudo)", message="Message à répéter")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
@@ -99,10 +96,7 @@ class SayAs(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="say_as",
-        aliases=["sa"],
-        help="(Admin) Fait répéter un message par le bot comme si c'était un autre membre.\n"
+    @commands.command(name="say_as",aliases=["sa"],help="(Admin) Fait répéter un message par le bot comme si c'était un autre membre.\n"
              "Usage: !say_as <mention|id|pseudo> <message>"
     )
     @commands.has_permissions(administrator=True)
