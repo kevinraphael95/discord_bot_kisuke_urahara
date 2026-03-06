@@ -150,7 +150,9 @@ class Devinelenombre(commands.Cog):
         view.message = await safe_send(channel, embed=embed, view=view)
         asyncio.create_task(view.start_timer())
 
+    # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
+    # ────────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="devinelenombre", description="Devine un nombre entre 0 et 100")
     @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
@@ -164,7 +166,9 @@ class Devinelenombre(commands.Cog):
             print(f"[ERREUR /devinelenombre] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
+    # ────────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
+    # ────────────────────────────────────────────────────────────────────────────────
     @commands.command(name="devinelenombre", help="Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_devinelenombre(self, ctx: commands.Context, mode: str = None):
