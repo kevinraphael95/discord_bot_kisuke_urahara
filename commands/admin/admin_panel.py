@@ -88,10 +88,7 @@ class AdminPanelCog(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="adminpanel",
-        description="Afficher le lien du panneau admin."
-    )
+    @app_commands.command(name="adminpanel",description="Afficher le lien du panneau admin.")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_admin_panel(self, interaction: discord.Interaction):
@@ -106,10 +103,7 @@ class AdminPanelCog(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="adminpanel",
-        help="🔒 Affiche le lien du panneau admin."
-    )
+    @commands.command(name="adminpanel",help="🔒 Affiche le lien du panneau admin.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def prefix_admin_panel(self, ctx: commands.Context):
