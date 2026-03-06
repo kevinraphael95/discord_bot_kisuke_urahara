@@ -158,10 +158,7 @@ class PizzaAleatoire(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="pizza",
-        description="🍕 Génère une pizza aléatoire."
-    )
+    @app_commands.command(name="pizza",description="🍕 Génère une pizza aléatoire.")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_pizza(self, interaction: discord.Interaction):
         data = load_data()
@@ -177,10 +174,7 @@ class PizzaAleatoire(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="pizza",
-        help="🍕 Génère une pizza aléatoire."
-    )
+    @commands.command(name="pizza",help="🍕 Génère une pizza aléatoire.")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_pizza(self, ctx: commands.Context):
         data = load_data()
