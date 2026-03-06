@@ -135,10 +135,7 @@ class NomDeLaCommande(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="nom_de_la_commande",
-        description="Description détaillée de la commande."
-    )
+    @app_commands.command(name="nom_de_la_commande",description="Description détaillée de la commande.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_nom_de_la_commande(self, interaction: discord.Interaction):
         await interaction.response.defer()
