@@ -61,10 +61,7 @@ class TestTache(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="testtache",
-        description="🕹️ Teste toutes les épreuves pour la commande hollow."
-    )
+    @app_commands.command(name="testtache",description="🕹️ Teste toutes les épreuves pour la commande hollow.")
     @app_commands.checks.cooldown(rate=1, per=10.0, key=lambda i: i.user.id)
     async def slash_testtache(self, interaction: discord.Interaction):
         embed = discord.Embed(
@@ -80,10 +77,7 @@ class TestTache(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="testtache",
-        help="🕹️ Teste toutes les épreuves pour la commande hollow."
-    )
+    @commands.command(name="testtache",help="🕹️ Teste toutes les épreuves pour la commande hollow.")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_testtache(self, ctx: commands.Context):
         embed = discord.Embed(
