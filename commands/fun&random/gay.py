@@ -83,10 +83,7 @@ class GayCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="gay",
-        description="🌈 Calcule ton taux de gaytitude."
-    )
+    @app_commands.command(name="gay",description="🌈 Calcule ton taux de gaytitude.")
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)  # Cooldown 3s par utilisateur
     @app_commands.describe(member="Utilisateur pour qui calculer la gaytitude (optionnel)")
     async def slash_gay(self, interaction: discord.Interaction, member: discord.Member = None):
@@ -104,10 +101,7 @@ class GayCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="gay",
-        help="🌈 Calcule ton taux de gaytitude."
-    )
+    @commands.command(name="gay",help="🌈 Calcule ton taux de gaytitude.")
     @commands.cooldown(1, 3, commands.BucketType.user)  # Cooldown 3s par utilisateur
     async def prefix_gay(self, ctx: commands.Context, member: discord.Member = None):
         try:
