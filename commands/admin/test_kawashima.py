@@ -46,10 +46,7 @@ class TestKawashima(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="testgame",
-        description="Tester un mini-jeu via son numéro ou 'all' pour tous."
-    )
+    @app_commands.command(name="testgame",description="Tester un mini-jeu via son numéro ou 'all' pour tous.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_testgame(self, interaction: discord.Interaction, choix: str = None):
         await safe_interact(interaction, "Chargement du quizz...", ephemeral=True)
@@ -58,11 +55,7 @@ class TestKawashima(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="testgame",
-        aliases=["tg"],
-        help="Tester un mini-jeu via son numéro ou 'all'."
-    )
+    @commands.command(name="testgame",aliases=["tg"],help="Tester un mini-jeu via son numéro ou 'all'.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_testgame(self, ctx: commands.Context, choix: str = None):
         await self.run_game(ctx, choix)
