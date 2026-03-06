@@ -262,10 +262,7 @@ class Mastermind(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="mastermind",
-        description="Jouer au Mastermind interactif."
-    )
+    @app_commands.command(name="mastermind",description="Jouer au Mastermind interactif.")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_mastermind(self, interaction: discord.Interaction, mode: str = "solo"):
