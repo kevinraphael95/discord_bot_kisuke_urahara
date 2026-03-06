@@ -184,10 +184,7 @@ class BMojiCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="bmoji",
-        description="Devine quel personnage Bleach se cache derrière ces emojis."
-    )
+    @app_commands.command(name="bmoji",description="Devine quel personnage Bleach se cache derrière ces emojis.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def bmoji_slash(self, interaction: discord.Interaction):
         await self._run_bmoji(interaction)
@@ -195,10 +192,7 @@ class BMojiCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="bmoji",
-        help="Devine quel personnage Bleach se cache derrière ces emojis."
-    )
+    @commands.command(name="bmoji",help="Devine quel personnage Bleach se cache derrière ces emojis.")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def bmoji_prefix(self, ctx: commands.Context):
         await self._run_bmoji(ctx)
