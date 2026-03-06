@@ -189,10 +189,7 @@ class MotsSecretsMulti(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="motsecret",
-        description="Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu."
-    )
+    @app_commands.command(name="motsecret",description="Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_motsecret(self, interaction: discord.Interaction):
         await self.start_game(interaction.channel)
@@ -209,11 +206,7 @@ class MotsSecretsMulti(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="motsecret",
-        aliases=["motssecrets", "ms"],
-        help="Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu."
-    )
+    @commands.command(name="motsecret",aliases=["motssecrets", "ms"],help="Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_motsecret(self, ctx: commands.Context):
         await self.start_game(ctx.channel)
