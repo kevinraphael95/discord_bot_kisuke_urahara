@@ -260,12 +260,7 @@ class ReiatsuAdmin(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Groupe PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.group(
-        name="reiatsuadmin",
-        aliases=["rtsa"],
-        invoke_without_command=True,
-        help="(Admin) Gère le Reiatsu : set, unset, change, spawn, speed."
-    )
+    @commands.group(name="reiatsuadmin",aliases=["rtsa"],invoke_without_command=True,help="(Admin) Gère le Reiatsu : set, unset, change, spawn, speed.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     async def reiatsuadmin(self, ctx: commands.Context):
