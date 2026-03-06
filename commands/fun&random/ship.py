@@ -112,10 +112,7 @@ class ShipCommand(commands.Cog):
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
     @app_commands.command(name="ship",description="💘 Calcule la compatibilité entre deux membres du serveur.")
-    @app_commands.describe(
-        membre1="Premier membre (toi par défaut si un seul membre fourni)",
-        membre2="Second membre (optionnel)"
-    )
+    @app_commands.describe(membre1="Premier membre (toi par défaut si un seul membre fourni)",membre2="Second membre (optionnel)")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_ship(self, interaction: discord.Interaction, membre1: discord.Member, membre2: discord.Member = None):
         await interaction.response.defer(ephemeral=True)
