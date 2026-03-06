@@ -168,10 +168,7 @@ class KisukeVol(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="kisukevol",
-        description="🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal."
-    )
+    @app_commands.command(name="kisukevol",description="🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal.")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=10.0, key=lambda i: i.user.id)
     async def slash_kisukevol(self, interaction: discord.Interaction):
@@ -182,11 +179,7 @@ class KisukeVol(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="kisukevol",
-        aliases=["kvol"],
-        help="🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal."
-    )
+    @commands.command(name="kisukevol",aliases=["kvol"],help="🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_kisukevol(self, ctx: commands.Context):
