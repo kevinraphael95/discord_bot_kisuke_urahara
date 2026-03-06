@@ -159,10 +159,7 @@ class MotContraint(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="mot_contraint",
-        description="Jeu : trouve un mot qui commence et finit par les lettres données."
-    )
+    @app_commands.command(name="mot_contraint",description="Jeu : trouve un mot qui commence et finit par les lettres données.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_mot_contraint(self, interaction: discord.Interaction):
         await interaction.response.defer()
