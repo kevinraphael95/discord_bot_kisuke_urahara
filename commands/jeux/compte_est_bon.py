@@ -198,10 +198,7 @@ class CompteEstBon(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="compte_est_bon",
-        description="Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)"
-    )
+    @app_commands.command(name="compte_est_bon",description="Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)")
     @app_commands.describe(mode="Écris 'multi' pour activer le mode multijoueur.")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_compte(self, interaction: discord.Interaction, mode: str = None):
