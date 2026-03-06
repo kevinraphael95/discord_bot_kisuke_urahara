@@ -201,10 +201,7 @@ class Division(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="division",
-        description="Réponds à un QCM pour savoir dans quelle division du Gotei 13 tu serais."
-    )
+    @app_commands.command(name="division",description="Réponds à un QCM pour savoir dans quelle division du Gotei 13 tu serais.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_division(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -214,10 +211,7 @@ class Division(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="division",
-        help="Détermine ta division dans le Gotei 13."
-    )
+    @commands.command(name="division",help="Détermine ta division dans le Gotei 13.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_division(self, ctx: commands.Context):
         await self._run_quiz(ctx.channel, ctx.author)
