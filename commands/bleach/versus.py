@@ -182,10 +182,7 @@ class VersusCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="versus",
-        description="⚔️ Lance un combat interactif contre le bot."
-    )
+    @app_commands.command(name="versus",description="⚔️ Lance un combat interactif contre le bot.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_versus(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -195,10 +192,7 @@ class VersusCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="versus",
-        help="⚔️ Lance un combat interactif contre le bot."
-    )
+    @commands.command(name="versus",help="⚔️ Lance un combat interactif contre le bot.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_versus(self, ctx: commands.Context):
         await self._run_combat(ctx.channel)
