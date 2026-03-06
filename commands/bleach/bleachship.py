@@ -151,10 +151,7 @@ class BleachShipCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="bleachship",
-        description="💘 Teste la compatibilité entre deux personnages de Bleach."
-    )
+    @app_commands.command(name="bleachship",description="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @app_commands.describe(p1="Nom du premier personnage", p2="Nom du second personnage")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_bleachship(self, interaction: discord.Interaction, p1: str = None, p2: str = None):
@@ -169,11 +166,7 @@ class BleachShipCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="bleachship",
-        aliases=["bship"],
-        help="💘 Teste la compatibilité entre deux personnages de Bleach."
-    )
+    @commands.command(name="bleachship",aliases=["bship"],help="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_bleachship(self, ctx: commands.Context, p1: str = None, p2: str = None):
         result = self._build_ship(p1, p2)
