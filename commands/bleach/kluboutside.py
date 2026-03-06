@@ -165,10 +165,7 @@ class KlubOutside(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="kluboutside",
-        description="Affiche une question de la FAQ du Klub Outside."
-    )
+    @app_commands.command(name="kluboutside",description="Affiche une question de la FAQ du Klub Outside.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_kluboutside(self, interaction: discord.Interaction, argument: str = None):
         await interaction.response.defer()
@@ -178,11 +175,7 @@ class KlubOutside(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="kluboutside",
-        aliases=["ko"],
-        help="Affiche une question de la FAQ du Klub Outside."
-    )
+    @commands.command(name="kluboutside",aliases=["ko"],help="Affiche une question de la FAQ du Klub Outside.")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def prefix_kluboutside(self, ctx: commands.Context, *, argument: str = None):
         await self._send_menu(ctx.channel, user=ctx.author, argument=argument)
