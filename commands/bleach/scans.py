@@ -169,10 +169,7 @@ class ScansBleach(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="scans",
-        description="📖 Lire un scan de Bleach."
-    )
+    @app_commands.command(name="scans",description="📖 Lire un scan de Bleach.")
     @app_commands.describe(scan="Nom du scan dans data/images/scans/", page="Page de départ")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_scans(self, interaction: discord.Interaction, scan: str | None = None, page: int = 1):
@@ -189,10 +186,7 @@ class ScansBleach(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="scans",
-        help="📖 Lire un scan de Bleach."
-    )
+    @commands.command(name="scans",help="📖 Lire un scan de Bleach.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_scans(self, ctx: commands.Context, scan: str | None = None, page: int = 1):
         if scan is None:
