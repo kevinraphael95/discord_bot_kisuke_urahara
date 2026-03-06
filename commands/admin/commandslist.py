@@ -53,10 +53,7 @@ class CommandsList(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
     # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(
-        name="commandslist",
-        description="Génère un .md avec toutes les commandes et les envoie en fichier."
-    )
+    @app_commands.command(name="commandslist",description="Génère un .md avec toutes les commandes et les envoie en fichier.")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_commandslist(self, interaction: discord.Interaction):
@@ -66,10 +63,7 @@ class CommandsList(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(
-        name="commandslist",
-        help="Génère un .md avec toutes les commandes et les envoie en fichier."
-    )
+    @commands.command(name="commandslist",help="Génère un .md avec toutes les commandes et les envoie en fichier.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_commandslist(self, ctx: commands.Context):
