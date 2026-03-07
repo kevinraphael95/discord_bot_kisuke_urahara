@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bleach Guesser — Kisuke Urahara Bot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #050508;
+  --void: #0a0a10;
+  --ink: #12121a;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --silver: #8a8fa8;
+  --white: #eeeaf0;
+  --reiatsu: #6b3fa0;
+  --reiatsu-glow: #9b6fd0;
+  /* Guesser-specific */
+  --surface: #0d0f18;
+  --surface2: #13161f;
+  --border: #1e2535;
+  --correct: #0d2a1a;
+  --wrong: #2a0d0d;
+  --close: #1a1a0d;
+  --cb: #27a35a;
+  --wb: #c0392b;
+  --lb: #d4a017;
+  --survival: #1a0a2e;
+  --survival-accent: #a855f7;
+  --survival-accent2: #d8b4fe;
+  --text-dim: #5a6a88;
+  --accent: #4a7fd4;
+  --accent2: #7aabff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Crimson Pro', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(107,63,160,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 50% at 90% 60%, rgba(201,168,76,0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '斬魄刀';
+  position: fixed;
+  right: -2vw;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  font-size: clamp(60px, 10vw, 130px);
+  font-family: serif;
+  color: rgba(201,168,76,0.04);
+  letter-spacing: 0.3em;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  padding: 1.2rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(5,5,8,0.95) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+  backdrop-filter: blur(4px);
+}
+
+.nav-logo {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--gold);
+  text-decoration: none;
+  letter-spacing: 0.15em;
+}
+
+.nav-links { display: flex; gap: 2.5rem; list-style: none; }
+
+.nav-links a {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  color: var(--silver);
+  text-decoration: none;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--gold);
+  transition: width 0.3s;
+}
+
+.nav-links a:hover { color: var(--gold); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--gold-light); }
+.nav-links a.active::after { width: 100%; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  position: relative;
+  z-index: 1;
+  padding: 7rem 3rem 2rem;
+  text-align: center;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.2s forwards;
+}
+
+.page-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.page-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  margin-bottom: 0.4rem;
+}
+
+.page-title span {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--gold);
+}
+
+.page-desc {
+  font-style: italic;
+  color: var(--silver);
+  font-size: 1.1rem;
+  margin-top: 0.6rem;
+}
+
+.divider {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 0 3rem; margin: 1rem 0;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201,168,76,0.3), transparent);
+}
+.divider-symbol { color: var(--gold); font-size: 1.2rem; opacity: 0.6; }
+
+/* ── MAIN GUESSER AREA ── */
+.guesser-wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem 5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.4s forwards;
+}
+
+/* Mode switcher */
+.mode-switcher {
+  display: flex;
+  gap: 2px;
+  background: var(--ink);
+  border: 1px solid rgba(201,168,76,0.15);
+  padding: 3px;
+}
+
+.mode-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  padding: 0.6rem 1.6rem;
+  border: none;
+  background: transparent;
+  color: var(--silver);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, rgba(74,127,212,0.3), rgba(74,127,212,0.15));
+  color: var(--white);
+  border: 1px solid rgba(74,127,212,0.4);
+}
+
+.mode-btn.active.surv {
+  background: linear-gradient(135deg, rgba(107,33,168,0.4), rgba(168,85,247,0.2));
+  color: var(--white);
+  border: 1px solid rgba(168,85,247,0.4);
+}
+
+/* Timer / Daily bar */
+.timer-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  color: var(--silver);
+  letter-spacing: 0.1em;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.timer-bar span { color: var(--gold-light); }
+
+/* Survival bar */
+.surv-bar {
+  display: none;
+  width: 100%;
+  max-width: 780px;
+  background: var(--ink);
+  border: 1px solid rgba(107,33,168,0.3);
+  padding: 12px 18px;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.surv-bar.visible { display: flex; }
+
+.surv-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+.surv-stat-val {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--survival-accent2);
+}
+
+.surv-stat-lbl {
+  font-family: 'Cinzel', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--silver);
+  text-transform: uppercase;
+}
+
+.surv-divider { width: 1px; height: 36px; background: var(--border); }
+
+.surv-attempts { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.surv-attempts-dots { display: flex; gap: 5px; }
+
+.surv-attempt-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 1px solid rgba(107,33,168,0.4);
+  transition: all 0.3s;
+}
+
+.surv-attempt-dot.used { background: #6b21a8; border-color: var(--survival-accent); }
+.surv-attempt-dot.win { background: #27a35a; border-color: #4fdf8a; }
+
+/* Flash */
+.surv-flash {
+  width: 100%;
+  max-width: 680px;
+  padding: 10px 20px;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  display: none;
+  animation: flashIn 0.3s ease;
+}
+
+@keyframes flashIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+.surv-flash.show { display: block; }
+.surv-flash.correct-flash { background: #061a0e; border: 1px solid var(--cb); color: #6ee89a; }
+.surv-flash.wrong-flash { background: #1a0606; border: 1px solid var(--wb); color: #e87070; }
+
+/* Input area */
+.input-area {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  gap: 8px;
+}
+
+.autocomplete-wrap { position: relative; flex: 1; }
+
+.guess-input {
+  width: 100%;
+  background: var(--ink);
+  border: 1px solid rgba(201,168,76,0.15);
+  color: var(--white);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  padding: 0.75rem 1rem;
+  outline: none;
+  letter-spacing: 0.05em;
+  transition: border-color 0.2s;
+}
+
+.guess-input:focus { border-color: rgba(201,168,76,0.5); }
+.guess-input::placeholder { color: var(--silver); }
+
+.survival-mode .guess-input:focus { border-color: rgba(168,85,247,0.5); }
+
+.guess-btn {
+  background: var(--gold);
+  border: none;
+  color: var(--black);
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.75rem 1.4rem;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.guess-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+.guess-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.survival-mode .guess-btn {
+  background: transparent;
+  color: var(--survival-accent2);
+  border: 1px solid rgba(168,85,247,0.5);
+}
+.survival-mode .guess-btn:hover { background: rgba(168,85,247,0.15); }
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  background: var(--ink);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-top: none;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 100;
+}
+.autocomplete-list:empty { display: none; }
+
+.autocomplete-item {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  color: var(--white);
+  letter-spacing: 0.04em;
+  transition: background 0.15s;
+  border-bottom: 1px solid rgba(201,168,76,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected { background: rgba(201,168,76,0.06); color: var(--gold-light); }
+
+.survival-mode .autocomplete-item:hover,
+.survival-mode .autocomplete-item.selected { color: var(--survival-accent2); }
+
+.autocomplete-item .gb2 { font-size: 0.65rem; color: var(--silver); margin-left: auto; white-space: nowrap; }
+
+/* Help */
+.help-toggle {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  color: var(--silver);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: none;
+  border: none;
+  transition: color 0.2s;
+}
+.help-toggle:hover { color: var(--gold); }
+.survival-mode .help-toggle:hover { color: var(--survival-accent2); }
+
+.help-panel {
+  max-width: 680px;
+  width: 100%;
+  background: var(--ink);
+  border: 1px solid rgba(201,168,76,0.15);
+  padding: 1rem 1.2rem;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--silver);
+}
+
+.help-panel.open { display: flex; }
+.help-panel strong { color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.1em; }
+
+.legend-row { display: flex; gap: 10px; align-items: center; }
+.lb2 { width: 18px; height: 18px; border: 1px solid; flex-shrink: 0; }
+.lb2.g { background: var(--correct); border-color: var(--cb); }
+.lb2.y { background: var(--close); border-color: var(--lb); }
+.lb2.r { background: var(--wrong); border-color: var(--wb); }
+
+/* ── DESKTOP TABLE ── */
+.guesses-container { width: 100%; overflow-x: auto; }
+
+.guesses-header {
+  display: grid;
+  grid-template-columns: 160px repeat(9,1fr);
+  gap: 3px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+  min-width: 860px;
+}
+
+.guesses-header div {
+  font-family: 'Cinzel', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: var(--silver);
+  text-align: center;
+  text-transform: uppercase;
+  padding: 4px 2px;
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+}
+
+.guesses-header div:first-child { text-align: left; padding-left: 8px; }
+
+.guess-row {
+  display: grid;
+  grid-template-columns: 160px repeat(9,1fr);
+  gap: 3px;
+  margin-bottom: 3px;
+  animation: si 0.35s cubic-bezier(0.2,0.8,0.3,1) both;
+  min-width: 860px;
+}
+
+@keyframes si { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+.guess-cell {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  padding: 8px 3px;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.03em;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.3;
+}
+
+.guess-cell:first-child { text-align: left; justify-content: flex-start; padding-left: 8px; font-size: 0.65rem; }
+.guess-cell.correct { background: var(--correct); border-color: var(--cb); color: #6ee89a; }
+.guess-cell.wrong { background: var(--wrong); border-color: var(--wb); color: #e87070; }
+.guess-cell.close { background: var(--close); border-color: var(--lb); color: #e8c870; }
+
+/* ── MOBILE CARDS ── */
+.guess-cards { display: none; flex-direction: column; gap: 8px; width: 100%; }
+
+.guess-card {
+  background: var(--ink);
+  border: 1px solid rgba(201,168,76,0.1);
+  overflow: hidden;
+  animation: si 0.35s cubic-bezier(0.2,0.8,0.3,1) both;
+}
+
+.guess-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+  background: rgba(201,168,76,0.03);
+}
+
+.card-monster-name { font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.06em; }
+.card-monster-name.correct { color: #6ee89a; }
+.card-monster-name.wrong { color: #e87070; }
+.card-badge { font-family: 'Cinzel', serif; font-size: 0.6rem; color: var(--silver); }
+
+.card-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); }
+
+.card-cell {
+  background: var(--ink);
+  padding: 7px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.card-cell.correct { background: var(--correct); }
+.card-cell.wrong { background: var(--wrong); }
+.card-cell.close { background: var(--close); }
+
+.card-label { font-family: 'Cinzel', serif; font-size: 0.45rem; letter-spacing: 0.1em; color: var(--silver); text-transform: uppercase; text-align: center; }
+.card-value { font-family: 'Cinzel', serif; font-size: 0.6rem; text-align: center; line-height: 1.3; }
+
+.card-cell.correct .card-label { color: #4fdf8a66; }
+.card-cell.correct .card-value { color: #6ee89a; }
+.card-cell.wrong .card-label { color: #e8707066; }
+.card-cell.wrong .card-value { color: #e87070; }
+.card-cell.close .card-label { color: #e8c87066; }
+.card-cell.close .card-value { color: #e8c870; }
+.card-arrow { font-size: 8px; opacity: 0.8; }
+
+/* ── RESULT BANNERS ── */
+.result-banner {
+  width: 100%;
+  max-width: 680px;
+  padding: 1.5rem;
+  border: 1px solid rgba(201,168,76,0.2);
+  background: var(--ink);
+  text-align: center;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  animation: fu 0.5s ease both;
+}
+
+@keyframes fu { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.result-banner.show { display: flex; }
+.result-banner.win { border-color: var(--cb); background: #061a0e; }
+.result-banner.lose { border-color: var(--wb); background: #1a0606; }
+
+.result-title { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 900; letter-spacing: 0.1em; }
+.result-banner.win .result-title { color: #6ee89a; }
+.result-banner.lose .result-title { color: #e87070; }
+
+.result-char { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold-light); }
+.result-desc { font-style: italic; color: var(--silver); font-size: 0.95rem; line-height: 1.6; }
+
+.next-timer { font-size: 0.8rem; color: var(--silver); letter-spacing: 0.08em; font-family: 'Cinzel', serif; }
+.next-timer span { color: var(--gold-light); font-size: 0.95rem; }
+
+.attempts-row { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+.attempt-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.attempt-dot.used { background: rgba(201,168,76,0.4); border-color: var(--gold); }
+.attempt-dot.win { background: #27a35a; border-color: #4fdf8a; }
+.attempt-dot.lose { background: var(--wb); border-color: #e87070; }
+
+.share-btn {
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold-light);
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.share-btn:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+
+/* Survival end */
+.surv-end {
+  width: 100%;
+  max-width: 680px;
+  padding: 24px;
+  border: 1px solid var(--survival-accent);
+  background: var(--survival);
+  text-align: center;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  animation: fu 0.5s ease both;
+}
+.surv-end.show { display: flex; }
+.surv-end-title { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 0.1em; color: var(--survival-accent2); }
+.surv-end-score { font-family: 'Cinzel', serif; font-size: 2.8rem; font-weight: 900; color: var(--survival-accent2); line-height: 1; }
+.surv-end-sub { font-style: italic; color: var(--silver); font-size: 0.9rem; line-height: 1.7; }
+
+.surv-end-stats { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.surv-end-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 14px;
+  background: rgba(10,5,20,0.8);
+  border: 1px solid rgba(107,33,168,0.3);
+}
+
+.surv-end-stat strong { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--survival-accent2); }
+.surv-end-stat span { font-size: 0.65rem; color: var(--silver); letter-spacing: 0.08em; }
+
+.restart-btn {
+  background: transparent;
+  border: 1px solid rgba(168,85,247,0.5);
+  color: var(--survival-accent2);
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.7rem 1.6rem;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.restart-btn:hover { background: rgba(168,85,247,0.12); transform: translateY(-1px); }
+
+.share-btn-surv {
+  background: transparent;
+  border: 1px solid rgba(168,85,247,0.4);
+  color: var(--survival-accent2);
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.share-btn-surv:hover { background: rgba(168,85,247,0.1); }
+
+/* Footer */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  padding: 2.5rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-copy { font-size: 0.85rem; color: rgba(138,143,168,0.5); }
+.footer-links { display: flex; gap: 2rem; list-style: none; }
+.footer-links a {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(138,143,168,0.5);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+.footer-links a:hover { color: var(--gold); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.15); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { gap: 1rem; }
+  .nav-links a { font-size: 0.65rem; }
+  .page-header { padding: 6rem 1.5rem 1.5rem; }
+  .guesser-wrap { padding: 0 0.8rem 3rem; }
+  .guesses-container { display: none; }
+  .guess-cards { display: flex; }
+  footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .guesses-header { grid-template-columns: 120px repeat(9,1fr); min-width: 700px; }
+  .guess-row { grid-template-columns: 120px repeat(9,1fr); min-width: 700px; }
+  .guess-cell { font-size: 0.52rem; padding: 6px 2px; min-height: 38px; }
+  .guess-cell:first-child { font-size: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">⚡ KISUKE</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="commandes.html">Commandes</a></li>
+    <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="guesser.html" class="active">Guesser</a></li>
+    <li><a href="install.html">Installation</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <p class="page-eyebrow">Minijeu · Bleach</p>
+  <h1 class="page-title">Bleach <span>Guesser</span></h1>
+  <p class="page-desc">Devinez le personnage Bleach du jour — ou lancez-vous en mode Survie.</p>
+</div>
+
+<div class="divider"><span class="divider-symbol">◆</span></div>
+
+<div class="guesser-wrap">
+
+  <div class="mode-switcher">
+    <button class="mode-btn active" id="btnDaily" onclick="switchMode('daily')">⚔ Quotidien</button>
+    <button class="mode-btn surv" id="btnSurv" onclick="switchMode('survival')">💀 Survie</button>
+  </div>
+
+  <!-- Daily bar -->
+  <div class="timer-bar" id="dailyBar">
+    <span id="gcl">0/8</span>
+    <div class="attempts-row" id="dots"></div>
+    <button class="help-toggle" onclick="toggleHelp()">? COMMENT JOUER</button>
+  </div>
+
+  <!-- Survival bar -->
+  <div class="surv-bar" id="survBar">
+    <div class="surv-stat">
+      <div class="surv-stat-val" id="survStreak">0</div>
+      <div class="surv-stat-lbl">🔥 Série actuelle</div>
+    </div>
+    <div class="surv-divider"></div>
+    <div class="surv-attempts">
+      <div class="surv-attempts-dots" id="survDots"></div>
+      <div class="surv-stat-lbl">Essais</div>
+    </div>
+    <div class="surv-divider"></div>
+    <div class="surv-stat">
+      <div class="surv-stat-val" id="survBest">0</div>
+      <div class="surv-stat-lbl">🏆 Record</div>
+    </div>
+    <button class="help-toggle" onclick="toggleHelp()">? RÈGLES</button>
+  </div>
+
+  <div class="help-panel" id="helpPanel">
+    <strong id="helpTitle">RÈGLES — MODE QUOTIDIEN</strong>
+    <div id="helpDaily">Devinez le personnage Bleach du jour en max <strong>8 essais</strong>.</div>
+    <div id="helpSurv" style="display:none">
+      Devinez des personnages aléatoires à la chaîne — <strong>8 essais par personnage</strong>.<br>
+      Raté en 8 essais → <strong>☠ Game Over !</strong> — Objectif : la plus longue série.
+    </div>
+    <div class="legend-row"><div class="lb2 g"></div><span>Correct — même valeur</span></div>
+    <div class="legend-row"><div class="lb2 y"></div><span>Proche — dangerosité ±1 · même mois · victoires ±2</span></div>
+    <div class="legend-row"><div class="lb2 r"></div><span>Incorrect</span></div>
+    <strong>COLONNES :</strong> Race · Sexe · Arc · Affiliation · Danger · Statut · Cheveux · Anniversaire · Combats (V/D)
+  </div>
+
+  <div class="surv-flash" id="survFlash"></div>
+
+  <div class="input-area">
+    <div class="autocomplete-wrap">
+      <input class="guess-input" id="gi" type="text" placeholder="Entrez un personnage..." autocomplete="off" oninput="onInput()" onkeydown="onKD(event)"/>
+      <div class="autocomplete-list" id="al"></div>
+    </div>
+    <button class="guess-btn" id="gb" onclick="submit()">DEVINER</button>
+  </div>
+
+  <!-- Desktop table -->
+  <div class="guesses-container">
+    <div class="guesses-header">
+      <div>PERSONNAGE</div><div>RACE</div><div>SEXE</div><div>ARC</div>
+      <div>AFFIL.</div><div>DANGER</div><div>STATUT</div>
+      <div>CHEVEUX</div><div>ANNIV.</div><div>COMBATS</div>
+    </div>
+    <div id="gr"></div>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="guess-cards" id="gc"></div>
+
+  <!-- Daily result -->
+  <div class="result-banner" id="rb">
+    <div class="result-title" id="rt"></div>
+    <div class="result-char" id="rm"></div>
+    <div class="result-desc" id="rd"></div>
+    <button class="share-btn" onclick="share()">📋 COPIER LE RÉSULTAT</button>
+    <div class="next-timer">Prochain personnage dans : <span id="nt">--:--:--</span></div>
+  </div>
+
+  <!-- Survival end -->
+  <div class="surv-end" id="survEnd">
+    <div class="surv-end-title">☠ GAME OVER ☠</div>
+    <div class="surv-end-sub" id="survEndSub"></div>
+    <div class="surv-end-stats">
+      <div class="surv-end-stat"><strong id="survEndKills">0</strong><span>Personnages trouvés</span></div>
+      <div class="surv-end-stat"><strong id="survEndBestStreak">0</strong><span>Meilleure série</span></div>
+      <div class="surv-end-stat"><strong id="survEndRecord">0</strong><span>Record absolu</span></div>
+    </div>
+    <button class="restart-btn" onclick="survRestart()">🔁 NOUVELLE PARTIE</button>
+    <button class="share-btn-surv" onclick="survShare()">📋 COPIER LE SCORE</button>
+  </div>
+
+</div>
+
+<footer>
+  <p class="footer-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
+  <ul class="footer-links">
+    <li><a href="commandes.html">Commandes</a></li>
+    <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="guesser.html">Guesser</a></li>
+    <li><a href="install.html">Installation</a></li>
+    <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
+  </ul>
+</footer>
+
+<script src="data.js"></script>
+<script>
+const COLS=[
+  {key:'r',label:'RACE'},{key:'sx',label:'SEXE'},{key:'arc',label:'ARC'},
+  {key:'af',label:'AFFIL.'},{key:'d',label:'DANGER'},{key:'st',label:'STATUT'},
+  {key:'hc',label:'CHEVEUX'},{key:'bday',label:'ANNIV.'},{key:'wl',label:'COMBATS'},
+];
+const MAX_DAILY=8, MAX_SURV=8;
+
+function seededShuffle(arr,seed){const a=arr.slice();let s=seed>>>0;for(let i=a.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function getDayNumber(){const start=new Date('2025-01-01T00:00:00');const today=new Date();today.setHours(0,0,0,0);return Math.floor((today-start)/86400000);}
+function getTodayChar(){const day=getDayNumber();return seededShuffle(CHARS,day^0xBEA6)[day%CHARS.length];}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+
+function cmp(m,tgt){
+  const dd=Math.abs(m.d-tgt.d);
+  const dw=Math.abs(m.w-tgt.w);
+  const sameBday=m.bday===tgt.bday;
+  const sameMois=m.bday!=='??/??' && tgt.bday!=='??/??' && m.bday.slice(3)===tgt.bday.slice(3);
+  return[
+    {v:m.r,   st:m.r===tgt.r?'correct':'wrong',a:''},
+    {v:m.sx,  st:m.sx===tgt.sx?'correct':'wrong',a:''},
+    {v:m.arc, st:m.arc===tgt.arc?'correct':'wrong',a:''},
+    {v:m.af,  st:m.af===tgt.af?'correct':'wrong',a:''},
+    {v:'★'.repeat(m.d)+'☆'.repeat(5-m.d), st:m.d===tgt.d?'correct':dd===1?'close':'wrong',a:m.d<tgt.d?'▲':m.d>tgt.d?'▼':''},
+    {v:m.st,  st:m.st===tgt.st?'correct':'wrong',a:''},
+    {v:m.hc,  st:m.hc===tgt.hc?'correct':'wrong',a:''},
+    {v:m.bday,st:sameBday?'correct':sameMois?'close':'wrong',a:''},
+    {v:m.w+'V / '+m.l+'D', st:m.w===tgt.w&&m.l===tgt.l?'correct':dw<=2?'close':'wrong',a:m.w<tgt.w?'▲':m.w>tgt.w?'▼':''},
+  ];
+}
+
+function renderRow(m,f,tgt){
+  const row=document.createElement('div');row.className='guess-row';
+  const nc=document.createElement('div');nc.className='guess-cell '+(m.n===tgt.n?'correct':'wrong');nc.textContent=m.n;row.appendChild(nc);
+  f.forEach(x=>{const c=document.createElement('div');c.className='guess-cell '+x.st;c.innerHTML=x.v+(x.a?'<span style="font-size:8px;margin-left:2px">'+x.a+'</span>':'');row.appendChild(c);});
+  document.getElementById('gr').prepend(row);
+}
+
+function renderCard(m,f,tgt){
+  const isWin=m.n===tgt.n;
+  const card=document.createElement('div');card.className='guess-card';
+  const hdr=document.createElement('div');hdr.className='guess-card-header';
+  const nm=document.createElement('div');nm.className='card-monster-name '+(isWin?'correct':'wrong');nm.textContent=m.n;
+  const badge=document.createElement('div');badge.className='card-badge';badge.textContent=m.r+' · '+m.arc;
+  hdr.appendChild(nm);hdr.appendChild(badge);card.appendChild(hdr);
+  const grid=document.createElement('div');grid.className='card-grid';
+  COLS.forEach((col,i)=>{
+    const x=f[i];
+    const cell=document.createElement('div');cell.className='card-cell '+x.st;
+    const lbl=document.createElement('div');lbl.className='card-label';lbl.textContent=col.label;
+    const val=document.createElement('div');val.className='card-value';
+    val.innerHTML=x.v+(x.a?'<span class="card-arrow"> '+x.a+'</span>':'');
+    cell.appendChild(lbl);cell.appendChild(val);grid.appendChild(cell);
+  });
+  card.appendChild(grid);
+  document.getElementById('gc').prepend(card);
+}
+
+function clearGrid(){document.getElementById('gr').innerHTML='';document.getElementById('gc').innerHTML='';}
+
+let mode='daily';
+let tgt=getTodayChar(), dGuesses=[], dOver=false, dSel=-1;
+let sStreak=0, sBestStreak=0, sKills=0;
+let sQueue=[], sQueueIdx=0, sCurrent=null, sGuesses=[], sSel=-1, sOver=false;
+let sBestRecord=0;
+
+function switchMode(m){
+  mode=m;
+  document.getElementById('btnDaily').classList.toggle('active',m==='daily');
+  document.getElementById('btnSurv').classList.toggle('active',m==='survival');
+  document.getElementById('dailyBar').style.display=m==='daily'?'flex':'none';
+  document.getElementById('survBar').classList.toggle('visible',m==='survival');
+  document.getElementById('helpTitle').textContent=m==='daily'?'RÈGLES — MODE QUOTIDIEN':'RÈGLES — MODE SURVIE';
+  document.getElementById('helpDaily').style.display=m==='daily'?'':'none';
+  document.getElementById('helpSurv').style.display=m==='survival'?'':'none';
+  document.getElementById('survFlash').classList.remove('show');
+  document.body.classList.toggle('survival-mode',m==='survival');
+  if(m==='daily'){
+    document.getElementById('survEnd').classList.remove('show');
+    clearGrid();
+    dGuesses.forEach(x=>{renderRow(x.m,x.f,tgt);renderCard(x.m,x.f,tgt);});
+    updateDots();
+    if(dOver) showDailyResult(dGuesses.some(x=>x.m.n===tgt.n));
+    else document.getElementById('rb').classList.remove('show');
+    document.getElementById('gi').disabled=dOver;
+    document.getElementById('gb').disabled=dOver;
+    if(!dOver) focusInput();
+  } else {
+    document.getElementById('rb').classList.remove('show');
+    if(sOver){clearGrid();showSurvEnd();}
+    else{
+      clearGrid();
+      if(!sCurrent) survInit();
+      else{sGuesses.forEach(x=>{renderRow(x.m,x.f,sCurrent);renderCard(x.m,x.f,sCurrent);});}
+      updateSurvUI();
+      document.getElementById('gi').disabled=false;
+      document.getElementById('gb').disabled=false;
+      focusInput();
+    }
+  }
+}
+
+function focusInput(){setTimeout(()=>document.getElementById('gi').focus(),50);}
+
+function saveDaily(won){try{localStorage.setItem('bleachg25v2',JSON.stringify({date:todayStr(),guesses:dGuesses.map(x=>({m:{n:x.m.n}})),over:dOver,won}));}catch(e){}}
+
+function loadDaily(){
+  try{
+    const s=JSON.parse(localStorage.getItem('bleachg25v2'));
+    if(!s||s.date!==todayStr())return;
+    for(const saved of (s.guesses||[])){
+      const fresh=CHARS.find(x=>x.n===saved.m.n);if(!fresh)continue;
+      const f=cmp(fresh,tgt);dGuesses.push({m:fresh,f});
+    }
+    dOver=s.over||false;
+    if(mode==='daily'){
+      dGuesses.forEach(x=>{renderRow(x.m,x.f,tgt);renderCard(x.m,x.f,tgt);});
+      updateDots();
+      if(dOver) showDailyResult(s.won);
+    }
+  }catch(e){}
+}
+
+function updateDots(){
+  const r=document.getElementById('dots');r.innerHTML='';
+  for(let i=0;i<MAX_DAILY;i++){
+    const d=document.createElement('div');d.className='attempt-dot';
+    if(i<dGuesses.length){const w=dGuesses[i].m.n===tgt.n;d.classList.add(w?'win':(dOver&&i===dGuesses.length-1?'lose':'used'));}
+    r.appendChild(d);
+  }
+  document.getElementById('gcl').innerHTML='<span>'+dGuesses.length+'/'+MAX_DAILY+'</span>';
+}
+
+function showDailyResult(won){
+  const b=document.getElementById('rb');
+  b.classList.add('show',won?'win':'lose');
+  document.getElementById('rt').textContent=won?'⚔ BIEN JOUÉ ⚔':'💀 BANKAI ÉCHOUÉ';
+  document.getElementById('rm').textContent='Le personnage était : '+tgt.n;
+  document.getElementById('rd').textContent=won
+    ?'Bravo ! '+tgt.n+' identifié en '+dGuesses.length+' essai'+(dGuesses.length>1?'s':'')+'.'
+    :tgt.n+' · '+tgt.r+' · '+tgt.st+' · Cheveux : '+tgt.hc+' · '+tgt.w+'V/'+tgt.l+'D · '+tgt.bday;
+  document.getElementById('gb').disabled=true;document.getElementById('gi').disabled=true;
+  tick();setInterval(tick,1000);
+}
+
+function tick(){
+  const now=new Date(),tom=new Date(now);tom.setDate(tom.getDate()+1);tom.setHours(0,0,0,0);
+  const diff=tom-now;
+  document.getElementById('nt').textContent=String(Math.floor(diff/3600000)).padStart(2,'0')+':'+String(Math.floor((diff%3600000)/60000)).padStart(2,'0')+':'+String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+}
+
+function share(){
+  let t='Bleach Guessr '+todayStr()+'\n'+dGuesses.length+'/'+MAX_DAILY+' essais\n\n';
+  dGuesses.forEach(x=>{const w=x.m.n===tgt.n;t+=(w?'⚔ ':'')+'['+x.m.n+']\n';t+=x.f.map(f=>f.st==='correct'?'🟩':f.st==='close'?'🟨':'🟥').join('')+'\n';});
+  try{navigator.clipboard.writeText(t);}catch(e){}
+  const b=document.querySelector('.share-btn');b.textContent='✓ COPIÉ !';setTimeout(()=>b.textContent='📋 COPIER LE RÉSULTAT',2000);
+}
+
+function loadSurvRecord(){try{const s=JSON.parse(localStorage.getItem('bleachg_surv'));if(s) sBestRecord=s.best||0;}catch(e){}}
+function saveSurvRecord(){try{localStorage.setItem('bleachg_surv',JSON.stringify({best:sBestRecord}));}catch(e){}}
+
+function survRandQueue(){const arr=CHARS.slice();for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+function survInit(){
+  sStreak=0;sBestStreak=0;sKills=0;
+  sQueue=survRandQueue();sQueueIdx=0;
+  sOver=false;
+  document.getElementById('survEnd').classList.remove('show');
+  survNext();
+}
+
+function survNext(){
+  if(sQueueIdx>=sQueue.length){sQueue=survRandQueue();sQueueIdx=0;}
+  sCurrent=sQueue[sQueueIdx++];
+  sGuesses=[];
+  clearGrid();
+  document.getElementById('survFlash').classList.remove('show');
+  document.getElementById('gi').disabled=false;
+  document.getElementById('gb').disabled=false;
+  focusInput();
+  updateSurvUI();
+}
+
+function survRestart(){survInit();}
+
+function updateSurvUI(){
+  document.getElementById('survStreak').textContent=sStreak;
+  document.getElementById('survBest').textContent=sBestRecord;
+  const dotsEl=document.getElementById('survDots');dotsEl.innerHTML='';
+  for(let i=0;i<MAX_SURV;i++){
+    const d=document.createElement('div');d.className='surv-attempt-dot';
+    if(i<sGuesses.length){const wasCorrect=sGuesses[i]&&sGuesses[i].m.n===sCurrent.n;d.classList.add(wasCorrect?'win':'used');}
+    dotsEl.appendChild(d);
+  }
+}
+
+function survShowFlash(type,msg){
+  const f=document.getElementById('survFlash');
+  f.className='surv-flash show '+type;
+  f.textContent=msg;
+  setTimeout(()=>f.classList.remove('show'),2200);
+}
+
+function survGameOver(revealName){
+  sOver=true;
+  if(sStreak>sBestRecord){sBestRecord=sStreak;saveSurvRecord();}
+  survShowFlash('wrong-flash','☠ '+revealName+' — Game Over !');
+  document.getElementById('gi').disabled=true;
+  document.getElementById('gb').disabled=true;
+  setTimeout(()=>showSurvEnd(),1400);
+}
+
+function survCorrect(guessCount){
+  sKills++;sStreak++;
+  if(sStreak>sBestStreak) sBestStreak=sStreak;
+  if(sStreak>sBestRecord){sBestRecord=sStreak;saveSurvRecord();}
+  const streakMsg=sStreak>=3?' 🔥 ×'+sStreak:'';
+  survShowFlash('correct-flash','✓ '+sCurrent.n+' trouvé'+streakMsg);
+  document.getElementById('gi').disabled=true;
+  document.getElementById('gb').disabled=true;
+  updateSurvUI();
+  setTimeout(()=>survNext(),1800);
+}
+
+function showSurvEnd(){
+  clearGrid();
+  document.getElementById('survEnd').classList.add('show');
+  document.getElementById('survEndSub').innerHTML='Série de <em>'+sStreak+'</em> — '+sKills+' personnage'+(sKills>1?'s':'')+' trouvés au total.';
+  document.getElementById('survEndKills').textContent=sKills;
+  document.getElementById('survEndBestStreak').textContent=sBestStreak;
+  document.getElementById('survEndRecord').textContent=sBestRecord;
+  document.getElementById('gi').disabled=true;
+  document.getElementById('gb').disabled=true;
+  updateSurvUI();
+}
+
+function survShare(){
+  const t='Bleach Guessr — Mode Survie\nSérie : '+sStreak+'\nPersonnages trouvés : '+sKills+'\nRecord absolu : '+sBestRecord+'\n\nPeux-tu faire mieux ?';
+  try{navigator.clipboard.writeText(t);}catch(e){}
+  const b=document.querySelector('.share-btn-surv');b.textContent='✓ COPIÉ !';setTimeout(()=>b.textContent='📋 COPIER LE SCORE',2000);
+}
+
+function submit(){if(mode==='daily') submitDaily(); else submitSurv();}
+
+function submitDaily(){
+  if(dOver)return;
+  const inp=document.getElementById('gi');const v=inp.value.trim();if(!v)return;
+  const m=CHARS.find(x=>x.n.toLowerCase()===v.toLowerCase());
+  if(!m){inp.style.borderColor='#c0392b';inp.placeholder='Personnage introuvable...';setTimeout(()=>{inp.style.borderColor='';inp.placeholder='Entrez un personnage...';},1500);return;}
+  if(dGuesses.find(x=>x.m.n===m.n)){inp.style.borderColor='#d4a017';inp.placeholder='Déjà essayé !';setTimeout(()=>{inp.style.borderColor='';inp.placeholder='Entrez un personnage...';},1500);return;}
+  const f=cmp(m,tgt);const data={m,f};dGuesses.push(data);
+  renderRow(m,f,tgt);renderCard(m,f,tgt);updateDots();
+  inp.value='';document.getElementById('al').innerHTML='';
+  const won=m.n===tgt.n;
+  if(won||dGuesses.length>=MAX_DAILY){dOver=true;saveDaily(won);setTimeout(()=>showDailyResult(won),400);}else saveDaily(false);
+}
+
+function submitSurv(){
+  if(sOver||!sCurrent)return;
+  const inp=document.getElementById('gi');const v=inp.value.trim();if(!v)return;
+  const m=CHARS.find(x=>x.n.toLowerCase()===v.toLowerCase());
+  if(!m){inp.style.borderColor='#c0392b';inp.placeholder='Personnage introuvable...';setTimeout(()=>{inp.style.borderColor='';inp.placeholder='Entrez un personnage...';},1500);return;}
+  if(sGuesses.find(x=>x.m.n===m.n)){inp.style.borderColor='#d4a017';inp.placeholder='Déjà essayé !';setTimeout(()=>{inp.style.borderColor='';inp.placeholder='Entrez un personnage...';},1500);return;}
+  const f=cmp(m,sCurrent);const data={m,f};sGuesses.push(data);
+  renderRow(m,f,sCurrent);renderCard(m,f,sCurrent);
+  inp.value='';document.getElementById('al').innerHTML='';
+  updateSurvUI();
+  if(m.n===sCurrent.n) survCorrect(sGuesses.length);
+  else if(sGuesses.length>=MAX_SURV) survGameOver(sCurrent.n);
+}
+
+function onInput(){
+  const v=document.getElementById('gi').value.toLowerCase().trim();
+  const l=document.getElementById('al');l.innerHTML='';
+  if(mode==='daily') dSel=-1; else sSel=-1;
+  if(!v)return;
+  const done=mode==='daily'?new Set(dGuesses.map(x=>x.m.n)):new Set(sGuesses.map(x=>x.m.n));
+  CHARS.filter(m=>m.n.toLowerCase().includes(v)&&!done.has(m.n)).slice(0,8).forEach(m=>{
+    const i=document.createElement('div');i.className='autocomplete-item';
+    i.innerHTML=m.n+'<span class="gb2">'+m.r+' · '+m.st+'</span>';
+    i.onclick=()=>{document.getElementById('gi').value=m.n;l.innerHTML='';submit();};l.appendChild(i);
+  });
+}
+
+function onKD(e){
+  const l=document.getElementById('al');const items=l.querySelectorAll('.autocomplete-item');
+  let sel=mode==='daily'?dSel:sSel;
+  if(e.key==='ArrowDown'){e.preventDefault();sel=Math.min(sel+1,items.length-1);items.forEach((x,i)=>x.classList.toggle('selected',i===sel));if(items[sel])document.getElementById('gi').value=items[sel].firstChild.textContent.trim();}
+  else if(e.key==='ArrowUp'){e.preventDefault();sel=Math.max(sel-1,-1);items.forEach((x,i)=>x.classList.toggle('selected',i===sel));if(sel>=0&&items[sel])document.getElementById('gi').value=items[sel].firstChild.textContent.trim();}
+  else if(e.key==='Enter'){e.preventDefault();l.innerHTML='';submit();}
+  else if(e.key==='Escape')l.innerHTML='';
+  if(mode==='daily') dSel=sel; else sSel=sel;
+}
+
+document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete-wrap'))document.getElementById('al').innerHTML='';});
+function toggleHelp(){document.getElementById('helpPanel').classList.toggle('open');}
+
+loadSurvRecord();
+updateDots();
+loadDaily();
+if(!dOver) focusInput();
+</script>
+</body>
+</html>
