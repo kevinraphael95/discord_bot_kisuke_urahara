@@ -242,6 +242,9 @@
     padding: 2.5rem 2rem;
     border: 1px solid rgba(201,168,76,0.08);
     transition: all 0.3s; cursor: default;
+    text-decoration: none;
+    color: inherit;
+    display: block;
   }
 
   .feature-card:hover { background: rgba(107,63,160,0.08); border-color: rgba(201,168,76,0.2); }
@@ -278,7 +281,8 @@
 
   @media (max-width: 640px) {
     nav { padding: 1rem 1.5rem; }
-    .nav-links { gap: 1.2rem; }
+    .nav-links { gap: 1rem; }
+    .nav-links a { font-size: 0.65rem; }
     .hero { padding: 7rem 1.5rem 4rem; }
     .hero-top { gap: 1.5rem; }
     .hero-title { text-align: center; }
@@ -295,6 +299,7 @@
     <li><a href="index.html" class="active">Accueil</a></li>
     <li><a href="commandes.html">Commandes</a></li>
     <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="guesser.html">Guesser</a></li>
     <li><a href="install.html">Installation</a></li>
   </ul>
 </nav>
@@ -348,6 +353,11 @@
       <p class="feature-name">Reiatsu</p>
       <p class="feature-desc">Mini-jeu de collecte : classes, compétences, quêtes, Hollow à vaincre, vol de Reiatsu.</p>
     </div>
+    <a class="feature-card" href="guesser.html">
+      <span class="feature-icon">🎯</span>
+      <p class="feature-name">Bleach Guesser</p>
+      <p class="feature-desc">Devinez le personnage Bleach du jour ou enchaînez les personnages en mode Survie.</p>
+    </a>
     <div class="feature-card">
       <span class="feature-icon">🕹️</span>
       <p class="feature-name">Jeux</p>
@@ -361,6 +371,7 @@
   <ul class="footer-links">
     <li><a href="commandes.html">Commandes</a></li>
     <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="guesser.html">Guesser</a></li>
     <li><a href="install.html">Installation</a></li>
     <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
   </ul>
