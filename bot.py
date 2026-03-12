@@ -126,7 +126,14 @@ async def on_message(message):
         else:
             embed.set_thumbnail(url=bot.user.default_avatar.url)
 
-        await safe_send(message.channel, embed=embed)
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(
+            label="🌐 Site / Présentation",
+            url="https://kevinraphael95.github.io/discord_bot_kisuke_urahara/index.html",
+            style=discord.ButtonStyle.link
+        ))
+
+        await safe_send(message.channel, embed=embed, view=view)
         return
 
     await bot.process_commands(message)
