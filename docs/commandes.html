@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commandes — Kisuke Urahara Bot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=Noto+Serif+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div class="atmo"></div>
 <div class="top-bar"></div>
-<div class="kanji">鬼道　卍解　死神</div>
 
 <nav>
-  <a class="nav-logo" href="index.html">⚡ KISUKE</a>
+  <a class="nav-logo" href="index.html">⚡ Kisuke <span>Bot</span></a>
   <ul class="nav-links">
     <li><a href="index.html">Accueil</a></li>
     <li><a href="commandes.html" class="active">Commandes</a></li>
@@ -24,17 +24,21 @@
   </ul>
   <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
 </nav>
+
 <div class="drawer" id="drawer">
-  <a href="index.html"          onclick="closeNav()">Accueil</a>
+  <a href="index.html"               onclick="closeNav()">Accueil</a>
   <a href="commandes.html" class="active" onclick="closeNav()">Commandes</a>
-  <a href="reiatsu.html"        onclick="closeNav()">Reiatsu</a>
-  <a href="guesser.html"        onclick="closeNav()">Guesser</a>
-  <a href="install.html"        onclick="closeNav()">Installation</a>
+  <a href="reiatsu.html"             onclick="closeNav()">Reiatsu</a>
+  <a href="guesser.html"             onclick="closeNav()">Guesser</a>
+  <a href="install.html"             onclick="closeNav()">Installation</a>
 </div>
 
 <div class="phdr">
-  <p class="pkana">鬼道 · コマンド · Soul Society</p>
-  <h1 class="pttl"><span class="t1">Commandes</span><span class="t2">Slash &amp; Prefix Commands</span></h1>
+  <p class="pkana">Gotei 13 · Slash Commands · Soul Society</p>
+  <h1 class="pttl">
+    <span class="t1">Commandes</span>
+    <span class="t2">Slash &amp; Prefix Commands</span>
+  </h1>
   <p class="psub">Toutes les commandes disponibles, organisées par catégorie.</p>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
@@ -185,8 +189,8 @@
       </div>
     </div>
 
-  </div><!-- #cats -->
-</div><!-- .content -->
+  </div>
+</div>
 
 <footer>
   <p class="foot-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
@@ -204,31 +208,26 @@ function toggleNav(){document.getElementById('ham').classList.toggle('open');doc
 function closeNav(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
 function toggle(hdr){hdr.classList.toggle('open');hdr.nextElementSibling.classList.toggle('open');}
 
-// Count badges
 document.querySelectorAll('.cat').forEach(cat=>{
-  const id  = cat.dataset.id;
-  const el  = document.getElementById('c-'+id);
-  const n   = cat.querySelectorAll('.cmd').length;
-  if(el) el.textContent = n + ' commande' + (n>1?'s':'');
+  const id=cat.dataset.id;
+  const el=document.getElementById('c-'+id);
+  const n=cat.querySelectorAll('.cmd').length;
+  if(el) el.textContent=n+' commande'+(n>1?'s':'');
 });
 
-// Live search filter
 function filter(){
-  const q = document.getElementById('si').value.toLowerCase().trim();
+  const q=document.getElementById('si').value.toLowerCase().trim();
   document.querySelectorAll('.cat').forEach(cat=>{
-    let vis = 0;
+    let vis=0;
     cat.querySelectorAll('.cmd').forEach(cmd=>{
-      const name = cmd.querySelector('.cmd-name').textContent.toLowerCase();
-      const desc = cmd.querySelector('.cmd-desc').textContent.toLowerCase();
-      const match = !q || name.includes(q) || desc.includes(q);
-      cmd.style.display = match ? '' : 'none';
-      if(match) vis++;
+      const name=cmd.querySelector('.cmd-name').textContent.toLowerCase();
+      const desc=cmd.querySelector('.cmd-desc').textContent.toLowerCase();
+      const match=!q||name.includes(q)||desc.includes(q);
+      cmd.style.display=match?'':'none';
+      if(match)vis++;
     });
-    cat.style.display = (!q || vis > 0) ? '' : 'none';
-    if(q){
-      cat.querySelector('.cat-hdr').classList.add('open');
-      cat.querySelector('.cmd-list').classList.add('open');
-    }
+    cat.style.display=(!q||vis>0)?'':'none';
+    if(q){cat.querySelector('.cat-hdr').classList.add('open');cat.querySelector('.cmd-list').classList.add('open');}
   });
 }
 </script>

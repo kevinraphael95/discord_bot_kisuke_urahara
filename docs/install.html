@@ -5,155 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Installation — Kisuke Urahara Bot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=Noto+Serif+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <style>
-
-:root{
-  --void:#010108;--abyss:#05050e;--ink:#09091a;--panel:#0d0d1f;--surface:#111128;--rim:#1a1a35;
-  --gold:#c9a84c;--gold-lt:#e8c96a;--gold-dim:rgba(201,168,76,.15);--gold-glow:rgba(201,168,76,.3);--gold-line:rgba(201,168,76,.12);
-  --rei:#4f1899;--rei-mid:#7c3aed;--rei-lt:#a78bfa;--rei-xlt:#ddd6fe;--rei-glow:rgba(124,58,237,.35);--rei-faint:rgba(124,58,237,.1);
-  --ok-bg:#031410;--ok-bd:#166534;--ok-tx:#4ade80;
-  --ko-bg:#150404;--ko-bd:#991b1b;--ko-tx:#f87171;
-  --yw-bg:#140c02;--yw-bd:#92400e;--yw-tx:#fbbf24;
-  --surv-bg:#0c0520;--surv-bd:rgba(167,139,250,.4);--surv-tx:#ddd6fe;
-  --white:#f0ecf8;--text:#bec8e0;--muted:#616a8a;--dim:#323550;
-}
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{background:var(--void);color:var(--text);font-family:'Crimson Pro',serif;min-height:100vh;overflow-x:hidden;}
-.atmo{position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 100% 60% at 50% -8%,rgba(79,24,153,.28) 0%,transparent 55%),
-    radial-gradient(ellipse 60% 80% at 110% 60%,rgba(15,31,64,.22) 0%,transparent 50%),
-    radial-gradient(ellipse 40% 40% at -8% 65%,rgba(79,24,153,.1) 0%,transparent 50%);}
-.top-bar{position:fixed;top:0;left:0;width:100%;height:3px;z-index:500;
-  background:linear-gradient(90deg,transparent 0%,var(--rei-mid) 10%,var(--gold) 35%,#e84545 55%,var(--gold) 75%,var(--rei-mid) 90%,transparent 100%);opacity:.65;}
-.kanji{position:fixed;right:-2vw;top:50%;transform:translateY(-50%) rotate(90deg);font-family:'Noto Serif JP',serif;
-  font-size:clamp(56px,9vw,128px);font-weight:700;color:rgba(124,58,237,.042);letter-spacing:.55em;
-  pointer-events:none;z-index:0;white-space:nowrap;user-select:none;}
-nav{position:fixed;top:3px;width:100%;z-index:300;padding:1rem 3rem;display:flex;align-items:center;justify-content:space-between;
-  background:linear-gradient(to bottom,rgba(1,1,8,.97) 0%,rgba(1,1,8,0) 100%);border-bottom:1px solid var(--gold-line);backdrop-filter:blur(12px);}
-.nav-logo{font-family:'Cinzel',serif;font-weight:900;font-size:1rem;color:var(--gold);text-decoration:none;letter-spacing:.2em;transition:color .2s;}
-.nav-logo:hover{color:var(--gold-lt);}
-.nav-links{display:flex;gap:2rem;list-style:none;}
-.nav-links a{font-family:'Cinzel',serif;font-size:.65rem;color:var(--muted);text-decoration:none;letter-spacing:.22em;text-transform:uppercase;transition:color .2s;position:relative;padding-bottom:3px;}
-.nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--gold);transition:width .3s;}
-.nav-links a:hover{color:var(--gold-lt);}
-.nav-links a:hover::after,.nav-links a.active::after{width:100%;}
-.nav-links a.active{color:var(--gold-lt);}
-.ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;z-index:400;}
-.ham span{display:block;width:24px;height:2px;background:var(--gold);border-radius:2px;transition:all .3s;}
-.ham.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-.ham.open span:nth-child(2){opacity:0;transform:scaleX(0);}
-.ham.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-.drawer{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(1,1,8,.99);border-bottom:1px solid rgba(201,168,76,.14);backdrop-filter:blur(20px);padding:5rem 2rem 2.5rem;display:flex;flex-direction:column;transform:translateY(-110%);transition:transform .4s cubic-bezier(.4,0,.2,1);}
-.drawer.open{transform:translateY(0);}
-.drawer a{font-family:'Cinzel',serif;font-size:.9rem;color:var(--muted);text-decoration:none;letter-spacing:.22em;text-transform:uppercase;padding:1.1rem 0;border-bottom:1px solid rgba(201,168,76,.06);transition:color .2s;display:block;}
-.drawer a:hover,.drawer a.active{color:var(--gold-lt);}
-.phdr{position:relative;z-index:1;padding:7.5rem 3rem 0;text-align:center;}
-.pkana{font-family:'Noto Serif JP',serif;font-size:clamp(.6rem,1.6vw,.75rem);color:var(--rei-lt);letter-spacing:.75em;margin-bottom:.7rem;opacity:0;animation:rise .7s .1s forwards;}
-.pttl{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(2rem,5.5vw,4.5rem);line-height:.88;letter-spacing:.02em;opacity:0;animation:rise .7s .25s forwards;}
-.pttl .t1{display:block;color:var(--white);}
-.pttl .t2{display:block;background:linear-gradient(135deg,var(--gold) 0%,var(--gold-lt) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:.52em;letter-spacing:.3em;margin-top:.2em;}
-.psub{font-style:italic;color:var(--muted);font-size:clamp(.9rem,2vw,1.1rem);margin-top:1rem;line-height:1.75;opacity:0;animation:rise .7s .4s forwards;}
-.orbs{display:flex;justify-content:center;gap:10px;margin:1.6rem 0 0;opacity:0;animation:rise .7s .55s forwards;}
-.orb{width:7px;height:7px;border-radius:50%;background:var(--rei-mid);box-shadow:0 0 10px var(--rei-glow);animation:pulse 2.6s ease-in-out infinite;}
-.orb:nth-child(2){animation-delay:.4s;background:var(--gold);box-shadow:0 0 10px var(--gold-glow);}
-.orb:nth-child(3){animation-delay:.8s;}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.55;}50%{transform:scale(1.6);opacity:1;}}
-.divider{position:relative;z-index:1;display:flex;align-items:center;gap:1.2rem;padding:0 3rem;margin:1.8rem 0 .8rem;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(124,58,237,.5),rgba(201,168,76,.3),transparent);}
-.div-sym{font-family:'Noto Serif JP',serif;color:var(--gold);font-size:1.1rem;opacity:.6;}
-.sec-lbl{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.5em;color:var(--gold);text-transform:uppercase;margin-bottom:2rem;display:flex;align-items:center;justify-content:center;gap:1.2rem;}
-.sec-lbl::before,.sec-lbl::after{content:'';width:50px;height:1px;background:linear-gradient(to right,transparent,var(--gold));}
-.sec-lbl::after{transform:scaleX(-1);}
-.btn{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;padding:.88rem 2.2rem;text-decoration:none;transition:all .3s;border:1px solid;display:inline-block;}
-.btn-gold{background:var(--gold);color:var(--void);border-color:var(--gold);}
-.btn-gold:hover{background:var(--gold-lt);border-color:var(--gold-lt);box-shadow:0 0 35px var(--gold-glow);transform:translateY(-2px);}
-.btn-ghost{background:transparent;color:var(--muted);border-color:rgba(97,106,138,.25);}
-.btn-ghost:hover{color:var(--white);border-color:rgba(97,106,138,.6);transform:translateY(-2px);}
-footer{position:relative;z-index:1;border-top:1px solid var(--gold-line);padding:2.2rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
-.foot-copy{font-size:.78rem;color:var(--dim);}
-.foot-links{display:flex;gap:1.8rem;list-style:none;flex-wrap:wrap;}
-.foot-links a{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.22em;color:var(--dim);text-decoration:none;text-transform:uppercase;transition:color .3s;}
-.foot-links a:hover{color:var(--gold);}
-@keyframes rise{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--void);}::-webkit-scrollbar-thumb{background:rgba(124,58,237,.25);border-radius:4px;}
-@media(max-width:700px){
-  nav{padding:.9rem 1.4rem;}
-  .nav-links{display:none;}
-  .ham{display:flex;}
-  .phdr{padding:6.5rem 1.4rem 0;}
-  .divider{padding:0 1.4rem;margin:1.5rem 0 .5rem;}
-  footer{padding:1.8rem 1.4rem;flex-direction:column;align-items:flex-start;}
-  .foot-links{gap:1rem;}
-}
-@media(min-width:701px) and (max-width:1024px){nav{padding:1rem 1.8rem;}.nav-links{gap:1.4rem;}}
-
-
-.content{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 3rem 6rem;opacity:0;animation:rise .8s .3s forwards;}
-.steps{display:flex;flex-direction:column;gap:1px;}
-.step{display:grid;grid-template-columns:56px 1fr;background:var(--panel);border:1px solid rgba(201,168,76,.08);padding:2rem;gap:1.5rem;align-items:start;position:relative;overflow:hidden;transition:background .3s;}
-.step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--rei-mid);transform:scaleY(0);transition:transform .4s;}
-.step:hover{background:rgba(124,58,237,.05);}
-.step:hover::before{transform:scaleY(1);}
-.step-num{font-family:'Cinzel',serif;font-size:2rem;font-weight:900;color:var(--rei-mid);line-height:1;padding-top:.15rem;text-shadow:0 0 20px var(--rei-glow);}
-.step-body{}
-.step-title{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.15em;color:var(--gold-lt);margin-bottom:.6rem;text-transform:uppercase;}
-.step-desc{font-size:.95rem;color:var(--muted);line-height:1.7;margin-bottom:.8rem;}
-.step-desc:last-child{margin-bottom:0;}
-.code-block{background:var(--ink);border:1px solid rgba(124,58,237,.2);padding:.9rem 1.2rem;font-family:'Courier New',monospace;font-size:.78rem;color:var(--rei-xlt);letter-spacing:.03em;overflow-x:auto;margin-top:.6rem;position:relative;}
-.code-block::before{content:'$';color:var(--gold);margin-right:.7rem;opacity:.6;}
-.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.07);margin-top:.8rem;overflow:hidden;}
-.env-row{background:var(--ink);padding:.7rem 1rem;display:flex;gap:.8rem;align-items:baseline;}
-.env-key{font-family:'Cinzel',serif;font-size:.62rem;color:var(--rei-lt);letter-spacing:.06em;flex-shrink:0;}
-.env-val{font-size:.85rem;color:var(--muted);line-height:1.45;}
-.req-list{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem;}
-.req-tag{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:var(--rei-xlt);font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;padding:.3rem .7rem;text-transform:uppercase;}
-@media(max-width:700px){
-  .content{padding:0 1rem 4rem;}
-  .step{grid-template-columns:40px 1fr;padding:1.4rem 1rem;gap:1rem;}
-  .step-num{font-size:1.6rem;}
-  .env-grid{grid-template-columns:1fr;}
-}
+.content{position:relative;z-index:1;max-width:840px;margin:0 auto;padding:0 3rem 6rem;opacity:0;animation:rise .7s .3s forwards;}
+@media(max-width:700px){.content{padding:0 1rem 4rem;}}
 @media(min-width:701px) and (max-width:1024px){.content{padding:0 1.8rem 5rem;}}
-
 </style>
 </head>
 <body>
+
 <div class="atmo"></div>
 <div class="top-bar"></div>
 
-<div class="kanji">設定　起動　接続</div>
-
 <nav>
-  <a class="nav-logo" href="index.html">⚡ KISUKE</a>
+  <a class="nav-logo" href="index.html">⚡ Kisuke <span>Bot</span></a>
   <ul class="nav-links">
-    <li><a href="index.html" >Accueil</a></li>
-    <li><a href="commandes.html" >Commandes</a></li>
-    <li><a href="reiatsu.html" >Reiatsu</a></li>
-    <li><a href="guesser.html" >Guesser</a></li>
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="commandes.html">Commandes</a></li>
+    <li><a href="reiatsu.html">Reiatsu</a></li>
+    <li><a href="guesser.html">Guesser</a></li>
     <li><a href="install.html" class="active">Installation</a></li>
   </ul>
   <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
 </nav>
+
 <div class="drawer" id="drawer">
-  <a href="index.html"  onclick="closeNav()">Accueil</a>
-  <a href="commandes.html"  onclick="closeNav()">Commandes</a>
-  <a href="reiatsu.html"  onclick="closeNav()">Reiatsu</a>
-  <a href="guesser.html"  onclick="closeNav()">Guesser</a>
+  <a href="index.html"               onclick="closeNav()">Accueil</a>
+  <a href="commandes.html"           onclick="closeNav()">Commandes</a>
+  <a href="reiatsu.html"             onclick="closeNav()">Reiatsu</a>
+  <a href="guesser.html"             onclick="closeNav()">Guesser</a>
   <a href="install.html" class="active" onclick="closeNav()">Installation</a>
 </div>
 
 <div class="phdr">
-  <p class="pkana">設定 · インストール · 接続</p>
-  <h1 class="pttl"><span class="t1">Installation</span><span class="t2">Mise en place</span></h1>
+  <p class="pkana">Configuration · Déploiement · Connexion</p>
+  <h1 class="pttl">
+    <span class="t1">Installation</span>
+    <span class="t2">Mise en place</span>
+  </h1>
   <p class="psub">Déploie Kisuke Urahara sur ton serveur Discord en quelques étapes.</p>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
+
 <div class="content">
   <p class="sec-lbl">Étapes d'installation</p>
   <div class="steps">
+
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
@@ -167,6 +65,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--gold-line);padding
         </div>
       </div>
     </div>
+
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
@@ -176,6 +75,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--gold-line);padding
         <div class="code-block">cd discord_bot_kisuke_urahara</div>
       </div>
     </div>
+
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
@@ -184,11 +84,12 @@ footer{position:relative;z-index:1;border-top:1px solid var(--gold-line);padding
         <div class="code-block">pip install -r requirements.txt</div>
       </div>
     </div>
+
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
         <p class="step-title">Configurer les variables d'environnement</p>
-        <p class="step-desc">Crée un fichier <code style="font-family:Cinzel,serif;font-size:.7rem;color:var(--rei-lt);background:rgba(124,58,237,.1);padding:1px 5px">.env</code> à la racine du projet et renseigne ces variables.</p>
+        <p class="step-desc">Crée un fichier <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">.env</code> à la racine du projet et renseigne ces variables.</p>
         <div class="env-grid">
           <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token du bot Discord</span></div>
           <div class="env-row"><span class="env-key">GUILD_ID</span><span class="env-val">ID de ton serveur</span></div>
@@ -197,15 +98,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--gold-line);padding
         </div>
       </div>
     </div>
+
     <div class="step">
       <div class="step-num">5</div>
       <div class="step-body">
         <p class="step-title">Lancer le bot</p>
         <p class="step-desc">Démarre le bot. Il se connectera automatiquement à Discord et synchronisera les commandes slash.</p>
         <div class="code-block">python bot.py</div>
-        <p class="step-desc" style="margin-top:.8rem">Le bot apparaît en ligne sur ton serveur. Utilise <code style="font-family:Cinzel,serif;font-size:.7rem;color:var(--rei-lt);background:rgba(124,58,237,.1);padding:1px 5px">/status</code> pour vérifier.</p>
+        <p class="step-desc" style="margin-top:.7rem">Le bot apparaît en ligne sur ton serveur. Utilise <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">/status</code> pour vérifier.</p>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -224,4 +127,5 @@ footer{position:relative;z-index:1;border-top:1px solid var(--gold-line);padding
 function toggleNav(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
 function closeNav(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
 </script>
-</body></html>
+</body>
+</html>
