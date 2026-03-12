@@ -5,10 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reiatsu — Kisuke Urahara Bot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+.content{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 3rem 6rem;opacity:0;animation:rise .7s .3s forwards;}
+@media(max-width:700px){.content{padding:0 1rem 4rem;}}
+@media(min-width:701px) and (max-width:1024px){.content{padding:0 1.8rem 5rem;}}
+</style>
 </head>
 <body>
+
 <div class="atmo"></div>
 <div class="top-bar"></div>
 
@@ -23,6 +29,7 @@
   </ul>
   <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
 </nav>
+
 <div class="drawer" id="drawer">
   <a href="index.html"               onclick="closeNav()">Accueil</a>
   <a href="commandes.html"           onclick="closeNav()">Commandes</a>
@@ -33,31 +40,88 @@
 
 <div class="phdr">
   <p class="pkana">霊圧 · Collecte · Progression</p>
-  <h1 class="pttl"><span class="t1">Reiatsu</span><span class="t2">Système de collecte</span></h1>
+  <h1 class="pttl">
+    <span class="t1">Reiatsu</span>
+    <span class="t2">Système de collecte</span>
+  </h1>
   <p class="psub">Collecte ta pression spirituelle, monte en classe et affronte les Hollows.</p>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
 
-<div class="page-content">
+<div class="content">
 
   <p class="sec-lbl">Classes Shinigami</p>
   <div class="cls-grid">
-    <div class="cls"><div class="cls-rank">👁️</div><p class="cls-name">Humain Ordinaire</p><p class="cls-range">0 – 499 REI</p><p class="cls-desc">Tu perçois à peine le monde des âmes. Le voyage commence ici.</p></div>
-    <div class="cls"><div class="cls-rank">⚪</div><p class="cls-name">Shinigami Novice</p><p class="cls-range">500 – 1 999 REI</p><p class="cls-desc">Ton Reiatsu se manifeste. Tu intègres les rangs du Gotei 13.</p></div>
-    <div class="cls"><div class="cls-rank">🟣</div><p class="cls-name">Shinigami Confirmé</p><p class="cls-range">2 000 – 4 999 REI</p><p class="cls-desc">Expérimenté, tu maîtrises les bases du Kidō et du Zanjutsu.</p></div>
-    <div class="cls"><div class="cls-rank">🔵</div><p class="cls-name">Fukutaichō</p><p class="cls-range">5 000 – 9 999 REI</p><p class="cls-desc">Vice-capitaine. Ton Shikai est libéré, ta pression impose le respect.</p></div>
-    <div class="cls"><div class="cls-rank">🔴</div><p class="cls-name">Taichō</p><p class="cls-range">10 000 – 24 999 REI</p><p class="cls-desc">Capitaine du Gotei 13. Tu maîtrises le Bankai et commandes ta division.</p></div>
-    <div class="cls"><div class="cls-rank">⚡</div><p class="cls-name">Sōtaichō</p><p class="cls-range">25 000+ REI</p><p class="cls-desc">Commandant suprême. Ton Reiatsu rivalise avec les dieux.</p></div>
+    <div class="cls">
+      <div class="cls-rank">👁️</div>
+      <p class="cls-name">Humain Ordinaire</p>
+      <p class="cls-range">0 – 499 REI</p>
+      <p class="cls-desc">Tu perçois à peine le monde des âmes. Le voyage commence ici.</p>
+    </div>
+    <div class="cls">
+      <div class="cls-rank">⚪</div>
+      <p class="cls-name">Shinigami Novice</p>
+      <p class="cls-range">500 – 1 999 REI</p>
+      <p class="cls-desc">Ton Reiatsu se manifeste. Tu intègres les rangs du Gotei 13.</p>
+    </div>
+    <div class="cls">
+      <div class="cls-rank">🟣</div>
+      <p class="cls-name">Shinigami Confirmé</p>
+      <p class="cls-range">2 000 – 4 999 REI</p>
+      <p class="cls-desc">Expérimenté, tu maîtrises les bases du Kidō et du Zanjutsu.</p>
+    </div>
+    <div class="cls">
+      <div class="cls-rank">🔵</div>
+      <p class="cls-name">Fukutaichō</p>
+      <p class="cls-range">5 000 – 9 999 REI</p>
+      <p class="cls-desc">Vice-capitaine. Ton Shikai est libéré, ta pression impose le respect.</p>
+    </div>
+    <div class="cls">
+      <div class="cls-rank">🔴</div>
+      <p class="cls-name">Taichō</p>
+      <p class="cls-range">10 000 – 24 999 REI</p>
+      <p class="cls-desc">Capitaine du Gotei 13. Tu maîtrises le Bankai et commandes ta division.</p>
+    </div>
+    <div class="cls">
+      <div class="cls-rank">⚡</div>
+      <p class="cls-name">Sōtaichō</p>
+      <p class="cls-range">25 000+ REI</p>
+      <p class="cls-desc">Commandant suprême. Ton Reiatsu rivalise avec les dieux.</p>
+    </div>
   </div>
 
   <p class="sec-lbl">Mécaniques</p>
   <div class="mechs">
-    <div class="mech"><span class="mech-icon">💠</span><p class="mech-name">Collecte horaire</p><p class="mech-desc">Utilise <code>/collecter</code> toutes les heures. Le montant dépend de ta classe et compétences.</p></div>
-    <div class="mech"><span class="mech-icon">👹</span><p class="mech-name">Combat de Hollow</p><p class="mech-desc"><code>/hollow</code> — Victoire = gros gain de REI. Défaite = perte partielle. Risque / récompense.</p></div>
-    <div class="mech"><span class="mech-icon">📜</span><p class="mech-name">Quêtes</p><p class="mech-desc"><code>/quete</code> — Missions secondaires avec récompenses bonus une fois accomplies.</p></div>
-    <div class="mech"><span class="mech-icon">🗡️</span><p class="mech-name">Vol de Reiatsu</p><p class="mech-desc"><code>/voler</code> — Tente de voler un adversaire. Échec = perte de REI et alerte ta cible.</p></div>
-    <div class="mech"><span class="mech-icon">🧠</span><p class="mech-name">Compétences</p><p class="mech-desc"><code>/competences</code> — Améliore collecte, résistance ou attaque pour progresser plus vite.</p></div>
-    <div class="mech"><span class="mech-icon">🏪</span><p class="mech-name">Boutique</p><p class="mech-desc"><code>/shop</code> — Achète boosts, protections et armes spéciales avec ton Reiatsu.</p></div>
+    <div class="mech">
+      <span class="mech-icon">💠</span>
+      <p class="mech-name">Collecte horaire</p>
+      <p class="mech-desc">Utilise <code>/collecter</code> toutes les heures. Le montant dépend de ta classe et compétences.</p>
+    </div>
+    <div class="mech">
+      <span class="mech-icon">👹</span>
+      <p class="mech-name">Combat de Hollow</p>
+      <p class="mech-desc"><code>/hollow</code> — Victoire = gros gain de REI. Défaite = perte partielle. Risque / récompense.</p>
+    </div>
+    <div class="mech">
+      <span class="mech-icon">📜</span>
+      <p class="mech-name">Quêtes</p>
+      <p class="mech-desc"><code>/quete</code> — Missions secondaires avec récompenses bonus une fois accomplies.</p>
+    </div>
+    <div class="mech">
+      <span class="mech-icon">🗡️</span>
+      <p class="mech-name">Vol de Reiatsu</p>
+      <p class="mech-desc"><code>/voler</code> — Tente de voler un adversaire. Échec = perte de REI et alerte ta cible.</p>
+    </div>
+    <div class="mech">
+      <span class="mech-icon">🧠</span>
+      <p class="mech-name">Compétences</p>
+      <p class="mech-desc"><code>/competences</code> — Améliore collecte, résistance ou attaque pour progresser plus vite.</p>
+    </div>
+    <div class="mech">
+      <span class="mech-icon">🏪</span>
+      <p class="mech-name">Boutique</p>
+      <p class="mech-desc"><code>/shop</code> — Achète boosts, protections et armes spéciales avec ton Reiatsu.</p>
+    </div>
   </div>
 
 </div>
@@ -72,6 +136,7 @@
     <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
   </ul>
 </footer>
+
 <script>
 function toggleNav(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
 function closeNav(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
