@@ -5,16 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Installation — Kisuke Urahara Bot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style>
-.content{position:relative;z-index:1;max-width:840px;margin:0 auto;padding:0 3rem 6rem;opacity:0;animation:rise .7s .3s forwards;}
-@media(max-width:700px){.content{padding:0 1rem 4rem;}}
-@media(min-width:701px) and (max-width:1024px){.content{padding:0 1.8rem 5rem;}}
-</style>
 </head>
 <body>
-
 <div class="atmo"></div>
 <div class="top-bar"></div>
 
@@ -29,7 +23,6 @@
   </ul>
   <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
 </nav>
-
 <div class="drawer" id="drawer">
   <a href="index.html"               onclick="closeNav()">Accueil</a>
   <a href="commandes.html"           onclick="closeNav()">Commandes</a>
@@ -40,21 +33,18 @@
 
 <div class="phdr">
   <p class="pkana">Configuration · Déploiement · Connexion</p>
-  <h1 class="pttl">
-    <span class="t1">Installation</span>
-    <span class="t2">Mise en place</span>
-  </h1>
+  <h1 class="pttl"><span class="t1">Installation</span><span class="t2">Mise en place</span></h1>
   <p class="psub">Déploie Kisuke Urahara sur ton serveur Discord en quelques étapes.</p>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
 
-<div class="content">
-  <p class="sec-lbl">Étapes d'installation</p>
+<div class="page-content">
+  <p class="sec-lbl">Étapes</p>
   <div class="steps">
 
     <div class="step">
       <div class="step-num">1</div>
-      <div class="step-body">
+      <div>
         <p class="step-title">Prérequis</p>
         <p class="step-desc">Assure-toi d'avoir les outils suivants installés sur ta machine.</p>
         <div class="req-list">
@@ -68,7 +58,7 @@
 
     <div class="step">
       <div class="step-num">2</div>
-      <div class="step-body">
+      <div>
         <p class="step-title">Cloner le dépôt</p>
         <p class="step-desc">Clone le projet depuis GitHub dans ton répertoire de travail.</p>
         <div class="code-block">git clone https://github.com/kevinraphael95/discord_bot_kisuke_urahara.git</div>
@@ -78,7 +68,7 @@
 
     <div class="step">
       <div class="step-num">3</div>
-      <div class="step-body">
+      <div>
         <p class="step-title">Installer les dépendances</p>
         <p class="step-desc">Installe les librairies Python requises via pip.</p>
         <div class="code-block">pip install -r requirements.txt</div>
@@ -87,9 +77,9 @@
 
     <div class="step">
       <div class="step-num">4</div>
-      <div class="step-body">
-        <p class="step-title">Configurer les variables d'environnement</p>
-        <p class="step-desc">Crée un fichier <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">.env</code> à la racine du projet et renseigne ces variables.</p>
+      <div>
+        <p class="step-title">Variables d'environnement</p>
+        <p class="step-desc">Crée un fichier <code style="background:var(--violet-bg);color:var(--violet-lt);padding:2px 6px;border-radius:3px;font-size:.85em">.env</code> à la racine et renseigne ces variables.</p>
         <div class="env-grid">
           <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token du bot Discord</span></div>
           <div class="env-row"><span class="env-key">GUILD_ID</span><span class="env-val">ID de ton serveur</span></div>
@@ -101,11 +91,11 @@
 
     <div class="step">
       <div class="step-num">5</div>
-      <div class="step-body">
+      <div>
         <p class="step-title">Lancer le bot</p>
-        <p class="step-desc">Démarre le bot. Il se connectera automatiquement à Discord et synchronisera les commandes slash.</p>
+        <p class="step-desc">Démarre le bot. Il se connecte automatiquement et synchronise les commandes slash.</p>
         <div class="code-block">python bot.py</div>
-        <p class="step-desc" style="margin-top:.7rem">Le bot apparaît en ligne sur ton serveur. Utilise <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">/status</code> pour vérifier.</p>
+        <p class="step-desc">Le bot apparaît en ligne. Utilise <code style="background:var(--violet-bg);color:var(--violet-lt);padding:2px 6px;border-radius:3px;font-size:.85em">/status</code> pour vérifier.</p>
       </div>
     </div>
 
@@ -122,7 +112,6 @@
     <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
   </ul>
 </footer>
-
 <script>
 function toggleNav(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
 function closeNav(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}

@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commandes — Kisuke Urahara Bot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="atmo"></div>
 <div class="top-bar"></div>
 
@@ -24,7 +23,6 @@
   </ul>
   <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
 </nav>
-
 <div class="drawer" id="drawer">
   <a href="index.html"               onclick="closeNav()">Accueil</a>
   <a href="commandes.html" class="active" onclick="closeNav()">Commandes</a>
@@ -35,54 +33,34 @@
 
 <div class="phdr">
   <p class="pkana">Gotei 13 · Slash Commands · Soul Society</p>
-  <h1 class="pttl">
-    <span class="t1">Commandes</span>
-    <span class="t2">Slash &amp; Prefix Commands</span>
-  </h1>
+  <h1 class="pttl"><span class="t1">Commandes</span><span class="t2">Slash &amp; Prefix Commands</span></h1>
   <p class="psub">Toutes les commandes disponibles, organisées par catégorie.</p>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
 
-<div class="content">
+<div class="page-content">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
     <input class="search-inp" id="si" type="text" placeholder="Rechercher une commande…" oninput="filter()"/>
   </div>
 
   <div id="cats">
-
-    <!-- ── Admin ── -->
     <div class="cat" data-id="admin">
-      <div class="cat-hdr open" onclick="toggle(this)">
-        <span class="cat-icon">⚙️</span>
-        <span class="cat-name">Admin</span>
-        <span class="cat-count" id="c-admin"></span>
-        <span class="cat-arrow">›</span>
-      </div>
+      <div class="cat-hdr open" onclick="toggle(this)"><span class="cat-icon">⚙️</span><span class="cat-name">Admin</span><span class="cat-count" id="c-admin"></span><span class="cat-arrow">›</span></div>
       <div class="cmd-list open">
         <div class="cmd cmd-admin"><span class="cmd-name">/adminpanel</span><span class="cmd-desc">🔒 Affiche le lien du panneau admin.</span></div>
         <div class="cmd cmd-admin"><span class="cmd-name">/commandslist</span><span class="cmd-desc">Génère un .md avec toutes les commandes et les envoie en fichier.</span></div>
         <div class="cmd cmd-admin"><span class="cmd-name">/kisukevol</span><span class="cmd-desc">🌀 Kisuke vole 10 % du Reiatsu d'un membre comme un joueur normal.</span></div>
         <div class="cmd cmd-admin"><span class="cmd-name">/reiatsuadmin</span><span class="cmd-desc">(Admin) Gère le Reiatsu : set, unset, change, spawn, speed.</span></div>
-        <div class="cmd cmd-admin">
-          <span class="cmd-name">/say_as</span>
-          <span class="cmd-desc">(Admin) Fait répéter un message par le bot comme si c'était un autre membre.</span>
-          <code class="cmd-usage">Usage : !say_as &lt;mention|id|pseudo&gt; &lt;message&gt;</code>
-        </div>
+        <div class="cmd cmd-admin"><span class="cmd-name">/say_as</span><span class="cmd-desc">(Admin) Fait répéter un message par le bot comme si c'était un autre membre.</span><code class="cmd-usage">Usage : !say_as &lt;mention|id|pseudo&gt; &lt;message&gt;</code></div>
         <div class="cmd cmd-admin"><span class="cmd-name">/sync</span><span class="cmd-desc">Synchronise les commandes slash (serveur ou global).</span></div>
         <div class="cmd cmd-admin"><span class="cmd-name">/testgame</span><span class="cmd-desc">Tester un mini-jeu via son numéro ou 'all'.</span></div>
         <div class="cmd cmd-admin"><span class="cmd-name">/testtache</span><span class="cmd-desc">🕹️ Teste toutes les épreuves pour la commande hollow.</span></div>
       </div>
     </div>
 
-    <!-- ── Bleach ── -->
     <div class="cat" data-id="bleach">
-      <div class="cat-hdr open" onclick="toggle(this)">
-        <span class="cat-icon">⚔️</span>
-        <span class="cat-name">Bleach</span>
-        <span class="cat-count" id="c-bleach"></span>
-        <span class="cat-arrow">›</span>
-      </div>
+      <div class="cat-hdr open" onclick="toggle(this)"><span class="cat-icon">⚔️</span><span class="cat-name">Bleach</span><span class="cat-count" id="c-bleach"></span><span class="cat-arrow">›</span></div>
       <div class="cmd-list open">
         <div class="cmd"><span class="cmd-name">/bleachship</span><span class="cmd-desc">💘 Teste la compatibilité entre deux personnages de Bleach.</span></div>
         <div class="cmd"><span class="cmd-name">/bmoji</span><span class="cmd-desc">Devine quel personnage Bleach se cache derrière ces emojis.</span></div>
@@ -97,58 +75,32 @@
       </div>
     </div>
 
-    <!-- ── Fun & Random ── -->
     <div class="cat" data-id="fun">
-      <div class="cat-hdr open" onclick="toggle(this)">
-        <span class="cat-icon">🎲</span>
-        <span class="cat-name">Fun &amp; Random</span>
-        <span class="cat-count" id="c-fun"></span>
-        <span class="cat-arrow">›</span>
-      </div>
+      <div class="cat-hdr open" onclick="toggle(this)"><span class="cat-icon">🎲</span><span class="cat-name">Fun &amp; Random</span><span class="cat-count" id="c-fun"></span><span class="cat-arrow">›</span></div>
       <div class="cmd-list open">
         <div class="cmd"><span class="cmd-name">/calc</span><span class="cmd-desc">Calculatrice scientifique interactive.</span></div>
         <div class="cmd"><span class="cmd-name">/couleur</span><span class="cmd-desc">🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.</span></div>
         <div class="cmd"><span class="cmd-name">/gay</span><span class="cmd-desc">🌈 Calcule ton taux de gaytitude.</span></div>
         <div class="cmd"><span class="cmd-name">/pizza</span><span class="cmd-desc">🍕 Génère une pizza aléatoire.</span></div>
-        <div class="cmd">
-          <span class="cmd-name">/ship</span>
-          <span class="cmd-desc">💘 Ship deux membres.</span>
-          <code class="cmd-usage">Usage : !ship @user | !ship @user1 @user2</code>
-        </div>
+        <div class="cmd"><span class="cmd-name">/ship</span><span class="cmd-desc">💘 Ship deux membres.</span><code class="cmd-usage">Usage : !ship @user | !ship @user1 @user2</code></div>
         <div class="cmd"><span class="cmd-name">/sorting</span><span class="cmd-desc">Trie 12 barres en longueurs différentes selon un algorithme.</span></div>
       </div>
     </div>
 
-    <!-- ── Général ── -->
     <div class="cat" data-id="general">
-      <div class="cat-hdr open" onclick="toggle(this)">
-        <span class="cat-icon">💬</span>
-        <span class="cat-name">Général</span>
-        <span class="cat-count" id="c-general"></span>
-        <span class="cat-arrow">›</span>
-      </div>
+      <div class="cat-hdr open" onclick="toggle(this)"><span class="cat-icon">💬</span><span class="cat-name">Général</span><span class="cat-count" id="c-general"></span><span class="cat-arrow">›</span></div>
       <div class="cmd-list open">
         <div class="cmd"><span class="cmd-name">/code</span><span class="cmd-desc">Affiche un lien vers le code source du bot.</span></div>
         <div class="cmd"><span class="cmd-name">/emoji</span><span class="cmd-desc">Montre un ou plusieurs emojis du serveur ou de tous les serveurs.</span></div>
         <div class="cmd"><span class="cmd-name">/help</span><span class="cmd-desc">Affiche l'aide du bot.</span></div>
         <div class="cmd"><span class="cmd-name">/quoi</span><span class="cmd-desc">Répond feur.</span></div>
         <div class="cmd"><span class="cmd-name">/react</span><span class="cmd-desc">Réagit à un message avec un ou plusieurs emojis.</span></div>
-        <div class="cmd">
-          <span class="cmd-name">/say</span>
-          <span class="cmd-desc">Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch.</span>
-          <code class="cmd-usage">Ex : !say *e *am Bonjour !</code>
-        </div>
+        <div class="cmd"><span class="cmd-name">/say</span><span class="cmd-desc">Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch.</span><code class="cmd-usage">Ex : !say *e *am Bonjour !</code></div>
       </div>
     </div>
 
-    <!-- ── Jeux ── -->
     <div class="cat" data-id="jeux">
-      <div class="cat-hdr open" onclick="toggle(this)">
-        <span class="cat-icon">🕹️</span>
-        <span class="cat-name">Jeux</span>
-        <span class="cat-count" id="c-jeux"></span>
-        <span class="cat-arrow">›</span>
-      </div>
+      <div class="cat-hdr open" onclick="toggle(this)"><span class="cat-icon">🕹️</span><span class="cat-name">Jeux</span><span class="cat-count" id="c-jeux"></span><span class="cat-arrow">›</span></div>
       <div class="cmd-list open">
         <div class="cmd"><span class="cmd-name">/capitales</span><span class="cmd-desc">Devine la capitale d'un pays.</span></div>
         <div class="cmd"><span class="cmd-name">/compte_est_bon</span><span class="cmd-desc">Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs).</span></div>
@@ -166,14 +118,8 @@
       </div>
     </div>
 
-    <!-- ── Reiatsu ── -->
     <div class="cat" data-id="reiatsu">
-      <div class="cat-hdr open" onclick="toggle(this)">
-        <span class="cat-icon">💠</span>
-        <span class="cat-name">Reiatsu</span>
-        <span class="cat-count" id="c-reiatsu"></span>
-        <span class="cat-arrow">›</span>
-      </div>
+      <div class="cat-hdr open" onclick="toggle(this)"><span class="cat-icon">💠</span><span class="cat-name">Reiatsu</span><span class="cat-count" id="c-reiatsu"></span><span class="cat-arrow">›</span></div>
       <div class="cmd-list open">
         <div class="cmd"><span class="cmd-name">/classe</span><span class="cmd-desc">Choisir sa classe Reiatsu.</span></div>
         <div class="cmd"><span class="cmd-name">/hollow</span><span class="cmd-desc">👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).</span></div>
@@ -188,7 +134,6 @@
         <div class="cmd"><span class="cmd-name">/tutoreiatsu</span><span class="cmd-desc">Affiche le tutoriel complet pour les nouveaux joueurs.</span></div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -202,29 +147,21 @@
     <li><a href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub</a></li>
   </ul>
 </footer>
-
 <script>
 function toggleNav(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
 function closeNav(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
 function toggle(hdr){hdr.classList.toggle('open');hdr.nextElementSibling.classList.toggle('open');}
-
 document.querySelectorAll('.cat').forEach(cat=>{
-  const id=cat.dataset.id;
-  const el=document.getElementById('c-'+id);
-  const n=cat.querySelectorAll('.cmd').length;
+  const id=cat.dataset.id,el=document.getElementById('c-'+id),n=cat.querySelectorAll('.cmd').length;
   if(el) el.textContent=n+' commande'+(n>1?'s':'');
 });
-
 function filter(){
   const q=document.getElementById('si').value.toLowerCase().trim();
   document.querySelectorAll('.cat').forEach(cat=>{
     let vis=0;
     cat.querySelectorAll('.cmd').forEach(cmd=>{
-      const name=cmd.querySelector('.cmd-name').textContent.toLowerCase();
-      const desc=cmd.querySelector('.cmd-desc').textContent.toLowerCase();
-      const match=!q||name.includes(q)||desc.includes(q);
-      cmd.style.display=match?'':'none';
-      if(match)vis++;
+      const ok=!q||cmd.querySelector('.cmd-name').textContent.toLowerCase().includes(q)||cmd.querySelector('.cmd-desc').textContent.toLowerCase().includes(q);
+      cmd.style.display=ok?'':'none';if(ok)vis++;
     });
     cat.style.display=(!q||vis>0)?'':'none';
     if(q){cat.querySelector('.cat-hdr').classList.add('open');cat.querySelector('.cmd-list').classList.add('open');}
