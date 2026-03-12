@@ -216,7 +216,7 @@ function updDots(){
 }
 function showDRes(won){
   const b=$('rb');b.classList.add('on',won?'win':'lose');
-  $('rttl').textContent=won?'⚔ BANKAI — BIEN JOUÉ !':'💀 BANKAI ÉCHOUÉ';
+  $('rttl').textContent=won?'⚔ BIEN JOUÉ !':'💀 ÉCHEC';
   $('rchar').textContent='Personnage : '+tgt.n;
   $('rdesc').textContent=won?tgt.n+' trouvé en '+dG.length+' essai'+(dG.length>1?'s':'')+'.'
     :tgt.n+' · '+tgt.r+' · '+tgt.st+' · Cheveux : '+tgt.hc+' · '+tgt.w+'V/'+tgt.l+'D · '+tgt.bday;
