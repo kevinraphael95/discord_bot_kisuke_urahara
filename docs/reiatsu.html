@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="nav.js" defer></script>
 <style>
 .content{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 3rem 6rem;opacity:0;animation:rise .7s .3s forwards;}
 @media(max-width:700px){.content{padding:0 1rem 4rem;}}
@@ -17,26 +18,6 @@
 
 <div class="atmo"></div>
 <div class="top-bar"></div>
-
-<nav>
-  <a class="nav-logo" href="index.html">⚡ Kisuke <span>Bot</span></a>
-  <ul class="nav-links">
-    <li><a href="index.html">Accueil</a></li>
-    <li><a href="commandes.html">Commandes</a></li>
-    <li><a href="reiatsu.html" class="active">Reiatsu</a></li>
-    <li><a href="guesser.html">Guesser</a></li>
-    <li><a href="install.html">Installation</a></li>
-  </ul>
-  <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
-</nav>
-
-<div class="drawer" id="drawer">
-  <a href="index.html"               onclick="closeNav()">Accueil</a>
-  <a href="commandes.html"           onclick="closeNav()">Commandes</a>
-  <a href="reiatsu.html" class="active" onclick="closeNav()">Reiatsu</a>
-  <a href="guesser.html"             onclick="closeNav()">Guesser</a>
-  <a href="install.html"             onclick="closeNav()">Installation</a>
-</div>
 
 <div class="phdr">
   <p class="pkana">霊圧 · Collecte · Progression</p>
@@ -137,9 +118,5 @@
   </ul>
 </footer>
 
-<script>
-function toggleNav(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
-function closeNav(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
-</script>
 </body>
 </html>

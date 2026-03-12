@@ -7,31 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="nav.js" defer></script>
 </head>
 <body>
 
 <div class="atmo"></div>
 <div class="top-bar"></div>
-
-<nav>
-  <a class="nav-logo" href="index.html">⚡ Kisuke <span>Bot</span></a>
-  <ul class="nav-links">
-    <li><a href="index.html">Accueil</a></li>
-    <li><a href="commandes.html">Commandes</a></li>
-    <li><a href="reiatsu.html">Reiatsu</a></li>
-    <li><a href="guesser.html" class="active">Guesser</a></li>
-    <li><a href="install.html">Installation</a></li>
-  </ul>
-  <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
-</nav>
-
-<div class="drawer" id="drawer">
-  <a href="index.html"               onclick="closeNav()">Accueil</a>
-  <a href="commandes.html"           onclick="closeNav()">Commandes</a>
-  <a href="reiatsu.html"             onclick="closeNav()">Reiatsu</a>
-  <a href="guesser.html" class="active" onclick="closeNav()">Guesser</a>
-  <a href="install.html"             onclick="closeNav()">Installation</a>
-</div>
 
 <div class="phdr">
   <p class="pkana">斬魄刀 · Bleach · Jeu de déduction</p>
@@ -45,20 +26,17 @@
 
 <div class="gwrap">
 
-  <!-- Mode -->
   <div class="msw">
     <button class="mbtn active" id="btnD" onclick="switchMode('daily')">⚔ Quotidien</button>
     <button class="mbtn surv"   id="btnS" onclick="switchMode('survival')">💀 Survie</button>
   </div>
 
-  <!-- Daily bar -->
   <div class="dbar" id="dbar">
     <span class="cnt" id="cnt">0/8</span>
     <div class="dots" id="dots"></div>
     <button class="hbtn" onclick="toggleHelp()">? Comment jouer</button>
   </div>
 
-  <!-- Survival bar -->
   <div class="sbar" id="sbar">
     <div class="sv"><div class="sv-n" id="sstreak">0</div><div class="sv-l">🔥 Série</div></div>
     <div class="svdiv"></div>
@@ -68,7 +46,6 @@
     <button class="hbtn" onclick="toggleHelp()">? Règles</button>
   </div>
 
-  <!-- Help panel -->
   <div class="hpanel" id="hpanel">
     <b id="htitle">RÈGLES — QUOTIDIEN</b>
     <div id="hd">Devinez le personnage Bleach du jour en max <strong>8 essais</strong>.</div>
@@ -79,10 +56,8 @@
     <b>Colonnes :</b> Race · Sexe · Arc · Affiliation · Danger · Statut · Cheveux · Anniversaire · Combats
   </div>
 
-  <!-- Flash -->
   <div class="flash" id="flash"></div>
 
-  <!-- Input -->
   <div class="iz">
     <div class="acw">
       <input class="gi" id="gi" type="text" placeholder="Entrez un personnage Bleach…" autocomplete="off" oninput="onIn()" onkeydown="onKD(event)"/>
@@ -91,7 +66,6 @@
     <button class="gbtn" id="gbtn" onclick="sub()">DEVINER</button>
   </div>
 
-  <!-- Desktop table -->
   <div class="tw">
     <div class="th">
       <div>PERSONNAGE</div><div>RACE</div><div>SEXE</div><div>ARC</div>
@@ -100,10 +74,8 @@
     <div id="gr"></div>
   </div>
 
-  <!-- Mobile cards -->
   <div class="cards" id="gc"></div>
 
-  <!-- Daily result -->
   <div class="rbanner" id="rb">
     <div class="rttl" id="rttl"></div>
     <div class="rchar" id="rchar"></div>
@@ -112,7 +84,6 @@
     <div class="ntmr">Prochain dans : <span id="nt">--:--:--</span></div>
   </div>
 
-  <!-- Survival end -->
   <div class="send" id="send">
     <div class="se-t">☠ GAME OVER ☠</div>
     <div class="se-s" id="sedesc"></div>
@@ -140,11 +111,6 @@
 
 <script src="data.js"></script>
 <script>
-// ── NAV
-function toggleNav(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
-function closeNav(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
-
-// ── CONSTANTS
 const COLS=[
   {k:'r',lb:'RACE'},{k:'sx',lb:'SEXE'},{k:'arc',lb:'ARC'},
   {k:'af',lb:'AFFIL.'},{k:'d',lb:'DANGER'},{k:'st',lb:'STATUT'},
@@ -201,7 +167,6 @@ function mkCard(m,f,tgt){
 }
 function clr(){$('gr').innerHTML='';$('gc').innerHTML='';}
 
-// ── STATE
 let mode='daily';
 let tgt=todayChar(),dG=[],dOver=false,dSel=-1;
 let sStr=0,sBst=0,sKil=0;
