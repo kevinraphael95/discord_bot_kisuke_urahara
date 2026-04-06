@@ -36,113 +36,224 @@ def login_required(f):
     return decorated
 
 
-# ─── HTML Template ─────────────────────────────────────────────────────────────
+# ─── HTML Templates ────────────────────────────────────────────────────────────
+
 HTML_LOGIN = """
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kisuke Admin — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>Kisuke Admin — Auth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #0a0a0f;
-    --card: #12121a;
-    --border: #2a2a3a;
-    --accent: #e8c840;
-    --accent2: #ff4444;
-    --text: #d0d0e0;
-    --muted: #555570;
+    --void: #05050a;
+    --surface: #0c0c14;
+    --raised: #12121f;
+    --line: #1e1e30;
+    --line2: #2a2a42;
+    --gold: #d4a843;
+    --gold-dim: rgba(212,168,67,.12);
+    --red: #e05555;
+    --cyan: #4db8c8;
+    --text: #b8b8d0;
+    --dim: #484860;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
+    background: var(--void);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: repeating-linear-gradient(
-      0deg, transparent, transparent 39px,
-      rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px
-    );
-  }
-  .login-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--accent);
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 400px;
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
     position: relative;
   }
-  .login-box::before {
-    content: 'KISUKE ADMIN';
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 6px;
-    color: var(--accent);
-    display: block;
-    margin-bottom: 8px;
+
+  /* Grid de fond */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(212,168,67,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,168,67,.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
   }
-  .login-box::after {
-    content: 'PANNEAU D\\'ADMINISTRATION';
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, transparent 40%, var(--void) 100%);
+    pointer-events: none;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: fadeUp .5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Glyphe décoratif */
+  .glyph {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 8px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .glyph::before, .glyph::after {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--line2);
+  }
+
+  .box {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--gold);
+    width: 380px;
+    padding: 40px;
+    position: relative;
+  }
+
+  /* Coin décoratif */
+  .box::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 20px; height: 20px;
+    border-bottom: 2px solid var(--gold);
+    border-right: 2px solid var(--gold);
+  }
+
+  .box-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .box-sub {
     font-size: 10px;
     letter-spacing: 3px;
-    color: var(--muted);
-    display: block;
+    color: var(--dim);
+    text-transform: uppercase;
     margin-bottom: 36px;
+    font-family: 'Syne Mono', monospace;
   }
+
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
   input[type=password] {
     width: 100%;
-    background: #0a0a0f;
-    border: 1px solid var(--border);
-    border-radius: 2px;
+    background: var(--void);
+    border: 1px solid var(--line2);
     color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Syne Mono', monospace;
     font-size: 14px;
     padding: 12px 16px;
     outline: none;
-    transition: border-color .2s;
-    margin-bottom: 16px;
-  }
-  input[type=password]:focus { border-color: var(--accent); }
-  button {
-    width: 100%;
-    background: var(--accent);
-    color: #0a0a0f;
-    border: none;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
     letter-spacing: 3px;
-    padding: 13px;
-    cursor: pointer;
-    transition: opacity .2s;
+    transition: border-color .2s, box-shadow .2s;
+    margin-bottom: 20px;
+    border-radius: 0;
+    -webkit-appearance: none;
   }
-  button:hover { opacity: .85; }
+
+  input[type=password]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-dim);
+  }
+
+  .btn-submit {
+    width: 100%;
+    background: var(--gold);
+    color: var(--void);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    padding: 14px;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+    border-radius: 0;
+  }
+
+  .btn-submit:hover { opacity: .88; }
+  .btn-submit:active { transform: scale(.99); }
+
   .error {
-    background: rgba(255,68,68,.1);
-    border: 1px solid var(--accent2);
-    color: var(--accent2);
-    font-size: 12px;
+    background: rgba(224,85,85,.08);
+    border: 1px solid rgba(224,85,85,.3);
+    border-left: 3px solid var(--red);
+    color: var(--red);
+    font-size: 11px;
     padding: 10px 14px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    letter-spacing: .5px;
+  }
+
+  .footer-line {
+    margin-top: 28px;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    font-family: 'Syne Mono', monospace;
   }
 </style>
 </head>
 <body>
-<div class="login-box">
-  {% if error %}<div class="error">⚠ {{ error }}</div>{% endif %}
-  <form method="POST">
-    <input type="password" name="password" placeholder="Mot de passe admin" autofocus>
-    <button type="submit">ENTRER</button>
-  </form>
+<div class="wrap">
+  <div class="glyph">Kisuke Admin</div>
+  <div class="box">
+    <div class="box-title">Accès</div>
+    <div class="box-sub">Panneau d'administration</div>
+    {% if error %}<div class="error">⚠ {{ error }}</div>{% endif %}
+    <form method="POST">
+      <label class="field-label">Mot de passe</label>
+      <input type="password" name="password" placeholder="••••••••••••" autofocus>
+      <button type="submit" class="btn-submit">Connexion</button>
+    </form>
+  </div>
+  <div class="footer-line">v2.0 · Système réservé</div>
 </div>
 </body>
 </html>
 """
+
 
 HTML_MAIN = """
 <!DOCTYPE html>
@@ -151,439 +262,1129 @@ HTML_MAIN = """
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kisuke Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #0a0a0f;
-    --panel: #0f0f18;
-    --card: #13131e;
-    --border: #22223a;
-    --border2: #2e2e4a;
-    --accent: #e8c840;
-    --accent2: #ff5555;
-    --accent3: #44aaff;
-    --green: #44dd88;
-    --text: #cccce0;
-    --muted: #44445a;
-    --muted2: #66667a;
+    --void:    #05050a;
+    --bg:      #080810;
+    --surface: #0c0c17;
+    --raised:  #101020;
+    --hover:   #13132a;
+    --line:    #1a1a2e;
+    --line2:   #252540;
+    --line3:   #303055;
+
+    --gold:     #d4a843;
+    --gold2:    #e8c060;
+    --gold-dim: rgba(212,168,67,.1);
+    --gold-glow:rgba(212,168,67,.2);
+
+    --cyan:     #4ab4c4;
+    --cyan-dim: rgba(74,180,196,.1);
+
+    --green:    #3dba7a;
+    --green-dim:rgba(61,186,122,.1);
+
+    --red:      #e05555;
+    --red-dim:  rgba(224,85,85,.1);
+
+    --purple:   #9066d4;
+
+    --text:     #c0c0d8;
+    --text2:    #8888a8;
+    --dim:      #3d3d5a;
+    --dim2:     #5a5a7a;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ──── SCROLLBAR ──────────────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--line3); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--dim2); }
+
+  /* ──── HEADER ─────────────────────────────────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 0;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 50;
+  }
+
+  /* barre top gold */
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold) 0%, transparent 60%);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 5px;
+    color: var(--gold2);
+    text-transform: uppercase;
+    margin-right: 32px;
+    flex-shrink: 0;
+  }
+
+  .logo-tag {
+    font-family: 'Syne Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--dim2);
+    margin-left: 10px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+
+  /* ──── NAV TABS ───────────────────────────────────────────────────────────── */
+  nav {
+    display: flex;
+    gap: 2px;
+    flex: 1;
+    height: 100%;
+    align-items: stretch;
+  }
+
+  .tab {
+    padding: 0 22px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--dim2);
+    font-family: 'Syne Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .tab .tab-ico { font-size: 13px; opacity: .6; }
+  .tab:hover { color: var(--text); background: var(--hover); }
+  .tab.active { color: var(--gold2); border-bottom-color: var(--gold); background: var(--gold-dim); }
+  .tab.active .tab-ico { opacity: 1; }
+
+  /* ──── HEADER RIGHT ───────────────────────────────────────────────────────── */
+  .hdr-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-left: 20px;
+    border-left: 1px solid var(--line);
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--green);
+    font-family: 'Syne Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .time-display {
+    font-family: 'Syne Mono', monospace;
+    font-size: 11px;
+    color: var(--dim2);
+    letter-spacing: 1px;
+  }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--line2);
+    color: var(--dim2);
+    font-family: 'Syne Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: all .15s;
+    border-radius: 0;
+  }
+
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* ──── MAIN LAYOUT ────────────────────────────────────────────────────────── */
+  .app-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ──── SIDEBAR ────────────────────────────────────────────────────────────── */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+
+  .sidebar-section-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--dim);
+    text-transform: uppercase;
+    padding: 12px 20px 6px;
+    font-family: 'Syne Mono', monospace;
+  }
+
+  .sidebar-section-title:first-child { padding-top: 4px; }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 20px;
+    color: var(--text2);
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all .12s;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+
+  .sidebar-link .ico { font-size: 14px; flex-shrink: 0; width: 18px; text-align: center; }
+  .sidebar-link:hover { color: var(--text); background: var(--hover); }
+  .sidebar-link.active {
+    color: var(--gold2);
+    background: var(--gold-dim);
+    border-left-color: var(--gold);
+  }
+
+  .sidebar-link .badge-count {
+    margin-left: auto;
+    background: var(--gold-dim);
+    border: 1px solid rgba(212,168,67,.2);
+    color: var(--gold);
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+
+  .sidebar-divider {
+    height: 1px;
+    background: var(--line);
+    margin: 12px 16px;
+  }
+
+  /* ──── CONTENT ────────────────────────────────────────────────────────────── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  /* ──── SECTIONS ───────────────────────────────────────────────────────────── */
+  .section { display: none; flex-direction: column; gap: 20px; }
+  .section.active { display: flex; }
+
+  /* ──── CARDS ──────────────────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
-  /* ─── Header ─── */
-  header {
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 5px;
-    color: var(--accent);
-    flex-shrink: 0;
-  }
-  .logo span { color: var(--muted2); font-size: 11px; letter-spacing: 2px; margin-left: 8px; vertical-align: middle; }
-  nav { display: flex; gap: 4px; flex: 1; }
-  .tab {
-    padding: 6px 18px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    background: none;
-    border: 1px solid transparent;
-    color: var(--muted2);
-    cursor: pointer;
-    transition: all .15s;
-    border-radius: 2px;
-  }
-  .tab:hover { color: var(--text); border-color: var(--border2); }
-  .tab.active { color: var(--accent); border-color: var(--accent); background: rgba(232,200,64,.07); }
-  .header-right { margin-left: auto; display: flex; gap: 12px; align-items: center; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  .btn-logout {
-    font-size: 10px; letter-spacing: 2px; color: var(--muted2); background: none;
-    border: 1px solid var(--border); padding: 5px 12px; cursor: pointer; border-radius: 2px;
-    transition: all .15s;
-  }
-  .btn-logout:hover { color: var(--accent2); border-color: var(--accent2); }
-
-  /* ─── Layout ─── */
-  main { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
-  .section { display: none; }
-  .section.active { display: flex; flex-direction: column; gap: 16px; }
-
-  /* ─── Cards ─── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
   .card-header {
     padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--panel);
+    background: rgba(0,0,0,.2);
+    flex-shrink: 0;
+    min-height: 46px;
   }
-  .card-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 15px;
-    letter-spacing: 3px;
-    color: var(--accent);
-  }
-  .card-body { padding: 20px; }
 
-  /* ─── Table ─── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th {
-    text-align: left;
-    padding: 8px 12px;
-    color: var(--muted2);
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+
+  .card-body { padding: 20px; flex: 1; }
+  .card-body-flush { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ──── TOOLBAR ────────────────────────────────────────────────────────────── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar { margin-left: auto; }
+
+  /* ──── SELECT ─────────────────────────────────────────────────────────────── */
+  select {
+    background: var(--raised);
+    border: 1px solid var(--line2);
+    color: var(--text);
+    font-family: 'Syne Mono', monospace;
+    font-size: 11px;
+    padding: 6px 10px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s;
+    border-radius: 0;
+    -webkit-appearance: none;
+    padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%233d3d5a'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  select:focus { border-color: var(--gold); }
+
+  /* ──── INPUTS ─────────────────────────────────────────────────────────────── */
+  .input {
+    background: var(--raised);
+    border: 1px solid var(--line2);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 7px 12px;
+    outline: none;
+    transition: border-color .15s;
+    border-radius: 0;
+  }
+
+  .input:focus { border-color: var(--gold); }
+  .input::placeholder { color: var(--dim); }
+
+  textarea.input {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.7;
+  }
+
+  /* ──── BOUTONS ────────────────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 18px;
+    font-family: 'Syne Mono', monospace;
     font-size: 10px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--border2);
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
     white-space: nowrap;
+    border-radius: 0;
+    font-weight: 500;
   }
+
+  .btn:hover { opacity: .82; }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+  .btn-gold    { background: var(--gold); color: var(--void); }
+  .btn-cyan    { background: var(--cyan); color: var(--void); }
+  .btn-green   { background: var(--green); color: var(--void); }
+  .btn-red     { background: var(--red); color: #fff; }
+  .btn-ghost   {
+    background: transparent;
+    border: 1px solid var(--line2);
+    color: var(--text2);
+    font-family: 'Syne Mono', monospace;
+    font-size: 10px;
+  }
+  .btn-ghost:hover { border-color: var(--line3); color: var(--text); }
+
+  /* ──── TABLE ──────────────────────────────────────────────────────────────── */
+  .table-wrap { overflow: auto; flex: 1; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+  }
+
+  thead { position: sticky; top: 0; z-index: 10; }
+
+  th {
+    background: var(--raised);
+    text-align: left;
+    padding: 9px 14px;
+    color: var(--dim2);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--line2);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Syne Mono', monospace;
+    transition: color .12s;
+  }
+
+  th:hover { color: var(--text2); }
+  th.sort-asc::after { content: ' ↑'; color: var(--gold); font-size: 11px; }
+  th.sort-desc::after { content: ' ↓'; color: var(--gold); font-size: 11px; }
+
   td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--border);
-    max-width: 200px;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--line);
+    max-width: 220px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,.02); }
-  .edit-cell { cursor: pointer; }
-  .edit-cell:hover { color: var(--accent); }
-  th { cursor: pointer; user-select: none; }
-  th:hover { color: var(--text); }
-  th.sort-asc::after { content: ' ↑'; color: var(--accent); }
-  th.sort-desc::after { content: ' ↓'; color: var(--accent); }
-
-  /* ─── Forms ─── */
-  .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  label { font-size: 10px; letter-spacing: 2px; color: var(--muted2); text-transform: uppercase; }
-  input[type=text], input[type=number], select, textarea {
-    background: #0a0a0f;
-    border: 1px solid var(--border2);
-    border-radius: 2px;
     color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    padding: 8px 12px;
-    outline: none;
-    transition: border-color .15s;
+    vertical-align: middle;
+    line-height: 1;
+    transition: background .08s;
   }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 80px; }
 
-  /* ─── Buttons ─── */
-  .btn {
-    padding: 8px 20px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
-    letter-spacing: 2px;
-    border: none;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: opacity .15s;
-    white-space: nowrap;
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--hover); }
+
+  td.editable { cursor: pointer; }
+  td.editable:hover { color: var(--gold2); }
+
+  /* Colonne PK */
+  td:first-child {
+    color: var(--dim2);
+    font-size: 11px;
   }
-  .btn:hover { opacity: .8; }
-  .btn-primary { background: var(--accent); color: #0a0a0f; }
-  .btn-danger { background: var(--accent2); color: #fff; }
-  .btn-info { background: var(--accent3); color: #0a0a0f; }
-  .btn-success { background: var(--green); color: #0a0a0f; }
-  .btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; }
 
-  /* ─── Logs ─── */
-  .log-box {
-    background: #060609;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 16px;
-    height: 480px;
+  /* ──── NULL / badges ──────────────────────────────────────────────────────── */
+  .cell-null {
+    color: var(--dim);
+    font-style: italic;
+    font-size: 10px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 8px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Syne Mono', monospace;
+    border-radius: 1px;
+  }
+
+  .badge-gold   { background: var(--gold-dim);  color: var(--gold);  border: 1px solid rgba(212,168,67,.25); }
+  .badge-cyan   { background: var(--cyan-dim);  color: var(--cyan);  border: 1px solid rgba(74,180,196,.25); }
+  .badge-green  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,186,122,.25); }
+  .badge-red    { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(224,85,85,.25); }
+
+  /* ──── STAT CARDS (dashboard) ─────────────────────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.gold::before { background: var(--gold); }
+  .stat-card.cyan::before { background: var(--cyan); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.purple::before { background: var(--purple); }
+  .stat-card.red::before { background: var(--red); }
+
+  .stat-label {
+    font-family: 'Syne Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--dim2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .stat-sub {
+    font-size: 10px;
+    color: var(--dim2);
+    margin-top: 6px;
+  }
+
+  .stat-icon {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    font-size: 28px;
+    opacity: .08;
+  }
+
+  /* ──── LOGS ───────────────────────────────────────────────────────────────── */
+  .log-wrap {
+    flex: 1;
     overflow-y: auto;
-    font-size: 12px;
-    line-height: 1.7;
+    padding: 16px 20px;
+    font-size: 11.5px;
+    line-height: 1.9;
+    background: var(--void);
+    font-family: 'DM Mono', monospace;
   }
-  .log-line { color: var(--text); }
-  .log-line.err { color: var(--accent2); }
-  .log-line.ok { color: var(--green); }
-  .log-line.warn { color: var(--accent); }
 
-  /* ─── Actions ─── */
-  .actions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .log-line { color: var(--text2); display: flex; gap: 10px; align-items: baseline; }
+  .log-line .log-ts { color: var(--dim); font-size: 10px; flex-shrink: 0; font-family: 'Syne Mono', monospace; }
+  .log-line.err  .log-msg { color: var(--red); }
+  .log-line.ok   .log-msg { color: var(--green); }
+  .log-line.warn .log-msg { color: var(--gold); }
+  .log-line.info .log-msg { color: var(--cyan); }
+
+  .log-controls {
+    padding: 10px 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .log-filter {
+    width: 200px;
+  }
+
+  .log-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: 'Syne Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--dim2);
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  /* ──── ACTIONS ────────────────────────────────────────────────────────────── */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
   .action-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+    position: relative;
+    transition: border-color .2s;
   }
-  .action-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 3px; color: var(--text); }
-  .action-desc { font-size: 11px; color: var(--muted2); line-height: 1.6; }
-  .result-box {
-    background: #060609;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 12px;
+
+  .action-card:hover { border-color: var(--line2); }
+
+  .action-header { display: flex; align-items: center; gap: 12px; }
+  .action-icon { font-size: 20px; }
+  .action-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .action-desc {
     font-size: 11px;
-    color: var(--green);
-    max-height: 200px;
+    color: var(--text2);
+    line-height: 1.7;
+    border-left: 2px solid var(--line2);
+    padding-left: 12px;
+  }
+
+  .action-result {
+    background: var(--void);
+    border: 1px solid var(--line);
+    padding: 12px 14px;
+    font-size: 11px;
+    line-height: 1.7;
+    max-height: 180px;
     overflow-y: auto;
     display: none;
+    color: var(--green);
+    font-family: 'DM Mono', monospace;
   }
-  .result-box.err { color: var(--accent2); }
 
-  /* ─── SQL ─── */
-  .sql-result { margin-top: 16px; }
-  
-  /* ─── Toast ─── */
-  #toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--card); border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    padding: 12px 20px; font-size: 12px;
-    opacity: 0; transition: opacity .3s;
-    z-index: 999; pointer-events: none;
-    max-width: 300px;
-  }
-  #toast.show { opacity: 1; }
-  #toast.err { border-left-color: var(--accent2); }
+  .action-result.err { color: var(--red); }
 
-  /* ─── Misc ─── */
-  .badge {
-    display: inline-block; padding: 2px 8px; border-radius: 2px;
-    font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  /* ──── SQL ────────────────────────────────────────────────────────────────── */
+  .quick-queries {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
   }
-  .badge-yellow { background: rgba(232,200,64,.15); color: var(--accent); border: 1px solid rgba(232,200,64,.3); }
-  .badge-blue { background: rgba(68,170,255,.15); color: var(--accent3); border: 1px solid rgba(68,170,255,.3); }
-  .badge-green { background: rgba(68,221,136,.15); color: var(--green); border: 1px solid rgba(68,221,136,.3); }
-  .sep { width: 1px; background: var(--border); align-self: stretch; }
-  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .filter-input { width: 240px; }
-  .table-meta { font-size: 11px; color: var(--muted2); }
+
+  /* ──── MODAL ──────────────────────────────────────────────────────────────── */
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+
+  #modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--line2);
+    border-top: 2px solid var(--gold);
+    padding: 32px;
+    min-width: 380px;
+    max-width: 580px;
+    width: 90%;
+    animation: modalIn .2s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.96) translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 4px;
+    color: var(--gold2);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .modal-meta {
+    font-size: 10px;
+    color: var(--dim2);
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    font-family: 'Syne Mono', monospace;
+  }
+
+  .modal-input {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .modal-footer { display: flex; gap: 10px; }
+
+  /* ──── TOAST ──────────────────────────────────────────────────────────────── */
+  #toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 999;
+    pointer-events: none;
+  }
+
+  .toast-item {
+    background: var(--raised);
+    border: 1px solid var(--line2);
+    border-left: 3px solid var(--gold);
+    padding: 11px 18px;
+    font-size: 11px;
+    font-family: 'Syne Mono', monospace;
+    letter-spacing: .5px;
+    min-width: 220px;
+    max-width: 320px;
+    animation: toastIn .25s ease both, toastOut .3s ease 2.7s both;
+    color: var(--text);
+  }
+
+  .toast-item.err { border-left-color: var(--red); }
+  .toast-item.ok  { border-left-color: var(--green); }
+
+  @keyframes toastIn  { from { opacity:0; transform: translateX(20px); } to { opacity:1; } }
+  @keyframes toastOut { to   { opacity:0; transform: translateX(20px); } }
+
+  /* ──── BREADCRUMB ─────────────────────────────────────────────────────────── */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Syne Mono', monospace;
+    font-size: 10px;
+    color: var(--dim2);
+    letter-spacing: 1.5px;
+    padding: 0 0 16px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 4px;
+  }
+
+  .breadcrumb span { color: var(--text2); }
+  .breadcrumb .sep { color: var(--dim); }
+
+  /* ──── TABLE INFO BAR ─────────────────────────────────────────────────────── */
+  .table-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 14px;
+    background: var(--raised);
+    border-bottom: 1px solid var(--line);
+    font-size: 10px;
+    color: var(--dim2);
+    font-family: 'Syne Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .table-info .ti-count { color: var(--text2); }
+
+  /* ──── MISC ───────────────────────────────────────────────────────────────── */
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ml-auto { margin-left: auto; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: var(--text);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .section-sub {
+    font-size: 10px;
+    color: var(--dim2);
+    letter-spacing: 2px;
+    font-family: 'Syne Mono', monospace;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  /* toggle switch */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 16px;
+  }
+  .switch input { display: none; }
+  .slider {
+    position: absolute;
+    inset: 0;
+    background: var(--line2);
+    cursor: pointer;
+    transition: .2s;
+    border-radius: 16px;
+  }
+  .slider::before {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    left: 3px; top: 3px;
+    background: var(--dim2);
+    transition: .2s;
+    border-radius: 50%;
+  }
+  input:checked + .slider { background: var(--green-dim); border: 1px solid var(--green); }
+  input:checked + .slider::before { transform: translateX(14px); background: var(--green); }
 </style>
 </head>
 <body>
 
-<!-- Header -->
+<!-- ─── HEADER ─────────────────────────────────────────────────────────────── -->
 <header>
-  <div class="logo">KISUKE <span>ADMIN</span></div>
+  <div class="logo">Kisuke <span class="logo-tag">Admin</span></div>
+
   <nav>
-    <button class="tab active" onclick="showTab('db', this)">BASE DE DONNÉES</button>
-    <button class="tab" onclick="showTab('sql', this)">SQL</button>
-    <button class="tab" onclick="showTab('logs', this)">LOGS</button>
-    <button class="tab" onclick="showTab('actions', this)">ACTIONS</button>
+    <button class="tab active" data-tab="db" onclick="showTab('db', this)">
+      <span class="tab-ico">⬡</span> Base de données
+    </button>
+    <button class="tab" data-tab="sql" onclick="showTab('sql', this)">
+      <span class="tab-ico">◈</span> SQL
+    </button>
+    <button class="tab" data-tab="logs" onclick="showTab('logs', this)">
+      <span class="tab-ico">▤</span> Logs
+    </button>
+    <button class="tab" data-tab="actions" onclick="showTab('actions', this)">
+      <span class="tab-ico">⚙</span> Actions
+    </button>
   </nav>
-  <div class="header-right">
-    <div class="status-dot" title="Bot en ligne"></div>
-    <form method="POST" action="/logout" style="display:inline">
-      <button class="btn-logout">DÉCONNEXION</button>
+
+  <div class="hdr-right">
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span>En ligne</span>
+    </div>
+    <div class="time-display" id="clock">--:--:--</div>
+    <form method="POST" action="/logout">
+      <button class="btn-logout">Déconnexion</button>
     </form>
   </div>
 </header>
 
-<main>
+<!-- ─── BODY ───────────────────────────────────────────────────────────────── -->
+<div class="app-body">
 
-  <!-- ══════════════════════════════════════════════════════════════
-       TAB : BASE DE DONNÉES
-  ══════════════════════════════════════════════════════════════ -->
-  <section class="section active" id="tab-db">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">TABLES</span>
-        <div class="row" style="margin-left: auto; gap: 12px;">
-          <select id="tableSelect" onchange="loadTable()"></select>
-          <input type="text" class="filter-input" id="filterInput" placeholder="Filtrer..." oninput="filterTable()">
-          <span class="table-meta" id="tableCount"></span>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Navigation</div>
+
+    <div class="sidebar-link active" onclick="showTab('db', document.querySelector('[data-tab=db]'))">
+      <span class="ico">⬡</span> Base de données
+    </div>
+    <div class="sidebar-link" onclick="showTab('sql', document.querySelector('[data-tab=sql]'))">
+      <span class="ico">◈</span> Requête SQL
+    </div>
+    <div class="sidebar-link" onclick="showTab('logs', document.querySelector('[data-tab=logs]'))">
+      <span class="ico">▤</span> Logs en direct
+    </div>
+    <div class="sidebar-link" onclick="showTab('actions', document.querySelector('[data-tab=actions]'))">
+      <span class="ico">⚙</span> Actions bot
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Requêtes rapides</div>
+
+    <div class="sidebar-link" onclick="quickSQL('SELECT user_id, username, points, classe, niveau FROM reiatsu ORDER BY points DESC LIMIT 20')">
+      <span class="ico">↑</span> Top 20 points
+    </div>
+    <div class="sidebar-link" onclick="quickSQL('SELECT * FROM reiatsu_config')">
+      <span class="ico">⚙</span> Config guildes
+    </div>
+    <div class="sidebar-link" onclick="quickSQL('SELECT user_id, username, last_found_at FROM mots_trouves ORDER BY last_found_at DESC LIMIT 20')">
+      <span class="ico">◷</span> Derniers mots
+    </div>
+    <div class="sidebar-link" onclick="quickSQL('SELECT COUNT(*) as total, SUM(points) as total_points FROM reiatsu')">
+      <span class="ico">∑</span> Stats globales
+    </div>
+    <div class="sidebar-link" onclick="quickSQL('SELECT classe, COUNT(*) as nb FROM reiatsu GROUP BY classe ORDER BY nb DESC')">
+      <span class="ico">≡</span> Par classe
+    </div>
+    <div class="sidebar-link" onclick="quickSQL('SELECT * FROM steam_keys ORDER BY won ASC')">
+      <span class="ico">🔑</span> Clés Steam
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">Système</div>
+    <div class="sidebar-link" id="sidebar-db-path" title="">
+      <span class="ico">◉</span> <span id="sb-db-name">reiatsu.db</span>
+      <span class="badge-count" id="sb-table-count">—</span>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ══ TAB : BASE DE DONNÉES ══════════════════════════════════════════════ -->
+    <section class="section active" id="tab-db">
+      <div class="breadcrumb">Admin <span class="sep">/</span> <span id="bc-table">Base de données</span></div>
+
+      <!-- Stats rapides -->
+      <div class="stats-grid" id="db-stats-grid"></div>
+
+      <div class="card" style="flex:1;min-height:400px;overflow:hidden;display:flex;flex-direction:column;">
+        <div class="card-header">
+          <span class="card-title">Contenu</span>
+          <div class="toolbar">
+            <select id="tableSelect" onchange="loadTable()"></select>
+            <input type="text" class="input" style="width:200px" id="filterInput" placeholder="Filtrer les lignes…" oninput="filterRows()">
+            <button class="btn btn-ghost" onclick="loadTable()">↻</button>
+          </div>
+        </div>
+        <div class="table-info">
+          <span>Table : <strong class="ti-count" id="ti-table">—</strong></span>
+          <span id="ti-pk" style="color:var(--dim)"></span>
+          <span class="ml-auto" id="ti-count">—</span>
+        </div>
+        <div class="card-body-flush">
+          <div class="table-wrap">
+            <table id="mainTable">
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="card-body">
-        <div class="table-wrap">
-          <table id="mainTable">
-            <thead id="tableHead"></thead>
-            <tbody id="tableBody"></tbody>
-          </table>
+    </section>
+
+    <!-- ══ TAB : SQL ══════════════════════════════════════════════════════════ -->
+    <section class="section" id="tab-sql">
+      <div class="breadcrumb">Admin <span class="sep">/</span> <span>SQL Console</span></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Requête SQL</span>
+          <div class="toolbar">
+            <button class="btn btn-ghost" onclick="document.getElementById('sqlQuery').value=''">Effacer</button>
+            <button class="btn btn-gold" onclick="runSQL()">▶ Exécuter</button>
+          </div>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
+          <textarea id="sqlQuery" class="input" rows="6" placeholder="SELECT * FROM reiatsu LIMIT 10;
+-- Ctrl+Enter pour exécuter"></textarea>
+          <div id="sqlResult"></div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ══════════════════════════════════════════════════════════════
-       TAB : SQL CUSTOM
-  ══════════════════════════════════════════════════════════════ -->
-  <section class="section" id="tab-sql">
-    <div class="card">
-      <div class="card-header"><span class="card-title">REQUÊTE SQL</span></div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
-        <textarea id="sqlQuery" rows="5" placeholder="SELECT * FROM reiatsu LIMIT 10;"></textarea>
-        <div class="row">
-          <button class="btn btn-primary" onclick="runSQL()">EXÉCUTER</button>
-          <button class="btn btn-ghost" onclick="document.getElementById('sqlQuery').value=''">EFFACER</button>
+    <!-- ══ TAB : LOGS ═════════════════════════════════════════════════════════ -->
+    <section class="section" id="tab-logs" style="flex:1">
+      <div class="breadcrumb">Admin <span class="sep">/</span> <span>Logs en direct</span></div>
+
+      <div class="card" style="flex:1;min-height:500px;overflow:hidden;display:flex;flex-direction:column;">
+        <div class="card-header">
+          <span class="card-title">Sortie du bot</span>
+          <div class="toolbar" style="margin-left:auto;gap:14px">
+            <label class="log-toggle">
+              <label class="switch"><input type="checkbox" id="autoRefresh" checked onchange="toggleAutoRefresh()"><span class="slider"></span></label>
+              Auto-refresh
+            </label>
+            <input type="text" class="input log-filter" id="logFilter" placeholder="Filtrer les logs…" oninput="filterLogs()">
+            <button class="btn btn-ghost" onclick="loadLogs()">↻ Refresh</button>
+            <button class="btn btn-ghost" onclick="clearLogs()">✕ Vider</button>
+          </div>
         </div>
-        <div id="sqlResult" class="sql-result"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">REQUÊTES RAPIDES</span></div>
-      <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-ghost" onclick="setSQL('SELECT user_id, username, points, classe, niveau FROM reiatsu ORDER BY points DESC LIMIT 20')">Top 20 points</button>
-        <button class="btn btn-ghost" onclick="setSQL('SELECT * FROM reiatsu_config')">Config guilds</button>
-        <button class="btn btn-ghost" onclick="setSQL('SELECT user_id, username, last_found_at FROM mots_trouves ORDER BY last_found_at DESC LIMIT 20')">Derniers mots</button>
-        <button class="btn btn-ghost" onclick="setSQL('SELECT COUNT(*) as total, SUM(points) as total_points FROM reiatsu')">Stats globales</button>
-        <button class="btn btn-ghost" onclick="setSQL('SELECT classe, COUNT(*) as nb FROM reiatsu GROUP BY classe ORDER BY nb DESC')">Par classe</button>
-        <button class="btn btn-ghost" onclick="setSQL('SELECT * FROM steam_keys ORDER BY won ASC')">Clés Steam</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════════════════════
-       TAB : LOGS
-  ══════════════════════════════════════════════════════════════ -->
-  <section class="section" id="tab-logs">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">LOGS EN DIRECT</span>
-        <div class="row" style="margin-left:auto;gap:10px">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="autoRefresh" checked onchange="toggleAutoRefresh()">
-            <span style="font-size:11px;letter-spacing:1px;color:var(--muted2)">AUTO-REFRESH</span>
+        <div class="log-wrap" id="logBox"></div>
+        <div class="log-controls">
+          <span class="badge badge-cyan" id="log-count">0 lignes</span>
+          <span style="font-size:10px;color:var(--dim2);font-family:'Syne Mono',monospace">Dernière mise à jour : <span id="log-ts">—</span></span>
+          <label class="log-toggle ml-auto">
+            <label class="switch"><input type="checkbox" id="autoScroll" checked><span class="slider"></span></label>
+            Auto-scroll
           </label>
-          <button class="btn btn-ghost" onclick="loadLogs()">↻ RAFRAÎCHIR</button>
-          <button class="btn btn-ghost" onclick="clearLogs()">VIDER</button>
         </div>
       </div>
-      <div class="card-body">
-        <div class="log-box" id="logBox"></div>
+    </section>
+
+    <!-- ══ TAB : ACTIONS ══════════════════════════════════════════════════════ -->
+    <section class="section" id="tab-actions">
+      <div class="breadcrumb">Admin <span class="sep">/</span> <span>Actions</span></div>
+
+      <div class="actions-grid">
+
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-icon">↓</span>
+            <span class="action-title">Git Pull</span>
+          </div>
+          <div class="action-desc">Récupère les dernières modifications depuis GitHub sans redémarrer le bot.</div>
+          <button class="btn btn-cyan" onclick="doAction('git_pull', this)">Lancer git pull</button>
+          <div class="action-result" id="res-git_pull"></div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-icon">↓↻</span>
+            <span class="action-title">Pull + Reload</span>
+          </div>
+          <div class="action-desc">Pull les mises à jour puis recharge tous les cogs sans interruption.</div>
+          <button class="btn btn-cyan" onclick="doAction('git_pull_restart', this)">Pull + reload cogs</button>
+          <div class="action-result" id="res-git_pull_restart"></div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-icon">↻</span>
+            <span class="action-title">Reload Cogs</span>
+          </div>
+          <div class="action-desc">Recharge tous les cogs/commandes sans redémarrer le bot. Idéal pour tester des changements rapides.</div>
+          <button class="btn btn-green" onclick="doAction('reload_cogs', this)">Reload cogs</button>
+          <div class="action-result" id="res-reload_cogs"></div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-icon">⏻</span>
+            <span class="action-title">Restart Bot</span>
+          </div>
+          <div class="action-desc">Redémarre le bot via start.sh. Le panel admin reste disponible pendant le redémarrage.</div>
+          <button class="btn btn-red" onclick="confirmRestart()">Redémarrer</button>
+          <div class="action-result" id="res-restart_bot"></div>
+        </div>
+
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ══════════════════════════════════════════════════════════════
-       TAB : ACTIONS
-  ══════════════════════════════════════════════════════════════ -->
-  <section class="section" id="tab-actions">
-    <div class="actions-grid">
+  </div><!-- /content -->
+</div><!-- /app-body -->
 
-      <div class="action-card">
-        <div class="action-title">🔄 GIT PULL</div>
-        <div class="action-desc">Récupère les dernières modifications depuis GitHub sans redémarrer le bot.</div>
-        <button class="btn btn-info" onclick="doAction('git_pull', this)">LANCER GIT PULL</button>
-        <div class="result-box" id="res-git_pull"></div>
-      </div>
-
-      <div class="action-card">
-        <div class="action-title">♻️ GIT PULL + RELOAD</div>
-        <div class="action-desc">Pull les mises à jour puis recharge tous les cogs sans interruption.</div>
-        <button class="btn btn-info" onclick="doAction('git_pull_restart', this)">PULL + RELOAD COGS</button>
-        <div class="result-box" id="res-git_pull_restart"></div>
-      </div>
-
-      <div class="action-card">
-        <div class="action-title">🔁 RELOAD COGS</div>
-        <div class="action-desc">Recharge tous les cogs/commandes sans redémarrer le bot. Idéal pour tester des changements rapides.</div>
-        <button class="btn btn-success" onclick="doAction('reload_cogs', this)">RELOAD COGS</button>
-        <div class="result-box" id="res-reload_cogs"></div>
-      </div>
-
-      <div class="action-card">
-        <div class="action-title">🛑 RESTART BOT</div>
-        <div class="action-desc">Redémarre uniquement le bot sans git pull. Le panel admin reste disponible.</div>
-        <button class="btn btn-danger" onclick="doAction('restart_bot', this)">REDÉMARRER</button>
-        <div class="result-box" id="res-restart_bot"></div>
-      </div>
-
-    </div>
-  </section>
-
-</main>
-
-<!-- Toast -->
-<div id="toast"></div>
-
-<!-- Edit Modal -->
-<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center">
-  <div style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--accent);padding:32px;min-width:360px;max-width:600px;width:90%">
-    <div style="font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:var(--accent);margin-bottom:20px">MODIFIER LA CELLULE</div>
-    <div style="font-size:11px;color:var(--muted2);margin-bottom:6px" id="editMeta"></div>
-    <input type="text" id="editValue" style="width:100%;margin-bottom:16px">
+<!-- ─── MODAL EDIT ──────────────────────────────────────────────────────────── -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Modifier la valeur</div>
+    <div class="modal-meta" id="modal-meta"></div>
+    <input type="text" class="input modal-input" id="editValue">
     <input type="hidden" id="editTable">
     <input type="hidden" id="editPk">
     <input type="hidden" id="editPkVal">
     <input type="hidden" id="editCol">
-    <div class="row">
-      <button class="btn btn-primary" onclick="saveEdit()">SAUVEGARDER</button>
-      <button class="btn btn-ghost" onclick="closeModal()">ANNULER</button>
+    <div class="modal-footer">
+      <button class="btn btn-gold" onclick="saveEdit()">Sauvegarder</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
     </div>
   </div>
 </div>
 
+<!-- ─── MODAL CONFIRM ──────────────────────────────────────────────────────── -->
+<div id="modal-confirm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(2px)">
+  <div class="modal" style="border-top-color:var(--red);">
+    <div class="modal-title" style="color:var(--red)">Confirmation</div>
+    <div class="modal-meta">Cette action va redémarrer le process du bot. Continuer ?</div>
+    <div class="modal-footer" style="margin-top:20px">
+      <button class="btn btn-red" onclick="doAction('restart_bot',this);document.getElementById('modal-confirm').style.display='none'">Redémarrer</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-confirm').style.display='none'">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOASTS ──────────────────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
 <script>
-// ─── Tab switching ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toast(msg, type='') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast-item' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function clock() {
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(clock, 1000); clock();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════════════════════════
 function showTab(name, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+  // sync sidebar
+  const sideIdx = {'db':0,'sql':1,'logs':2,'actions':3};
+  const links = document.querySelectorAll('.sidebar-link');
+  if (sideIdx[name] !== undefined) links[sideIdx[name]]?.classList.add('active');
   if (name === 'db') loadTable();
   if (name === 'logs') loadLogs();
 }
 
-// ─── Toast ──────────────────────────────────────────────────────────────────
-function toast(msg, isErr=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show' + (isErr ? ' err' : '');
-  setTimeout(() => t.className = '', 3000);
-}
-
-// ─── DB Table ───────────────────────────────────────────────────────────────
-let currentData = [];
-let currentCols = [];
-let currentTableName = '';
-let currentPk = '';
-let sortCol = null;
-let sortDir = 1;
+// ══════════════════════════════════════════════════════════════════════════════
+// DATABASE
+// ══════════════════════════════════════════════════════════════════════════════
+let currentData = [], currentCols = [], currentTableName = '', currentPk = '';
+let sortCol = null, sortDir = 1;
+let rawLogs = [];
 
 async function loadTableList() {
   const res = await fetch('/api/tables');
   const data = await res.json();
-  const select = document.getElementById('tableSelect');
-  select.innerHTML = data.tables.map(t => `<option value="${t}">${t}</option>`).join('');
+  const sel = document.getElementById('tableSelect');
+  sel.innerHTML = data.tables.map(t => `<option value="${t}">${t}</option>`).join('');
+  document.getElementById('sb-table-count').textContent = data.tables.length;
   loadTable();
 }
 
 async function loadTable() {
   const table = document.getElementById('tableSelect').value;
   if (!table) return;
+  document.getElementById('ti-table').textContent = table;
+  document.getElementById('bc-table').textContent = table;
   const res = await fetch('/api/table/' + table);
   const data = await res.json();
   currentData = data.rows;
@@ -591,23 +1392,56 @@ async function loadTable() {
   currentTableName = table;
   currentPk = data.pk;
   sortCol = null;
-  renderTable(data.columns, data.rows, table, data.pk);
-  document.getElementById('tableCount').textContent = data.rows.length + ' entrées';
+  renderTable(data.columns, data.rows);
+  document.getElementById('ti-pk').textContent = 'PK: ' + data.pk;
+  document.getElementById('ti-count').textContent = data.rows.length + ' entrée' + (data.rows.length > 1 ? 's' : '');
+  updateStatCards(data);
+}
+
+function updateStatCards(data) {
+  const grid = document.getElementById('db-stats-grid');
+  const colors = ['gold','cyan','green','purple','red'];
+  const icons = ['◈','∑','↑','⚙','★'];
+  // Quelques colonnes numériques
+  const numCols = data.columns
+    .map((c,i) => ({name:c, idx:i}))
+    .filter(({name}) => /point|niveau|count|total|nb|score/i.test(name))
+    .slice(0, 4);
+
+  const cards = [
+    { label:'Total entrées', value: data.rows.length, icon:'⬡', color:'gold' },
+    { label:'Colonnes', value: data.columns.length, icon:'◈', color:'cyan' },
+  ];
+
+  numCols.forEach(({name, idx}, i) => {
+    const vals = data.rows.map(r => parseFloat(r[idx])).filter(v => !isNaN(v));
+    if (vals.length) {
+      const sum = vals.reduce((a,b)=>a+b,0);
+      cards.push({ label: name.toUpperCase(), value: Math.round(sum).toLocaleString('fr'), icon: icons[i+2], color: colors[i+2] });
+    }
+  });
+
+  grid.innerHTML = cards.map(c => `
+    <div class="stat-card ${c.color}">
+      <div class="stat-label">${esc(c.label)}</div>
+      <div class="stat-value">${esc(c.value)}</div>
+      <div class="stat-icon">${c.icon}</div>
+    </div>
+  `).join('');
 }
 
 function sortBy(colIndex) {
-  if (sortCol === colIndex) { sortDir *= -1; } else { sortCol = colIndex; sortDir = 1; }
+  if (sortCol === colIndex) sortDir *= -1; else { sortCol = colIndex; sortDir = 1; }
   const sorted = [...currentData].sort((a, b) => {
-    const va = a[colIndex] ?? '';
-    const vb = b[colIndex] ?? '';
+    const va = a[colIndex] ?? '', vb = b[colIndex] ?? '';
     const na = parseFloat(va), nb = parseFloat(vb);
     if (!isNaN(na) && !isNaN(nb)) return (na - nb) * sortDir;
-    return String(va).localeCompare(String(vb), 'fr', {sensitivity: 'base'}) * sortDir;
+    return String(va).localeCompare(String(vb), 'fr', {sensitivity:'base'}) * sortDir;
   });
-  renderTable(currentCols, sorted, currentTableName, currentPk);
+  renderTable(currentCols, sorted);
 }
 
-function renderTable(cols, rows, tableName, pk) {
+function renderTable(cols, rows) {
   const head = document.getElementById('tableHead');
   const body = document.getElementById('tableBody');
   const htr = document.createElement('tr');
@@ -615,160 +1449,207 @@ function renderTable(cols, rows, tableName, pk) {
     const th = document.createElement('th');
     th.textContent = c;
     if (sortCol === i) th.className = sortDir === 1 ? 'sort-asc' : 'sort-desc';
-    th.addEventListener('click', () => sortBy(i));
+    th.onclick = () => sortBy(i);
     htr.appendChild(th);
   });
-  head.innerHTML = '';
-  head.appendChild(htr);
+  head.innerHTML = ''; head.appendChild(htr);
   body.innerHTML = '';
   rows.forEach(row => {
     const tr = document.createElement('tr');
     cols.forEach((col, i) => {
-      const val = row[i] ?? '';
-      const isPk = col === pk;
+      const val = row[i];
       const td = document.createElement('td');
-      td.textContent = val;
-      td.title = String(val);
+      const isPk = col === currentPk;
+      if (val === null || val === undefined || val === '') {
+        td.innerHTML = '<span class="cell-null">null</span>';
+      } else {
+        td.textContent = val;
+        td.title = String(val);
+      }
       if (!isPk) {
-        td.className = 'edit-cell';
-        td.dataset.table = tableName;
-        td.dataset.pk = pk;
-        td.dataset.pkval = String(row[0]);
-        td.dataset.col = col;
-        td.dataset.val = String(val);
-        td.addEventListener('click', function() {
-          openEdit(this.dataset.table, this.dataset.pk, this.dataset.pkval, this.dataset.col, this.dataset.val);
-        });
+        td.className = 'editable';
+        td.onclick = () => openEdit(currentTableName, currentPk, String(row[0]), col, String(val ?? ''));
       }
       tr.appendChild(td);
     });
     body.appendChild(tr);
   });
+  filterRows();
 }
 
-function filterTable() {
-  const filter = document.getElementById('filterInput').value.toLowerCase();
-  const rows = document.getElementById('tableBody').querySelectorAll('tr');
-  rows.forEach(r => {
-    r.style.display = r.textContent.toLowerCase().includes(filter) ? '' : 'none';
+function filterRows() {
+  const f = document.getElementById('filterInput').value.toLowerCase();
+  document.querySelectorAll('#tableBody tr').forEach(r => {
+    r.style.display = f === '' || r.textContent.toLowerCase().includes(f) ? '' : 'none';
   });
 }
 
-// ─── Edit Modal ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// MODAL EDIT
+// ══════════════════════════════════════════════════════════════════════════════
 function openEdit(table, pk, pkVal, col, val) {
   document.getElementById('editTable').value = table;
   document.getElementById('editPk').value = pk;
   document.getElementById('editPkVal').value = pkVal;
   document.getElementById('editCol').value = col;
   document.getElementById('editValue').value = val;
-  document.getElementById('editMeta').textContent = `Table: ${table} | Colonne: ${col} | ID: ${pkVal}`;
-  document.getElementById('editModal').style.display = 'flex';
-  document.getElementById('editValue').focus();
+  document.getElementById('modal-meta').textContent = `${table} · ${col} · ID ${pkVal}`;
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('editValue').focus(), 50);
 }
 
 function closeModal() {
-  document.getElementById('editModal').style.display = 'none';
+  document.getElementById('modal-overlay').classList.remove('open');
 }
 
 async function saveEdit() {
   const payload = {
     table: document.getElementById('editTable').value,
-    pk: document.getElementById('editPk').value,
-    pk_val: document.getElementById('editPkVal').value,
-    col: document.getElementById('editCol').value,
+    pk:    document.getElementById('editPk').value,
+    pk_val:document.getElementById('editPkVal').value,
+    col:   document.getElementById('editCol').value,
     value: document.getElementById('editValue').value,
   };
-  const res = await fetch('/api/edit', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const res = await fetch('/api/edit', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const data = await res.json();
   closeModal();
-  if (data.ok) { toast('✅ Modifié avec succès'); loadTable(); }
-  else toast('❌ ' + data.error, true);
+  if (data.ok) { toast('✓ Modifié avec succès', 'ok'); loadTable(); }
+  else toast('✕ ' + data.error, 'err');
 }
 
-document.getElementById('editModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('editModal')) closeModal();
+document.getElementById('modal-overlay').onclick = e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+};
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (document.getElementById('modal-overlay').classList.contains('open')) saveEdit();
+    else if (document.getElementById('tab-sql').classList.contains('active')) runSQL();
+  }
 });
 
-// ─── SQL ────────────────────────────────────────────────────────────────────
-function setSQL(q) {
+// ══════════════════════════════════════════════════════════════════════════════
+// SQL
+// ══════════════════════════════════════════════════════════════════════════════
+function quickSQL(q) {
+  showTab('sql', document.querySelector('[data-tab=sql]'));
   document.getElementById('sqlQuery').value = q;
-  document.querySelectorAll('.tab')[1].click();
+  runSQL();
 }
 
 async function runSQL() {
-  const q = document.getElementById('sqlQuery').value;
-  const res = await fetch('/api/sql', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({query: q}) });
-  const data = await res.json();
+  const q = document.getElementById('sqlQuery').value.trim();
+  if (!q) return;
   const el = document.getElementById('sqlResult');
+  el.innerHTML = '<span style="color:var(--dim2);font-size:11px">⏳ Exécution…</span>';
+  const res = await fetch('/api/sql', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});
+  const data = await res.json();
+
   if (data.error) {
-    el.innerHTML = `<div style="color:var(--accent2);font-size:12px;padding:12px;background:#060609;border:1px solid var(--border)">❌ ${data.error}</div>`;
-  } else if (data.columns) {
-    let html = `<div class="table-wrap"><table><thead><tr>${data.columns.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
-    html += data.rows.map(r => `<tr>${r.map(v=>`<td>${v??''}</td>`).join('')}</tr>`).join('');
-    html += `</tbody></table></div><div class="table-meta" style="margin-top:8px">${data.rows.length} résultat(s)</div>`;
+    el.innerHTML = `<div style="background:var(--void);border:1px solid var(--red);border-left:3px solid var(--red);padding:12px 16px;color:var(--red);font-size:11px;margin-top:4px">✕ ${esc(data.error)}</div>`;
+    return;
+  }
+
+  if (data.columns) {
+    let html = `<div class="table-wrap" style="margin-top:8px;border:1px solid var(--line);max-height:400px;overflow:auto"><table>`;
+    html += `<thead><tr>${data.columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+    html += data.rows.map(r=>`<tr>${r.map(v=>`<td>${v===null?'<span class="cell-null">null</span>':esc(v)}</td>`).join('')}</tr>`).join('');
+    html += `</tbody></table></div>`;
+    html += `<div style="margin-top:8px;font-size:10px;color:var(--dim2);font-family:'Syne Mono',monospace">${data.rows.length} résultat(s)</div>`;
     el.innerHTML = html;
   } else {
-    el.innerHTML = `<div style="color:var(--green);font-size:12px;padding:12px;background:#060609;border:1px solid var(--border)">✅ ${data.message}</div>`;
+    el.innerHTML = `<div style="background:var(--void);border:1px solid var(--green);border-left:3px solid var(--green);padding:12px 16px;color:var(--green);font-size:11px;margin-top:4px">✓ ${esc(data.message)}</div>`;
   }
 }
 
-// ─── Logs ───────────────────────────────────────────────────────────────────
-let autoRefreshInterval = null;
+// ══════════════════════════════════════════════════════════════════════════════
+// LOGS
+// ══════════════════════════════════════════════════════════════════════════════
+let autoRefreshTimer = null;
 
 async function loadLogs() {
   const res = await fetch('/api/logs');
   const data = await res.json();
-  const box = document.getElementById('logBox');
-  const wasAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 10;
-  box.innerHTML = data.logs.map(line => {
-    let cls = 'log-line';
-    if (line.includes('❌') || line.includes('ERROR') || line.includes('error')) cls += ' err';
-    else if (line.includes('✅') || line.includes('Loaded') || line.includes('Connecté')) cls += ' ok';
-    else if (line.includes('⚠') || line.includes('WARNING')) cls += ' warn';
-    return `<div class="${cls}">${escHtml(line)}</div>`;
-  }).join('');
-  if (wasAtBottom) box.scrollTop = box.scrollHeight;
+  rawLogs = data.logs;
+  const ts = new Date().toLocaleTimeString('fr-FR');
+  document.getElementById('log-ts').textContent = ts;
+  document.getElementById('log-count').textContent = rawLogs.length + ' ligne' + (rawLogs.length > 1 ? 's' : '');
+  renderLogs();
 }
 
+function renderLogs() {
+  const filter = document.getElementById('logFilter').value.toLowerCase();
+  const box = document.getElementById('logBox');
+  const wasAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 30;
+
+  const lines = filter ? rawLogs.filter(l => l.toLowerCase().includes(filter)) : rawLogs;
+
+  box.innerHTML = lines.map(line => {
+    let cls = 'log-line';
+    if (/❌|ERROR|error|Exception/i.test(line)) cls += ' err';
+    else if (/✅|Loaded|Connecté|OK|success/i.test(line)) cls += ' ok';
+    else if (/⚠|WARNING|warn/i.test(line)) cls += ' warn';
+    else if (/INFO|→|←/i.test(line)) cls += ' info';
+
+    // Essaye d'extraire timestamp
+    const tsMatch = line.match(/\d{2}:\d{2}:\d{2}/);
+    const ts = tsMatch ? `<span class="log-ts">${tsMatch[0]}</span>` : '';
+    const msg = line.replace(/\d{2}:\d{2}:\d{2}\s*/, '');
+
+    return `<div class="${cls}">${ts}<span class="log-msg">${esc(msg)}</span></div>`;
+  }).join('');
+
+  const autoScroll = document.getElementById('autoScroll').checked;
+  if ((wasAtBottom || autoScroll) && !filter) box.scrollTop = box.scrollHeight;
+}
+
+function filterLogs() { renderLogs(); }
+
 function clearLogs() {
-  document.getElementById('logBox').innerHTML = '';
+  rawLogs = [];
+  renderLogs();
   fetch('/api/logs/clear', {method:'POST'});
 }
 
 function toggleAutoRefresh() {
-  const checked = document.getElementById('autoRefresh').checked;
-  if (checked) { autoRefreshInterval = setInterval(loadLogs, 2000); }
-  else { clearInterval(autoRefreshInterval); }
+  const on = document.getElementById('autoRefresh').checked;
+  clearInterval(autoRefreshTimer);
+  if (on) autoRefreshTimer = setInterval(loadLogs, 2000);
 }
 
-// ─── Actions ────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════════════════════════════════════
+function confirmRestart() {
+  document.getElementById('modal-confirm').style.display = 'flex';
+}
+
 async function doAction(action, btn) {
   const resBox = document.getElementById('res-' + action);
   resBox.style.display = 'block';
-  resBox.className = 'result-box';
-  resBox.textContent = '⏳ En cours...';
-  btn.disabled = true;
+  resBox.className = 'action-result';
+  resBox.textContent = '⏳ En cours…';
+  if (btn) btn.disabled = true;
   try {
-    const res = await fetch('/api/action/' + action, {method: 'POST'});
+    const res = await fetch('/api/action/' + action, {method:'POST'});
     const data = await res.json();
-    resBox.textContent = data.output || data.message;
+    resBox.textContent = data.output || data.message || '';
     if (!data.ok) resBox.classList.add('err');
-    else toast('✅ ' + action + ' terminé');
+    else toast('✓ ' + action + ' terminé', 'ok');
   } catch(e) {
-    resBox.textContent = '❌ Erreur réseau';
+    resBox.textContent = '✕ Erreur réseau';
     resBox.classList.add('err');
+    toast('✕ Erreur réseau', 'err');
   }
-  btn.disabled = false;
+  if (btn) btn.disabled = false;
 }
 
-// ─── Utils ──────────────────────────────────────────────────────────────────
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ─── Init ───────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════════════
 loadTableList();
-autoRefreshInterval = setInterval(loadLogs, 2000);
+autoRefreshTimer = setInterval(loadLogs, 2000);
 </script>
 </body>
 </html>
@@ -815,9 +1696,9 @@ def get_pk_for_table(table):
     cols = cur.fetchall()
     conn.close()
     for col in cols:
-        if col[5] == 1:  # col[5] = pk flag
+        if col[5] == 1:
             return col[1]
-    return cols[0][1]  # fallback : première colonne
+    return cols[0][1]
 
 @app.route("/api/tables")
 @login_required
@@ -838,7 +1719,6 @@ def api_table(table_name):
     columns = [d[0] for d in cur.description]
     pk_col = get_pk_for_table(table_name)
     pk_idx = columns.index(pk_col) if pk_col in columns else 0
-    # Convertir les IDs en string pour éviter la perte de précision JS (Number.MAX_SAFE_INTEGER)
     rows = [
         [str(cell) if i == pk_idx and cell is not None else cell for i, cell in enumerate(row)]
         for row in raw_rows
@@ -851,11 +1731,11 @@ def api_table(table_name):
 @login_required
 def api_edit():
     data = request.json
-    table = data.get("table")
-    pk    = data.get("pk")
-    pk_val= data.get("pk_val")
-    col   = data.get("col")
-    value = data.get("value")
+    table  = data.get("table")
+    pk     = data.get("pk")
+    pk_val = data.get("pk_val")
+    col    = data.get("col")
+    value  = data.get("value")
 
     if table not in get_all_tables():
         return jsonify({"ok": False, "error": "Table non autorisée"})
@@ -866,11 +1746,14 @@ def api_edit():
         try:
             value = int(value)
         except (ValueError, TypeError):
-            pass  # valeur texte, on la garde telle quelle
+            pass
 
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
-        cur.execute(f"UPDATE {table} SET {col} = ? WHERE CAST({pk} AS TEXT) = CAST(? AS TEXT)", (value, str(pk_val)))
+        cur.execute(
+            f"UPDATE {table} SET {col} = ? WHERE CAST({pk} AS TEXT) = CAST(? AS TEXT)",
+            (value, str(pk_val))
+        )
         rows_affected = cur.rowcount
         conn.commit()
         conn.close()
@@ -944,7 +1827,7 @@ def api_action(action):
             return jsonify({"ok": False, "output": output + "\n❌ Bot non disponible pour le reload"})
         import asyncio
         output_lines = [output]
-    
+
         async def do_reload():
             extensions = list(_bot_ref.extensions.keys())
             for ext in extensions:
@@ -953,7 +1836,7 @@ def api_action(action):
                     output_lines.append(f"✅ {ext}")
                 except Exception as e:
                     output_lines.append(f"❌ {ext}: {e}")
-    
+
         asyncio.run_coroutine_threadsafe(do_reload(), _bot_ref.loop).result(timeout=15)
         return jsonify({"ok": True, "output": "\n".join(output_lines)})
 
@@ -978,29 +1861,23 @@ def api_action(action):
 
     elif action == "restart_bot":
         threading.Timer(1.0, restart_bot_process).start()
-        return jsonify({"ok": True, "output": "⏳ Redémarrage en cours..."})
+        return jsonify({"ok": True, "output": "⏳ Redémarrage en cours…"})
 
     return jsonify({"ok": False, "output": "Action inconnue"})
 
 
 def restart_bot_process():
-    """Relance via start.sh pour que le tunnel soit aussi redémarré et l'URL recapturée."""
     print("🔄 Redémarrage complet via start.sh...")
-    
     start_sh = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start.sh")
-    
-    # Relance start.sh dans un nouveau processus indépendant
     subprocess.Popen(
         ["bash", start_sh],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         close_fds=True,
-        start_new_session=True  # détaché du processus actuel
+        start_new_session=True
     )
-    
-    # Laisse le temps au nouveau processus de démarrer, puis quitte
     time.sleep(1)
-    os.kill(os.getpid(), 9)  # kill brutal du processus actuel
+    os.kill(os.getpid(), 9)
 
 
 # ─── Lancement Flask (dans un thread) ─────────────────────────────────────────
