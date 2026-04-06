@@ -329,8 +329,8 @@ class ReiatsuSpawner(commands.Cog):
                 gain += 4
             elif classe == "Parieur":
                 gain = 0 if random.random() < 0.5 else random.randint(5, 12)
-            else:
-                # Bonus5 : tous les 5 reiatsu normaux → +6 au 5ème
+            elif classe is None:
+                # Bonus5 : uniquement pour les joueurs sans classe
                 bonus5 += 1
                 if bonus5 >= 5:
                     gain   = 6
