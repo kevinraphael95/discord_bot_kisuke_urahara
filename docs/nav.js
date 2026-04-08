@@ -46,7 +46,7 @@
   </ul>
   <div class="nav-right">
     <div class="theme-switcher" id="themeSwitcher">
-      <button class="theme-toggle" id="themeToggle" onclick="toggleThemeMenu()" title="Changer le thème">🎨</button>
+      <button class="theme-toggle" id="themeToggle" title="Changer le thème">🎨</button>
       <div class="theme-menu" id="themeMenu">
         <div class="theme-menu-title">Thème</div>
         ${themeOptions}
@@ -65,6 +65,11 @@
   </div>
 </div>
 `);
+
+  document.getElementById('themeToggle').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('themeMenu').classList.toggle('open');
+});
 
   // Active le bon bouton de thème
   function updateThemeButtons(themeId) {
