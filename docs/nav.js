@@ -1,4 +1,3 @@
-/* ── NAV CENTRALISÉE ─────────────────────────────────── */
 (function () {
   const pages = [
     { href: 'index.html',     label: 'Accueil' },
@@ -8,37 +7,100 @@
     { href: 'install.html',   label: 'Installation' },
   ];
 
-  // Détecte la page active
+  const themes = [
+    { id: 'soul-society', label: 'Soul Society', icon: '⚔️' },
+    { id: 'hueco-mundo',  label: 'Hueco Mundo',  icon: '🌑' },
+    { id: 'hollow',       label: 'Hollow',       icon: '💀' },
+    { id: 'gotei',        label: 'Gotei 13',     icon: '🌿' },
+  ];
+
+  // Applique le thème sauvegardé
+  const savedTheme = localStorage.getItem('kisuke-theme') || 'soul-society';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
   const current = location.pathname.split('/').pop() || 'index.html';
 
-  // Construit les liens nav
   const navLinks = pages.map(p => {
     const active = (current === p.href || (current === '' && p.href === 'index.html')) ? ' class="active"' : '';
     return `<li><a href="${p.href}"${active}>${p.label}</a></li>`;
   }).join('\n    ');
 
-  // Construit les liens drawer
   const drawerLinks = pages.map(p => {
     const active = (current === p.href || (current === '' && p.href === 'index.html')) ? ' class="active"' : '';
     return `<a href="${p.href}"${active} onclick="closeNav()">${p.label}</a>`;
   }).join('\n  ');
 
-  // Injecte la nav
+  const themeOptions = themes.map(t =>
+    `<button class="theme-opt" data-theme="${t.id}" title="${t.label}">${t.icon}</button>`
+  ).join('');
+
+  const drawerThemeOptions = themes.map(t =>
+    `<button class="drawer-theme-opt" data-theme="${t.id}">${t.icon} ${t.label}</button>`
+  ).join('');
+
   document.body.insertAdjacentHTML('afterbegin', `
 <nav>
   <a class="nav-logo" href="index.html">⚡ Kisuke <span>Bot</span></a>
   <ul class="nav-links">
     ${navLinks}
   </ul>
-  <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
+  <div class="nav-right">
+    <div class="theme-switcher" id="themeSwitcher">
+      <button class="theme-toggle" id="themeToggle" title="Changer le thème">🎨</button>
+      <div class="theme-menu" id="themeMenu">
+        <div class="theme-menu-title">Thème</div>
+        ${themeOptions}
+      </div>
+    </div>
+    <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
+  </div>
 </nav>
-
 <div class="drawer" id="drawer">
   ${drawerLinks}
+  <div class="drawer-theme-section">
+    <div class="drawer-theme-label">Thème visuel</div>
+    <div class="drawer-theme-btns">
+      ${drawerThemeOptions}
+    </div>
+  </div>
 </div>
 `);
 
-  // Fonctions hamburger
+  document.getElementById('themeToggle').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('themeMenu').classList.toggle('open');
+});
+
+  // Active le bon bouton de thème
+  function updateThemeButtons(themeId) {
+    document.querySelectorAll('.theme-opt, .drawer-theme-opt').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === themeId);
+    });
+  }
+  updateThemeButtons(savedTheme);
+
+  // Clic sur un bouton de thème
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-theme]');
+    if (btn) {
+      const t = btn.dataset.theme;
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('kisuke-theme', t);
+      updateThemeButtons(t);
+      // ferme le menu
+      document.getElementById('themeMenu').classList.remove('open');
+    }
+    // Ferme le menu thème si clic dehors
+    if (!e.target.closest('#themeSwitcher')) {
+      const m = document.getElementById('themeMenu');
+      if (m) m.classList.remove('open');
+    }
+  });
+
+  window.toggleThemeMenu = function () {
+    document.getElementById('themeMenu').classList.toggle('open');
+  };
+
   window.toggleNav = function () {
     document.getElementById('ham').classList.toggle('open');
     document.getElementById('drawer').classList.toggle('open');
