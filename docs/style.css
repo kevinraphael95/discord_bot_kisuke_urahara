@@ -224,6 +224,7 @@ nav {
   border-bottom: 1px solid var(--gold-line);
   backdrop-filter: blur(14px);
   transition: border-color .4s;
+  overflow: visible;
 }
 
 .nav-logo {
