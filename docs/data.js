@@ -89,7 +89,7 @@ const CHARS = [
   {n:"As Nodt",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:5,st:"Mort",hc:"Noir",bday:"??/??",w:3,l:1,draw:0},
   {n:"Lille Barro",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:5,st:"Mort",hc:"Blanc",bday:"??/??",w:3,l:1,draw:0},
   {n:"Gerard Valkyrie",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:5,st:"Incertain",hc:"Blanc",bday:"??/??",w:3,l:1,draw:0},
-  {n:"Pernida Parnkgjas",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:5,st:"Mort",hc:"Blanc",bday:"??/??",w:3,l:1,draw:0},
+  {n:"Pernida Parnkgjas",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:5,st:"Mort",hc:"Chauve",bday:"??/??",w:3,l:1,draw:0},
   {n:"Askin Nakk Le Vaar",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:5,st:"Mort",hc:"Brun",bday:"??/??",w:3,l:1,draw:0},
   {n:"Gremmy Thoumeaux",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:5,st:"Mort",hc:"Blanc",bday:"??/??",w:2,l:1,draw:0},
   {n:"Bazz-B",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Mort",hc:"Rouge",bday:"??/??",w:2,l:2,draw:0},
