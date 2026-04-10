@@ -53,10 +53,10 @@ const CHARS = [
   // ============================================================
   {n:"Genryusai Yamamoto",    r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:5, st:"Mort",      hc:"Blanc",  bday:"21/01", w:5,  l:1,  draw:0}, // Cap Div 1 — tué par Yhwach
   {n:"Retsu Unohana",         r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:5, st:"Mort",      hc:"Noir",   bday:"21/04", w:3,  l:1,  draw:0}, // Cap Div 4 — tuée par Zaraki
-  {n:"Sosuke Aizen",          r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:5, st:"Vivant",    hc:"Brun",   bday:"29/05", w:12, l:1,  draw:0}, // Cap Div 5 — emprisonné
+  {n:"Sosuke Aizen",          r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Indépendant", d:5, st:"Vivant",    hc:"Brun",   bday:"29/05", w:12, l:1,  draw:0}, // Cap Div 5 — emprisonné
   {n:"Sajin Komamura",        r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Incertain", hc:"Roux",   bday:"23/08", w:4,  l:3,  draw:0}, // Cap Div 7 — redevenu mortel
-  {n:"Kaname Tousen",         r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Mort",      hc:"Noir",   bday:"13/10", w:3,  l:2,  draw:0}, // Cap Div 9 — tué par Hisagi
-  {n:"Gin Ichimaru",          r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:5, st:"Mort",      hc:"Argent", bday:"10/09", w:4,  l:1,  draw:0}, // Cap Div 3 — tué par Aizen
+  {n:"Kaname Tousen",         r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Indépendant", d:4, st:"Mort",      hc:"Noir",   bday:"13/10", w:3,  l:2,  draw:0}, // Cap Div 9 — tué par Hisagi
+  {n:"Gin Ichimaru",          r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Indépendant", d:5, st:"Mort",      hc:"Argent", bday:"10/09", w:4,  l:1,  draw:0}, // Cap Div 3 — tué par Aizen
   {n:"Jushiro Ukitake",       r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1}, // Cap Div 13 — mort au TYBW
   {n:"Ginrei Kuchiki",        r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:1,  l:0,  draw:0}, // Ancien cap Div 6
 
