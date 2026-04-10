@@ -61,7 +61,7 @@ const CHARS = [
   {n:"Ginrei Kuchiki",        r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:1,  l:0,  draw:0}, // Ancien cap Div 6
 
   // ============================================================
-  // GOTEI 13 — VICE-CAPITAINES ACTUELS (épilogue, 10 ans après TYBW)
+  // GOTEI 13 — VICE-CAPITAINES TYBW
   // ============================================================
   {n:"Nanao Ise",             r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/07", w:2,  l:1,  draw:0}, // Vice-cap Div 1
   {n:"Genshiro Okikiba",      r:"Shinigami",sx:"M", arc:"Thousand-Year Blood War",  af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0}, // Vice-cap Div 1 (co)
@@ -88,7 +88,6 @@ const CHARS = [
   // ============================================================
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
   // ============================================================
-  {n:"Ikkaku Madarame",       r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"08/11", w:4,  l:3,  draw:0},
   {n:"Yumichika Ayasegawa",   r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"19/09", w:3,  l:1,  draw:0},
   {n:"Hanataro Yamada",       r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:1, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0},
 
@@ -146,6 +145,13 @@ const CHARS = [
   // HOLLOWS
   // ============================================================
   {n:"Grand Fisher",          r:"Hollow",   sx:"M", arc:"Agent of Shinigami",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Roux",   bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Acidwire",              r:"Hollow",   sx:"M", arc:"Agent of Shinigami",       af:"Hueco Mundo", d:1, st:"Mort",      hc:"Noir",   bday:"??/??", w:0,  l:1,  draw:0}, // frère d'Orihime
+  {n:"Shrieker",              r:"Hollow",   sx:"M", arc:"Agent of Shinigami",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Metastacia",            r:"Hollow",   sx:"M", arc:"Soul Society",             af:"Hueco Mundo", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0}, // tue Kaien Shiba
+  {n:"Runuganga",             r:"Hollow",   sx:"M", arc:"Hueco Mundo",              af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Fishbone D",            r:"Hollow",   sx:"M", arc:"Agent of Shinigami",       af:"Hueco Mundo", d:1, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0}, // tout premier Hollow du manga
+  {n:"Bulbous G",             r:"Hollow",   sx:"M", arc:"Agent of Shinigami",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Hexapodus",             r:"Hollow",   sx:"M", arc:"Agent of Shinigami",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
 
   // ============================================================
   // FULLBRING — XCUTION
