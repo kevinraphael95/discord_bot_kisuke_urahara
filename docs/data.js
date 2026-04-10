@@ -190,16 +190,16 @@ const CHARS = [
   {n:"Quilge Opie",           r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0}, // J — The Jail
   {n:"BG9",                   r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0}, // K — The Puppet
   {n:"PePe Waccabrada",       r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0}, // L — The Love
-  {n:"Mask De Masculine",     r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0}, // S — The Superstar
-  {n:"Candice Catnipp",       r:"Quincy",   sx:"F", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Vivant",    hc:"Vert",   bday:"??/??", w:2,  l:1,  draw:0}, // T — The Thunderbolt
-  {n:"NaNaNa Najahkoop",      r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0}, // U — The Underbelly
-  {n:"Gremmy Thoumeaux",      r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:5, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0}, // V — The Visionary
-  {n:"Nianzol Weizol",        r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0}, // W — The Wind
   {n:"Robert Accutrone",      r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Blanc",  bday:"??/??", w:1,  l:1,  draw:0}, // N — The Needle (tué par Kyoraku)
   {n:"Driscoll Berci",        r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0}, // O — The Overkill (tué par Yamamoto)
   {n:"Meninas McAllon",       r:"Quincy",   sx:"F", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Vivant",    hc:"Rose",   bday:"??/??", w:2,  l:1,  draw:0}, // P — The Power
   {n:"Berenice Gabrielli",    r:"Quincy",   sx:"F", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0}, // Q — The Question (tuée par Zaraki)
   {n:"Jerome Guizbatt",       r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0}, // R — The Roar (tué par Zaraki)
+  {n:"Mask De Masculine",     r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0}, // S — The Superstar
+  {n:"Candice Catnipp",       r:"Quincy",   sx:"F", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Vivant",    hc:"Vert",   bday:"??/??", w:2,  l:1,  draw:0}, // T — The Thunderbolt
+  {n:"NaNaNa Najahkoop",      r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0}, // U — The Underbelly
+  {n:"Gremmy Thoumeaux",      r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:5, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0}, // V — The Visionary
+  {n:"Nianzol Weizol",        r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0}, // W — The Wind
   {n:"Royd Lloyd",            r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0}, // Y — The Yourself (tué par Yamamoto)
   {n:"Loyd Lloyd",            r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0}, // Y — The Yourself (tué par Zaraki)
   {n:"Giselle Gewelle",       r:"Quincy",   sx:"F", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Vivant",    hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0}, // Z — The Zombie
