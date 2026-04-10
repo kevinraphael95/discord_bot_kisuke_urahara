@@ -49,7 +49,7 @@
     <div id="hd">Devinez le personnage Bleach du jour en max <strong>8 essais</strong>.</div>
     <div id="hs" style="display:none">Personnages aléatoires à la chaîne — <strong>8 essais par personnage</strong>.<br>Raté → <strong>☠ Game Over !</strong></div>
     <div class="leg"><div class="sw g"></div><span>Correct — même valeur</span></div>
-    <div class="leg"><div class="sw y"></div><span>Proche — FORCE ±1 · même mois · victoires ±2</span></div>
+    <div class="leg"><div class="sw y"></div><span>Proche — FORCE ±1 · arc adjacent · même mois · victoires ±2</span></div>
     <div class="leg"><div class="sw r"></div><span>Incorrect — ▲ plus tard dans l'année · ▼ plus tôt</span></div>
     <b>Colonnes :</b> Race · Sexe · Arc · Affiliation · FORCE · Statut · Cheveux · Anniversaire · Combats
   </div>
@@ -127,6 +127,16 @@ function bdayToDay(bday){
   return cum[mo-1]+d;
 }
 
+  const ARC_ORDER = [
+  'Agent des Shinigami',
+  'Soul Society',
+  'Arrancar',
+  'Hueco Mundo',
+  'Fake Karakura Town',
+  'Fullbring',
+  'Millénaire du Sang',
+];
+
 function cmp(m,t){
   const dd=Math.abs(m.d-t.d),dw=Math.abs(m.w-t.w);
   const sameBd=m.bday===t.bday;
@@ -142,7 +152,16 @@ function cmp(m,t){
   return[
     {v:m.r,   s:m.r===t.r?'correct':'wrong',a:''},
     {v:m.sx,  s:m.sx===t.sx?'correct':'wrong',a:''},
-    {v:m.arc, s:m.arc===t.arc?'correct':'wrong',a:''},
+    {v:m.arc, s:(()=>{
+  if(m.arc===t.arc) return 'correct';
+  const mi=ARC_ORDER.indexOf(m.arc), ti=ARC_ORDER.indexOf(t.arc);
+  return (mi>=0&&ti>=0&&Math.abs(mi-ti)===1)?'close':'wrong';
+})(), a:(()=>{
+  if(m.arc===t.arc) return '';
+  const mi=ARC_ORDER.indexOf(m.arc), ti=ARC_ORDER.indexOf(t.arc);
+  if(mi<0||ti<0) return '';
+  return mi<ti?'▲':'▼';
+})()},
     {v:m.af,  s:m.af===t.af?'correct':'wrong',a:''},
     {v:'★'.repeat(m.d)+'☆'.repeat(5-m.d),s:m.d===t.d?'correct':dd===1?'close':'wrong',a:m.d<t.d?'▲':m.d>t.d?'▼':''},
     {v:m.st,  s:m.st===t.st?'correct':'wrong',a:''},
