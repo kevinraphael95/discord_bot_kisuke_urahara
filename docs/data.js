@@ -15,7 +15,7 @@ const CHARS = [
   {n:"Kukaku Shiba",          r:"Humain",   sx:"F", arc:"Soul Society",             af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
 
   // ============================================================
-  // URAHARA SHOTEN
+  // URAHARA SHOP
   // ============================================================
   {n:"Kisuke Urahara",        r:"Shinigami",sx:"M", arc:"Agent of Shinigami",       af:"Indépendant", d:5, st:"Vivant",    hc:"Blond",  bday:"31/12", w:10, l:1,  draw:1},
   {n:"Yoruichi Shihoin",      r:"Shinigami",sx:"F", arc:"Agent of Shinigami",       af:"Indépendant", d:5, st:"Vivant",    hc:"Violet", bday:"01/01", w:8,  l:1,  draw:0},
@@ -24,11 +24,16 @@ const CHARS = [
   {n:"Ururu Tsumugiya",       r:"Humain",   sx:"F", arc:"Agent of Shinigami",       af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
 
   // ============================================================
-  // GOTEI 13 — CAPITAINES (postes finaux après TYBW)
-  // Div 1 Kyoraku | 2 Soi Fon | 3 Rose | 4 Isane | 5 Shinji
-  // Div 6 Byakuya | 8 Lisa | 9 Kensei | 10 Hitsugaya
-  // Div 11 Zaraki | 12 Mayuri | 13 Rukia
-  // (Div 7 : Iba Tetsuzaemon — hors scope)
+  // DIVISION ZÉRO — ROYAL GUARD
+  // ============================================================
+  {n:"Ichibei Hyosube",       r:"Shinigami",sx:"M", arc:"Thousand-Year Blood War",  af:"Division Zero", d:5, st:"Vivant",    hc:"Blanc",  bday:"??/??", w:4,  l:0,  draw:0},
+  {n:"Oetsu Nimaiya",         r:"Shinigami",sx:"M", arc:"Thousand-Year Blood War",  af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",   bday:"??/??", w:3,  l:0,  draw:0},
+  {n:"Tenjiro Kirinji",       r:"Shinigami",sx:"M", arc:"Thousand-Year Blood War",  af:"Division Zero", d:5, st:"Vivant",    hc:"Rouge",  bday:"??/??", w:2,  l:0,  draw:0},
+  {n:"Kirio Hikifune",        r:"Shinigami",sx:"F", arc:"Thousand-Year Blood War",  af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",   bday:"??/??", w:2,  l:0,  draw:0},
+  {n:"Shutara Senjumaru",     r:"Shinigami",sx:"F", arc:"Thousand-Year Blood War",  af:"Division Zero", d:5, st:"Vivant",    hc:"Blanc",  bday:"??/??", w:2,  l:0,  draw:0},
+  
+  // ============================================================
+  // GOTEI 13 — CAPITAINES
   // ============================================================
   {n:"Shunsui Kyoraku",       r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:5, st:"Vivant",    hc:"Brun",   bday:"11/07", w:6,  l:1,  draw:1}, // Cap-Commandant Div 1
   {n:"Soi Fon",               r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"11/02", w:5,  l:2,  draw:1}, // Cap Div 2
@@ -56,19 +61,30 @@ const CHARS = [
   {n:"Ginrei Kuchiki",        r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:1,  l:0,  draw:0}, // Ancien cap Div 6
 
   // ============================================================
-  // GOTEI 13 — VICE-CAPITAINES
+  // GOTEI 13 — VICE-CAPITAINES ACTUELS (épilogue, 10 ans après TYBW)
   // ============================================================
-  {n:"Chojiro Sasakibe",      r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Mort",      hc:"Brun",   bday:"04/11", w:0,  l:1,  draw:0}, // Vice-cap Div 1 — tué au TYBW
+  {n:"Nanao Ise",             r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/07", w:2,  l:1,  draw:0}, // Vice-cap Div 1
+  {n:"Genshiro Okikiba",      r:"Shinigami",sx:"M", arc:"Thousand-Year Blood War",  af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0}, // Vice-cap Div 1 (co)
   {n:"Marenoshin Omaeda",     r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0}, // Vice-cap Div 2
-  {n:"Izuru Kira",            r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0}, // Vice-cap Div 3 — état incertain après TYBW
+  {n:"Izuru Kira",            r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0}, // Vice-cap Div 3
+  {n:"Kiyone Kotetsu",        r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Vert",   bday:"??/??", w:1,  l:1,  draw:0}, // Vice-cap Div 4
   {n:"Momo Hinamori",         r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Brun",   bday:"03/06", w:2,  l:3,  draw:0}, // Vice-cap Div 5
   {n:"Renji Abarai",          r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0}, // Vice-cap Div 6
-  {n:"Nanao Ise",             r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/07", w:2,  l:1,  draw:0}, // Vice-cap Div 8
+  {n:"Atau Rindo",            r:"Shinigami",sx:"M", arc:"Thousand-Year Blood War",  af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0}, // Vice-cap Div 7
+  {n:"Yuyu Yayahara",         r:"Shinigami",sx:"F", arc:"Thousand-Year Blood War",  af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0}, // Vice-cap Div 8
   {n:"Shuhei Hisagi",         r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0}, // Vice-cap Div 9
   {n:"Rangiku Matsumoto",     r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"29/09", w:3,  l:3,  draw:0}, // Vice-cap Div 10
-  {n:"Yachiru Kusajishi",     r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1}, // Vice-cap Div 11 — disparaît (esprit zanpakuto)
-  {n:"Nemu Kurotsuchi",       r:"Mod-Soul", sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0}, // Vice-cap Div 12 — morte au TYBW
+  {n:"Ikkaku Madarame",       r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"08/11", w:4,  l:3,  draw:0}, // Vice-cap Div 11
+  {n:"Akon",                  r:"Shinigami",sx:"M", arc:"Thousand-Year Blood War",  af:"Gotei 13",    d:2, st:"Vivant",    hc:"Violet", bday:"??/??", w:1,  l:0,  draw:0}, // Vice-cap Div 12
+  {n:"Sentaro Kotsubaki",     r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0}, // Vice-cap Div 13
 
+  // ============================================================
+  // GOTEI 13 — ANCIENS VICE-CAPITAINES
+  // ============================================================
+  {n:"Chojiro Sasakibe",      r:"Shinigami",sx:"M", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Mort",      hc:"Brun",   bday:"04/11", w:0,  l:1,  draw:0}, // Vice-cap Div 1 — tué au TYBW
+  {n:"Yachiru Kusajishi",     r:"Shinigami",sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1}, // Vice-cap Div 11 — disparaît (esprit zanpakuto de Zaraki)
+  {n:"Nemu Kurotsuchi",       r:"Mod-Soul", sx:"F", arc:"Soul Society",             af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0}, // Vice-cap Div 12 — morte au TYBW
+  
   // ============================================================
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
   // ============================================================
