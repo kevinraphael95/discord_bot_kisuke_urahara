@@ -5,7 +5,7 @@ const CHARS = [
   // ============================================================
   // PROTAGONISTES & KARAKURA
   // ============================================================
-  {n:"Ichigo Kurosaki",       r:"Humain",   sx:"M", arc:"Agent of Shinigami",       af:"Karakura",    d:5, st:"Vivant",    hc:"Orange", bday:"15/07", w:28, l:6,  draw:2},
+  {n:"Ichigo Kurosaki",       r:"Humain",   sx:"M", arc:"Agent of Shinigami",       af:"Karakura",    d:5, st:"Vivant",    hc:"Roux", bday:"15/07", w:28, l:6,  draw:2},
   {n:"Orihime Inoue",         r:"Humain",   sx:"F", arc:"Agent of Shinigami",       af:"Karakura",    d:2, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1},
   {n:"Yasutora Sado",         r:"Humain",   sx:"M", arc:"Agent of Shinigami",       af:"Karakura",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/04", w:6,  l:4,  draw:0},
   {n:"Uryuu Ishida",          r:"Quincy",   sx:"M", arc:"Agent of Shinigami",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1},
