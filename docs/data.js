@@ -171,7 +171,7 @@ const CHARS = [
   {n:"Riruka Dokugamine",     r:"Fullbring",sx:"F", arc:"Arc Fullbringers (4)",              af:"Xcution",     d:3, st:"Vivant",    hc:"Rouge",  bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Yukio Hans Vorarlberna",r:"Fullbring",sx:"M", arc:"Arc Fullbringers (4)",              af:"Xcution",     d:3, st:"Vivant",    hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Jackie Tristan",        r:"Fullbring",sx:"F", arc:"Arc Fullbringers (4)",              af:"Xcution",     d:3, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Giriko Kutsuzawa",      r:"Fullbring",sx:"M", arc:"Arc Fullbringers (4)",              af:"Xcution",     d:3, st:"Mort",      hc:"Blond",  bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Giriko Kutsuzawa",      r:"Fullbring",sx:"M", arc:"Arc Fullbringers (4)",              af:"Xcution",     d:3, st:"Mort",      hc:"Noir",  bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Moe Shishigawara",      r:"Fullbring",sx:"M", arc:"Arc Fullbringers (4)",              af:"Xcution",     d:2, st:"Vivant",    hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0},
 
   // ============================================================
