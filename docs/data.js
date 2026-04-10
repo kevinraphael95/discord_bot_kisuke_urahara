@@ -154,7 +154,7 @@ const CHARS = [
   // ============================================================
   // HOLLOWS
   // ============================================================
-  {n:"Grand Fisher",          r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Roux",   bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Grand Fisher",          r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
   {n:"Acidwire",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:1, st:"Mort",      hc:"Noir",   bday:"??/??", w:0,  l:1,  draw:0},
   {n:"Shrieker",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Metastacia",            r:"Hollow",   sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Hueco Mundo", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
