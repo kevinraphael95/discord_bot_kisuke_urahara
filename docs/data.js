@@ -133,7 +133,7 @@ const CHARS = [
   // ============================================================
   {n:"Loly Aivirrne",         r:"Arrancar", sx:"F", arc:"Arrancar",                 af:"Espada",      d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:2,  draw:0},
   {n:"Menoly Mallia",         r:"Arrancar", sx:"F", arc:"Arrancar",                 af:"Espada",      d:2, st:"Incertain", hc:"Blond",  bday:"??/??", w:0,  l:2,  draw:0},
-  {n:"Shawlong Koufang",      r:"Arrancar", sx:"M", arc:"Arrancar",                 af:"Espada",      d:3, st:"Mort",      hc:"Bleu",   bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Shawlong Koufang",      r:"Arrancar", sx:"M", arc:"Arrancar",                 af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Findorr Calius",        r:"Arrancar", sx:"M", arc:"Fake Karakura",            af:"Espada",      d:3, st:"Mort",      hc:"Blond",  bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Charlotte Cuuhlhourne", r:"Arrancar", sx:"M", arc:"Fake Karakura",            af:"Espada",      d:3, st:"Mort",      hc:"Blond",  bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Dordoni Alessandro",    r:"Arrancar", sx:"M", arc:"Hueco Mundo",              af:"Hueco Mundo", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:2,  l:2,  draw:0}, // Privaron Espada
