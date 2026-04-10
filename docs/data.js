@@ -103,6 +103,7 @@ const CHARS = [
   // ESPADA (par numéro tatoué : 1 → 10)
   // ============================================================
   {n:"Coyote Starrk",         r:"Arrancar", sx:"M", arc:"Arrancar",                 af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"??/??", w:4,  l:1,  draw:0}, // Espada 1
+  {n:"Lilynette Gingerbuck",  r:"Arrancar", sx:"F", arc:"Arrancars",                af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0}, // Fracción de Starrk — fusionnée avec lui
   {n:"Baraggan Louisenbairn", r:"Arrancar", sx:"M", arc:"Fake Karakura",            af:"Espada",      d:5, st:"Mort",      hc:"Chauve", bday:"??/??", w:3,  l:1,  draw:0}, // Espada 2
   {n:"Tier Harribel",         r:"Arrancar", sx:"F", arc:"Fake Karakura",            af:"Espada",      d:5, st:"Vivant",    hc:"Blond",  bday:"??/??", w:3,  l:1,  draw:0}, // Espada 3
   {n:"Ulquiorra Cifer",       r:"Arrancar", sx:"M", arc:"Arrancar",                 af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:5,  l:1,  draw:0}, // Espada 4
