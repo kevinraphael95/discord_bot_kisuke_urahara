@@ -95,7 +95,7 @@ const CHARS = [
   {n:"Bazz-B",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Mort",hc:"Rouge",bday:"??/??",w:2,l:2,draw:0},
   {n:"Cang Du",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Mort",hc:"Blanc",bday:"??/??",w:2,l:1,draw:0},
   {n:"BG9",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Mort",hc:"Chauve",bday:"??/??",w:2,l:1,draw:0},
-  {n:"PePe Waccabrada",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Mort",hc:"Blanc",bday:"??/??",w:2,l:1,draw:0},
+  {n:"PePe Waccabrada",r:"Quincy",sx:"M",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Mort",hc:"Chauve",bday:"??/??",w:2,l:1,draw:0},
   {n:"Liltotto Lamperd",r:"Quincy",sx:"F",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Vivant",hc:"Blond",bday:"??/??",w:3,l:1,draw:0},
   {n:"Bambietta Basterbine",r:"Quincy",sx:"F",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Mort",hc:"Noir",bday:"??/??",w:2,l:1,draw:0},
   {n:"Candice Catnipp",r:"Quincy",sx:"F",arc:"Thousand-Year Blood War",af:"Wandenreich",d:4,st:"Vivant",hc:"Vert",bday:"??/??",w:2,l:1,draw:0},
