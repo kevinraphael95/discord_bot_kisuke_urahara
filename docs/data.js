@@ -190,7 +190,7 @@ const CHARS = [
   {n:"Cang Du",               r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0}, // I — The Iron
   {n:"Quilge Opie",           r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0}, // J — The Jail
   {n:"BG9",                   r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0}, // K — The Puppet
-  {n:"PePe Waccabrada",       r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0}, // L — The Love
+  {n:"PePe Waccabrada",       r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve",  bday:"??/??", w:2,  l:1,  draw:0}, // L — The Love
   {n:"Robert Accutrone",      r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Blanc",  bday:"??/??", w:1,  l:1,  draw:0}, // N — The Needle (tué par Kyoraku)
   {n:"Driscoll Berci",        r:"Quincy",   sx:"M", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0}, // O — The Overkill (tué par Yamamoto)
   {n:"Meninas McAllon",       r:"Quincy",   sx:"F", arc:"Thousand-Year Blood War",  af:"Wandenreich", d:4, st:"Vivant",    hc:"Rose",   bday:"??/??", w:2,  l:1,  draw:0}, // P — The Power
