@@ -49,9 +49,9 @@
     <div id="hd">Devinez le personnage Bleach du jour en max <strong>8 essais</strong>.</div>
     <div id="hs" style="display:none">Personnages aléatoires à la chaîne — <strong>8 essais par personnage</strong>.<br>Raté → <strong>☠ Game Over !</strong></div>
     <div class="leg"><div class="sw g"></div><span>Correct — même valeur</span></div>
-    <div class="leg"><div class="sw y"></div><span>Proche — danger ±1 · même mois · victoires ±2</span></div>
+    <div class="leg"><div class="sw y"></div><span>Proche — FORCE ±1 · même mois · victoires ±2</span></div>
     <div class="leg"><div class="sw r"></div><span>Incorrect — ▲ plus tard dans l'année · ▼ plus tôt</span></div>
-    <b>Colonnes :</b> Race · Sexe · Arc · Affiliation · Danger · Statut · Cheveux · Anniversaire · Combats
+    <b>Colonnes :</b> Race · Sexe · Arc · Affiliation · FORCE · Statut · Cheveux · Anniversaire · Combats
   </div>
 
   <div class="flash" id="flash"></div>
@@ -67,7 +67,7 @@
   <div class="tw">
     <div class="th">
       <div>PERSONNAGE</div><div>RACE</div><div>SEXE</div><div>ARC</div>
-      <div>AFFIL.</div><div>DANGER</div><div>STATUT</div><div>CHEVEUX</div><div>ANNIV.</div><div>COMBATS</div>
+      <div>AFFIL.</div><div>FORCE</div><div>STATUT</div><div>CHEVEUX</div><div>ANNIV.</div><div>COMBATS</div>
     </div>
     <div id="gr"></div>
   </div>
@@ -104,7 +104,7 @@
 <script>
 const COLS=[
   {k:'r',lb:'RACE'},{k:'sx',lb:'SEXE'},{k:'arc',lb:'ARC'},
-  {k:'af',lb:'AFFIL.'},{k:'d',lb:'DANGER'},{k:'st',lb:'STATUT'},
+  {k:'af',lb:'AFFIL.'},{k:'d',lb:'FORCE'},{k:'st',lb:'STATUT'},
   {k:'hc',lb:'CHEVEUX'},{k:'bday',lb:'ANNIV.'},{k:'wl',lb:'COMBATS'},
 ];
 const MAX=8;
