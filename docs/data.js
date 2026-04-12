@@ -20,16 +20,16 @@ const CHARS = [
   {n:"Uryuu Ishida",          r:"Quincy",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1},
   {n:"Isshin Kurosaki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0},
   {n:"Kon",                   r:"Mod-Soul", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",  bday:"??/??", w:1,  l:3,  draw:0},
-  {n:"Don Kanonji",           r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"23/03", w:0, l:0, draw:0},
+  {n:"Don Kanonji",           r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"23/03", w:0,  l:0,  draw:0},
   {n:"Ganju Shiba",           r:"Humain",   sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"02/11", w:2,  l:2,  draw:0},
   {n:"Kukaku Shiba",          r:"Humain",   sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
-  {n:"Masaki Kurosaki",       r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Mort",      hc:"Noir",   bday:"09/06", w:0, l:0, draw:0},
-  {n:"Karin Kurosaki",        r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/06", w:0, l:0, draw:0},
-  {n:"Yuzu Kurosaki",         r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/06", w:0, l:0, draw:0},
-  {n:"Tatsuki Arisawa",       r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"17/07", w:1, l:0, draw:0},
-  {n:"Keigo Asano",           r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"01/04", w:0, l:0, draw:0},
-  {n:"Mizuiro Kojima",        r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0, l:0, draw:0},
-  {n:"Chizuru Honsho",        r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"??/??", w:0, l:0, draw:0},
+  {n:"Masaki Kurosaki",       r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Mort",      hc:"Noir",   bday:"09/06", w:0,  l:0,  draw:0},
+  {n:"Karin Kurosaki",        r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/06", w:0,  l:0,  draw:0},
+  {n:"Yuzu Kurosaki",         r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/06", w:0,  l:0,  draw:0},
+  {n:"Tatsuki Arisawa",       r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"17/07", w:1,  l:0,  draw:0},
+  {n:"Keigo Asano",           r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"01/04", w:0,  l:0,  draw:0},
+  {n:"Mizuiro Kojima",        r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
+  {n:"Chizuru Honsho",        r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"??/??", w:0,  l:0,  draw:0},
   
   // ============================================================
   // URAHARA SHOP
@@ -52,18 +52,18 @@ const CHARS = [
   // ============================================================
   // GOTEI 13 — CAPITAINES
   // ============================================================
-  {n:"Shunsui Kyoraku",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Brun",   bday:"11/07", w:6,  l:1,  draw:1},
-  {n:"Soi Fon",               r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"11/02", w:5,  l:2,  draw:1},
-  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Gotei 13",   d:4, st:"Vivant",    hc:"Blond",  bday:"16/01", w:2,  l:2,  draw:0},
-  {n:"Isane Kotetsu",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"08/08", w:1,  l:1,  draw:0},
+  {n:"Shunsui Kyoraku",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:5, st:"Vivant",    hc:"Brun",   bday:"11/07", w:6,  l:1,  draw:1},
+  {n:"Soi Fon",               r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"11/02", w:5,  l:2,  draw:1},
+  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"16/01", w:2,  l:2,  draw:0},
+  {n:"Isane Kotetsu",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"08/08", w:1,  l:1,  draw:0},
   {n:"Shinji Hirako",         r:"Vizard",   sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"15/05", w:3,  l:2,  draw:0},
-  {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",         af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0},
-  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Gotei 13",   d:4, st:"Vivant",    hc:"Noir",   bday:"03/07", w:2,  l:2,  draw:0},
-  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Gotei 13",   d:4, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0},
-  {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0},
-  {n:"Kenpachi Zaraki",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"19/11", w:9,  l:2,  draw:1},
-  {n:"Mayuri Kurotsuchi",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"30/03", w:6,  l:1,  draw:0},
-  {n:"Rukia Kuchiki",         r:"Shinigami",sx:"F", arc:"Le Shinigami Remplaçant (1)",         af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"14/01", w:9,  l:3,  draw:0},
+  {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",           af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0},
+  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"03/07", w:2,  l:2,  draw:0},
+  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:4, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0},
+  {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:5, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0},
+  {n:"Kenpachi Zaraki",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"19/11", w:9,  l:2,  draw:1},
+  {n:"Mayuri Kurotsuchi",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"30/03", w:6,  l:1,  draw:0},
+  {n:"Rukia Kuchiki",         r:"Shinigami",sx:"F", arc:"Le Shinigami Remplaçant (1)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"14/01", w:9,  l:3,  draw:0},
 
   // ============================================================
   // GOTEI 13 — ANCIENS CAPITAINES
