@@ -126,7 +126,7 @@ const CHARS = [
   // ============================================================
   // EX-ESPADA & ARRANCAR NOTABLES
   // ============================================================
-  {n:"Nelliel Tu Odelschwanck",r:"Arrancar",sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Invasion du Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",   bday:"??/??", w:4,  l:1,  draw:0},
+  {n:"Nelliel Tu Odelschwanck",r:"Arrancar",sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",   bday:"??/??", w:4,  l:1,  draw:0},
   {n:"Luppi Antenor",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Wonderweiss Margela",   r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0},
 
@@ -145,23 +145,23 @@ const CHARS = [
   {n:"Shawlong Koufang",      r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Findorr Calius",        r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:3, st:"Mort",      hc:"Blond",  bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Charlotte Cuuhlhourne", r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:3, st:"Mort",      hc:"Blond",  bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Dordoni Alessandro",    r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Invasion du Hueco Mundo", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:2,  l:2,  draw:0},
-  {n:"Cirucci Sanderwicci",   r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Invasion du Hueco Mundo", d:3, st:"Mort",      hc:"Violet", bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Gantenbainne Mosqueda", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Invasion du Hueco Mundo", d:3, st:"Mort",      hc:"Blanc",  bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Pesche Guatiche",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Invasion du Hueco Mundo", d:2, st:"Vivant",    hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
-  {n:"Dondochakka Birstanne", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Invasion du Hueco Mundo", d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Dordoni Alessandro",    r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:2,  l:2,  draw:0},
+  {n:"Cirucci Sanderwicci",   r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:3, st:"Mort",      hc:"Violet", bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Gantenbainne Mosqueda", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:3, st:"Mort",      hc:"Blanc",  bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Pesche Guatiche",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Dondochakka Birstanne", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:1,  draw:0},
 
   // ============================================================
   // HOLLOWS
   // ============================================================
-  {n:"Grand Fisher",          r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Invasion du Hueco Mundo", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
-  {n:"Acidwire",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Invasion du Hueco Mundo", d:1, st:"Mort",      hc:"Noir",   bday:"??/??", w:0,  l:1,  draw:0},
-  {n:"Shrieker",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Invasion du Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Metastacia",            r:"Hollow",   sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Invasion du Hueco Mundo", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Runuganga",             r:"Hollow",   sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Invasion du Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
-  {n:"Fishbone D",            r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Invasion du Hueco Mundo", d:1, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
-  {n:"Bulbous G",             r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Invasion du Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
-  {n:"Hexapodus",             r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Invasion du Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Grand Fisher",          r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Acidwire",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:1, st:"Mort",      hc:"Noir",   bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Shrieker",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Metastacia",            r:"Hollow",   sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Hueco Mundo", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Runuganga",             r:"Hollow",   sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Fishbone D",            r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:1, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Bulbous G",             r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
+  {n:"Hexapodus",             r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
 
   // ============================================================
   // FULLBRING — XCUTION
