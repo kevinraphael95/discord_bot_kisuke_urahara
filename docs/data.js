@@ -12,7 +12,7 @@
 const CHARS = [
 
   // ============================================================
-  // PROTAGONISTES & KARAKURA
+  // PROTAGONISTES, FAMILLE DE ICHIGO & HUMAINS DE KARAKURA
   // ============================================================
   {n:"Ichigo Kurosaki",       r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Roux",   bday:"15/07", w:28, l:6,  draw:2},
   {n:"Orihime Inoue",         r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:2, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1},
@@ -20,9 +20,17 @@ const CHARS = [
   {n:"Uryuu Ishida",          r:"Quincy",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1},
   {n:"Isshin Kurosaki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0},
   {n:"Kon",                   r:"Mod-Soul", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",  bday:"??/??", w:1,  l:3,  draw:0},
+  {n:"Don Kanonji",           r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"23/03", w:0, l:0, draw:0},
   {n:"Ganju Shiba",           r:"Humain",   sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"02/11", w:2,  l:2,  draw:0},
   {n:"Kukaku Shiba",          r:"Humain",   sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
-
+  {n:"Masaki Kurosaki",       r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Mort",      hc:"Noir",   bday:"09/06", w:0, l:0, draw:0},
+  {n:"Karin Kurosaki",        r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/06", w:0, l:0, draw:0},
+  {n:"Yuzu Kurosaki",         r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/06", w:0, l:0, draw:0},
+  {n:"Tatsuki Arisawa",       r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"17/07", w:1, l:0, draw:0},
+  {n:"Keigo Asano",           r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"01/04", w:0, l:0, draw:0},
+  {n:"Mizuiro Kojima",        r:"Humain",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0, l:0, draw:0},
+  {n:"Chizuru Honsho",        r:"Humain",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"??/??", w:0, l:0, draw:0},
+  
   // ============================================================
   // URAHARA SHOP
   // ============================================================
