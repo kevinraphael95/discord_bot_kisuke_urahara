@@ -98,7 +98,7 @@ const CHARS = [
   // ============================================================
   // GOTEI 13 — ANCIENS VICE-CAPITAINES
   // ============================================================
-  {n:"Chojiro Sasakibe",      r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Mort",      hc:"Brun",   bday:"04/11", w:0,  l:1,  draw:0},
+  {n:"Chojiro Sasakibe",      r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Mort",      hc:"Blanc",   bday:"04/11", w:0,  l:1,  draw:0},
   {n:"Yachiru Kusajishi",     r:"Shinigami",sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1},
   {n:"Nemu Kurotsuchi",       r:"Mod-Soul", sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0},
 
