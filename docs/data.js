@@ -20,8 +20,8 @@ const CHARS = [
   {n:"Uryuu Ishida",          r:"Quincy",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1},
   {n:"Isshin Kurosaki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0},
   {n:"Kon",                   r:"Mod-Soul", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",  bday:"??/??", w:1,  l:3,  draw:0},
-  {n:"Ganju Shiba",           r:"Humain",   sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"02/11", w:2,  l:2,  draw:0},
-  {n:"Kukaku Shiba",          r:"Humain",   sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
+  {n:"Ganju Shiba",           r:"Humain",   sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"02/11", w:2,  l:2,  draw:0},
+  {n:"Kukaku Shiba",          r:"Humain",   sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
 
   // ============================================================
   // URAHARA SHOP
@@ -49,13 +49,13 @@ const CHARS = [
   {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Gotei 13",   d:4, st:"Vivant",    hc:"Blond",  bday:"16/01", w:2,  l:2,  draw:0},
   {n:"Isane Kotetsu",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"08/08", w:1,  l:1,  draw:0},
   {n:"Shinji Hirako",         r:"Vizard",   sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"15/05", w:3,  l:2,  draw:0},
-  {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0},
+  {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",         af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0},
   {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Gotei 13",   d:4, st:"Vivant",    hc:"Noir",   bday:"03/07", w:2,  l:2,  draw:0},
   {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Gotei 13",   d:4, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0},
   {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0},
   {n:"Kenpachi Zaraki",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"19/11", w:9,  l:2,  draw:1},
   {n:"Mayuri Kurotsuchi",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"30/03", w:6,  l:1,  draw:0},
-  {n:"Rukia Kuchiki",         r:"Shinigami",sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"14/01", w:9,  l:3,  draw:0},
+  {n:"Rukia Kuchiki",         r:"Shinigami",sx:"F", arc:"Le Shinigami Remplaçant (1)",         af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"14/01", w:9,  l:3,  draw:0},
 
   // ============================================================
   // GOTEI 13 — ANCIENS CAPITAINES
@@ -73,18 +73,18 @@ const CHARS = [
   // GOTEI 13 — VICE-CAPITAINES TYBW
   // ============================================================
   {n:"Nanao Ise",             r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/07", w:2,  l:1,  draw:0},
-  {n:"Genshiro Okikiba",      r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0},
+  {n:"Genshiro Okikiba",      r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0},
   {n:"Marenoshin Omaeda",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0},
   {n:"Izuru Kira",            r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0},
   {n:"Kiyone Kotetsu",        r:"Shinigami",sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Vert",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Momo Hinamori",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Brun",   bday:"03/06", w:2,  l:3,  draw:0},
-  {n:"Renji Abarai",          r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0},
-  {n:"Atau Rindo",            r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
-  {n:"Yuyu Yayahara",         r:"Shinigami",sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
+  {n:"Renji Abarai",          r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",         af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0},
+  {n:"Atau Rindo",            r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
+  {n:"Yuyu Yayahara",         r:"Shinigami",sx:"F", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
   {n:"Shuhei Hisagi",         r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0},
   {n:"Rangiku Matsumoto",     r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"29/09", w:3,  l:3,  draw:0},
   {n:"Ikkaku Madarame",       r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"08/11", w:4,  l:3,  draw:0},
-  {n:"Akon",                  r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Gotei 13",    d:2, st:"Vivant",    hc:"Violet", bday:"??/??", w:1,  l:0,  draw:0},
+  {n:"Akon",                  r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Violet", bday:"??/??", w:1,  l:0,  draw:0},
   {n:"Sentaro Kotsubaki",     r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0},
 
   // ============================================================
@@ -113,20 +113,20 @@ const CHARS = [
   // ============================================================
   {n:"Coyote Starrk",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"??/??", w:4,  l:1,  draw:0},
   {n:"Lilynette Gingerbuck",  r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0},
-  {n:"Baraggan Louisenbairn", r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:5, st:"Mort",      hc:"Chauve", bday:"??/??", w:3,  l:1,  draw:0},
-  {n:"Tier Harribel",         r:"Arrancar", sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:5, st:"Vivant",    hc:"Blond",  bday:"??/??", w:3,  l:1,  draw:0},
+  {n:"Baraggan Louisenbairn", r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",            af:"Espada",     d:5, st:"Mort",      hc:"Chauve", bday:"??/??", w:3,  l:1,  draw:0},
+  {n:"Tier Harribel",         r:"Arrancar", sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",            af:"Espada",     d:5, st:"Vivant",    hc:"Blond",  bday:"??/??", w:3,  l:1,  draw:0},
   {n:"Ulquiorra Cifer",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:5,  l:1,  draw:0},
-  {n:"Nnoitra Gilga",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:4,  l:1,  draw:0},
+  {n:"Nnoitra Gilga",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:4,  l:1,  draw:0},
   {n:"Grimmjow Jaegerjaquez", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Vivant",    hc:"Bleu",   bday:"??/??", w:4,  l:2,  draw:0},
-  {n:"Zommari Rureaux",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0},
-  {n:"Szayelaporro Grantz",   r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Espada",      d:4, st:"Mort",      hc:"Rose",   bday:"??/??", w:3,  l:1,  draw:0},
-  {n:"Aaroniero Arruruerie",  r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Espada",      d:4, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Zommari Rureaux",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Szayelaporro Grantz",   r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Rose",   bday:"??/??", w:3,  l:1,  draw:0},
+  {n:"Aaroniero Arruruerie",  r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
   {n:"Yammy Llargo",          r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:3,  l:1,  draw:0},
 
   // ============================================================
   // EX-ESPADA & ARRANCAR NOTABLES
   // ============================================================
-  {n:"Nelliel Tu Odelschwanck",r:"Arrancar",sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",   bday:"??/??", w:4,  l:1,  draw:0},
+  {n:"Nelliel Tu Odelschwanck",r:"Arrancar",sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",   bday:"??/??", w:4,  l:1,  draw:0},
   {n:"Luppi Antenor",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Wonderweiss Margela",   r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0},
 
@@ -142,7 +142,7 @@ const CHARS = [
   // ============================================================
   {n:"Loly Aivirrne",         r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Espada",      d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:2,  draw:0},
   {n:"Menoly Mallia",         r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Espada",      d:2, st:"Incertain", hc:"Blond",  bday:"??/??", w:0,  l:2,  draw:0},
-  {n:"Shawlong Koufang",      r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Shawlong Koufang",      r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",  af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Findorr Calius",        r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:3, st:"Mort",      hc:"Blond",  bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Charlotte Cuuhlhourne", r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:3, st:"Mort",      hc:"Blond",  bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Dordoni Alessandro",    r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:2,  l:2,  draw:0},
@@ -157,7 +157,7 @@ const CHARS = [
   {n:"Grand Fisher",          r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
   {n:"Acidwire",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:1, st:"Mort",      hc:"Noir",   bday:"??/??", w:0,  l:1,  draw:0},
   {n:"Shrieker",              r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Metastacia",            r:"Hollow",   sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Hueco Mundo", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Metastacia",            r:"Hollow",   sx:"M", arc:"Soul Society : Le Sauvetage (2.2)", af:"Hueco Mundo", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Runuganga",             r:"Hollow",   sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",        af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
   {n:"Fishbone D",            r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:1, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
   {n:"Bulbous G",             r:"Hollow",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Hueco Mundo", d:2, st:"Mort",      hc:"Chauve", bday:"??/??", w:0,  l:1,  draw:0},
