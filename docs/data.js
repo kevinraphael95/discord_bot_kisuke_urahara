@@ -84,7 +84,7 @@ const CHARS = [
   {n:"Genshiro Okikiba",      r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0},
   {n:"Marenoshin Omaeda",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0},
   {n:"Izuru Kira",            r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0},
-  {n:"Kiyone Kotetsu",        r:"Shinigami",sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Vert",   bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Kiyone Kotetsu",        r:"Shinigami",sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Momo Hinamori",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Brun",   bday:"03/06", w:2,  l:3,  draw:0},
   {n:"Renji Abarai",          r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",         af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0},
   {n:"Atau Rindo",            r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
