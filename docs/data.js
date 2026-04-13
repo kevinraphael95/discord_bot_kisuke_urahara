@@ -117,29 +117,30 @@ const CHARS = [
   {n:"Love Aikawa",           r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",             af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0},
   {n:"Hachigen Ushoda",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",             af:"Indépendant", d:4, st:"Vivant",    hc:"Rose",   bday:"08/09", w:2,  l:1,  draw:0},
 
-  // vérifié jusque là
   // ============================================================
   // ESPADA (par numéro tatoué : 1 → 10)
   // ============================================================
-  {n:"Coyote Starrk",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"??/??", w:4,  l:1,  draw:0},
-  {n:"Lilynette Gingerbuck",  r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0},
-  {n:"Baraggan Louisenbairn", r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",            af:"Espada",     d:5, st:"Mort",      hc:"Chauve", bday:"??/??", w:3,  l:1,  draw:0},
-  {n:"Tier Harribel",         r:"Arrancar", sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",            af:"Espada",     d:5, st:"Vivant",    hc:"Blond",  bday:"??/??", w:3,  l:1,  draw:0},
-  {n:"Ulquiorra Cifer",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:5,  l:1,  draw:0},
-  {n:"Nnoitra Gilga",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:4,  l:1,  draw:0},
-  {n:"Grimmjow Jaegerjaquez", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Vivant",    hc:"Bleu",   bday:"??/??", w:4,  l:2,  draw:0},
-  {n:"Zommari Rureaux",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0},
-  {n:"Szayelaporro Grantz",   r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Rose",   bday:"??/??", w:3,  l:1,  draw:0},
-  {n:"Aaroniero Arruruerie",  r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
-  {n:"Yammy Llargo",          r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:3,  l:1,  draw:0},
+  {n:"Coyote Starrk",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"19/01", w:4,  l:1,  draw:0},
+  {n:"Lilynette Gingerbuck",  r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:4, st:"Mort",      hc:"Vert",  bday:"19/01", w:2,  l:1,  draw:0},
+  {n:"Baraggan Louisenbairn", r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",            af:"Espada",     d:5, st:"Mort",      hc:"Blanc", bday:"09/02", w:3,  l:1,  draw:0},
+  {n:"Tier Harribel",         r:"Arrancar", sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",            af:"Espada",     d:5, st:"Vivant",    hc:"Blond",  bday:"25/07", w:3,  l:1,  draw:0},
+  {n:"Ulquiorra Cifer",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"01/12", w:5,  l:1,  draw:0},
+  {n:"Nnoitra Gilga",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"11/11", w:4,  l:1,  draw:0},
+  {n:"Grimmjow Jaegerjaquez", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Vivant",    hc:"Bleu",   bday:"31/07", w:4,  l:2,  draw:0},
+  {n:"Zommari Rureaux",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"13/10", w:2,  l:1,  draw:0},
+  {n:"Szayelaporro Grantz",   r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Rose",   bday:"22/06", w:3,  l:1,  draw:0},
+  {n:"Aaroniero Arruruerie",  r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Espada",      d:4, st:"Mort",      hc:"Chauve",   bday:"23/04", w:2,  l:1,  draw:0},
+  {n:"Yammy Llargo",          r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:5, st:"Mort",      hc:"Chauve",   bday:"??/??", w:3,  l:1,  draw:0},
 
   // ============================================================
   // EX-ESPADA & ARRANCAR NOTABLES
   // ============================================================
-  {n:"Nelliel Tu Odelschwanck",r:"Arrancar",sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",   bday:"??/??", w:4,  l:1,  draw:0},
-  {n:"Luppi Antenor",         r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Wonderweiss Margela",   r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Espada",     d:4, st:"Mort",      hc:"Blond",  bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Kukkapuro",                r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Chauve",   bday:"04/04", w:0,  l:0,  draw:0},
+  {n:"Nelliel Tu Odelschwanck",  r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",         af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",     bday:"24/04", w:4,  l:1,  draw:0},
+  {n:"Luppi Antenor",            r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Espada",      d:3, st:"Mort",      hc:"Noir",     bday:"05/06", w:1,  l:1,  draw:0},
+  {n:"Wonderweiss Margela",      r:"Arrancar", sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",            af:"Espada",      d:4, st:"Mort",      hc:"Blond",    bday:"06/07", w:2,  l:1,  draw:0},
 
+  // vérifié jusque là
   // ============================================================
   // FRACCIÓN DE HARRIBEL (Espada 3)
   // ============================================================
