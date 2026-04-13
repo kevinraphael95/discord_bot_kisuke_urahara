@@ -209,7 +209,7 @@ const CHARS = [
   {n:"Mask De Masculine",     r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"??/??", w:2,  l:1,  draw:0},
   {n:"Candice Catnipp",       r:"Quincy",   sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Vivant",    hc:"Vert",   bday:"??/??", w:2,  l:1,  draw:0},
   {n:"NaNaNa Najahkoop",      r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0},
-  {n:"Gremmy Thoumeaux",      r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Gremmy Thoumeaux",      r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Blond",  bday:"30/06", w:2,  l:1,  draw:0},
   {n:"Nianzol Weizol",        r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Blanc",  bday:"??/??", w:2,  l:1,  draw:0},
   {n:"Royd Lloyd",            r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0},
   {n:"Loyd Lloyd",            r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:1,  draw:0},
