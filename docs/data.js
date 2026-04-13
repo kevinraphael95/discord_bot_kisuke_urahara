@@ -15,8 +15,8 @@ const CHARS = [
   // ============================================================
   // PROTAGONISTES, FAMILLE DE ICHIGO & HUMAINS DE KARAKURA
   // ============================================================
-  {n:"Ichigo Kurosaki",       r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:6, st:"Vivant",    hc:"Roux",   bday:"15/07", w:28, l:6,  draw:2},
-  {n:"Orihime Inoue",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:2, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1},
+  {n:"Ichigo Kurosaki",       r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Roux",   bday:"15/07", w:28, l:6,  draw:2},
+  {n:"Orihime Inoue",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1},
   {n:"Yasutora Sado",         r:"Fullbring", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"07/04", w:6,  l:4,  draw:0},
   {n:"Uryuu Ishida",          r:"Quincy",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1},
   {n:"Isshin Kurosaki",       r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0},
