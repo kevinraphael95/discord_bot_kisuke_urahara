@@ -78,31 +78,31 @@ const CHARS = [
   {n:"Jushiro Ukitake",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1},
   {n:"Ginrei Kuchiki",        r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Mort",      hc:"Gris",  bday:"02/06", w:1,  l:0,  draw:0},
 
-  // vérifié jusque là
   // ============================================================
   // GOTEI 13 — VICE-CAPITAINES TYBW
   // ============================================================
-  {n:"Nanao Ise",             r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/07", w:2,  l:1,  draw:0},
-  {n:"Genshiro Okikiba",      r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blanc",   bday:"??/??", w:1,  l:0,  draw:0},
-  {n:"Marechiyo Omaeda",      r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0},
-  {n:"Izuru Kira",            r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0},
-  {n:"Kiyone Kotetsu",        r:"Shinigami",sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",   bday:"22/09", w:1,  l:1,  draw:0},
-  {n:"Momo Hinamori",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"03/06", w:2,  l:3,  draw:0},
-  {n:"Renji Abarai",          r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",         af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0},
-  {n:"Atau Rindo",            r:"Shinigami",sx:"M", arc:"NO BREATHES FROM HELL (6)",           af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
-  {n:"Yuyu Yayahara",         r:"Shinigami",sx:"F", arc:"NO BREATHES FROM HELL (6)",           af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
-  {n:"Shuhei Hisagi",         r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0},
-  {n:"Rangiku Matsumoto",     r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"29/09", w:3,  l:3,  draw:0},
-  {n:"Ikkaku Madarame",       r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"08/11", w:4,  l:3,  draw:0},
-  {n:"Akon",                  r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Violet", bday:"??/??", w:1,  l:0,  draw:0},
-  {n:"Sentaro Kotsubaki",     r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:2, st:"Vivant",    hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0},
+  {n:"Nanao Ise",             r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/07", w:2,  l:1,  draw:0},
+  {n:"Genshiro Okikiba",      r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blanc",   bday:"??/??", w:1,  l:0,  draw:0},
+  {n:"Marechiyo Omaeda",      r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0},
+  {n:"Izuru Kira",            r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0},
+  {n:"Kiyone Kotetsu",        r:"Shinigami",sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",   bday:"22/09", w:1,  l:1,  draw:0},
+  {n:"Momo Hinamori",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Brun",   bday:"03/06", w:2,  l:3,  draw:0},
+  {n:"Renji Abarai",          r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0},
+  {n:"Atau Rindo",            r:"Shinigami",sx:"M", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0},
+  {n:"Yuyu Yayahara",         r:"Shinigami",sx:"F", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",   bday:"??/??", w:0,  l:0,  draw:0},
+  {n:"Shuhei Hisagi",         r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0},
+  {n:"Mashiro Kuna",          r:"Vizard",   sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0},  
+  {n:"Rangiku Matsumoto",     r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"25/05", w:3,  l:3,  draw:0},
+  {n:"Ikkaku Madarame",       r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0},
+  {n:"Akon",                  r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir", bday:"??/??", w:1,  l:0,  draw:0},
+  {n:"Sentaro Kotsubaki",     r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"22/09", w:1,  l:1,  draw:0},
 
   // ============================================================
   // GOTEI 13 — ANCIENS VICE-CAPITAINES
   // ============================================================
-  {n:"Chojiro Sasakibe",      r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Mort",      hc:"Blanc",   bday:"04/11", w:0,  l:1,  draw:0},
-  {n:"Yachiru Kusajishi",     r:"Shinigami",sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1},
-  {n:"Nemu Kurotsuchi",       r:"Mod-Soul/Âme artificielle", sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0},
+  {n:"Chojiro Sasakibe",      r:"Shinigami",                  sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Mort",      hc:"Blanc",  bday:"04/11", w:0,  l:1,  draw:0},
+  {n:"Yachiru Kusajishi",     r:"Shinigami",                  sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1},
+  {n:"Nemu Kurotsuchi",       r:"Mod-Soul/Âme artificielle",  sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0},
 
   // ============================================================
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
@@ -111,13 +111,13 @@ const CHARS = [
   {n:"Hanataro Yamada",       r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",   af:"Gotei 13",    d:1, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0},
 
   // ============================================================
-  // VIZARDS (non promus capitaines à la fin)
+  // VIZARDS (non promus à la fin)
   // ============================================================
-  {n:"Hiyori Sarugaki",       r:"Vizard",   sx:"F", arc:"Arrancar : Invasion du monde des humains (3.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Blond",  bday:"08/08", w:2,  l:2,  draw:0},
-  {n:"Love Aikawa",           r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Gotei 13",   d:4, st:"Vivant",    hc:"Noir",   bday:"21/06", w:2,  l:2,  draw:0},
-  {n:"Mashiro Kuna",          r:"Vizard",   sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Indépendant",d:3, st:"Vivant",    hc:"Vert",   bday:"28/05", w:2,  l:1,  draw:0},
-  {n:"Hachigen Ushoda",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",af:"Indépendant",d:4, st:"Vivant",    hc:"Rose",   bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"Hiyori Sarugaki",       r:"Vizard",   sx:"F", arc:"Arrancar : Invasion du monde des humains (3.1)",    af:"Indépendant", d:3, st:"Vivant",    hc:"Blond",  bday:"01/08", w:2,  l:2,  draw:0},
+  {n:"Love Aikawa",           r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",             af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0},
+  {n:"Hachigen Ushoda",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",             af:"Indépendant", d:4, st:"Vivant",    hc:"Rose",   bday:"08/09", w:2,  l:1,  draw:0},
 
+  // vérifié jusque là
   // ============================================================
   // ESPADA (par numéro tatoué : 1 → 10)
   // ============================================================
