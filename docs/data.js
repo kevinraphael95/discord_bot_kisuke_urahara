@@ -160,7 +160,7 @@ const CHARS = [
   {n:"Cirucci Sanderwicci",   r:"Arrancar", sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",            af:"Hueco Mundo", d:3, st:"Mort",      hc:"Violet", bday:"27/02", w:1,  l:1,  draw:0},
   {n:"Gantenbainne Mosqueda", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",            af:"Hueco Mundo", d:3, st:"Mort",      hc:"Roux",   bday:"21/09", w:1,  l:1,  draw:0},
   {n:"Pesche Guatiche",       r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",            af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Blond",  bday:"25/05", w:0,  l:1,  draw:0},
-  {n:"Dondochakka Birstanne", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",            af:"Hueco Mundo", d:2, st:"Vivant",    hc:"??",     bday:"30/06", w:0,  l:1,  draw:0},
+  {n:"Dondochakka Birstanne", r:"Arrancar", sx:"M", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",            af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Chauve",     bday:"30/06", w:0,  l:1,  draw:0},
 
   // ============================================================
   // HOLLOWS
@@ -200,7 +200,7 @@ const CHARS = [
   {n:"Bazz-B",                r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Rouge",  bday:"14/07", w:2,  l:2,  draw:0},
   {n:"Cang Du",               r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"27/05", w:2,  l:1,  draw:0},
   {n:"Quilge Opie",           r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"01/09", w:2,  l:1,  draw:0},
-  {n:"BG9",                   r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"??",     bday:"??/??", w:2,  l:1,  draw:0},
+  {n:"BG9",                   r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve",     bday:"??/??", w:2,  l:1,  draw:0},
   {n:"PePe Waccabrada",       r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"03/04", w:2,  l:1,  draw:0},
   {n:"Robert Accutrone",      r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Driscoll Berci",        r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"25/03", w:1,  l:1,  draw:0},
