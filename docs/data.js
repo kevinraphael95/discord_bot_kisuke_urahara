@@ -59,6 +59,7 @@ const CHARS = [
   {n:"Isane Kotetsu",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"02/08", w:1,  l:1,  draw:0},
   {n:"Shinji Hirako",         r:"Vizard",   sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)",  af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"10/05", w:3,  l:2,  draw:0},
   {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", arc:"Le Shinigami Remplaçant (1)",                     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0},
+  {n:"Tetsuzaemon Iba",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"18/07", w:0,  l:0,  draw:1},
   {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"03/02", w:2,  l:2,  draw:0},
   {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0},
   {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0},
