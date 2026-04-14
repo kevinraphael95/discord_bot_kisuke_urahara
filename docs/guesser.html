@@ -49,9 +49,9 @@
     <div id="hd">Devinez le personnage Bleach du jour en max <strong>8 essais</strong>.</div>
     <div id="hs" style="display:none">Personnages aléatoires à la chaîne — <strong>8 essais par personnage</strong>.<br>Raté → <strong>☠ Game Over !</strong></div>
     <div class="leg"><div class="sw g"></div><span>Correct — même valeur</span></div>
-    <div class="leg"><div class="sw y"></div><span>Proche — danger ±1 · même mois · victoires ±2</span></div>
-    <div class="leg"><div class="sw r"></div><span>Incorrect</span></div>
-    <b>Colonnes :</b> Race · Sexe · Arc · Affiliation · Danger · Statut · Cheveux · Anniversaire · Combats
+    <div class="leg"><div class="sw y"></div><span>Proche — FORCE ±1 · arc adjacent · même mois · victoires ±2</span></div>
+    <div class="leg"><div class="sw r"></div><span>Incorrect — ▲ plus tard dans l'année · ▼ plus tôt</span></div>
+    <b>Colonnes :</b> Race · Sexe · Arc · Affiliation · FORCE · Statut · Cheveux · Anniversaire · Combats
   </div>
 
   <div class="flash" id="flash"></div>
@@ -67,7 +67,7 @@
   <div class="tw">
     <div class="th">
       <div>PERSONNAGE</div><div>RACE</div><div>SEXE</div><div>ARC</div>
-      <div>AFFIL.</div><div>DANGER</div><div>STATUT</div><div>CHEVEUX</div><div>ANNIV.</div><div>COMBATS</div>
+      <div>AFFIL.</div><div>FORCE</div><div>STATUT</div><div>CHEVEUX</div><div>ANNIV.</div><div>COMBATS</div>
     </div>
     <div id="gr"></div>
   </div>
@@ -104,7 +104,7 @@
 <script>
 const COLS=[
   {k:'r',lb:'RACE'},{k:'sx',lb:'SEXE'},{k:'arc',lb:'ARC'},
-  {k:'af',lb:'AFFIL.'},{k:'d',lb:'DANGER'},{k:'st',lb:'STATUT'},
+  {k:'af',lb:'AFFIL.'},{k:'d',lb:'FORCE'},{k:'st',lb:'STATUT'},
   {k:'hc',lb:'CHEVEUX'},{k:'bday',lb:'ANNIV.'},{k:'wl',lb:'COMBATS'},
 ];
 const MAX=8;
@@ -115,19 +115,60 @@ function dayNum(){const s=new Date('2025-01-01');const t=new Date();t.setHours(0
 function todayChar(){const d=dayNum();return seededShuffle(CHARS,d^0xBEA6)[d%CHARS.length];}
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
 
+// Convertit "DD/MM" en numéro de jour dans l'année (1-366) pour comparaison
+function bdayToDay(bday){
+  if(!bday||bday==='??/??')return null;
+  const p=bday.split('/');
+  if(p.length<2)return null;
+  const d=parseInt(p[0],10),mo=parseInt(p[1],10);
+  if(isNaN(d)||isNaN(mo))return null;
+  // Jours cumulés par mois (année non-bissextile)
+  const cum=[0,31,59,90,120,151,181,212,243,273,304,334];
+  return cum[mo-1]+d;
+}
+
+  const ARC_ORDER = [
+    'Le Shinigami Remplaçant (1)',
+    "Soul Society : L'Invasion (2.1)",
+    'Soul Society : Le Sauvetage (2.2)',
+    'Arrancar : Invasion du monde des humains (3.1)',
+    'Arrancar : Invasion du Hueco Mundo (3.2)',
+    'Arrancar : Bataille de Karakura (3.3)',
+    'Arc Fullbringers (4)',
+    'Guerre Sanglante de Mille Ans (5)',
+    'NO BREATHES FROM HELL (6)',
+  ];
+
 function cmp(m,t){
   const dd=Math.abs(m.d-t.d),dw=Math.abs(m.w-t.w);
   const sameBd=m.bday===t.bday;
   const sameMo=m.bday!=='??/??' && t.bday!=='??/??' && m.bday.slice(3)===t.bday.slice(3);
+
+  // Direction anniversaire : ▲ = le vrai anniv est plus tard dans l'année, ▼ = plus tôt
+  let bdDir='';
+  const mDay=bdayToDay(m.bday), tDay=bdayToDay(t.bday);
+  if(!sameBd && mDay!==null && tDay!==null){
+    bdDir = mDay < tDay ? '▲' : '▼';
+  }
+
   return[
     {v:m.r,   s:m.r===t.r?'correct':'wrong',a:''},
     {v:m.sx,  s:m.sx===t.sx?'correct':'wrong',a:''},
-    {v:m.arc, s:m.arc===t.arc?'correct':'wrong',a:''},
+    {v:m.arc, s:(()=>{
+  if(m.arc===t.arc) return 'correct';
+  const mi=ARC_ORDER.indexOf(m.arc), ti=ARC_ORDER.indexOf(t.arc);
+  return (mi>=0&&ti>=0&&Math.abs(mi-ti)===1)?'close':'wrong';
+})(), a:(()=>{
+  if(m.arc===t.arc) return '';
+  const mi=ARC_ORDER.indexOf(m.arc), ti=ARC_ORDER.indexOf(t.arc);
+  if(mi<0||ti<0) return '';
+  return mi<ti?'▲':'▼';
+})()},
     {v:m.af,  s:m.af===t.af?'correct':'wrong',a:''},
     {v:'★'.repeat(m.d)+'☆'.repeat(5-m.d),s:m.d===t.d?'correct':dd===1?'close':'wrong',a:m.d<t.d?'▲':m.d>t.d?'▼':''},
     {v:m.st,  s:m.st===t.st?'correct':'wrong',a:''},
     {v:m.hc,  s:m.hc===t.hc?'correct':'wrong',a:''},
-    {v:m.bday,s:sameBd?'correct':sameMo?'close':'wrong',a:''},
+    {v:m.bday,s:sameBd?'correct':sameMo?'close':'wrong',a:sameBd?'':bdDir},
     {v:m.w+'V/'+m.l+'D',s:m.w===t.w&&m.l===t.l?'correct':dw<=2?'close':'wrong',a:m.w<t.w?'▲':m.w>t.w?'▼':''},
   ];
 }
