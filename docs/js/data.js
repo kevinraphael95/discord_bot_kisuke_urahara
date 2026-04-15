@@ -77,7 +77,6 @@ const CHARS = [
   {n:"Kaname Tousen",         r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Indépendant", d:4, st:"Mort",      hc:"Brun",   bday:"13/10", w:3,  l:2,  draw:0},
   {n:"Gin Ichimaru",          r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Indépendant", d:5, st:"Mort",      hc:"Gris",   bday:"10/09", w:4,  l:1,  draw:0},
   {n:"Jushiro Ukitake",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1},
-  {n:"Ginrei Kuchiki",        r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Mort",      hc:"Gris",   bday:"02/06", w:1,  l:0,  draw:0},
 
   // ============================================================
   // GOTEI 13 — VICE-CAPITAINES TYBW
