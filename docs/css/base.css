@@ -185,53 +185,46 @@
 
 
 /* ── THÈME BLEACH / REIATSU BLUE ───────────── */
-.top-bar {
-  background: var(--top-bar-bg);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
+[data-theme="light-blue"] {
+  --void:    #e9f0f8;
+  --deep:    #dbe7f3;
+  --panel:   #ffffff;
+  --surface: #f4f8fc;
+  --rim:     #cbd6e2;
+  --border:  rgba(15,23,42,.10);
 
-/* ligne reiatsu animable / glow */
-.top-bar::after {
-  content: "";
-  display: block;
-  height: 2px;
-  background: var(--top-bar-accent);
-  opacity: .9;
-}
+  /* Reiatsu blue (plus vivant) */
+  --rei:       #2563eb;
+  --rei-mid:   #3b82f6;
+  --rei-lt:    #60a5fa;
+  --rei-glow:  rgba(59,130,246,.22);
 
-/* container navigation */
-.nav {
-  display: flex;
-  gap: 10px;
-  padding: 10px 14px;
-  align-items: center;
-}
+  /* Hollow red accent */
+  --hollow:    #ef4444;
+  --hollow-lt: #f87171;
+  --hollow-glow: rgba(239,68,68,.18);
 
-/* boutons nav (Commandes / Reiatsu / Character Guesser) */
-.nav-item {
-  padding: 8px 12px;
-  border-radius: 10px;
-  color: var(--muted);
-  font-weight: 500;
-  transition: all .2s ease;
-  background: transparent;
-}
+  --text:   #0f172a;
+  --muted:  #475569;
+  --dim:    #64748b;
 
-/* hover propre */
-.nav-item:hover {
-  background: rgba(59,130,246,.10);
-  color: var(--text);
-}
+  /* UI effects */
+  --shadow: 0 10px 30px rgba(15,23,42,.08);
 
-/* actif = reiatsu */
-.nav-item.active {
-  background: rgba(59,130,246,.14);
-  color: var(--rei);
-  box-shadow: 0 0 0 1px rgba(59,130,246,.25);
+  --top-bar-bg: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f6f9fc 100%
+  );
+
+  --top-bar-accent: linear-gradient(
+    90deg,
+    transparent,
+    #3b82f6,
+    #60a5fa,
+    #3b82f6,
+    transparent
+  );
 }
 
 
