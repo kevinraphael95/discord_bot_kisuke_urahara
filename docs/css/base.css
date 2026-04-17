@@ -184,61 +184,61 @@
 
 
 
-/* ── THÈME LIGHT BLUE (gris/bleu clair) ───────────── */
+/* ── THÈME BLEACH / REIATSU BLUE ───────────── */
 [data-theme="light-blue"] {
-  --void:    #eef3f8;
-  --deep:    #e4ebf3;
-  --panel:   #ffffff;
-  --surface: #f6f9fc;
-  --rim:     #d6dde6;
-  --border:  rgba(0,0,0,.08);
+  --void:    #0b1220;   /* fond profond */
+  --deep:    #0f1a2b;
+  --panel:   #111c30;
+  --surface: #16233a;
+  --rim:     #24324a;
+  --border:  rgba(120,160,255,.12);
 
+  /* énergie reiatsu (bleu spirituel) */
   --gold:      #3b82f6;
   --gold-lt:   #60a5fa;
-  --gold-pale: rgba(59,130,246,.12);
-  --gold-glow: rgba(59,130,246,.25);
-  --gold-line: rgba(59,130,246,.18);
+  --gold-pale: rgba(59,130,246,.08);
+  --gold-glow: rgba(59,130,246,.35);
 
   --rei:       #2563eb;
   --rei-mid:   #3b82f6;
   --rei-lt:    #93c5fd;
-  --rei-pale:  rgba(59,130,246,.10);
-  --rei-glow:  rgba(59,130,246,.25);
+  --rei-pale:  rgba(59,130,246,.06);
+  --rei-glow:  rgba(59,130,246,.30);
 
-  --red:       #64748b;
-  --red-lt:    #94a3b8;
-  --red-pale:  rgba(148,163,184,.10);
-  --red-glow:  rgba(148,163,184,.25);
-  --red-line:  rgba(148,163,184,.20);
+  /* accent rouge type danger / hollow */
+  --red:       #ef4444;
+  --red-lt:    #f87171;
+  --red-pale:  rgba(239,68,68,.08);
+  --red-glow:  rgba(239,68,68,.25);
 
-  --white:  #0f172a;
-  --text:   #1e293b;
-  --muted:  #64748b;
-  --dim:    #94a3b8;
+  --white:  #e2e8f0;
+  --text:   #cbd5e1;
+  --muted:  #94a3b8;
+  --dim:    #64748b;
 
-  --ok-bg: #ecfdf5; --ok-bd: #22c55e; --ok-tx: #15803d;
-  --ko-bg: #fef2f2; --ko-bd: #ef4444; --ko-tx: #b91c1c;
-  --yw-bg: #fffbeb; --yw-bd: #f59e0b; --yw-tx: #b45309;
+  --ok-bg: #0f2a1d; --ok-bd: #22c55e; --ok-tx: #4ade80;
+  --ko-bg: #2a0f12; --ko-bd: #ef4444; --ko-tx: #f87171;
+  --yw-bg: #2a230f; --yw-bd: #f59e0b; --yw-tx: #fbbf24;
 
-  --surv-bg: #f0f7ff;
+  --surv-bg: #0f1b2e;
   --surv-bd: rgba(59,130,246,.25);
-  --surv-tx: #1d4ed8;
+  --surv-tx: #60a5fa;
 
-  --atmo-1: rgba(59,130,246,.10);
-  --atmo-2: rgba(148,163,184,.08);
-  --atmo-3: rgba(59,130,246,.05);
+  --atmo-1: rgba(59,130,246,.12);
+  --atmo-2: rgba(148,163,184,.06);
+  --atmo-3: rgba(239,68,68,.05);
 
+  /* 🔥 barre du haut plus “reiatsu instable” */
   --top-bar-grad: linear-gradient(
     90deg,
-    transparent 0%,
-    #3b82f6 20%,
-    #60a5fa 40%,
-    #93c5fd 60%,
+    #0b1220 0%,
+    #1d4ed8 25%,
+    #60a5fa 50%,
+    #ef4444 65%,
     #3b82f6 80%,
-    transparent 100%
+    #0b1220 100%
   );
 }
-
 
 
 
