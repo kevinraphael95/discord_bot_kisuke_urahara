@@ -91,52 +91,6 @@
     document.getElementById('drawer').classList.remove('open');
   };
 
- // ── EASTER EGG : Konami Code → Archives secrètes ─────
-const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
-let konamiIdx = 0;
-document.addEventListener('keydown', function(e) {
-  if (e.key === KONAMI[konamiIdx]) {
-    konamiIdx++;
-    if (konamiIdx === KONAMI.length) {
-      konamiIdx = 0;
-      openEasterEgg();
-    }
-  } else {
-    konamiIdx = 0;
-  }
-});
 
-function openEasterEgg() {
-    if (document.getElementById('egg-overlay')) return;
-  
-    const overlay = document.createElement('div');
-    overlay.id = 'egg-overlay';
-    overlay.style.cssText = `
-      position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
-      animation:rise .4s ease;
-    `;
-  
-    overlay.innerHTML = `
-      <div style="font-family:'Shippori Mincho',serif;font-size:1.6rem;color:#f87171;letter-spacing:.1em;">
-        ☠ ARCHIVES SECRÈTES ☠
-      </div>
-  
-      <div style="font-size:.75rem;color:#8e8a84;letter-spacing:.2em;">
-        ↑↑↓↓←→←→
-      </div>
-  
-      <button onclick="document.getElementById('egg-overlay').remove()"
-        style="margin-top:.5rem;background:none;border:none;color:#484440;font-size:.75rem;cursor:pointer;letter-spacing:.1em;">
-        [ FERMER ]
-      </button>
-    `;
-  
-    document.body.appendChild(overlay);
-  
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay) overlay.remove();
-    });
-  }
 
 })();
