@@ -107,7 +107,10 @@ document.addEventListener('keydown', e => {
 });
 
 // Charger le premier onglet au démarrage
-document.querySelector('.stab').click();
+window.addEventListener('DOMContentLoaded', () => {
+  const first = document.querySelector('.stab');
+  if (first) loadScan('no_breath_from_hell', first);
+});
 </script>
 </body>
 </html>
