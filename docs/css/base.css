@@ -138,49 +138,6 @@
   --top-bar-grad: linear-gradient(90deg, transparent 0%, #c62828 15%, #ff7043 38%, #7f0000 55%, #ff7043 75%, #c62828 92%, transparent 100%);
 }
 
-/* ── THÈME GOTEI 13 (vert sauge/gris) ───────────────── */
-[data-theme="gotei"] {
-  --void:    #070d0a;
-  --deep:    #0b1210;
-  --panel:   #101a16;
-  --surface: #15211c;
-  --rim:     #1c2b24;
-  --border:  rgba(255,255,255,.08);
-
-  --gold:      #80cfa0;
-  --gold-lt:   #a8e6c0;
-  --gold-pale: rgba(128,207,160,.12);
-  --gold-glow: rgba(128,207,160,.28);
-  --gold-line: rgba(128,207,160,.18);
-
-  --rei:       #1b5e40;
-  --rei-mid:   #2e7d52;
-  --rei-lt:    #6ecf96;
-  --rei-pale:  rgba(46,125,82,.12);
-  --rei-glow:  rgba(46,125,82,.32);
-
-  --red:       #546e6a;
-  --red-lt:    #80cbc4;
-  --red-pale:  rgba(128,203,196,.08);
-  --red-glow:  rgba(128,203,196,.22);
-  --red-line:  rgba(128,203,196,.16);
-
-  --white:  #eaf4ee;
-  --text:   #bdd4c4;
-  --muted:  #7a9880;
-  --dim:    #3a5040;
-
-  --ok-bg: #041208; --ok-bd: #2e7d52; --ok-tx: #6ecf96;
-  --ko-bg: #130606; --ko-bd: #991b1b; --ko-tx: #f87171;
-  --yw-bg: #130d03; --yw-bd: #92400e; --yw-tx: #fbbf24;
-
-  --surv-bg: #070f0b; --surv-bd: rgba(110,207,150,.35); --surv-tx: #d9ffe8;
-
-  --atmo-1: rgba(46,125,82,.15);
-  --atmo-2: rgba(128,203,196,.07);
-  --atmo-3: rgba(46,125,82,.06);
-  --top-bar-grad: linear-gradient(90deg, transparent 0%, #2e7d52 15%, #80cfa0 38%, #1b5e40 55%, #80cfa0 75%, #2e7d52 92%, transparent 100%);
-}
 
 
 
