@@ -11,6 +11,7 @@
     { id: 'hueco-mundo',  label: 'Hueco Mundo',  icon: '🌑' },
     { id: 'hollow',       label: 'Hollow',       icon: '💀' },
     { id: 'gotei',        label: 'Gotei 13',     icon: '🌿' },
+    { id: 'light-blue',   label: 'Bleu clair',   icon: '🔵' },
   ];
 
   // Applique le thème sauvegardé
