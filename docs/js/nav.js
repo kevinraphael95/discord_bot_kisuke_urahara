@@ -106,8 +106,10 @@
     }
   });
 
+  
   function openEasterEgg() {
     if (document.getElementById('egg-overlay')) return;
+  
     const overlay = document.createElement('div');
     overlay.id = 'egg-overlay';
     overlay.style.cssText = `
@@ -115,15 +117,24 @@
       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
       animation:rise .4s ease;
     `;
+  
     overlay.innerHTML = `
-      <div style="font-family:'Shippori Mincho',serif;font-size:1.6rem;color:#f87171;letter-spacing:.1em;">☠ ARCHIVES SECRÈTES ☠</div>
-      <div style="font-size:.75rem;color:#8e8a84;letter-spacing:.2em;">↑↑↓↓←→←→</div>
-      <div style="display:flex;flex-direction:column;gap:.7rem;margin-top:1rem;">
-        <a href="scans.html" style="background:#130606;border:1px solid #991b1b;color:#f87171;padding:.8rem 2rem;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.1em;text-decoration:none;text-align:center;text-transform:uppercase;">📖 Lire les scans</a>
+      <div style="font-family:'Shippori Mincho',serif;font-size:1.6rem;color:#f87171;letter-spacing:.1em;">
+        ☠ ARCHIVES SECRÈTES ☠
       </div>
-      <button onclick="document.getElementById('egg-overlay').remove()" style="margin-top:.5rem;background:none;border:none;color:#484440;font-size:.75rem;cursor:pointer;letter-spacing:.1em;">[ FERMER ]</button>
+  
+      <div style="font-size:.75rem;color:#8e8a84;letter-spacing:.2em;">
+        ↑↑↓↓←→←→
+      </div>
+  
+      <button onclick="document.getElementById('egg-overlay').remove()"
+        style="margin-top:.5rem;background:none;border:none;color:#484440;font-size:.75rem;cursor:pointer;letter-spacing:.1em;">
+        [ FERMER ]
+      </button>
     `;
+  
     document.body.appendChild(overlay);
+  
     overlay.addEventListener('click', function(e) {
       if (e.target === overlay) overlay.remove();
     });
