@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archives Secrètes — Kisuke</title>
+<link rel="stylesheet" href="css/base.css">
+<script src="js/nav.js" defer></script>
+<style>
+  .scans-wrap { max-width: 800px; margin: 100px auto 4rem; padding: 0 1rem; }
+  .scans-title { font-family:'Shippori Mincho',serif; font-size:1.8rem; color:var(--ko-tx); text-align:center; margin-bottom:2rem; letter-spacing:.1em; }
+  .scans-tabs { display:flex; gap:2px; margin-bottom:2px; }
+  .stab { flex:1; background:var(--panel); border:1px solid var(--border); color:var(--muted); font-family:'DM Sans',sans-serif; font-size:.75rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; padding:.7rem; cursor:pointer; transition:all .2s; }
+  .stab.active { background:var(--ko-bg); border-color:var(--ko-bd); color:var(--ko-tx); }
+  .spanel { display:none; flex-direction:column; gap:4px; }
+  .spanel.on { display:flex; }
+  .spanel img { width:100%; display:block; }
+</style>
+</head>
+<body>
+<div class="atmo"></div>
+<div class="top-bar"></div>
+
+<div class="scans-wrap">
+  <div class="scans-title">☠ ARCHIVES SECRÈTES ☠</div>
+
+  <div class="scans-tabs">
+    <button class="stab active" onclick="showTab('nbfh',this)">No Breathes From Hell</button>
+    <button class="stab" onclick="showTab('pilote',this)">Pilote</button>
+    <button class="stab" onclick="showTab('artbook',this)">Artbook</button>
+  </div>
+
+  <div class="spanel on" id="tab-nbfh">
+    <img src="data/images/scans/no_breath_from_hell/01.jpg" alt="">
+    <img src="data/images/scans/no_breath_from_hell/02.jpg" alt="">
+    <!-- etc. -->
+  </div>
+
+  <div class="spanel" id="tab-pilote">
+    <img src="data/images/scans/pilote/01.jpg" alt="">
+    <!-- etc. -->
+  </div>
+
+  <div class="spanel" id="tab-artbook">
+    <img src="data/images/scans/artbook/01.jpg" alt="">
+    <!-- etc. -->
+  </div>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.spanel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('on');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
