@@ -366,8 +366,9 @@ function onIn(){
 function onKD(e){
   const l=$('acl');const items=l.querySelectorAll('.aci');
   let sel=mode==='daily'?dSel:sSel;
-  if(e.key==='ArrowDown'){e.preventDefault();sel=Math.min(sel+1,items.length-1);items.forEach((x,i)=>x.classList.toggle('sel',i===sel));if(items[sel])$('gi').value=items[sel].firstChild.textContent.trim();}
-  else if(e.key==='ArrowUp'){e.preventDefault();sel=Math.max(sel-1,-1);items.forEach((x,i)=>x.classList.toggle('sel',i===sel));if(sel>=0&&items[sel])$('gi').value=items[sel].firstChild.textContent.trim();}
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){e.preventDefault();sel=Math.min(sel+1,items.length-1);items.forEach((x,i)=>x.classList.toggle('sel',i===sel));if(items[sel]){$('gi').value=items[sel].firstChild.textContent.trim();items[sel].scrollIntoView({block:"nearest"});}}
+  else if(e.key==='ArrowUp'){e.preventDefault();sel=Math.max(sel-1,-1);items.forEach((x,i)=>x.classList.toggle('sel',i===sel));if(sel>=0&&items[sel]){$('gi').value=items[sel].firstChild.textContent.trim();items[sel].scrollIntoView({block:"nearest"});}}
   else if(e.key==='Enter'){e.preventDefault();l.innerHTML='';sub();}
   else if(e.key==='Escape')l.innerHTML='';
   if(mode==='daily')dSel=sel;else sSel=sel;
