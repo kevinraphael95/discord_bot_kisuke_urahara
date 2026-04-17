@@ -186,57 +186,51 @@
 
 /* ── THÈME BLEACH / REIATSU BLUE ───────────── */
 [data-theme="light-blue"] {
-  --void:    #0b1220;   /* fond profond */
-  --deep:    #0f1a2b;
-  --panel:   #111c30;
-  --surface: #16233a;
-  --rim:     #24324a;
-  --border:  rgba(120,160,255,.12);
+  --void:    #e6edf5;
+  --deep:    #dbe6f2;
+  --panel:   #f9fbfe;
+  --surface: #f1f6fb;
+  --rim:     #cfd9e6;
+  --border:  rgba(0,0,0,.10);
 
-  /* énergie reiatsu (bleu spirituel) */
   --gold:      #3b82f6;
-  --gold-lt:   #60a5fa;
-  --gold-pale: rgba(59,130,246,.08);
-  --gold-glow: rgba(59,130,246,.35);
+  --gold-lt:   #5b9cf8;
+  --gold-pale: rgba(59,130,246,.14);
+  --gold-glow: rgba(59,130,246,.28);
+  --gold-line: rgba(59,130,246,.20);
 
   --rei:       #2563eb;
   --rei-mid:   #3b82f6;
-  --rei-lt:    #93c5fd;
-  --rei-pale:  rgba(59,130,246,.06);
-  --rei-glow:  rgba(59,130,246,.30);
+  --rei-lt:    #8fbdfd;
+  --rei-pale:  rgba(59,130,246,.12);
+  --rei-glow:  rgba(59,130,246,.28);
 
-  /* accent rouge type danger / hollow */
-  --red:       #ef4444;
-  --red-lt:    #f87171;
-  --red-pale:  rgba(239,68,68,.08);
-  --red-glow:  rgba(239,68,68,.25);
+  --red:       #64748b;
+  --red-lt:    #94a3b8;
+  --red-pale:  rgba(148,163,184,.12);
+  --red-glow:  rgba(148,163,184,.22);
 
-  --white:  #e2e8f0;
-  --text:   #cbd5e1;
-  --muted:  #94a3b8;
-  --dim:    #64748b;
+  --white:  #0f172a;
+  --text:   #1f2a3a;
+  --muted:  #64748b;
+  --dim:    #94a3b8;
 
-  --ok-bg: #0f2a1d; --ok-bd: #22c55e; --ok-tx: #4ade80;
-  --ko-bg: #2a0f12; --ko-bd: #ef4444; --ko-tx: #f87171;
-  --yw-bg: #2a230f; --yw-bd: #f59e0b; --yw-tx: #fbbf24;
+  --surv-bg: #eef5ff;
+  --surv-bd: rgba(59,130,246,.22);
+  --surv-tx: #1d4ed8;
 
-  --surv-bg: #0f1b2e;
-  --surv-bd: rgba(59,130,246,.25);
-  --surv-tx: #60a5fa;
-
-  --atmo-1: rgba(59,130,246,.12);
+  --atmo-1: rgba(59,130,246,.08);
   --atmo-2: rgba(148,163,184,.06);
-  --atmo-3: rgba(239,68,68,.05);
+  --atmo-3: rgba(59,130,246,.04);
 
-  /* 🔥 barre du haut plus “reiatsu instable” */
   --top-bar-grad: linear-gradient(
     90deg,
-    #0b1220 0%,
-    #1d4ed8 25%,
-    #60a5fa 50%,
-    #ef4444 65%,
-    #3b82f6 80%,
-    #0b1220 100%
+    transparent 0%,
+    #3b82f6 22%,
+    #60a5fa 45%,
+    #93c5fd 60%,
+    #3b82f6 78%,
+    transparent 100%
   );
 }
 
