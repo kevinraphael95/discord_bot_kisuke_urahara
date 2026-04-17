@@ -182,6 +182,67 @@
   --top-bar-grad: linear-gradient(90deg, transparent 0%, #2e7d52 15%, #80cfa0 38%, #1b5e40 55%, #80cfa0 75%, #2e7d52 92%, transparent 100%);
 }
 
+
+
+/* ── THÈME LIGHT BLUE (gris/bleu clair) ───────────── */
+[data-theme="light-blue"] {
+  --void:    #eef3f8;
+  --deep:    #e4ebf3;
+  --panel:   #ffffff;
+  --surface: #f6f9fc;
+  --rim:     #d6dde6;
+  --border:  rgba(0,0,0,.08);
+
+  --gold:      #3b82f6;
+  --gold-lt:   #60a5fa;
+  --gold-pale: rgba(59,130,246,.12);
+  --gold-glow: rgba(59,130,246,.25);
+  --gold-line: rgba(59,130,246,.18);
+
+  --rei:       #2563eb;
+  --rei-mid:   #3b82f6;
+  --rei-lt:    #93c5fd;
+  --rei-pale:  rgba(59,130,246,.10);
+  --rei-glow:  rgba(59,130,246,.25);
+
+  --red:       #64748b;
+  --red-lt:    #94a3b8;
+  --red-pale:  rgba(148,163,184,.10);
+  --red-glow:  rgba(148,163,184,.25);
+  --red-line:  rgba(148,163,184,.20);
+
+  --white:  #0f172a;
+  --text:   #1e293b;
+  --muted:  #64748b;
+  --dim:    #94a3b8;
+
+  --ok-bg: #ecfdf5; --ok-bd: #22c55e; --ok-tx: #15803d;
+  --ko-bg: #fef2f2; --ko-bd: #ef4444; --ko-tx: #b91c1c;
+  --yw-bg: #fffbeb; --yw-bd: #f59e0b; --yw-tx: #b45309;
+
+  --surv-bg: #f0f7ff;
+  --surv-bd: rgba(59,130,246,.25);
+  --surv-tx: #1d4ed8;
+
+  --atmo-1: rgba(59,130,246,.10);
+  --atmo-2: rgba(148,163,184,.08);
+  --atmo-3: rgba(59,130,246,.05);
+
+  --top-bar-grad: linear-gradient(
+    90deg,
+    transparent 0%,
+    #3b82f6 20%,
+    #60a5fa 40%,
+    #93c5fd 60%,
+    #3b82f6 80%,
+    transparent 100%
+  );
+}
+
+
+
+
+
 /* ── RESET ───────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
