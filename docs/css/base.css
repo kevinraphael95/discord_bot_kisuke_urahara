@@ -185,55 +185,54 @@
 
 
 /* ── THÈME BLEACH / REIATSU BLUE ───────────── */
-[data-theme="light-blue"] {
-  --void:    #e6edf5;
-  --deep:    #dbe6f2;
-  --panel:   #f9fbfe;
-  --surface: #f1f6fb;
-  --rim:     #cfd9e6;
-  --border:  rgba(0,0,0,.10);
-
-  --gold:      #3b82f6;
-  --gold-lt:   #5b9cf8;
-  --gold-pale: rgba(59,130,246,.14);
-  --gold-glow: rgba(59,130,246,.28);
-  --gold-line: rgba(59,130,246,.20);
-
-  --rei:       #2563eb;
-  --rei-mid:   #3b82f6;
-  --rei-lt:    #8fbdfd;
-  --rei-pale:  rgba(59,130,246,.12);
-  --rei-glow:  rgba(59,130,246,.28);
-
-  --red:       #64748b;
-  --red-lt:    #94a3b8;
-  --red-pale:  rgba(148,163,184,.12);
-  --red-glow:  rgba(148,163,184,.22);
-
-  --white:  #0f172a;
-  --text:   #1f2a3a;
-  --muted:  #64748b;
-  --dim:    #94a3b8;
-
-  --surv-bg: #eef5ff;
-  --surv-bd: rgba(59,130,246,.22);
-  --surv-tx: #1d4ed8;
-
-  --atmo-1: rgba(59,130,246,.08);
-  --atmo-2: rgba(148,163,184,.06);
-  --atmo-3: rgba(59,130,246,.04);
-
-  --top-bar-grad: linear-gradient(
-    90deg,
-    transparent 0%,
-    #3b82f6 22%,
-    #60a5fa 45%,
-    #93c5fd 60%,
-    #3b82f6 78%,
-    transparent 100%
-  );
+.top-bar {
+  background: var(--top-bar-bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
+/* ligne reiatsu animable / glow */
+.top-bar::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: var(--top-bar-accent);
+  opacity: .9;
+}
+
+/* container navigation */
+.nav {
+  display: flex;
+  gap: 10px;
+  padding: 10px 14px;
+  align-items: center;
+}
+
+/* boutons nav (Commandes / Reiatsu / Character Guesser) */
+.nav-item {
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  transition: all .2s ease;
+  background: transparent;
+}
+
+/* hover propre */
+.nav-item:hover {
+  background: rgba(59,130,246,.10);
+  color: var(--text);
+}
+
+/* actif = reiatsu */
+.nav-item.active {
+  background: rgba(59,130,246,.14);
+  color: var(--rei);
+  box-shadow: 0 0 0 1px rgba(59,130,246,.25);
+}
 
 
 
