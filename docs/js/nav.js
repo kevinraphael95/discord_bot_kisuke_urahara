@@ -2,7 +2,7 @@
   const pages = [
     { href: 'commandes.html', label: 'Commandes' },
     { href: 'reiatsu.html',   label: 'Reiatsu' },
-    { href: 'guesser.html',   label: 'Guesser' },
+    { href: 'guesser.html',   label: 'Character Guesser' },
     { href: 'install.html',   label: 'Installation' },
   ];
 
