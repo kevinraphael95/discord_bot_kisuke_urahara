@@ -91,23 +91,22 @@
     document.getElementById('drawer').classList.remove('open');
   };
 
-  // ── EASTER EGG : Konami Code → Archives secrètes ─────
-  const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
-  let konamiIdx = 0;
-  document.addEventListener('keydown', function(e) {
-    if (e.key === KONAMI[konamiIdx]) {
-      konamiIdx++;
-      if (konamiIdx === KONAMI.length) {
-        konamiIdx = 0;
-        openEasterEgg();
-      }
-    } else {
+ // ── EASTER EGG : Konami Code → Archives secrètes ─────
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
+let konamiIdx = 0;
+document.addEventListener('keydown', function(e) {
+  if (e.key === KONAMI[konamiIdx]) {
+    konamiIdx++;
+    if (konamiIdx === KONAMI.length) {
       konamiIdx = 0;
+      openEasterEgg();
     }
-  });
+  } else {
+    konamiIdx = 0;
+  }
+});
 
-  
-  function openEasterEgg() {
+function openEasterEgg() {
     if (document.getElementById('egg-overlay')) return;
   
     const overlay = document.createElement('div');
