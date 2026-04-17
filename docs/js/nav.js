@@ -107,5 +107,25 @@
   window.closeNav = function () {
     document.getElementById('ham').classList.remove('open');
     document.getElementById('drawer').classList.remove('open');
+
+
+
+// ── EASTER EGG : Konami Code → NBFH ──────────────────
+  const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
+  let konamiIdx = 0;
+  document.addEventListener('keydown', function(e) {
+    if (e.key === KONAMI[konamiIdx]) {
+      konamiIdx++;
+      if (konamiIdx === KONAMI.length) {
+        konamiIdx = 0;
+        window.location.href = 'nbfh.html';
+      }
+    } else {
+      konamiIdx = 0;
+    }
+  });
+
+
+    
   };
 })();
