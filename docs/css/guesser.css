@@ -81,7 +81,7 @@
 .survival-mode .gbtn { background:var(--rei-mid); color:var(--white); }
 .survival-mode .gbtn:hover { background:var(--rei-lt); color:var(--void); }
 
-.acl { position:absolute; top:100%; left:0; right:0; background:var(--surface); border:1px solid var(--border); border-top:none; max-height:195px; overflow-y:auto; z-index:100; }
+.acl { position:absolute; top:100%; left:0; right:0; background:var(--panel); border:1px solid var(--border); border-top:none; max-height:195px; overflow-y:auto; z-index:100; }
 .acl:empty { display:none; }
 .aci { padding:8px 13px; cursor:pointer; font-size:.76rem; font-weight:500; color:var(--text); transition:background .1s; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:9px; }
 .aci:hover, .aci.sel { background:var(--gold-pale); color:var(--gold-lt); }
