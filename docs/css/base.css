@@ -191,7 +191,7 @@ body {
   font-family: 'DM Sans', sans-serif;
   font-weight: 400;
   min-height: 100vh;
-  overflow-x: clip; /* overflow-x: hidden;  */
+  overflow-x: hidden;
   line-height: 1.6;
 }
 
