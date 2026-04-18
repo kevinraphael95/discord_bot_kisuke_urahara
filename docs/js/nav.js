@@ -9,7 +9,8 @@
     { id: 'soul-society', label: 'Soul Society', icon: '⚔️' },
     { id: 'hueco-mundo',  label: 'Hueco Mundo',  icon: '🌑' },
     { id: 'hollow',       label: 'Hollow',       icon: '💀' },
-    { id: 'gotei',        label: 'Gotei 13',     icon: '🌿' }
+    { id: 'gotei',        label: 'Gotei 13',     icon: '🌿' },
+    { id: 'light-blue',   label: 'Light',        icon: '💙' }
   ];
   const savedTheme = localStorage.getItem('kisuke-theme') || 'soul-society';
   document.documentElement.setAttribute('data-theme', savedTheme);
