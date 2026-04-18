@@ -7,9 +7,6 @@
   ];
   const themes = [
     { id: 'shinigami',    label: 'Shinigami',    icon: '⚔️' },
-    { id: 'hueco-mundo',  label: 'Hueco Mundo',  icon: '🌑' },
-    { id: 'hollow',       label: 'Hollow',       icon: '💀' },
-    { id: 'gotei',        label: 'Gotei 13',     icon: '🌿' },
     { id: 'quincy',       label: 'Quincy',       icon: '↗️' }
   ];
 
