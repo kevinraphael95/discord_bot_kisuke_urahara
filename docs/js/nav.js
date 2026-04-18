@@ -2,18 +2,14 @@
   const pages = [
     { href: 'commandes.html', label: 'Commandes' },
     { href: 'reiatsu.html',   label: 'Reiatsu' },
-    { href: 'guesser.html',   label: 'Guesser' },
+    { href: 'guesser.html',   label: 'Character Guesser' },
     { href: 'install.html',   label: 'Installation' },
   ];
-
   const themes = [
-    { id: 'soul-society', label: 'Soul Society', icon: '⚔️' },
-    { id: 'hueco-mundo',  label: 'Hueco Mundo',  icon: '🌑' },
-    { id: 'hollow',       label: 'Hollow',       icon: '💀' },
-    { id: 'gotei',        label: 'Gotei 13',     icon: '🌿' },
+    { id: 'shinigami',    label: 'Shinigami',    icon: '⚔️' },
+    { id: 'quincy',       label: 'Quincy',       icon: '↗️' }
   ];
 
-  // Applique le thème sauvegardé
   const savedTheme = localStorage.getItem('kisuke-theme') || 'soul-society';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
@@ -30,12 +26,14 @@
   }).join('\n  ');
 
   const themeOptions = themes.map(t =>
-    `<button class="theme-opt" data-theme="${t.id}" title="${t.label}">${t.icon}</button>`
+    `<button class="theme-opt" data-theme="${t.id}" title="${t.label}">${t.icon} ${t.label}</button>`
   ).join('');
 
   const drawerThemeOptions = themes.map(t =>
     `<button class="drawer-theme-opt" data-theme="${t.id}">${t.icon} ${t.label}</button>`
   ).join('');
+
+  const activeTheme = themes.find(t => t.id === savedTheme) || themes[0];
 
   document.body.insertAdjacentHTML('afterbegin', `
 <nav>
@@ -45,7 +43,7 @@
   </ul>
   <div class="nav-right">
     <div class="theme-switcher" id="themeSwitcher">
-      <button class="theme-toggle" id="themeToggle" title="Changer le thème">🎨</button>
+      <button class="theme-toggle" id="themeToggle">${activeTheme.icon} ${activeTheme.label}</button>
       <div class="theme-menu" id="themeMenu">
         <div class="theme-menu-title">Thème</div>
         ${themeOptions}
@@ -65,20 +63,23 @@
 </div>
 `);
 
-  document.getElementById('themeToggle').addEventListener('click', function(e) {
-  e.stopPropagation();
-  document.getElementById('themeMenu').classList.toggle('open');
-});
+  document.getElementById('themeToggle').addEventListener('click', function (e) {
+    e.stopPropagation();
+    document.getElementById('themeMenu').classList.toggle('open');
+  });
 
-  // Active le bon bouton de thème
   function updateThemeButtons(themeId) {
     document.querySelectorAll('.theme-opt, .drawer-theme-opt').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.theme === themeId);
     });
+    const active = themes.find(t => t.id === themeId);
+    if (active) {
+      document.getElementById('themeToggle').textContent = `${active.icon} ${active.label}`;
+    }
   }
+
   updateThemeButtons(savedTheme);
 
-  // Clic sur un bouton de thème
   document.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-theme]');
     if (btn) {
@@ -86,10 +87,8 @@
       document.documentElement.setAttribute('data-theme', t);
       localStorage.setItem('kisuke-theme', t);
       updateThemeButtons(t);
-      // ferme le menu
       document.getElementById('themeMenu').classList.remove('open');
     }
-    // Ferme le menu thème si clic dehors
     if (!e.target.closest('#themeSwitcher')) {
       const m = document.getElementById('themeMenu');
       if (m) m.classList.remove('open');
@@ -99,7 +98,6 @@
   window.toggleThemeMenu = function () {
     document.getElementById('themeMenu').classList.toggle('open');
   };
-
   window.toggleNav = function () {
     document.getElementById('ham').classList.toggle('open');
     document.getElementById('drawer').classList.toggle('open');
