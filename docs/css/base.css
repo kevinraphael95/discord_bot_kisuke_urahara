@@ -6,11 +6,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap');
 
 /* ── THÈMES ──────────────────────────────────────────── */
-@import url('./themes/theme1.css');
-@import url('./themes/theme2.css');
-@import url('./themes/theme3.css');
-@import url('./themes/theme4.css');
-@import url('./themes/theme5.css');
+@import url('./themes/shinigami.css');
+@import url('./themes/quincy.css');
 
 /* ── RESET ───────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
