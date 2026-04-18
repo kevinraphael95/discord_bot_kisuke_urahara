@@ -1,0 +1,42 @@
+/* ═══════════════════════════════════════════════════════
+   THÈME : BLEACH / REIATSU BLUE (clair)
+   ═══════════════════════════════════════════════════════ */
+
+[data-theme="light-blue"] {
+  --void:    #e9f0f8;
+  --deep:    #dbe7f3;
+  --panel:   #ffffff;
+  --surface: #f4f8fc;
+  --rim:     #cbd6e2;
+  --border:  rgba(15,23,42,.10);
+
+  --rei:       #2563eb;
+  --rei-mid:   #3b82f6;
+  --rei-lt:    #60a5fa;
+  --rei-glow:  rgba(59,130,246,.22);
+
+  --hollow:    #ef4444;
+  --hollow-lt: #f87171;
+  --hollow-glow: rgba(239,68,68,.18);
+
+  --text:   #0f172a;
+  --muted:  #475569;
+  --dim:    #64748b;
+
+  --shadow: 0 10px 30px rgba(15,23,42,.08);
+
+  --top-bar-bg: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f6f9fc 100%
+  );
+
+  --top-bar-accent: linear-gradient(
+    90deg,
+    transparent,
+    #3b82f6,
+    #60a5fa,
+    #3b82f6,
+    transparent
+  );
+}
