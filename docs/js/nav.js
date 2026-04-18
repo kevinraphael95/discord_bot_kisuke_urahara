@@ -6,11 +6,11 @@
     { href: 'install.html',   label: 'Installation' },
   ];
   const themes = [
-    { id: 'soul-society', label: 'Shinigami',    icon: '⚔️' },
+    { id: 'shinigami',    label: 'Shinigami',    icon: '⚔️' },
     { id: 'hueco-mundo',  label: 'Hueco Mundo',  icon: '🌑' },
     { id: 'hollow',       label: 'Hollow',       icon: '💀' },
     { id: 'gotei',        label: 'Gotei 13',     icon: '🌿' },
-    { id: 'light-blue',   label: 'Quincy',       icon: '↗️' }
+    { id: 'quincy',       label: 'Quincy',       icon: '↗️' }
   ];
 
   const savedTheme = localStorage.getItem('kisuke-theme') || 'soul-society';
