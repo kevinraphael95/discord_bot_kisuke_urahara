@@ -2,46 +2,48 @@
    THÈME : SHINIGAMI (bleu/or)
    ═══════════════════════════════════════════════════════ */
 
-:root,
 [data-theme="shinigami"] {
-  --void:    #0e1014;
-  --deep:    #13161b;
-  --panel:   #181c22;
-  --surface: #1d2128;
-  --rim:     #252a32;
-  --border:  rgba(255,255,255,.09);
+  --void:    #12151a;
+  --deep:    #171b21;
+  --panel:   #1c2128;
+  --surface: #21262e;
+  --rim:     #2a3038;
+  --border:  rgba(255,255,255,.10);
 
   --gold:      #d4a843;
   --gold-lt:   #f0c96a;
-  --gold-pale: rgba(212,168,67,.12);
-  --gold-glow: rgba(212,168,67,.28);
-  --gold-line: rgba(212,168,67,.18);
+  --gold-pale: rgba(212,168,67,.14);
+  --gold-glow: rgba(212,168,67,.30);
+  --gold-line: rgba(212,168,67,.22);
 
   --rei:       #1460b8;
   --rei-mid:   #1e7fe8;
-  --rei-lt:    #5eb0ff;
-  --rei-pale:  rgba(30,127,232,.10);
-  --rei-glow:  rgba(30,127,232,.32);
+  --rei-lt:    #6bb8ff;
+  --rei-pale:  rgba(30,127,232,.14);
+  --rei-glow:  rgba(30,127,232,.36);
 
   --red:       #c43318;
-  --red-lt:    #e8541a;
-  --red-pale:  rgba(232,84,26,.10);
-  --red-glow:  rgba(232,84,26,.28);
-  --red-line:  rgba(232,84,26,.20);
+  --red-lt:    #ff5a1f;
+  --red-pale:  rgba(232,84,26,.12);
+  --red-glow:  rgba(232,84,26,.30);
+  --red-line:  rgba(232,84,26,.22);
 
-  --white:  #f0ece6;
-  --text:   #cdc9c2;
-  --muted:  #8e8a84;
-  --dim:    #484440;
+  --white:  #f4f1eb;
+  --text:   #d6d2cb;
+  --muted:  #9a9690;
+  --dim:    #5a5651;
 
   --ok-bg: #071410; --ok-bd: #15803d; --ok-tx: #4ade80;
   --ko-bg: #130606; --ko-bd: #991b1b; --ko-tx: #f87171;
   --yw-bg: #130d03; --yw-bd: #92400e; --yw-tx: #fbbf24;
 
-  --surv-bg: #0b1020; --surv-bd: rgba(94,176,255,.35); --surv-tx: #d9eeff;
+  --surv-bg: #0b1020; --surv-bd: rgba(94,176,255,.40); --surv-tx: #e0f2ff;
 
-  --atmo-1: rgba(30,127,232,.15);
-  --atmo-2: rgba(232,84,26,.07);
-  --atmo-3: rgba(30,127,232,.06);
-  --top-bar-grad: linear-gradient(90deg, transparent 0%, var(--rei-mid) 15%, var(--gold) 38%, var(--red-lt) 55%, var(--gold) 75%, var(--rei-mid) 92%, transparent 100%);
+  --atmo-1: rgba(30,127,232,.18);
+  --atmo-2: rgba(232,84,26,.09);
+  --atmo-3: rgba(30,127,232,.08);
+
+  --top-bar-grad: linear-gradient(90deg, transparent 0%, #1e7fe8 15%, #d4a843 38%, #ff5a1f 55%, #d4a843 75%, #1e7fe8 92%, transparent 100%);
+
+  --nav-bg: rgba(28,33,40,.92);
 }
