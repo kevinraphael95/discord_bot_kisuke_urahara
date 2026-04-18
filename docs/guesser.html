@@ -376,6 +376,55 @@ function onKD(e){
 document.addEventListener('click',e=>{if(!e.target.closest('.acw'))$('acl').innerHTML='';});
 function toggleHelp(){$('hpanel').classList.toggle('on');}
 
+
+
+// ── KONAMI CODE EASTER EGG ────────────────────────────
+(function(){
+  const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
+  const TRACKS = [
+    'https://www.youtube.com/watch?v=2QsD6QIxjSQ', // Number One
+    'https://www.youtube.com/watch?v=oWpzWvMnEYk', // Asterisk
+    'https://www.youtube.com/watch?v=6xKWiCMKKJg', // Ichirin no Hana
+    'https://www.youtube.com/watch?v=6oHEG8PFP6k', // After Dark
+    'https://www.youtube.com/watch?v=sdqHMGOWFHo', // Chu-Bura
+    'https://www.youtube.com/watch?v=7Fh4CTR6sFU', // Velonica
+    'https://www.youtube.com/watch?v=TOmd2GkDsn4', // Alones
+    'https://www.youtube.com/watch?v=gXyPMgFSh2E', // Ranbu no Melody
+  ];
+  let buf = [];
+  let toast = null;
+
+  document.addEventListener('keydown', function(e){
+    buf.push(e.key);
+    if(buf.length > KONAMI.length) buf.shift();
+    if(buf.join(',') === KONAMI.join(',')){
+      buf = [];
+      const url = TRACKS[Math.floor(Math.random() * TRACKS.length)];
+      window.open(url, '_blank');
+      showKonamiToast();
+    }
+  });
+
+  function showKonamiToast(){
+    if(toast) toast.remove();
+    toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed; bottom:2rem; left:50%; transform:translateX(-50%);
+      background:var(--panel); border:1px solid var(--gold-line);
+      color:var(--gold-lt); font-family:'Shippori Mincho',serif;
+      font-size:.85rem; letter-spacing:.08em;
+      padding:.75rem 1.5rem; z-index:9999;
+      box-shadow:0 0 32px var(--gold-glow);
+      animation:rise .4s ease forwards;
+      pointer-events:none;
+    `;
+    toast.textContent = '⚡ Reiatsu musical activé…';
+    document.body.appendChild(toast);
+    setTimeout(() => { toast && toast.remove(); toast = null; }, 3000);
+  }
+})();
+  
+
 loadRec();updDots();loadD();if(!dOver)foc();
 </script>
 </body>
