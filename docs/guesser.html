@@ -415,7 +415,7 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
 
     player = new Audio(url);
     player.volume = 0.35;
-    player.loop = true;
+    player.loop = false; /* true; */
     player.play().catch(()=>{});
 
     showToast(track.replace('.mp3',''), player);
