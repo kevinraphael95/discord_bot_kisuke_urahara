@@ -3,47 +3,47 @@
    ═══════════════════════════════════════════════════════ */
 
 [data-theme="shinigami"] {
-  --void:    #12151a;
-  --deep:    #171b21;
-  --panel:   #1c2128;
-  --surface: #21262e;
-  --rim:     #2a3038;
-  --border:  rgba(255,255,255,.10);
+  --void:    #14181d;
+  --deep:    #1a1f25;
+  --panel:   #20252d;
+  --surface: #252b34;
+  --rim:     #2e353f;
+  --border:  rgba(255,255,255,.11);
 
   --gold:      #d4a843;
   --gold-lt:   #f0c96a;
-  --gold-pale: rgba(212,168,67,.14);
-  --gold-glow: rgba(212,168,67,.30);
-  --gold-line: rgba(212,168,67,.22);
+  --gold-pale: rgba(212,168,67,.15);
+  --gold-glow: rgba(212,168,67,.32);
+  --gold-line: rgba(212,168,67,.24);
 
   --rei:       #1460b8;
   --rei-mid:   #1e7fe8;
   --rei-lt:    #6bb8ff;
-  --rei-pale:  rgba(30,127,232,.14);
-  --rei-glow:  rgba(30,127,232,.36);
+  --rei-pale:  rgba(30,127,232,.16);
+  --rei-glow:  rgba(30,127,232,.38);
 
   --red:       #c43318;
   --red-lt:    #ff5a1f;
-  --red-pale:  rgba(232,84,26,.12);
-  --red-glow:  rgba(232,84,26,.30);
-  --red-line:  rgba(232,84,26,.22);
+  --red-pale:  rgba(232,84,26,.13);
+  --red-glow:  rgba(232,84,26,.32);
+  --red-line:  rgba(232,84,26,.24);
 
-  --white:  #f4f1eb;
-  --text:   #d6d2cb;
-  --muted:  #9a9690;
-  --dim:    #5a5651;
+  --white:  #f5f2ec;
+  --text:   #dbd7d0;
+  --muted:  #a29e98;
+  --dim:    #66625d;
 
   --ok-bg: #071410; --ok-bd: #15803d; --ok-tx: #4ade80;
   --ko-bg: #130606; --ko-bd: #991b1b; --ko-tx: #f87171;
   --yw-bg: #130d03; --yw-bd: #92400e; --yw-tx: #fbbf24;
 
-  --surv-bg: #0b1020; --surv-bd: rgba(94,176,255,.40); --surv-tx: #e0f2ff;
+  --surv-bg: #0b1020; --surv-bd: rgba(94,176,255,.42); --surv-tx: #e6f4ff;
 
-  --atmo-1: rgba(30,127,232,.18);
-  --atmo-2: rgba(232,84,26,.09);
-  --atmo-3: rgba(30,127,232,.08);
+  --atmo-1: rgba(30,127,232,.20);
+  --atmo-2: rgba(232,84,26,.10);
+  --atmo-3: rgba(30,127,232,.09);
 
   --top-bar-grad: linear-gradient(90deg, transparent 0%, #1e7fe8 15%, #d4a843 38%, #ff5a1f 55%, #d4a843 75%, #1e7fe8 92%, transparent 100%);
 
-  --nav-bg: rgba(28,33,40,.92);
+  --nav-bg: rgba(34,39,46,.94);
 }
