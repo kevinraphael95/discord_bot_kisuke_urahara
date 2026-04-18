@@ -476,66 +476,7 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
 })();
 
 
-<!-- 🌈 PRIDE EASTER EGG -->
-<div id="pride-layer" style="
-  position:fixed;
-  inset:0;
-  overflow:hidden;
-  z-index:99999;
-  pointer-events:none;
-  display:none;
-"></div>
 
-<style>
-@keyframes prideMove {
-  from { transform: translateX(-10vw); }
-  to   { transform: translateX(120vw); }
-}
-</style>
-
-<script>
-(function () {
-  const layer = document.getElementById('pride-layer');
-
-  function launchPride() {
-    layer.innerHTML = '';
-    layer.style.display = 'block';
-
-    for (let i = 0; i < 45; i++) {
-      const flag = document.createElement('div');
-      flag.textContent = '🏳️‍🌈';
-
-      flag.style.position = 'absolute';
-      flag.style.left = '-10vw';
-      flag.style.top = Math.random() * 100 + 'vh';
-      flag.style.fontSize = (1 + Math.random() * 2.5) + 'rem';
-      flag.style.opacity = '0.85';
-
-      const duration = 5 + Math.random() * 5;
-      flag.style.animation = `prideMove ${duration}s linear forwards`;
-
-      layer.appendChild(flag);
-    }
-
-    setTimeout(() => {
-      layer.style.display = 'none';
-      layer.innerHTML = '';
-    }, 12000);
-  }
-
-  // déclenchement secret
-  document.addEventListener('keydown', (e) => {
-    const active = document.activeElement;
-    if (active && active.id === 'gi') {
-      if (active.value.trim().toLowerCase() === 'gay') {
-        active.value = '';
-        launchPride();
-      }
-    }
-  });
-})();
-</script>
-  
   
 
 loadRec();updDots();loadD();if(!dOver)foc();
