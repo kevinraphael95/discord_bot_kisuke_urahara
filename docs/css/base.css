@@ -6,7 +6,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap');
 
 /* ── THÈMES ──────────────────────────────────────────── */
-@import url('./themes/gotei.css');
 @import url('./themes/soul-society.css');
 @import url('./themes/hueco-mundo.css');
 @import url('./themes/hollow.css');
@@ -49,7 +48,7 @@ nav {
   padding: 0 3rem;
   height: 60px;
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(14,16,20,.94);
+  background: var(--nav-bg, rgba(14,16,20,.94));
   border-bottom: 1px solid var(--gold-line);
   backdrop-filter: blur(14px);
   transition: border-color .4s;
@@ -142,7 +141,7 @@ nav {
 /* ── DRAWER MOBILE ───────────────────────────────────── */
 .drawer {
   position: fixed; top: 0; left: 0; right: 0; z-index: 300;
-  background: rgba(14,16,20,.98);
+  background: var(--nav-bg, rgba(14,16,20,.98));
   border-bottom: 1px solid var(--gold-line);
   backdrop-filter: blur(20px);
   padding: 4.5rem 1.5rem 2rem;
