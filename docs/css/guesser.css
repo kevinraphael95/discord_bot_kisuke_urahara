@@ -112,10 +112,18 @@
 .cgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); }
 .cc    { background:var(--panel); padding:7px 4px; display:flex; flex-direction:column; align-items:center; gap:2px; }
 .cc.correct { background:var(--ok-bg); } .cc.close { background:var(--yw-bg); } .cc.wrong { background:var(--ko-bg); }
-.cl { font-size:.48rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; text-align:center; color:var(--dim); }
-.cc.correct .cl{color:rgba(74,222,128,.4);} .cc.close .cl{color:rgba(251,191,36,.4);} .cc.wrong .cl{color:rgba(248,113,113,.4);}
-.cv { font-size:.66rem; font-weight:500; text-align:center; line-height:1.3; }
-.cc.correct .cv{color:var(--ok-tx);} .cc.close .cv{color:var(--yw-tx);} .cc.wrong .cv{color:var(--ko-tx);}
+
+/* ── Labels RACE, SEXE, ARC... : opaques et contrastés ── */
+.cl { font-size:.5rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; text-align:center; color:var(--dim); }
+.cc.correct .cl { color:var(--ok-bd); }
+.cc.close   .cl { color:var(--yw-bd); }
+.cc.wrong   .cl { color:var(--ko-bd); }
+
+/* ── Valeurs dans les cellules ── */
+.cv { font-size:.68rem; font-weight:600; text-align:center; line-height:1.3; }
+.cc.correct .cv { color:var(--ok-tx); }
+.cc.close   .cv { color:var(--yw-tx); }
+.cc.wrong   .cv { color:var(--ko-tx); }
 
 .rbanner { width:100%; max-width:660px; padding:1.5rem 1.6rem; border:1px solid; text-align:center; display:none; flex-direction:column; gap:11px; animation:rise .45s ease both; }
 .rbanner.on  { display:flex; }
