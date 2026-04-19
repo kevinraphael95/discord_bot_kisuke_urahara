@@ -254,6 +254,9 @@ function onIn(){
     i.innerHTML=x.n+'<span class="acb">'+x.r+' · '+x.st+'</span>';
     i.onclick=()=>{$('gi').value=x.n;l.innerHTML='';sub();};l.appendChild(i);
   });
+
+  // ── EASTER EGG GAY — détection à la frappe ──────────
+  if(v==='gay') triggerGay();
 }
 function onKD(e){
   const l=$('acl');const items=l.querySelectorAll('.aci');
@@ -267,6 +270,7 @@ function onKD(e){
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.acw'))$('acl').innerHTML='';});
 function toggleHelp(){$('hpanel').classList.toggle('on');}
+
 
 // ── KONAMI CODE EASTER EGG ────────────────────────────
 (function(){
@@ -362,6 +366,99 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
     document.body.appendChild(toast);
   }
 })();
+
+
+// ── GAY PRIDE EASTER EGG ──────────────────────────────
+(function(){
+  const DURATION   = 13000; // durée totale de l'animation (ms)
+  const FLAG_COUNT = 18;    // nombre de drapeaux qui traversent l'écran
+
+  // Drapeau arc-en-ciel 6 bandes en SVG inline
+  const FLAG_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 44" width="72" height="44">
+    <rect y="0"  width="72" height="7.3" fill="#FF0018"/>
+    <rect y="7.3"  width="72" height="7.3" fill="#FFA52C"/>
+    <rect y="14.6" width="72" height="7.3" fill="#FFFF41"/>
+    <rect y="21.9" width="72" height="7.3" fill="#008018"/>
+    <rect y="29.2" width="72" height="7.3" fill="#0000F9"/>
+    <rect y="36.5" width="72" height="7.5" fill="#86007D"/>
+  </svg>`;
+
+  let running = false;
+  let timers  = [];
+
+  // Injecte les keyframes une seule fois
+  function injectStyles(){
+    if(document.getElementById('gay-pride-style')) return;
+    const st = document.createElement('style');
+    st.id = 'gay-pride-style';
+    st.textContent = `
+      @keyframes gayFly {
+        0%   { transform: translateX(-100px) translateY(var(--gy)) rotate(var(--gr)) scale(.9); opacity:0; }
+        6%   { opacity:1; }
+        92%  { opacity:1; }
+        100% { transform: translateX(calc(100vw + 100px)) translateY(var(--gy)) rotate(var(--gr)) scale(1.08); opacity:0; }
+      }
+      @keyframes gayOverlay {
+        0%,8% { opacity:0; } 20% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; }
+      }
+      .gay-flag {
+        position:fixed; top:0; left:0; z-index:8888;
+        pointer-events:none; will-change:transform;
+        filter: drop-shadow(0 3px 10px rgba(0,0,0,.5));
+        animation: gayFly var(--gd) linear forwards;
+      }
+      .gay-overlay {
+        position:fixed; inset:0; z-index:8887; pointer-events:none;
+        background: linear-gradient(135deg,
+          rgba(255,0,24,.06) 0%, rgba(255,165,44,.06) 17%,
+          rgba(255,255,65,.06) 33%, rgba(0,128,24,.06) 50%,
+          rgba(0,0,249,.06) 67%, rgba(134,0,125,.06) 100%);
+        animation: gayOverlay var(--gTotal) linear forwards;
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  window.triggerGay = function(){
+    if(running) return;
+    running = true;
+    injectStyles();
+
+    // Overlay de teinte arc-en-ciel léger
+    const overlay = document.createElement('div');
+    overlay.className = 'gay-overlay';
+    overlay.style.setProperty('--gTotal', DURATION + 'ms');
+    document.body.appendChild(overlay);
+
+    // Spawne les drapeaux de façon échelonnée
+    for(let i = 0; i < FLAG_COUNT; i++){
+      const delay = (DURATION * 0.85 / FLAG_COUNT) * i;
+      const t = setTimeout(()=>{
+        const flag = document.createElement('div');
+        flag.className = 'gay-flag';
+        const yPct = 3 + Math.random() * 82;           // hauteur aléatoire
+        const rot  = -12 + Math.random() * 24;          // rotation légère
+        const dur  = 2800 + Math.random() * 2200;       // vitesse variable
+        flag.style.setProperty('--gy', yPct + 'vh');
+        flag.style.setProperty('--gr', rot + 'deg');
+        flag.style.setProperty('--gd', dur + 'ms');
+        flag.innerHTML = FLAG_SVG;
+        document.body.appendChild(flag);
+        setTimeout(()=>flag.remove(), dur + 200);
+      }, delay);
+      timers.push(t);
+    }
+
+    // Nettoyage final
+    const endT = setTimeout(()=>{
+      overlay.remove();
+      timers = [];
+      running = false;
+    }, DURATION + 600);
+    timers.push(endT);
+  };
+})();
+
 
 // ── INIT ────────────────────────────
 loadRec();
