@@ -376,7 +376,7 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
 (function(){
   const DURATION    = 13000;
   const EMOJI_COUNT = 22;
-  const EMOJIS      = ['🧀','🫕','🧀','🫙','🧀','🥐','🧀'];
+  const EMOJIS      = ['🫕','🧀'];
 
   let running = false;
   let timers  = [];
