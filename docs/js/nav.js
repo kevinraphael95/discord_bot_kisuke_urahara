@@ -7,9 +7,7 @@
   ];
   const themes = [
     { id: 'shinigami',    label: 'Shinigami',    icon: '⚔️' },
-    { id: 'quincy',       label: 'Quincy',       icon: '↗️' },
-    { id: 'arrancar',     label: 'Arrancar',     icon: '👺' },
-    { id: 'hollow',       label: 'Hollow',       icon: '👻' },
+    { id: 'quincy',       label: 'Quincy',       icon: '↗️' }
   ];
 
   const savedTheme = localStorage.getItem('kisuke-theme') || 'soul-society';
