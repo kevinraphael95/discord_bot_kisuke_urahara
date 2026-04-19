@@ -255,8 +255,11 @@ function onIn(){
     i.onclick=()=>{$('gi').value=x.n;l.innerHTML='';sub();};l.appendChild(i);
   });
 
-  // ── EASTER EGG GAY — détection à la frappe ──────────
+  // ── EASTER EGGS — détection à la frappe ──────────
   if(v==='gay') triggerGay();
+
+  if(v==='fromage') triggerFromage();
+  
 }
 function onKD(e){
   const l=$('acl');const items=l.querySelectorAll('.aci');
@@ -366,6 +369,68 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
     document.body.appendChild(toast);
   }
 })();
+
+
+
+// ── FROMAGE EASTER EGG ────────────────────────────────
+(function(){
+  const DURATION    = 13000;
+  const EMOJI_COUNT = 22;
+  const EMOJIS      = ['🧀','🫕','🧀','🫙','🧀','🥐','🧀'];
+
+  let running = false;
+  let timers  = [];
+
+  function injectStyles(){
+    if(document.getElementById('fromage-style')) return;
+    const st = document.createElement('style');
+    st.id = 'fromage-style';
+    st.textContent = `
+      @keyframes fromageFly {
+        0%   { transform: translateX(-80px) translateY(var(--fy)) rotate(var(--fr)) scale(.8); opacity:0; }
+        7%   { opacity:1; }
+        90%  { opacity:1; }
+        100% { transform: translateX(calc(100vw + 80px)) translateY(var(--fy)) rotate(var(--fr)) scale(1.1); opacity:0; }
+      }
+      .fromage-emoji {
+        position:fixed; top:0; left:0; z-index:8888;
+        pointer-events:none; font-size:2.4rem; line-height:1;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+        animation: fromageFly var(--fd) linear forwards;
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  window.triggerFromage = function(){
+    if(running) return;
+    running = true;
+    injectStyles();
+
+    for(let i = 0; i < EMOJI_COUNT; i++){
+      const delay = (DURATION * 0.85 / EMOJI_COUNT) * i;
+      const t = setTimeout(()=>{
+        const el = document.createElement('div');
+        el.className = 'fromage-emoji';
+        el.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+        const yPct = 3  + Math.random() * 82;
+        const rot  = -20 + Math.random() * 40;
+        const dur  = 2600 + Math.random() * 2400;
+        el.style.setProperty('--fy', yPct + 'vh');
+        el.style.setProperty('--fr', rot  + 'deg');
+        el.style.setProperty('--fd', dur  + 'ms');
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(), dur + 200);
+      }, delay);
+      timers.push(t);
+    }
+
+    const endT = setTimeout(()=>{ timers = []; running = false; }, DURATION + 600);
+    timers.push(endT);
+  };
+})();
+
+
 
 
 // ── GAY PRIDE EASTER EGG ──────────────────────────────
