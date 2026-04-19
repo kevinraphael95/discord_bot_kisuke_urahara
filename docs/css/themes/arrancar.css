@@ -1,0 +1,39 @@
+/* ═══════════════════════════════════════════════════════
+   THÈME : ARRANCAR (blanc/noir/turquoise)
+   ═══════════════════════════════════════════════════════ */
+[data-theme="arrancar"] {
+  --void:    #f5f5f5;
+  --deep:    #ebebeb;
+  --panel:   #ffffff;
+  --surface: #f0f0f0;
+  --rim:     #cccccc;
+  --border:  rgba(0,0,0,.12);
+  --gold:      #0e7490;
+  --gold-lt:   #0891b2;
+  --gold-pale: rgba(8,145,178,.10);
+  --gold-glow: rgba(8,145,178,.28);
+  --gold-line: rgba(8,145,178,.22);
+  --rei:       #0891b2;
+  --rei-mid:   #22d3ee;
+  --rei-lt:    #0e7490;
+  --rei-pale:  rgba(34,211,238,.12);
+  --rei-glow:  rgba(34,211,238,.30);
+  --red:       #be123c;
+  --red-lt:    #e11d48;
+  --red-pale:  rgba(225,29,72,.10);
+  --red-glow:  rgba(225,29,72,.24);
+  --red-line:  rgba(225,29,72,.18);
+  --white:  #0a0a0a;
+  --text:   #1a1a1a;
+  --muted:  #333333;
+  --dim:    #1a3a42;
+  --ok-bg: #f0fdfa; --ok-bd: #0e7490; --ok-tx: #164e63;
+  --ko-bg: #fff1f2; --ko-bd: #be123c; --ko-tx: #881337;
+  --yw-bg: #fefce8; --yw-bd: #a16207; --yw-tx: #713f12;
+  --surv-bg: #ecfeff; --surv-bd: rgba(8,145,178,.40); --surv-tx: #164e63;
+  --atmo-1: rgba(8,145,178,.10);
+  --atmo-2: rgba(225,29,72,.05);
+  --atmo-3: rgba(8,145,178,.04);
+  --top-bar-grad: linear-gradient(90deg, transparent 0%, #0e7490 15%, #22d3ee 38%, #0891b2 55%, #22d3ee 75%, #0e7490 92%, transparent 100%);
+  --nav-bg: rgba(240,240,240,.96);
+}
