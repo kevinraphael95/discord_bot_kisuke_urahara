@@ -73,7 +73,7 @@ const CHARS = [
   {n:"Genryusai Yamamoto",    r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:5, st:"Mort",      hc:"Chauve", bday:"21/01", w:5,  l:1,  draw:0},
   {n:"Retsu Unohana",         r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:5, st:"Mort",      hc:"Noir",   bday:"21/04", w:3,  l:1,  draw:0},
   {n:"Sosuke Aizen",          r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Indépendant", d:5, st:"Vivant",    hc:"Brun",   bday:"29/05", w:12, l:1,  draw:0},
-  {n:"Sajin Komamura",        r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Incertain", hc:"Roux",   bday:"23/08", w:4,  l:3,  draw:0},
+  {n:"Sajin Komamura",        r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Incertain", hc:"Brun",   bday:"23/08", w:4,  l:3,  draw:0},
   {n:"Kaname Tousen",         r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Indépendant", d:4, st:"Mort",      hc:"Brun",   bday:"13/10", w:3,  l:2,  draw:0},
   {n:"Gin Ichimaru",          r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Indépendant", d:5, st:"Mort",      hc:"Gris",   bday:"10/09", w:4,  l:1,  draw:0},
   {n:"Jushiro Ukitake",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1},
