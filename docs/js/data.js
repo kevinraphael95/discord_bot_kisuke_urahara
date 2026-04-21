@@ -204,7 +204,7 @@ const CHARS = [
   {n:"Robert Accutrone",      r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Brun",   bday:"??/??", w:1,  l:1,  draw:0},
   {n:"Driscoll Berci",        r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"25/03", w:1,  l:1,  draw:0},
   {n:"Meninas McAllon",       r:"Quincy",   sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Vivant",    hc:"Rose",   bday:"09/03", w:2,  l:1,  draw:0},
-  {n:"Berenice Gabrielli",    r:"Quincy",   sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Blond",  bday:"08/02", w:1,  l:1,  draw:0},
+  {n:"Berenice Gabrielli",    r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Blond",  bday:"08/02", w:1,  l:1,  draw:0},
   {n:"Jerome Guizbatt",       r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"25/08", w:1,  l:1,  draw:0},
   {n:"Mask De Masculine",     r:"Quincy",   sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Blond",  bday:"20/10", w:2,  l:1,  draw:0},
   {n:"Candice Catnipp",       r:"Quincy",   sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Vivant",    hc:"Vert",   bday:"07/06", w:2,  l:1,  draw:0},
