@@ -11,75 +11,65 @@
 
 [data-theme="shinigami"] {
 
-  /* ─────────── BACKGROUNDS / SURFACES ─────────── */
-  --void:    #181c22; /* fond global (body) */
-  --deep:    #1f242c; /* sections profondes */
-  --panel:   #252b34; /* cartes / blocs */
-  --surface: #2c3440; /* éléments interactifs */
-  --rim:     #2e353f; /* contours légers */
-  --border:  rgba(255,255,255,.11); /* bordures générales */
+  /* === FONDS === */
+  --void:    #181c22; /* fond page */
+  --deep:    #1f242c; /* sections */
+  --panel:   #252b34; /* cartes */
+  --surface: #2c3440; /* boutons / inputs */
+  --rim:     #2e353f; /* contours */
+  --border:  rgba(255,255,255,.11); /* bordures */
 
 
-  /* ─────────── OR (accent principal) ─────────── */
-  --gold:      #d4a843; /* couleur principale */
-  --gold-lt:   #f0c96a; /* hover / highlight */
-  --gold-pale: rgba(212,168,67,.15); /* fond léger */
-  --gold-glow: rgba(212,168,67,.32); /* glow */
-  --gold-line: rgba(212,168,67,.24); /* bordure / séparation */
+  /* === OR (accent principal) === */
+  --gold:      #d4a843; /* principal */
+  --gold-lt:   #f0c96a; /* hover */
+  --gold-pale: rgba(212,168,67,.15); /* fond */
+  --gold-glow: rgba(212,168,67,.32); /* effet */
+  --gold-line: rgba(212,168,67,.24); /* bordure */
 
 
-  /* ─────────── REIATSU (bleu - énergie) ─────────── */
-  --rei:       #1460b8; /* base */
-  --rei-mid:   #1e7fe8; /* principal UI */
-  --rei-lt:    #6bb8ff; /* hover / accent */
-  --rei-pale:  rgba(30,127,232,.16); /* fond léger */
-  --rei-glow:  rgba(30,127,232,.38); /* effet glow */
+  /* === BLEU (reiatsu / énergie) === */
+  --rei:      #1460b8; /* base */
+  --rei-mid:  #1e7fe8; /* principal */
+  --rei-lt:   #6bb8ff; /* hover */
+  --rei-pale: rgba(30,127,232,.16); /* fond */
+  --rei-glow: rgba(30,127,232,.38); /* effet */
 
 
-  /* ─────────── DANGER / ERREUR (rouge) ─────────── */
-  --red:       #c43318; /* base */
-  --red-lt:    #ff5a1f; /* accent / hover */
-  --red-pale:  rgba(232,84,26,.13); /* fond léger */
-  --red-glow:  rgba(232,84,26,.32); /* glow */
-  --red-line:  rgba(232,84,26,.24); /* bordure */
+  /* === ROUGE (danger / erreur) === */
+  --red:      #c43318; /* base */
+  --red-lt:   #ff5a1f; /* hover */
+  --red-pale: rgba(232,84,26,.13); /* fond */
+  --red-glow: rgba(232,84,26,.32); /* effet */
+  --red-line: rgba(232,84,26,.24); /* bordure */
 
 
-  /* ─────────── TEXTE ─────────── */
-  --white:  #f5f2ec; /* texte blanc pur */
-  --text:   #dbd7d0; /* texte principal */
-  --muted:  #a29e98; /* texte secondaire */
-  --dim:    #66625d; /* texte désactivé */
+  /* === TEXTE === */
+  --white: #f5f2ec; /* blanc */
+  --text:  #dbd7d0; /* normal */
+  --muted: #a29e98; /* secondaire */
+  --dim:   #66625d; /* désactivé */
 
 
-  /* ─────────── ÉTATS UI ─────────── */
-  /* Succès */
-  --ok-bg: #071410;
-  --ok-bd: #15803d;
-  --ok-tx: #4ade80;
-
-  /* Erreur */
-  --ko-bg: #130606;
-  --ko-bd: #991b1b;
-  --ko-tx: #f87171;
-
-  /* Warning */
-  --yw-bg: #130d03;
-  --yw-bd: #92400e;
-  --yw-tx: #fbbf24;
-
-  /* Mode survie / info spéciale */
-  --surv-bg: #0b1020;
-  --surv-bd: rgba(94,176,255,.42);
-  --surv-tx: #e6f4ff;
+  /* === ÉTATS === */
+  --ok-bg: #071410; --ok-bd: #15803d; --ok-tx: #4ade80; /* succès */
+  --ko-bg: #130606; --ko-bd: #991b1b; --ko-tx: #f87171; /* erreur */
+  --yw-bg: #130d03; --yw-bd: #92400e; --yw-tx: #fbbf24; /* warning */
 
 
-  /* ─────────── EFFETS / AMBIANCE ─────────── */
-  --atmo-1: rgba(30,127,232,.20); /* glow bleu */
-  --atmo-2: rgba(232,84,26,.10); /* glow rouge */
-  --atmo-3: rgba(30,127,232,.09); /* ambiance légère */
+  /* === SPÉCIAL === */
+  --surv-bg: #0b1020; 
+  --surv-bd: rgba(94,176,255,.42); 
+  --surv-tx: #e6f4ff; /* mode spécial */
 
 
-  /* ─────────── UI SPÉCIFIQUE ─────────── */
+  /* === EFFETS === */
+  --atmo-1: rgba(30,127,232,.20);
+  --atmo-2: rgba(232,84,26,.10);
+  --atmo-3: rgba(30,127,232,.09);
+
+
+  /* === UI === */
   --top-bar-grad: linear-gradient(
     90deg,
     transparent 0%,
@@ -89,7 +79,7 @@
     #d4a843 75%,
     #1e7fe8 92%,
     transparent 100%
-  ); /* barre décorative */
+  );
 
-  --nav-bg: rgba(34,39,46,.94); /* fond navbar */
+  --nav-bg: rgba(34,39,46,.94);
 }
