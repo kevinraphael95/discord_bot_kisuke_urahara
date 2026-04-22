@@ -12,12 +12,12 @@
 [data-theme="shinigami"] {
 
   /* === FONDS === */
-  --void:    #20242c; /* fond page (éclairci) */
-  --deep:    #262b34; /* sections */
-  --panel:   #2c323c; /* cartes */
-  --surface: #323a46; /* boutons / inputs */
-  --rim:     #38414d; /* contours */
-  --border:  rgba(255,255,255,.13); /* bordures */
+  --void:    #2a2f38; /* fond page (plus clair) */
+  --deep:    #303640; /* sections */
+  --panel:   #363d48; /* cartes */
+  --surface: #3d4552; /* boutons / inputs */
+  --rim:     #444d5b; /* contours */
+  --border:  rgba(255,255,255,.16); /* bordures */
 
 
   /* === OR (accent principal) === */
@@ -81,5 +81,5 @@
     transparent 100%
   );
 
-  --nav-bg: rgba(40,45,52,.94); /* légèrement éclairci */
+  --nav-bg: rgba(48,54,64,.94); /* plus clair */
 }
