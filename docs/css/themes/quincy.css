@@ -12,74 +12,74 @@
 [data-theme="quincy"] {
 
   /* === FONDS === */
-  --void:    #eef3fa;
-  --deep:    #e3ecf6;
-  --panel:   #f7faff;
-  --surface: #f0f5fc;
-  --rim:     #d3dfec;
-  --border:  rgba(15,23,42,.08);
+  --void:    #e7eef7;
+  --deep:    #dbe6f3;
+  --panel:   #f6f9ff;
+  --surface: #eef4fc;
+  --rim:     #c7d6e8;
+  --border:  rgba(15,23,42,.10);
 
 
   /* === BLEU (accent principal) === */
-  --gold:      #4b78e6;
-  --gold-lt:   #6a95f0;
-  --gold-pale: rgba(106,149,240,.12);
-  --gold-glow: rgba(106,149,240,.18);
-  --gold-line: rgba(106,149,240,.14);
+  --gold:      #2563eb;
+  --gold-lt:   #3b82f6;
+  --gold-pale: rgba(59,130,246,.10);
+  --gold-glow: rgba(59,130,246,.22);
+  --gold-line: rgba(59,130,246,.18);
 
 
   /* === REIATSU (énergie) === */
-  --rei:       #3f6fd6;
-  --rei-mid:   #5f8df0;
-  --rei-lt:    #7aa7ff;
-  --rei-pale:  rgba(95,141,240,.10);
-  --rei-glow:  rgba(95,141,240,.22);
+  --rei:       #1d4ed8;
+  --rei-mid:   #3b82f6;
+  --rei-lt:    #60a5fa;
+  --rei-pale:  rgba(59,130,246,.12);
+  --rei-glow:  rgba(59,130,246,.28);
 
 
   /* === ROUGE (danger / erreur) === */
-  --red:       #c75b5b;
-  --red-lt:    #f07a7a;
-  --red-pale:  rgba(240,122,122,.10);
-  --red-glow:  rgba(240,122,122,.18);
-  --red-line:  rgba(240,122,122,.14);
+  --red:       #b91c1c;
+  --red-lt:    #ef4444;
+  --red-pale:  rgba(239,68,68,.10);
+  --red-glow:  rgba(239,68,68,.22);
+  --red-line:  rgba(239,68,68,.18);
 
 
   /* === TEXTE === */
   --white:  #0f172a;
-  --text:   #24324a;
-  --muted:  #51627a;
-  --dim:    #3a4a63;
+  --text:   #1e293b;
+  --muted:  #475569;
+  --dim:    #334155;
 
 
   /* === ÉTATS === */
-  --ok-bg: #f3fbf5; --ok-bd: #2f9e57; --ok-tx: #2f7a46;
-  --ko-bg: #fdf3f3; --ko-bd: #d85a5a; --ko-tx: #a33a3a;
-  --yw-bg: #fff8ec; --yw-bd: #e0a84a; --yw-tx: #8a5e12;
+  --ok-bg: #f0fdf4; --ok-bd: #15803d; --ok-tx: #166534;
+  --ko-bg: #fef2f2; --ko-bd: #dc2626; --ko-tx: #991b1b;
+  --yw-bg: #fffbeb; --yw-bd: #d97706; --yw-tx: #92400e;
 
 
   /* === SPÉCIAL === */
-  --surv-bg: #f3f8ff;
-  --surv-bd: rgba(95,141,240,.22);
-  --surv-tx: #2a4f8a;
+  --surv-bg: #f1f7ff;
+  --surv-bd: rgba(59,130,246,.30);
+  --surv-tx: #1e3a8a;
 
 
   /* === EFFETS === */
-  --atmo-1: rgba(95,141,240,.08);
-  --atmo-2: rgba(240,122,122,.04);
-  --atmo-3: rgba(95,141,240,.03);
+  --atmo-1: rgba(59,130,246,.10);
+  --atmo-2: rgba(239,68,68,.05);
+  --atmo-3: rgba(59,130,246,.04);
 
 
   /* === UI === */
   --top-bar-grad: linear-gradient(
     90deg,
     transparent 0%,
-    #6a95f0 15%,
-    #a9c4ff 38%,
-    #4b78e6 55%,
-    #a9c4ff 75%,
-    #6a95f0 92%,
+    #2563eb 15%,
+    #60a5fa 38%,
+    #1d4ed8 55%,
+    #60a5fa 75%,
+    #2563eb 92%,
     transparent 100%
   );
 
-  --nav-bg: rgba(233,240,250,.96);
+  --nav-bg: rgba(224,233,244,.96);
 }
