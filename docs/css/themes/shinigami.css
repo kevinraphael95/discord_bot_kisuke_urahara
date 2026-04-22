@@ -12,74 +12,74 @@
 [data-theme="shinigami"] {
 
   /* === FONDS === */
-  --void:    #181c22; /* fond page */
-  --deep:    #1f242c; /* sections */
-  --panel:   #252b34; /* cartes */
-  --surface: #2c3440; /* boutons / inputs */
-  --rim:     #2e353f; /* contours */
-  --border:  rgba(255,255,255,.11); /* bordures */
+  --void:    #20252d; /* fond page (éclairci) */
+  --deep:    #272d36; /* sections */
+  --panel:   #2e3540; /* cartes */
+  --surface: #353e4b; /* boutons / inputs */
+  --rim:     #3a4350; /* contours */
+  --border:  rgba(255,255,255,.14); /* bordures + visibles */
 
 
   /* === OR (accent principal) === */
   --gold:      #d4a843; /* principal */
-  --gold-lt:   #f0c96a; /* hover */
-  --gold-pale: rgba(212,168,67,.15); /* fond */
-  --gold-glow: rgba(212,168,67,.32); /* effet */
-  --gold-line: rgba(212,168,67,.24); /* bordure */
+  --gold-lt:   #f3cf78; /* un peu + clair */
+  --gold-pale: rgba(212,168,67,.18);
+  --gold-glow: rgba(212,168,67,.36);
+  --gold-line: rgba(212,168,67,.28);
 
 
   /* === BLEU (reiatsu / énergie) === */
-  --rei:      #1460b8; /* base */
-  --rei-mid:  #1e7fe8; /* principal */
-  --rei-lt:   #6bb8ff; /* hover */
-  --rei-pale: rgba(30,127,232,.16); /* fond */
-  --rei-glow: rgba(30,127,232,.38); /* effet */
+  --rei:      #1a6fd0; /* légèrement boosté */
+  --rei-mid:  #2c8fff; /* plus lumineux */
+  --rei-lt:   #8ecaff; /* plus doux */
+  --rei-pale: rgba(44,143,255,.18);
+  --rei-glow: rgba(44,143,255,.42);
 
 
   /* === ROUGE (danger / erreur) === */
-  --red:      #c43318; /* base */
-  --red-lt:   #ff5a1f; /* hover */
-  --red-pale: rgba(232,84,26,.13); /* fond */
-  --red-glow: rgba(232,84,26,.32); /* effet */
-  --red-line: rgba(232,84,26,.24); /* bordure */
+  --red:      #d64526;
+  --red-lt:   #ff6a3a;
+  --red-pale: rgba(255,106,58,.16);
+  --red-glow: rgba(255,106,58,.36);
+  --red-line: rgba(255,106,58,.28);
 
 
   /* === TEXTE === */
-  --white: #f5f2ec; /* blanc */
-  --text:  #dbd7d0; /* normal */
-  --muted: #a29e98; /* secondaire */
-  --dim:   #66625d; /* désactivé */
+  --white: #faf7f2; /* un peu + doux */
+  --text:  #e2ded8; /* + lisible */
+  --muted: #b4b0aa;
+  --dim:   #7a7671;
 
 
   /* === ÉTATS === */
-  --ok-bg: #071410; --ok-bd: #15803d; --ok-tx: #4ade80; /* succès */
-  --ko-bg: #130606; --ko-bd: #991b1b; --ko-tx: #f87171; /* erreur */
-  --yw-bg: #130d03; --yw-bd: #92400e; --yw-tx: #fbbf24; /* warning */
+  --ok-bg: #0a1a14; --ok-bd: #22c55e; --ok-tx: #4ade80;
+  --ko-bg: #1a0a0a; --ko-bd: #dc2626; --ko-tx: #f87171;
+  --yw-bg: #1a1206; --yw-bd: #d97706; --yw-tx: #fbbf24;
 
 
   /* === SPÉCIAL === */
-  --surv-bg: #0b1020; 
-  --surv-bd: rgba(94,176,255,.42); 
-  --surv-tx: #e6f4ff; /* mode spécial */
+  --surv-bg: #111833;
+  --surv-bd: rgba(120,190,255,.45);
+  --surv-tx: #eef7ff;
 
 
   /* === EFFETS === */
-  --atmo-1: rgba(30,127,232,.20);
-  --atmo-2: rgba(232,84,26,.10);
-  --atmo-3: rgba(30,127,232,.09);
+  --atmo-1: rgba(44,143,255,.22);
+  --atmo-2: rgba(255,106,58,.12);
+  --atmo-3: rgba(44,143,255,.11);
 
 
   /* === UI === */
   --top-bar-grad: linear-gradient(
     90deg,
     transparent 0%,
-    #1e7fe8 15%,
+    #2c8fff 15%,
     #d4a843 38%,
-    #ff5a1f 55%,
+    #ff6a3a 55%,
     #d4a843 75%,
-    #1e7fe8 92%,
+    #2c8fff 92%,
     transparent 100%
   );
 
-  --nav-bg: rgba(34,39,46,.94);
+  --nav-bg: rgba(40,46,55,.94); /* légèrement + clair */
 }
