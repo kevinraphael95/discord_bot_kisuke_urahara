@@ -10,7 +10,7 @@
     { id: 'quincy',       label: 'Quincy',       icon: '↗️' }
   ];
 
-  const savedTheme = localStorage.getItem('kisuke-theme') || 'soul-society';
+  const savedTheme = localStorage.getItem('shinigami-theme') || 'shinigami';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
   const current = location.pathname.split('/').pop() || 'index.html';
