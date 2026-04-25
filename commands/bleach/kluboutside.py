@@ -34,8 +34,8 @@ def load_data():
     merged = {"Questions": {}}
     try:
         files = sorted(
-            f for f in os.listdir(KO_DATA_DIR)
-            if f.startswith("ko") and f.endswith(".json"),
+            (f for f in os.listdir(KO_DATA_DIR)
+             if f.startswith("ko") and f.endswith(".json")),
             key=lambda f: int(f[2:-5])
         )
         for filename in files:
@@ -72,7 +72,7 @@ class KlubPaginator(View):
     async def _send_embed(self, interaction: discord.Interaction):
         key      = self.keys[self.index]
         question = self.data["Questions"][key]
-
+    
         embed = discord.Embed(
             title=f"📓 Question Klub Outside n°{key}",
             color=discord.Color.dark_green()
@@ -81,14 +81,14 @@ class KlubPaginator(View):
         embed.add_field(name="❓ Question", value=question.get("question", "?"), inline=False)
         embed.add_field(name="💬 Réponse",  value=question.get("réponse",  "?"), inline=False)
         embed.set_footer(text=f"{self.index + 1} / {len(self.keys)}")
-
+    
         image_path = self._find_image_file(key)
         if image_path:
             file = discord.File(image_path, filename=os.path.basename(image_path))
             embed.set_image(url=f"attachment://{os.path.basename(image_path)}")
-            await safe_interact(interaction, embed=embed, view=self, attachments=[file], edit=True)
+            await interaction.response.edit_message(embed=embed, view=self, attachments=[file])
         else:
-            await safe_interact(interaction, embed=embed, view=self, attachments=[], edit=True)
+            await interaction.response.edit_message(embed=embed, view=self, attachments=[])
 
     @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary)
     async def previous(self, interaction: discord.Interaction, button: discord.ui.Button):
