@@ -23,7 +23,7 @@ from utils.taches import lancer_3_taches
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Constantes
 # ────────────────────────────────────────────────────────────────────────────────
-HOLLOW_IMAGE_PATH = os.path.join("data", "images", "hollows", "hollow0.jpg")
+HOLLOW_IMAGE_PATH = os.path.join("assets", "hollows", "hollow0.jpg")
 REIATSU_COST = 1
 
 # ────────────────────────────────────────────────────────────────────────────────
