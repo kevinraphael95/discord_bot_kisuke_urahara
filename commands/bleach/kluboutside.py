@@ -26,17 +26,28 @@ log = logging.getLogger(__name__)
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Chargement des données JSON
 # ────────────────────────────────────────────────────────────────────────────────
-KO_DATA_PATH = os.path.join("data", "ko.json")
+KO_DATA_DIR = os.path.join("data", "kluboutside")
 KO_IMAGE_DIR = os.path.join("assets", "kluboutside")
 
 def load_data():
-    """Charge le fichier JSON contenant les questions Klub Outside."""
+    """Charge et fusionne tous les fichiers ko*.json du dossier data/kluboutside."""
+    merged = {"Questions": {}}
     try:
-        with open(KO_DATA_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+        files = sorted(
+            f for f in os.listdir(KO_DATA_DIR)
+            if f.startswith("ko") and f.endswith(".json")
+        )
+        for filename in files:
+            path = os.path.join(KO_DATA_DIR, filename)
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                merged["Questions"].update(data.get("Questions", {}))
+            except Exception as e:
+                log.exception("[kluboutside] Impossible de charger %s : %s", path, e)
     except Exception as e:
-        log.exception("[kluboutside] Impossible de charger %s : %s", KO_DATA_PATH, e)
-        return {}
+        log.exception("[kluboutside] Impossible de lire le dossier %s : %s", KO_DATA_DIR, e)
+    return merged
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎛️ UI — Pagination interactive
