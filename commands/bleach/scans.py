@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Gestion des scans
 # ────────────────────────────────────────────────────────────────────────────────
-SCANS_FOLDER = os.path.join("data", "images", "scans")
+SCANS_FOLDER = os.path.join("assets", "scans")
 
 def get_folders():
     """Retourne la liste des scans disponibles dans scans/."""
