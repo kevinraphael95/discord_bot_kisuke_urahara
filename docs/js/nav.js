@@ -85,7 +85,7 @@
     if (btn) {
       const t = btn.dataset.theme;
       document.documentElement.setAttribute('data-theme', t);
-      localStorage.setItem('kisuke-theme', t);
+      localStorage.setItem('shinigami', t);
       updateThemeButtons(t);
       document.getElementById('themeMenu').classList.remove('open');
     }
