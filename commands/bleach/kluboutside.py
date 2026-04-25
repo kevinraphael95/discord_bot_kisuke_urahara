@@ -35,7 +35,8 @@ def load_data():
     try:
         files = sorted(
             f for f in os.listdir(KO_DATA_DIR)
-            if f.startswith("ko") and f.endswith(".json")
+            if f.startswith("ko") and f.endswith(".json"),
+            key=lambda f: int(f[2:-5])
         )
         for filename in files:
             path = os.path.join(KO_DATA_DIR, filename)
