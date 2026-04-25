@@ -22,7 +22,7 @@ from utils.discord_utils import safe_send, safe_respond, safe_interact
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Gestion des personnages et combat
 # ────────────────────────────────────────────────────────────────────────────────
-CHAR_DIR    = os.path.join("data", "personnages")
+CHAR_DIR    = os.path.join("assets", "personnages")
 COMBAT_FILE = os.path.join("data", "combat.json")
 
 with open(COMBAT_FILE, "r", encoding="utf-8") as f:
