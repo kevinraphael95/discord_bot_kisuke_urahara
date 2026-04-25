@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 # 📂 Chargement des données JSON
 # ────────────────────────────────────────────────────────────────────────────────
 KO_DATA_PATH = os.path.join("data", "ko.json")
-KO_IMAGE_DIR = os.path.join("data", "images", "kluboutside")
+KO_IMAGE_DIR = os.path.join("assets", "kluboutside")
 
 def load_data():
     """Charge le fichier JSON contenant les questions Klub Outside."""
