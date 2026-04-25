@@ -23,7 +23,7 @@ from utils.discord_utils import safe_send, safe_interact, safe_edit
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Gestion des personnages
 # ────────────────────────────────────────────────────────────────────────────────
-CHAR_DIR = os.path.join("data", "personnages")
+CHAR_DIR = os.path.join("assets", "personnages")
 
 def load_character(name: str):
     path = os.path.join(CHAR_DIR, f"{name.lower()}.json")

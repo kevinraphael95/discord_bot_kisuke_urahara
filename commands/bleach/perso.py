@@ -22,7 +22,7 @@ from utils.discord_utils import safe_send
 # ────────────────────────────────────────────────────────────────────────────────
 # 📂 Dossier contenant les JSON des personnages
 # ────────────────────────────────────────────────────────────────────────────────
-CHAR_DIR = os.path.join("data", "personnages")
+CHAR_DIR = os.path.join("assets", "personnages")
 
 def load_character(name: str):
     """Charge la fiche JSON d'un personnage par nom."""
