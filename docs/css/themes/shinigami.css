@@ -9,6 +9,17 @@
    - UI spécifique
    ═══════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════
+   THÈME : SHINIGAMI (bleu / or)
+   Organisation :
+   - Backgrounds / surfaces
+   - Couleurs principales (Or / Reiatsu / Danger)
+   - Texte
+   - États UI (succès, erreur…)
+   - Effets & ambiance
+   - UI spécifique
+   ═══════════════════════════════════════════════════════ */
+
 [data-theme="shinigami"] {
 
   /* === FONDS === */
