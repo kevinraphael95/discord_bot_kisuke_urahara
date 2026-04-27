@@ -20,74 +20,66 @@
   --border:  rgba(255,255,255,.22);   
 
 
-  /* === OR (accent) === */
-  --gold:      #e0b84f;
-  --gold-lt:   #ffd978;
-  --gold-pale: rgba(224,184,79,.18);
-  --gold-glow: rgba(224,184,79,.40);
-  --gold-line: rgba(224,184,79,.30);
+  /* === OR (accent principal) === */
+  --gold:      #d4a843; /* principal */
+  --gold-lt:   #f0c96a; /* hover */
+  --gold-pale: rgba(212,168,67,.15); /* fond */
+  --gold-glow: rgba(212,168,67,.32); /* effet */
+  --gold-line: rgba(212,168,67,.24); /* bordure */
 
 
-  /* === BLEU (plus lumineux) === */
-  --rei:      #1b6fd1;
-  --rei-mid:  #2f8fff;
-  --rei-lt:   #8cc8ff;
-  --rei-pale: rgba(47,143,255,.20);
-  --rei-glow: rgba(47,143,255,.45);
+  /* === BLEU (reiatsu / énergie) === */
+  --rei:      #1460b8; /* base */
+  --rei-mid:  #1e7fe8; /* principal */
+  --rei-lt:   #6bb8ff; /* hover */
+  --rei-pale: rgba(30,127,232,.16); /* fond */
+  --rei-glow: rgba(30,127,232,.38); /* effet */
 
 
-  /* === ROUGE (moins sombre) === */
-  --red:      #d63c1c;
-  --red-lt:   #ff6a2a;
-  --red-pale: rgba(255,106,42,.16);
-  --red-glow: rgba(255,106,42,.38);
-  --red-line: rgba(255,106,42,.28);
+  /* === ROUGE (danger / erreur) === */
+  --red:      #c43318; /* base */
+  --red-lt:   #ff5a1f; /* hover */
+  --red-pale: rgba(232,84,26,.13); /* fond */
+  --red-glow: rgba(232,84,26,.32); /* effet */
+  --red-line: rgba(232,84,26,.24); /* bordure */
 
 
-  /* === TEXTE (gros gain ici) === */
-  --white: #ffffff;
-  --text:  #e6e2db; /* + clair */
-  --muted: #b7b2ab; /* + lisible */
-  --dim:   #7a756f; /* moins écrasé */
+  /* === TEXTE === */
+  --white: #f5f2ec; /* blanc */
+  --text:  #dbd7d0; /* normal */
+  --muted: #a29e98; /* secondaire */
+  --dim:   #66625d; /* désactivé */
 
 
-  /* === ÉTATS (plus visibles) === */
-  --ok-bg: #0b1f17;
-  --ok-bd: #22c55e;
-  --ok-tx: #86efac;
-
-  --ko-bg: #1a0a0a;
-  --ko-bd: #dc2626;
-  --ko-tx: #fca5a5;
-
-  --yw-bg: #1a1205;
-  --yw-bd: #d97706;
-  --yw-tx: #fcd34d;
+  /* === ÉTATS === */
+  --ok-bg: #122b1c; --ok-bd: #15803d; --ok-tx: #4ade80; /* succès */
+  --ko-bg: #2a0d0d; --ko-bd: #991b1b; --ko-tx: #f87171; /* erreur */
+  --yw-bg: #2a1804; --yw-bd: #92400e; --yw-tx: #fbbf24; /* warning */
 
 
   /* === SPÉCIAL === */
-  --surv-bg: #10172a; 
-  --surv-bd: rgba(120,190,255,.55); 
-  --surv-tx: #f0f8ff;
+  --surv-bg: #0b1020; 
+  --surv-bd: rgba(94,176,255,.42); 
+  --surv-tx: #e6f4ff; /* mode spécial */
 
 
-  /* === EFFETS (plus doux, moins “boueux”) === */
-  --atmo-1: rgba(47,143,255,.25);
-  --atmo-2: rgba(255,106,42,.12);
-  --atmo-3: rgba(47,143,255,.12);
+  /* === EFFETS === */
+  --atmo-1: rgba(30,127,232,.20);
+  --atmo-2: rgba(232,84,26,.10);
+  --atmo-3: rgba(30,127,232,.09);
 
 
   /* === UI === */
   --top-bar-grad: linear-gradient(
     90deg,
     transparent 0%,
-    #2f8fff 15%,
-    #e0b84f 38%,
-    #ff6a2a 55%,
-    #e0b84f 75%,
-    #2f8fff 92%,
+    #1e7fe8 15%,
+    #d4a843 38%,
+    #ff5a1f 55%,
+    #d4a843 75%,
+    #1e7fe8 92%,
     transparent 100%
   );
 
-  --nav-bg: rgba(46,53,65,.96); /* plus lisible */
+  --nav-bg: rgba(40,45,52,.94); /* légèrement éclairci */
 }
