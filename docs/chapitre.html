@@ -1,511 +1,312 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="shinigami">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quel Chapitre ? — Bleach</title>
+<title>Quel Chapitre ? — Kisuke Urahara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<script src="js/nav.js" defer></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@400;600;700&display=swap');
+.page-wrap {
+  position: relative; z-index: 1;
+  max-width: 720px; margin: 0 auto;
+  padding: 0 1.5rem 5rem;
+}
 
-  :root {
-    --bg:      #0a0c10;
-    --surface: #111318;
-    --card:    #16191f;
-    --border:  #2a2d35;
-    --gold:    #c9a84c;
-    --gold2:   #e8c96a;
-    --red:     #c0392b;
-    --green:   #27ae60;
-    --text:    #e8e4dc;
-    --muted:   #6b7280;
-    --close:   #e67e22;
-  }
+/* ── SCORE ── */
+.scorebar {
+  display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 1.8rem;
+  opacity: 0; animation: rise .6s .5s forwards;
+}
+.sstat {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: .7rem 1.4rem; text-align: center; min-width: 80px;
+}
+.sstat .sv {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.5rem; font-weight: 700; color: var(--gold); display: block;
+}
+.sstat .sl { font-size: .62rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── LOADING ── */
+#loadBox {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: 3rem 1.5rem; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 1.2rem;
+}
+.spinner {
+  width: 36px; height: 36px;
+  border: 2px solid var(--border); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loadMsg { color: var(--muted); font-size: .85rem; letter-spacing: .05em; }
+.prog-wrap { width: 220px; height: 1px; background: var(--border); }
+.prog-fill  { height: 100%; background: var(--gold); transition: width .4s; width: 0%; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+/* ── IMAGE ── */
+#imgBox {
+  border: 1px solid var(--gold-line); overflow: hidden;
+  display: none; position: relative; background: var(--deep);
+}
+#mangaImg {
+  width: 100%; max-height: 540px; object-fit: contain;
+  display: block; background: #000; transition: filter .4s;
+}
+#mangaImg.blurred { filter: blur(20px) brightness(.7); }
+.img-src {
+  position: absolute; bottom: 0; right: 0; padding: 4px 10px;
+  background: rgba(0,0,0,.6); font-size: .62rem; color: var(--dim); letter-spacing: .06em;
+}
 
-  /* ── HEADER ── */
-  header {
-    width: 100%;
-    background: linear-gradient(135deg, #0d0f14 0%, #1a1208 100%);
-    border-bottom: 1px solid var(--gold);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow: 0 2px 20px rgba(201,168,76,.15);
-  }
-  header .logo { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--gold); letter-spacing: 2px; }
-  header .sub  { font-size: .8rem; color: var(--muted); letter-spacing: 1px; }
+/* ── DOTS ── */
+.tries-row { display: flex; gap: 6px; justify-content: center; margin: .8rem 0; }
+.try-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--border); transition: background .3s;
+}
+.try-dot.correct { background: var(--ok-bd); box-shadow: 0 0 6px var(--ok-bd); }
+.try-dot.close   { background: var(--yw-bd); box-shadow: 0 0 6px var(--yw-bd); }
+.try-dot.wrong   { background: var(--ko-bd); box-shadow: 0 0 6px var(--ko-bd); }
 
-  /* ── MAIN ── */
-  main {
-    width: 100%;
-    max-width: 700px;
-    padding: 20px 16px 60px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+/* ── INDICES ── */
+.hint-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .8rem; }
+.hint-btn {
+  font-family: 'DM Sans', sans-serif; font-size: .7rem; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted); padding: .4rem .9rem; cursor: pointer; transition: all .2s;
+}
+.hint-btn:hover:not(:disabled) { border-color: var(--gold-line); color: var(--gold-lt); }
+.hint-btn:disabled { opacity: .3; cursor: not-allowed; }
+.hint-tags { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .6rem; }
+.hint-tag {
+  background: var(--gold-pale); border: 1px solid var(--gold-line);
+  padding: .4rem .9rem; font-size: .78rem; color: var(--gold-lt); letter-spacing: .04em;
+}
 
-  /* ── SCORE BAR ── */
-  .scorebar {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .sstat {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 18px;
-    text-align: center;
-    min-width: 90px;
-  }
-  .sstat .sv { font-size: 1.4rem; font-weight: 700; color: var(--gold); }
-  .sstat .sl { font-size: .65rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+/* ── INPUT ── */
+#inputBox { display: none; flex-direction: column; gap: .7rem; }
+.input-row { display: flex; gap: .5rem; }
+#chapInput {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1rem;
+  padding: .8rem 1rem; outline: none; transition: border-color .2s;
+}
+#chapInput:focus { border-color: var(--gold-line); }
+#chapInput::placeholder { color: var(--dim); }
 
-  /* ── LOADING ── */
-  #loadBox {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 40px 20px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid var(--border);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loadMsg { color: var(--muted); font-size: .9rem; }
+/* ── FEEDBACK ── */
+#feedback { border: 1px solid; padding: .9rem 1.1rem; display: none; flex-direction: column; gap: .3rem; }
+#feedback.correct { background: var(--ok-bg); border-color: var(--ok-bd); }
+#feedback.close   { background: var(--yw-bg); border-color: var(--yw-bd); }
+#feedback.wrong   { background: var(--ko-bg); border-color: var(--ko-bd); }
+.fb-title  { font-weight: 600; font-size: .95rem; }
+.fb-detail { font-size: .78rem; color: var(--muted); }
 
-  /* ── IMAGE BOX ── */
-  #imgBox {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-    display: none;
-  }
-  #mangaImg {
-    width: 100%;
-    max-height: 520px;
-    object-fit: contain;
-    display: block;
-    background: #000;
-  }
-  .img-overlay {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 10px 14px;
-    background: linear-gradient(transparent, rgba(0,0,0,.85));
-    font-size: .75rem;
-    color: var(--muted);
-    text-align: right;
-  }
-  /* reveal blur */
-  #mangaImg.blurred { filter: blur(18px); }
+/* ── HIST ── */
+#histBox { display: flex; flex-direction: column; gap: .4rem; }
+.hist-item {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: .65rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: .85rem;
+}
+.hist-item.correct { border-color: var(--ok-bd); }
+.hist-item.close   { border-color: var(--yw-bd); }
+.hist-item.wrong   { border-color: var(--ko-bd); }
+.hist-guess { color: var(--text); font-weight: 500; font-family: 'Shippori Mincho', serif; }
+.hist-info  { display: flex; gap: .7rem; align-items: center; }
+.hist-arrow { color: var(--muted); font-size: .75rem; }
+.hist-badge { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: .2rem .6rem; }
+.hist-badge.correct { background: var(--ok-bg); color: var(--ok-tx); }
+.hist-badge.close   { background: var(--yw-bg); color: var(--yw-tx); }
+.hist-badge.wrong   { background: var(--ko-bg); color: var(--ko-tx); }
 
-  /* ── INPUT ZONE ── */
-  #inputBox {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .input-row {
-    display: flex;
-    gap: 8px;
-  }
-  #chapInput {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.1rem;
-    outline: none;
-    transition: border-color .2s;
-  }
-  #chapInput:focus { border-color: var(--gold); }
-  #chapInput::placeholder { color: var(--muted); }
+/* ── RÉSULTAT ── */
+#result {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: 2rem 1.5rem; display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center;
+}
+#result.win  { border-color: var(--ok-bd); }
+#result.lose { border-color: var(--ko-bd); }
+.res-kana  { font-family: 'Noto Serif JP', serif; font-size: .65rem; letter-spacing: .5em; color: var(--rei-lt); }
+.res-title { font-family: 'Shippori Mincho', serif; font-size: 1.4rem; font-weight: 800; color: var(--gold); }
+#resImg    { max-height: 280px; object-fit: contain; border: 1px solid var(--gold-line); }
+.res-chap  { font-family: 'Shippori Mincho', serif; font-size: 2.2rem; font-weight: 800; color: var(--white); }
+.res-arc   { font-size: .78rem; color: var(--muted); letter-spacing: .06em; }
+.result-btns { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; margin-top: .5rem; }
 
-  .btn {
-    background: linear-gradient(135deg, var(--gold), #a07830);
-    border: none;
-    border-radius: 8px;
-    padding: 12px 22px;
-    color: #0a0c10;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: opacity .2s, transform .1s;
-  }
-  .btn:hover { opacity: .88; }
-  .btn:active { transform: scale(.97); }
-  .btn:disabled { opacity: .4; cursor: not-allowed; }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+/* ── ERREUR ── */
+#errorBox {
+  background: var(--ko-bg); border: 1px solid var(--ko-bd);
+  padding: 2rem; text-align: center; display: none; flex-direction: column; gap: 1rem;
+}
+#errMsg { color: var(--ko-tx); font-size: .9rem; }
 
-  .hint-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .hint-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 12px;
-    color: var(--muted);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: .8rem;
-    cursor: pointer;
-    transition: all .2s;
-    letter-spacing: .5px;
-  }
-  .hint-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
-  .hint-btn:disabled { opacity: .3; cursor: not-allowed; }
-
-  /* ── FEEDBACK ── */
-  #feedback {
-    border-radius: 10px;
-    padding: 16px;
-    font-size: 1rem;
-    font-weight: 600;
-    display: none;
-    flex-direction: column;
-    gap: 6px;
-  }
-  #feedback.correct { background: rgba(39,174,96,.15); border: 1px solid var(--green); }
-  #feedback.close   { background: rgba(230,126,34,.15); border: 1px solid var(--close); }
-  #feedback.wrong   { background: rgba(192,57,43,.12);  border: 1px solid var(--red); }
-  #feedback .fb-title { font-size: 1.2rem; }
-  #feedback .fb-detail { font-size: .85rem; color: var(--muted); }
-  #feedback .fb-answer { color: var(--gold); font-size: .9rem; }
-
-  /* ── TRIES ── */
-  .tries-row {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-  }
-  .try-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--border);
-    transition: background .3s;
-  }
-  .try-dot.used    { background: var(--red); }
-  .try-dot.correct { background: var(--green); }
-  .try-dot.close   { background: var(--close); }
-
-  /* ── RESULT ── */
-  #result {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 24px;
-    text-align: center;
-    display: none;
-    flex-direction: column;
-    gap: 14px;
-    border: 1px solid var(--border);
-  }
-  #result.win  { border-color: var(--green); }
-  #result.lose { border-color: var(--red); }
-  #result .res-title { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--gold); }
-  #result .res-chap  { font-size: 2rem; font-weight: 700; color: var(--text); }
-  #result .res-sub   { font-size: .85rem; color: var(--muted); }
-  .result-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-
-  /* ── HISTORY ── */
-  #histBox { display: flex; flex-direction: column; gap: 6px; }
-  .hist-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: .9rem;
-  }
-  .hist-item.correct { border-color: var(--green); }
-  .hist-item.close   { border-color: var(--close); }
-  .hist-item.wrong   { border-color: var(--red); }
-  .hist-guess { color: var(--text); font-weight: 600; }
-  .hist-badge {
-    font-size: .75rem;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 700;
-    letter-spacing: .5px;
-  }
-  .hist-badge.correct { background: rgba(39,174,96,.2); color: var(--green); }
-  .hist-badge.close   { background: rgba(230,126,34,.2); color: var(--close); }
-  .hist-badge.wrong   { background: rgba(192,57,43,.15); color: var(--red); }
-  .hist-arrow { color: var(--muted); font-size: .8rem; }
-
-  /* ── HINT TAG ── */
-  .hint-tag {
-    display: inline-block;
-    background: rgba(201,168,76,.1);
-    border: 1px solid rgba(201,168,76,.3);
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: .8rem;
-    color: var(--gold);
-    margin-top: 4px;
-  }
-
-  /* ── ERROR ── */
-  #errorBox {
-    background: rgba(192,57,43,.1);
-    border: 1px solid var(--red);
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* ── PROGRESS BAR ── */
-  .prog-wrap { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .prog-fill { height: 100%; background: var(--gold); transition: width .4s; width: 0%; }
+@media (max-width: 700px) {
+  .page-wrap { padding: 0 1rem 4rem; }
+  .sstat { padding: .6rem .9rem; min-width: 70px; }
+}
 </style>
 </head>
 <body>
+<div class="atmo"></div>
+<div class="top-bar"></div>
 
-<header>
-  <div>
-    <div class="logo">⚔ QUEL CHAPITRE ?</div>
-    <div class="sub">BLEACH — MANGA GUESSER</div>
-  </div>
+<header class="phdr">
+  <p class="pkana">ブリーチ · 章</p>
+  <h1 class="pttl">
+    <span class="t1">Quel Chapitre ?</span>
+    <span class="t2">Bleach Manga Guesser</span>
+  </h1>
+  <p class="psub">Une page aléatoire du manga s'affiche. Devinez le numéro du chapitre en 5 essais.</p>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </header>
 
-<main>
+<div class="divider"><span class="div-sym">卍</span></div>
 
-  <!-- Score -->
+<main class="page-wrap">
+
   <div class="scorebar">
-    <div class="sstat"><div class="sv" id="sScore">0</div><div class="sl">Score</div></div>
-    <div class="sstat"><div class="sv" id="sStreak">0</div><div class="sl">Série 🔥</div></div>
-    <div class="sstat"><div class="sv" id="sBest">0</div><div class="sl">Record</div></div>
-    <div class="sstat"><div class="sv" id="sRound">0</div><div class="sl">Manche</div></div>
+    <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
+    <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+    <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+    <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
   </div>
 
-  <!-- Chargement -->
   <div id="loadBox">
     <div class="spinner"></div>
     <div id="loadMsg">Chargement d'une page de Bleach…</div>
-    <div class="prog-wrap" style="width:200px"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
   </div>
 
-  <!-- Erreur -->
   <div id="errorBox">
-    <div style="font-size:1.5rem">😵</div>
-    <div id="errMsg">Impossible de charger une page. Réessaie !</div>
-    <button class="btn" onclick="newRound()">🔄 Réessayer</button>
+    <div id="errMsg">Impossible de charger. Vérifie ta connexion.</div>
+    <button class="btn btn-ghost" onclick="newRound()">🔄 Réessayer</button>
   </div>
 
-  <!-- Image -->
   <div id="imgBox">
     <img id="mangaImg" alt="Page de Bleach" class="blurred"/>
-    <div class="img-overlay">📖 MangaDex · Bleach</div>
+    <div class="img-src">📖 MangaDex · Bleach</div>
   </div>
 
-  <!-- Essais -->
   <div class="tries-row" id="triesRow"></div>
 
-  <!-- Input -->
   <div id="inputBox">
-    <div class="hint-row" id="hintRow">
-      <button class="hint-btn" id="hintArc"  onclick="giveHint('arc')">💡 Indice Arc</button>
-      <button class="hint-btn" id="hintRange" onclick="giveHint('range')">💡 Fourchette ±50</button>
-      <button class="hint-btn" id="hintUnblur" onclick="giveHint('unblur')">👁 Dézoomer</button>
+    <div class="hint-row">
+      <button class="hint-btn" id="hintArc"    onclick="giveHint('arc')">💡 Arc narratif</button>
+      <button class="hint-btn" id="hintRange"  onclick="giveHint('range')">📐 Fourchette ±50</button>
+      <button class="hint-btn" id="hintUnblur" onclick="giveHint('unblur')">👁 Révéler l'image</button>
     </div>
-    <div id="hintDisplay"></div>
+    <div class="hint-tags" id="hintTags"></div>
     <div class="input-row">
-      <input type="number" id="chapInput" placeholder="Numéro du chapitre (1–686)"
+      <input type="number" id="chapInput" placeholder="Numéro du chapitre (1 – 686)"
              min="1" max="686" onkeydown="if(event.key==='Enter') submit()"/>
-      <button class="btn" id="subBtn" onclick="submit()">VALIDER</button>
+      <button class="btn btn-gold" id="subBtn" onclick="submit()">Valider</button>
     </div>
   </div>
 
-  <!-- Feedback dernière tentative -->
   <div id="feedback">
-    <div class="fb-title" id="fbTitle"></div>
+    <div class="fb-title"  id="fbTitle"></div>
     <div class="fb-detail" id="fbDetail"></div>
-    <div class="fb-answer" id="fbAnswer"></div>
   </div>
 
-  <!-- Historique des tentatives -->
   <div id="histBox"></div>
 
-  <!-- Résultat -->
   <div id="result">
+    <div class="res-kana">結果</div>
     <div class="res-title" id="resTtl"></div>
-    <img id="resImg" style="max-height:300px;object-fit:contain;border-radius:8px;" alt=""/>
+    <img id="resImg" alt="Page révélée"/>
     <div class="res-chap" id="resChap"></div>
-    <div class="res-sub" id="resSub"></div>
+    <div class="res-arc"  id="resArc"></div>
     <div class="result-btns">
-      <button class="btn" onclick="newRound()">▶ Prochaine page</button>
-      <button class="btn btn-outline" onclick="openMangadex()">📖 Voir sur MangaDex</button>
+      <button class="btn btn-gold"  onclick="newRound()">▶ Prochaine page</button>
+      <button class="btn btn-ghost" onclick="openMangadex()">📖 MangaDex</button>
     </div>
   </div>
 
 </main>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────
-const BLEACH_ID = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
-const API       = 'https://api.mangadex.org';
-const MAX_TRIES = 5;
-const MARGIN_CORRECT = 0;
-const MARGIN_CLOSE   = 15;
+const BLEACH_ID  = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
+const API_BASE   = 'https://api.mangadex.org';
+const PROXY      = 'https://corsproxy.io/?url=';
+const MAX_TRIES  = 5;
+const CLOSE_MARGIN = 15;
 
-// Arcs Bleach (chapitre début → nom)
 const ARCS = [
-  [1,   'Agent de la Shinigami (début)'],
-  [70,  'Soul Society : Perturbation'],
-  [118, 'Soul Society : Sauvetage'],
-  [182, 'Arrancars'],
-  [240, 'Hueco Mundo'],
-  [295, 'Fake Karakura Town'],
-  [342, 'Fullbring'],
-  [424, 'La Guerre des Mille Ans'],
-  [480, 'La Guerre des Mille Ans : La Fumée de l\'Enfer'],
-  [541, 'La Guerre des Mille Ans : Sang pour Sang'],
-  [612, 'La Guerre des Mille Ans : La Moisson'],
-  [665, 'Épilogue'],
+  [1,'Agent de la Shinigami'],[70,'Soul Society — Perturbation'],
+  [118,'Soul Society — Sauvetage'],[182,'Arrancar'],[240,'Hueco Mundo'],
+  [295,'Fake Karakura Town'],[343,'Fullbring'],[424,'La Guerre des Mille Ans'],
+  [480,'La Guerre des Mille Ans — La Fumée'],[541,'Sang pour Sang'],
+  [612,'La Moisson'],[665,'Épilogue'],
 ];
 
-// ── STATE ─────────────────────────────────────────────────
-let targetChap = null; // { num, id, title, pageUrl }
-let tries = [];
-let roundOver = false;
-let score = 0, streak = 0, best = 0, round = 0;
-let hintsUsed = new Set();
-let chapCache = null; // cache des chapitres
+let target=null, tries=[], over=false, hints=new Set(), chapCache=null;
+let score=0, streak=0, best=0, round=0;
+const $=id=>document.getElementById(id);
 
-const $ = id => document.getElementById(id);
+window.addEventListener('load',()=>{ loadRec(); newRound(); });
 
-// ── INIT ──────────────────────────────────────────────────
-window.addEventListener('load', () => {
-  loadRecord();
-  newRound();
-});
+function loadRec(){ try{ const s=JSON.parse(localStorage.getItem('bqc_v1')); if(s){score=s.score||0;best=s.best||0;} }catch(e){} }
+function saveRec(){ try{ localStorage.setItem('bqc_v1',JSON.stringify({score,best})); }catch(e){} }
 
-function loadRecord() {
-  try {
-    const s = JSON.parse(localStorage.getItem('bleach_chap_v1'));
-    if (s) { score=s.score||0; best=s.best||0; }
-  } catch(e){}
-}
-function saveRecord() {
-  try { localStorage.setItem('bleach_chap_v1', JSON.stringify({score,best})); } catch(e){}
-}
-
-// ── NOUVEAU TOUR ──────────────────────────────────────────
-async function newRound() {
-  tries=[]; roundOver=false; hintsUsed=new Set();
-  targetChap=null;
-
-  // Reset UI
-  $('imgBox').style.display='none';
-  $('inputBox').style.display='none';
-  $('feedback').style.display='none';
-  $('result').style.display='none';
-  $('errorBox').style.display='none';
+async function newRound(){
+  tries=[]; over=false; hints=new Set(); target=null;
+  ['imgBox','inputBox','feedback','result','errorBox'].forEach(id=>$(id).style.display='none');
   $('loadBox').style.display='flex';
-  $('histBox').innerHTML='';
-  $('hintDisplay').innerHTML='';
-  $('chapInput').value='';
-  $('chapInput').disabled=false;
-  $('subBtn').disabled=false;
+  ['histBox','hintTags'].forEach(id=>$(id).innerHTML='');
+  $('chapInput').value=''; $('chapInput').disabled=false; $('subBtn').disabled=false;
   $('mangaImg').className='blurred';
-  $('hintArc').disabled=false;
-  $('hintRange').disabled=false;
-  $('hintUnblur').disabled=false;
-  updTries();
-  updStats();
-
-  try {
-    await loadRandomPage();
-  } catch(e) {
-    console.error(e);
-    $('loadBox').style.display='none';
-    $('errMsg').textContent = 'Erreur : ' + e.message;
-    $('errorBox').style.display='flex';
-  }
+  ['hintArc','hintRange','hintUnblur'].forEach(id=>$(id).disabled=false);
+  updTries(); updStats();
+  try { await loadPage(); }
+  catch(e){ console.error(e); $('loadBox').style.display='none'; $('errMsg').textContent='Erreur : '+e.message; $('errorBox').style.display='flex'; }
 }
 
-// ── CHARGEMENT PAGE ALÉATOIRE ─────────────────────────────
-async function loadRandomPage() {
-  setLoad('📚 Récupération des chapitres…', 20);
+async function apiGet(path){
+  // Sans proxy d'abord
+  try{
+    const r=await fetch(API_BASE+path,{signal:AbortSignal.timeout(6000)});
+    if(r.ok) return r.json();
+  }catch(e){}
+  // Avec proxy corsproxy.io
+  const r2=await fetch(PROXY+encodeURIComponent(API_BASE+path));
+  if(!r2.ok) throw new Error('HTTP '+r2.status);
+  return r2.json();
+}
 
-  // Charger la liste des chapitres (avec cache)
-  if (!chapCache) {
-    chapCache = await fetchAllChapters();
+async function loadPage(){
+  setLoad('📚 Récupération des chapitres…',15);
+  if(!chapCache) chapCache=await fetchChapters();
+
+  setLoad('🎲 Sélection…',65);
+  const chap=chapCache[Math.floor(Math.random()*chapCache.length)];
+
+  setLoad('🖼 Chargement de la page…',80);
+  let pData;
+  try{
+    const r=await fetch(`${API_BASE}/at-home/server/${chap.id}`,{signal:AbortSignal.timeout(6000)});
+    if(!r.ok) throw new Error();
+    pData=await r.json();
+  }catch(e){
+    const r2=await fetch(PROXY+encodeURIComponent(`${API_BASE}/at-home/server/${chap.id}`));
+    pData=await r2.json();
   }
 
-  setLoad('🎲 Sélection d\'un chapitre aléatoire…', 60);
+  const hash=pData.chapter.hash;
+  const pages=pData.chapter.dataSaver;
+  if(!pages?.length) throw new Error('Chapitre sans pages');
 
-  // Choisir un chapitre aléatoire
-  const chap = chapCache[Math.floor(Math.random() * chapCache.length)];
+  const idx=1+Math.floor(Math.random()*(pages.length-1));
+  const pageUrl=`${pData.baseUrl}/data-saver/${hash}/${pages[idx]}`;
 
-  setLoad('🖼 Chargement de la page…', 80);
+  target={ num:parseFloat(chap.attrs.chapter), id:chap.id, title:chap.attrs.title||'', pageUrl };
 
-  // Récupérer les pages du chapitre
-  const pagesResp = await fetch(`${API}/at-home/server/${chap.id}`);
-  if (!pagesResp.ok) throw new Error('Pages inaccessibles');
-  const pagesData = await pagesResp.json();
-
-  const hash  = pagesData.chapter.hash;
-  const pages = pagesData.chapter.dataSaver; // qualité réduite pour vitesse
-  if (!pages || !pages.length) throw new Error('Chapitre sans pages');
-
-  // Page aléatoire (éviter la 1ère qui est souvent une couverture de volume)
-  const pageIdx = Math.floor(Math.random() * pages.length);
-  const pageUrl = `${pagesData.baseUrl}/data-saver/${hash}/${pages[pageIdx]}`;
-
-  targetChap = {
-    num:   parseFloat(chap.attrs.chapter),
-    id:    chap.id,
-    title: chap.attrs.title || '',
-    pageUrl,
-  };
-
-  setLoad('✅ Chargement terminé !', 100);
-
-  // Afficher l'image
-  await loadImage(pageUrl);
+  setLoad('✅ Prêt !',100);
+  await loadImg(pageUrl);
   round++;
   $('loadBox').style.display='none';
   $('imgBox').style.display='block';
@@ -514,208 +315,96 @@ async function loadRandomPage() {
   updStats();
 }
 
-async function fetchAllChapters() {
-  // Bleach a ~686 chapitres, l'API retourne 100 par page → 7 requêtes
-  let all = [], offset = 0, total = Infinity;
-  while (offset < total) {
-    const url = `${API}/manga/${BLEACH_ID}/feed?translatedLanguage[]=fr&translatedLanguage[]=en&limit=100&offset=${offset}&order[chapter]=asc&includeEmptyPages=0&contentRating[]=safe`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('Feed inaccessible (HTTP ' + r.status + ')');
-    const d = await r.json();
-    total = d.total;
-    const valid = (d.data || []).filter(c => {
-      const ch = parseFloat(c.attributes.chapter);
-      return !isNaN(ch) && ch >= 1 && ch <= 686;
-    });
-    all = all.concat(valid.map(c => ({ id: c.id, attrs: c.attributes })));
-    offset += 100;
-    if (offset < total) setLoad(`📚 Chapitres : ${all.length}/${total}…`, Math.round(20 + 40*(offset/total)));
-    if (all.length > 800) break; // sécurité
+async function fetchChapters(){
+  let all=[],offset=0,total=Infinity;
+  while(offset<total&&all.length<900){
+    const path=`/manga/${BLEACH_ID}/feed?translatedLanguage[]=fr&translatedLanguage[]=en&limit=100&offset=${offset}&order[chapter]=asc&includeEmptyPages=0&contentRating[]=safe`;
+    const d=await apiGet(path);
+    total=d.total;
+    const valid=(d.data||[]).filter(c=>{ const n=parseFloat(c.attributes.chapter); return !isNaN(n)&&n>=1&&n<=686; });
+    all=all.concat(valid.map(c=>({id:c.id,attrs:c.attributes})));
+    offset+=100;
+    if(offset<total) setLoad(`📚 ${all.length} chapitres…`,Math.round(15+50*(offset/Math.min(total,700))));
   }
-  if (!all.length) throw new Error('Aucun chapitre trouvé');
-  // Dédupliquer par numéro de chapitre (garder un seul scan par chapitre)
-  const seen = new Set();
-  return all.filter(c => {
-    const n = parseFloat(c.attrs.chapter);
-    if (seen.has(n)) return false;
-    seen.add(n); return true;
-  });
+  if(!all.length) throw new Error('Aucun chapitre trouvé');
+  const seen=new Set();
+  return all.filter(c=>{ const n=parseFloat(c.attrs.chapter); if(seen.has(n))return false; seen.add(n); return true; });
 }
 
-function loadImage(url) {
-  return new Promise((res, rej) => {
-    const img = $('mangaImg');
-    img.onload  = res;
-    img.onerror = () => rej(new Error('Image non chargeable'));
-    img.src = url;
-  });
+function loadImg(url){
+  return new Promise((res,rej)=>{ const img=$('mangaImg'); img.onload=res; img.onerror=()=>rej(new Error('Image non chargeable')); img.src=url; });
+}
+function setLoad(msg,pct){ $('loadMsg').textContent=msg; $('progFill').style.width=pct+'%'; }
+
+function submit(){
+  if(over||!target) return;
+  const raw=parseInt($('chapInput').value);
+  if(isNaN(raw)||raw<1||raw>686){ shake($('chapInput')); return; }
+  const diff=Math.abs(raw-target.num);
+  const res=diff===0?'correct':diff<=CLOSE_MARGIN?'close':'wrong';
+  const arr=raw<target.num?'▲ c\'est plus tard':raw>target.num?'▼ c\'est plus tôt':'';
+  tries.push({guess:raw,result:res,diff,arr});
+  addHist(raw,res,diff,arr); updTries();
+  $('chapInput').value='';
+  if(res==='correct'||tries.length>=MAX_TRIES) endRound(res==='correct');
+  else{ showFeedback(res,diff,arr); $('chapInput').focus(); }
 }
 
-function setLoad(msg, pct) {
-  $('loadMsg').textContent = msg;
-  $('progFill').style.width = pct + '%';
+function showFeedback(res,diff,arr){
+  const fb=$('feedback'); fb.style.display='flex'; fb.className=res;
+  $('fbTitle').textContent  = res==='close' ? '🟡 Presque — tu chauffes !' : '❌ Raté';
+  $('fbDetail').textContent = `Écart de ${diff} chapitre${diff>1?'s':''}. ${arr} — ${MAX_TRIES-tries.length} essai${MAX_TRIES-tries.length>1?'s':''} restant${MAX_TRIES-tries.length>1?'s':''}.`;
 }
 
-// ── SOUMISSION ────────────────────────────────────────────
-function submit() {
-  if (roundOver || !targetChap) return;
-  const raw = parseInt($('chapInput').value);
-  if (isNaN(raw) || raw < 1 || raw > 686) {
-    shake($('chapInput')); return;
-  }
-
-  const diff = Math.abs(raw - targetChap.num);
-  let result;
-  if (diff === 0)           result = 'correct';
-  else if (diff <= MARGIN_CLOSE) result = 'close';
-  else                      result = 'wrong';
-
-  const arrow = raw < targetChap.num ? '▲ plus tard' : raw > targetChap.num ? '▼ plus tôt' : '';
-  tries.push({ guess: raw, result, diff, arrow });
-  addHistItem(raw, result, diff, arrow);
-  updTries();
-  $('chapInput').value = '';
-
-  if (result === 'correct' || tries.length >= MAX_TRIES) {
-    endRound(result === 'correct');
-  } else {
-    showFeedback(result, diff, arrow, raw);
-    $('chapInput').focus();
-  }
-}
-
-function showFeedback(result, diff, arrow, guess) {
-  const fb = $('feedback');
-  fb.style.display = 'flex';
-  fb.className = result;
-  if (result === 'close') {
-    $('fbTitle').textContent = '🟠 Presque ! C\'est dans les environs.';
-    $('fbDetail').textContent = `Écart de ${diff} chapitre${diff>1?'s':''}. ${arrow}`;
-    $('fbAnswer').textContent = '';
-  } else {
-    $('fbTitle').textContent = '❌ Raté !';
-    $('fbDetail').textContent = `Écart de ${diff} chapitres. ${arrow}`;
-    $('fbAnswer').textContent = `Il te reste ${MAX_TRIES - tries.length} essai${MAX_TRIES-tries.length>1?'s':''}.`;
-  }
-}
-
-// ── FIN DE ROUND ──────────────────────────────────────────
-function endRound(won) {
-  roundOver = true;
-  $('chapInput').disabled = true;
-  $('subBtn').disabled = true;
-  $('feedback').style.display = 'none';
+function endRound(won){
+  over=true; $('chapInput').disabled=true; $('subBtn').disabled=true;
+  $('feedback').style.display='none'; $('inputBox').style.display='none';
   $('mangaImg').classList.remove('blurred');
-  $('inputBox').style.display = 'none';
-
-  // Score
-  if (won) {
-    const pts = Math.max(10, 100 - (tries.length-1)*20 - (hintsUsed.size*10));
-    score += pts; streak++;
-    if (streak > best) { best = streak; }
-  } else {
-    streak = 0;
-  }
-  saveRecord(); updStats();
-
-  // Résultat
-  const r = $('result');
-  r.style.display = 'flex';
-  r.className = won ? 'win' : 'lose';
-  $('resTtl').textContent    = won ? '🎉 BIEN VU !' : '💀 RATÉ !';
-  $('resImg').src            = targetChap.pageUrl;
-  $('resImg').style.display  = 'block';
-  $('resChap').textContent   = 'Chapitre ' + targetChap.num;
-  $('resSub').textContent    = targetChap.title
-    ? '"' + targetChap.title + '" — ' + getArc(targetChap.num)
-    : getArc(targetChap.num);
+  if(won){ score+=Math.max(10,100-(tries.length-1)*15-hints.size*10); streak++; if(streak>best)best=streak; }
+  else streak=0;
+  saveRec(); updStats();
+  const r=$('result'); r.style.display='flex'; r.className=won?'win':'lose';
+  $('resTtl').textContent  = won?'🎉 Bien vu !':'💀 Raté !';
+  $('resImg').src          = target.pageUrl;
+  $('resChap').textContent = 'Chapitre '+target.num;
+  $('resArc').textContent  = (target.title?'"'+target.title+'" — ':'')+getArc(target.num);
 }
 
-// ── HISTORIQUE ────────────────────────────────────────────
-function addHistItem(guess, result, diff, arrow) {
-  const box = $('histBox');
-  const d = document.createElement('div');
-  d.className = 'hist-item ' + result;
-  const badge = result==='correct' ? '✅ EXACT' : result==='close' ? '🟠 PROCHE' : '❌ RATÉ';
-  const info  = result==='correct' ? '' : ` (${arrow}, écart ${diff})`;
-  d.innerHTML = `
-    <span class="hist-guess">Chapitre ${guess}</span>
-    <span style="display:flex;gap:8px;align-items:center">
-      <span class="hist-arrow">${info}</span>
-      <span class="hist-badge ${result}">${badge}</span>
-    </span>`;
-  box.appendChild(d);
+function addHist(guess,res,diff,arr){
+  const d=document.createElement('div'); d.className='hist-item '+res;
+  const badge=res==='correct'?'✅ Exact':res==='close'?'🟡 Proche':'❌ Raté';
+  d.innerHTML=`<span class="hist-guess">Chapitre ${guess}</span><span class="hist-info">${res!=='correct'?`<span class="hist-arrow">${arr} · écart ${diff}</span>`:''}<span class="hist-badge ${res}">${badge}</span></span>`;
+  $('histBox').appendChild(d);
 }
 
-// ── TRIES DOTS ────────────────────────────────────────────
-function updTries() {
-  const row = $('triesRow');
-  row.innerHTML = '';
-  for (let i=0; i<MAX_TRIES; i++) {
-    const d = document.createElement('div');
-    d.className = 'try-dot';
-    if (i < tries.length) d.classList.add(tries[i].result);
+function updTries(){
+  const row=$('triesRow'); row.innerHTML='';
+  for(let i=0;i<MAX_TRIES;i++){
+    const d=document.createElement('div');
+    d.className='try-dot'+(i<tries.length?' '+tries[i].result:'');
     row.appendChild(d);
   }
 }
+function updStats(){ $('sScore').textContent=score; $('sStreak').textContent=streak; $('sBest').textContent=best; $('sRound').textContent=round; }
 
-// ── STATS ─────────────────────────────────────────────────
-function updStats() {
-  $('sScore').textContent  = score;
-  $('sStreak').textContent = streak;
-  $('sBest').textContent   = best;
-  $('sRound').textContent  = round;
+function giveHint(type){
+  if(hints.has(type)||!target) return;
+  hints.add(type);
+  if(type==='unblur'){ $('mangaImg').classList.remove('blurred'); $('hintUnblur').disabled=true; return; }
+  let text='';
+  if(type==='arc'){ text='🗡 Arc : '+getArc(target.num); $('hintArc').disabled=true; }
+  else if(type==='range'){ const lo=Math.max(1,target.num-50),hi=Math.min(686,target.num+50); text=`📐 Entre le chapitre ${lo} et ${hi}`; $('hintRange').disabled=true; }
+  const span=document.createElement('div'); span.className='hint-tag'; span.textContent=text;
+  $('hintTags').appendChild(span);
 }
 
-// ── INDICES ───────────────────────────────────────────────
-function giveHint(type) {
-  if (hintsUsed.has(type) || !targetChap) return;
-  hintsUsed.add(type);
-  let text = '';
+function getArc(n){ let a=ARCS[0][1]; for(const[s,nm]of ARCS){if(n>=s)a=nm;else break;} return a; }
 
-  if (type==='arc') {
-    text = '🗡 Arc : ' + getArc(targetChap.num);
-    $('hintArc').disabled = true;
-  } else if (type==='range') {
-    const lo = Math.max(1, targetChap.num - 50);
-    const hi = Math.min(686, targetChap.num + 50);
-    text = `📐 Fourchette : entre le chapitre ${lo} et ${hi}`;
-    $('hintRange').disabled = true;
-  } else if (type==='unblur') {
-    $('mangaImg').classList.remove('blurred');
-    $('hintUnblur').disabled = true;
-    return;
-  }
-
-  const d = $('hintDisplay');
-  const span = document.createElement('span');
-  span.className = 'hint-tag';
-  span.textContent = text;
-  d.appendChild(span);
+function shake(el){
+  el.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:240});
+  el.style.borderColor='var(--ko-bd)'; setTimeout(()=>el.style.borderColor='',1000);
 }
-
-function getArc(chap) {
-  let arc = ARCS[0][1];
-  for (const [start, name] of ARCS) {
-    if (chap >= start) arc = name;
-    else break;
-  }
-  return arc;
-}
-
-// ── UTILS ─────────────────────────────────────────────────
-function shake(el) {
-  el.animate(
-    [{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],
-    {duration:250}
-  );
-  el.style.borderColor='var(--red)';
-  setTimeout(()=>el.style.borderColor='',1000);
-}
-
-function openMangadex() {
-  if (targetChap) window.open(`https://mangadex.org/chapter/${targetChap.id}`, '_blank');
-}
+function openMangadex(){ if(target) window.open('https://mangadex.org/chapter/'+target.id,'_blank'); }
 </script>
 </body>
 </html>
