@@ -52,9 +52,9 @@
 
 
   /* === ÉTATS === */
-  --ok-bg: #071410; --ok-bd: #15803d; --ok-tx: #4ade80; /* succès */
-  --ko-bg: #130606; --ko-bd: #991b1b; --ko-tx: #f87171; /* erreur */
-  --yw-bg: #130d03; --yw-bd: #92400e; --yw-tx: #fbbf24; /* warning */
+  --ok-bg: #0f241c;  /* au lieu de #071410 */
+  --ko-bg: #1f0d0d;  /* au lieu de #130606 */
+  --yw-bg: #211606;  /* au lieu de #130d03 */
 
 
   /* === SPÉCIAL === */
