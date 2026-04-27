@@ -228,11 +228,17 @@
 </main>
 
 <script>
-const BLEACH_ID  = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
-const API_BASE   = 'https://api.mangadex.org';
-const PROXY      = 'https://corsproxy.io/?url=';
-const MAX_TRIES  = 5;
+const BLEACH_ID    = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
+const API_BASE     = 'https://api.mangadex.org';
+const MAX_TRIES    = 5;
 const CLOSE_MARGIN = 15;
+
+// Proxies CORS tentés dans l'ordre
+const PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
 
 const ARCS = [
   [1,'Agent de la Shinigami'],[70,'Soul Society — Perturbation'],
@@ -264,44 +270,64 @@ async function newRound(){
   catch(e){ console.error(e); $('loadBox').style.display='none'; $('errMsg').textContent='Erreur : '+e.message; $('errorBox').style.display='flex'; }
 }
 
+// Fetch avec fallback sur plusieurs proxies CORS
 async function apiGet(path){
-  // Sans proxy d'abord
-  try{
-    const r=await fetch(API_BASE+path,{signal:AbortSignal.timeout(6000)});
+  const fullUrl = API_BASE + path;
+
+  // 1. Tentative directe (fonctionne si le navigateur accepte)
+  try {
+    const r = await fetch(fullUrl, { signal: AbortSignal.timeout(6000) });
     if(r.ok) return r.json();
-  }catch(e){}
-  // Avec proxy corsproxy.io
-  const r2=await fetch(PROXY+encodeURIComponent(API_BASE+path));
-  if(!r2.ok) throw new Error('HTTP '+r2.status);
-  return r2.json();
+  } catch(e) {}
+
+  // 2. Tentative via chaque proxy dans l'ordre
+  for(const proxy of PROXIES){
+    try {
+      const r = await fetch(proxy(fullUrl), { signal: AbortSignal.timeout(8000) });
+      if(r.ok) return r.json();
+    } catch(e) {}
+  }
+
+  throw new Error('Tous les proxies ont échoué');
 }
 
 async function loadPage(){
   setLoad('📚 Récupération des chapitres…',15);
-  if(!chapCache) chapCache=await fetchChapters();
+  if(!chapCache) chapCache = await fetchChapters();
 
   setLoad('🎲 Sélection…',65);
-  const chap=chapCache[Math.floor(Math.random()*chapCache.length)];
+  const chap = chapCache[Math.floor(Math.random()*chapCache.length)];
 
   setLoad('🖼 Chargement de la page…',80);
-  let pData;
-  try{
-    const r=await fetch(`${API_BASE}/at-home/server/${chap.id}`,{signal:AbortSignal.timeout(6000)});
-    if(!r.ok) throw new Error();
-    pData=await r.json();
-  }catch(e){
-    const r2=await fetch(PROXY+encodeURIComponent(`${API_BASE}/at-home/server/${chap.id}`));
-    pData=await r2.json();
+
+  // Chargement du serveur de pages avec fallback proxies
+  const serverUrl = `${API_BASE}/at-home/server/${chap.id}`;
+  let pData, fetched = false;
+
+  try {
+    const r = await fetch(serverUrl, { signal: AbortSignal.timeout(6000) });
+    if(r.ok){ pData = await r.json(); fetched = true; }
+  } catch(e) {}
+
+  if(!fetched){
+    for(const proxy of PROXIES){
+      try {
+        const r = await fetch(proxy(serverUrl), { signal: AbortSignal.timeout(8000) });
+        if(r.ok){ pData = await r.json(); fetched = true; break; }
+      } catch(e) {}
+    }
   }
 
-  const hash=pData.chapter.hash;
-  const pages=pData.chapter.dataSaver;
+  if(!fetched) throw new Error('Impossible de charger le serveur de pages');
+
+  const hash  = pData.chapter.hash;
+  const pages = pData.chapter.dataSaver;
   if(!pages?.length) throw new Error('Chapitre sans pages');
 
-  const idx=1+Math.floor(Math.random()*(pages.length-1));
-  const pageUrl=`${pData.baseUrl}/data-saver/${hash}/${pages[idx]}`;
+  const idx     = 1 + Math.floor(Math.random()*(pages.length-1));
+  const pageUrl = `${pData.baseUrl}/data-saver/${hash}/${pages[idx]}`;
 
-  target={ num:parseFloat(chap.attrs.chapter), id:chap.id, title:chap.attrs.title||'', pageUrl };
+  target = { num: parseFloat(chap.attrs.chapter), id: chap.id, title: chap.attrs.title||'', pageUrl };
 
   setLoad('✅ Prêt !',100);
   await loadImg(pageUrl);
@@ -315,17 +341,17 @@ async function loadPage(){
 
 async function fetchChapters(){
   let all=[],offset=0,total=Infinity;
-  while(offset<total&&all.length<900){
+  while(offset<total && all.length<900){
     const path=`/manga/${BLEACH_ID}/feed?translatedLanguage[]=fr&translatedLanguage[]=en&limit=100&offset=${offset}&order[chapter]=asc&includeEmptyPages=0&contentRating[]=safe`;
-    const d=await apiGet(path);
-    total=d.total;
-    const valid=(d.data||[]).filter(c=>{ const n=parseFloat(c.attributes.chapter); return !isNaN(n)&&n>=1&&n<=686; });
-    all=all.concat(valid.map(c=>({id:c.id,attrs:c.attributes})));
-    offset+=100;
-    if(offset<total) setLoad(`📚 ${all.length} chapitres…`,Math.round(15+50*(offset/Math.min(total,700))));
+    const d = await apiGet(path);
+    total = d.total;
+    const valid = (d.data||[]).filter(c=>{ const n=parseFloat(c.attributes.chapter); return !isNaN(n)&&n>=1&&n<=686; });
+    all = all.concat(valid.map(c=>({id:c.id, attrs:c.attributes})));
+    offset += 100;
+    if(offset<total) setLoad(`📚 ${all.length} chapitres…`, Math.round(15+50*(offset/Math.min(total,700))));
   }
   if(!all.length) throw new Error('Aucun chapitre trouvé');
-  const seen=new Set();
+  const seen = new Set();
   return all.filter(c=>{ const n=parseFloat(c.attrs.chapter); if(seen.has(n))return false; seen.add(n); return true; });
 }
 
