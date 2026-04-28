@@ -81,11 +81,15 @@ async function loadImage(chapterId) {
    LOAD CHAPITRE
    ══════════════════════════════════════════ */
 async function loadPage(attempt = 0) {
-    if (attempt > 5) throw new Error("Trop de tentatives");
+    if (attempt > 8) throw new Error("Trop de tentatives");
 
     setLoad('🎲 Recherche...', 30);
 
-    const offset = Math.floor(Math.random() * 600);
+    // Récupère le total réel d'abord
+    const first = await apiGet(`https://api.mangadex.org/manga/${BLEACH_ID}/feed?limit=1&includeExternalUrl=0&contentRating[]=safe&order[chapter]=asc`);
+    const total = first?.total || 50;
+
+    const offset = Math.floor(Math.random() * Math.max(1, total - 50));
     const params = new URLSearchParams({
         limit: 50, offset,
         includeEmptyPages: 0,
