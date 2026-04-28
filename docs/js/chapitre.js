@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════
    BLEACH — Quel Chapitre ? · chapitre.js
-   Version ULTIME : Correction Double Encodage
+   Version Stable : Anti-429 & Multi-Proxy
    ══════════════════════════════════════════ */
 
 const BLEACH_ID    = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
@@ -8,14 +8,18 @@ const API_BASE     = 'https://api.mangadex.org';
 const MAX_TRIES    = 5;
 const CLOSE_MARGIN = 15;
 
-// AllOrigins est le plus fiable ici car il ne modifie pas l'URL interne
+// Liste de proxies pour alterner si l'un répond 429
 const PROXIES = [
   url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
 ];
 
 let target = null, tries = [], over = false, score = 0, streak = 0, best = 0, round = 0;
 const $ = id => document.getElementById(id);
+
+// Petite fonction pour attendre (évite le spam)
+const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 window.addEventListener('load', () => { 
   const s = JSON.parse(localStorage.getItem('bqc_v1'));
@@ -43,65 +47,70 @@ async function newRound() {
 async function apiGet(path) {
   const fullUrl = API_BASE + path;
   
-  for (const makeProxy of PROXIES) {
+  // On mélange un peu les proxies pour ne pas toujours taper sur le même
+  const shuffledProxies = [...PROXIES].sort(() => Math.random() - 0.5);
+
+  for (const makeProxy of shuffledProxies) {
     try {
       const pUrl = makeProxy(fullUrl);
       const r = await fetch(pUrl, { cache: 'no-store' });
+      
+      if (r.status === 429) continue; // Si limite atteinte, on passe au proxy suivant
+
       if (r.ok) {
         const text = await r.text();
-        // AllOrigins peut renvoyer le JSON direct ou dans .contents
         try {
           const data = JSON.parse(text);
           return data.contents ? JSON.parse(data.contents) : data;
-        } catch(e) {
-          return JSON.parse(text);
-        }
+        } catch(e) { return JSON.parse(text); }
       }
-    } catch(e) { console.warn("Proxy instable, essai suivant..."); }
+    } catch(e) { console.warn("Proxy instable..."); }
   }
-  throw new Error("MangaDex est surchargé. Réessaie.");
+  throw new Error("Trop de requêtes. Attends 30 secondes.");
 }
 
 async function loadPage() {
   setLoad('🎲 Recherche...', 30);
+  
+  // On limite à 680 pour éviter les chapitres bonus inexistants
   const randomChap = Math.floor(Math.random() * 680) + 1;
-
-  // URL SIMPLIFIÉE : On retire les crochets [] qui font planter les proxies
-  // MangaDex accepte les paramètres sans crochets pour les filtres simples
   const path = `/manga/${BLEACH_ID}/feed?limit=1&chapter=${randomChap}&translatedLanguage=fr&contentRating=safe`;
   
-  const d = await apiGet(path);
+  try {
+    const d = await apiGet(path);
 
-  if (!d.data || d.data.length === 0) {
-      // Si pas de FR, on tente en anglais sans crochets non plus
-      const dEn = await apiGet(`/manga/${BLEACH_ID}/feed?limit=1&chapter=${randomChap}&translatedLanguage=en&contentRating=safe`);
-      if (!dEn.data || dEn.data.length === 0) return loadPage();
-      var chap = dEn.data[0];
-  } else {
-      var chap = d.data[0];
+    // Si le chapitre n'existe pas en FR, on ne boucle pas direct ! On attend un peu.
+    if (!d.data || d.data.length === 0) {
+        await sleep(500); 
+        return loadPage();
+    }
+
+    const chap = d.data[0];
+    setLoad('🖼 Image...', 60);
+
+    const pData = await apiGet(`/at-home/server/${chap.id}`);
+    const pageUrl = `${pData.baseUrl}/data-saver/${pData.chapter.hash}/${pData.chapter.dataSaver[0]}`;
+
+    target = { num: parseFloat(chap.attributes.chapter), id: chap.id, pageUrl };
+    
+    const img = $('mangaImg');
+    // On utilise AllOrigins pour l'image car il est plus rapide pour le binaire
+    img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(pageUrl)}`;
+    
+    img.onload = () => {
+      round++;
+      $('loadBox').style.display = 'none';
+      $('imgBox').style.display = 'block';
+      $('inputBox').style.display = 'flex';
+      updStats();
+    };
+  } catch (err) {
+    throw err;
   }
-
-  setLoad('🖼 Image...', 60);
-  const pData = await apiGet(`/at-home/server/${chap.id}`);
-  const pageUrl = `${pData.baseUrl}/data-saver/${pData.chapter.hash}/${pData.chapter.dataSaver[0]}`;
-
-  target = { num: parseFloat(chap.attributes.chapter), id: chap.id, pageUrl };
-  
-  // Chargement image via proxy
-  const img = $('mangaImg');
-  img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(pageUrl)}`;
-  
-  img.onload = () => {
-    round++;
-    $('loadBox').style.display = 'none';
-    $('imgBox').style.display = 'block';
-    $('inputBox').style.display = 'flex';
-    updStats();
-  };
 }
 
 function submit() {
-  if (over) return;
+  if (over || !target) return;
   const raw = parseInt($('chapInput').value);
   if (isNaN(raw)) return;
   
