@@ -1,157 +1,15 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="shinigami">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quel Chapitre ? — Kisuke Urahara</title>
+<title>Quel Chapitre ? — Bleach Manga Guesser</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<script src="js/nav.js" defer></script>
-<style>
-.page-wrap {
-  position: relative; z-index: 1;
-  max-width: 720px; margin: 0 auto;
-  padding: 0 1.5rem 5rem;
-}
-
-/* ── SCORE ── */
-.scorebar {
-  display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap;
-  margin-bottom: 1.8rem;
-  opacity: 0; animation: rise .6s .5s forwards;
-}
-.sstat {
-  background: var(--panel); border: 1px solid var(--gold-line);
-  padding: .7rem 1.4rem; text-align: center; min-width: 80px;
-}
-.sstat .sv {
-  font-family: 'Shippori Mincho', serif;
-  font-size: 1.5rem; font-weight: 700; color: var(--gold); display: block;
-}
-.sstat .sl { font-size: .62rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
-
-/* ── LOADING ── */
-#loadBox {
-  background: var(--panel); border: 1px solid var(--gold-line);
-  padding: 3rem 1.5rem; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 1.2rem;
-}
-.spinner {
-  width: 36px; height: 36px;
-  border: 2px solid var(--border); border-top-color: var(--gold);
-  border-radius: 50%; animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-#loadMsg { color: var(--muted); font-size: .85rem; letter-spacing: .05em; }
-.prog-wrap { width: 220px; height: 1px; background: var(--border); }
-.prog-fill  { height: 100%; background: var(--gold); transition: width .4s; width: 0%; }
-
-/* ── IMAGE ── */
-#imgBox {
-  border: 1px solid var(--gold-line); overflow: hidden;
-  display: none; position: relative; background: var(--deep);
-}
-#mangaImg {
-  width: 100%; max-height: 540px; object-fit: contain;
-  display: block; background: #000; transition: filter .4s;
-}
-#mangaImg.blurred { filter: blur(20px) brightness(.7); }
-.img-src {
-  position: absolute; bottom: 0; right: 0; padding: 4px 10px;
-  background: rgba(0,0,0,.6); font-size: .62rem; color: var(--dim); letter-spacing: .06em;
-}
-
-/* ── DOTS ── */
-.tries-row { display: flex; gap: 6px; justify-content: center; margin: .8rem 0; }
-.try-dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--border); transition: background .3s;
-}
-.try-dot.correct { background: var(--ok-bd); box-shadow: 0 0 6px var(--ok-bd); }
-.try-dot.close   { background: var(--yw-bd); box-shadow: 0 0 6px var(--yw-bd); }
-.try-dot.wrong   { background: var(--ko-bd); box-shadow: 0 0 6px var(--ko-bd); }
-
-/* ── INDICES ── */
-.hint-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .8rem; }
-.hint-btn {
-  font-family: 'DM Sans', sans-serif; font-size: .7rem; font-weight: 600;
-  letter-spacing: .06em; text-transform: uppercase;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--muted); padding: .4rem .9rem; cursor: pointer; transition: all .2s;
-}
-.hint-btn:hover:not(:disabled) { border-color: var(--gold-line); color: var(--gold-lt); }
-.hint-btn:disabled { opacity: .3; cursor: not-allowed; }
-.hint-tags { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .6rem; }
-.hint-tag {
-  background: var(--gold-pale); border: 1px solid var(--gold-line);
-  padding: .4rem .9rem; font-size: .78rem; color: var(--gold-lt); letter-spacing: .04em;
-}
-
-/* ── INPUT ── */
-#inputBox { display: none; flex-direction: column; gap: .7rem; }
-.input-row { display: flex; gap: .5rem; }
-#chapInput {
-  flex: 1; background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1rem;
-  padding: .8rem 1rem; outline: none; transition: border-color .2s;
-}
-#chapInput:focus { border-color: var(--gold-line); }
-#chapInput::placeholder { color: var(--dim); }
-
-/* ── FEEDBACK ── */
-#feedback { border: 1px solid; padding: .9rem 1.1rem; display: none; flex-direction: column; gap: .3rem; }
-#feedback.correct { background: var(--ok-bg); border-color: var(--ok-bd); }
-#feedback.close   { background: var(--yw-bg); border-color: var(--yw-bd); }
-#feedback.wrong   { background: var(--ko-bg); border-color: var(--ko-bd); }
-.fb-title  { font-weight: 600; font-size: .95rem; }
-.fb-detail { font-size: .78rem; color: var(--muted); }
-
-/* ── HIST ── */
-#histBox { display: flex; flex-direction: column; gap: .4rem; }
-.hist-item {
-  background: var(--surface); border: 1px solid var(--border);
-  padding: .65rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: .85rem;
-}
-.hist-item.correct { border-color: var(--ok-bd); }
-.hist-item.close   { border-color: var(--yw-bd); }
-.hist-item.wrong   { border-color: var(--ko-bd); }
-.hist-guess { color: var(--text); font-weight: 500; font-family: 'Shippori Mincho', serif; }
-.hist-info  { display: flex; gap: .7rem; align-items: center; }
-.hist-arrow { color: var(--muted); font-size: .75rem; }
-.hist-badge { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: .2rem .6rem; }
-.hist-badge.correct { background: var(--ok-bg); color: var(--ok-tx); }
-.hist-badge.close   { background: var(--yw-bg); color: var(--yw-tx); }
-.hist-badge.wrong   { background: var(--ko-bg); color: var(--ko-tx); }
-
-/* ── RÉSULTAT ── */
-#result {
-  background: var(--panel); border: 1px solid var(--gold-line);
-  padding: 2rem 1.5rem; display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center;
-}
-#result.win  { border-color: var(--ok-bd); }
-#result.lose { border-color: var(--ko-bd); }
-.res-kana  { font-family: 'Noto Serif JP', serif; font-size: .65rem; letter-spacing: .5em; color: var(--rei-lt); }
-.res-title { font-family: 'Shippori Mincho', serif; font-size: 1.4rem; font-weight: 800; color: var(--gold); }
-#resImg    { max-height: 280px; object-fit: contain; border: 1px solid var(--gold-line); }
-.res-chap  { font-family: 'Shippori Mincho', serif; font-size: 2.2rem; font-weight: 800; color: var(--white); }
-.res-arc   { font-size: .78rem; color: var(--muted); letter-spacing: .06em; }
-.result-btns { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; margin-top: .5rem; }
-
-/* ── ERREUR ── */
-#errorBox {
-  background: var(--ko-bg); border: 1px solid var(--ko-bd);
-  padding: 2rem; text-align: center; display: none; flex-direction: column; gap: 1rem;
-}
-#errMsg { color: var(--ko-tx); font-size: .9rem; }
-
-@media (max-width: 700px) {
-  .page-wrap { padding: 0 1rem 4rem; }
-  .sstat { padding: .6rem .9rem; min-width: 70px; }
-}
-</style>
+<link rel="stylesheet" href="css/chapitre.css">
 </head>
 <body>
+
 <div class="atmo"></div>
 <div class="top-bar"></div>
 
@@ -162,11 +20,16 @@
     <span class="t2">Bleach Manga Guesser</span>
   </h1>
   <p class="psub">Une page aléatoire du manga s'affiche. Devinez le numéro du chapitre en 5 essais.</p>
-  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="orbs">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
 </header>
 
 <main class="page-wrap">
 
+  <!-- SCORE -->
   <div class="scorebar">
     <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
     <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
@@ -174,24 +37,29 @@
     <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
   </div>
 
+  <!-- CHARGEMENT -->
   <div id="loadBox">
     <div class="spinner"></div>
     <div id="loadMsg">Chargement d'une page de Bleach…</div>
     <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
   </div>
 
-  <div id="errorBox">
+  <!-- ERREUR -->
+  <div id="errorBox" style="display:none; flex-direction:column; gap:1rem;">
     <div id="errMsg">Impossible de charger. Vérifie ta connexion.</div>
     <button class="btn btn-ghost" onclick="newRound()">🔄 Réessayer</button>
   </div>
 
+  <!-- IMAGE -->
   <div id="imgBox">
     <img id="mangaImg" alt="Page de Bleach" class="blurred"/>
     <div class="img-src">📖 MangaDex · Bleach</div>
   </div>
 
+  <!-- DOTS ESSAIS -->
   <div class="tries-row" id="triesRow"></div>
 
+  <!-- INPUT + INDICES -->
   <div id="inputBox">
     <div class="hint-row">
       <button class="hint-btn" id="hintArc"    onclick="giveHint('arc')">💡 Arc narratif</button>
@@ -200,25 +68,33 @@
     </div>
     <div class="hint-tags" id="hintTags"></div>
     <div class="input-row">
-      <input type="number" id="chapInput" placeholder="Numéro du chapitre (1 – 686)"
-             min="1" max="686" onkeydown="if(event.key==='Enter') submit()"/>
+      <input
+        type="number"
+        id="chapInput"
+        placeholder="Numéro du chapitre (1 – 686)"
+        min="1" max="686"
+        onkeydown="if(event.key==='Enter') submit()"
+      />
       <button class="btn btn-gold" id="subBtn" onclick="submit()">Valider</button>
     </div>
   </div>
 
+  <!-- FEEDBACK -->
   <div id="feedback">
     <div class="fb-title"  id="fbTitle"></div>
     <div class="fb-detail" id="fbDetail"></div>
   </div>
 
+  <!-- HISTORIQUE -->
   <div id="histBox"></div>
 
+  <!-- RÉSULTAT FINAL -->
   <div id="result">
     <div class="res-kana">結果</div>
     <div class="res-title" id="resTtl"></div>
     <img id="resImg" alt="Page révélée"/>
-    <div class="res-chap" id="resChap"></div>
-    <div class="res-arc"  id="resArc"></div>
+    <div class="res-chap"  id="resChap"></div>
+    <div class="res-arc"   id="resArc"></div>
     <div class="result-btns">
       <button class="btn btn-gold"  onclick="newRound()">▶ Prochaine page</button>
       <button class="btn btn-ghost" onclick="openMangadex()">📖 MangaDex</button>
@@ -227,208 +103,6 @@
 
 </main>
 
-<script>
-const BLEACH_ID    = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
-const API_BASE     = 'https://api.mangadex.org';
-const MAX_TRIES    = 5;
-const CLOSE_MARGIN = 15;
-
-// Proxies CORS tentés dans l'ordre
-const PROXIES = [
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-  url => `https://thingproxy.freeboard.io/fetch/${url}`,
-];
-
-const ARCS = [
-  [1,'Agent de la Shinigami'],[70,'Soul Society — Perturbation'],
-  [118,'Soul Society — Sauvetage'],[182,'Arrancar'],[240,'Hueco Mundo'],
-  [295,'Fake Karakura Town'],[343,'Fullbring'],[424,'La Guerre des Mille Ans'],
-  [480,'La Guerre des Mille Ans — La Fumée'],[541,'Sang pour Sang'],
-  [612,'La Moisson'],[665,'Épilogue'],
-];
-
-let target=null, tries=[], over=false, hints=new Set(), chapCache=null;
-let score=0, streak=0, best=0, round=0;
-const $=id=>document.getElementById(id);
-
-window.addEventListener('load',()=>{ loadRec(); newRound(); });
-
-function loadRec(){ try{ const s=JSON.parse(localStorage.getItem('bqc_v1')); if(s){score=s.score||0;best=s.best||0;} }catch(e){} }
-function saveRec(){ try{ localStorage.setItem('bqc_v1',JSON.stringify({score,best})); }catch(e){} }
-
-async function newRound(){
-  tries=[]; over=false; hints=new Set(); target=null;
-  ['imgBox','inputBox','feedback','result','errorBox'].forEach(id=>$(id).style.display='none');
-  $('loadBox').style.display='flex';
-  ['histBox','hintTags'].forEach(id=>$(id).innerHTML='');
-  $('chapInput').value=''; $('chapInput').disabled=false; $('subBtn').disabled=false;
-  $('mangaImg').className='blurred';
-  ['hintArc','hintRange','hintUnblur'].forEach(id=>$(id).disabled=false);
-  updTries(); updStats();
-  try { await loadPage(); }
-  catch(e){ console.error(e); $('loadBox').style.display='none'; $('errMsg').textContent='Erreur : '+e.message; $('errorBox').style.display='flex'; }
-}
-
-// Fetch avec fallback sur plusieurs proxies CORS
-async function apiGet(path){
-  const fullUrl = API_BASE + path;
-
-  // 1. Tentative directe (fonctionne si le navigateur accepte)
-  try {
-    const r = await fetch(fullUrl, { signal: AbortSignal.timeout(6000) });
-    if(r.ok) return r.json();
-  } catch(e) {}
-
-  // 2. Tentative via chaque proxy dans l'ordre
-  for(const proxy of PROXIES){
-    try {
-      const r = await fetch(proxy(fullUrl), { signal: AbortSignal.timeout(8000) });
-      if(r.ok) return r.json();
-    } catch(e) {}
-  }
-
-  throw new Error('Tous les proxies ont échoué');
-}
-
-async function loadPage(){
-  setLoad('📚 Récupération des chapitres…',15);
-  if(!chapCache) chapCache = await fetchChapters();
-
-  setLoad('🎲 Sélection…',65);
-  const chap = chapCache[Math.floor(Math.random()*chapCache.length)];
-
-  setLoad('🖼 Chargement de la page…',80);
-
-  // Chargement du serveur de pages avec fallback proxies
-  const serverUrl = `${API_BASE}/at-home/server/${chap.id}`;
-  let pData, fetched = false;
-
-  try {
-    const r = await fetch(serverUrl, { signal: AbortSignal.timeout(6000) });
-    if(r.ok){ pData = await r.json(); fetched = true; }
-  } catch(e) {}
-
-  if(!fetched){
-    for(const proxy of PROXIES){
-      try {
-        const r = await fetch(proxy(serverUrl), { signal: AbortSignal.timeout(8000) });
-        if(r.ok){ pData = await r.json(); fetched = true; break; }
-      } catch(e) {}
-    }
-  }
-
-  if(!fetched) throw new Error('Impossible de charger le serveur de pages');
-
-  const hash  = pData.chapter.hash;
-  const pages = pData.chapter.dataSaver;
-  if(!pages?.length) throw new Error('Chapitre sans pages');
-
-  const idx     = 1 + Math.floor(Math.random()*(pages.length-1));
-  const pageUrl = `${pData.baseUrl}/data-saver/${hash}/${pages[idx]}`;
-
-  target = { num: parseFloat(chap.attrs.chapter), id: chap.id, title: chap.attrs.title||'', pageUrl };
-
-  setLoad('✅ Prêt !',100);
-  await loadImg(pageUrl);
-  round++;
-  $('loadBox').style.display='none';
-  $('imgBox').style.display='block';
-  $('inputBox').style.display='flex';
-  $('chapInput').focus();
-  updStats();
-}
-
-async function fetchChapters(){
-  let all=[],offset=0,total=Infinity;
-  while(offset<total && all.length<900){
-    const path=`/manga/${BLEACH_ID}/feed?translatedLanguage[]=fr&translatedLanguage[]=en&limit=100&offset=${offset}&order[chapter]=asc&includeEmptyPages=0&contentRating[]=safe`;
-    const d = await apiGet(path);
-    total = d.total;
-    const valid = (d.data||[]).filter(c=>{ const n=parseFloat(c.attributes.chapter); return !isNaN(n)&&n>=1&&n<=686; });
-    all = all.concat(valid.map(c=>({id:c.id, attrs:c.attributes})));
-    offset += 100;
-    if(offset<total) setLoad(`📚 ${all.length} chapitres…`, Math.round(15+50*(offset/Math.min(total,700))));
-  }
-  if(!all.length) throw new Error('Aucun chapitre trouvé');
-  const seen = new Set();
-  return all.filter(c=>{ const n=parseFloat(c.attrs.chapter); if(seen.has(n))return false; seen.add(n); return true; });
-}
-
-function loadImg(url){
-  return new Promise((res,rej)=>{ const img=$('mangaImg'); img.onload=res; img.onerror=()=>rej(new Error('Image non chargeable')); img.src=url; });
-}
-function setLoad(msg,pct){ $('loadMsg').textContent=msg; $('progFill').style.width=pct+'%'; }
-
-function submit(){
-  if(over||!target) return;
-  const raw=parseInt($('chapInput').value);
-  if(isNaN(raw)||raw<1||raw>686){ shake($('chapInput')); return; }
-  const diff=Math.abs(raw-target.num);
-  const res=diff===0?'correct':diff<=CLOSE_MARGIN?'close':'wrong';
-  const arr=raw<target.num?'▲ c\'est plus tard':raw>target.num?'▼ c\'est plus tôt':'';
-  tries.push({guess:raw,result:res,diff,arr});
-  addHist(raw,res,diff,arr); updTries();
-  $('chapInput').value='';
-  if(res==='correct'||tries.length>=MAX_TRIES) endRound(res==='correct');
-  else{ showFeedback(res,diff,arr); $('chapInput').focus(); }
-}
-
-function showFeedback(res,diff,arr){
-  const fb=$('feedback'); fb.style.display='flex'; fb.className=res;
-  $('fbTitle').textContent  = res==='close' ? '🟡 Presque — tu chauffes !' : '❌ Raté';
-  $('fbDetail').textContent = `Écart de ${diff} chapitre${diff>1?'s':''}. ${arr} — ${MAX_TRIES-tries.length} essai${MAX_TRIES-tries.length>1?'s':''} restant${MAX_TRIES-tries.length>1?'s':''}.`;
-}
-
-function endRound(won){
-  over=true; $('chapInput').disabled=true; $('subBtn').disabled=true;
-  $('feedback').style.display='none'; $('inputBox').style.display='none';
-  $('mangaImg').classList.remove('blurred');
-  if(won){ score+=Math.max(10,100-(tries.length-1)*15-hints.size*10); streak++; if(streak>best)best=streak; }
-  else streak=0;
-  saveRec(); updStats();
-  const r=$('result'); r.style.display='flex'; r.className=won?'win':'lose';
-  $('resTtl').textContent  = won?'🎉 Bien vu !':'💀 Raté !';
-  $('resImg').src          = target.pageUrl;
-  $('resChap').textContent = 'Chapitre '+target.num;
-  $('resArc').textContent  = (target.title?'"'+target.title+'" — ':'')+getArc(target.num);
-}
-
-function addHist(guess,res,diff,arr){
-  const d=document.createElement('div'); d.className='hist-item '+res;
-  const badge=res==='correct'?'✅ Exact':res==='close'?'🟡 Proche':'❌ Raté';
-  d.innerHTML=`<span class="hist-guess">Chapitre ${guess}</span><span class="hist-info">${res!=='correct'?`<span class="hist-arrow">${arr} · écart ${diff}</span>`:''}<span class="hist-badge ${res}">${badge}</span></span>`;
-  $('histBox').appendChild(d);
-}
-
-function updTries(){
-  const row=$('triesRow'); row.innerHTML='';
-  for(let i=0;i<MAX_TRIES;i++){
-    const d=document.createElement('div');
-    d.className='try-dot'+(i<tries.length?' '+tries[i].result:'');
-    row.appendChild(d);
-  }
-}
-function updStats(){ $('sScore').textContent=score; $('sStreak').textContent=streak; $('sBest').textContent=best; $('sRound').textContent=round; }
-
-function giveHint(type){
-  if(hints.has(type)||!target) return;
-  hints.add(type);
-  if(type==='unblur'){ $('mangaImg').classList.remove('blurred'); $('hintUnblur').disabled=true; return; }
-  let text='';
-  if(type==='arc'){ text='🗡 Arc : '+getArc(target.num); $('hintArc').disabled=true; }
-  else if(type==='range'){ const lo=Math.max(1,target.num-50),hi=Math.min(686,target.num+50); text=`📐 Entre le chapitre ${lo} et ${hi}`; $('hintRange').disabled=true; }
-  const span=document.createElement('div'); span.className='hint-tag'; span.textContent=text;
-  $('hintTags').appendChild(span);
-}
-
-function getArc(n){ let a=ARCS[0][1]; for(const[s,nm]of ARCS){if(n>=s)a=nm;else break;} return a; }
-
-function shake(el){
-  el.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:240});
-  el.style.borderColor='var(--ko-bd)'; setTimeout(()=>el.style.borderColor='',1000);
-}
-function openMangadex(){ if(target) window.open('https://mangadex.org/chapter/'+target.id,'_blank'); }
-</script>
+<script src="js/chapitre.js"></script>
 </body>
 </html>
