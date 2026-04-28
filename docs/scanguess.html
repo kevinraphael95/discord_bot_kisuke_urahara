@@ -13,14 +13,16 @@
 <body>
 <div class="atmo"></div>
 <div class="top-bar"></div>
+<div class="phdr">
+  <h1 class="pttl">
+    <span class="t1">Quel Tome ?</span>
+    <span class="t2">Bleach Manga Guesser</span>
+  </h1>
+  <p class="psub">Devine de quel tome vient cette page.</p>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+</div>
 <div class="gwrap">
-
-  <div class="phdr-mini">
-    <div class="phdr-title">Quel Tome ? <span>Bleach Manga Guesser</span></div>
-  </div>
-
   <div class="game-layout">
-
     <div class="col-img">
       <div id="loadBox">
         <div class="spinner"></div>
@@ -36,38 +38,30 @@
         <div class="img-src">📖 SushiScan · Bleach</div>
       </div>
     </div>
-
     <div class="col-game">
-
       <div class="sstat consigne">
         <span class="sl">Devine de quel tome vient cette page</span>
         <span class="sv">5 essais</span>
       </div>
-
       <div class="scorebar">
         <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
         <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
         <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
         <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
       </div>
-
       <div class="tries-row" id="triesRow"></div>
-
       <div id="inputBox" style="display:none;">
         <div class="input-row">
           <input type="number" id="chapInput" placeholder="Tome (1 – 74)" min="1" max="74" onkeydown="if(event.key==='Enter') submit()"/>
           <button class="btn btn-gold" onclick="submit()">Valider</button>
         </div>
       </div>
-
       <div id="histBox"></div>
-
       <div id="result" style="display:none;">
         <div class="res-title" id="resTtl"></div>
         <div class="res-chap" id="resChap"></div>
         <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
       </div>
-
     </div>
   </div>
 </div>
