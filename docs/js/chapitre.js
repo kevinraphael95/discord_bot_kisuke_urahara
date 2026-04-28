@@ -1,16 +1,17 @@
 /* ══════════════════════════════════════════
-   BLEACH — Quel Chapitre ? · chapitre.js
+   BLEACH — Quel Tome ? · chapitre.js
+   Source : SushiScan.fr
    ══════════════════════════════════════════ */
 
-const BLEACH_ID = '239d6260-d71f-43b0-afff-074e3619e3de';
 const MAX_TRIES = 5;
-const CLOSE_MARGIN = 15;
+const CLOSE_MARGIN = 3;
+const MAX_VOLUME = 74;
 
 let target = null, tries = [], over = false, score = 0, streak = 0, best = 0, round = 0;
 const $ = id => document.getElementById(id);
 
 window.addEventListener('load', () => {
-    const s = JSON.parse(localStorage.getItem('bqc_v1'));
+    const s = JSON.parse(localStorage.getItem('bqc_v1') || 'null');
     if (s) { score = s.score || 0; best = s.best || 0; }
     newRound();
 });
@@ -33,7 +34,7 @@ async function newRound() {
     updStats();
 
     try {
-        await loadPage();
+        await loadVolume();
     } catch(e) {
         console.error(e);
         $('loadBox').style.display = 'none';
@@ -43,77 +44,62 @@ async function newRound() {
 }
 
 /* ══════════════════════════════════════════
-   FETCH API
+   FETCH HTML via proxy
    ══════════════════════════════════════════ */
-async function apiGet(url) {
+async function fetchHtml(url) {
     const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    return res.text();
 }
 
 /* ══════════════════════════════════════════
-   LOAD IMAGE
+   LOAD VOLUME
    ══════════════════════════════════════════ */
-async function loadImage(chapterId) {
-    for (let i = 0; i < 3; i++) {
-        try {
-            const pData = await apiGet(`https://api.mangadex.org/at-home/server/${chapterId}`);
-            if (!pData?.chapter?.dataSaver?.length) throw new Error();
-
-            const url = `${pData.baseUrl}/data-saver/${pData.chapter.hash}/${pData.chapter.dataSaver[0]}`;
-            const img = $('mangaImg');
-
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = url;
-            });
-
-            return url;
-        } catch {
-            console.warn(`Retry image (${i + 1}/3)...`);
-        }
-    }
-    throw new Error("Image failed");
-}
-
-/* ══════════════════════════════════════════
-   LOAD CHAPITRE
-   ══════════════════════════════════════════ */
-async function loadPage(attempt = 0) {
+async function loadVolume(attempt = 0) {
     if (attempt > 8) throw new Error("Trop de tentatives");
 
-    setLoad('🎲 Recherche...', 30);
+    setLoad('🎲 Tirage du tome...', 20);
 
-    // Récupère le total réel d'abord
-    const first = await apiGet(`https://api.mangadex.org/manga/${BLEACH_ID}/feed?limit=1&includeExternalUrl=0&contentRating[]=safe&order[chapter]=asc`);
-    const total = first?.total || 50;
+    const num = Math.floor(Math.random() * MAX_VOLUME) + 1;
+    const url = `https://sushiscan.fr/bleach-volume-${num}/`;
 
-    const offset = Math.floor(Math.random() * Math.max(1, total - 50));
-    const params = new URLSearchParams({
-        limit: 50, offset,
-        includeEmptyPages: 0,
-        includeFuturePublishAt: 0,
-        includeExternalUrl: 0
+    let html;
+    try {
+        html = await fetchHtml(url);
+    } catch {
+        return loadVolume(attempt + 1);
+    }
+
+    // Extraire les images depuis ts_reader.run(...)
+    const match = html.match(/ts_reader\.run\((.+?)\)\s*;/s);
+    if (!match) return loadVolume(attempt + 1);
+
+    let data;
+    try {
+        data = JSON.parse(match[1]);
+    } catch {
+        return loadVolume(attempt + 1);
+    }
+
+    const images = data?.sources?.[0]?.images;
+    if (!images?.length) return loadVolume(attempt + 1);
+
+    // Choisir une page aléatoire (pas la couverture = index 0)
+    const pageIndex = Math.floor(Math.random() * (images.length - 1)) + 1;
+    const imgUrl = images[pageIndex];
+
+    setLoad('🖼 Chargement image...', 70);
+
+    // Charger l'image
+    await new Promise((resolve, reject) => {
+        const img = $('mangaImg');
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = imgUrl;
+        setTimeout(reject, 10000); // timeout 10s
     });
-    params.append('contentRating[]', 'safe');
-    params.append('order[chapter]', 'asc');
 
-    const d = await apiGet(`https://api.mangadex.org/manga/${BLEACH_ID}/feed?${params.toString()}`);
-
-    const valid = d?.data?.filter(c =>
-        !isNaN(parseFloat(c.attributes.chapter)) &&
-        !c.attributes.externalUrl
-    );
-
-    if (!valid?.length) return loadPage(attempt + 1);
-
-    const chap = valid[Math.floor(Math.random() * valid.length)];
-    setLoad('🖼 Image...', 70);
-
-    const pageUrl = await loadImage(chap.id);
-
-    target = { num: parseFloat(chap.attributes.chapter), id: chap.id, pageUrl };
+    target = { num, imgUrl };
     round++;
 
     $('loadBox').style.display = 'none';
@@ -129,7 +115,7 @@ function submit() {
     if (over || !target) return;
 
     const raw = parseInt($('chapInput').value);
-    if (isNaN(raw)) return;
+    if (isNaN(raw) || raw < 1 || raw > MAX_VOLUME) return;
 
     const diff = Math.abs(raw - target.num);
     const res = diff === 0 ? 'correct' : diff <= CLOSE_MARGIN ? 'close' : 'wrong';
@@ -139,7 +125,7 @@ function submit() {
 
     const item = document.createElement('div');
     item.className = 'hist-item ' + res;
-    item.innerHTML = `<span>Ch. ${raw}</span> <span>${res === 'correct' ? '✅' : arr}</span>`;
+    item.innerHTML = `<span>Tome ${raw}</span> <span>${res === 'correct' ? '✅' : arr}</span>`;
     $('histBox').appendChild(item);
 
     updTries();
@@ -161,7 +147,7 @@ function submit() {
 
         $('result').style.display = 'flex';
         $('resTtl').textContent = res === 'correct' ? '🎉 BIEN JOUÉ !' : '💀 PERDU !';
-        $('resChap').textContent = "C'était le chapitre " + target.num;
+        $('resChap').textContent = "C'était le tome " + target.num;
 
         updStats();
     }
