@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/scanguess.css">
+<link rel="stylesheet" href="css/chapitre.css">
 <script src="js/nav.js" defer></script>
 </head>
 <body>
@@ -15,10 +15,22 @@
 <div class="top-bar"></div>
 <div class="gwrap">
 
-  <div class="phdr-mini">
-    <div class="phdr-title">Quel Tome ? <span>Bleach Manga Guesser</span></div>
-  </div>
+  <!-- TITRE PLEINE LARGEUR -->
+  <header class="game-header">
+    <div class="game-header-left">
+      <p class="game-kana">ブリーチ · 巻</p>
+      <h1 class="game-title">Quel Tome ?</h1>
+      <p class="game-sub">Devine de quel tome vient cette page — 5 essais.</p>
+    </div>
+    <div class="scorebar">
+      <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
+      <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+      <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+      <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
+    </div>
+  </header>
 
+  <!-- LAYOUT 2 COLONNES -->
   <div class="game-layout">
 
     <div class="col-img">
@@ -38,39 +50,23 @@
     </div>
 
     <div class="col-game">
-
-      <div class="sstat consigne">
-        <span class="sl">Devine de quel tome vient cette page</span>
-        <span class="sv">5 essais</span>
-      </div>
-
-      <div class="scorebar">
-        <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
-        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
-        <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
-        <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
-      </div>
-
       <div class="tries-row" id="triesRow"></div>
-
       <div id="inputBox" style="display:none;">
         <div class="input-row">
           <input type="number" id="chapInput" placeholder="Tome (1 – 74)" min="1" max="74" onkeydown="if(event.key==='Enter') submit()"/>
           <button class="btn btn-gold" onclick="submit()">Valider</button>
         </div>
       </div>
-
       <div id="histBox"></div>
-
       <div id="result" style="display:none;">
         <div class="res-title" id="resTtl"></div>
         <div class="res-chap" id="resChap"></div>
         <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
       </div>
-
     </div>
+
   </div>
 </div>
-<script src="js/scanguess.js"></script>
+<script src="js/chapitre.js"></script>
 </body>
 </html>
