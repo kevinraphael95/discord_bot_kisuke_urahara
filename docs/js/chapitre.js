@@ -1,6 +1,5 @@
 /* ══════════════════════════════════════════
    BLEACH — Quel Chapitre ? · chapitre.js
-   Version FINAL : Stable + MangaDex compliant
    ══════════════════════════════════════════ */
 
 const BLEACH_ID = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
@@ -10,10 +9,10 @@ const CLOSE_MARGIN = 15;
 let target = null, tries = [], over = false, score = 0, streak = 0, best = 0, round = 0;
 const $ = id => document.getElementById(id);
 
-window.addEventListener('load', () => { 
+window.addEventListener('load', () => {
     const s = JSON.parse(localStorage.getItem('bqc_v1'));
     if (s) { score = s.score || 0; best = s.best || 0; }
-    newRound(); 
+    newRound();
 });
 
 /* ══════════════════════════════════════════
@@ -23,28 +22,28 @@ async function newRound() {
     tries = []; over = false; target = null;
 
     ['imgBox','inputBox','feedback','result','errorBox'].forEach(id => {
-        const el = $(id); if(el) el.style.display = 'none';
+        const el = $(id); if (el) el.style.display = 'none';
     });
 
     $('loadBox').style.display = 'flex';
     $('histBox').innerHTML = '';
     $('mangaImg').className = 'blurred';
 
-    updTries(); 
+    updTries();
     updStats();
 
-    try { 
-        await loadPage(); 
-    } catch(e) { 
+    try {
+        await loadPage();
+    } catch(e) {
         console.error(e);
-        $('loadBox').style.display = 'none'; 
+        $('loadBox').style.display = 'none';
         $('errorBox').style.display = 'flex';
         $('errMsg').textContent = "Connexion impossible.";
     }
 }
 
 /* ══════════════════════════════════════════
-   FETCH API (proxy uniquement pour JSON)
+   FETCH API
    ══════════════════════════════════════════ */
 async function apiGet(url) {
     const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
@@ -53,36 +52,28 @@ async function apiGet(url) {
 }
 
 /* ══════════════════════════════════════════
-   LOAD IMAGE (MangaDex@Home compliant)
+   LOAD IMAGE
    ══════════════════════════════════════════ */
 async function loadImage(chapterId) {
     for (let i = 0; i < 3; i++) {
         try {
-            const serverUrl = `https://api.mangadex.org/at-home/server/${chapterId}`;
-            const pData = await apiGet(serverUrl);
-
+            const pData = await apiGet(`https://api.mangadex.org/at-home/server/${chapterId}`);
             if (!pData?.chapter?.dataSaver?.length) throw new Error();
 
-            const base = pData.baseUrl;
-            const hash = pData.chapter.hash;
-            const file = pData.chapter.dataSaver[0];
-
-            const url = `${base}/data-saver/${hash}/${file}`;
+            const url = `${pData.baseUrl}/data-saver/${pData.chapter.hash}/${pData.chapter.dataSaver[0]}`;
             const img = $('mangaImg');
 
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
-                img.src = url; // ✅ DIRECT (PAS DE PROXY)
+                img.src = url;
             });
 
             return url;
-
         } catch {
-            console.warn("Retry serveur image...");
+            console.warn(`Retry image (${i + 1}/3)...`);
         }
     }
-
     throw new Error("Image failed");
 }
 
@@ -105,8 +96,7 @@ async function loadPage(attempt = 0) {
     params.append('contentRating[]', 'safe');
     params.append('order[chapter]', 'desc');
 
-    const feedUrl = `https://api.mangadex.org/manga/${BLEACH_ID}/feed?${params.toString()}`;
-    const d = await apiGet(feedUrl);
+    const d = await apiGet(`https://api.mangadex.org/manga/${BLEACH_ID}/feed?${params.toString()}`);
 
     const valid = d?.data?.filter(c => !isNaN(parseFloat(c.attributes.chapter)));
     if (!valid?.length) return loadPage(attempt + 1);
@@ -116,7 +106,14 @@ async function loadPage(attempt = 0) {
 
     const pageUrl = await loadImage(chap.id);
 
-    target = { num: parseFloat(chap.attributes.chapter),
+    target = { num: parseFloat(chap.attributes.chapter), id: chap.id, pageUrl };
+    round++;
+
+    $('loadBox').style.display = 'none';
+    $('imgBox').style.display = 'block';
+    $('inputBox').style.display = 'flex';
+    updStats();
+}
 
 /* ══════════════════════════════════════════
    GAME
@@ -128,12 +125,7 @@ function submit() {
     if (isNaN(raw)) return;
 
     const diff = Math.abs(raw - target.num);
-
-    const res =
-        diff === 0 ? 'correct' :
-        diff <= CLOSE_MARGIN ? 'close' :
-        'wrong';
-
+    const res = diff === 0 ? 'correct' : diff <= CLOSE_MARGIN ? 'close' : 'wrong';
     const arr = raw < target.num ? "▲ plus tard" : "▼ plus tôt";
 
     tries.push({ result: res });
@@ -162,7 +154,7 @@ function submit() {
 
         $('result').style.display = 'flex';
         $('resTtl').textContent = res === 'correct' ? '🎉 BIEN JOUÉ !' : '💀 PERDU !';
-        $('resChap').textContent = 'C\'était le chapitre ' + target.num;
+        $('resChap').textContent = "C'était le chapitre " + target.num;
 
         updStats();
     }
@@ -171,9 +163,9 @@ function submit() {
 /* ══════════════════════════════════════════
    UI
    ══════════════════════════════════════════ */
-function setLoad(m, p) { 
-    $('loadMsg').textContent = m; 
-    $('progFill').style.width = p + '%'; 
+function setLoad(m, p) {
+    $('loadMsg').textContent = m;
+    $('progFill').style.width = p + '%';
 }
 
 function updTries() {
@@ -186,8 +178,8 @@ function updTries() {
 }
 
 function updStats() {
-    $('sScore').textContent = score; 
+    $('sScore').textContent = score;
     $('sStreak').textContent = streak;
-    $('sBest').textContent = best; 
+    $('sBest').textContent = best;
     $('sRound').textContent = round;
 }
