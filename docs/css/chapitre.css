@@ -53,7 +53,6 @@
   width: 100%; max-height: 540px; object-fit: contain;
   display: block; background: #000; transition: filter .4s;
 }
-#mangaImg.blurred { filter: blur(20px) brightness(.7); }
 .img-src {
   position: absolute; bottom: 0; right: 0; padding: 4px 10px;
   background: rgba(0,0,0,.6); font-size: .62rem; color: var(--dim); letter-spacing: .06em;
