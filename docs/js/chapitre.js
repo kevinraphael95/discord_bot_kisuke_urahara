@@ -1,8 +1,3 @@
-/* ══════════════════════════════════════════
-   BLEACH — Quel Tome ? · chapitre.js
-   Source : SushiScan.fr
-   ══════════════════════════════════════════ */
-
 const MAX_TRIES = 5;
 const CLOSE_MARGIN = 3;
 const MAX_VOLUME = 74;
@@ -16,9 +11,6 @@ window.addEventListener('load', () => {
     newRound();
 });
 
-/* ══════════════════════════════════════════
-   RESET
-   ══════════════════════════════════════════ */
 async function newRound() {
     tries = []; over = false; target = null;
 
@@ -28,6 +20,7 @@ async function newRound() {
 
     $('loadBox').style.display = 'flex';
     $('histBox').innerHTML = '';
+    $('mangaImg').className = '';
 
     updTries();
     updStats();
@@ -42,18 +35,12 @@ async function newRound() {
     }
 }
 
-/* ══════════════════════════════════════════
-   FETCH HTML via proxy
-   ══════════════════════════════════════════ */
 async function fetchHtml(url) {
     const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.text();
 }
 
-/* ══════════════════════════════════════════
-   LOAD VOLUME
-   ══════════════════════════════════════════ */
 async function loadVolume(attempt = 0) {
     if (attempt > 8) throw new Error("Trop de tentatives");
 
@@ -69,7 +56,6 @@ async function loadVolume(attempt = 0) {
         return loadVolume(attempt + 1);
     }
 
-    // Extraire les images depuis ts_reader.run(...)
     const match = html.match(/ts_reader\.run\((.+?)\)\s*;/s);
     if (!match) return loadVolume(attempt + 1);
 
@@ -83,19 +69,17 @@ async function loadVolume(attempt = 0) {
     const images = data?.sources?.[0]?.images;
     if (!images?.length) return loadVolume(attempt + 1);
 
-    // Choisir une page aléatoire (pas la couverture = index 0)
     const pageIndex = Math.floor(Math.random() * (images.length - 1)) + 1;
     const imgUrl = images[pageIndex];
 
     setLoad('🖼 Chargement image...', 70);
 
-    // Charger l'image
     await new Promise((resolve, reject) => {
         const img = $('mangaImg');
         img.onload = resolve;
         img.onerror = reject;
         img.src = imgUrl;
-        setTimeout(reject, 10000); // timeout 10s
+        setTimeout(reject, 10000);
     });
 
     target = { num, imgUrl };
@@ -107,9 +91,6 @@ async function loadVolume(attempt = 0) {
     updStats();
 }
 
-/* ══════════════════════════════════════════
-   GAME
-   ══════════════════════════════════════════ */
 function submit() {
     if (over || !target) return;
 
@@ -152,9 +133,6 @@ function submit() {
     }
 }
 
-/* ══════════════════════════════════════════
-   UI
-   ══════════════════════════════════════════ */
 function setLoad(m, p) {
     $('loadMsg').textContent = m;
     $('progFill').style.width = p + '%';
