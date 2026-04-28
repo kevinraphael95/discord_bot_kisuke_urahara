@@ -85,20 +85,23 @@ async function loadPage(attempt = 0) {
 
     setLoad('🎲 Recherche...', 30);
 
-    const offset = Math.floor(Math.random() * 400);
+    const offset = Math.floor(Math.random() * 600);
     const params = new URLSearchParams({
         limit: 50, offset,
         includeEmptyPages: 0,
         includeFuturePublishAt: 0,
         includeExternalUrl: 0
     });
-    params.append('translatedLanguage[]', 'fr');
     params.append('contentRating[]', 'safe');
-    params.append('order[chapter]', 'desc');
+    params.append('order[chapter]', 'asc');
 
     const d = await apiGet(`https://api.mangadex.org/manga/${BLEACH_ID}/feed?${params.toString()}`);
 
-    const valid = d?.data?.filter(c => !isNaN(parseFloat(c.attributes.chapter)));
+    const valid = d?.data?.filter(c =>
+        !isNaN(parseFloat(c.attributes.chapter)) &&
+        !c.attributes.externalUrl
+    );
+
     if (!valid?.length) return loadPage(attempt + 1);
 
     const chap = valid[Math.floor(Math.random() * valid.length)];
