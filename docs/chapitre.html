@@ -13,34 +13,21 @@
 <body>
 <div class="atmo"></div>
 <div class="top-bar"></div>
-<div class="phdr">
-  <p class="pkana">ブリーチ · 巻</p>
-  <h1 class="pttl">
-    <span class="t1">Quel Tome ?</span>
-    <span class="t2">Bleach Manga Guesser</span>
-  </h1>
-  <p class="psub">
-    Une page aléatoire du manga s'affiche. Devinez le numéro du tome en 5 essais.
-  </p>
-  <div class="orbs">
-    <div class="orb"></div>
-    <div class="orb"></div>
-    <div class="orb"></div>
-  </div>
-</div>
 <div class="gwrap">
+  <div class="page-title">Quel Tome ? <span>Bleach Manga Guesser</span></div>
   <div class="scorebar">
-    <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
-    <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
-    <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
-    <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
+    <span class="sitem"><span id="sScore">0</span> pts</span>
+    <span class="sep">·</span>
+    <span class="sitem">Série <span id="sStreak">0</span> 🔥</span>
+    <span class="sep">·</span>
+    <span class="sitem">Record <span id="sBest">0</span></span>
+    <span class="sep">·</span>
+    <span class="sitem">Manche <span id="sRound">0</span></span>
   </div>
   <div id="loadBox">
     <div class="spinner"></div>
-    <div id="loadMsg">Chargement d'une page de Bleach…</div>
-    <div class="prog-wrap">
-      <div class="prog-fill" id="progFill"></div>
-    </div>
+    <div id="loadMsg">Chargement…</div>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
   </div>
   <div id="errorBox" style="display:none;">
     <div id="errMsg">Impossible de charger. Vérifie ta connexion.</div>
@@ -53,27 +40,15 @@
   <div class="tries-row" id="triesRow"></div>
   <div id="inputBox" style="display:none;">
     <div class="input-row">
-      <input
-        type="number"
-        id="chapInput"
-        placeholder="Numéro du tome (1 – 74)"
-        min="1"
-        max="74"
-        onkeydown="if(event.key==='Enter') submit()"
-      />
-      <button class="btn btn-gold" id="subBtn" onclick="submit()">Valider</button>
+      <input type="number" id="chapInput" placeholder="Tome (1 – 74)" min="1" max="74" onkeydown="if(event.key==='Enter') submit()"/>
+      <button class="btn btn-gold" onclick="submit()">Valider</button>
     </div>
   </div>
   <div id="histBox"></div>
   <div id="result" style="display:none;">
-    <div class="res-kana">結果</div>
     <div class="res-title" id="resTtl"></div>
-    <img id="resImg" alt="Page révélée"/>
     <div class="res-chap" id="resChap"></div>
-    <div class="result-btns">
-      <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
-      <button class="btn btn-ghost" onclick="openMangadex()">📖 Voir l'image</button>
-    </div>
+    <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
   </div>
 </div>
 <script src="js/chapitre.js"></script>
