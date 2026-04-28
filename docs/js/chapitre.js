@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════
    BLEACH — Quel Chapitre ? · chapitre.js
-   Version "Hardcore" : Encodage d'URL strict
+   Version ULTIME : Correction Double Encodage
    ══════════════════════════════════════════ */
 
 const BLEACH_ID    = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
@@ -8,33 +8,27 @@ const API_BASE     = 'https://api.mangadex.org';
 const MAX_TRIES    = 5;
 const CLOSE_MARGIN = 15;
 
-// AllOrigins est souvent le plus stable pour les APIs complexes
+// AllOrigins est le plus fiable ici car il ne modifie pas l'URL interne
 const PROXIES = [
   url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
 ];
 
-const ARCS = [
-  [1,   'Agent de la Shinigami'], [70,  'Soul Society'], [182, 'Arrancar'],
-  [240, 'Hueco Mundo'], [343, 'Fullbring'], [424, 'Guerre de 1000 ans']
-];
-
-let target = null, tries = [], over = false, hints = new Set(), score = 0, streak = 0, best = 0, round = 0;
+let target = null, tries = [], over = false, score = 0, streak = 0, best = 0, round = 0;
 const $ = id => document.getElementById(id);
 
-window.addEventListener('load', () => { loadRec(); newRound(); });
-
-function loadRec() {
+window.addEventListener('load', () => { 
   const s = JSON.parse(localStorage.getItem('bqc_v1'));
   if (s) { score = s.score || 0; best = s.best || 0; }
-}
+  newRound(); 
+});
 
 async function newRound() {
-  tries = []; over = false; hints = new Set(); target = null;
+  tries = []; over = false; target = null;
   ['imgBox','inputBox','feedback','result','errorBox'].forEach(id => $(id).style.display = 'none');
   $('loadBox').style.display = 'flex';
-  ['histBox','hintTags'].forEach(id => $(id).innerHTML = '');
-  $('chapInput').value = ''; $('chapInput').disabled = false; $('subBtn').disabled = false;
+  $('histBox').innerHTML = '';
+  $('chapInput').value = '';
   $('mangaImg').className = 'blurred';
   updTries(); updStats();
   
@@ -42,103 +36,103 @@ async function newRound() {
   catch(e) { 
     $('loadBox').style.display = 'none'; 
     $('errorBox').style.display = 'flex';
-    $('errMsg').textContent = e.message;
+    $('errMsg').textContent = "Erreur : " + e.message;
   }
 }
 
-// CETTE FONCTION CORRIGE L'ERREUR 400
-async function apiGet(endpoint, params = {}) {
-  const url = new URL(API_BASE + endpoint);
-  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-  const fullUrl = url.toString();
-
+async function apiGet(path) {
+  const fullUrl = API_BASE + path;
+  
   for (const makeProxy of PROXIES) {
     try {
       const pUrl = makeProxy(fullUrl);
-      const r = await fetch(pUrl, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+      const r = await fetch(pUrl, { cache: 'no-store' });
       if (r.ok) {
-        const res = await r.json();
-        return res.contents ? JSON.parse(res.contents) : res;
+        const text = await r.text();
+        // AllOrigins peut renvoyer le JSON direct ou dans .contents
+        try {
+          const data = JSON.parse(text);
+          return data.contents ? JSON.parse(data.contents) : data;
+        } catch(e) {
+          return JSON.parse(text);
+        }
       }
-    } catch(e) { console.warn("Echec proxy..."); }
+    } catch(e) { console.warn("Proxy instable, essai suivant..."); }
   }
-  throw new Error("Serveurs indisponibles. Réessaie.");
+  throw new Error("MangaDex est surchargé. Réessaie.");
 }
 
 async function loadPage() {
   setLoad('🎲 Recherche...', 30);
-  const randomChap = Math.floor(Math.random() * 686) + 1;
+  const randomChap = Math.floor(Math.random() * 680) + 1;
 
-  // Paramètres simplifiés pour éviter les erreurs 400
-  const d = await apiGet(`/manga/${BLEACH_ID}/feed`, {
-    'limit': 1,
-    'chapter': randomChap,
-    'translatedLanguage[]': 'fr',
-    'contentRating[]': 'safe'
-  });
+  // URL SIMPLIFIÉE : On retire les crochets [] qui font planter les proxies
+  // MangaDex accepte les paramètres sans crochets pour les filtres simples
+  const path = `/manga/${BLEACH_ID}/feed?limit=1&chapter=${randomChap}&translatedLanguage=fr&contentRating=safe`;
+  
+  const d = await apiGet(path);
 
-  if (!d.data || d.data.length === 0) return loadPage();
-  const chap = d.data[0];
+  if (!d.data || d.data.length === 0) {
+      // Si pas de FR, on tente en anglais sans crochets non plus
+      const dEn = await apiGet(`/manga/${BLEACH_ID}/feed?limit=1&chapter=${randomChap}&translatedLanguage=en&contentRating=safe`);
+      if (!dEn.data || dEn.data.length === 0) return loadPage();
+      var chap = dEn.data[0];
+  } else {
+      var chap = d.data[0];
+  }
 
   setLoad('🖼 Image...', 60);
   const pData = await apiGet(`/at-home/server/${chap.id}`);
   const pageUrl = `${pData.baseUrl}/data-saver/${pData.chapter.hash}/${pData.chapter.dataSaver[0]}`;
 
   target = { num: parseFloat(chap.attributes.chapter), id: chap.id, pageUrl };
-  await loadImg(pageUrl);
-
-  round++;
-  $('loadBox').style.display = 'none';
-  $('imgBox').style.display = 'block';
-  $('inputBox').style.display = 'flex';
-  updStats();
-}
-
-function loadImg(url) {
-  return new Promise((res, rej) => {
-    const img = $('mangaImg');
-    img.onload = res;
-    img.onerror = rej;
-    // On passe l'image par AllOrigins pour éviter le blocage direct
-    img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  });
-}
-
-function setLoad(msg, pct) {
-  $('loadMsg').textContent = msg;
-  $('progFill').style.width = pct + '%';
+  
+  // Chargement image via proxy
+  const img = $('mangaImg');
+  img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(pageUrl)}`;
+  
+  img.onload = () => {
+    round++;
+    $('loadBox').style.display = 'none';
+    $('imgBox').style.display = 'block';
+    $('inputBox').style.display = 'flex';
+    updStats();
+  };
 }
 
 function submit() {
+  if (over) return;
   const raw = parseInt($('chapInput').value);
   if (isNaN(raw)) return;
+  
   const diff = Math.abs(raw - target.num);
   const res = diff === 0 ? 'correct' : diff <= CLOSE_MARGIN ? 'close' : 'wrong';
   const arr = raw < target.num ? "▲ plus tard" : "▼ plus tôt";
   
   tries.push({ result: res });
-  addHist(raw, res, diff, arr);
-  updTries();
-  if (res === 'correct' || tries.length >= MAX_TRIES) endRound(res === 'correct');
-}
-
-function endRound(won) {
-  over = true;
-  $('inputBox').style.display = 'none';
-  $('mangaImg').classList.remove('blurred');
-  if (won) { score += 50; streak++; if (streak > best) best = streak; } else { streak = 0; }
-  localStorage.setItem('bqc_v1', JSON.stringify({ score, best }));
-  $('result').style.display = 'flex';
-  $('resTtl').textContent = won ? '🎉 GAGNE !' : '💀 PERDU !';
-  $('resChap').textContent = 'Chapitre ' + target.num;
-  $('resImg').src = `https://api.allorigins.win/raw?url=${encodeURIComponent(target.pageUrl)}`;
-}
-
-function addHist(g, r, d, a) {
   const item = document.createElement('div');
-  item.className = 'hist-item ' + r;
-  item.innerHTML = `<span>Ch. ${g}</span> <span>${r === 'correct' ? '✅' : a}</span>`;
+  item.className = 'hist-item ' + res;
+  item.innerHTML = `<span>Ch. ${raw}</span> <span>${res === 'correct' ? '✅' : arr}</span>`;
   $('histBox').appendChild(item);
+  
+  updTries();
+  $('chapInput').value = '';
+
+  if (res === 'correct' || tries.length >= MAX_TRIES) {
+    over = true;
+    $('mangaImg').classList.remove('blurred');
+    if (res === 'correct') { score += 100; streak++; if (streak > best) best = streak; } else { streak = 0; }
+    localStorage.setItem('bqc_v1', JSON.stringify({ score, best }));
+    $('result').style.display = 'flex';
+    $('resTtl').textContent = res === 'correct' ? '🎉 BIEN JOUÉ !' : '💀 PERDU !';
+    $('resChap').textContent = 'C\'était le chapitre ' + target.num;
+    updStats();
+  }
+}
+
+function setLoad(msg, pct) {
+  $('loadMsg').textContent = msg;
+  $('progFill').style.width = pct + '%';
 }
 
 function updTries() {
@@ -156,5 +150,3 @@ function updStats() {
   $('sBest').textContent = best;
   $('sRound').textContent = round;
 }
-
-function saveRec() { localStorage.setItem('bqc_v1', JSON.stringify({ score, best })); }
