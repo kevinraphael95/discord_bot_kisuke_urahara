@@ -28,7 +28,6 @@ async function newRound() {
 
     $('loadBox').style.display = 'flex';
     $('histBox').innerHTML = '';
-    $('mangaImg').className = 'blurred';
 
     updTries();
     updStats();
