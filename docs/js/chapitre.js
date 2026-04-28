@@ -47,25 +47,9 @@ async function newRound() {
    FETCH API (proxy uniquement pour JSON)
    ══════════════════════════════════════════ */
 async function apiGet(url) {
-    const proxies = [
-        u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
-        u => `https://corsproxy.io/?${encodeURIComponent(u)}`
-    ];
-
-    for (const proxy of proxies) {
-        try {
-            const res = await fetch(proxy(url));
-            if (!res.ok) continue;
-
-            const data = await res.json();
-
-            if (data.contents) return JSON.parse(data.contents);
-            return data;
-
-        } catch {}
-    }
-
-    throw new Error("API down");
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
 }
 
 /* ══════════════════════════════════════════
