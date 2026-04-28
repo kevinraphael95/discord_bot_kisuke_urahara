@@ -1,106 +1,125 @@
 .gwrap {
   position: relative; z-index: 1;
-  max-width: 1000px; margin: 0 auto;
+  max-width: 1020px; margin: 0 auto;
   padding: 1.5rem 1.5rem 4rem;
 }
 
-/* ── EN-TÊTE ── */
-.phdr-mini {
+/* ── HEADER ── */
+.game-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1rem;
   margin-bottom: 1.2rem;
-  padding-bottom: .9rem;
   border-bottom: 1px solid var(--gold-line);
+  flex-wrap: wrap;
+  opacity: 0; animation: rise .5s .1s forwards;
 }
-.phdr-title {
+.game-kana {
+  font-family: 'Noto Serif JP', serif;
+  font-size: .62rem; letter-spacing: .4em;
+  color: var(--muted); margin-bottom: .3rem;
+  text-transform: uppercase;
+}
+.game-title {
   font-family: 'Shippori Mincho', serif;
-  font-size: 1.4rem; font-weight: 700; color: var(--gold);
+  font-size: 2rem; font-weight: 800; color: var(--gold);
+  line-height: 1; margin-bottom: .4rem;
 }
-.phdr-title span {
-  font-family: 'DM Sans', sans-serif;
-  font-size: .7rem; font-weight: 400;
-  color: var(--muted); letter-spacing: .1em;
-  text-transform: uppercase; margin-left: .6rem;
+.game-sub {
+  font-size: .78rem; color: var(--muted); letter-spacing: .03em;
+}
+
+/* ── STATS ── */
+.scorebar {
+  display: flex; gap: .4rem; flex-shrink: 0;
+}
+.sstat {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: .6rem .9rem; text-align: center; min-width: 72px;
+}
+.sstat .sv {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.3rem; font-weight: 700; color: var(--gold); display: block;
+}
+.sstat .sl {
+  font-size: .56rem; color: var(--muted);
+  letter-spacing: .1em; text-transform: uppercase;
 }
 
 /* ── LAYOUT ── */
 .game-layout {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem;
   align-items: flex-start;
 }
-.col-img  { flex: 1 1 55%; min-width: 0; }
-.col-game { flex: 1 1 45%; min-width: 0; display: flex; flex-direction: column; gap: .7rem; }
-
-/* ── CONSIGNE ── */
-.sstat {
-  background: var(--panel); border: 1px solid var(--gold-line);
-  padding: .6rem .8rem; text-align: center;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.sstat .sv { font-family: 'Shippori Mincho', serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); display: block; }
-.sstat .sl { font-size: .58rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
-
-.sstat.consigne {
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: .7rem 1rem;
-  gap: 1rem;
-}
-.sstat.consigne .sl { font-size: .78rem; letter-spacing: .02em; text-transform: none; color: var(--text); }
-.sstat.consigne .sv { font-size: .78rem; font-family: 'DM Sans', sans-serif; font-weight: 500; color: var(--muted); white-space: nowrap; }
-
-/* ── STATS ── */
-.scorebar {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem;
-  opacity: 0; animation: rise .4s .3s forwards;
-}
+.col-img  { flex: 1 1 58%; min-width: 0; }
+.col-game { flex: 1 1 42%; min-width: 0; display: flex; flex-direction: column; gap: .6rem; }
 
 /* ── LOADING ── */
 #loadBox {
   background: var(--panel); border: 1px solid var(--gold-line);
-  padding: 2rem 1.5rem; text-align: center;
+  padding: 3rem 1.5rem; text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  min-height: 300px; justify-content: center;
 }
 .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
-#loadMsg { color: var(--muted); font-size: .82rem; }
+#loadMsg { color: var(--muted); font-size: .8rem; }
 .prog-wrap { width: 160px; height: 1px; background: var(--border); }
 .prog-fill { height: 100%; background: var(--gold); transition: width .4s; width: 0%; }
 
 /* ── IMAGE ── */
-#imgBox { border: 1px solid var(--gold-line); overflow: hidden; display: none; position: relative; background: var(--deep); }
-#mangaImg { width: 100%; max-height: 520px; object-fit: contain; display: block; background: #000; }
-.img-src { position: absolute; bottom: 0; right: 0; padding: 3px 8px; background: rgba(0,0,0,.6); font-size: .6rem; color: var(--dim); letter-spacing: .05em; }
+#imgBox { border: 1px solid var(--gold-line); overflow: hidden; display: none; position: relative; background: #000; }
+#mangaImg { width: 100%; max-height: 560px; object-fit: contain; display: block; }
+.img-src { position: absolute; bottom: 0; right: 0; padding: 3px 8px; background: rgba(0,0,0,.65); font-size: .58rem; color: var(--dim); letter-spacing: .05em; }
 
 /* ── DOTS ── */
-.tries-row { display: flex; gap: 5px; justify-content: center; }
-.try-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background .3s; }
-.try-dot.correct { background: var(--ok-bd); box-shadow: 0 0 5px var(--ok-bd); }
-.try-dot.close   { background: var(--yw-bd); box-shadow: 0 0 5px var(--yw-bd); }
-.try-dot.wrong   { background: var(--ko-bd); box-shadow: 0 0 5px var(--ko-bd); }
+.tries-row { display: flex; gap: 6px; justify-content: center; padding: .3rem 0; }
+.try-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); transition: background .3s; }
+.try-dot.correct { background: var(--ok-bd); box-shadow: 0 0 6px var(--ok-bd); }
+.try-dot.close   { background: var(--yw-bd); box-shadow: 0 0 6px var(--yw-bd); }
+.try-dot.wrong   { background: var(--ko-bd); box-shadow: 0 0 6px var(--ko-bd); }
 
 /* ── INPUT ── */
 #inputBox { display: none; flex-direction: column; }
 .input-row { display: flex; gap: .4rem; }
-#chapInput { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: .9rem; padding: .65rem .9rem; outline: none; transition: border-color .2s; }
+#chapInput {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: .9rem;
+  padding: .7rem .9rem; outline: none; transition: border-color .2s;
+}
 #chapInput:focus { border-color: var(--gold-line); }
 #chapInput::placeholder { color: var(--dim); }
 
 /* ── HISTORIQUE ── */
 #histBox { display: flex; flex-direction: column; gap: .3rem; }
-.hist-item { background: var(--surface); border: 1px solid var(--border); padding: .45rem .8rem; display: flex; justify-content: space-between; align-items: center; font-size: .82rem; }
-.hist-item.correct { border-color: var(--ok-bd); }
-.hist-item.close   { border-color: var(--yw-bd); }
+.hist-item {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: .5rem .8rem; display: flex; justify-content: space-between;
+  align-items: center; font-size: .82rem;
+}
+.hist-item.correct { border-color: var(--ok-bd); background: var(--ok-bg); }
+.hist-item.close   { border-color: var(--yw-bd); background: var(--yw-bg); }
 .hist-item.wrong   { border-color: var(--ko-bd); }
 
 /* ── RÉSULTAT ── */
-#result { background: var(--panel); border: 1px solid var(--gold-line); padding: 1.2rem; display: none; flex-direction: column; align-items: center; gap: .6rem; text-align: center; }
+#result {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: 1.5rem 1rem; display: none;
+  flex-direction: column; align-items: center; gap: .7rem; text-align: center;
+}
 #result.win  { border-color: var(--ok-bd); }
 #result.lose { border-color: var(--ko-bd); }
 .res-title { font-family: 'Shippori Mincho', serif; font-size: 1.1rem; font-weight: 800; color: var(--gold); }
-.res-chap  { font-family: 'Shippori Mincho', serif; font-size: 1.6rem; font-weight: 800; color: var(--white); }
+.res-chap  { font-family: 'Shippori Mincho', serif; font-size: 1.8rem; font-weight: 800; color: var(--white); }
 
 /* ── ERREUR ── */
-#errorBox { background: var(--ko-bg); border: 1px solid var(--ko-bd); padding: 1.5rem; text-align: center; display: none; flex-direction: column; gap: .8rem; }
+#errorBox {
+  background: var(--ko-bg); border: 1px solid var(--ko-bd);
+  padding: 1.5rem; text-align: center;
+  display: none; flex-direction: column; gap: .8rem;
+}
 #errMsg { color: var(--ko-tx); font-size: .88rem; }
 
 /* ── ANIMATIONS ── */
@@ -109,5 +128,7 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 700px) {
   .game-layout { flex-direction: column; }
+  .game-header { flex-direction: column; align-items: flex-start; }
+  .scorebar { width: 100%; justify-content: space-between; }
   .gwrap { padding: 1rem 1rem 3rem; }
 }
