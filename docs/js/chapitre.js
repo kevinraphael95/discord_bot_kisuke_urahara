@@ -89,51 +89,34 @@ async function loadImage(chapterId) {
 /* ══════════════════════════════════════════
    LOAD CHAPITRE
    ══════════════════════════════════════════ */
-async function loadPage() {
+async function loadPage(attempt = 0) {
+    if (attempt > 5) throw new Error("Trop de tentatives");
+
     setLoad('🎲 Recherche...', 30);
 
     const offset = Math.floor(Math.random() * 400);
-
     const params = new URLSearchParams({
-        limit: 50,
-        offset: offset,
+        limit: 50, offset,
         includeEmptyPages: 0,
         includeFuturePublishAt: 0,
         includeExternalUrl: 0
     });
-
     params.append('translatedLanguage[]', 'fr');
     params.append('contentRating[]', 'safe');
     params.append('order[chapter]', 'desc');
 
     const feedUrl = `https://api.mangadex.org/manga/${BLEACH_ID}/feed?${params.toString()}`;
-
     const d = await apiGet(feedUrl);
 
-    if (!d?.data?.length) return loadPage();
-
-    // filtre chapitres valides
-    const valid = d.data.filter(c => !isNaN(parseFloat(c.attributes.chapter)));
-    if (!valid.length) return loadPage();
+    const valid = d?.data?.filter(c => !isNaN(parseFloat(c.attributes.chapter)));
+    if (!valid?.length) return loadPage(attempt + 1);
 
     const chap = valid[Math.floor(Math.random() * valid.length)];
-
     setLoad('🖼 Image...', 70);
 
     const pageUrl = await loadImage(chap.id);
 
-    target = { 
-        num: parseFloat(chap.attributes.chapter), 
-        id: chap.id, 
-        pageUrl 
-    };
-
-    round++;
-    $('loadBox').style.display = 'none';
-    $('imgBox').style.display = 'block';
-    $('inputBox').style.display = 'flex';
-    updStats();
-}
+    target = { num: parseFloat(chap.attributes.chapter),
 
 /* ══════════════════════════════════════════
    GAME
