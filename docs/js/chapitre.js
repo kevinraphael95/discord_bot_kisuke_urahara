@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════
    BLEACH — Quel Chapitre ? · chapitre.js
-   Version optimisée : Tirage direct + Fix CORS
+   Version stabilisée : Fix Erreur 400 & CORS
    ══════════════════════════════════════════ */
 
 const BLEACH_ID    = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
@@ -8,9 +8,10 @@ const API_BASE     = 'https://api.mangadex.org';
 const MAX_TRIES    = 5;
 const CLOSE_MARGIN = 15;
 
+// AllOrigins est mis en premier car il est plus tolérant sur les caractères spéciaux
 const PROXIES = [
-  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
   url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
   url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
 ];
 
@@ -68,7 +69,7 @@ async function newRound() {
   } catch(e) {
     console.error(e);
     $('loadBox').style.display = 'none';
-    $('errMsg').textContent = 'Erreur : ' + e.message;
+    $('errMsg').textContent = 'Erreur réseau : ' + e.message;
     $('errorBox').style.display = 'flex';
   }
 }
@@ -80,18 +81,20 @@ async function apiGet(path) {
       const proxyUrl = makeProxy(fullUrl);
       const r = await fetch(proxyUrl, { 
         cache: 'no-store', 
-        signal: AbortSignal.timeout(10000) 
+        signal: AbortSignal.timeout(15000) // Timeout étendu à 15s
       });
+
       if (r.ok) {
         const text = await r.text();
         try {
           const json = JSON.parse(text);
+          // Gère le format spécifique de AllOrigins
           return json.contents ? JSON.parse(json.contents) : json;
-        } catch { continue; }
+        } catch (err) { continue; }
       }
-    } catch(e) { console.warn('Proxy échoué...', e.message); }
+    } catch(e) { console.warn('Proxy échoué, essai suivant...'); }
   }
-  throw new Error('Connexion impossible aux serveurs MangaDex.');
+  throw new Error('Tous les proxies ont échoué. Réessaie dans un instant.');
 }
 
 async function loadPage() {
@@ -100,13 +103,21 @@ async function loadPage() {
   // Tirage aléatoire entre 1 et 686
   const randomChap = Math.floor(Math.random() * 686) + 1;
 
-  // On cherche ce chapitre précis
-  const path = `/manga/${BLEACH_ID}/feed?limit=1&chapter=${randomChap}&translatedLanguage[]=fr&translatedLanguage[]=en&contentRating[]=safe`;
+  // On simplifie la requête pour éviter l'erreur 400 (Bad Request) sur les proxies
+  const path = `/manga/${BLEACH_ID}/feed?limit=1&chapter=${randomChap}&translatedLanguage[]=fr&contentRating[]=safe`;
+  
   const d = await apiGet(path);
 
-  if (!d.data || d.data.length === 0) return loadPage(); // On relance si vide
+  // Si pas de VF, on tente sans filtre de langue (souvent de l'Anglais par défaut)
+  if (!d.data || d.data.length === 0) {
+      const fallbackPath = `/manga/${BLEACH_ID}/feed?limit=1&chapter=${randomChap}&contentRating[]=safe`;
+      const dFallback = await apiGet(fallbackPath);
+      if (!dFallback.data || dFallback.data.length === 0) return loadPage();
+      var chap = dFallback.data[0];
+  } else {
+      var chap = d.data[0];
+  }
 
-  const chap = d.data[0];
   setLoad('🖼 Préparation de l\'image...', 60);
 
   const pData = await apiGet(`/at-home/server/${chap.id}`);
@@ -115,7 +126,6 @@ async function loadPage() {
   
   if (!pages?.length) return loadPage();
 
-  // Page au hasard (on évite souvent la 0 qui est la couverture)
   const idx = pages.length > 1 ? 1 + Math.floor(Math.random() * (pages.length - 1)) : 0;
   const pageUrl = `${pData.baseUrl}/data-saver/${hash}/${pages[idx]}`;
 
@@ -140,9 +150,9 @@ function loadImg(url) {
   return new Promise((res, rej) => {
     const img = $('mangaImg');
     img.onload = res;
-    img.onerror = () => rej(new Error('Image bloquée par le serveur'));
-    // IMPORTANT : On passe aussi l'image par le proxy pour le CORS
-    img.src = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+    img.onerror = () => rej(new Error('Image bloquée par MangaDex'));
+    // Utilisation de AllOrigins pour l'image également pour plus de fiabilité
+    img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   });
 }
 
@@ -154,7 +164,7 @@ function setLoad(msg, pct) {
 function submit() {
   if (over || !target) return;
   const raw = parseInt($('chapInput').value);
-  if (isNaN(raw) || raw < 1 || raw > 700) { shake($('chapInput')); return; }
+  if (isNaN(raw) || raw < 1 || raw > 750) { shake($('chapInput')); return; }
 
   const diff = Math.abs(raw - target.num);
   const res = diff === 0 ? 'correct' : diff <= CLOSE_MARGIN ? 'close' : 'wrong';
@@ -203,7 +213,8 @@ function endRound(won) {
   r.style.display = 'flex';
   r.className = won ? 'win' : 'lose';
   $('resTtl').textContent = won ? '🎉 Bravo !' : '💀 Perdu !';
-  $('resImg').src = `https://corsproxy.io/?url=${encodeURIComponent(target.pageUrl)}`;
+  // On repasse par proxy pour l'image de résultat également
+  $('resImg').src = `https://api.allorigins.win/raw?url=${encodeURIComponent(target.pageUrl)}`;
   $('resChap').textContent = 'Chapitre ' + target.num;
   $('resArc').textContent = (target.title ? '"' + target.title + '" — ' : '') + getArc(target.num);
 }
