@@ -4,7 +4,7 @@
     { href: 'reiatsu.html',   label: 'Reiatsu' },
     { href: 'guesser.html',   label: 'Character Guesser' },
     { href: 'chapitre.html',   label: '????' },
-    { href: 'install.html',   label: 'Installation' },
+    { href: 'scanguess.html',   label: 'Installation' },
   ];
   const themes = [
     { id: 'shinigami',    label: 'Shinigami',    icon: '⚔️' },
