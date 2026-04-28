@@ -2,7 +2,7 @@
    BLEACH — Quel Chapitre ? · chapitre.js
    ══════════════════════════════════════════ */
 
-const BLEACH_ID = 'be5f4e76-b030-4b96-834c-a4a17792da4e';
+const BLEACH_ID = '239d6260-d71f-43b0-afff-074e3619e3de';
 const MAX_TRIES = 5;
 const CLOSE_MARGIN = 15;
 
