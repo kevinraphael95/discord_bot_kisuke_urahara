@@ -14,42 +14,66 @@
 <div class="atmo"></div>
 <div class="top-bar"></div>
 <div class="gwrap">
-  <div class="page-title">Quel Tome ? <span>Bleach Manga Guesser</span></div>
-  <p class="psub">Devine de quel tome vient cette page.</p>
-  <div class="scorebar">
-    <span class="sitem"><span id="sScore">0</span> pts</span>
-    <span class="sep">·</span>
-    <span class="sitem">Série <span id="sStreak">0</span> 🔥</span>
-    <span class="sep">·</span>
-    <span class="sitem">Record <span id="sBest">0</span></span>
-    <span class="sep">·</span>
-    <span class="sitem">Manche <span id="sRound">0</span></span>
+
+  <!-- EN-TÊTE -->
+  <div class="phdr-mini">
+    <div class="phdr-title">Quel Tome ? <span>Bleach Manga Guesser</span></div>
+    <p class="phdr-sub">Devine de quel tome vient cette page. 5 essais.</p>
   </div>
-  <div id="loadBox">
-    <div class="spinner"></div>
-    <div id="loadMsg">Chargement…</div>
-    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
-  </div>
-  <div id="errorBox" style="display:none;">
-    <div id="errMsg">Impossible de charger. Vérifie ta connexion.</div>
-    <button class="btn btn-ghost" onclick="newRound()">🔄 Réessayer</button>
-  </div>
-  <div id="imgBox" style="display:none;">
-    <img id="mangaImg" alt="Page de Bleach"/>
-    <div class="img-src">📖 SushiScan · Bleach</div>
-  </div>
-  <div class="tries-row" id="triesRow"></div>
-  <div id="inputBox" style="display:none;">
-    <div class="input-row">
-      <input type="number" id="chapInput" placeholder="Tome (1 – 74)" min="1" max="74" onkeydown="if(event.key==='Enter') submit()"/>
-      <button class="btn btn-gold" onclick="submit()">Valider</button>
+
+  <!-- LAYOUT 2 COLONNES -->
+  <div class="game-layout">
+
+    <!-- COLONNE GAUCHE : image -->
+    <div class="col-img">
+      <div id="loadBox">
+        <div class="spinner"></div>
+        <div id="loadMsg">Chargement…</div>
+        <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+      </div>
+      <div id="errorBox" style="display:none;">
+        <div id="errMsg">Impossible de charger. Vérifie ta connexion.</div>
+        <button class="btn btn-ghost" onclick="newRound()">🔄 Réessayer</button>
+      </div>
+      <div id="imgBox" style="display:none;">
+        <img id="mangaImg" alt="Page de Bleach"/>
+        <div class="img-src">📖 SushiScan · Bleach</div>
+      </div>
     </div>
-  </div>
-  <div id="histBox"></div>
-  <div id="result" style="display:none;">
-    <div class="res-title" id="resTtl"></div>
-    <div class="res-chap" id="resChap"></div>
-    <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
+
+    <!-- COLONNE DROITE : stats + jeu -->
+    <div class="col-game">
+
+      <!-- Stats -->
+      <div class="scorebar">
+        <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
+        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+        <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+        <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
+      </div>
+
+      <!-- Dots -->
+      <div class="tries-row" id="triesRow"></div>
+
+      <!-- Input -->
+      <div id="inputBox" style="display:none;">
+        <div class="input-row">
+          <input type="number" id="chapInput" placeholder="Tome (1 – 74)" min="1" max="74" onkeydown="if(event.key==='Enter') submit()"/>
+          <button class="btn btn-gold" onclick="submit()">Valider</button>
+        </div>
+      </div>
+
+      <!-- Historique -->
+      <div id="histBox"></div>
+
+      <!-- Résultat -->
+      <div id="result" style="display:none;">
+        <div class="res-title" id="resTtl"></div>
+        <div class="res-chap" id="resChap"></div>
+        <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
+      </div>
+
+    </div>
   </div>
 </div>
 <script src="js/chapitre.js"></script>
