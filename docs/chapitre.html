@@ -4,21 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quel Tome ? — Bleach Manga Guesser</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/chapitre.css">
-
 <script src="js/nav.js" defer></script>
 </head>
-
 <body>
-
 <div class="atmo"></div>
 <div class="top-bar"></div>
-
 <div class="phdr">
   <p class="pkana">ブリーチ · 巻</p>
   <h1 class="pttl">
@@ -28,24 +22,19 @@
   <p class="psub">
     Une page aléatoire du manga s'affiche. Devinez le numéro du tome en 5 essais.
   </p>
-
   <div class="orbs">
     <div class="orb"></div>
     <div class="orb"></div>
     <div class="orb"></div>
   </div>
 </div>
-
 <div class="gwrap">
-
   <div class="scorebar">
     <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
     <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
     <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
     <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
   </div>
-
-  <!-- LOADING -->
   <div id="loadBox">
     <div class="spinner"></div>
     <div id="loadMsg">Chargement d'une page de Bleach…</div>
@@ -53,22 +42,15 @@
       <div class="prog-fill" id="progFill"></div>
     </div>
   </div>
-
-  <!-- ERROR -->
   <div id="errorBox" style="display:none;">
     <div id="errMsg">Impossible de charger. Vérifie ta connexion.</div>
     <button class="btn btn-ghost" onclick="newRound()">🔄 Réessayer</button>
   </div>
-
-  <!-- IMAGE -->
   <div id="imgBox" style="display:none;">
+    <img id="mangaImg" alt="Page de Bleach"/>
     <div class="img-src">📖 SushiScan · Bleach</div>
   </div>
-
-  <!-- TRIES -->
   <div class="tries-row" id="triesRow"></div>
-
-  <!-- INPUT -->
   <div id="inputBox" style="display:none;">
     <div class="input-row">
       <input
@@ -82,28 +64,18 @@
       <button class="btn btn-gold" id="subBtn" onclick="submit()">Valider</button>
     </div>
   </div>
-
-  <!-- HISTORY -->
   <div id="histBox"></div>
-
-  <!-- RESULT -->
   <div id="result" style="display:none;">
     <div class="res-kana">結果</div>
     <div class="res-title" id="resTtl"></div>
-
     <img id="resImg" alt="Page révélée"/>
-
     <div class="res-chap" id="resChap"></div>
-
     <div class="result-btns">
       <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
       <button class="btn btn-ghost" onclick="openMangadex()">📖 Voir l'image</button>
     </div>
   </div>
-
 </div>
-
 <script src="js/chapitre.js"></script>
-
 </body>
 </html>
