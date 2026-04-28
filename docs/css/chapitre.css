@@ -1,124 +1,13 @@
 /* ══════════════════════════════════════════
    BLEACH — Quel Chapitre ? · chapitre.css
+   Styles spécifiques uniquement — base.css gère le reste
    ══════════════════════════════════════════ */
 
-/* ── BASE & RESET ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:       #0a0a0f;
-  --deep:     #060609;
-  --surface:  #111118;
-  --panel:    #13131c;
-  --border:   #2a2a3a;
-  --gold:     #c9a84c;
-  --gold-lt:  #e2c576;
-  --gold-line:#3a3020;
-  --gold-pale:#1c1a0f;
-  --text:     #ddd8cc;
-  --muted:    #7a7870;
-  --dim:      #44433f;
-  --white:    #f0ece4;
-  --rei-lt:   #8899bb;
-
-  --ok-bg:  #0d1f12; --ok-bd: #2d6e3e; --ok-tx: #6ddb8a;
-  --yw-bg:  #1e1a0a; --yw-bd: #7a6010; --yw-tx: #e8c040;
-  --ko-bg:  #1f0d0d; --ko-bd: #7a2020; --ko-tx: #dd6060;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ── ATMOSPHERE ── */
-.atmo {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(201,168,76,.04) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 80% 80%, rgba(50,40,120,.06) 0%, transparent 60%);
-}
-
-/* ── TOP BAR ── */
-.top-bar {
-  position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 100;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity: .5;
-}
-
-/* ── HEADER ── */
-.phdr {
-  position: relative; z-index: 1;
-  text-align: center;
-  padding: 3.5rem 1.5rem 2.5rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2rem;
-}
-.pkana {
-  font-family: 'Noto Serif JP', serif;
-  font-size: .65rem; letter-spacing: .6em;
-  color: var(--rei-lt); margin-bottom: .9rem;
-}
-.pttl { margin-bottom: .7rem; }
-.pttl .t1 {
-  display: block;
-  font-family: 'Shippori Mincho', serif;
-  font-size: clamp(1.8rem, 5vw, 2.6rem);
-  font-weight: 800; color: var(--gold);
-  letter-spacing: .03em;
-}
-.pttl .t2 {
-  display: block;
-  font-size: .72rem; font-weight: 300;
-  letter-spacing: .22em; text-transform: uppercase;
-  color: var(--muted); margin-top: .3rem;
-}
-.psub { font-size: .82rem; color: var(--muted); max-width: 460px; margin: 0 auto 1.5rem; }
-
-/* ── ORBS ── */
-.orbs { display: flex; gap: 6px; justify-content: center; }
-.orb  { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); opacity: .3; }
-.orb:nth-child(2) { opacity: .6; }
-
-/* ── BUTTONS ── */
-.btn {
-  font-family: 'DM Sans', sans-serif;
-  font-size: .78rem; font-weight: 600;
-  letter-spacing: .1em; text-transform: uppercase;
-  border: 1px solid; padding: .7rem 1.4rem;
-  cursor: pointer; transition: all .2s; white-space: nowrap;
-}
-.btn-gold {
-  background: var(--gold); border-color: var(--gold);
-  color: #0a0a0f;
-}
-.btn-gold:hover:not(:disabled) { background: var(--gold-lt); border-color: var(--gold-lt); }
-.btn-ghost {
-  background: transparent; border-color: var(--border);
-  color: var(--muted);
-}
-.btn-ghost:hover:not(:disabled) { border-color: var(--gold-line); color: var(--gold-lt); }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
-
-/* ── ANIMATIONS ── */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
 /* ── PAGE WRAP ── */
-.page-wrap {
+.gwrap {
   position: relative; z-index: 1;
   max-width: 720px; margin: 0 auto;
-  padding: 0 1.5rem 5rem;
+  padding: 2rem 1.5rem 5rem;
 }
 
 /* ── SCORE ── */
@@ -135,7 +24,10 @@ body {
   font-family: 'Shippori Mincho', serif;
   font-size: 1.5rem; font-weight: 700; color: var(--gold); display: block;
 }
-.sstat .sl { font-size: .62rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+.sstat .sl {
+  font-size: .62rem; color: var(--muted);
+  letter-spacing: .12em; text-transform: uppercase;
+}
 
 /* ── LOADING ── */
 #loadBox {
@@ -205,14 +97,17 @@ body {
 #chapInput::placeholder { color: var(--dim); }
 
 /* ── FEEDBACK ── */
-#feedback { border: 1px solid; padding: .9rem 1.1rem; display: none; flex-direction: column; gap: .3rem; }
+#feedback {
+  border: 1px solid; padding: .9rem 1.1rem;
+  display: none; flex-direction: column; gap: .3rem;
+}
 #feedback.correct { background: var(--ok-bg); border-color: var(--ok-bd); }
 #feedback.close   { background: var(--yw-bg); border-color: var(--yw-bd); }
 #feedback.wrong   { background: var(--ko-bg); border-color: var(--ko-bd); }
 .fb-title  { font-weight: 600; font-size: .95rem; }
 .fb-detail { font-size: .78rem; color: var(--muted); }
 
-/* ── HIST ── */
+/* ── HISTORIQUE ── */
 #histBox { display: flex; flex-direction: column; gap: .4rem; }
 .hist-item {
   background: var(--surface); border: 1px solid var(--border);
@@ -224,7 +119,10 @@ body {
 .hist-guess { color: var(--text); font-weight: 500; font-family: 'Shippori Mincho', serif; }
 .hist-info  { display: flex; gap: .7rem; align-items: center; }
 .hist-arrow { color: var(--muted); font-size: .75rem; }
-.hist-badge { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: .2rem .6rem; }
+.hist-badge {
+  font-size: .62rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; padding: .2rem .6rem;
+}
 .hist-badge.correct { background: var(--ok-bg); color: var(--ok-tx); }
 .hist-badge.close   { background: var(--yw-bg); color: var(--yw-tx); }
 .hist-badge.wrong   { background: var(--ko-bg); color: var(--ko-tx); }
@@ -232,7 +130,8 @@ body {
 /* ── RÉSULTAT ── */
 #result {
   background: var(--panel); border: 1px solid var(--gold-line);
-  padding: 2rem 1.5rem; display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center;
+  padding: 2rem 1.5rem; display: none;
+  flex-direction: column; align-items: center; gap: 1rem; text-align: center;
 }
 #result.win  { border-color: var(--ok-bd); }
 #result.lose { border-color: var(--ko-bd); }
@@ -246,12 +145,16 @@ body {
 /* ── ERREUR ── */
 #errorBox {
   background: var(--ko-bg); border: 1px solid var(--ko-bd);
-  padding: 2rem; text-align: center; display: none; flex-direction: column; gap: 1rem;
+  padding: 2rem; text-align: center;
+  display: none; flex-direction: column; gap: 1rem;
 }
 #errMsg { color: var(--ko-tx); font-size: .9rem; }
 
+/* ── ANIMATIONS ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 700px) {
-  .page-wrap { padding: 0 1rem 4rem; }
+  .gwrap { padding: 1rem 1rem 4rem; }
   .sstat { padding: .6rem .9rem; min-width: 70px; }
 }
