@@ -47,7 +47,7 @@ async function newRound() {
    FETCH API (proxy uniquement pour JSON)
    ══════════════════════════════════════════ */
 async function apiGet(url) {
-    const res = await fetch(url);
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
 }
