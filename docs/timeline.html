@@ -3,240 +3,188 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Avant ou Après ? — Bleach</title>
+<title>Avant ou Après ? — Bleach Manga Guesser</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<script src="js/nav.js" defer></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── LAYOUT TIMELINE ── */
+.tl-wrap {
+  position: relative; z-index: 1;
+  max-width: 1000px; margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+  display: flex; flex-direction: column; gap: 1.2rem;
+}
 
-  :root {
-    --bg:      #0a0a0f;
-    --surface: #13131a;
-    --panel:   #1a1a24;
-    --border:  rgba(255,255,255,0.08);
-    --gold:    #c9a84c;
-    --gold2:   #f0cc7a;
-    --text:    #e8e4d9;
-    --muted:   #7a7670;
-    --dim:     #444;
-    --ok:      #4caf82;
-    --ko:      #c95c4c;
-    --before:  #4a7fc9;
-    --after:   #9b59b6;
-  }
+/* ── STATS HEADER ── */
+.tl-stats {
+  display: flex; gap: .5rem; justify-content: flex-end;
+}
+.sstat {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: .5rem .9rem; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.sstat .sv { font-family: 'Shippori Mincho', serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); display: block; }
+.sstat .sl { font-size: .58rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+/* ── LOADING ── */
+#loadBox {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: 3rem 1.5rem; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+#loadMsg { color: var(--muted); font-size: .82rem; }
+.prog-wrap { width: 160px; height: 1px; background: var(--border); }
+.prog-fill { height: 100%; background: var(--gold); transition: width .4s; width: 0%; }
 
-  /* Fond animé */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background: radial-gradient(ellipse 60% 40% at 20% 60%, rgba(201,168,76,0.04) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 60% at 80% 20%, rgba(74,127,201,0.04) 0%, transparent 70%);
-    pointer-events: none;
-  }
+/* ── GAME ── */
+#gameBox {
+  display: none; flex-direction: column; gap: 1.2rem;
+}
 
-  header {
-    width: 100%; max-width: 1000px;
-    padding: 1.5rem 2rem 1rem;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-  }
+.question-label {
+  text-align: center;
+  font-size: .9rem; color: var(--muted);
+  letter-spacing: .03em;
+}
+.question-label strong { color: var(--text); font-weight: 500; }
 
-  .logo {
-    font-family: 'Shippori Mincho', serif;
-    font-size: 1.1rem; font-weight: 700; color: var(--gold);
-    letter-spacing: .02em;
-  }
-  .logo span { color: var(--muted); font-size: .7rem; font-family: 'DM Sans', sans-serif; margin-left: .5rem; }
+.images-row {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center;
+}
 
-  .stats {
-    display: flex; gap: 1.5rem;
-  }
-  .stat { text-align: center; }
-  .stat .sv { font-family: 'Shippori Mincho', serif; font-size: 1.4rem; font-weight: 700; color: var(--gold); display: block; line-height: 1; }
-  .stat .sl { font-size: .6rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+.img-card {
+  border: 1px solid var(--gold-line);
+  background: var(--deep, #0a0a0f);
+  overflow: hidden; position: relative;
+}
+.img-card img {
+  width: 100%; max-height: 420px; object-fit: contain;
+  display: block; background: #000;
+}
+.img-label {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: .35rem .7rem;
+  background: rgba(0,0,0,.75);
+  font-size: .62rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+  font-family: 'DM Sans', sans-serif;
+}
 
-  main {
-    width: 100%; max-width: 1000px;
-    padding: 2rem;
-    flex: 1;
-  }
+.vs-divider {
+  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+  color: var(--muted);
+}
+.vs-line { width: 1px; height: 36px; background: var(--border); }
+.vs-text {
+  font-family: 'Shippori Mincho', serif;
+  font-size: .85rem; color: var(--muted);
+}
 
-  /* ── LOADING ── */
-  #loadBox {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 1.2rem;
-    min-height: 400px;
-    color: var(--muted); font-size: .85rem;
-  }
-  .spinner {
-    width: 32px; height: 32px;
-    border: 2px solid var(--border);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  .prog-wrap { width: 180px; height: 1px; background: var(--border); }
-  .prog-fill { height: 100%; background: var(--gold); width: 60%; animation: pulse-bar 1.5s ease-in-out infinite alternate; }
+/* ── BOUTONS CHOIX ── */
+.btn-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .8rem;
+  max-width: 480px; margin: 0 auto; width: 100%;
+}
 
-  /* ── GAME ── */
-  #gameBox {
-    display: none; flex-direction: column; gap: 1.5rem;
-  }
+.btn-choice {
+  padding: .9rem 1.2rem;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .9rem; font-weight: 500;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+  display: flex; flex-direction: column; align-items: center; gap: .25rem;
+}
+.btn-choice .bc-icon { font-size: 1.2rem; }
+.btn-choice .bc-label { font-size: .62rem; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
 
-  .question-label {
-    text-align: center;
-    font-family: 'Shippori Mincho', serif;
-    font-size: 1rem; color: var(--muted);
-    letter-spacing: .05em;
-  }
-  .question-label strong { color: var(--text); font-weight: 700; }
+.btn-choice.before:hover { border-color: #4a7fc9; background: rgba(74,127,201,.1); color: #7aaef0; }
+.btn-choice.after:hover  { border-color: #9b59b6; background: rgba(155,89,182,.1); color: #c9a0f0; }
+.btn-choice:active { transform: scale(0.97); }
 
-  .images-row {
-    display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center;
-  }
+/* ── STREAK DOTS ── */
+.streak-bar {
+  text-align: center; font-size: .75rem; color: var(--muted);
+}
+.streak-dots { display: flex; gap: 5px; justify-content: center; margin-top: .4rem; flex-wrap: wrap; }
+.sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-bd, #4caf82); opacity: .25; transition: opacity .3s; }
+.sdot.active { opacity: 1; box-shadow: 0 0 5px var(--ok-bd, #4caf82); }
 
-  .img-card {
-    border: 1px solid var(--border);
-    background: var(--surface);
-    overflow: hidden;
-    position: relative;
-  }
-  .img-card img {
-    width: 100%; max-height: 420px; object-fit: contain;
-    display: block; background: #000;
-  }
-  .img-label {
-    position: absolute; top: 0; left: 0; right: 0;
-    padding: .4rem .8rem;
-    background: rgba(0,0,0,.7);
-    font-size: .7rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
-  }
+/* ── RESULT ── */
+#resultBox {
+  background: var(--panel); border: 1px solid var(--ko-bd, #c95c4c);
+  padding: 2.5rem 1.5rem;
+  display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center;
+}
+.res-emoji { font-size: 2.2rem; }
+.res-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.6rem; font-weight: 800; color: var(--ko-bd, #c95c4c);
+}
+.res-info { font-size: .88rem; color: var(--muted); }
+.res-info strong { color: var(--text); font-weight: 500; }
+.res-record { font-family: 'Shippori Mincho', serif; font-size: .95rem; color: var(--gold); }
 
-  .vs-divider {
-    display: flex; flex-direction: column; align-items: center; gap: .5rem;
-    color: var(--dim);
-  }
-  .vs-line { width: 1px; height: 40px; background: var(--border); }
-  .vs-text {
-    font-family: 'Shippori Mincho', serif;
-    font-size: .9rem; color: var(--muted);
-  }
+/* ── ERROR ── */
+#errorBox {
+  background: var(--panel); border: 1px solid var(--ko-bd, #c95c4c);
+  padding: 2rem 1.5rem; text-align: center;
+  display: none; flex-direction: column; align-items: center; gap: 1rem;
+}
+#errMsg { color: var(--muted); font-size: .88rem; }
 
-  .btn-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
-    max-width: 500px; margin: 0 auto; width: 100%;
-  }
+/* ── BOUTONS STANDARD ── */
+.btn { padding: .65rem 1.5rem; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .15s; border: 1px solid var(--border); background: var(--panel); color: var(--text); letter-spacing: .03em; }
+.btn-gold { border-color: var(--gold); color: var(--gold); background: transparent; }
+.btn-gold:hover { background: rgba(201,168,76,.1); }
+.btn-ghost { color: var(--muted); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border); }
 
-  .btn-choice {
-    padding: 1rem 1.5rem;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: .95rem; font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-    display: flex; flex-direction: column; align-items: center; gap: .3rem;
-  }
-  .btn-choice .bc-icon { font-size: 1.4rem; }
-  .btn-choice .bc-label { font-size: .7rem; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  .btn-choice.before:hover { border-color: var(--before); background: rgba(74,127,201,.1); color: #7aaef0; }
-  .btn-choice.after:hover  { border-color: var(--after);  background: rgba(155,89,182,.1); color: #c9a0f0; }
-  .btn-choice:active { transform: scale(0.97); }
-
-  /* ── RESULT ── */
-  #resultBox {
-    display: none; flex-direction: column; align-items: center;
-    justify-content: center; gap: 1.5rem;
-    min-height: 400px; text-align: center;
-  }
-
-  .res-ko { font-size: 2.5rem; }
-  .res-title {
-    font-family: 'Shippori Mincho', serif;
-    font-size: 1.8rem; font-weight: 800; color: var(--ko);
-  }
-  .res-streak {
-    font-size: .9rem; color: var(--muted);
-  }
-  .res-streak strong { color: var(--text); font-weight: 500; }
-  .res-best {
-    font-family: 'Shippori Mincho', serif;
-    font-size: 1rem; color: var(--gold);
-  }
-
-  .btn-restart {
-    margin-top: .5rem;
-    padding: .8rem 2.5rem;
-    border: 1px solid var(--gold);
-    background: transparent;
-    color: var(--gold);
-    font-family: 'DM Sans', sans-serif;
-    font-size: .9rem; font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-    letter-spacing: .05em;
-  }
-  .btn-restart:hover { background: rgba(201,168,76,.1); }
-
-  /* ── ERROR ── */
-  #errorBox {
-    display: none; flex-direction: column; align-items: center;
-    gap: 1rem; min-height: 300px; justify-content: center;
-    color: var(--ko); font-size: .9rem; text-align: center;
-  }
-
-  /* ── STREAK BADGE ── */
-  .streak-bar {
-    text-align: center;
-    font-size: .8rem; color: var(--muted);
-  }
-  .streak-dots { display: flex; gap: 5px; justify-content: center; margin-top: .5rem; flex-wrap: wrap; }
-  .sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); opacity: .3; transition: opacity .3s; }
-  .sdot.active { opacity: 1; box-shadow: 0 0 6px var(--ok); }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes pulse-bar { from { opacity: .4; } to { opacity: 1; } }
-
-  @media (max-width: 640px) {
-    .images-row { grid-template-columns: 1fr; }
-    .vs-divider { flex-direction: row; }
-    .vs-line { width: 40px; height: 1px; }
-    main { padding: 1rem; }
-  }
+@media (max-width: 640px) {
+  .images-row { grid-template-columns: 1fr; }
+  .vs-divider { flex-direction: row; }
+  .vs-line { width: 36px; height: 1px; }
+  .tl-wrap { padding: 1rem 1rem 3rem; }
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">Bleach <span>Avant ou Après ?</span></div>
-  <div class="stats">
-    <div class="stat"><span class="sv" id="sStreak">0</span><span class="sl">Série</span></div>
-    <div class="stat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+<div class="atmo"></div>
+<div class="top-bar"></div>
+
+<div class="phdr">
+  <h1 class="pttl">
+    <span class="t1">Avant ou Après ?</span>
+  </h1>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+</div>
+
+<div class="tl-wrap">
+
+  <!-- STATS -->
+  <div class="tl-stats">
+    <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+    <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
   </div>
-</header>
 
-<main>
-
+  <!-- LOADING -->
   <div id="loadBox">
     <div class="spinner"></div>
-    <div>Chargement des pages…</div>
-    <div class="prog-wrap"><div class="prog-fill"></div></div>
+    <div id="loadMsg">Chargement des pages…</div>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
   </div>
 
+  <!-- GAME -->
   <div id="gameBox">
-    <p class="question-label">La deuxième image est-elle <strong>avant</strong> ou <strong>après</strong> la première ?</p>
+    <p class="question-label">La deuxième image est-elle <strong>avant</strong> ou <strong>après</strong> la première dans la série ?</p>
 
     <div class="images-row">
       <div class="img-card">
@@ -275,41 +223,186 @@
     </div>
   </div>
 
+  <!-- RESULT -->
   <div id="resultBox">
-    <div class="res-ko">💀</div>
+    <div class="res-emoji">💀</div>
     <div class="res-title">Raté !</div>
-    <div class="res-streak">Tu as tenu <strong id="resStreak">0</strong> bonne(s) réponse(s)</div>
-    <div class="res-best" id="resBest"></div>
-    <button class="btn-restart" onclick="restart()">▶ Rejouer</button>
+    <div class="res-info">Tu as tenu <strong id="resStreak">0</strong> bonne(s) réponse(s)</div>
+    <div class="res-record" id="resBest"></div>
+    <button class="btn btn-gold" onclick="restart()">▶ Rejouer</button>
   </div>
 
+  <!-- ERROR -->
   <div id="errorBox">
-    <div>Impossible de charger les images.</div>
-    <button class="btn-restart" onclick="restart()">🔄 Réessayer</button>
+    <div id="errMsg">Impossible de charger les images.</div>
+    <button class="btn btn-ghost" onclick="restart()">🔄 Réessayer</button>
   </div>
 
-</main>
+</div>
 
-<script src="timeline.js"></script>
 <script>
-// Mise à jour des points de streak
-const origUpdStats = updStats;
-function updStats() {
-    $('sStreak').textContent = streak;
-    $('sBest').textContent = best;
-    // dots
-    const dots = $('streakDots');
-    if (!dots) return;
-    dots.innerHTML = '';
-    const show = Math.max(streak, 5);
-    for (let i = 0; i < show; i++) {
-        const d = document.createElement('div');
-        d.className = 'sdot' + (i < streak ? ' active' : '');
-        dots.appendChild(d);
+/* ── TIMELINE GAME — inline (pas de script externe) ── */
+const MAX_VOLUME = 74;
+const $ = id => document.getElementById(id);
+
+let imgA = null, imgB = null;
+let usedImages = new Set();
+let streak = 0, best = 0, loading = false;
+
+window.addEventListener('load', () => {
+  const s = JSON.parse(localStorage.getItem('bqc_tl_v1') || 'null');
+  if (s) { best = s.best || 0; }
+  updStats();
+  startGame();
+});
+
+async function fetchHtml(url) {
+  const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.text();
+}
+
+function setLoad(msg, pct) {
+  $('loadMsg').textContent = msg;
+  $('progFill').style.width = pct + '%';
+}
+
+async function fetchRandomPage(attempt = 0) {
+  if (attempt > 15) throw new Error("Trop de tentatives");
+  const num = Math.floor(Math.random() * MAX_VOLUME) + 1;
+  const url = `https://sushiscan.fr/bleach-volume-${num}/`;
+  let html;
+  try { html = await fetchHtml(url); } catch { return fetchRandomPage(attempt + 1); }
+  const match = html.match(/ts_reader\.run\((.+?)\)\s*;/s);
+  if (!match) return fetchRandomPage(attempt + 1);
+  let data;
+  try { data = JSON.parse(match[1]); } catch { return fetchRandomPage(attempt + 1); }
+  const images = data?.sources?.[0]?.images;
+  if (!images?.length) return fetchRandomPage(attempt + 1);
+  const pageIndex = Math.floor(Math.random() * (images.length - 1)) + 1;
+  const imgUrl = images[pageIndex];
+  if (usedImages.has(imgUrl)) return fetchRandomPage(attempt + 1);
+  return { num, imgUrl };
+}
+
+async function loadImgEl(elId, data) {
+  return new Promise((resolve, reject) => {
+    const el = $(elId);
+    const timeout = setTimeout(reject, 12000);
+    el.onload  = () => { clearTimeout(timeout); resolve(); };
+    el.onerror = ()  => { clearTimeout(timeout); reject(); };
+    el.src = data.imgUrl;
+  });
+}
+
+async function startGame() {
+  if (loading) return;
+  loading = true;
+  showState('loading');
+  setLoad('🎲 Tirage des pages…', 20);
+
+  try {
+    let a = await fetchRandomPage();
+    usedImages.add(a.imgUrl);
+    setLoad('🎲 Tirage de la deuxième page…', 50);
+    let b;
+    do { b = await fetchRandomPage(); } while (b.num === a.num);
+    usedImages.add(b.imgUrl);
+
+    imgA = a; imgB = b;
+    setLoad('🖼 Chargement images…', 80);
+    await Promise.all([loadImgEl('imgA', imgA), loadImgEl('imgB', imgB)]);
+    showState('game');
+  } catch(e) {
+    console.error(e);
+    showState('error');
+  }
+  loading = false;
+}
+
+function answer(choice) {
+  if (loading) return;
+  const correct = (choice === 'before' && imgB.num < imgA.num) ||
+                  (choice === 'after'  && imgB.num > imgA.num);
+
+  if (correct) {
+    streak++;
+    if (streak > best) {
+      best = streak;
+      localStorage.setItem('bqc_tl_v1', JSON.stringify({ best }));
     }
-    // résultat
-    const rb = $('resBest');
-    if (rb) rb.textContent = best > 0 ? `Record : ${best}` : '';
+    updStats();
+    nextRound();
+  } else {
+    showResult();
+  }
+}
+
+async function nextRound() {
+  if (loading) return;
+  loading = true;
+  showState('loading');
+  setLoad('🖼 Nouvelle page…', 30);
+
+  try {
+    imgA = imgB;
+    $('imgA').src = imgA.imgUrl;
+
+    let b;
+    do { b = await fetchRandomPage(); } while (b.num === imgA.num);
+    usedImages.add(b.imgUrl);
+    imgB = b;
+
+    setLoad('🖼 Chargement…', 70);
+    await loadImgEl('imgB', imgB);
+    showState('game');
+  } catch(e) {
+    console.error(e);
+    showState('error');
+  }
+  loading = false;
+}
+
+function showResult() {
+  $('resStreak').textContent = streak;
+  $('resBest').textContent = best > 0 ? `Record : ${best}` : '';
+  streak = 0;
+  updStats();
+  localStorage.setItem('bqc_tl_v1', JSON.stringify({ best }));
+  showState('result');
+}
+
+function restart() {
+  usedImages = new Set();
+  imgA = null; imgB = null;
+  streak = 0;
+  updStats();
+  startGame();
+}
+
+function showState(state) {
+  ['loadBox','gameBox','resultBox','errorBox'].forEach(id => {
+    const el = $(id);
+    if (el) el.style.display = 'none';
+  });
+  const map = { loading: 'loadBox', game: 'gameBox', result: 'resultBox', error: 'errorBox' };
+  const target = $(map[state]);
+  if (target) target.style.display = 'flex';
+}
+
+function updStats() {
+  $('sStreak').textContent = streak;
+  $('sBest').textContent   = best;
+  // streak dots
+  const dots = $('streakDots');
+  if (!dots) return;
+  dots.innerHTML = '';
+  const show = Math.max(streak, 5);
+  for (let i = 0; i < show; i++) {
+    const d = document.createElement('div');
+    d.className = 'sdot' + (i < streak ? ' active' : '');
+    dots.appendChild(d);
+  }
 }
 </script>
 </body>
