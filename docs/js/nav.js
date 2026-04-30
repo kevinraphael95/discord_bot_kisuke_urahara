@@ -3,7 +3,6 @@
     { href: 'commandes.html', label: 'Commandes' },
     { href: 'reiatsu.html',   label: 'Reiatsu' },
     { href: 'guesser.html',   label: 'Character Guesser' },
-    { href: 'scanguess.html',   label: 'Devine le tome' },
     { href: 'minijeux.html',   label: 'Minijeux' },
     { href: 'install.html',   label: 'Installation' },
   ];
