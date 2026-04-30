@@ -17,17 +17,15 @@
   display: flex; flex-direction: column; gap: 1.2rem;
 }
 
-/* ── STATS HEADER ── */
-.tl-stats {
-  display: flex; gap: .5rem; justify-content: flex-end;
-}
+/* ── STATS (inline avec boutons) ── */
 .sstat {
   background: var(--panel); border: 1px solid var(--gold-line);
   padding: .5rem .9rem; text-align: center;
-  display: flex; flex-direction: column; align-items: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 64px;
 }
-.sstat .sv { font-family: 'Shippori Mincho', serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); display: block; }
-.sstat .sl { font-size: .58rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+.sstat .sv { font-family: 'Shippori Mincho', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); display: block; }
+.sstat .sl { font-size: .55rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
 
 /* ── LOADING ── */
 #loadBox {
@@ -83,10 +81,11 @@
   font-size: .85rem; color: var(--muted);
 }
 
-/* ── BOUTONS CHOIX ── */
+/* ── BOUTONS CHOIX + STATS ── */
 .btn-row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: .8rem;
-  max-width: 480px; margin: 0 auto; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr auto auto; gap: .5rem;
+  align-items: stretch;
+  max-width: 600px; margin: 0 auto; width: 100%;
 }
 
 .btn-choice {
@@ -152,6 +151,8 @@
   .vs-divider { flex-direction: row; }
   .vs-line { width: 36px; height: 1px; }
   .tl-wrap { padding: 1rem 1rem 3rem; }
+  .btn-row { grid-template-columns: 1fr 1fr; }
+  .btn-row .sstat { display: none; }
 }
 </style>
 </head>
@@ -168,12 +169,6 @@
 </div>
 
 <div class="tl-wrap">
-
-  <!-- STATS -->
-  <div class="tl-stats">
-    <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
-    <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
-  </div>
 
   <!-- LOADING -->
   <div id="loadBox">
@@ -215,6 +210,8 @@
         <span>Après</span>
         <span class="bc-label">Image 2 arrive après</span>
       </button>
+      <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+      <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
     </div>
 
     <div class="streak-bar">
