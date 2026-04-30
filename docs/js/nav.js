@@ -4,7 +4,7 @@
     { href: 'reiatsu.html',   label: 'Reiatsu' },
     { href: 'guesser.html',   label: 'Character Guesser' },
     { href: 'scanguess.html',   label: 'Devine le tome' },
-    { href: 'timeline.html',   label: 'Test timeline' },
+    { href: 'minijeux.html',   label: 'Minijeux' },
     { href: 'install.html',   label: 'Installation' },
   ];
   const themes = [
