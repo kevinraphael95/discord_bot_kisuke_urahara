@@ -1,12 +1,12 @@
 const MAX_TRIES = 5;
-const CLOSE_MARGIN = 3;
-const MAX_VOLUME = 74;
+const CLOSE_MARGIN = 10;
+const MAX_CHAPTER = 686;
 
 let target = null, tries = [], over = false, score = 0, streak = 0, best = 0, round = 0;
 const $ = id => document.getElementById(id);
 
 window.addEventListener('load', () => {
-    const s = JSON.parse(localStorage.getItem('bqc_v1') || 'null');
+    const s = JSON.parse(localStorage.getItem('bqc_ch_v1') || 'null');
     if (s) { score = s.score || 0; best = s.best || 0; }
     newRound();
 });
@@ -26,7 +26,7 @@ async function newRound() {
     updStats();
 
     try {
-        await loadVolume();
+        await loadChapter();
     } catch(e) {
         console.error(e);
         $('loadBox').style.display = 'none';
@@ -41,33 +41,33 @@ async function fetchHtml(url) {
     return res.text();
 }
 
-async function loadVolume(attempt = 0) {
+async function loadChapter(attempt = 0) {
     if (attempt > 8) throw new Error("Trop de tentatives");
 
-    setLoad('🎲 Tirage du tome...', 20);
+    setLoad('🎲 Tirage du chapitre...', 20);
 
-    const num = Math.floor(Math.random() * MAX_VOLUME) + 1;
-    const url = `https://sushiscan.fr/bleach-volume-${num}/`;
+    const num = Math.floor(Math.random() * MAX_CHAPTER) + 1;
+    const url = `https://sushiscan.fr/bleach-chapitre-${num}/`;
 
     let html;
     try {
         html = await fetchHtml(url);
     } catch {
-        return loadVolume(attempt + 1);
+        return loadChapter(attempt + 1);
     }
 
     const match = html.match(/ts_reader\.run\((.+?)\)\s*;/s);
-    if (!match) return loadVolume(attempt + 1);
+    if (!match) return loadChapter(attempt + 1);
 
     let data;
     try {
         data = JSON.parse(match[1]);
     } catch {
-        return loadVolume(attempt + 1);
+        return loadChapter(attempt + 1);
     }
 
     const images = data?.sources?.[0]?.images;
-    if (!images?.length) return loadVolume(attempt + 1);
+    if (!images?.length) return loadChapter(attempt + 1);
 
     const pageIndex = Math.floor(Math.random() * (images.length - 1)) + 1;
     const imgUrl = images[pageIndex];
@@ -95,7 +95,7 @@ function submit() {
     if (over || !target) return;
 
     const raw = parseInt($('chapInput').value);
-    if (isNaN(raw) || raw < 1 || raw > MAX_VOLUME) return;
+    if (isNaN(raw) || raw < 1 || raw > MAX_CHAPTER) return;
 
     const diff = Math.abs(raw - target.num);
     const res = diff === 0 ? 'correct' : diff <= CLOSE_MARGIN ? 'close' : 'wrong';
@@ -105,7 +105,7 @@ function submit() {
 
     const item = document.createElement('div');
     item.className = 'hist-item ' + res;
-    item.innerHTML = `<span>Tome ${raw}</span> <span>${res === 'correct' ? '✅' : arr}</span>`;
+    item.innerHTML = `<span>Chapitre ${raw}</span> <span>${res === 'correct' ? '✅' : arr}</span>`;
     $('histBox').appendChild(item);
 
     updTries();
@@ -123,11 +123,11 @@ function submit() {
             streak = 0;
         }
 
-        localStorage.setItem('bqc_v1', JSON.stringify({ score, best }));
+        localStorage.setItem('bqc_ch_v1', JSON.stringify({ score, best }));
 
         $('result').style.display = 'flex';
         $('resTtl').textContent = res === 'correct' ? '🎉 BIEN JOUÉ !' : '💀 PERDU !';
-        $('resChap').textContent = "C'était le tome " + target.num;
+        $('resChap').textContent = "C'était le chapitre " + target.num;
 
         updStats();
     }
