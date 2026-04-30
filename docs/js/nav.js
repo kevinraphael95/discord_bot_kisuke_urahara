@@ -3,7 +3,8 @@
     { href: 'commandes.html', label: 'Commandes' },
     { href: 'reiatsu.html',   label: 'Reiatsu' },
     { href: 'guesser.html',   label: 'Character Guesser' },
-    { href: 'scanguess.html',   label: '????' },
+    { href: 'scanguess.html',   label: 'Devine le tome' },
+    { href: 'timeline.html',   label: 'Test timeline' },
     { href: 'install.html',   label: 'Installation' },
   ];
   const themes = [
