@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avant ou Après ? — Bleach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0a0a0f;
+    --surface: #13131a;
+    --panel:   #1a1a24;
+    --border:  rgba(255,255,255,0.08);
+    --gold:    #c9a84c;
+    --gold2:   #f0cc7a;
+    --text:    #e8e4d9;
+    --muted:   #7a7670;
+    --dim:     #444;
+    --ok:      #4caf82;
+    --ko:      #c95c4c;
+    --before:  #4a7fc9;
+    --after:   #9b59b6;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Fond animé */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 20% 60%, rgba(201,168,76,0.04) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 80% 20%, rgba(74,127,201,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  header {
+    width: 100%; max-width: 1000px;
+    padding: 1.5rem 2rem 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--gold);
+    letter-spacing: .02em;
+  }
+  .logo span { color: var(--muted); font-size: .7rem; font-family: 'DM Sans', sans-serif; margin-left: .5rem; }
+
+  .stats {
+    display: flex; gap: 1.5rem;
+  }
+  .stat { text-align: center; }
+  .stat .sv { font-family: 'Shippori Mincho', serif; font-size: 1.4rem; font-weight: 700; color: var(--gold); display: block; line-height: 1; }
+  .stat .sl { font-size: .6rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+
+  main {
+    width: 100%; max-width: 1000px;
+    padding: 2rem;
+    flex: 1;
+  }
+
+  /* ── LOADING ── */
+  #loadBox {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 1.2rem;
+    min-height: 400px;
+    color: var(--muted); font-size: .85rem;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  .prog-wrap { width: 180px; height: 1px; background: var(--border); }
+  .prog-fill { height: 100%; background: var(--gold); width: 60%; animation: pulse-bar 1.5s ease-in-out infinite alternate; }
+
+  /* ── GAME ── */
+  #gameBox {
+    display: none; flex-direction: column; gap: 1.5rem;
+  }
+
+  .question-label {
+    text-align: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem; color: var(--muted);
+    letter-spacing: .05em;
+  }
+  .question-label strong { color: var(--text); font-weight: 700; }
+
+  .images-row {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center;
+  }
+
+  .img-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+    position: relative;
+  }
+  .img-card img {
+    width: 100%; max-height: 420px; object-fit: contain;
+    display: block; background: #000;
+  }
+  .img-label {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: .4rem .8rem;
+    background: rgba(0,0,0,.7);
+    font-size: .7rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+  }
+
+  .vs-divider {
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    color: var(--dim);
+  }
+  .vs-line { width: 1px; height: 40px; background: var(--border); }
+  .vs-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: .9rem; color: var(--muted);
+  }
+
+  .btn-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    max-width: 500px; margin: 0 auto; width: 100%;
+  }
+
+  .btn-choice {
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem; font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex; flex-direction: column; align-items: center; gap: .3rem;
+  }
+  .btn-choice .bc-icon { font-size: 1.4rem; }
+  .btn-choice .bc-label { font-size: .7rem; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+
+  .btn-choice.before:hover { border-color: var(--before); background: rgba(74,127,201,.1); color: #7aaef0; }
+  .btn-choice.after:hover  { border-color: var(--after);  background: rgba(155,89,182,.1); color: #c9a0f0; }
+  .btn-choice:active { transform: scale(0.97); }
+
+  /* ── RESULT ── */
+  #resultBox {
+    display: none; flex-direction: column; align-items: center;
+    justify-content: center; gap: 1.5rem;
+    min-height: 400px; text-align: center;
+  }
+
+  .res-ko { font-size: 2.5rem; }
+  .res-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.8rem; font-weight: 800; color: var(--ko);
+  }
+  .res-streak {
+    font-size: .9rem; color: var(--muted);
+  }
+  .res-streak strong { color: var(--text); font-weight: 500; }
+  .res-best {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem; color: var(--gold);
+  }
+
+  .btn-restart {
+    margin-top: .5rem;
+    padding: .8rem 2.5rem;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem; font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .05em;
+  }
+  .btn-restart:hover { background: rgba(201,168,76,.1); }
+
+  /* ── ERROR ── */
+  #errorBox {
+    display: none; flex-direction: column; align-items: center;
+    gap: 1rem; min-height: 300px; justify-content: center;
+    color: var(--ko); font-size: .9rem; text-align: center;
+  }
+
+  /* ── STREAK BADGE ── */
+  .streak-bar {
+    text-align: center;
+    font-size: .8rem; color: var(--muted);
+  }
+  .streak-dots { display: flex; gap: 5px; justify-content: center; margin-top: .5rem; flex-wrap: wrap; }
+  .sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); opacity: .3; transition: opacity .3s; }
+  .sdot.active { opacity: 1; box-shadow: 0 0 6px var(--ok); }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse-bar { from { opacity: .4; } to { opacity: 1; } }
+
+  @media (max-width: 640px) {
+    .images-row { grid-template-columns: 1fr; }
+    .vs-divider { flex-direction: row; }
+    .vs-line { width: 40px; height: 1px; }
+    main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Bleach <span>Avant ou Après ?</span></div>
+  <div class="stats">
+    <div class="stat"><span class="sv" id="sStreak">0</span><span class="sl">Série</span></div>
+    <div class="stat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+  </div>
+</header>
+
+<main>
+
+  <div id="loadBox">
+    <div class="spinner"></div>
+    <div>Chargement des pages…</div>
+    <div class="prog-wrap"><div class="prog-fill"></div></div>
+  </div>
+
+  <div id="gameBox">
+    <p class="question-label">La deuxième image est-elle <strong>avant</strong> ou <strong>après</strong> la première ?</p>
+
+    <div class="images-row">
+      <div class="img-card">
+        <div class="img-label">Image 1 — référence</div>
+        <img id="imgA" alt="Page de référence" />
+      </div>
+
+      <div class="vs-divider">
+        <div class="vs-line"></div>
+        <div class="vs-text">VS</div>
+        <div class="vs-line"></div>
+      </div>
+
+      <div class="img-card">
+        <div class="img-label">Image 2 — à situer</div>
+        <img id="imgB" alt="Page à situer" />
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-choice before" onclick="answer('before')">
+        <span class="bc-icon">◀◀</span>
+        <span>Avant</span>
+        <span class="bc-label">Image 2 arrive avant</span>
+      </button>
+      <button class="btn-choice after" onclick="answer('after')">
+        <span class="bc-icon">▶▶</span>
+        <span>Après</span>
+        <span class="bc-label">Image 2 arrive après</span>
+      </button>
+    </div>
+
+    <div class="streak-bar">
+      Série en cours
+      <div class="streak-dots" id="streakDots"></div>
+    </div>
+  </div>
+
+  <div id="resultBox">
+    <div class="res-ko">💀</div>
+    <div class="res-title">Raté !</div>
+    <div class="res-streak">Tu as tenu <strong id="resStreak">0</strong> bonne(s) réponse(s)</div>
+    <div class="res-best" id="resBest"></div>
+    <button class="btn-restart" onclick="restart()">▶ Rejouer</button>
+  </div>
+
+  <div id="errorBox">
+    <div>Impossible de charger les images.</div>
+    <button class="btn-restart" onclick="restart()">🔄 Réessayer</button>
+  </div>
+
+</main>
+
+<script src="timeline.js"></script>
+<script>
+// Mise à jour des points de streak
+const origUpdStats = updStats;
+function updStats() {
+    $('sStreak').textContent = streak;
+    $('sBest').textContent = best;
+    // dots
+    const dots = $('streakDots');
+    if (!dots) return;
+    dots.innerHTML = '';
+    const show = Math.max(streak, 5);
+    for (let i = 0; i < show; i++) {
+        const d = document.createElement('div');
+        d.className = 'sdot' + (i < streak ? ' active' : '');
+        dots.appendChild(d);
+    }
+    // résultat
+    const rb = $('resBest');
+    if (rb) rb.textContent = best > 0 ? `Record : ${best}` : '';
+}
+</script>
+</body>
+</html>
