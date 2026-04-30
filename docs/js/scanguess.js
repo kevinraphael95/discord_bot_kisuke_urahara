@@ -42,17 +42,24 @@ async function fetchHtml(url) {
 }
 
 async function loadChapter(attempt = 0) {
-    if (attempt > 8) throw new Error("Trop de tentatives");
+    if (attempt > 12) throw new Error("Trop de tentatives");
 
     setLoad('🎲 Tirage du chapitre...', 20);
 
     const num = Math.floor(Math.random() * MAX_CHAPTER) + 1;
-    const url = `https://sushiscan.fr/bleach-chapitre-${num}/`;
+
+    // SushiScan utilise ce format pour les chapitres Bleach
+    const url = `https://sushiscan.fr/scan-bleach-chapitre-${num}-vf/`;
 
     let html;
     try {
         html = await fetchHtml(url);
     } catch {
+        return loadChapter(attempt + 1);
+    }
+
+    // Vérifie que la page existe vraiment (pas une 404 déguisée)
+    if (html.includes('Page not found') || html.includes('404') || !html.includes('ts_reader')) {
         return loadChapter(attempt + 1);
     }
 
@@ -76,10 +83,10 @@ async function loadChapter(attempt = 0) {
 
     await new Promise((resolve, reject) => {
         const img = $('mangaImg');
-        img.onload = resolve;
-        img.onerror = reject;
+        const timeout = setTimeout(() => loadChapter(attempt + 1).then(resolve).catch(reject), 10000);
+        img.onload = () => { clearTimeout(timeout); resolve(); };
+        img.onerror = () => { clearTimeout(timeout); loadChapter(attempt + 1).then(resolve).catch(reject); };
         img.src = imgUrl;
-        setTimeout(reject, 10000);
     });
 
     target = { num, imgUrl };
@@ -88,6 +95,14 @@ async function loadChapter(attempt = 0) {
     $('loadBox').style.display = 'none';
     $('imgBox').style.display = 'block';
     $('inputBox').style.display = 'flex';
+
+    // Met à jour le placeholder et le max selon le mode chapitre
+    const input = $('chapInput');
+    if (input) {
+        input.placeholder = 'Chapitre (1 – 686)';
+        input.max = MAX_CHAPTER;
+    }
+
     updStats();
 }
 
@@ -142,7 +157,7 @@ function updTries() {
     $('triesRow').innerHTML = '';
     for (let i = 0; i < MAX_TRIES; i++) {
         const d = document.createElement('div');
-        d.className = 'try-dot' + (i < tries.length ? ' filled' : '');
+        d.className = 'try-dot' + (i < tries.length ? ' ' + tries[i].result : '');
         $('triesRow').appendChild(d);
     }
 }
