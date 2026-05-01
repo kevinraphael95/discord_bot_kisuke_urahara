@@ -126,15 +126,41 @@ nav {
 .theme-opt:hover  { border-color: var(--gold-line); color: var(--gold-lt); background: var(--gold-pale); }
 .theme-opt.active { border-color: var(--gold); color: var(--gold-lt); background: var(--gold-pale); }
 
-/* ── HAMBURGER ───────────────────────────────────────── */
+/* ── HAMBURGER (version Atem) ── */
 .ham {
-  display: none; flex-direction: column; gap: 5px;
-  background: none; border: none; cursor: pointer; padding: 6px; z-index: 500;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 8px 10px;
+  z-index: 500;
+  transition: all 0.2s ease;
 }
-.ham span { display:block; width:22px; height:1.5px; background:var(--gold); border-radius:2px; transition:all .3s; }
-.ham.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-.ham.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.ham.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.ham span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.ham.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.ham.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.ham.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
 
 /* ── DRAWER MOBILE ───────────────────────────────────── */
 .drawer {

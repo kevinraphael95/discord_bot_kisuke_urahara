@@ -113,59 +113,82 @@ async function fetchAniList(mediaIds, dataNames, imageMap) {
 }
 
 /* ── AUTOCOMPLETE ──────────────────────────────────────────── */
+/* ── AUTOCOMPLETE (version améliorée comme guesser.js) ── */
 function initAutocomplete() {
   const input = $("guessInput");
-  const box   = $("autocompleteBox");
+  const box = $("autocompleteBox");
 
   input.addEventListener("input", () => {
-    const val = input.value.toLowerCase();
-    box.innerHTML = ""; acIndex = -1;
-    if (!val) { box.style.display = "none"; return; }
+    const val = input.value.toLowerCase().trim();
+    box.innerHTML = "";
+    acIndex = -1;
+
+    if (!val) {
+      box.style.display = "none";
+      return;
+    }
 
     const guessed = new Set(sessionGuesses.map(g => normalize(g.name)));
     const escaped = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    const startsWith  = allNames.filter(n => n.toLowerCase().startsWith(val));
-    const wordStarts  = allNames.filter(n =>
-      !n.toLowerCase().startsWith(val) &&
-      n.toLowerCase().split(/\s+/).slice(1).some(w => w.startsWith(val))
-    );
-    const matches = [...startsWith, ...wordStarts].slice(0, 10);
-
-    const reWordStart = new RegExp(`(^|\\s)(${escaped})`, "gi");
+    
+    // Filtrer les personnages
+    const matches = allNames
+      .filter(name => name.toLowerCase().includes(val) && !guessed.has(normalize(name)))
+      .slice(0, 8);
+    
+    const re = new RegExp(`(${escaped})`, "gi");
 
     matches.forEach(name => {
-      const isGuessed = guessed.has(normalize(name));
       const div = document.createElement("div");
-      div.className = "ac-item" + (isGuessed ? " already-guessed" : "");
-      div.innerHTML = name.replace(reWordStart,
-        (_, space, match) => `${space}<span class="ac-highlight">${match}</span>`);
-      if (!isGuessed) div.onclick = () => { input.value = name; box.style.display = "none"; };
+      div.className = "ac-item";
+      div.innerHTML = name.replace(re, `<span class="ac-highlight">$1</span>`);
+      div.onclick = () => {
+        input.value = name;
+        box.style.display = "none";
+        submit();
+      };
       box.appendChild(div);
     });
 
     box.style.display = matches.length ? "block" : "none";
   });
 
-  input.addEventListener("keydown", e => {
-    const items = [...box.querySelectorAll(".ac-item:not(.already-guessed)")];
-    if (e.key === "ArrowDown") { e.preventDefault(); acIndex++; }
-    if (e.key === "ArrowUp")   { e.preventDefault(); acIndex--; }
-    if (e.key === "Enter" && acIndex >= 0 && items[acIndex]) {
-      input.value = items[acIndex].textContent.trim();
+  input.addEventListener("keydown", (e) => {
+    const items = [...box.querySelectorAll(".ac-item")];
+    if (!items.length) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      acIndex = Math.min(acIndex + 1, items.length - 1);
+      updateActiveItem(items);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      acIndex = Math.max(acIndex - 1, -1);
+      updateActiveItem(items);
+    } else if (e.key === "Enter" && acIndex >= 0 && items[acIndex]) {
+      e.preventDefault();
+      input.value = items[acIndex].textContent;
       box.style.display = "none";
-    }
-    items.forEach(i => i.classList.remove("active"));
-    if (items.length) {
-      if (acIndex >= items.length) acIndex = 0;
-      if (acIndex < 0) acIndex = items.length - 1;
-      items[acIndex]?.classList.add("active");
+      submit();
+    } else if (e.key === "Escape") {
+      box.style.display = "none";
     }
   });
 
-  document.addEventListener("click", e => {
-    if (!box.contains(e.target) && e.target !== input) box.style.display = "none";
+  document.addEventListener("click", (e) => {
+    if (!box.contains(e.target) && e.target !== input) {
+      box.style.display = "none";
+    }
   });
+}
+
+function updateActiveItem(items) {
+  items.forEach((item, i) => {
+    item.classList.toggle("active", i === acIndex);
+  });
+  if (acIndex >= 0 && items[acIndex]) {
+    items[acIndex].scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
 }
 
 /* ── GAME LIFECYCLE ────────────────────────────────────────── */
