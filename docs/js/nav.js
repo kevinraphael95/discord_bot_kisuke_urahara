@@ -75,11 +75,7 @@
       </div>
     </div>
 
-    <button class="ham" id="ham" onclick="toggleNav()">
-  <span></span>
-  <span></span>
-  <span></span>
-</button>
+    <button class="ham" id="ham" onclick="toggleNav()">☰</button>
   </div>
 </nav>
 
