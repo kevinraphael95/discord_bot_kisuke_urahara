@@ -127,4 +127,18 @@
     document.getElementById('drawer').classList.remove('open');
   };
 
+// ── PAGE TRANSITIONS ──
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[href]');
+  if (!link) return;
+  const href = link.getAttribute('href');
+  // Ignorer les liens externes, ancres, et nouveaux onglets
+  if (!href || href.startsWith('#') || href.startsWith('http') || link.target === '_blank') return;
+  e.preventDefault();
+  document.body.classList.add('page-out');
+  setTimeout(() => { window.location.href = href; }, 260);
+});
+
+  
+
 })();
