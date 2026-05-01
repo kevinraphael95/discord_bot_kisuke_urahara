@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <script src="js/nav.js" defer></script>
+<script src="js/data.js"></script>
 
 <style>
 .pg-wrap { max-width:900px;margin:0 auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.2rem; }
@@ -75,43 +76,22 @@ canvas { width:100%; max-height:420px; display:block; }
 
 <script>
 const $ = id => document.getElementById(id);
-
 const LEVELS = [4, 6, 8, 10, 13, 16, 20, 25, 32, 45, 64, 120];
 
-// Noms manga canon — format "Prénom Nom" (on inversera le "Nom, Prénom" de Jikan)
-const WHITELIST = new Set([
-  "Ichigo Kurosaki","Rukia Kuchiki","Orihime Inoue","Yasutora Sado","Uryuu Ishida",
-  "Renji Abarai","Byakuya Kuchiki","Toshiro Hitsugaya","Rangiku Matsumoto",
-  "Gin Ichimaru","Sosuke Aizen","Kaname Tousen","Kisuke Urahara","Yoruichi Shihouin",
-  "Shunsui Kyouraku","Jushiro Ukitake","Retsu Unohana","Sajin Komamura",
-  "Izuru Kira","Shuhei Hisagi","Ikkaku Madarame","Yumichika Ayasegawa",
-  "Kenpachi Zaraki","Yachiru Kusajishi","Mayuri Kurotsuchi","Nemu Kurotsuchi",
-  "Soifon","Marechiyo Omaeda","Momo Hinamori","Nanao Ise","Chojiro Sasakibe",
-  "Genryuusai Yamamoto","Isshin Kurosaki","Ryuken Ishida","Tessai Tsukabishi",
-  "Jinta Hanakari","Ururu Tsumugiya","Kon","Kaien Shiba","Kukaku Shiba","Ganju Shiba",
-  "Grimmjow Jaegerjaquez","Ulquiorra Cifer","Nnoitra Gilga","Szayelaporro Grantz",
-  "Aaroniero Arruruerie","Zommari Rureaux","Barragan Louisenbairn","Coyote Starrk",
-  "Tier Harribel","Yammy Llargo","Neliel Tu Odelschwanck","Pesche Guatiche",
-  "Dondochakka Birstanne","Wonderweiss Margela",
-  "Shinji Hirako","Hiyori Sarugaki","Lisa Yadomaru","Love Aikawa",
-  "Rose Otoribashi","Kensei Muguruma","Hachigen Ushoda","Mashiro Kuna",
-  "Yhwach","Jugram Haschwalth","Bambietta Basterbine","Candice Catnipp",
-  "Liltotto Lamperd","Giselle Gewelle","Meninas McAllon","Bazz-B",
-  "As Nodt","Gerard Valkyrie","Lille Barro","Pernida Parnkgjas","Gremmy Thoumeaux",
-  "Ichibei Hyosube","Oetsu Nimaiya","Senjumaru Shutara","Tenjiro Kirinji","Kirio Hikifune",
-  "Kugo Ginjo","Shukuro Tsukishima","Riruka Dokugamine","Jackie Tristan",
-  "Yukio Hans Vorarlberna","Giriko Kutsuzawa"
-]);
-
-let characters = [], used = new Set(), allNames = [];
-let current, img, level = 0, streak = 0, best = 0, loading = false, acIndex = -1;
+let characters = [];   // { name, image, hints }
+let allNames = [];
+let used = new Set();
+let current, img;
+let level = 0, streak = 0, best = 0, loading = false, acIndex = -1;
 
 const canvas = $("canvas");
 const ctx = canvas.getContext("2d");
 
+/* ===== INIT ===== */
 window.onload = async () => {
   const s = JSON.parse(localStorage.getItem("pixel_bleach") || "null");
   if (s) best = s.best || 0;
+
   await loadCharacters();
   initAutocomplete();
   updateStats();
@@ -119,33 +99,55 @@ window.onload = async () => {
   $("guessInput").addEventListener("keypress", e => { if (e.key === "Enter") submit(); });
 };
 
+/* ===== LOAD =====
+   1. Fetch Jikan → map "Nom, Prénom" → "Prénom Nom" → image URL
+   2. Croise avec CHARS de data.js (champ n) → garde seulement les persos connus
+   3. Pour les persos sans image Jikan → ignorés (pas d'image inventée)
+*/
 async function loadCharacters() {
+  $("loadMsg").textContent = "Chargement des personnages…";
+
+  // Noms de data.js indexés pour lookup rapide
+  const dataNames = new Set(CHARS.map(c => normalize(c.n)));
+
+  let imageMap = {}; // normalize(name) → url
+
   try {
     const res = await fetch("https://api.jikan.moe/v4/anime/269/characters");
     const json = await res.json();
 
-    characters = json.data
-      .filter(e => e.character?.images?.jpg?.image_url)
-      .map(e => {
-        // Jikan retourne "Kurosaki, Ichigo" → on inverse
-        const parts = e.character.name.split(", ");
-        const name = parts.length === 2 ? parts[1] + " " + parts[0] : e.character.name;
-        return { name, image: e.character.images.jpg.image_url };
-      })
-      .filter(c => WHITELIST.has(c.name))
-      .map(c => ({ ...c, hints: generateHints(c.name) }));
-
-    allNames = characters.map(c => c.name);
-
+    json.data.forEach(e => {
+      if (!e.character?.images?.jpg?.image_url) return;
+      // Jikan : "Kurosaki, Ichigo" → "Ichigo Kurosaki"
+      const parts = e.character.name.split(", ");
+      const name = parts.length === 2 ? parts[1].trim() + " " + parts[0].trim() : e.character.name.trim();
+      imageMap[normalize(name)] = e.character.images.jpg.image_url;
+    });
   } catch(e) {
     console.error("Jikan failed:", e);
-    characters = [];
+  }
+
+  // Construire la liste finale : persos de data.js qui ont une image Jikan
+  characters = CHARS
+    .filter(c => imageMap[normalize(c.n)])
+    .map(c => ({
+      name: c.n,
+      image: imageMap[normalize(c.n)],
+      hints: generateHints(c.n)
+    }));
+
+  allNames = CHARS.map(c => c.n); // autocomplete sur TOUS les persos de data.js
+
+  if (!characters.length) {
+    $("loadMsg").textContent = "Aucune image trouvée. Recharge la page.";
   }
 }
 
+/* ===== AUTOCOMPLETE ===== */
 function initAutocomplete() {
   const input = $("guessInput");
   const box = $("autocompleteBox");
+
   input.addEventListener("input", () => {
     const val = input.value.toLowerCase();
     box.innerHTML = ""; acIndex = -1;
@@ -160,6 +162,7 @@ function initAutocomplete() {
     });
     box.style.display = matches.length ? "block" : "none";
   });
+
   input.addEventListener("keydown", e => {
     const items = box.querySelectorAll(".ac-item");
     if (e.key === "ArrowDown") acIndex++;
@@ -175,14 +178,16 @@ function initAutocomplete() {
       items[acIndex]?.classList.add("active");
     }
   });
+
   document.addEventListener("click", e => {
     if (!box.contains(e.target) && e.target !== input) box.style.display = "none";
   });
 }
 
+/* ===== GAME ===== */
 function startGame() {
   loading = true; showState("load");
-  if (!characters.length) { $("loadMsg").textContent = "Aucun personnage chargé."; return; }
+  if (!characters.length) { $("loadMsg").textContent = "Aucun personnage disponible."; return; }
   const pool = characters.filter(c => !used.has(c.name));
   if (!pool.length) used.clear();
   current = pool[Math.floor(Math.random() * pool.length)];
@@ -216,6 +221,7 @@ function draw() {
   $("sLevel").textContent = size + "x" + size;
 }
 
+/* ===== INPUT ===== */
 function submit() {
   if (loading) return;
   $("autocompleteBox").style.display = "none";
@@ -251,6 +257,7 @@ function showResult(titre) {
   showState("result");
 }
 
+/* ===== HINTS ===== */
 function updateHints() {
   if (level === 2) $("hintBox").textContent = "Initiale : " + current.name[0];
   if (level === 5) $("hintBox").textContent = current.hints[0];
@@ -262,6 +269,7 @@ function generateHints(name) {
   return ["Prénom : " + p[0], "Nom : " + (p[1] || "?")];
 }
 
+/* ===== UTILS ===== */
 function normalize(s) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 }
