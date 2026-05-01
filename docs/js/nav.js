@@ -23,7 +23,9 @@
   const current = parts[parts.length - 1] || 'index.html';
 
   // ── THEME ──
-  const savedTheme = localStorage.getItem('shinigami-theme') || 'shinigami';
+  const validThemes = ['shinigami', 'quincy'];
+  const saved = localStorage.getItem('shinigami-theme');
+  const savedTheme = validThemes.includes(saved) ? saved : 'shinigami';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
   const activeTheme = themes.find(t => t.id === savedTheme) || themes[0];
