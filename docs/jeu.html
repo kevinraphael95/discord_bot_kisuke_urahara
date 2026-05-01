@@ -12,24 +12,213 @@
 <script src="js/data.js"></script>
 
 <style>
-.pg-wrap { max-width:900px;margin:0 auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.2rem; }
-.canvas-card { border:1px solid var(--gold-line); background:#000; padding:.25rem .5rem; }
-canvas { width:100%; max-height:380px; display:block; transition:opacity .15s; }
-.input-row { display:flex; gap:.5rem; position:relative; }
-#guessInput { flex:1; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:.6rem; }
-.autocomplete { position:absolute; top:100%; left:0; right:60px; background:var(--panel); border:1px solid var(--gold-line); max-height:220px; overflow-y:auto; z-index:10; display:none; }
-.ac-item { padding:.55rem .7rem; cursor:pointer; font-size:.85rem; border-bottom:1px solid rgba(255,255,255,.05); }
-.ac-item:hover, .ac-item.active { background:rgba(201,168,76,.12); color:var(--gold); }
-.ac-highlight { color:var(--gold); font-weight:bold; }
-.hint { font-size:.8rem; color:var(--muted); text-align:center; min-height:18px; }
-.btn-row { display:grid; grid-template-columns:1fr auto auto; gap:.5rem; }
-.sstat { background:var(--panel); border:1px solid var(--gold-line); padding:.45rem; text-align:center; }
-.sv { color:var(--gold); font-weight:bold; }
-.sl { font-size:.6rem; color:var(--muted); }
-#loadBox { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; min-height:240px; text-align:center; }
-#resultBox { display:none; flex-direction:column; align-items:center; gap:1rem; }
-#resultImg { width:100%; max-width:280px; border:1px solid var(--gold-line); display:block; }
-.res-name { font-size:1.3rem; color:var(--gold); font-family:'Shippori Mincho',serif; font-weight:700; }
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #c9a84c;
+  --gold-line: rgba(201,168,76,.3);
+  --surface: #0d0d0d;
+  --panel: #111;
+  --border: rgba(255,255,255,.1);
+  --text: #e8e4d8;
+  --muted: rgba(232,228,216,.45);
+  --bg: #080808;
+}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+input, button { font-family: inherit; }
+
+/* ── Top bar & header ─────────────────────────────────────────── */
+.top-bar { height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.phdr { padding: 1.2rem 1.5rem .6rem; border-bottom: 1px solid var(--gold-line); }
+.pttl { font-family: 'Shippori Mincho', serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); letter-spacing: .04em; }
+.atmo { position: fixed; inset: 0; background: radial-gradient(ellipse at 50% -20%, rgba(201,168,76,.07) 0%, transparent 60%); pointer-events: none; }
+
+/* ── Main layout ─────────────────────────────────────────────── */
+.pg-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ── Load box ─────────────────────────────────────────────────── */
+#loadBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .8rem;
+  min-height: 300px;
+  text-align: center;
+  color: var(--muted);
+}
+.spinner {
+  width: 36px; height: 36px;
+  border: 2px solid var(--gold-line);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Game layout: side by side ───────────────────────────────── */
+#gameBox {
+  display: none;
+  gap: 1.2rem;
+}
+.game-left {
+  flex: 0 0 auto;
+  width: 400px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+}
+.game-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  min-width: 0;
+}
+
+/* ── Canvas ───────────────────────────────────────────────────── */
+.canvas-card {
+  border: 1px solid var(--gold-line);
+  background: #000;
+  padding: .25rem .5rem;
+}
+canvas {
+  width: 100%;
+  max-height: 380px;
+  display: block;
+  transition: opacity .15s;
+  image-rendering: pixelated;
+}
+
+/* ── Stats row ────────────────────────────────────────────────── */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+.sstat {
+  background: var(--panel);
+  border: 1px solid var(--gold-line);
+  padding: .45rem;
+  text-align: center;
+}
+.sv { color: var(--gold); font-weight: bold; display: block; font-size: 1.1rem; }
+.sl { font-size: .6rem; color: var(--muted); }
+
+/* ── Input area ───────────────────────────────────────────────── */
+.input-row { display: flex; gap: .5rem; position: relative; }
+#guessInput {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .6rem .8rem;
+  font-size: .9rem;
+  outline: none;
+  transition: border-color .15s;
+}
+#guessInput:focus { border-color: var(--gold-line); }
+#guessInput:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn {
+  padding: .6rem 1rem;
+  border: 1px solid var(--gold-line);
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: .85rem;
+  letter-spacing: .04em;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.btn:hover { background: rgba(201,168,76,.12); }
+.btn:active { background: rgba(201,168,76,.22); }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ── Autocomplete ─────────────────────────────────────────────── */
+.autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #161616;
+  border: 1px solid var(--gold-line);
+  border-top: none;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 10;
+  display: none;
+}
+.ac-item {
+  padding: .55rem .7rem;
+  cursor: pointer;
+  font-size: .85rem;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.ac-item:hover, .ac-item.active { background: rgba(201,168,76,.1); color: var(--gold); }
+.ac-item.already-guessed { opacity: .35; cursor: not-allowed; pointer-events: none; }
+.ac-item.already-guessed::after { content: "déjà proposé"; font-size: .7rem; color: var(--muted); margin-left: auto; }
+.ac-highlight { color: var(--gold); font-weight: bold; }
+
+/* ── Hint ─────────────────────────────────────────────────────── */
+.hint {
+  font-size: .8rem;
+  color: var(--muted);
+  text-align: center;
+  min-height: 18px;
+  padding: .2rem 0;
+}
+
+/* ── Guesses history ──────────────────────────────────────────── */
+.guesses-section { display: flex; flex-direction: column; gap: .5rem; flex: 1; }
+.guesses-label { font-size: .7rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; padding-bottom: .3rem; border-bottom: 1px solid var(--gold-line); }
+.guesses-list { display: flex; flex-direction: column; gap: .3rem; overflow-y: auto; max-height: 280px; }
+.guess-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,.06);
+  padding: .4rem .6rem;
+  font-size: .85rem;
+  animation: slideIn .15s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.guess-icon { font-size: .75rem; flex-shrink: 0; }
+.guess-wrong .guess-icon::before { content: "✗"; color: #e05555; }
+.no-guesses { font-size: .8rem; color: var(--muted); font-style: italic; padding: .3rem 0; }
+
+/* ── Attempts counter ─────────────────────────────────────────── */
+.attempts-bar { font-size: .75rem; color: var(--muted); text-align: right; }
+.attempts-bar span { color: var(--gold); font-weight: 500; }
+
+/* ── Result box ───────────────────────────────────────────────── */
+#resultBox {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--gold-line);
+  background: var(--panel);
+}
+#resultImg { width: 100%; max-width: 260px; border: 1px solid var(--gold-line); display: block; }
+.res-title { font-size: 1.4rem; }
+.res-name { font-size: 1.3rem; color: var(--gold); font-family: 'Shippori Mincho', serif; font-weight: 700; }
+.res-guesses { font-size: .8rem; color: var(--muted); }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  #gameBox { flex-direction: column; }
+  .game-left { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -38,74 +227,99 @@ canvas { width:100%; max-height:380px; display:block; transition:opacity .15s; }
 <div class="top-bar"></div>
 
 <div class="phdr">
-  <h1 class="pttl"><span class="t1">Qui est ce personnage ? (Pixel Guess)</span></h1>
+  <h1 class="pttl"><span class="t1">Qui est ce personnage ? — Pixel Guess</span></h1>
 </div>
 
 <div class="pg-wrap">
 
-<div id="loadBox">
-  <div class="spinner"></div>
-  <div id="loadMsg">Chargement…</div>
+  <!-- LOADING -->
+  <div id="loadBox">
+    <div class="spinner"></div>
+    <div id="loadMsg">Chargement…</div>
+  </div>
+
+  <!-- GAME -->
+  <div id="gameBox" style="display:none; flex-direction:row;">
+
+    <!-- Gauche : canvas + stats -->
+    <div class="game-left">
+      <div class="canvas-card">
+        <canvas id="canvas" width="400" height="400"></canvas>
+      </div>
+      <div class="stats-row">
+        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">🔥 Série</span></div>
+        <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+        <div class="sstat"><span class="sv" id="sLevel">—</span><span class="sl">Résolution</span></div>
+      </div>
+      <div class="hint" id="hintBox"></div>
+    </div>
+
+    <!-- Droite : saisie + historique -->
+    <div class="game-right">
+      <div class="input-row">
+        <input id="guessInput" autocomplete="off" placeholder="Nom du personnage…" />
+        <button class="btn" id="submitBtn" onclick="submit()">Valider</button>
+        <div id="autocompleteBox" class="autocomplete"></div>
+      </div>
+      <div class="attempts-bar">Tentatives : <span id="attemptsCount">0</span> / <span id="attemptsMax">12</span></div>
+
+      <div class="guesses-section">
+        <div class="guesses-label">Propositions</div>
+        <div class="guesses-list" id="guessList">
+          <div class="no-guesses" id="noGuesses">Aucune proposition encore…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RESULT -->
+  <div id="resultBox">
+    <div class="res-title" id="resTitle"></div>
+    <img id="resultImg" src="" alt="" />
+    <div class="res-name" id="resName"></div>
+    <div class="res-guesses" id="resGuessesInfo"></div>
+    <button class="btn" onclick="restart()">▶ Rejouer</button>
+  </div>
+
 </div>
 
-<div id="gameBox" style="display:none; flex-direction:column; gap:1rem;">
-  <div class="canvas-card">
-    <canvas id="canvas" width="400" height="400"></canvas>
-  </div>
-  <div class="input-row">
-    <input id="guessInput" autocomplete="off" placeholder="Nom du personnage..." />
-    <button class="btn btn-gold" onclick="submit()">Valider</button>
-    <div id="autocompleteBox" class="autocomplete"></div>
-  </div>
-  <div class="hint" id="hintBox"></div>
-  <div class="btn-row">
-    <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">🔥 Série</span></div>
-    <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
-    <div class="sstat"><span class="sv" id="sLevel">0</span><span class="sl">Niveau</span></div>
-  </div>
-</div>
-
-<div id="resultBox">
-  <div class="res-title" id="resTitle"></div>
-  <img id="resultImg" src="" alt="" />
-  <div class="res-name" id="resName"></div>
-  <button class="btn btn-gold" onclick="restart()">▶ Rejouer</button>
-</div>
-
-</div>
+<!-- ── DATA (inline placeholder – remplace par ton <script src="js/data.js"></script>) ── -->
+<script>
+// CHARS doit être défini par data.js — exemple minimal de fallback
+if (typeof CHARS === "undefined") {
+  window.CHARS = [
+    {n:"Ichigo Kurosaki"},{n:"Rukia Kuchiki"},{n:"Orihime Inoue"},{n:"Uryu Ishida"},
+    {n:"Yasutora Sado"},{n:"Byakuya Kuchiki"},{n:"Renji Abarai"},{n:"Toshiro Hitsugaya"},
+    {n:"Sosuke Aizen"},{n:"Kisuke Urahara"},{n:"Yoruichi Shihoin"},{n:"Genryusai Yamamoto"},
+    {n:"Rangiku Matsumoto"},{n:"Gin Ichimaru"},{n:"Kaname Tosen"},{n:"Shunsui Kyoraku"},
+    {n:"Jushiro Ukitake"},{n:"Retsu Unohana"},{n:"Mayuri Kurotsuchi"},{n:"Zaraki Kenpachi"},
+    {n:"Nelliel Tu Odelschwanck"},{n:"Ulquiorra Cifer"},{n:"Grimmjow Jaegerjaquez"},
+    {n:"Tier Harribel"},{n:"Coyote Starrk"},{n:"Baraggan Louisenbairn"},
+    {n:"Yhwach"},{n:"Jugram Haschwalth"},{n:"Bazz-B"},{n:"Gerard Valkyrie"},
+    {n:"Uryu Ishida"},{n:"Senjumaru Shutara"},{n:"Lille Barro"}
+  ];
+}
+</script>
 
 <script>
 const $ = id => document.getElementById(id);
 const LEVELS = [4, 6, 8, 10, 13, 16, 20, 25, 32, 45, 64, 120];
 
-/*
-  CROPS : zones de recadrage aléatoires [x, y, w, h] en proportions 0..1
-  Chaque partie tire une zone différente → même image = vue totalement différente.
-  Combiné à plusieurs sources d'images, la variation est maximale.
-*/
 const CROPS = [
-  [0,    0,    1,    0.7 ],
-  [0,    0.05, 1,    0.7 ],
-  [0,    0.1,  1,    0.7 ],
-  [0,    0.15, 1,    0.7 ],
-  [0,    0.2,  1,    0.7 ],
-  [0,    0.25, 1,    0.7 ],
-  [0,    0,    1,    0.55],
-  [0,    0.1,  1,    0.55],
-  [0.05, 0,    0.9,  0.8 ],
-  [0.1,  0,    0.8,  0.8 ],
-  [0,    0,    0.85, 0.85],
-  [0.15, 0,    0.85, 0.85],
-  [0.05, 0.05, 0.9,  0.65],
-  [0,    0,    0.75, 1   ],
-  [0.25, 0,    0.75, 1   ],
+  [0,    0,    1,    0.7 ],[0,    0.05, 1,    0.7 ],[0,    0.1,  1,    0.7 ],
+  [0,    0.15, 1,    0.7 ],[0,    0.2,  1,    0.7 ],[0,    0.25, 1,    0.7 ],
+  [0,    0,    1,    0.55],[0,    0.1,  1,    0.55],[0.05, 0,    0.9,  0.8 ],
+  [0.1,  0,    0.8,  0.8 ],[0,    0,    0.85, 0.85],[0.15, 0,    0.85, 0.85],
+  [0.05, 0.05, 0.9,  0.65],[0,    0,    0.75, 1   ],[0.25, 0,    0.75, 1   ],
 ];
 
-let characters = [];  // { name, images:[url,...] }
+let characters = [];
 let allNames   = [];
 let used       = new Set();
 let current, img, currentCrop;
 let level = 0, streak = 0, best = 0, loading = false, acIndex = -1;
+let sessionGuesses = []; // { name, attempt } for current round
 
 const canvas = $("canvas");
 const ctx    = canvas.getContext("2d");
@@ -121,19 +335,11 @@ window.onload = async () => {
   $("guessInput").addEventListener("keypress", e => { if (e.key === "Enter") submit(); });
 };
 
-/* ===== LOAD =====
-  Sources d'images :
-  1. Jikan — Bleach (anime 269, original)
-  2. Jikan — Bleach TYBW (anime 41467)
-  3. AniList GraphQL — Bleach (id 205) + TYBW (id 146065)
-
-  Pour chaque perso on accumule toutes les URLs trouvées dans un Set.
-  À chaque partie : URL aléatoire + crop aléatoire = toujours différent.
-*/
+/* ===== LOAD ===== */
 async function loadCharacters() {
   $("loadMsg").textContent = "Chargement des personnages…";
   const dataNames = new Set(CHARS.map(c => normalize(c.n)));
-  const imageMap  = {}; // key → Set<url>
+  const imageMap  = {};
 
   $("loadMsg").textContent = "Source 1/3 — Jikan Bleach…";
   await fetchJikanAnime(269, dataNames, imageMap);
@@ -150,8 +356,7 @@ async function loadCharacters() {
 
   allNames = CHARS.map(c => c.n);
 
-  if (!characters.length)
-    $("loadMsg").textContent = "Aucune image trouvée. Recharge la page.";
+  if (!characters.length) $("loadMsg").textContent = "Aucune image trouvée. Recharge la page.";
 }
 
 async function fetchJikanAnime(animeId, dataNames, imageMap) {
@@ -172,9 +377,7 @@ async function fetchJikanAnime(animeId, dataNames, imageMap) {
       if (e.character.images.webp?.image_url)
         imageMap[key].add(e.character.images.webp.image_url);
     });
-  } catch(e) {
-    console.warn("Jikan", animeId, "failed:", e);
-  }
+  } catch(e) { console.warn("Jikan", animeId, "failed:", e); }
 }
 
 async function fetchAniList(mediaIds, dataNames, imageMap) {
@@ -192,9 +395,9 @@ async function fetchAniList(mediaIds, dataNames, imageMap) {
             }
           }`;
         const res  = await fetch("https://graphql.anilist.co", {
-          method:  "POST",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ query, variables: { p: page } })
+          body: JSON.stringify({ query, variables: { p: page } })
         });
         const json  = await res.json();
         const chars = json?.data?.Media?.characters;
@@ -228,23 +431,33 @@ function initAutocomplete() {
     const val = input.value.toLowerCase();
     box.innerHTML = ""; acIndex = -1;
     if (!val) return box.style.display = "none";
-    const matches = allNames.filter(n => n.toLowerCase().includes(val)).slice(0, 8);
+
+    const guessedSet = new Set(sessionGuesses.map(g => normalize(g.name)));
+    const matches = allNames
+      .filter(n => n.toLowerCase().includes(val))
+      .slice(0, 10);
+
     matches.forEach(name => {
       const div = document.createElement("div");
-      div.className = "ac-item";
-      div.innerHTML = name.replace(new RegExp(val, "gi"), m => `<span class="ac-highlight">${m}</span>`);
-      div.onclick = () => { input.value = name; box.style.display = "none"; };
+      const alreadyGuessed = guessedSet.has(normalize(name));
+      div.className = "ac-item" + (alreadyGuessed ? " already-guessed" : "");
+      div.innerHTML = name.replace(new RegExp(val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi"),
+        m => `<span class="ac-highlight">${m}</span>`);
+      if (!alreadyGuessed) {
+        div.onclick = () => { input.value = name; box.style.display = "none"; };
+      }
       box.appendChild(div);
     });
+
     box.style.display = matches.length ? "block" : "none";
   });
 
   input.addEventListener("keydown", e => {
-    const items = box.querySelectorAll(".ac-item");
-    if (e.key === "ArrowDown") acIndex++;
-    if (e.key === "ArrowUp")   acIndex--;
+    const items = [...box.querySelectorAll(".ac-item:not(.already-guessed)")];
+    if (e.key === "ArrowDown") { e.preventDefault(); acIndex++; }
+    if (e.key === "ArrowUp")   { e.preventDefault(); acIndex--; }
     if (e.key === "Enter" && acIndex >= 0 && items[acIndex]) {
-      input.value = items[acIndex].textContent;
+      input.value = items[acIndex].textContent.trim();
       box.style.display = "none";
     }
     items.forEach(i => i.classList.remove("active"));
@@ -265,6 +478,9 @@ function startGame() {
   loading = true;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   canvas.style.opacity = "0";
+  sessionGuesses = [];
+  renderGuessList();
+  updateAttempts();
   showState("load");
 
   if (!characters.length) {
@@ -277,12 +493,11 @@ function startGame() {
   current = pool[Math.floor(Math.random() * pool.length)];
   used.add(current.name);
 
-  // Image aléatoire parmi toutes les sources disponibles pour ce perso
-  const imgUrl = current.images[Math.floor(Math.random() * current.images.length)];
-  // Crop aléatoire — garantit une vue différente même si l'URL est identique
-  currentCrop  = CROPS[Math.floor(Math.random() * CROPS.length)];
+  const imgUrl    = current.images[Math.floor(Math.random() * current.images.length)];
+  currentCrop     = CROPS[Math.floor(Math.random() * CROPS.length)];
 
   level = 0;
+  $("attemptsMax").textContent = LEVELS.length;
   tryLoad(imgUrl, current.images);
 }
 
@@ -298,7 +513,6 @@ function tryLoad(url, allUrls) {
       loading = false;
     })
     .catch(() => {
-      // Essayer une autre URL du même perso
       const others = allUrls.filter(u => u !== url);
       if (others.length) {
         const next = others[Math.floor(Math.random() * others.length)];
@@ -329,7 +543,6 @@ function draw() {
   const srcW = Math.floor(cw * img.naturalWidth);
   const srcH = Math.floor(ch * img.naturalHeight);
 
-  // Off-screen canvas pour la réduction propre sans lissage
   const off = document.createElement("canvas");
   off.width = off.height = size;
   const octx = off.getContext("2d");
@@ -340,44 +553,103 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(off, 0, 0, size, size, 0, 0, canvas.width, canvas.height);
 
-  $("sLevel").textContent = size + "x" + size;
+  $("sLevel").textContent = size + "×" + size;
 }
 
 /* ===== INPUT ===== */
 function submit() {
   if (loading) return;
   $("autocompleteBox").style.display = "none";
-  const val = normalize($("guessInput").value);
-  if (!val) return;
-  if (isClose(val, normalize(current.name))) win();
-  else wrong();
+  const raw = $("guessInput").value.trim();
+  if (!raw) return;
+
+  const val = normalize(raw);
+
+  // Anti-doublon
+  if (sessionGuesses.some(g => normalize(g.name) === val)) {
+    flashInput("Déjà proposé !");
+    $("guessInput").value = "";
+    return;
+  }
+
   $("guessInput").value = "";
+
+  if (isClose(val, normalize(current.name))) {
+    sessionGuesses.push({ name: raw, correct: true });
+    renderGuessList();
+    win();
+  } else {
+    sessionGuesses.push({ name: raw, correct: false });
+    renderGuessList();
+    wrong();
+  }
+}
+
+function flashInput(msg) {
+  const input = $("guessInput");
+  const prev  = input.placeholder;
+  input.placeholder = msg;
+  input.style.borderColor = "rgba(224,85,85,.6)";
+  setTimeout(() => {
+    input.placeholder = prev;
+    input.style.borderColor = "";
+  }, 1400);
 }
 
 function win() {
   streak++; if (streak > best) best = streak;
   save(); updateStats();
-  showResult("✅ Bien joué !");
+  setTimeout(() => showResult("✅ Bien joué !"), 250);
 }
 
 function wrong() {
   level++;
+  updateAttempts();
   if (level >= LEVELS.length) return lose();
   draw(); updateHints();
 }
 
 function lose() {
   streak = 0; save(); updateStats();
-  showResult("💀 Perdu !");
+  setTimeout(() => showResult("💀 Perdu !"), 250);
 }
 
 function showResult(titre) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   canvas.style.opacity = "0";
-  $("resTitle").textContent = titre;
-  $("resName").textContent  = current.name;
-  $("resultImg").src        = img.src;
+  $("resTitle").textContent   = titre;
+  $("resName").textContent    = current.name;
+  $("resultImg").src          = img.src;
+  const n = sessionGuesses.filter(g => !g.correct).length;
+  $("resGuessesInfo").textContent = n === 0
+    ? "Trouvé du premier coup !"
+    : `${n} mauvaise${n > 1 ? "s" : ""} proposition${n > 1 ? "s" : ""}`;
   showState("result");
+}
+
+/* ===== GUESS LIST ===== */
+function renderGuessList() {
+  const list = $("guessList");
+  $("noGuesses").style.display = sessionGuesses.length ? "none" : "block";
+
+  // Remove all real guess items (keep noGuesses)
+  [...list.querySelectorAll(".guess-item")].forEach(el => el.remove());
+
+  // Insert newest first
+  [...sessionGuesses].reverse().forEach(g => {
+    const div = document.createElement("div");
+    div.className = "guess-item guess-wrong";
+    div.innerHTML = `<span class="guess-icon"></span><span>${escapeHtml(g.name)}</span>`;
+    list.insertBefore(div, $("noGuesses").nextSibling);
+  });
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function updateAttempts() {
+  $("attemptsCount").textContent = sessionGuesses.length;
 }
 
 /* ===== HINTS ===== */
@@ -390,16 +662,16 @@ function updateHints() {
 
 /* ===== UTILS ===== */
 function normalize(s) {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"");
 }
-function isClose(a, b) { return a === b || b.includes(a) || a.includes(b); }
+function isClose(a, b)  { return a === b || b.includes(a) || a.includes(b); }
 function save()         { localStorage.setItem("pixel_bleach", JSON.stringify({ best })); }
 function updateStats()  { $("sStreak").textContent = streak; $("sBest").textContent = best; }
 function restart()      { used.clear(); streak = 0; updateStats(); startGame(); }
 function showState(s) {
-  $("loadBox").style.display   = s === "load"   ? "flex" : "none";
-  $("gameBox").style.display   = s === "game"   ? "flex" : "none";
-  $("resultBox").style.display = s === "result" ? "flex" : "none";
+  $("loadBox").style.display   = s === "load"   ? "flex"  : "none";
+  $("gameBox").style.display   = s === "game"   ? "flex"  : "none";
+  $("resultBox").style.display = s === "result" ? "flex"  : "none";
 }
 </script>
 
