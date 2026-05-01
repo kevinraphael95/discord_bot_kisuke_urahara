@@ -324,3 +324,19 @@ footer {
 @media (min-width: 701px) and (max-width: 1024px) {
   nav { padding: 0 1.8rem; }
 }
+
+
+/* ── PAGE TRANSITIONS ────────────────────────────────── */
+body {
+  animation: pageIn .35s ease forwards;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+body.page-out {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity .25s ease, transform .25s ease;
+  pointer-events: none;
+}
