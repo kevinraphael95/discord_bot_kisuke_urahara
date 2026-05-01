@@ -1,10 +1,10 @@
 (function () {
   const pages = [
-    { href: '/commandes.html', label: 'Commandes' },
-    { href: '/reiatsu.html', label: 'Reiatsu' },
-    { href: '/guesser.html', label: 'Character Guesser' },
-    { href: '/minijeux.html', label: 'Minijeux' },
-    { href: '/install.html', label: 'Installation' },
+    { href: 'commandes.html', label: 'Commandes' },
+    { href: 'reiatsu.html', label: 'Reiatsu' },
+    { href: 'guesser.html', label: 'Character Guesser' },
+    { href: 'minijeux.html', label: 'Minijeux' },
+    { href: 'install.html', label: 'Installation' },
   ];
 
   const themes = [
@@ -12,11 +12,15 @@
     { id: 'quincy', label: 'Quincy', icon: '↗️' }
   ];
 
-  // ── BASE PATH (important GitHub Pages) ──
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  const basePath = location.origin + '/';
+  // ── CALCUL DU PREFIX (GitHub Pages safe) ──
+  const parts = location.pathname.split('/').filter(Boolean);
 
-  const currentPage = location.pathname.split('/').pop() || 'index.html';
+  const SUB_DIRS = ['minijeux'];
+  const inSub = parts.length >= 2 && SUB_DIRS.includes(parts[parts.length - 2]);
+
+  const prefix = inSub ? '../' : './';
+
+  const current = parts[parts.length - 1] || 'index.html';
 
   // ── THEME ──
   const savedTheme = localStorage.getItem('shinigami-theme') || 'shinigami';
@@ -24,24 +28,20 @@
 
   const activeTheme = themes.find(t => t.id === savedTheme) || themes[0];
 
-  // ── HELPERS ──
-  const isActive = (href) => {
-    const file = href.split('/').pop();
-    return currentPage === file;
-  };
+  // ── ACTIVE PAGE ──
+  function isActive(href) {
+    return current === href;
+  }
 
-  const makeLink = (p, extra = '') =>
-    `<a href="${p.href}" class="${extra}">${p.label}</a>`;
-
-  // ── NAV LINKS ──
+  // ── LINKS ──
   const navLinks = pages.map(p => {
-    const active = isActive(p.href) ? 'active' : '';
-    return `<li>${makeLink(p, active)}</li>`;
+    const active = isActive(p.href) ? ' class="active"' : '';
+    return `<li><a href="${prefix}${p.href}"${active}>${p.label}</a></li>`;
   }).join('');
 
   const drawerLinks = pages.map(p => {
-    const active = isActive(p.href) ? 'active' : '';
-    return `${makeLink(p, active)}`;
+    const active = isActive(p.href) ? ' class="active"' : '';
+    return `<a href="${prefix}${p.href}"${active} onclick="closeNav()">${p.label}</a>`;
   }).join('');
 
   const themeOptions = themes.map(t =>
@@ -55,7 +55,9 @@
   // ── INSERT NAV ──
   document.body.insertAdjacentHTML('afterbegin', `
 <nav>
-  <a class="nav-logo" href="/index.html">⚡ Kisuke <span>Bot</span></a>
+  <a class="nav-logo" href="${prefix}index.html">
+    ⚡ Kisuke <span>Bot</span>
+  </a>
 
   <ul class="nav-links">
     ${navLinks}
@@ -73,7 +75,7 @@
       </div>
     </div>
 
-    <button class="ham" id="ham">☰</button>
+    <button class="ham" id="ham" onclick="toggleNav()">☰</button>
   </div>
 </nav>
 
@@ -85,7 +87,7 @@
 </div>
 `);
 
-  // ── EVENTS ──
+  // ── THEME LOGIC ──
   const themeToggle = document.getElementById('themeToggle');
   const themeMenu = document.getElementById('themeMenu');
 
@@ -96,8 +98,10 @@
 
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-theme]');
+
     if (btn) {
       const theme = btn.dataset.theme;
+
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('shinigami-theme', theme);
 
@@ -112,10 +116,15 @@
     }
   });
 
-  // ── NAV DRAWER ──
+  // ── DRAWER ──
   window.toggleNav = function () {
     document.getElementById('ham').classList.toggle('open');
     document.getElementById('drawer').classList.toggle('open');
+  };
+
+  window.closeNav = function () {
+    document.getElementById('ham').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
   };
 
 })();
