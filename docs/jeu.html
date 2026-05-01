@@ -234,10 +234,8 @@ canvas {
 <!-- nav.js injecte la nav ici -->
 
 <div class="phdr">
-  <p class="pkana">ブリーチ</p>
   <h1 class="pttl">
-    <span class="t1">Pixel Guess</span>
-    <span class="t2">Bleach — Qui est ce personnage ?</span>
+    <span class="t1">Pixel Guess — Devine le personnage</span>
   </h1>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
@@ -439,14 +437,25 @@ function initAutocomplete() {
     if (!val) { box.style.display = "none"; return; }
 
     const guessed = new Set(sessionGuesses.map(g => normalize(g.name)));
-    const matches = allNames.filter(n => n.toLowerCase().includes(val)).slice(0, 10);
+    const escaped = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Priorité 1 : commence par val  |  Priorité 2 : un mot commence par val
+    const startsWith  = allNames.filter(n => n.toLowerCase().startsWith(val));
+    const wordStarts  = allNames.filter(n =>
+      !n.toLowerCase().startsWith(val) &&
+      n.toLowerCase().split(/\s+/).slice(1).some(w => w.startsWith(val))
+    );
+    const matches = [...startsWith, ...wordStarts].slice(0, 10);
+
+    // Highlight : seulement le premier match par mot-début
+    const reWordStart = new RegExp(`(^|\\s)(${escaped})`, "gi");
 
     matches.forEach(name => {
       const isGuessed = guessed.has(normalize(name));
       const div = document.createElement("div");
       div.className = "ac-item" + (isGuessed ? " already-guessed" : "");
-      const re = new RegExp(val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
-      div.innerHTML = name.replace(re, m => `<span class="ac-highlight">${m}</span>`);
+      div.innerHTML = name.replace(reWordStart,
+        (_, space, match) => `${space}<span class="ac-highlight">${match}</span>`);
       if (!isGuessed) div.onclick = () => { input.value = name; box.style.display = "none"; };
       box.appendChild(div);
     });
