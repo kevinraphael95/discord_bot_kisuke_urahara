@@ -49,10 +49,13 @@
     </div>
 
     <div class="game-right">
-      <div class="input-row">
-        <input id="guessInput" autocomplete="off" placeholder="Nom du personnage…" />
-        <button class="btn-sm" id="submitBtn" onclick="submit()">Valider</button>
-        <div id="autocompleteBox" class="autocomplete"></div>
+      <!-- Structure identique à guesser.html -->
+      <div class="iz">
+        <div class="acw">
+          <input class="gi" id="guessInput" type="text" placeholder="Nom du personnage…" autocomplete="off" oninput="onIn()" onkeydown="onKD(event)"/>
+          <div class="acl" id="acl"></div>
+        </div>
+        <button class="gbtn" id="submitBtn" onclick="submit()">VALIDER</button>
       </div>
       <div class="attempts-bar">Tentatives : <span id="attemptsCount">0</span> / <span id="attemptsMax">12</span></div>
 
@@ -81,7 +84,6 @@
 
 </div>
 
-<!-- Fallback si data.js absent -->
 <script>
 if (typeof CHARS === "undefined") {
   window.CHARS = [
