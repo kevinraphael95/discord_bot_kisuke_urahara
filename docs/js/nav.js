@@ -127,22 +127,6 @@
     document.getElementById('drawer').classList.remove('open');
   };
 
-// ── PAGE TRANSITIONS ──
-document.addEventListener('click', (e) => {
-  const link = e.target.closest('a[href]');
-  if (!link) return;
-  const href = link.getAttribute('href');
-  if (!href || href.startsWith('#') || href.startsWith('http') || link.target === '_blank') return;
-  e.preventDefault();
-
-  if (document.startViewTransition) {
-    document.startViewTransition(() => {
-      window.location.href = href;
-    });
-  } else {
-    window.location.href = href;
-  }
-});
 
   
 
