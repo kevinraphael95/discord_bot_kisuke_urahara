@@ -125,7 +125,8 @@ canvas { width:100%; max-height:420px; display:block; }
 const $ = id => document.getElementById(id);
 
 /* ================= CONFIG ================= */
-const API_URL = "https://raw.githubusercontent.com/ashishk1331/bleach-api/master/data/characters.json";
+// Bleach MAL ID = 269. Jikan v4 retourne 25 persos/page.
+const JIKAN_URL = "https://api.jikan.moe/v4/anime/269/characters";
 const LEVELS = [6,10,16,24,36,64];
 
 /* ================= STATE ================= */
@@ -162,18 +163,22 @@ window.onload = async () => {
 /* ================= LOAD API ================= */
 async function loadCharacters() {
   try {
-    const res = await fetch(API_URL);
-    const data = await res.json();
+    // Jikan /anime/{id}/characters retourne tous les persos en une seule réponse (pas paginée)
+    const res = await fetch(JIKAN_URL);
+    const json = await res.json();
 
-    characters = data.filter(c => c.image).map(c => ({
-      name: c.name,
-      image: c.image,
-      hints: generateHints(c.name)
-    }));
+    characters = json.data
+      .filter(entry => entry.character?.images?.jpg?.image_url)
+      .map(entry => ({
+        name: entry.character.name,
+        image: entry.character.images.jpg.image_url,
+        hints: generateHints(entry.character.name)
+      }));
 
     allNames = characters.map(c => c.name);
 
-  } catch {
+  } catch(e) {
+    console.error("Jikan fetch failed:", e);
     characters = [];
   }
 }
@@ -237,6 +242,11 @@ function startGame() {
   loading = true;
   showState("load");
 
+  if (!characters.length) {
+    $("loadMsg").textContent = "Aucun personnage chargé. Recharge la page.";
+    return;
+  }
+
   const pool = characters.filter(c => !used.has(c.name));
   if (!pool.length) used.clear();
 
@@ -252,6 +262,10 @@ function startGame() {
     showState("game");
     $("guessInput").focus();
     loading = false;
+  }).catch(() => {
+    // Image inaccessible (CORS MAL), passer au suivant
+    used.add(current.name);
+    startGame();
   });
 }
 
