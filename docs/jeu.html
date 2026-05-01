@@ -13,8 +13,8 @@
 
 <style>
 .pg-wrap { max-width:900px;margin:0 auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.2rem; }
-.canvas-card { border:1px solid var(--gold-line); background:#000; padding:.5rem; }
-canvas { width:100%; max-height:420px; display:block; }
+.canvas-card { border:1px solid var(--gold-line); background:#000; padding:.25rem .5rem; }
+canvas { width:100%; max-height:280px; display:block; transition:opacity .15s; }
 .input-row { display:flex; gap:.5rem; position:relative; }
 #guessInput { flex:1; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:.6rem; }
 .autocomplete { position:absolute; top:100%; left:0; right:60px; background:var(--panel); border:1px solid var(--gold-line); max-height:220px; overflow-y:auto; z-index:10; display:none; }
@@ -26,9 +26,9 @@ canvas { width:100%; max-height:420px; display:block; }
 .sstat { background:var(--panel); border:1px solid var(--gold-line); padding:.45rem; text-align:center; }
 .sv { color:var(--gold); font-weight:bold; }
 .sl { font-size:.6rem; color:var(--muted); }
-#loadBox { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; min-height:300px; text-align:center; }
+#loadBox { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; min-height:240px; text-align:center; }
 #resultBox { display:none; flex-direction:column; align-items:center; gap:1rem; }
-#resultImg { width:100%; max-width:380px; border:1px solid var(--gold-line); display:block; }
+#resultImg { width:100%; max-width:280px; border:1px solid var(--gold-line); display:block; }
 .res-name { font-size:1.3rem; color:var(--gold); font-family:'Shippori Mincho',serif; font-weight:700; }
 </style>
 </head>
@@ -78,7 +78,7 @@ canvas { width:100%; max-height:420px; display:block; }
 const $ = id => document.getElementById(id);
 const LEVELS = [4, 6, 8, 10, 13, 16, 20, 25, 32, 45, 64, 120];
 
-let characters = [];   // { name, image, hints }
+let characters = [];   // { name, images: [...], hints }
 let allNames = [];
 let used = new Set();
 let current, img;
@@ -100,17 +100,17 @@ window.onload = async () => {
 };
 
 /* ===== LOAD =====
-   1. Fetch Jikan → map "Nom, Prénom" → "Prénom Nom" → image URL
-   2. Croise avec CHARS de data.js (champ n) → garde seulement les persos connus
-   3. Pour les persos sans image Jikan → ignorés (pas d'image inventée)
+   Jikan /characters → image principale
+   Jikan /characters/{id}/pictures → images supplémentaires pour varier
+   On stocke un tableau d'images par perso et on en choisit une au hasard à chaque partie.
 */
 async function loadCharacters() {
   $("loadMsg").textContent = "Chargement des personnages…";
 
-  // Noms de data.js indexés pour lookup rapide
   const dataNames = new Set(CHARS.map(c => normalize(c.n)));
 
-  let imageMap = {}; // normalize(name) → url
+  // imageMap : normalize(name) → { mainUrl, malId }
+  let imageMap = {};
 
   try {
     const res = await fetch("https://api.jikan.moe/v4/anime/269/characters");
@@ -118,25 +118,55 @@ async function loadCharacters() {
 
     json.data.forEach(e => {
       if (!e.character?.images?.jpg?.image_url) return;
-      // Jikan : "Kurosaki, Ichigo" → "Ichigo Kurosaki"
       const parts = e.character.name.split(", ");
-      const name = parts.length === 2 ? parts[1].trim() + " " + parts[0].trim() : e.character.name.trim();
-      imageMap[normalize(name)] = e.character.images.jpg.image_url;
+      const name = parts.length === 2
+        ? parts[1].trim() + " " + parts[0].trim()
+        : e.character.name.trim();
+      const key = normalize(name);
+      if (dataNames.has(key)) {
+        imageMap[key] = {
+          mainUrl: e.character.images.jpg.image_url,
+          malId: e.character.mal_id
+        };
+      }
     });
   } catch(e) {
-    console.error("Jikan failed:", e);
+    console.error("Jikan characters failed:", e);
   }
 
-  // Construire la liste finale : persos de data.js qui ont une image Jikan
+  // Pour chaque perso trouvé, on tente de récupérer ses images supplémentaires
+  // On fait les requêtes en parallèle par batch pour ne pas surcharger l'API
+  const keys = Object.keys(imageMap);
+  const BATCH = 4; // requêtes simultanées max
+  for (let i = 0; i < keys.length; i += BATCH) {
+    const batch = keys.slice(i, i + BATCH);
+    await Promise.all(batch.map(async key => {
+      const { malId, mainUrl } = imageMap[key];
+      try {
+        const r = await fetch(`https://api.jikan.moe/v4/characters/${malId}/pictures`);
+        const j = await r.json();
+        const extras = (j.data || [])
+          .map(p => p?.jpg?.image_url)
+          .filter(Boolean);
+        // Combine image principale + extras, dédoublonnés
+        const all = [...new Set([mainUrl, ...extras])];
+        imageMap[key].images = all;
+      } catch {
+        // En cas d'échec on garde juste l'image principale
+        imageMap[key].images = [mainUrl];
+      }
+    }));
+  }
+
   characters = CHARS
     .filter(c => imageMap[normalize(c.n)])
     .map(c => ({
       name: c.n,
-      image: imageMap[normalize(c.n)],
+      images: imageMap[normalize(c.n)].images,
       hints: generateHints(c.n)
     }));
 
-  allNames = CHARS.map(c => c.n); // autocomplete sur TOUS les persos de data.js
+  allNames = CHARS.map(c => c.n);
 
   if (!characters.length) {
     $("loadMsg").textContent = "Aucune image trouvée. Recharge la page.";
@@ -186,20 +216,44 @@ function initAutocomplete() {
 
 /* ===== GAME ===== */
 function startGame() {
-  loading = true; showState("load");
+  loading = true;
+  // Effacer immédiatement le canvas pour éviter le flash de l'ancienne image
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.style.opacity = "0";
+  showState("load");
+
   if (!characters.length) { $("loadMsg").textContent = "Aucun personnage disponible."; return; }
+
   const pool = characters.filter(c => !used.has(c.name));
   if (!pool.length) used.clear();
   current = pool[Math.floor(Math.random() * pool.length)];
   used.add(current.name);
+
+  // Choisir une image au hasard parmi celles disponibles pour ce perso
+  const imgUrl = current.images[Math.floor(Math.random() * current.images.length)];
+
   level = 0;
-  preloadImage(current.image).then(im => {
-    img = im; draw();
+  preloadImage(imgUrl).then(im => {
+    img = im;
+    draw();
+    canvas.style.opacity = "1";
     $("hintBox").textContent = "";
     showState("game");
     $("guessInput").focus();
     loading = false;
-  }).catch(() => { used.add(current.name); startGame(); });
+  }).catch(() => {
+    // Si l'image choisie échoue, tenter la première image du perso
+    const fallback = current.images[0];
+    if (fallback && fallback !== imgUrl) {
+      preloadImage(fallback).then(im => {
+        img = im; draw(); canvas.style.opacity = "1";
+        $("hintBox").textContent = "";
+        showState("game"); $("guessInput").focus(); loading = false;
+      }).catch(() => { used.add(current.name); startGame(); });
+    } else {
+      used.add(current.name); startGame();
+    }
+  });
 }
 
 function preloadImage(src) {
@@ -251,9 +305,11 @@ function lose() {
 
 function showResult(titre) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.style.opacity = "0";
   $("resTitle").textContent = titre;
   $("resName").textContent = current.name;
-  $("resultImg").src = current.image;
+  // Afficher l'image qui était utilisée dans cette partie
+  $("resultImg").src = img.src;
   showState("result");
 }
 
