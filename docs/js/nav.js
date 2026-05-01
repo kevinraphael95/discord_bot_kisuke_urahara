@@ -14,7 +14,7 @@
   const savedTheme = localStorage.getItem('shinigami-theme') || 'shinigami';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
-  const current = location.pathname.split('/').pop() || 'index.html';
+  const current = location.pathname;
 
   const navLinks = pages.map(p => {
     const active = (current === p.href || (current === '' && p.href === 'index.html')) ? ' class="active"' : '';
