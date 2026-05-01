@@ -126,20 +126,16 @@ nav {
 .theme-opt:hover  { border-color: var(--gold-line); color: var(--gold-lt); background: var(--gold-pale); }
 .theme-opt.active { border-color: var(--gold); color: var(--gold-lt); background: var(--gold-pale); }
 
-/* ── HAMBURGER ── */
+/* ── HAMBURGER (version Atem) ── */
 .ham {
   display: none;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   gap: 5px;
-  width: 44px;
-  height: 44px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
   cursor: pointer;
-  padding: 0;
+  padding: 8px 10px;
   z-index: 500;
   transition: all 0.2s ease;
 }
@@ -148,7 +144,7 @@ nav {
   display: block;
   width: 22px;
   height: 2px;
-  background: var(--gold);
+  background: #ffffff;
   border-radius: 2px;
   transition: all 0.3s ease;
 }
@@ -328,8 +324,4 @@ footer {
 }
 @media (min-width: 701px) and (max-width: 1024px) {
   nav { padding: 0 1.8rem; }
-}
-
-.ham.open {
-  background: red !important;
 }
