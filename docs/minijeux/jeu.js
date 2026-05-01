@@ -1,0 +1,358 @@
+/* ══════════════════════════════════════════════════════
+   PIXEL GUESS — GAME LOGIC
+   ══════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+
+const LEVELS = [4, 6, 8, 10, 13, 16, 20, 25, 32, 45, 64, 120];
+
+const CROPS = [
+  [0,    0,    1,    0.70],[0,    0.05, 1,    0.70],[0,    0.10, 1,    0.70],
+  [0,    0.15, 1,    0.70],[0,    0.20, 1,    0.70],[0,    0.25, 1,    0.70],
+  [0,    0,    1,    0.55],[0,    0.10, 1,    0.55],[0.05, 0,    0.90, 0.80],
+  [0.10, 0,    0.80, 0.80],[0,    0,    0.85, 0.85],[0.15, 0,    0.85, 0.85],
+  [0.05, 0.05, 0.90, 0.65],[0,    0,    0.75, 1   ],[0.25, 0,    0.75, 1   ],
+];
+
+let characters = [], allNames = [];
+let used       = new Set();
+let current, img, currentCrop;
+let level = 0, streak = 0, best = 0, loading = false, acIndex = -1;
+let sessionGuesses = [];
+
+const canvas = $("canvas");
+const ctx    = canvas.getContext("2d");
+const sleep  = ms => new Promise(r => setTimeout(r, ms));
+
+/* ── INIT ──────────────────────────────────────────────────── */
+window.addEventListener("load", async () => {
+  const s = JSON.parse(localStorage.getItem("pixel_bleach") || "null");
+  if (s) best = s.best || 0;
+  await loadCharacters();
+  initAutocomplete();
+  updateStats();
+  startGame();
+  $("guessInput").addEventListener("keypress", e => { if (e.key === "Enter") submit(); });
+});
+
+/* ── LOAD CHARACTERS ───────────────────────────────────────── */
+async function loadCharacters() {
+  const dataNames = new Set(CHARS.map(c => normalize(c.n)));
+  const imageMap  = {};
+
+  setLoadMsg("Source 1/3 — Jikan Bleach…");
+  await fetchJikan(269, dataNames, imageMap);
+
+  setLoadMsg("Source 2/3 — Jikan TYBW…");
+  await fetchJikan(41467, dataNames, imageMap);
+
+  setLoadMsg("Source 3/3 — AniList…");
+  await fetchAniList([205, 146065], dataNames, imageMap);
+
+  characters = CHARS
+    .filter(c => imageMap[normalize(c.n)]?.size > 0)
+    .map(c => ({ name: c.n, images: [...imageMap[normalize(c.n)]] }));
+
+  allNames = CHARS.map(c => c.n);
+
+  if (!characters.length) setLoadMsg("Aucune image trouvée. Recharge la page.");
+}
+
+function setLoadMsg(msg) { $("loadMsg").textContent = msg; }
+
+async function fetchJikan(animeId, dataNames, imageMap) {
+  try {
+    const res  = await fetch(`https://api.jikan.moe/v4/anime/${animeId}/characters`);
+    const json = await res.json();
+    (json.data || []).forEach(e => {
+      if (!e.character?.images?.jpg?.image_url) return;
+      const raw   = e.character.name;
+      const parts = raw.split(", ");
+      const name  = parts.length === 2
+        ? `${parts[1].trim()} ${parts[0].trim()}`
+        : raw.trim();
+      const key = normalize(name);
+      if (!dataNames.has(key)) return;
+      if (!imageMap[key]) imageMap[key] = new Set();
+      imageMap[key].add(e.character.images.jpg.image_url);
+      if (e.character.images.webp?.image_url)
+        imageMap[key].add(e.character.images.webp.image_url);
+    });
+  } catch(e) { console.warn("Jikan", animeId, e); }
+}
+
+async function fetchAniList(mediaIds, dataNames, imageMap) {
+  for (const mediaId of mediaIds) {
+    let page = 1, hasNext = true;
+    while (hasNext && page <= 8) {
+      try {
+        const query = `query($p:Int){Media(id:${mediaId},type:ANIME){characters(page:$p,perPage:25,sort:ROLE){pageInfo{hasNextPage}nodes{name{full}image{large medium}}}}}`;
+        const res  = await fetch("https://graphql.anilist.co", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, variables: { p: page } })
+        });
+        const json  = await res.json();
+        const chars = json?.data?.Media?.characters;
+        if (!chars) break;
+        hasNext = chars.pageInfo.hasNextPage;
+        chars.nodes.forEach(node => {
+          const key = normalize(node.name.full);
+          if (!dataNames.has(key)) return;
+          if (!imageMap[key]) imageMap[key] = new Set();
+          if (node.image.large)  imageMap[key].add(node.image.large);
+          if (node.image.medium) imageMap[key].add(node.image.medium);
+        });
+        page++;
+        await sleep(250);
+      } catch(e) {
+        console.warn("AniList", mediaId, "page", page, e);
+        break;
+      }
+    }
+  }
+}
+
+/* ── AUTOCOMPLETE ──────────────────────────────────────────── */
+function initAutocomplete() {
+  const input = $("guessInput");
+  const box   = $("autocompleteBox");
+
+  input.addEventListener("input", () => {
+    const val = input.value.toLowerCase();
+    box.innerHTML = ""; acIndex = -1;
+    if (!val) { box.style.display = "none"; return; }
+
+    const guessed = new Set(sessionGuesses.map(g => normalize(g.name)));
+    const escaped = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const startsWith  = allNames.filter(n => n.toLowerCase().startsWith(val));
+    const wordStarts  = allNames.filter(n =>
+      !n.toLowerCase().startsWith(val) &&
+      n.toLowerCase().split(/\s+/).slice(1).some(w => w.startsWith(val))
+    );
+    const matches = [...startsWith, ...wordStarts].slice(0, 10);
+
+    const reWordStart = new RegExp(`(^|\\s)(${escaped})`, "gi");
+
+    matches.forEach(name => {
+      const isGuessed = guessed.has(normalize(name));
+      const div = document.createElement("div");
+      div.className = "ac-item" + (isGuessed ? " already-guessed" : "");
+      div.innerHTML = name.replace(reWordStart,
+        (_, space, match) => `${space}<span class="ac-highlight">${match}</span>`);
+      if (!isGuessed) div.onclick = () => { input.value = name; box.style.display = "none"; };
+      box.appendChild(div);
+    });
+
+    box.style.display = matches.length ? "block" : "none";
+  });
+
+  input.addEventListener("keydown", e => {
+    const items = [...box.querySelectorAll(".ac-item:not(.already-guessed)")];
+    if (e.key === "ArrowDown") { e.preventDefault(); acIndex++; }
+    if (e.key === "ArrowUp")   { e.preventDefault(); acIndex--; }
+    if (e.key === "Enter" && acIndex >= 0 && items[acIndex]) {
+      input.value = items[acIndex].textContent.trim();
+      box.style.display = "none";
+    }
+    items.forEach(i => i.classList.remove("active"));
+    if (items.length) {
+      if (acIndex >= items.length) acIndex = 0;
+      if (acIndex < 0) acIndex = items.length - 1;
+      items[acIndex]?.classList.add("active");
+    }
+  });
+
+  document.addEventListener("click", e => {
+    if (!box.contains(e.target) && e.target !== input) box.style.display = "none";
+  });
+}
+
+/* ── GAME LIFECYCLE ────────────────────────────────────────── */
+function startGame() {
+  loading = true;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.style.opacity = "0";
+  sessionGuesses = [];
+  renderGuessList();
+  updateAttempts();
+  showState("load");
+
+  if (!characters.length) { setLoadMsg("Aucun personnage disponible."); return; }
+
+  const pool = characters.filter(c => !used.has(c.name));
+  if (!pool.length) used.clear();
+
+  current     = pool[Math.floor(Math.random() * pool.length)];
+  currentCrop = CROPS[Math.floor(Math.random() * CROPS.length)];
+  used.add(current.name);
+  level = 0;
+
+  $("attemptsMax").textContent = LEVELS.length;
+
+  const url = current.images[Math.floor(Math.random() * current.images.length)];
+  tryLoad(url, current.images);
+}
+
+function tryLoad(url, remaining) {
+  preloadImage(url)
+    .then(im => {
+      img = im;
+      draw();
+      canvas.style.opacity = "1";
+      $("hintBox").textContent = "";
+      showState("game");
+      $("guessInput").focus();
+      loading = false;
+    })
+    .catch(() => {
+      const others = remaining.filter(u => u !== url);
+      if (others.length) {
+        const next = others[Math.floor(Math.random() * others.length)];
+        tryLoad(next, others.filter(u => u !== next));
+      } else {
+        used.add(current.name);
+        startGame();
+      }
+    });
+}
+
+function preloadImage(src) {
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.crossOrigin = "Anonymous";
+    im.onload  = () => resolve(im);
+    im.onerror = reject;
+    im.src = src;
+  });
+}
+
+function draw() {
+  const size = LEVELS[level];
+  const [cx, cy, cw, ch] = currentCrop;
+
+  const srcX = Math.floor(cx * img.naturalWidth);
+  const srcY = Math.floor(cy * img.naturalHeight);
+  const srcW = Math.floor(cw * img.naturalWidth);
+  const srcH = Math.floor(ch * img.naturalHeight);
+
+  const off = document.createElement("canvas");
+  off.width = off.height = size;
+  const octx = off.getContext("2d");
+  octx.imageSmoothingEnabled = false;
+  octx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, size, size);
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(off, 0, 0, size, size, 0, 0, canvas.width, canvas.height);
+
+  $("sLevel").textContent = `${size}×${size}`;
+}
+
+/* ── INPUT & SUBMIT ────────────────────────────────────────── */
+function submit() {
+  if (loading) return;
+  $("autocompleteBox").style.display = "none";
+  const raw = $("guessInput").value.trim();
+  if (!raw) return;
+
+  const val = normalize(raw);
+  $("guessInput").value = "";
+
+  if (sessionGuesses.some(g => normalize(g.name) === val)) {
+    flashInput("Déjà proposé !");
+    return;
+  }
+
+  if (isClose(val, normalize(current.name))) {
+    sessionGuesses.push({ name: raw, correct: true });
+    renderGuessList();
+    win();
+  } else {
+    sessionGuesses.push({ name: raw, correct: false });
+    renderGuessList();
+    wrong();
+  }
+}
+
+function flashInput(msg) {
+  const input = $("guessInput");
+  const prev  = input.placeholder;
+  input.placeholder = msg;
+  input.style.borderColor = "rgba(224,85,85,.6)";
+  setTimeout(() => { input.placeholder = prev; input.style.borderColor = ""; }, 1400);
+}
+
+function win() {
+  streak++;
+  if (streak > best) best = streak;
+  save(); updateStats();
+  setTimeout(() => showResult("✅ Bien joué !"), 250);
+}
+
+function wrong() {
+  level++;
+  updateAttempts();
+  if (level >= LEVELS.length) return lose();
+  draw();
+  updateHints();
+}
+
+function lose() {
+  streak = 0; save(); updateStats();
+  setTimeout(() => showResult("💀 Perdu !"), 250);
+}
+
+function showResult(titre) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.style.opacity = "0";
+  $("resTitle").textContent  = titre;
+  $("resName").textContent   = current.name;
+  $("resultImg").src         = img.src;
+  const wrongs = sessionGuesses.filter(g => !g.correct).length;
+  $("resGuessesInfo").textContent = wrongs === 0
+    ? "Trouvé du premier coup !"
+    : `${wrongs} mauvaise${wrongs > 1 ? "s" : ""} proposition${wrongs > 1 ? "s" : ""}`;
+  showState("result");
+}
+
+/* ── RENDER GUESS LIST ─────────────────────────────────────── */
+function renderGuessList() {
+  const list = $("guessList");
+  list.querySelectorAll(".guess-item").forEach(el => el.remove());
+
+  $("noGuesses").style.display = sessionGuesses.length ? "none" : "block";
+
+  [...sessionGuesses].reverse().forEach(g => {
+    const div = document.createElement("div");
+    div.className = "guess-item guess-wrong";
+    div.innerHTML = `<span class="guess-icon"></span><span>${escapeHtml(g.name)}</span>`;
+    $("noGuesses").insertAdjacentElement("afterend", div);
+  });
+}
+
+function updateAttempts() { $("attemptsCount").textContent = sessionGuesses.length; }
+
+/* ── HINTS ─────────────────────────────────────────────────── */
+function updateHints() {
+  const parts = current.name.split(" ");
+  if (level === 2) $("hintBox").textContent = "Initiale : " + current.name[0];
+  if (level === 5) $("hintBox").textContent = "Prénom : " + parts[0];
+  if (level === 8) $("hintBox").textContent = "Prénom : " + parts[0] + " | Nom : " + (parts[1] || "?");
+}
+
+/* ── UTILS ─────────────────────────────────────────────────── */
+function normalize(s) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+}
+function isClose(a, b)  { return a === b || b.includes(a) || a.includes(b); }
+function escapeHtml(s)  { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function save()         { localStorage.setItem("pixel_bleach", JSON.stringify({ best })); }
+function updateStats()  { $("sStreak").textContent = streak; $("sBest").textContent = best; }
+function restart()      { used.clear(); streak = 0; updateStats(); startGame(); }
+
+function showState(s) {
+  $("loadBox").style.display   = s === "load"   ? "flex"  : "none";
+  $("gameBox").style.display   = s === "game"   ? "flex"  : "none";
+  $("resultBox").style.display = s === "result" ? "flex"  : "none";
+}

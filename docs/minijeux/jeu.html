@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Guess — Bleach</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="jeu.css">
+
+<script src="../js/nav.js" defer></script>
+<script src="../js/data.js"></script>
+</head>
+<body>
+
+<div class="atmo"></div>
+<div class="top-bar"></div>
+
+<div class="phdr">
+  <h1 class="pttl">
+    <span class="t1">Pixel Guess — Devine le personnage</span>
+  </h1>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+</div>
+
+<div class="pg-wrap">
+
+  <!-- LOADING -->
+  <div id="loadBox">
+    <div class="spinner"></div>
+    <div id="loadMsg">Chargement…</div>
+  </div>
+
+  <!-- GAME -->
+  <div id="gameBox">
+
+    <div class="game-left">
+      <div class="canvas-card">
+        <canvas id="canvas" width="400" height="400"></canvas>
+      </div>
+      <div class="stats-row">
+        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">🔥 Série</span></div>
+        <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+        <div class="sstat"><span class="sv" id="sLevel">—</span><span class="sl">Résolution</span></div>
+      </div>
+      <div class="hint" id="hintBox"></div>
+    </div>
+
+    <div class="game-right">
+      <div class="input-row">
+        <input id="guessInput" autocomplete="off" placeholder="Nom du personnage…" />
+        <button class="btn-sm" id="submitBtn" onclick="submit()">Valider</button>
+        <div id="autocompleteBox" class="autocomplete"></div>
+      </div>
+      <div class="attempts-bar">Tentatives : <span id="attemptsCount">0</span> / <span id="attemptsMax">12</span></div>
+
+      <div class="guesses-section">
+        <div class="guesses-label">Propositions</div>
+        <div class="guesses-list" id="guessList">
+          <div class="no-guesses" id="noGuesses">Aucune proposition encore…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RESULT -->
+  <div id="resultBox">
+    <div class="result-left">
+      <img id="resultImg" src="" alt="" />
+    </div>
+    <div class="result-right">
+      <div class="res-title" id="resTitle"></div>
+      <div class="res-name" id="resName"></div>
+      <div class="res-guesses" id="resGuessesInfo"></div>
+      <button class="btn-sm" onclick="restart()">▶ Rejouer</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Fallback si data.js absent -->
+<script>
+if (typeof CHARS === "undefined") {
+  window.CHARS = [
+    {n:"Ichigo Kurosaki"},{n:"Rukia Kuchiki"},{n:"Orihime Inoue"},{n:"Uryu Ishida"},
+    {n:"Yasutora Sado"},{n:"Byakuya Kuchiki"},{n:"Renji Abarai"},{n:"Toshiro Hitsugaya"},
+    {n:"Sosuke Aizen"},{n:"Kisuke Urahara"},{n:"Yoruichi Shihoin"},{n:"Genryusai Yamamoto"},
+    {n:"Rangiku Matsumoto"},{n:"Gin Ichimaru"},{n:"Kaname Tosen"},{n:"Shunsui Kyoraku"},
+    {n:"Jushiro Ukitake"},{n:"Retsu Unohana"},{n:"Mayuri Kurotsuchi"},{n:"Zaraki Kenpachi"},
+    {n:"Nelliel Tu Odelschwanck"},{n:"Ulquiorra Cifer"},{n:"Grimmjow Jaegerjaquez"},
+    {n:"Tier Harribel"},{n:"Coyote Starrk"},{n:"Baraggan Louisenbairn"},
+    {n:"Yhwach"},{n:"Jugram Haschwalth"},{n:"Bazz-B"},{n:"Gerard Valkyrie"},
+    {n:"Senjumaru Shutara"},{n:"Lille Barro"}
+  ];
+}
+</script>
+
+<script src="jeu.js"></script>
+
+</body>
+</html>
