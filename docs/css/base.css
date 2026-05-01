@@ -165,7 +165,7 @@ nav {
 /* ── DRAWER MOBILE ───────────────────────────────────── */
 .drawer {
   position: fixed; top: 0; left: 0; right: 0; z-index: 300;
-  background: var(--nav-bg, rgba(14,16,20,.98));
+  background: var(--void);
   border-bottom: 1px solid var(--gold-line);
   backdrop-filter: blur(20px);
   padding: 4.5rem 1.5rem 2rem;
