@@ -214,7 +214,12 @@ function submit() {
   $("guessInput").value = "";
 }
 
-function win() { streak++; if (streak > best) best = streak; save(); updateStats(); startGame(); }
+function win() {
+  streak++;
+  if (streak > best) best = streak;
+  save(); updateStats();
+  showResult("✅ Bien joué !");
+}
 
 function wrong() {
   level++;
@@ -223,10 +228,19 @@ function wrong() {
 }
 
 function lose() {
-  $("resTitle").textContent = "💀 Perdu !";
+  streak = 0; save(); updateStats();
+  showResult("💀 Perdu !");
+}
+
+function showResult(titre) {
+  $("resTitle").textContent = titre;
   $("resName").textContent = current.name;
-  $("resultImg").src = current.image;
-  streak = 0; save(); updateStats(); showState("result");
+  // Image pleine résolution sans crossOrigin pour éviter les blocages CORS sur l'affichage
+  const ri = $("resultImg");
+  ri.onload = null;
+  ri.src = "";
+  ri.src = current.image;
+  showState("result");
 }
 
 function updateHints() {
