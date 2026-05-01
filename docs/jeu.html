@@ -244,6 +244,7 @@ function lose() {
 }
 
 function showResult(titre) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   $("resTitle").textContent = titre;
   $("resName").textContent = current.name;
   $("resultImg").src = current.image;
