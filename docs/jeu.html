@@ -27,7 +27,7 @@ canvas { width:100%; max-height:420px; display:block; }
 .sl { font-size:.6rem; color:var(--muted); }
 #loadBox { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; min-height:300px; text-align:center; }
 #resultBox { display:none; flex-direction:column; align-items:center; gap:1rem; }
-#resultImg { width:100%; max-width:400px; border:1px solid var(--gold-line); display:block; }
+#resultImg { width:100%; max-width:380px; border:1px solid var(--gold-line); display:block; }
 .res-name { font-size:1.3rem; color:var(--gold); font-family:'Shippori Mincho',serif; font-weight:700; }
 </style>
 </head>
@@ -78,60 +78,74 @@ const $ = id => document.getElementById(id);
 
 const LEVELS = [4, 6, 8, 10, 13, 16, 20, 25, 32, 45, 64, 120];
 
-/* ===== BASE DE DONNÉES ===== */
-const CHARACTERS = [
-  { name: "Ichigo Kurosaki",       image: "https://cdn.myanimelist.net/images/characters/9/310307.jpg" },
-  { name: "Rukia Kuchiki",         image: "https://cdn.myanimelist.net/images/characters/9/131317.jpg" },
-  { name: "Orihime Inoue",         image: "https://cdn.myanimelist.net/images/characters/3/91007.jpg" },
-  { name: "Yasutora Sado",         image: "https://cdn.myanimelist.net/images/characters/3/91010.jpg" },
-  { name: "Uryuu Ishida",          image: "https://cdn.myanimelist.net/images/characters/14/91004.jpg" },
-  { name: "Renji Abarai",          image: "https://cdn.myanimelist.net/images/characters/10/171877.jpg" },
-  { name: "Byakuya Kuchiki",       image: "https://cdn.myanimelist.net/images/characters/11/72879.jpg" },
-  { name: "Toshiro Hitsugaya",     image: "https://cdn.myanimelist.net/images/characters/8/72875.jpg" },
-  { name: "Rangiku Matsumoto",     image: "https://cdn.myanimelist.net/images/characters/2/72877.jpg" },
-  { name: "Gin Ichimaru",          image: "https://cdn.myanimelist.net/images/characters/7/72873.jpg" },
-  { name: "Sosuke Aizen",          image: "https://cdn.myanimelist.net/images/characters/13/72869.jpg" },
-  { name: "Kaname Tousen",         image: "https://cdn.myanimelist.net/images/characters/4/72871.jpg" },
-  { name: "Kisuke Urahara",        image: "https://cdn.myanimelist.net/images/characters/2/72863.jpg" },
-  { name: "Yoruichi Shihouin",     image: "https://cdn.myanimelist.net/images/characters/6/72865.jpg" },
-  { name: "Kenpachi Zaraki",       image: "https://cdn.myanimelist.net/images/characters/7/72897.jpg" },
-  { name: "Mayuri Kurotsuchi",     image: "https://cdn.myanimelist.net/images/characters/11/72901.jpg" },
-  { name: "Grimmjow Jaegerjaquez", image: "https://cdn.myanimelist.net/images/characters/6/167038.jpg" },
-  { name: "Ulquiorra Cifer",       image: "https://cdn.myanimelist.net/images/characters/8/167040.jpg" },
-  { name: "Tier Harribel",         image: "https://cdn.myanimelist.net/images/characters/8/167054.jpg" },
-  { name: "Coyote Starrk",         image: "https://cdn.myanimelist.net/images/characters/6/167052.jpg" },
-  { name: "Neliel Tu Odelschwanck",image: "https://cdn.myanimelist.net/images/characters/12/167058.jpg" },
-  { name: "Yhwach",                image: "https://cdn.myanimelist.net/images/characters/8/243745.jpg" },
-  { name: "Shinji Hirako",         image: "https://cdn.myanimelist.net/images/characters/6/193045.jpg" },
-  { name: "Isshin Kurosaki",       image: "https://cdn.myanimelist.net/images/characters/5/116345.jpg" },
-  { name: "Kon",                   image: "https://cdn.myanimelist.net/images/characters/7/116349.jpg" },
-];
+// Noms manga canon — format "Prénom Nom" (on inversera le "Nom, Prénom" de Jikan)
+const WHITELIST = new Set([
+  "Ichigo Kurosaki","Rukia Kuchiki","Orihime Inoue","Yasutora Sado","Uryuu Ishida",
+  "Renji Abarai","Byakuya Kuchiki","Toshiro Hitsugaya","Rangiku Matsumoto",
+  "Gin Ichimaru","Sosuke Aizen","Kaname Tousen","Kisuke Urahara","Yoruichi Shihouin",
+  "Shunsui Kyouraku","Jushiro Ukitake","Retsu Unohana","Sajin Komamura",
+  "Izuru Kira","Shuhei Hisagi","Ikkaku Madarame","Yumichika Ayasegawa",
+  "Kenpachi Zaraki","Yachiru Kusajishi","Mayuri Kurotsuchi","Nemu Kurotsuchi",
+  "Soifon","Marechiyo Omaeda","Momo Hinamori","Nanao Ise","Chojiro Sasakibe",
+  "Genryuusai Yamamoto","Isshin Kurosaki","Ryuken Ishida","Tessai Tsukabishi",
+  "Jinta Hanakari","Ururu Tsumugiya","Kon","Kaien Shiba","Kukaku Shiba","Ganju Shiba",
+  "Grimmjow Jaegerjaquez","Ulquiorra Cifer","Nnoitra Gilga","Szayelaporro Grantz",
+  "Aaroniero Arruruerie","Zommari Rureaux","Barragan Louisenbairn","Coyote Starrk",
+  "Tier Harribel","Yammy Llargo","Neliel Tu Odelschwanck","Pesche Guatiche",
+  "Dondochakka Birstanne","Wonderweiss Margela",
+  "Shinji Hirako","Hiyori Sarugaki","Lisa Yadomaru","Love Aikawa",
+  "Rose Otoribashi","Kensei Muguruma","Hachigen Ushoda","Mashiro Kuna",
+  "Yhwach","Jugram Haschwalth","Bambietta Basterbine","Candice Catnipp",
+  "Liltotto Lamperd","Giselle Gewelle","Meninas McAllon","Bazz-B",
+  "As Nodt","Gerard Valkyrie","Lille Barro","Pernida Parnkgjas","Gremmy Thoumeaux",
+  "Ichibei Hyosube","Oetsu Nimaiya","Senjumaru Shutara","Tenjiro Kirinji","Kirio Hikifune",
+  "Kugo Ginjo","Shukuro Tsukishima","Riruka Dokugamine","Jackie Tristan",
+  "Yukio Hans Vorarlberna","Giriko Kutsuzawa"
+]);
 
-/* ===== STATE ===== */
-let characters = CHARACTERS.map(c => ({ ...c, hints: generateHints(c.name) }));
-let allNames = characters.map(c => c.name);
-let used = new Set();
-let current, img;
-let level = 0, streak = 0, best = 0, loading = false, acIndex = -1;
+let characters = [], used = new Set(), allNames = [];
+let current, img, level = 0, streak = 0, best = 0, loading = false, acIndex = -1;
 
 const canvas = $("canvas");
 const ctx = canvas.getContext("2d");
 
-/* ===== INIT ===== */
-window.onload = () => {
+window.onload = async () => {
   const s = JSON.parse(localStorage.getItem("pixel_bleach") || "null");
   if (s) best = s.best || 0;
+  await loadCharacters();
   initAutocomplete();
   updateStats();
   startGame();
   $("guessInput").addEventListener("keypress", e => { if (e.key === "Enter") submit(); });
 };
 
-/* ===== AUTOCOMPLETE ===== */
+async function loadCharacters() {
+  try {
+    const res = await fetch("https://api.jikan.moe/v4/anime/269/characters");
+    const json = await res.json();
+
+    characters = json.data
+      .filter(e => e.character?.images?.jpg?.image_url)
+      .map(e => {
+        // Jikan retourne "Kurosaki, Ichigo" → on inverse
+        const parts = e.character.name.split(", ");
+        const name = parts.length === 2 ? parts[1] + " " + parts[0] : e.character.name;
+        return { name, image: e.character.images.jpg.image_url };
+      })
+      .filter(c => WHITELIST.has(c.name))
+      .map(c => ({ ...c, hints: generateHints(c.name) }));
+
+    allNames = characters.map(c => c.name);
+
+  } catch(e) {
+    console.error("Jikan failed:", e);
+    characters = [];
+  }
+}
+
 function initAutocomplete() {
   const input = $("guessInput");
   const box = $("autocompleteBox");
-
   input.addEventListener("input", () => {
     const val = input.value.toLowerCase();
     box.innerHTML = ""; acIndex = -1;
@@ -146,7 +160,6 @@ function initAutocomplete() {
     });
     box.style.display = matches.length ? "block" : "none";
   });
-
   input.addEventListener("keydown", e => {
     const items = box.querySelectorAll(".ac-item");
     if (e.key === "ArrowDown") acIndex++;
@@ -162,15 +175,14 @@ function initAutocomplete() {
       items[acIndex]?.classList.add("active");
     }
   });
-
   document.addEventListener("click", e => {
     if (!box.contains(e.target) && e.target !== input) box.style.display = "none";
   });
 }
 
-/* ===== GAME ===== */
 function startGame() {
   loading = true; showState("load");
+  if (!characters.length) { $("loadMsg").textContent = "Aucun personnage chargé."; return; }
   const pool = characters.filter(c => !used.has(c.name));
   if (!pool.length) used.clear();
   current = pool[Math.floor(Math.random() * pool.length)];
@@ -215,8 +227,7 @@ function submit() {
 }
 
 function win() {
-  streak++;
-  if (streak > best) best = streak;
+  streak++; if (streak > best) best = streak;
   save(); updateStats();
   showResult("✅ Bien joué !");
 }
@@ -235,11 +246,7 @@ function lose() {
 function showResult(titre) {
   $("resTitle").textContent = titre;
   $("resName").textContent = current.name;
-  // Image pleine résolution sans crossOrigin pour éviter les blocages CORS sur l'affichage
-  const ri = $("resultImg");
-  ri.onload = null;
-  ri.src = "";
-  ri.src = current.image;
+  $("resultImg").src = current.image;
   showState("result");
 }
 
