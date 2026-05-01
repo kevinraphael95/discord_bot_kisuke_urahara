@@ -144,7 +144,7 @@ nav {
   display: block;
   width: 22px;
   height: 2px;
-  background: #ffffff;
+  background: var(--gold);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
@@ -161,7 +161,6 @@ nav {
 .ham.open span:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
 }
-
 
 /* ── DRAWER MOBILE ───────────────────────────────────── */
 .drawer {
