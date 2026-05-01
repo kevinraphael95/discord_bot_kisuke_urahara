@@ -1,10 +1,10 @@
 (function () {
   const pages = [
-    { href: '/commandes.html', label: 'Commandes' },
-    { href: '/reiatsu.html',   label: 'Reiatsu' },
-    { href: '/guesser.html',   label: 'Character Guesser' },
-    { href: '/minijeux.html',   label: 'Minijeux' },
-    { href: '/install.html',   label: 'Installation' },
+    { href: 'commandes.html', label: 'Commandes' },
+    { href: 'reiatsu.html',   label: 'Reiatsu' },
+    { href: 'guesser.html',   label: 'Character Guesser' },
+    { href: 'minijeux.html',   label: 'Minijeux' },
+    { href: 'install.html',   label: 'Installation' },
   ];
   const themes = [
     { id: 'shinigami',    label: 'Shinigami',    icon: '⚔️' },
