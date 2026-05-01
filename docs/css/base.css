@@ -299,3 +299,7 @@ footer {
 @media (min-width: 701px) and (max-width: 1024px) {
   nav { padding: 0 1.8rem; }
 }
+
+.ham.open {
+  background: red !important;
+}
