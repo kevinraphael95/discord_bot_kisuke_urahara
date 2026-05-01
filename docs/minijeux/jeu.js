@@ -16,8 +16,9 @@ const CROPS = [
 let characters = [], allNames = [];
 let used       = new Set();
 let current, img, currentCrop;
-let level = 0, streak = 0, best = 0, loading = false, acIndex = -1;
+let level = 0, streak = 0, best = 0, loading = false;
 let sessionGuesses = [];
+let aSel = -1;  // selected index for autocomplete
 
 const canvas = $("canvas");
 const ctx    = canvas.getContext("2d");
@@ -28,10 +29,8 @@ window.addEventListener("load", async () => {
   const s = JSON.parse(localStorage.getItem("pixel_bleach") || "null");
   if (s) best = s.best || 0;
   await loadCharacters();
-  initAutocomplete();
   updateStats();
   startGame();
-  $("guessInput").addEventListener("keypress", e => { if (e.key === "Enter") submit(); });
 });
 
 /* ── LOAD CHARACTERS ───────────────────────────────────────── */
@@ -112,84 +111,66 @@ async function fetchAniList(mediaIds, dataNames, imageMap) {
   }
 }
 
-/* ── AUTOCOMPLETE ──────────────────────────────────────────── */
-/* ── AUTOCOMPLETE (version améliorée comme guesser.js) ── */
-function initAutocomplete() {
-  const input = $("guessInput");
-  const box = $("autocompleteBox");
-
-  input.addEventListener("input", () => {
-    const val = input.value.toLowerCase().trim();
-    box.innerHTML = "";
-    acIndex = -1;
-
-    if (!val) {
-      box.style.display = "none";
-      return;
-    }
-
-    const guessed = new Set(sessionGuesses.map(g => normalize(g.name)));
-    const escaped = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    
-    // Filtrer les personnages
-    const matches = allNames
-      .filter(name => name.toLowerCase().includes(val) && !guessed.has(normalize(name)))
-      .slice(0, 8);
-    
-    const re = new RegExp(`(${escaped})`, "gi");
-
-    matches.forEach(name => {
-      const div = document.createElement("div");
-      div.className = "ac-item";
-      div.innerHTML = name.replace(re, `<span class="ac-highlight">$1</span>`);
-      div.onclick = () => {
-        input.value = name;
-        box.style.display = "none";
-        submit();
-      };
-      box.appendChild(div);
-    });
-
-    box.style.display = matches.length ? "block" : "none";
-  });
-
-  input.addEventListener("keydown", (e) => {
-    const items = [...box.querySelectorAll(".ac-item")];
-    if (!items.length) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      acIndex = Math.min(acIndex + 1, items.length - 1);
-      updateActiveItem(items);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      acIndex = Math.max(acIndex - 1, -1);
-      updateActiveItem(items);
-    } else if (e.key === "Enter" && acIndex >= 0 && items[acIndex]) {
-      e.preventDefault();
-      input.value = items[acIndex].textContent;
-      box.style.display = "none";
+/* ── AUTOCOMPLETE (identique à guesser.js) ─────────────────── */
+function onIn() {
+  const v = $("guessInput").value.toLowerCase().trim();
+  const l = $("acl");
+  l.innerHTML = "";
+  aSel = -1;
+  if (!v) return;
+  
+  const done = new Set(sessionGuesses.map(g => normalize(g.name)));
+  const matches = allNames.filter(x => x.toLowerCase().includes(v) && !done.has(normalize(x))).slice(0, 8);
+  
+  matches.forEach(x => {
+    const i = document.createElement("div");
+    i.className = "aci";
+    // trouver la race du personnage pour le badge
+    const char = CHARS.find(c => c.n === x);
+    const race = char ? char.r : "?";
+    i.innerHTML = x + '<span class="acb">' + race + '</span>';
+    i.onclick = () => {
+      $("guessInput").value = x;
+      l.innerHTML = "";
       submit();
-    } else if (e.key === "Escape") {
-      box.style.display = "none";
-    }
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!box.contains(e.target) && e.target !== input) {
-      box.style.display = "none";
-    }
+    };
+    l.appendChild(i);
   });
 }
 
-function updateActiveItem(items) {
-  items.forEach((item, i) => {
-    item.classList.toggle("active", i === acIndex);
-  });
-  if (acIndex >= 0 && items[acIndex]) {
-    items[acIndex].scrollIntoView({ block: "nearest", behavior: "smooth" });
+function onKD(e) {
+  const l = $("acl");
+  const items = l.querySelectorAll(".aci");
+  if (!items.length) return;
+  
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    aSel = Math.min(aSel + 1, items.length - 1);
+    items.forEach((x, i) => x.classList.toggle("sel", i === aSel));
+    if (items[aSel]) {
+      $("guessInput").value = items[aSel].firstChild.textContent.trim();
+      items[aSel].scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    aSel = Math.max(aSel - 1, -1);
+    items.forEach((x, i) => x.classList.toggle("sel", i === aSel));
+    if (aSel >= 0 && items[aSel]) {
+      $("guessInput").value = items[aSel].firstChild.textContent.trim();
+      items[aSel].scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    l.innerHTML = "";
+    submit();
+  } else if (e.key === "Escape") {
+    l.innerHTML = "";
   }
 }
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".acw")) $("acl").innerHTML = "";
+});
 
 /* ── GAME LIFECYCLE ────────────────────────────────────────── */
 function startGame() {
@@ -275,7 +256,7 @@ function draw() {
 /* ── INPUT & SUBMIT ────────────────────────────────────────── */
 function submit() {
   if (loading) return;
-  $("autocompleteBox").style.display = "none";
+  $("acl").innerHTML = "";
   const raw = $("guessInput").value.trim();
   if (!raw) return;
 
