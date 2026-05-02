@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avant ou Après ? — Bleach Manga Guesser</title>
+<!-- empêcher le flash blanc aux changements de page : -->
+<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
+<!-- no flash -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="css/avant-apres.css">
+<script src="../js/nav.js" defer></script>
+<script src="js/avant-apres.js" defer></script>
+</head>
+<body>
+
+<div class="atmo"></div>
+<div class="top-bar"></div>
+
+<div class="phdr">
+  <h1 class="pttl">
+    <span class="t1">La deuxième image est-elle <strong>avant</strong> ou <strong>après</strong> ?</span>
+  </h1>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+</div>
+
+<div class="tl-wrap">
+
+  <div id="loadBox">
+    <div class="spinner"></div>
+    <div id="loadMsg">Chargement des pages…</div>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+  </div>
+
+  <div id="gameBox">
+    <div class="images-row">
+      <div class="img-card">
+        <div class="img-label">Image 1 — référence</div>
+        <img id="imgA" alt="Page de référence" />
+      </div>
+      <div class="vs-divider">
+        <div class="vs-line"></div>
+        <div class="vs-text">VS</div>
+        <div class="vs-line"></div>
+      </div>
+      <div class="img-card">
+        <div class="img-label">Image 2 — à situer</div>
+        <img id="imgB" alt="Page à situer" />
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-choice before" onclick="answer('before')">
+        <span class="bc-icon">◀◀</span>
+        <span>Avant</span>
+      </button>
+      <button class="btn-choice after" onclick="answer('after')">
+        <span class="bc-icon">▶▶</span>
+        <span>Après</span>
+      </button>
+      <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+      <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+    </div>
+
+    <div class="streak-bar">
+      Série en cours
+      <div class="streak-dots" id="streakDots"></div>
+    </div>
+  </div>
+
+  <div id="resultBox">
+    <div class="res-emoji">💀</div>
+    <div class="res-title">Raté !</div>
+    <div class="res-info">Tu as tenu <strong id="resStreak">0</strong> bonne(s) réponse(s)</div>
+    <div class="res-record" id="resBest"></div>
+    <button class="btn btn-gold" onclick="restart()">▶ Rejouer</button>
+  </div>
+
+  <div id="errorBox">
+    <div id="errMsg">Impossible de charger les images.</div>
+    <button class="btn btn-ghost" onclick="restart()">🔄 Réessayer</button>
+  </div>
+
+</div>
+
+</body>
+</html>
