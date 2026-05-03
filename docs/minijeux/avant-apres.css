@@ -60,9 +60,11 @@
 }
 
 .btn-row {
-  display: grid; grid-template-columns: 1fr 1fr auto auto; gap: .5rem;
+  display: flex;
+  justify-content: center;
   align-items: stretch;
-  max-width: 600px; margin: 0 auto; width: 100%;
+  gap: .5rem;
+  margin: 0 auto;
 }
 
 .btn-choice {
