@@ -84,7 +84,10 @@
 <div class="drawer" id="drawer">
   ${drawerLinks}
   <div class="drawer-theme-section">
-    ${drawerThemeOptions}
+    <div class="drawer-theme-label">Thème visuel</div>
+    <div class="drawer-theme-btns">
+      ${drawerThemeOptions}
+    </div>
   </div>
 </div>
 `);
