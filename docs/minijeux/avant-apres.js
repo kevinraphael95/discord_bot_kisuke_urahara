@@ -141,8 +141,8 @@ function showResult() {
   $('resBest').textContent = best > 0 ? `Record : ${best}` : '';
   $('resImgA').src = imgA.imgUrl;
   $('resImgB').src = imgB.imgUrl;
-  $('resDbgA').textContent = `T${imgA.num} P${imgA.pageIndex}`;
-  $('resDbgB').textContent = `T${imgB.num} P${imgB.pageIndex}`;
+  $('resDbgA').textContent = `Tome ${imgA.num} Page ${imgA.pageIndex}`;
+  $('resDbgB').textContent = `Tome ${imgB.num} Page ${imgB.pageIndex}`;
   streak = 0;
   updStats();
   localStorage.setItem('bqc_tl_v1', JSON.stringify({ best }));
