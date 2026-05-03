@@ -52,8 +52,10 @@
     </div>
 
     <div class="btn-row">
-      <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
-      <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+      <div class="btn-row-left">
+        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+        <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+      </div>
       <button class="btn-choice before" onclick="answer('before')">
         <span class="bc-icon">◀◀</span>
         <span>Avant</span>
@@ -62,9 +64,11 @@
         <span class="bc-icon">▶▶</span>
         <span>Après</span>
       </button>
-      <div class="sstat" id="debugBox" style="min-width:auto; padding:.45rem 1rem; flex-direction:row; gap:.8rem;">
-        <span style="font-size:.62rem; color:var(--muted);">P1 : <strong id="dbgA">—</strong></span>
-        <span style="font-size:.62rem; color:var(--muted);">P2 : <strong id="dbgB">—</strong></span>
+      <div class="btn-row-right">
+        <div class="sstat" id="debugBox" style="min-width:auto; padding:.45rem 1rem; flex-direction:row; gap:.8rem;">
+          <span style="font-size:.62rem; color:var(--muted);">P1 : <strong id="dbgA">—</strong></span>
+          <span style="font-size:.62rem; color:var(--muted);">P2 : <strong id="dbgB">—</strong></span>
+        </div>
       </div>
     </div>
 
