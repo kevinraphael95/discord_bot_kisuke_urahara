@@ -178,3 +178,10 @@ function updStats() {
     dots.appendChild(d);
   }
 }
+
+function updDebug() {
+  const a = document.getElementById('dbgA');
+  const b = document.getElementById('dbgB');
+  if (a && imgA) a.textContent = imgA.pageIndex;
+  if (b && imgB) b.textContent = imgB.pageIndex;
+}
