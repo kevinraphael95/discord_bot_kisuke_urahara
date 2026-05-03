@@ -77,6 +77,7 @@ async function loadImgEl(elId, data) {
 async function startGame() {
   if (loading) return;
   loading = true;
+  updDebug();
   showState('loading');
   setLoad('🎲 Tirage des pages…', 20);
 
@@ -89,9 +90,11 @@ async function startGame() {
     imgA = a; imgB = b;
     setLoad('🖼 Chargement images…', 80);
     await Promise.all([loadImgEl('imgA', imgA), loadImgEl('imgB', imgB)]);
+    updDebug();
     showState('game');
   } catch(e) {
     console.error(e);
+    updDebug();
     showState('error');
   }
   loading = false;
@@ -118,6 +121,7 @@ function answer(choice) {
 async function nextRound() {
   if (loading) return;
   loading = true;
+  updDebug();
   showState('loading');
   setLoad('🖼 Nouvelle page…', 30);
 
@@ -130,6 +134,7 @@ async function nextRound() {
 
     setLoad('🖼 Chargement…', 70);
     await loadImgEl('imgB', imgB);
+    updDebug();
     showState('game');
   } catch(e) {
     console.error(e);
