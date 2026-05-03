@@ -80,13 +80,11 @@ async function startGame() {
   updDebug();
   showState('loading');
   setLoad('🎲 Tirage des pages…', 20);
-
   try {
     let a = await fetchRandomPage();
     usedImages.add(a.imgUrl);
     setLoad('🎲 Tirage de la deuxième page…', 50);
     let b = await fetchRandomPageInVolume(a.num, a.pageIndex);
-
     imgA = a; imgB = b;
     setLoad('🖼 Chargement images…', 80);
     await Promise.all([loadImgEl('imgA', imgA), loadImgEl('imgB', imgB)]);
@@ -94,7 +92,6 @@ async function startGame() {
     showState('game');
   } catch(e) {
     console.error(e);
-    updDebug();
     showState('error');
   }
   loading = false;
@@ -104,7 +101,6 @@ function answer(choice) {
   if (loading) return;
   const correct = (choice === 'before' && imgB.pageIndex < imgA.pageIndex) ||
                   (choice === 'after'  && imgB.pageIndex > imgA.pageIndex);
-
   if (correct) {
     streak++;
     if (streak > best) {
@@ -124,14 +120,11 @@ async function nextRound() {
   updDebug();
   showState('loading');
   setLoad('🖼 Nouvelle page…', 30);
-
   try {
     imgA = imgB;
     $('imgA').src = imgA.imgUrl;
-
     let b = await fetchRandomPageInVolume(imgA.num, imgA.pageIndex);
     imgB = b;
-
     setLoad('🖼 Chargement…', 70);
     await loadImgEl('imgB', imgB);
     updDebug();
@@ -146,22 +139,10 @@ async function nextRound() {
 function showResult() {
   $('resStreak').textContent = streak;
   $('resBest').textContent = best > 0 ? `Record : ${best}` : '';
-
-  // images
   $('resImgA').src = imgA.imgUrl;
   $('resImgB').src = imgB.imgUrl;
-  $('resLabelA').textContent = `Image 1 — T${imgA.num} P${imgA.pageIndex}`;
-  $('resLabelB').textContent = `Image 2 — T${imgB.num} P${imgB.pageIndex}`;
-
-  // liens
-  const urlA = `https://sushiscan.fr/bleach-volume-${imgA.num}/`;
-  const urlB = `https://sushiscan.fr/bleach-volume-${imgB.num}/`;
-  $('resLinks').innerHTML = `
-    <a href="${urlA}" target="_blank" style="color:var(--gold);">→ Tome ${imgA.num} sur Sushiscan</a>
-    &nbsp;|&nbsp;
-    <a href="${urlB}" target="_blank" style="color:var(--gold);">→ Tome ${imgB.num} sur Sushiscan</a>
-  `;
-
+  $('resDbgA').textContent = `T${imgA.num} P${imgA.pageIndex}`;
+  $('resDbgB').textContent = `T${imgB.num} P${imgB.pageIndex}`;
   streak = 0;
   updStats();
   localStorage.setItem('bqc_tl_v1', JSON.stringify({ best }));
@@ -199,7 +180,6 @@ function updStats() {
     dots.appendChild(d);
   }
 }
-
 
 function updDebug() {
   const a = document.getElementById('dbgA');
