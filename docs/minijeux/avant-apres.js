@@ -146,6 +146,22 @@ async function nextRound() {
 function showResult() {
   $('resStreak').textContent = streak;
   $('resBest').textContent = best > 0 ? `Record : ${best}` : '';
+
+  // images
+  $('resImgA').src = imgA.imgUrl;
+  $('resImgB').src = imgB.imgUrl;
+  $('resLabelA').textContent = `Image 1 — T${imgA.num} P${imgA.pageIndex}`;
+  $('resLabelB').textContent = `Image 2 — T${imgB.num} P${imgB.pageIndex}`;
+
+  // liens
+  const urlA = `https://sushiscan.fr/bleach-volume-${imgA.num}/`;
+  const urlB = `https://sushiscan.fr/bleach-volume-${imgB.num}/`;
+  $('resLinks').innerHTML = `
+    <a href="${urlA}" target="_blank" style="color:var(--gold);">→ Tome ${imgA.num} sur Sushiscan</a>
+    &nbsp;|&nbsp;
+    <a href="${urlB}" target="_blank" style="color:var(--gold);">→ Tome ${imgB.num} sur Sushiscan</a>
+  `;
+
   streak = 0;
   updStats();
   localStorage.setItem('bqc_tl_v1', JSON.stringify({ best }));
