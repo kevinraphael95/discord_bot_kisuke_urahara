@@ -150,8 +150,8 @@ function showResult() {
   // images
   $('resImgA').src = imgA.imgUrl;
   $('resImgB').src = imgB.imgUrl;
-  $('resLabelA').textContent = `T${imgA.num} P${imgA.pageIndex}`;
-  $('resLabelB').textContent = `T${imgB.num} P${imgB.pageIndex}`;
+  $('resLabelA').textContent = `Image 1 — T${imgA.num} P${imgA.pageIndex}`;
+  $('resLabelB').textContent = `Image 2 — T${imgB.num} P${imgB.pageIndex}`;
 
   // liens
   const urlA = `https://sushiscan.fr/bleach-volume-${imgA.num}/`;
