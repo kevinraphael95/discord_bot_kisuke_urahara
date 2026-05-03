@@ -184,9 +184,10 @@ function updStats() {
   }
 }
 
+
 function updDebug() {
   const a = document.getElementById('dbgA');
   const b = document.getElementById('dbgB');
-  if (a && imgA) a.textContent = imgA.pageIndex;
-  if (b && imgB) b.textContent = imgB.pageIndex;
+  if (a && imgA) a.textContent = `T${imgA.num} P${imgA.pageIndex}`;
+  if (b && imgB) b.textContent = `T${imgB.num} P${imgB.pageIndex}`;
 }
