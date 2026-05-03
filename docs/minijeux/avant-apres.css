@@ -112,8 +112,8 @@
 
 #resultBox {
   background: var(--panel); border: 1px solid var(--ko-bd, #c95c4c);
-  padding: 2.5rem 1.5rem;
-  display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center;
+  padding: .8rem 1.5rem;
+  display: none; flex-direction: column; align-items: center; gap: .4rem; text-align: center;
 }
 .res-emoji { font-size: 2.2rem; }
 .res-title {
