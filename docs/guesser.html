@@ -81,23 +81,38 @@
   <div class="cards" id="gc"></div>
 
   <div class="rbanner" id="rb">
-    <div class="rttl" id="rttl"></div>
-    <div class="rchar" id="rchar"></div>
-    <div class="rdesc" id="rdesc"></div>
-    <button class="xbtn" onclick="share()">📋 Copier le résultat</button>
-    <div class="ntmr">Prochain dans : <span id="nt">--:--:--</span></div>
+    <div class="rbanner-inner">
+      <div class="rbanner-left" id="r-img-wrap">
+        <img id="r-img" src="" alt="" />
+      </div>
+      <div class="rbanner-right">
+        <div class="rttl" id="rttl"></div>
+        <div class="rchar" id="rchar"></div>
+        <div class="rdesc" id="rdesc"></div>
+        <button class="xbtn" onclick="share()">📋 Copier le résultat</button>
+        <div class="ntmr">Prochain dans : <span id="nt">--:--:--</span></div>
+      </div>
+    </div>
   </div>
 
+  
   <div class="send" id="send">
-    <div class="se-t">☠ GAME OVER ☠</div>
-    <div class="se-s" id="sedesc"></div>
-    <div class="sestats">
-      <div class="sestat"><strong id="sek">0</strong><span>Trouvés</span></div>
-      <div class="sestat"><strong id="seb">0</strong><span>Meilleure série</span></div>
-      <div class="sestat"><strong id="ser">0</strong><span>Record absolu</span></div>
+    <div class="send-inner">
+      <div class="send-left" id="s-img-wrap">
+        <img id="s-img" src="" alt="" />
+      </div>
+      <div class="send-right">
+        <div class="se-t">☠ GAME OVER ☠</div>
+        <div class="se-s" id="sedesc"></div>
+        <div class="sestats">
+          <div class="sestat"><strong id="sek">0</strong><span>Trouvés</span></div>
+          <div class="sestat"><strong id="seb">0</strong><span>Meilleure série</span></div>
+          <div class="sestat"><strong id="ser">0</strong><span>Record absolu</span></div>
+        </div>
+        <button class="r2btn" onclick="sRestart()">🔁 Nouvelle partie</button>
+        <button class="xbtn2" onclick="sShare()">📋 Copier le score</button>
+      </div>
     </div>
-    <button class="r2btn" onclick="sRestart()">🔁 Nouvelle partie</button>
-    <button class="xbtn2" onclick="sShare()">📋 Copier le score</button>
   </div>
 
 </div>
