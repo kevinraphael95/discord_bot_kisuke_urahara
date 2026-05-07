@@ -6,6 +6,32 @@ const COLS=[
 const MAX=8;
 const $=id=>document.getElementById(id);
 
+// ── Image helpers ────────────────────────────────────────────
+const RACE_TO_FOLDER = {
+  'Arrancar':                  'arrancar',
+  'Hollow':                    'hollow',
+  'Shinigami':                 'shinigami',
+  'Vizard':                    'vizard',
+  'Quincy':                    'quincy',
+  'Fullbring':                 'fullbring',
+  'Humain':                    'humain',
+  'Mod-Soul/Âme artificielle': 'mod-soul',
+};
+
+function nameToSlug(name) {
+  return name
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+function charImg(char) {
+  const folder = RACE_TO_FOLDER[char.r] || 'humain';
+  return `docs/assets/${folder}/${nameToSlug(char.n)}.png`;
+}
+
 function seededShuffle(arr,seed){const a=arr.slice();let s=seed>>>0;for(let i=a.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
 function dayNum(){const s=new Date('2025-01-01');const t=new Date();t.setHours(0,0,0,0);return Math.floor((t-s)/86400000);}
 function todayChar(){const d=dayNum();return seededShuffle(CHARS,d^0xBEA6)[d%CHARS.length];}
@@ -155,11 +181,20 @@ function showDRes(won){
   const b=$('rb');b.classList.add('on',won?'win':'lose');
   $('rttl').textContent=won?'⚔ BIEN JOUÉ !':'💀 ÉCHEC';
   $('rchar').textContent='Personnage : '+tgt.n;
-  $('rdesc').textContent=won?tgt.n+' trouvé en '+dG.length+' essai'+(dG.length>1?'s':'')+'.'
+  $('rdesc').textContent=won
+    ?tgt.n+' trouvé en '+dG.length+' essai'+(dG.length>1?'s':'')+'.'
     :tgt.n+' · '+tgt.r+' · '+tgt.st+' · Cheveux : '+tgt.hc+' · '+tgt.w+'V/'+tgt.l+'D · '+tgt.bday;
   $('gi').disabled=true;$('gbtn').disabled=true;
+
+  // Image du personnage
+  const imgEl=$('r-img');
+  imgEl.src=charImg(tgt);
+  imgEl.alt=tgt.n;
+  imgEl.onerror=()=>$('r-img-wrap').style.display='none';
+
   tick();setInterval(tick,1000);
 }
+
 function tick(){
   const now=new Date(),tom=new Date(now);tom.setDate(tom.getDate()+1);tom.setHours(0,0,0,0);
   const d=tom-now;
@@ -204,7 +239,16 @@ function showSEnd(){
   $('sedesc').innerHTML='Série de <em>'+sStr+'</em> — '+sKil+' personnage'+(sKil>1?'s':'')+'.';
   $('sek').textContent=sKil;$('seb').textContent=sBst;$('ser').textContent=sRec;
   $('gi').disabled=true;$('gbtn').disabled=true;updSUI();
+
+  // Image du dernier personnage à deviner
+  const imgEl=$('s-img');
+  if(sCur){
+    imgEl.src=charImg(sCur);
+    imgEl.alt=sCur.n;
+    imgEl.onerror=()=>$('s-img-wrap').style.display='none';
+  }
 }
+
 function sRestart(){sInit();}
 function sShare(){
   const t='Bleach Character Guesser — Survie\nSérie : '+sStr+'\nTrouvés : '+sKil+'\nRecord : '+sRec+'\n\n🎮 Jouer sur https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
@@ -251,16 +295,19 @@ function onIn(){
   const done=new Set((mode==='daily'?dG:sG).map(x=>x.m.n));
   CHARS.filter(x=>x.n.toLowerCase().includes(v)&&!done.has(x.n)).slice(0,8).forEach(x=>{
     const i=document.createElement('div');i.className='aci';
-    i.innerHTML=x.n+'<span class="acb">'+x.r+' · '+x.st+'</span>';
-    i.onclick=()=>{$('gi').value=x.n;l.innerHTML='';sub();};l.appendChild(i);
+    const img=document.createElement('img');
+    img.src=charImg(x);img.className='aci-img';
+    img.onerror=()=>img.style.display='none';
+    i.appendChild(img);
+    i.innerHTML+=x.n+'<span class="acb">'+x.r+' · '+x.st+'</span>';
+    i.onclick=()=>{$('gi').value=x.n;l.innerHTML='';sub();};
+    l.appendChild(i);
   });
 
-  // ── EASTER EGGS — détection à la frappe ──────────
   if(v==='gay') triggerGay();
-
   if(v==='fromage') triggerFromage();
-  
 }
+
 function onKD(e){
   const l=$('acl');const items=l.querySelectorAll('.aci');
   let sel=mode==='daily'?dSel:sSel;
