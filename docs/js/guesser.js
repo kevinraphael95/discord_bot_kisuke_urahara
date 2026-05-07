@@ -9,13 +9,13 @@ const $=id=>document.getElementById(id);
 // ── Image helpers ────────────────────────────────────────────
 const RACE_TO_FOLDER = {
   'Arrancar':                  'arrancar',
-  'Hollow':                    'hollow',
+  'Hollow':                    'arrancar',
   'Shinigami':                 'shinigami',
-  'Vizard':                    'vizard',
+  'Vizard':                    'shinigami',
   'Quincy':                    'quincy',
-  'Fullbring':                 'fullbring',
-  'Humain':                    'humain',
-  'Mod-Soul/Âme artificielle': 'mod-soul',
+  'Fullbring':                 'humans',
+  'Humain':                    'humans',
+  'Mod-Soul/Âme artificielle': 'humans',
 };
 
 function nameToSlug(name) {
