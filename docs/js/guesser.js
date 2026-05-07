@@ -9,13 +9,23 @@ const $=id=>document.getElementById(id);
 // ── Image helpers ────────────────────────────────────────────
 function charImg(char) {
   if(char.img) return char.img;
-  const slug = char.n
+  const parts = char.n
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
-    .replace(/\s+/g, '-');
-  return `assets/personnages/${slug}.png`;
+    .split(' ');
+  
+  // Essaie prénom-nom puis nom-prénom
+  const slugs = [
+    parts.join('-'),
+    parts.reverse().join('-'),
+  ];
+
+  const img = new Image();
+  img.src = `assets/personnages/${slugs[0]}.png`;
+  img.onerror = () => { img.src = `assets/personnages/${slugs[1]}.png`; };
+  return img.src;
 }
 
 function seededShuffle(arr,seed){const a=arr.slice();let s=seed>>>0;for(let i=a.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
