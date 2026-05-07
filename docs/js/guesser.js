@@ -24,7 +24,14 @@ function charImg(char) {
 
   const img = new Image();
   img.src = `assets/personnages/${slugs[0]}.png`;
-  img.onerror = () => { img.src = `assets/personnages/${slugs[1]}.png`; };
+  img.onerror = () => {
+  img.onerror = null; // ← stop la boucle
+  const parts = x.n.toLowerCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'')
+    .trim().split(' ');
+  img.src = `assets/personnages/${parts.reverse().join('-')}.png`;
+  img.onerror = () => { img.onerror = null; img.style.display='none'; };
+};
   return img.src;
 }
 
