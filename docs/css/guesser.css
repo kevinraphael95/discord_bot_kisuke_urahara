@@ -165,3 +165,61 @@
   .cell { font-size:.5rem; min-height:38px; }
   .cell:first-child { font-size:.56rem; }
 }
+
+/* ── Autocomplete image ── */
+.aci-img {
+  width: 32px; height: 32px; object-fit: cover;
+  border: 1px solid var(--rim); flex-shrink: 0;
+  background: var(--panel);
+}
+
+/* ── Result banner split ── */
+.rbanner-inner {
+  display: flex; gap: 0; width: 100%; min-height: 220px;
+}
+.rbanner-left {
+  width: 50%; flex-shrink: 0; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.25);
+}
+.rbanner-left img {
+  width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  display: block;
+}
+.rbanner-right {
+  width: 50%; padding: 1.2rem 1.4rem;
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: flex-start; justify-content: center;
+}
+.rbanner-right .xbtn { align-self: flex-start; }
+
+/* ── Game Over split ── */
+.send-inner {
+  display: flex; gap: 0; width: 100%; min-height: 220px;
+}
+.send-left {
+  width: 50%; flex-shrink: 0; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.25);
+}
+.send-left img {
+  width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  display: block;
+}
+.send-right {
+  width: 50%; padding: 1.2rem 1.4rem;
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: flex-start; justify-content: center;
+}
+.send-right .r2btn,
+.send-right .xbtn2 { align-self: flex-start; }
+
+/* ── Mobile : stack vertical ── */
+@media (max-width: 700px) {
+  .rbanner-inner, .send-inner { flex-direction: column; }
+  .rbanner-left, .send-left   { width: 100%; height: 180px; }
+  .rbanner-right, .send-right { width: 100%; align-items: center; text-align: center; }
+  .rbanner-right .xbtn,
+  .send-right .r2btn,
+  .send-right .xbtn2          { align-self: center; }
+}
