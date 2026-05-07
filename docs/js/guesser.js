@@ -87,7 +87,11 @@ function cmp(m,t){
 
 function mkRow(m,f,tgt){
   const row=document.createElement('div');row.className='row';
-  const nc=document.createElement('div');nc.className='cell '+(m.n===tgt.n?'correct':'wrong');nc.textContent=m.n;row.appendChild(nc);
+  const nc=document.createElement('div');nc.className='cell '+(m.n===tgt.n?'correct':'wrong');
+  const ri=document.createElement('img');ri.className='row-img';setImg(ri,m);
+  nc.appendChild(ri);
+  nc.appendChild(document.createTextNode(m.n));
+  row.appendChild(nc);
   f.forEach(x=>{const c=document.createElement('div');c.className='cell '+x.s;c.innerHTML=x.v+(x.a?'<span style="font-size:7px;margin-left:2px">'+x.a+'</span>':'');row.appendChild(c);});
   $('gr').prepend(row);
 }
