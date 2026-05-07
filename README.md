@@ -1,4 +1,4 @@
-![Kisuke](data/assets/kisuke.jpg)
+![Kisuke](assets/kisuke.jpg)
 
 # ⚡ Kisuke Urahara
 
