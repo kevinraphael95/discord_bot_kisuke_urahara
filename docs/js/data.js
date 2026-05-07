@@ -33,42 +33,42 @@ const CHARS = [
   // ============================================================
   // AMIS
   // ============================================================
-  {n:"Orihime Inoue",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1},
-  {n:"Yasutora Sado",         r:"Fullbring", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"07/04", w:6,  l:4,  draw:0},
-  {n:"Uryuu Ishida",          r:"Quincy",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1},
+  {n:"Orihime Inoue",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1, img:"assets/personnages/orihime-inoue.png"},
+  {n:"Yasutora Sado",         r:"Fullbring", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"07/04", w:6,  l:4,  draw:0, img:"assets/personnages/yasutora-sado.png"},
+  {n:"Uryuu Ishida",          r:"Quincy",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1, img:"assets/personnages/uryu-ishida.png"},
   
   // ============================================================
   // HUMAINS DE KARAKURA
   // ============================================================
-  {n:"Don Kanonji",           r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"23/03", w:0,  l:0,  draw:0},
-  {n:"Tatsuki Arisawa",       r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Noir",   bday:"17/07", w:1,  l:0,  draw:0},
-  {n:"Keigo Asano",           r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"01/04", w:0,  l:0,  draw:0},
-  {n:"Mizuiro Kojima",        r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"23/05", w:0,  l:0,  draw:0},
-  {n:"Chizuru Honsho",        r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Rouge",   bday:"13/04", w:0,  l:0,  draw:0},
+  {n:"Don Kanonji",           r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"23/03", w:0,  l:0,  draw:0, img:"assets/personnages/don-kanonji.png"},
+  {n:"Tatsuki Arisawa",       r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Noir",   bday:"17/07", w:1,  l:0,  draw:0, img:"assets/personnages/tatsuki-arisawa.png"},
+  {n:"Keigo Asano",           r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"01/04", w:0,  l:0,  draw:0, img:"assets/personnages/keigo-asano.png"},
+  {n:"Mizuiro Kojima",        r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"23/05", w:0,  l:0,  draw:0, img:"assets/personnages/mizuiro-kojima.png"},
+  {n:"Chizuru Honsho",        r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Rouge",   bday:"13/04", w:0,  l:0,  draw:0, img:"assets/personnages/chizuru-honsho.png"},
 
   // ============================================================
   // ÂMES
   // ============================================================
-  {n:"Ganju Shiba",           r:"Humain",    sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0},
-  {n:"Kukaku Shiba",          r:"Humain",    sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
+  {n:"Ganju Shiba",           r:"Humain",    sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0, img:"assets/personnages/"},
+  {n:"Kukaku Shiba",          r:"Humain",    sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0, img:"assets/personnages/"},
 
   // ============================================================
   // URAHARA SHOP
   // ============================================================
-  {n:"Kisuke Urahara",        r:"Shinigami",                   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Blond",  bday:"10/05", w:10, l:1,  draw:1},
-  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Violet", bday:"11/02", w:8,  l:1,  draw:0},
-  {n:"Tessai Tsukabishi",     r:"Shinigami",                   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"12/05", w:2,  l:0,  draw:0},
-  {n:"Jinta Hanakari",        r:"Mod-Soul/Âme artificielle",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:1, st:"Vivant",    hc:"Rouge",  bday:"04/04", w:0,  l:1,  draw:0},
-  {n:"Ururu Tsumugiya",       r:"Mod-Soul/Âme artificielle",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"09/09", w:1,  l:1,  draw:0},
+  {n:"Kisuke Urahara",        r:"Shinigami",                   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Blond",  bday:"10/05", w:10, l:1,  draw:1, img:"assets/personnages/kisuke-urahara.png"},
+  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Violet", bday:"11/02", w:8,  l:1,  draw:0, img:"assets/personnages/yoruichi-shihoin.png"},
+  {n:"Tessai Tsukabishi",     r:"Shinigami",                   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"12/05", w:2,  l:0,  draw:0, img:"assets/personnages/tessai-tsukabishi.png"},
+  {n:"Jinta Hanakari",        r:"Mod-Soul/Âme artificielle",   sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:1, st:"Vivant",    hc:"Rouge",  bday:"04/04", w:0,  l:1,  draw:0, img:"assets/personnages/jinta-hanakari.png"},
+  {n:"Ururu Tsumugiya",       r:"Mod-Soul/Âme artificielle",   sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"09/09", w:1,  l:1,  draw:0, img:"assets/personnages/ururu-tsumugiya.png"},
 
   // ============================================================
   // DIVISION ZÉRO — ROYAL GUARD
   // ============================================================
-  {n:"Ichibei Hyosube",       r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Chauve",  bday:"01/01", w:4,  l:0,  draw:0},
-  {n:"Oetsu Nimaiya",         r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",    bday:"18/08", w:3,  l:0,  draw:0},
-  {n:"Tenjiro Kirinji",       r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",    bday:"31/05", w:2,  l:0,  draw:0},
-  {n:"Kirio Hikifune",        r:"Shinigami",sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Violet",  bday:"16/12", w:2,  l:0,  draw:0},
-  {n:"Shutara Senjumaru",     r:"Shinigami",sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",    bday:"01/11", w:2,  l:0,  draw:0},
+  {n:"Ichibei Hyosube",       r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Chauve",  bday:"01/01", w:4,  l:0,  draw:0, img:"assets/personnages/ichibe-hyosube.png"},
+  {n:"Oetsu Nimaiya",         r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",    bday:"18/08", w:3,  l:0,  draw:0, img:"assets/personnages/oetsu-nimaiya.png"},
+  {n:"Tenjiro Kirinji",       r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",    bday:"31/05", w:2,  l:0,  draw:0, img:"assets/personnages/tenjiro-kirinji.png"},
+  {n:"Kirio Hikifune",        r:"Shinigami",sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Violet",  bday:"16/12", w:2,  l:0,  draw:0, img:"assets/personnages/kirio-hikifune.png"},
+  {n:"Shutara Senjumaru",     r:"Shinigami",sx:"F", arc:"Guerre Sanglante de Mille Ans (5)", af:"Division Zero", d:5, st:"Vivant",    hc:"Noir",    bday:"01/11", w:2,  l:0,  draw:0, img:"assets/personnages/senjumaru-shutara.png"},
 
   // ============================================================
   // GOTEI 13 — CAPITAINES
