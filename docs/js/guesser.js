@@ -8,16 +8,14 @@ const $=id=>document.getElementById(id);
 
 // ── Image helpers ─────────────────────────────────────────────
 const WIKI_IMGS = {};
+const _imgQueue = [];
+let _imgRunning = false;
 
-async function setImg(imgEl, char) {
-  if (char.img) { imgEl.src = char.img; return; }
-  if (WIKI_IMGS[char.n]) { imgEl.src = WIKI_IMGS[char.n]; return; }
-  const slug = char.n.toLowerCase().normalize('NFD')
-    .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'')
-    .trim().replace(/\s+/g,'-');
-  imgEl.src = `assets/personnages/${slug}.png`;
-  imgEl.onerror = async () => {
-    imgEl.onerror = null;
+async function _processQueue() {
+  if (_imgRunning) return;
+  _imgRunning = true;
+  while (_imgQueue.length) {
+    const { char, imgEl } = _imgQueue.shift();
     try {
       const r = await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(char.n)}&limit=1`);
       const d = await r.json();
@@ -25,6 +23,25 @@ async function setImg(imgEl, char) {
       if (url) { WIKI_IMGS[char.n] = url; imgEl.src = url; }
       else imgEl.style.display = 'none';
     } catch { imgEl.style.display = 'none'; }
+    await new Promise(r => setTimeout(r, 350)); // 350ms entre chaque requête
+  }
+  _imgRunning = false;
+}
+
+async function setImg(imgEl, char) {
+  if (char.img) { imgEl.src = char.img; return; }
+  if (WIKI_IMGS[char.n]) { imgEl.src = WIKI_IMGS[char.n]; return; }
+
+  const slug = char.n.toLowerCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '')
+    .trim().replace(/\s+/g, '-');
+  imgEl.src = `assets/personnages/${slug}.png`;
+
+  imgEl.onerror = () => {
+    imgEl.onerror = null;
+    imgEl.src = ''; // vide pendant le chargement
+    _imgQueue.push({ char, imgEl });
+    _processQueue();
   };
 }
 
