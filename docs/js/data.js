@@ -1,37 +1,57 @@
 // data.js — Bleach Guessr
 // Arcs :
 // "Le Shinigami Remplaçant (1)"                     — ch. 1–70
+// Jusqu'à la fin de l'entrainement avec Urahara et la traversée du portail pour rentrer dans la Soul Society
 // "Soul Society : L'Invasion (2.1)"                 — ch. 71–117
+// Jusqu'au premier combat contre byakuya sur le pont et l'arrivé de Yoruichi qui va entrainer Ichigo
 // "Soul Society : Le Sauvetage (2.2)"               — ch. 118–182
-// "Arrancar : Invasion du monde des humains (3.1)"  — ch. 183–286
-// "Arrancar : Invasion du Hueco Mundo (3.2)"        — ch. 287–423
-// "Arrancar : Bataille de Karakura (3.3)"           — ch. 424–479
-// "Arc Fullbringers (4)"                            — ch. 480–523
-// "Guerre Sanglante de Mille Ans (5)"               — ch. 524–686
+// Ichigo est rentré chez lui le monde des humains Rukia est sauvée
+// "Arrancar : Invasion du monde des humains (3.1)"  — ch. 183–229
+// ???
+// "Arrancar : Invasion du Hueco Mundo (3.2)"        — ch. 230–315
+// Infiltration du Hueco Mundo jusqu'au départ d'Aizen vers Karakura
+// "Arrancar : Bataille de Karakura (3.3)"           — ch. 316–423
+// Fake Karakura Town, combat final contre Aizen
+// "Arc Fullbringers (4)"                            — ch. 424–479
+// Les fullbringers
+// "Guerre Sanglante de Mille Ans (5)"               — ch. 480–686
 // NO BREATHES FROM HELL (6)
+// La guerre sanglante c'est sanglant
 
 const CHARS = [
 
   // ============================================================
-  // PROTAGONISTES, FAMILLE DE ICHIGO & HUMAINS DE KARAKURA
+  // FAMILLE DE ICHIGO
   // ============================================================
+  {n:"Isshin Kurosaki",       r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0},
+  {n:"Masaki Kurosaki",       r:"Quincy",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Mort",      hc:"Brun",   bday:"09/06", w:0,  l:0,  draw:0},
   {n:"Ichigo Kurosaki",       r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Roux",   bday:"15/07", w:28, l:6,  draw:2},
+  {n:"Karin Kurosaki",        r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/05", w:0,  l:0,  draw:0},
+  {n:"Yuzu Kurosaki",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",   bday:"06/05", w:0,  l:0,  draw:0},
+  {n:"Kon",                   r:"Mod-Soul/Âme artificielle", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",  bday:"30/12", w:1,  l:3,  draw:0},
+
+  // ============================================================
+  // AMIS
+  // ============================================================
   {n:"Orihime Inoue",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1},
   {n:"Yasutora Sado",         r:"Fullbring", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"07/04", w:6,  l:4,  draw:0},
   {n:"Uryuu Ishida",          r:"Quincy",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1},
-  {n:"Isshin Kurosaki",       r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0},
-  {n:"Kon",                   r:"Mod-Soul/Âme artificielle", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",  bday:"30/12", w:1,  l:3,  draw:0},
+  
+  // ============================================================
+  // HUMAINS DE KARAKURA
+  // ============================================================
   {n:"Don Kanonji",           r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"23/03", w:0,  l:0,  draw:0},
-  {n:"Ganju Shiba",           r:"Humain",    sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0},
-  {n:"Kukaku Shiba",          r:"Humain",    sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
-  {n:"Masaki Kurosaki",       r:"Quincy",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Mort",      hc:"Brun",   bday:"09/06", w:0,  l:0,  draw:0},
-  {n:"Karin Kurosaki",        r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/05", w:0,  l:0,  draw:0},
-  {n:"Yuzu Kurosaki",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",   bday:"06/05", w:0,  l:0,  draw:0},
   {n:"Tatsuki Arisawa",       r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Noir",   bday:"17/07", w:1,  l:0,  draw:0},
   {n:"Keigo Asano",           r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Brun",   bday:"01/04", w:0,  l:0,  draw:0},
   {n:"Mizuiro Kojima",        r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"23/05", w:0,  l:0,  draw:0},
   {n:"Chizuru Honsho",        r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Rouge",   bday:"13/04", w:0,  l:0,  draw:0},
-  
+
+  // ============================================================
+  // ÂMES
+  // ============================================================
+  {n:"Ganju Shiba",           r:"Humain",    sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0},
+  {n:"Kukaku Shiba",          r:"Humain",    sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0},
+
   // ============================================================
   // URAHARA SHOP
   // ============================================================
@@ -93,8 +113,8 @@ const CHARS = [
   {n:"Shuhei Hisagi",         r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0},
   {n:"Mashiro Kuna",          r:"Vizard",   sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0},  
   {n:"Rangiku Matsumoto",     r:"Shinigami",sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"25/05", w:3,  l:3,  draw:0},
-  {n:"Ikkaku Madarame",       r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0},
-  {n:"Akon",                  r:"Shinigami",sx:"M", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir", bday:"29/06", w:1,  l:0,  draw:0},
+  {n:"Ikkaku Madarame",       r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0},
+  {n:"Akon",                  r:"Shinigami",sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir", bday:"??/??", w:1,  l:0,  draw:0},
   {n:"Sentaro Kotsubaki",     r:"Shinigami",sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"22/09", w:1,  l:1,  draw:0},
 
   // ============================================================
