@@ -9,28 +9,23 @@ const $=id=>document.getElementById(id);
 // ── Image helpers ─────────────────────────────────────────────
 const WIKI_IMGS = {};
 
-async function preloadWikiImgs() {
-  await Promise.allSettled(CHARS.map(async char => {
-    try {
-      const r = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(char.n)}`);
-      const d = await r.json();
-      if(d.thumbnail?.source) WIKI_IMGS[char.n] = d.thumbnail.source;
-    } catch {}
-  }));
-}
-
-function charImg(char) {
-  if(char.img) return char.img;
-  if(WIKI_IMGS[char.n]) return WIKI_IMGS[char.n];
+async function setImg(imgEl, char) {
+  if (char.img) { imgEl.src = char.img; return; }
+  if (WIKI_IMGS[char.n]) { imgEl.src = WIKI_IMGS[char.n]; return; }
   const slug = char.n.toLowerCase().normalize('NFD')
     .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'')
     .trim().replace(/\s+/g,'-');
-  return `assets/personnages/${slug}.png`;
-}
-
-function setImg(imgEl, char) {
-  imgEl.src = charImg(char);
-  imgEl.onerror = () => { imgEl.onerror = null; imgEl.style.display = 'none'; };
+  imgEl.src = `assets/personnages/${slug}.png`;
+  imgEl.onerror = async () => {
+    imgEl.onerror = null;
+    try {
+      const r = await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(char.n)}&limit=1`);
+      const d = await r.json();
+      const url = d.data?.[0]?.images?.jpg?.image_url;
+      if (url) { WIKI_IMGS[char.n] = url; imgEl.src = url; }
+      else imgEl.style.display = 'none';
+    } catch { imgEl.style.display = 'none'; }
+  };
 }
 
 // ── Logique de base ───────────────────────────────────────────
@@ -426,7 +421,5 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
 // ── INIT ─────────────────────────────────────────────────────
 loadRec();
 updDots();
-preloadWikiImgs().then(() => {
-  loadD();
-  if(!dOver) foc();
-});
+loadD();
+if(!dOver) foc();
