@@ -23,12 +23,12 @@ const CHARS = [
   // ============================================================
   // FAMILLE DE ICHIGO
   // ============================================================
-  {n:"Isshin Kurosaki",       r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0, img:"docs/assets/shinigami/isshin-kurosaki.png"},
-  {n:"Masaki Kurosaki",       r:"Quincy",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Mort",      hc:"Brun",   bday:"09/06", w:0,  l:0,  draw:0, img:"docs/assets/quincy/masaki-kurosaki.png"},
-  {n:"Ichigo Kurosaki",       r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Roux",   bday:"15/07", w:28, l:6,  draw:2, img:"docs/assets/humans/ichigo-kurosaki.png"},
-  {n:"Karin Kurosaki",        r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/05", w:0,  l:0,  draw:0, img:"docs/assets/humans/karin-kurosaki.png"},
-  {n:"Yuzu Kurosaki",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",   bday:"06/05", w:0,  l:0,  draw:0, img:"docs/assets/humans/yuzu-kurosaki.png"},
-  {n:"Kon",                   r:"Mod-Soul/Âme artificielle", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",  bday:"30/12", w:1,  l:3,  draw:0, img:"docs/assets/humans/kon.jpg"},
+  {n:"Isshin Kurosaki",       r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Noir",   bday:"10/12", w:5,  l:1,  draw:0, img:"assets/shinigami/isshin-kurosaki.png"},
+  {n:"Masaki Kurosaki",       r:"Quincy",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Mort",      hc:"Brun",   bday:"09/06", w:0,  l:0,  draw:0, img:"assets/quincy/masaki-kurosaki.png"},
+  {n:"Ichigo Kurosaki",       r:"Humain",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:5, st:"Vivant",    hc:"Roux",   bday:"15/07", w:28, l:6,  draw:2, img:"assets/humans/ichigo-kurosaki.png"},
+  {n:"Karin Kurosaki",        r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Noir",   bday:"06/05", w:0,  l:0,  draw:0, img:"assets/humans/karin-kurosaki.png"},
+  {n:"Yuzu Kurosaki",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",   bday:"06/05", w:0,  l:0,  draw:0, img:"assets/humans/yuzu-kurosaki.png"},
+  {n:"Kon",                   r:"Mod-Soul/Âme artificielle", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:1, st:"Vivant",    hc:"Blond",  bday:"30/12", w:1,  l:3,  draw:0, img:"assets/humans/kon.jpg"},
 
   // ============================================================
   // AMIS
