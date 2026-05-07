@@ -96,9 +96,10 @@ function mkCard(m,f,tgt){
   const win=m.n===tgt.n;
   const card=document.createElement('div');card.className='card '+(win?'ok':'ko');
   const top=document.createElement('div');top.className='ctop';
+  const ci=document.createElement('img');ci.className='cimg';setImg(ci,m);
   const nm=document.createElement('div');nm.className='cname '+(win?'correct':'wrong');nm.textContent=m.n;
   const badge=document.createElement('div');badge.className='cbadge';badge.innerHTML=m.r+'<br>'+m.arc;
-  top.appendChild(nm);top.appendChild(badge);card.appendChild(top);
+  top.appendChild(ci);top.appendChild(nm);top.appendChild(badge);card.appendChild(top);
   const g=document.createElement('div');g.className='cgrid';
   COLS.forEach((col,i)=>{
     const x=f[i];
