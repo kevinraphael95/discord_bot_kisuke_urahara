@@ -8,7 +8,14 @@ const $=id=>document.getElementById(id);
 
 // ── Image helpers ────────────────────────────────────────────
 function charImg(char) {
-  return char.img || '';
+  if(char.img) return char.img;
+  const slug = char.n
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+  return `assets/personnages/${slug}.png`;
 }
 
 function seededShuffle(arr,seed){const a=arr.slice();let s=seed>>>0;for(let i=a.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
