@@ -224,3 +224,11 @@
   .send-right .r2btn,
   .send-right .xbtn2          { align-self: center; }
 }
+
+
+/* ── Image dans les cartes ── */
+.ctop { min-height: 60px; }
+.cimg {
+  width: 52px; height: 58px; object-fit: cover; object-position: top center;
+  border: 1px solid var(--rim); flex-shrink: 0;
+}
