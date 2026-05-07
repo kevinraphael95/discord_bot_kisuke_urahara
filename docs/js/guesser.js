@@ -7,29 +7,8 @@ const MAX=8;
 const $=id=>document.getElementById(id);
 
 // ── Image helpers ────────────────────────────────────────────
-const RACE_TO_FOLDER = {
-  'Arrancar':                  'arrancar',
-  'Hollow':                    'arrancar',
-  'Shinigami':                 'shinigami',
-  'Vizard':                    'shinigami',
-  'Quincy':                    'quincy',
-  'Fullbring':                 'humans',
-  'Humain':                    'humans',
-  'Mod-Soul/Âme artificielle': 'humans',
-};
-
-function nameToSlug(name) {
-  return name
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-');
-}
-
 function charImg(char) {
-  const folder = RACE_TO_FOLDER[char.r] || 'humain';
-  return `docs/assets/${folder}/${nameToSlug(char.n)}.png`;
+  return char.img || '';
 }
 
 function seededShuffle(arr,seed){const a=arr.slice();let s=seed>>>0;for(let i=a.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -298,12 +277,12 @@ function onIn(){
     const img=document.createElement('img');
     img.src=charImg(x);img.className='aci-img';
     img.onerror=()=>img.style.display='none';
-    i.appendChild(img);
-    i.innerHTML+=x.n+'<span class="acb">'+x.r+' · '+x.st+'</span>';
+    const txt=document.createElement('span');txt.textContent=x.n;
+    const badge=document.createElement('span');badge.className='acb';badge.textContent=x.r+' · '+x.st;
+    i.appendChild(img);i.appendChild(txt);i.appendChild(badge);
     i.onclick=()=>{$('gi').value=x.n;l.innerHTML='';sub();};
     l.appendChild(i);
   });
-
   if(v==='gay') triggerGay();
   if(v==='fromage') triggerFromage();
 }
