@@ -52,6 +52,10 @@
     </div>
 
     <div class="btn-row">
+      <div class="btn-row-left">
+        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
+        <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+      </div>
       <button class="btn-choice before" onclick="answer('before')">
         <span class="bc-icon">◀◀</span>
         <span>Avant</span>
@@ -60,8 +64,12 @@
         <span class="bc-icon">▶▶</span>
         <span>Après</span>
       </button>
-      <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
-      <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
+      <div class="btn-row-right">
+        <div class="sstat" id="debugBox" style="min-width:auto; padding:.45rem 1rem; flex-direction:row; gap:.8rem;">
+          <span style="font-size:.62rem; color:var(--muted);">P1 : <strong id="dbgA">—</strong></span>
+          <span style="font-size:.62rem; color:var(--muted);">P2 : <strong id="dbgB">—</strong></span>
+        </div>
+      </div>
     </div>
 
     <div class="streak-bar">
@@ -71,10 +79,23 @@
   </div>
 
   <div id="resultBox">
-    <div class="res-emoji">💀</div>
-    <div class="res-title">Raté !</div>
+    <div style="display:flex; align-items:center; gap:.5rem; justify-content:center;">
+      <span class="res-emoji">💀</span>
+      <span class="res-title">Raté !</span>
+    </div>
     <div class="res-info">Tu as tenu <strong id="resStreak">0</strong> bonne(s) réponse(s)</div>
     <div class="res-record" id="resBest"></div>
+    <div style="display:flex; gap:.8rem; width:100%;">
+      <div class="img-card" style="flex:1;">
+        <div class="img-label" id="resLabelA">—</div>
+        <img id="resImgA" style="max-height:280px; width:100%; object-fit:contain;" alt="" />
+      </div>
+      <div class="img-card" style="flex:1;">
+        <div class="img-label" id="resLabelB">—</div>
+        <img id="resImgB" style="max-height:280px; width:100%; object-fit:contain;" alt="" />
+      </div>
+    </div>
+    <div style="font-size:.62rem; color:var(--muted);">Page 1 : <strong id="resDbgA">—</strong> &nbsp;|&nbsp; Page 2 : <strong id="resDbgB">—</strong></div>
     <button class="btn btn-gold" onclick="restart()">▶ Rejouer</button>
   </div>
 

@@ -77,18 +77,18 @@ async function loadImgEl(elId, data) {
 async function startGame() {
   if (loading) return;
   loading = true;
+  updDebug();
   showState('loading');
   setLoad('🎲 Tirage des pages…', 20);
-
   try {
     let a = await fetchRandomPage();
     usedImages.add(a.imgUrl);
     setLoad('🎲 Tirage de la deuxième page…', 50);
     let b = await fetchRandomPageInVolume(a.num, a.pageIndex);
-
     imgA = a; imgB = b;
     setLoad('🖼 Chargement images…', 80);
     await Promise.all([loadImgEl('imgA', imgA), loadImgEl('imgB', imgB)]);
+    updDebug();
     showState('game');
   } catch(e) {
     console.error(e);
@@ -101,7 +101,6 @@ function answer(choice) {
   if (loading) return;
   const correct = (choice === 'before' && imgB.pageIndex < imgA.pageIndex) ||
                   (choice === 'after'  && imgB.pageIndex > imgA.pageIndex);
-
   if (correct) {
     streak++;
     if (streak > best) {
@@ -118,18 +117,17 @@ function answer(choice) {
 async function nextRound() {
   if (loading) return;
   loading = true;
+  updDebug();
   showState('loading');
   setLoad('🖼 Nouvelle page…', 30);
-
   try {
     imgA = imgB;
     $('imgA').src = imgA.imgUrl;
-
     let b = await fetchRandomPageInVolume(imgA.num, imgA.pageIndex);
     imgB = b;
-
     setLoad('🖼 Chargement…', 70);
     await loadImgEl('imgB', imgB);
+    updDebug();
     showState('game');
   } catch(e) {
     console.error(e);
@@ -141,6 +139,10 @@ async function nextRound() {
 function showResult() {
   $('resStreak').textContent = streak;
   $('resBest').textContent = best > 0 ? `Record : ${best}` : '';
+  $('resImgA').src = imgA.imgUrl;
+  $('resImgB').src = imgB.imgUrl;
+  $('resDbgA').textContent = `Tome ${imgA.num} Page ${imgA.pageIndex}`;
+  $('resDbgB').textContent = `Tome ${imgB.num} Page ${imgB.pageIndex}`;
   streak = 0;
   updStats();
   localStorage.setItem('bqc_tl_v1', JSON.stringify({ best }));
@@ -177,4 +179,11 @@ function updStats() {
     d.className = 'sdot' + (i < streak ? ' active' : '');
     dots.appendChild(d);
   }
+}
+
+function updDebug() {
+  const a = document.getElementById('dbgA');
+  const b = document.getElementById('dbgB');
+  if (a && imgA) a.textContent = `T${imgA.num} P${imgA.pageIndex}`;
+  if (b && imgB) b.textContent = `T${imgB.num} P${imgB.pageIndex}`;
 }

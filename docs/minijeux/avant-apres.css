@@ -60,9 +60,29 @@
 }
 
 .btn-row {
-  display: grid; grid-template-columns: 1fr 1fr auto auto; gap: .5rem;
+  display: flex;
+  justify-content: center;
   align-items: stretch;
-  max-width: 600px; margin: 0 auto; width: 100%;
+  gap: .5rem;
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
+}
+
+.btn-row-left {
+  position: absolute;
+  left: 0;
+  display: flex;
+  gap: .5rem;
+  align-items: stretch;
+}
+
+.btn-row-right {
+  position: absolute;
+  right: 0;
+  display: flex;
+  gap: .5rem;
+  align-items: stretch;
 }
 
 .btn-choice {
@@ -92,8 +112,8 @@
 
 #resultBox {
   background: var(--panel); border: 1px solid var(--ko-bd, #c95c4c);
-  padding: 2.5rem 1.5rem;
-  display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center;
+  padding: .8rem 1.5rem;
+  display: none; flex-direction: column; align-items: center; gap: .4rem; text-align: center;
 }
 .res-emoji { font-size: 2.2rem; }
 .res-title {
@@ -124,6 +144,6 @@
   .vs-divider { flex-direction: row; }
   .vs-line { width: 36px; height: 1px; }
   .tl-wrap { padding: 1rem 1rem 3rem; }
-  .btn-row { grid-template-columns: 1fr 1fr; }
+  .btn-row { flex-wrap: wrap; }
   .btn-row .sstat { display: none; }
 }
