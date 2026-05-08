@@ -502,12 +502,3 @@ updDots();
 loadD();
 if(!dOver) foc();
 
-// ── Modal auth : afficher au 1er lancement si pas de session ─
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    if (typeof currentUser !== 'undefined' && !currentUser) {
-      const alreadySkipped = localStorage.getItem('bleachg_auth_skipped');
-      if (!alreadySkipped) showAuthModal();
-    }
-  }, 800);
-});
