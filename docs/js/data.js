@@ -207,7 +207,7 @@ const CHARS = [
   // ============================================================
   // WANDENREICH
   // ============================================================
-  {n:"Yhwach",                r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:8,  l:1,  draw:0, img:"assets/personnages/yhwach.png"},
+  {n:"Yhwach",                r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:8,  l:1,  draw:0, img:"assets/personnages/yhwach.webp"},
   {n:"Jugram Haschwalth",     r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Blond",  bday:"05/11", w:5,  l:1,  draw:0, img:"assets/personnages/jugram-haschwalth.png"},
   {n:"Pernida Parnkgjas",     r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Chauve", bday:"19/01", w:3,  l:1,  draw:0, img:"assets/personnages/pernida-parnkgjas.png"},
   {n:"Askin Nakk Le Vaar",    r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Noir",   bday:"06/06", w:3,  l:1,  draw:0, img:"assets/personnages/askin-nakk-le-vaar.png"},
