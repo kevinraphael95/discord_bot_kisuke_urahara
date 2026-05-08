@@ -473,4 +473,11 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
 
 // ── INIT ─────────────────────────────────────────────────────
 loadRec();
-switchMode('daily');
+updDots();
+if(!currentUser){
+  $('gi').disabled=true;
+  $('gi').placeholder='🔒 Connectez-vous pour jouer';
+  $('gbtn').disabled=true;
+} else {
+  foc();
+}
