@@ -322,7 +322,6 @@ function subD(){
   inp.value='';$('acl').innerHTML='';
   $('gi').focus();
   const won=m.n===tgt.n;
-  const won=m.n===tgt.n;
   if(won||dG.length>=MAX){dOver=true;saveD(won);setTimeout(()=>showDRes(won),400);}else saveD(false);
 }
 
