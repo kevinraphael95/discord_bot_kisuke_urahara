@@ -211,7 +211,7 @@
 .se-t { font-family: 'Shippori Mincho', serif; font-size: 1.1rem; font-weight: 800; letter-spacing: .08em; color: var(--surv-tx); }
 .se-s { color: var(--text); font-size: .88rem; line-height: 1.7; }
 
-.sestats { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; }
+.sestats { display: flex; gap: 9px; justify-content: center; flex-wrap: nowrap; }
 .sestat  { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 13px; background: rgba(1,1,8,.6); border: 1px solid rgba(30,127,232,.22); }
 .sestat strong { font-family: 'Shippori Mincho', serif; font-size: 1.2rem; color: var(--surv-tx); }
 .sestat span   { font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
