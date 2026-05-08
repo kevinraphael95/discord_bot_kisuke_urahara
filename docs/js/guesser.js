@@ -6,60 +6,55 @@ const COLS=[
 const MAX=8;
 const $=id=>document.getElementById(id);
 
-// ── Image helpers ─────────────────────────────────────────────
-const WIKI_IMGS = {};
-const _imgQueue = [];
-let _imgRunning = false;
+const WIKI_IMGS={};
+const _imgQueue=[];
+let _imgRunning=false;
 
-async function _processQueue() {
-  if (_imgRunning) return;
-  _imgRunning = true;
-  while (_imgQueue.length) {
-    const { char, imgEl } = _imgQueue.shift();
-    try {
-      const r = await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(char.n)}&limit=1`);
-      const d = await r.json();
-      const url = d.data?.[0]?.images?.jpg?.image_url;
-      if (url) { WIKI_IMGS[char.n] = url; imgEl.src = url; }
-      else imgEl.style.display = 'none';
-    } catch { imgEl.style.display = 'none'; }
-    await new Promise(r => setTimeout(r, 350));
+async function _processQueue(){
+  if(_imgRunning)return;
+  _imgRunning=true;
+  while(_imgQueue.length){
+    const{char,imgEl}=_imgQueue.shift();
+    try{
+      const r=await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(char.n)}&limit=1`);
+      const d=await r.json();
+      const url=d.data?.[0]?.images?.jpg?.image_url;
+      if(url){WIKI_IMGS[char.n]=url;imgEl.src=url;}
+      else imgEl.style.display='none';
+    }catch{imgEl.style.display='none';}
+    await new Promise(r=>setTimeout(r,350));
   }
-  _imgRunning = false;
+  _imgRunning=false;
 }
 
-async function setImg(imgEl, char) {
-  if (char.img) { imgEl.src = char.img; return; }
-  if (WIKI_IMGS[char.n]) { imgEl.src = WIKI_IMGS[char.n]; return; }
-  const slug = char.n.toLowerCase().normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '')
-    .trim().replace(/\s+/g, '-');
-  imgEl.src = `assets/personnages/${slug}.png`;
-  imgEl.onerror = () => {
-    imgEl.onerror = null;
-    imgEl.src = '';
-    _imgQueue.push({ char, imgEl });
-    _processQueue();
+async function setImg(imgEl,char){
+  if(char.img){imgEl.src=char.img;return;}
+  if(WIKI_IMGS[char.n]){imgEl.src=WIKI_IMGS[char.n];return;}
+  const slug=char.n.toLowerCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'')
+    .trim().replace(/\s+/g,'-');
+  imgEl.src=`assets/personnages/${slug}.png`;
+  imgEl.onerror=()=>{
+    imgEl.onerror=null;imgEl.src='';
+    _imgQueue.push({char,imgEl});_processQueue();
   };
 }
 
-// ── Helpers show/hide game elements ──────────────────────────
-function hideGameUI() {
-  $('dbar').style.display = 'none';
-  document.querySelector('.iz').style.display = 'none';
-  document.querySelector('.tw').style.display = 'none';
-  document.querySelector('.cards').style.display = 'none';
+function hideGameUI(){
+  $('dbar').style.display='none';
+  document.querySelector('.iz').style.display='none';
+  document.querySelector('.tw').style.display='none';
+  document.querySelector('.cards').style.display='none';
   $('hpanel').classList.remove('on');
 }
 
-function showGameUI(m) {
-  document.querySelector('.iz').style.display = 'flex';
-  document.querySelector('.tw').style.display = '';
-  document.querySelector('.cards').style.display = '';
-  if (m === 'daily') $('dbar').style.display = 'flex';
+function showGameUI(m){
+  document.querySelector('.iz').style.display='flex';
+  document.querySelector('.tw').style.display='';
+  document.querySelector('.cards').style.display='';
+  if(m==='daily')$('dbar').style.display='flex';
 }
 
-// ── Logique de base ───────────────────────────────────────────
 function seededShuffle(arr,seed){const a=arr.slice();let s=seed>>>0;for(let i=a.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
 function dayNum(){const s=new Date('2025-01-01');const t=new Date();t.setHours(0,0,0,0);return Math.floor((t-s)/86400000);}
 function todayChar(){const d=dayNum();return seededShuffle(CHARS,d^0xBEA6)[d%CHARS.length];}
@@ -75,7 +70,7 @@ function bdayToDay(bday){
   return cum[mo-1]+d;
 }
 
-const ARC_ORDER = [
+const ARC_ORDER=[
   'Le Shinigami Remplaçant (1)',
   "Soul Society : L'Invasion (2.1)",
   'Soul Society : Le Sauvetage (2.2)',
@@ -92,25 +87,16 @@ function cmp(m,t){
   const sameBd=m.bday===t.bday;
   const sameMo=m.bday!=='??/??' && t.bday!=='??/??' && m.bday.slice(3)===t.bday.slice(3);
   let bdDir='';
-  const mDay=bdayToDay(m.bday), tDay=bdayToDay(t.bday);
-  if(!sameBd && mDay!==null && tDay!==null) bdDir = mDay < tDay ? '▲' : '▼';
+  const mDay=bdayToDay(m.bday),tDay=bdayToDay(t.bday);
+  if(!sameBd&&mDay!==null&&tDay!==null)bdDir=mDay<tDay?'▲':'▼';
   return[
-    {v:m.r,   s:m.r===t.r?'correct':'wrong',a:''},
-    {v:m.sx,  s:m.sx===t.sx?'correct':'wrong',a:''},
-    {v:m.arc, s:(()=>{
-      if(m.arc===t.arc) return 'correct';
-      const mi=ARC_ORDER.indexOf(m.arc), ti=ARC_ORDER.indexOf(t.arc);
-      return (mi>=0&&ti>=0&&Math.abs(mi-ti)===1)?'close':'wrong';
-    })(), a:(()=>{
-      if(m.arc===t.arc) return '';
-      const mi=ARC_ORDER.indexOf(m.arc), ti=ARC_ORDER.indexOf(t.arc);
-      if(mi<0||ti<0) return '';
-      return mi<ti?'▲':'▼';
-    })()},
-    {v:m.af,  s:m.af===t.af?'correct':'wrong',a:''},
+    {v:m.r,s:m.r===t.r?'correct':'wrong',a:''},
+    {v:m.sx,s:m.sx===t.sx?'correct':'wrong',a:''},
+    {v:m.arc,s:(()=>{if(m.arc===t.arc)return'correct';const mi=ARC_ORDER.indexOf(m.arc),ti=ARC_ORDER.indexOf(t.arc);return(mi>=0&&ti>=0&&Math.abs(mi-ti)===1)?'close':'wrong';})(),a:(()=>{if(m.arc===t.arc)return'';const mi=ARC_ORDER.indexOf(m.arc),ti=ARC_ORDER.indexOf(t.arc);if(mi<0||ti<0)return'';return mi<ti?'▲':'▼';})()},
+    {v:m.af,s:m.af===t.af?'correct':'wrong',a:''},
     {v:'★'.repeat(m.d)+'☆'.repeat(5-m.d),s:m.d===t.d?'correct':dd===1?'close':'wrong',a:m.d<t.d?'▲':m.d>t.d?'▼':''},
-    {v:m.st,  s:m.st===t.st?'correct':'wrong',a:''},
-    {v:m.hc,  s:m.hc===t.hc?'correct':'wrong',a:''},
+    {v:m.st,s:m.st===t.st?'correct':'wrong',a:''},
+    {v:m.hc,s:m.hc===t.hc?'correct':'wrong',a:''},
     {v:m.bday,s:sameBd?'correct':sameMo?'close':'wrong',a:sameBd?'':bdDir},
     {v:m.w+'V/'+m.l+'D',s:m.w===t.w&&m.l===t.l?'correct':dw<=2?'close':'wrong',a:m.w<t.w?'▲':m.w>t.w?'▼':''},
   ];
@@ -120,9 +106,7 @@ function mkRow(m,f,tgt){
   const row=document.createElement('div');row.className='row';
   const nc=document.createElement('div');nc.className='cell '+(m.n===tgt.n?'correct':'wrong');
   const ri=document.createElement('img');ri.className='row-img';setImg(ri,m);
-  nc.appendChild(ri);
-  nc.appendChild(document.createTextNode(m.n));
-  row.appendChild(nc);
+  nc.appendChild(ri);nc.appendChild(document.createTextNode(m.n));row.appendChild(nc);
   f.forEach(x=>{const c=document.createElement('div');c.className='cell '+x.s;c.innerHTML=x.v+(x.a?'<span style="font-size:7px;margin-left:2px">'+x.a+'</span>':'');row.appendChild(c);});
   $('gr').prepend(row);
 }
@@ -149,7 +133,6 @@ function mkCard(m,f,tgt){
 
 function clr(){$('gr').innerHTML='';$('gc').innerHTML='';}
 
-// ── State ────────────────────────────────────────────────────
 let mode='daily';
 let tgt=todayChar(),dG=[],dOver=false,dSel=-1;
 let sStr=0,sBst=0,sKil=0;
@@ -157,6 +140,7 @@ let sQ=[],sQi=0,sCur=null,sG=[],sSel=-1,sOver=false,sRec=0;
 
 function switchMode(m){
   mode=m;
+  $('gi').value='';$('acl').innerHTML='';
   $('btnD').classList.toggle('active',m==='daily');
   $('btnS').classList.toggle('active',m==='survival');
   $('sbar').classList.toggle('on',m==='survival');
@@ -172,32 +156,31 @@ function switchMode(m){
     if(dOver){
       hideGameUI();
       showDRes(dG.some(x=>x.m.n===tgt.n));
-    } else {
+    }else{
       showGameUI('daily');
       $('rb').classList.remove('on');
       $('gi').disabled=!currentUser;$('gbtn').disabled=!currentUser;
-      if(!currentUser) $('gi').placeholder='🔒 Connectez-vous pour jouer';
+      if(!currentUser)$('gi').placeholder='🔒 Connectez-vous pour jouer';
+      else $('gi').placeholder='Entrez un personnage Bleach…';
       foc();
     }
-  } else {
+  }else{
     $('rb').classList.remove('on');
     if(sOver){
-      clr();
-      hideGameUI();
-      showSEnd();
-    } else {
-      showGameUI('survival');
-      clr();
-      if(!sCur) sInit();
+      clr();hideGameUI();showSEnd();
+    }else{
+      showGameUI('survival');clr();
+      if(!sCur)sInit();
       else sG.forEach(x=>{mkRow(x.m,x.f,sCur);mkCard(x.m,x.f,sCur);});
-      updSUI();$('gi').disabled=false;$('gbtn').disabled=false;foc();
+      updSUI();$('gi').disabled=false;$('gbtn').disabled=false;
+      $('gi').placeholder='Entrez un personnage Bleach…';
+      foc();
     }
   }
 }
 
 function foc(){setTimeout(()=>$('gi').focus(),60);}
 
-// ── Daily ────────────────────────────────────────────────────
 function updDots(){
   const r=$('dots');r.innerHTML='';
   for(let i=0;i<MAX;i++){
@@ -217,8 +200,7 @@ function showDRes(won){
     ?tgt.n+' trouvé en '+dG.length+' essai'+(dG.length>1?'s':'')+'.'
     :tgt.n+' · '+tgt.r+' · '+tgt.st+' · Cheveux : '+tgt.hc+' · '+tgt.w+'V/'+tgt.l+'D · '+tgt.bday;
   $('gi').disabled=true;$('gbtn').disabled=true;
-  setImg($('r-img'), tgt);
-  $('r-img').alt=tgt.n;
+  setImg($('r-img'),tgt);$('r-img').alt=tgt.n;
   tick();setInterval(tick,1000);
 }
 
@@ -236,7 +218,6 @@ function share(){
   const b=document.querySelector('.xbtn');b.textContent='✓ Copié !';setTimeout(()=>b.textContent='📋 Copier le résultat',2000);
 }
 
-// ── Survival ─────────────────────────────────────────────────
 function loadRec(){try{const s=JSON.parse(localStorage.getItem('bleachg_surv'));if(s)sRec=s.best||0;}catch(e){}}
 function saveRec(){try{localStorage.setItem('bleachg_surv',JSON.stringify({best:sRec}));}catch(e){}}
 function rndQ(){const a=CHARS.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -275,13 +256,11 @@ function showSEnd(){
   $('sedesc').innerHTML='Série de <em>'+sStr+'</em> — '+sKil+' personnage'+(sKil>1?'s':'')+'.';
   $('sek').textContent=sKil;$('seb').textContent=sBst;$('ser').textContent=sRec;
   $('gi').disabled=true;$('gbtn').disabled=true;updSUI();
-  if(sCur){ setImg($('s-img'), sCur); $('s-img').alt=sCur.n; }
+  if(sCur){setImg($('s-img'),sCur);$('s-img').alt=sCur.n;}
 }
 
 function sRestart(){
-  showGameUI('survival');
-  $('sbar').classList.add('on');
-  sInit();
+  showGameUI('survival');$('sbar').classList.add('on');sInit();
 }
 
 function sShare(){
@@ -290,11 +269,10 @@ function sShare(){
   const b=document.querySelector('.xbtn2');b.textContent='✓ Copié !';setTimeout(()=>b.textContent='📋 Copier le score',2000);
 }
 
-// ── Submit ───────────────────────────────────────────────────
 function sub(){mode==='daily'?subD():subS();}
 
 function subD(){
-  if(!currentUser){ showAuthModal(); return; }
+  if(!currentUser){showAuthModal();return;}
   if(dOver)return;
   const inp=$('gi');const v=inp.value.trim();if(!v)return;
   const m=CHARS.find(x=>x.n.toLowerCase()===v.toLowerCase());
@@ -302,17 +280,10 @@ function subD(){
   if(dG.find(x=>x.m.n===m.n)){shake(inp,'Déjà essayé !');return;}
   const f=cmp(m,tgt);dG.push({m,f});
   mkRow(m,f,tgt);mkCard(m,f,tgt);updDots();
-  inp.value='';$('acl').innerHTML='';
-  $('gi').focus();
+  inp.value='';$('acl').innerHTML='';$('gi').focus();
   const won=m.n===tgt.n;
   if(typeof submitScore==='function'){
-    submitScore({
-      date: todayKey(),
-      found: won,
-      attempts: dG.length,
-      mode: 'daily',
-      guesses: dG.map(x => x.m.n),
-    });
+    submitScore({date:todayKey(),found:won,attempts:dG.length,mode:'daily',guesses:dG.map(x=>x.m.n)});
   }
   if(won||dG.length>=MAX){
     dOver=true;
@@ -329,18 +300,17 @@ function subS(){
   const f=cmp(m,sCur);sG.push({m,f});
   mkRow(m,f,sCur);mkCard(m,f,sCur);
   inp.value='';$('acl').innerHTML='';updSUI();
-  if(!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
-  if(m.n===sCur.n) sCorrect();
-  else if(sG.length>=MAX) sGameOver(sCur.n);
+  if(!/Mobi|Android/i.test(navigator.userAgent))$('gi').focus();
+  if(m.n===sCur.n)sCorrect();
+  else if(sG.length>=MAX)sGameOver(sCur.n);
 }
 
 function shake(inp,msg){
   inp.style.borderColor='var(--ko-bd)';inp.placeholder=msg;
   inp.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:240});
-  setTimeout(()=>{inp.style.borderColor='';inp.placeholder='Entrez un personnage Bleach…';},1500);
+  setTimeout(()=>{inp.style.borderColor='';inp.placeholder=mode==='daily'&&!currentUser?'🔒 Connectez-vous pour jouer':'Entrez un personnage Bleach…';},1500);
 }
 
-// ── Autocomplete ─────────────────────────────────────────────
 function onIn(){
   const v=$('gi').value.toLowerCase().trim();
   const l=$('acl');l.innerHTML='';
@@ -349,23 +319,21 @@ function onIn(){
   const done=new Set((mode==='daily'?dG:sG).map(x=>x.m.n));
   CHARS.filter(x=>x.n.toLowerCase().includes(v)&&!done.has(x.n)).slice(0,8).forEach(x=>{
     const i=document.createElement('div');i.className='aci';
-    const img=document.createElement('img');
-    img.className='aci-img';
-    setImg(img, x);
+    const img=document.createElement('img');img.className='aci-img';setImg(img,x);
     const txt=document.createElement('span');txt.textContent=x.n;
     const badge=document.createElement('span');badge.className='acb';badge.textContent=x.r+' · '+x.st;
     i.appendChild(img);i.appendChild(txt);i.appendChild(badge);
     i.onclick=()=>{$('gi').value=x.n;l.innerHTML='';sub();};
     l.appendChild(i);
   });
-  if(v==='gay') triggerGay();
-  if(v==='fromage') triggerFromage();
+  if(v==='gay')triggerGay();
+  if(v==='fromage')triggerFromage();
 }
 
 function onKD(e){
   const l=$('acl');const items=l.querySelectorAll('.aci');
   let sel=mode==='daily'?dSel:sSel;
-  if(!items.length) return;
+  if(!items.length)return;
   if(e.key==='ArrowDown'){e.preventDefault();sel=Math.min(sel+1,items.length-1);items.forEach((x,i)=>x.classList.toggle('sel',i===sel));if(items[sel]){$('gi').value=items[sel].querySelector('span').textContent.trim();items[sel].scrollIntoView({block:"nearest",behavior:"smooth"});}}
   else if(e.key==='ArrowUp'){e.preventDefault();sel=Math.max(sel-1,-1);items.forEach((x,i)=>x.classList.toggle('sel',i===sel));if(sel>=0&&items[sel]){$('gi').value=items[sel].querySelector('span').textContent.trim();items[sel].scrollIntoView({block:"nearest",behavior:"smooth"});}}
   else if(e.key==='Enter'){e.preventDefault();l.innerHTML='';sub();}
@@ -376,7 +344,7 @@ function onKD(e){
 document.addEventListener('click',e=>{if(!e.target.closest('.acw'))$('acl').innerHTML='';});
 function toggleHelp(){$('hpanel').classList.toggle('on');}
 
-// ── KONAMI CODE EASTER EGG ────────────────────────────────────
+// ── KONAMI CODE ───────────────────────────────────────────────
 (function(){
   const KONAMI=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
   const API='https://api.github.com/repos/kevinraphael95/bleachmusics/contents/';
@@ -384,14 +352,11 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
   let buf=[],player=null,toast=null,tracks=[];
   document.addEventListener('keydown',function(e){
     if(e.target===$('gi'))return;
-    buf.push(e.key);
-    if(buf.length>KONAMI.length)buf.shift();
-    if(buf.join(',')===KONAMI.join(',')){ buf=[];triggerKonami(); }
+    buf.push(e.key);if(buf.length>KONAMI.length)buf.shift();
+    if(buf.join(',')===KONAMI.join(',')){{buf=[];triggerKonami();}}
   });
   async function triggerKonami(){
-    if(!tracks.length){
-      try{const res=await fetch(API);const files=await res.json();tracks=files.filter(f=>f.name.endsWith('.mp3')).map(f=>f.name);}catch(e){tracks=[];}
-    }
+    if(!tracks.length){try{const res=await fetch(API);const files=await res.json();tracks=files.filter(f=>f.name.endsWith('.mp3')).map(f=>f.name);}catch(e){tracks=[];}}
     if(!tracks.length)return;
     const name=tracks[Math.floor(Math.random()*tracks.length)];
     const url=BASE+encodeURIComponent(name);
@@ -416,7 +381,7 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
   }
 })();
 
-// ── FROMAGE EASTER EGG ───────────────────────────────────────
+// ── FROMAGE ───────────────────────────────────────────────────
 (function(){
   const DURATION=13000,EMOJI_COUNT=22,EMOJIS=['🫕','🧀'];
   let running=false,timers=[];
@@ -443,7 +408,7 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
   };
 })();
 
-// ── GAY PRIDE EASTER EGG ─────────────────────────────────────
+// ── GAY PRIDE ─────────────────────────────────────────────────
 (function(){
   const DURATION=13000,FLAG_COUNT=18;
   const FLAG_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 44" width="72" height="44"><rect y="0" width="72" height="7.3" fill="#FF0018"/><rect y="7.3" width="72" height="7.3" fill="#FFA52C"/><rect y="14.6" width="72" height="7.3" fill="#FFFF41"/><rect y="21.9" width="72" height="7.3" fill="#008018"/><rect y="29.2" width="72" height="7.3" fill="#0000F9"/><rect y="36.5" width="72" height="7.5" fill="#86007D"/></svg>`;
