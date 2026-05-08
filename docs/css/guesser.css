@@ -123,13 +123,13 @@
 
 
 /* ── Tableau des propositions (desktop) ──────────────── */
-.tw { width: 100%; overflow-x: auto; }
+.tw { width: 100%; overflow-x: auto; background: var(--panel); border: 1px solid var(--border); padding: 6px; }
 
 .th { display: grid; grid-template-columns: 145px repeat(9, 1fr); gap: 2px; margin-bottom: 5px; min-width: 800px; padding: 0 1px; }
 .th div { font-size: .58rem; font-weight: 600; letter-spacing: .08em; color: var(--muted); text-align: center; padding: 4px 2px; border-bottom: 1px solid rgba(30,127,232,.2); text-transform: uppercase; }
 .th div:first-child { text-align: left; padding-left: 7px; }
 
-.row  { display: grid; grid-template-columns: 145px repeat(9, 1fr); gap: 2px; margin-bottom: 2px; min-width: 800px; animation: rowIn .35s cubic-bezier(.2,.8,.3,1) both; }
+.row  { display: grid; grid-template-columns: 145px repeat(9, 1fr); gap: 0; margin-bottom: 2px; min-width: 800px; animation: rowIn .35s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes rowIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
 .cell { background: var(--panel); border: 1px solid var(--rim); padding: 6px 2px; text-align: center; font-size: .58rem; font-weight: 500; min-height: 42px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
