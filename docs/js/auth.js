@@ -7,33 +7,37 @@ const db = createClient(SUPA_URL, SUPA_KEY);
 
 let currentUser = null;
 
-// ── Init : vérif session au chargement ───────────────────────
+// ── Init ─────────────────────────────────────────────────────
 async function authInit() {
+  // Détecter le retour OAuth (gère ## et # )
+  const fullUrl = window.location.href;
+  const hashIdx = fullUrl.indexOf('#');
+  if (hashIdx !== -1) {
+    const fragment = fullUrl.slice(hashIdx + 1).replace(/^#/, ''); // gère ##
+    if (fragment.includes('access_token')) {
+      // Réécrire l'URL proprement pour que Supabase parse le fragment
+      const cleanUrl = window.location.pathname + '#' + fragment;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }
+
   const { data: { session } } = await db.auth.getSession();
   if (session?.user) {
     currentUser = session.user;
     renderAuthBtn(session.user);
+    window.history.replaceState(null, '', window.location.pathname);
     await loadDailyFromSupabase();
   }
+
+  // Notifier guesser.js que l'état auth est résolu
+  if (typeof onAuthReady === 'function') onAuthReady();
 
   db.auth.onAuthStateChange(async (_event, session) => {
     currentUser = session?.user || null;
     renderAuthBtn(currentUser);
+    if (typeof onAuthReady === 'function') onAuthReady();
     if (currentUser) await loadDailyFromSupabase();
   });
-
-  // Redirect OAuth : fermer le modal si on revient après login
-  const hash = window.location.hash;
-  if (hash && hash.includes('access_token')) {
-    const { data: { session: s } } = await db.auth.getSession();
-    if (s?.user) {
-      currentUser = s.user;
-      renderAuthBtn(s.user);
-      hideAuthModal();
-      await loadDailyFromSupabase();
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-  }
 }
 
 // ── Charger progression daily depuis Supabase ────────────────
@@ -62,7 +66,6 @@ async function loadDailyFromSupabase() {
 
 // ── Login ────────────────────────────────────────────────────
 async function loginWith(provider) {
-  // URL propre sans fragment ni query string
   const redirect = window.location.origin + window.location.pathname;
   await db.auth.signInWithOAuth({
     provider,
@@ -76,13 +79,13 @@ async function logout() {
   currentUser = null;
   renderAuthBtn(null);
   closeUserMenu();
+  if (typeof onAuthReady === 'function') onAuthReady();
 }
 
 // ── Bouton auth dans .msw ─────────────────────────────────────
 function renderAuthBtn(user) {
   const btn = document.getElementById('auth-msw-btn');
   if (!btn) return;
-
   if (user) {
     const avatar = user.user_metadata?.avatar_url;
     const name   = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '?';
@@ -101,38 +104,31 @@ function renderAuthBtn(user) {
 // ── Menu utilisateur ──────────────────────────────────────────
 function toggleUserMenu() {
   if (!currentUser) { showAuthModal(); return; }
+  const existing = document.getElementById('user-menu');
+  if (existing) { closeUserMenu(); return; }
 
-  let menu = document.getElementById('user-menu');
-  if (menu) { closeUserMenu(); return; }
-
-  const btn = document.getElementById('auth-msw-btn');
+  const btn  = document.getElementById('auth-msw-btn');
   const name = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || '?';
 
-  menu = document.createElement('div');
-  menu.id = 'user-menu';
+  const menu = document.createElement('div');
+  menu.id        = 'user-menu';
   menu.className = 'user-menu';
   menu.innerHTML = `
     <div class="um-name">${name}</div>
     <div class="um-email">${currentUser.email || ''}</div>
     <button class="um-logout" onclick="logout()">⏏ Se déconnecter</button>
   `;
-
   document.body.appendChild(menu);
 
   const rect = btn.getBoundingClientRect();
-  menu.style.position = 'fixed';
-  menu.style.top = (rect.bottom + 6) + 'px';
-  menu.style.left = rect.left + 'px';
-  menu.style.zIndex = '9999';
+  menu.style.cssText = `position:fixed;top:${rect.bottom + 6}px;left:${rect.left}px;z-index:9999`;
 
   setTimeout(() => document.addEventListener('click', closeUserMenuOutside), 100);
 }
 
 function closeUserMenuOutside(e) {
   const menu = document.getElementById('user-menu');
-  if (menu && !menu.contains(e.target) && e.target.id !== 'auth-msw-btn') {
-    closeUserMenu();
-  }
+  if (menu && !menu.contains(e.target) && e.target.id !== 'auth-msw-btn') closeUserMenu();
 }
 
 function closeUserMenu() {
@@ -146,12 +142,10 @@ function showAuthModal() {
   const m = document.getElementById('auth-modal');
   if (m) m.classList.add('on');
 }
-
 function hideAuthModal() {
   const m = document.getElementById('auth-modal');
   if (m) m.classList.remove('on');
 }
-
 function skipAuth() {
   hideAuthModal();
 }
@@ -159,26 +153,15 @@ function skipAuth() {
 // ── Soumission du score ───────────────────────────────────────
 async function submitScore({ date, found, attempts, mode, guesses }) {
   if (!currentUser) return;
-
-  const pseudo     = currentUser.user_metadata?.full_name
-                  || currentUser.user_metadata?.name
-                  || currentUser.email?.split('@')[0]
-                  || 'Anonyme';
+  const pseudo     = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || 'Anonyme';
   const avatar_url = currentUser.user_metadata?.avatar_url || null;
-
   await db.from('scores').upsert({
-    user_id: currentUser.id,
-    pseudo,
-    avatar_url,
-    date,
-    found,
-    attempts,
-    mode,
-    guesses,
+    user_id: currentUser.id, pseudo, avatar_url,
+    date, found, attempts, mode, guesses,
   }, { onConflict: 'user_id,date,mode' });
 }
 
-// ── Chargement leaderboard mensuel ───────────────────────────
+// ── Leaderboard ───────────────────────────────────────────────
 async function loadLeaderboard() {
   const now   = new Date();
   const year  = now.getFullYear();
@@ -189,8 +172,7 @@ async function loadLeaderboard() {
   const { data, error } = await db
     .from('scores')
     .select('pseudo, avatar_url, found, attempts, date, mode')
-    .gte('date', from)
-    .lte('date', to)
+    .gte('date', from).lte('date', to)
     .eq('found', true)
     .order('attempts', { ascending: true });
 
@@ -202,15 +184,11 @@ async function loadLeaderboard() {
     map[row.pseudo].found++;
     map[row.pseudo].attempts += row.attempts;
   }
-
-  return Object.values(map)
-    .sort((a, b) => b.found - a.found || a.attempts - b.attempts)
-    .slice(0, 20);
+  return Object.values(map).sort((a, b) => b.found - a.found || a.attempts - b.attempts).slice(0, 20);
 }
 
-// ── Modal leaderboard ─────────────────────────────────────────
 async function showLeaderboard() {
-  let modal = document.getElementById('lb-modal');
+  const modal = document.getElementById('lb-modal');
   if (!modal) return;
   modal.classList.add('on');
 
@@ -218,14 +196,9 @@ async function showLeaderboard() {
   body.innerHTML = '<div class="lb-loading">Chargement…</div>';
 
   const rows = await loadLeaderboard();
+  if (!rows.length) { body.innerHTML = '<div class="lb-empty">Aucun score ce mois-ci.</div>'; return; }
 
-  if (!rows.length) {
-    body.innerHTML = '<div class="lb-empty">Aucun score ce mois-ci.</div>';
-    return;
-  }
-
-  const now = new Date();
-  const monthLabel = now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   document.getElementById('lb-month').textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
 
   body.innerHTML = rows.map((r, i) => {
@@ -252,7 +225,7 @@ function hideLeaderboard() {
   if (modal) modal.classList.remove('on');
 }
 
-// ── Lancer l'init dès que possible ───────────────────────────
+// ── Lancer l'init ─────────────────────────────────────────────
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', authInit);
 } else {
