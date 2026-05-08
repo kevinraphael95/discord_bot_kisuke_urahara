@@ -179,7 +179,8 @@ function switchMode(m){
     } else {
       showGameUI('daily');
       $('rb').classList.remove('on');
-      $('gi').disabled=false;$('gbtn').disabled=false;
+      $('gi').disabled=!currentUser;$('gbtn').disabled=!currentUser;
+      if(!currentUser) $('gi').placeholder='🔒 Connectez-vous pour jouer';
       foc();
     }
   } else {
