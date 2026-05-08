@@ -312,6 +312,7 @@ function sShare(){
 function sub(){mode==='daily'?subD():subS();}
 
 function subD(){
+  if(!currentUser){ showAuthModal(); return; }
   if(dOver)return;
   const inp=$('gi');const v=inp.value.trim();if(!v)return;
   const m=CHARS.find(x=>x.n.toLowerCase()===v.toLowerCase());
