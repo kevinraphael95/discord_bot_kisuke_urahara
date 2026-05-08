@@ -89,7 +89,7 @@ function toggleUserMenu() {
   btn.parentElement.style.position = 'relative';
   btn.parentElement.appendChild(menu);
 
-  setTimeout(() => document.addEventListener('click', closeUserMenuOutside), 10);
+  setTimeout(() => document.addEventListener('click', closeUserMenuOutside), 100);
 }
 
 function closeUserMenuOutside(e) {
