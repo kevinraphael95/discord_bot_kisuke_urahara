@@ -324,18 +324,18 @@ function subD(){
   inp.value='';$('acl').innerHTML='';
   $('gi').focus();
   const won=m.n===tgt.n;
+  if(typeof submitScore==='function'){
+    submitScore({
+      date: todayKey(),
+      found: won,
+      attempts: dG.length,
+      mode: 'daily',
+      guesses: dG.map(x => x.m.n),
+    });
+  }
   if(won||dG.length>=MAX){
     dOver=true;
     saveD(won);
-    // ── Soumission score leaderboard ──
-    if(typeof submitScore==='function'){
-      submitScore({
-        date: todayKey(),
-        found: won,
-        attempts: dG.length,
-        mode: 'daily'
-      });
-    }
     setTimeout(()=>showDRes(won),400);
   } else {
     saveD(false);
