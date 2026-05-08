@@ -31,12 +31,10 @@ async function _processQueue() {
 async function setImg(imgEl, char) {
   if (char.img) { imgEl.src = char.img; return; }
   if (WIKI_IMGS[char.n]) { imgEl.src = WIKI_IMGS[char.n]; return; }
-
   const slug = char.n.toLowerCase().normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '')
     .trim().replace(/\s+/g, '-');
   imgEl.src = `assets/personnages/${slug}.png`;
-
   imgEl.onerror = () => {
     imgEl.onerror = null;
     imgEl.src = '';
@@ -58,9 +56,7 @@ function showGameUI(m) {
   document.querySelector('.iz').style.display = 'flex';
   document.querySelector('.tw').style.display = '';
   document.querySelector('.cards').style.display = '';
-  if (m === 'daily') {
-    $('dbar').style.display = 'flex';
-  }
+  if (m === 'daily') $('dbar').style.display = 'flex';
 }
 
 // ── Logique de base ───────────────────────────────────────────
@@ -202,21 +198,6 @@ function switchMode(m){
 function foc(){setTimeout(()=>$('gi').focus(),60);}
 
 // ── Daily ────────────────────────────────────────────────────
-function saveD(won){try{localStorage.setItem('bleachg25v2',JSON.stringify({date:todayKey(),guesses:dG.map(x=>({n:x.m.n})),over:dOver,won}));}catch(e){}}
-function loadD(){
-  try{
-    const s=JSON.parse(localStorage.getItem('bleachg25v2'));
-    if(!s||s.date!==todayKey())return;
-    for(const sv of (s.guesses||[])){const fr=CHARS.find(x=>x.n===sv.n);if(!fr)continue;dG.push({m:fr,f:cmp(fr,tgt)});}
-    dOver=s.over||false;
-    if(mode==='daily'){
-      dG.forEach(x=>{mkRow(x.m,x.f,tgt);mkCard(x.m,x.f,tgt);});
-      updDots();
-      if(dOver){ hideGameUI(); showDRes(s.won); }
-    }
-  }catch(e){}
-}
-
 function updDots(){
   const r=$('dots');r.innerHTML='';
   for(let i=0;i<MAX;i++){
@@ -335,10 +316,7 @@ function subD(){
   }
   if(won||dG.length>=MAX){
     dOver=true;
-    saveD(won);
     setTimeout(()=>showDRes(won),400);
-  } else {
-    saveD(false);
   }
 }
 
@@ -404,14 +382,12 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
   const API='https://api.github.com/repos/kevinraphael95/bleachmusics/contents/';
   const BASE='https://raw.githubusercontent.com/kevinraphael95/bleachmusics/main/';
   let buf=[],player=null,toast=null,tracks=[];
-
   document.addEventListener('keydown',function(e){
     if(e.target===$('gi'))return;
     buf.push(e.key);
     if(buf.length>KONAMI.length)buf.shift();
     if(buf.join(',')===KONAMI.join(',')){ buf=[];triggerKonami(); }
   });
-
   async function triggerKonami(){
     if(!tracks.length){
       try{const res=await fetch(API);const files=await res.json();tracks=files.filter(f=>f.name.endsWith('.mp3')).map(f=>f.name);}catch(e){tracks=[];}
@@ -423,7 +399,6 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
     player=new Audio(url);player.volume=0.10;player.loop=false;player.play().catch(()=>{});
     showToast(name.replace('.mp3',''),player);
   }
-
   function showToast(title,audio){
     if(toast)toast.remove();
     toast=document.createElement('div');
@@ -499,6 +474,4 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
 // ── INIT ─────────────────────────────────────────────────────
 loadRec();
 updDots();
-loadD();
-if(!dOver) foc();
-
+foc();
