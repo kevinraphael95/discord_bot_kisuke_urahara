@@ -56,12 +56,36 @@ async function loadDailyFromSupabase() {
 
   if (!data || !data.guesses || !data.guesses.length) return;
 
-  localStorage.setItem('bleachg25v2', JSON.stringify({
-    date: today,
-    guesses: data.guesses.map(n => ({ n })),
-    over: data.found || data.attempts >= 8,
-    won: data.found,
-  }));
+  // Reconstituer l'état daily côté client
+  // guesses est stocké comme tableau de noms (strings)
+  const names = data.guesses;
+
+  // Attendre que CHARS et les fonctions de guesser.js soient dispo
+  function restore() {
+    if (typeof CHARS === 'undefined' || typeof cmp === 'undefined' || typeof todayChar === 'undefined') {
+      setTimeout(restore, 80);
+      return;
+    }
+    const target = todayChar();
+    dG = [];
+    clr();
+    for (const name of names) {
+      const m = CHARS.find(x => x.n === name);
+      if (!m) continue;
+      const f = cmp(m, target);
+      dG.push({ m, f });
+      mkRow(m, f, target);
+      mkCard(m, f, target);
+    }
+    updDots();
+    const over = data.found || data.attempts >= MAX;
+    if (over) {
+      dOver = true;
+      hideGameUI();
+      showDRes(data.found);
+    }
+  }
+  restore();
 }
 
 // ── Login ────────────────────────────────────────────────────
