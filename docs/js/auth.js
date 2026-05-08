@@ -85,7 +85,7 @@ function renderAuthBtn(user) {
   if (gi && gbtn) {
     if (!user && typeof mode !== 'undefined' && mode === 'daily') {
       gi.disabled = true;
-      gi.placeholder = '🔒 Connectez-vous pour jouer (la tête à gauche de quotidien)';
+      gi.placeholder = '🔒 Connectez-vous pour jouer';
       gbtn.disabled = true;
     } else if (user) {
       gi.disabled = false;
