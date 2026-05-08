@@ -13,11 +13,13 @@ async function authInit() {
   if (session?.user) {
     currentUser = session.user;
     renderAuthBtn(session.user);
+    await loadDailyFromSupabase();
   }
 
-  db.auth.onAuthStateChange((_event, session) => {
+  db.auth.onAuthStateChange(async (_event, session) => {
     currentUser = session?.user || null;
     renderAuthBtn(currentUser);
+    if (currentUser) await loadDailyFromSupabase();
   });
 
   // Redirect OAuth : fermer le modal si on revient après login
@@ -28,9 +30,34 @@ async function authInit() {
       currentUser = s.user;
       renderAuthBtn(s.user);
       hideAuthModal();
+      await loadDailyFromSupabase();
       window.history.replaceState(null, '', window.location.pathname);
     }
   }
+}
+
+// ── Charger progression daily depuis Supabase ────────────────
+async function loadDailyFromSupabase() {
+  if (!currentUser) return;
+  const today = typeof todayKey === 'function' ? todayKey() : null;
+  if (!today) return;
+
+  const { data } = await db
+    .from('scores')
+    .select('guesses, found, attempts')
+    .eq('user_id', currentUser.id)
+    .eq('date', today)
+    .eq('mode', 'daily')
+    .single();
+
+  if (!data || !data.guesses || !data.guesses.length) return;
+
+  localStorage.setItem('bleachg25v2', JSON.stringify({
+    date: today,
+    guesses: data.guesses.map(n => ({ n })),
+    over: data.found || data.attempts >= 8,
+    won: data.found,
+  }));
 }
 
 // ── Login ────────────────────────────────────────────────────
@@ -54,18 +81,18 @@ function renderAuthBtn(user) {
   const btn = document.getElementById('auth-msw-btn');
   if (!btn) return;
   const gi = document.getElementById('gi');
-    const gbtn = document.getElementById('gbtn');
-    if (gi && gbtn) {
-      if (!user && typeof mode !== 'undefined' && mode === 'daily') {
-        gi.disabled = true;
-        gi.placeholder = '🔒 Connectez-vous pour jouer';
-        gbtn.disabled = true;
-      } else if (user) {
-        gi.disabled = false;
-        gi.placeholder = 'Entrez un personnage Bleach…';
-        gbtn.disabled = false;
-      }
-    }  
+  const gbtn = document.getElementById('gbtn');
+  if (gi && gbtn) {
+    if (!user && typeof mode !== 'undefined' && mode === 'daily') {
+      gi.disabled = true;
+      gi.placeholder = '🔒 Connectez-vous pour jouer';
+      gbtn.disabled = true;
+    } else if (user) {
+      gi.disabled = false;
+      gi.placeholder = 'Entrez un personnage Bleach…';
+      gbtn.disabled = false;
+    }
+  }
   if (user) {
     const avatar = user.user_metadata?.avatar_url;
     const name   = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '?';
@@ -81,10 +108,10 @@ function renderAuthBtn(user) {
   }
 }
 
-// ── Menu utilisateur (déco) ───────────────────────────────────
+// ── Menu utilisateur ──────────────────────────────────────────
 function toggleUserMenu() {
   if (!currentUser) { showAuthModal(); return; }
-  
+
   let menu = document.getElementById('user-menu');
   if (menu) { closeUserMenu(); return; }
 
@@ -101,7 +128,7 @@ function toggleUserMenu() {
   `;
 
   document.body.appendChild(menu);
-  
+
   const rect = btn.getBoundingClientRect();
   menu.style.position = 'fixed';
   menu.style.top = (rect.bottom + 6) + 'px';
@@ -140,7 +167,7 @@ function skipAuth() {
 }
 
 // ── Soumission du score ───────────────────────────────────────
-async function submitScore({ date, found, attempts, mode }) {
+async function submitScore({ date, found, attempts, mode, guesses }) {
   if (!currentUser) return;
 
   const pseudo     = currentUser.user_metadata?.full_name
@@ -157,6 +184,7 @@ async function submitScore({ date, found, attempts, mode }) {
     found,
     attempts,
     mode,
+    guesses,
   }, { onConflict: 'user_id,date,mode' });
 }
 
@@ -178,7 +206,6 @@ async function loadLeaderboard() {
 
   if (error || !data) return [];
 
-  // Agrégation : par pseudo, compter trouvés et total tentatives
   const map = {};
   for (const row of data) {
     if (!map[row.pseudo]) map[row.pseudo] = { pseudo: row.pseudo, avatar_url: row.avatar_url, found: 0, attempts: 0 };
