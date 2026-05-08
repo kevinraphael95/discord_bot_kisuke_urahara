@@ -473,5 +473,4 @@ function toggleHelp(){$('hpanel').classList.toggle('on');}
 
 // ── INIT ─────────────────────────────────────────────────────
 loadRec();
-updDots();
-foc();
+switchMode('daily');
