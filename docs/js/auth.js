@@ -104,9 +104,16 @@ async function logout() {
   renderAuthBtn(null);
   closeUserMenu();
 
-  // Réinitialiser l'affichage daily
+  // Réinitialiser l'état daily
+  dG = []; dOver = false;
   if (typeof clr === 'function') clr();
-  if (typeof updDots === 'function') { dG = []; dOver = false; updDots(); }
+  if (typeof updDots === 'function') updDots();
+
+  // Cacher le banner de fin, réafficher l'UI
+  const rb = document.getElementById('rb');
+  if (rb) rb.classList.remove('on', 'win', 'lose');
+  if (typeof showGameUI === 'function') showGameUI('daily');
+
   if (typeof onAuthReady === 'function') onAuthReady();
 }
 
