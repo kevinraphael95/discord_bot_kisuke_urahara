@@ -322,7 +322,22 @@ function subD(){
   inp.value='';$('acl').innerHTML='';
   $('gi').focus();
   const won=m.n===tgt.n;
-  if(won||dG.length>=MAX){dOver=true;saveD(won);setTimeout(()=>showDRes(won),400);}else saveD(false);
+  if(won||dG.length>=MAX){
+    dOver=true;
+    saveD(won);
+    // ── Soumission score leaderboard ──
+    if(typeof submitScore==='function'){
+      submitScore({
+        date: todayKey(),
+        found: won,
+        attempts: dG.length,
+        mode: 'daily'
+      });
+    }
+    setTimeout(()=>showDRes(won),400);
+  } else {
+    saveD(false);
+  }
 }
 
 function subS(){
@@ -335,9 +350,8 @@ function subS(){
   mkRow(m,f,sCur);mkCard(m,f,sCur);
   inp.value='';$('acl').innerHTML='';updSUI();
   if(!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
-  if(m.n===sCur.n)sCorrect();
-  if(m.n===sCur.n)sCorrect();
-  else if(sG.length>=MAX)sGameOver(sCur.n);
+  if(m.n===sCur.n) sCorrect();
+  else if(sG.length>=MAX) sGameOver(sCur.n);
 }
 
 function shake(inp,msg){
@@ -485,3 +499,13 @@ loadRec();
 updDots();
 loadD();
 if(!dOver) foc();
+
+// ── Modal auth : afficher au 1er lancement si pas de session ─
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if (typeof currentUser !== 'undefined' && !currentUser) {
+      const alreadySkipped = localStorage.getItem('bleachg_auth_skipped');
+      if (!alreadySkipped) showAuthModal();
+    }
+  }, 800);
+});
