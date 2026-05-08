@@ -320,6 +320,8 @@ function subD(){
   const f=cmp(m,tgt);dG.push({m,f});
   mkRow(m,f,tgt);mkCard(m,f,tgt);updDots();
   inp.value='';$('acl').innerHTML='';
+  $('gi').focus();
+  const won=m.n===tgt.n;
   const won=m.n===tgt.n;
   if(won||dG.length>=MAX){dOver=true;saveD(won);setTimeout(()=>showDRes(won),400);}else saveD(false);
 }
@@ -333,6 +335,8 @@ function subS(){
   const f=cmp(m,sCur);sG.push({m,f});
   mkRow(m,f,sCur);mkCard(m,f,sCur);
   inp.value='';$('acl').innerHTML='';updSUI();
+  if(!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
+  if(m.n===sCur.n)sCorrect();
   if(m.n===sCur.n)sCorrect();
   else if(sG.length>=MAX)sGameOver(sCur.n);
 }
