@@ -80,19 +80,7 @@ async function logout() {
 function renderAuthBtn(user) {
   const btn = document.getElementById('auth-msw-btn');
   if (!btn) return;
-  const gi = document.getElementById('gi');
-  const gbtn = document.getElementById('gbtn');
-  if (gi && gbtn) {
-    if (!user && typeof mode !== 'undefined' && mode === 'daily') {
-      gi.disabled = true;
-      gi.placeholder = '🔒 Connectez-vous pour jouer';
-      gbtn.disabled = true;
-    } else if (user) {
-      gi.disabled = false;
-      gi.placeholder = 'Entrez un personnage Bleach…';
-      gbtn.disabled = false;
-    }
-  }
+
   if (user) {
     const avatar = user.user_metadata?.avatar_url;
     const name   = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '?';
