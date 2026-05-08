@@ -230,6 +230,8 @@
   .gbtn  { min-width: 68px; font-size: .66rem; padding: 0 .8rem; }
   .tw    { display: none; }
   .cards { display: flex; }
+  .sestats { gap: 4px; }
+  .sestat  { padding: 5px 7px; }
 
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }
