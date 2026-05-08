@@ -62,9 +62,11 @@ async function loadDailyFromSupabase() {
 
 // ── Login ────────────────────────────────────────────────────
 async function loginWith(provider) {
+  // URL propre sans fragment ni query string
+  const redirect = window.location.origin + window.location.pathname;
   await db.auth.signInWithOAuth({
     provider,
-    options: { redirectTo: window.location.href }
+    options: { redirectTo: redirect }
   });
 }
 
