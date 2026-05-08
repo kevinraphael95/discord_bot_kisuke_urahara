@@ -15,8 +15,9 @@
 // "Arc Fullbringers (4)"                            — ch. 424–479
 // Les fullbringers
 // "Guerre Sanglante de Mille Ans (5)"               — ch. 480–686
-// NO BREATHES FROM HELL (6)
 // La guerre sanglante c'est sanglant
+// NO BREATHES FROM HELL (6)                         — ch. xxx
+// ouai ouai
 
 const CHARS = [
 
