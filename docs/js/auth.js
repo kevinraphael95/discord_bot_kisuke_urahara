@@ -71,6 +71,7 @@ function renderAuthBtn(user) {
 // ── Menu utilisateur (déco) ───────────────────────────────────
 function toggleUserMenu() {
   if (!currentUser) { showAuthModal(); return; }
+  
   let menu = document.getElementById('user-menu');
   if (menu) { closeUserMenu(); return; }
 
@@ -86,8 +87,13 @@ function toggleUserMenu() {
     <button class="um-logout" onclick="logout()">⏏ Se déconnecter</button>
   `;
 
-  btn.parentElement.style.position = 'relative';
-  btn.parentElement.appendChild(menu);
+  document.body.appendChild(menu);
+  
+  const rect = btn.getBoundingClientRect();
+  menu.style.position = 'fixed';
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.style.left = rect.left + 'px';
+  menu.style.zIndex = '9999';
 
   setTimeout(() => document.addEventListener('click', closeUserMenuOutside), 100);
 }
