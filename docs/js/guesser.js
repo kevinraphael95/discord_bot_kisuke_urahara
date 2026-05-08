@@ -23,7 +23,7 @@ async function _processQueue() {
       if (url) { WIKI_IMGS[char.n] = url; imgEl.src = url; }
       else imgEl.style.display = 'none';
     } catch { imgEl.style.display = 'none'; }
-    await new Promise(r => setTimeout(r, 350)); // 350ms entre chaque requête
+    await new Promise(r => setTimeout(r, 350));
   }
   _imgRunning = false;
 }
@@ -39,10 +39,28 @@ async function setImg(imgEl, char) {
 
   imgEl.onerror = () => {
     imgEl.onerror = null;
-    imgEl.src = ''; // vide pendant le chargement
+    imgEl.src = '';
     _imgQueue.push({ char, imgEl });
     _processQueue();
   };
+}
+
+// ── Helpers show/hide game elements ──────────────────────────
+function hideGameUI() {
+  $('dbar').style.display = 'none';
+  document.querySelector('.iz').style.display = 'none';
+  document.querySelector('.tw').style.display = 'none';
+  document.querySelector('.cards').style.display = 'none';
+  $('hpanel').classList.remove('on');
+}
+
+function showGameUI(m) {
+  document.querySelector('.iz').style.display = 'flex';
+  document.querySelector('.tw').style.display = '';
+  document.querySelector('.cards').style.display = '';
+  if (m === 'daily') {
+    $('dbar').style.display = 'flex';
+  }
 }
 
 // ── Logique de base ───────────────────────────────────────────
@@ -145,7 +163,6 @@ function switchMode(m){
   mode=m;
   $('btnD').classList.toggle('active',m==='daily');
   $('btnS').classList.toggle('active',m==='survival');
-  $('dbar').style.display=m==='daily'?'flex':'none';
   $('sbar').classList.toggle('on',m==='survival');
   $('htitle').textContent=m==='daily'?'RÈGLES — QUOTIDIEN':'RÈGLES — SURVIE';
   $('hd').style.display=m==='daily'?'':'none';
@@ -156,14 +173,23 @@ function switchMode(m){
     $('send').classList.remove('on');clr();
     dG.forEach(x=>{mkRow(x.m,x.f,tgt);mkCard(x.m,x.f,tgt);});
     updDots();
-    if(dOver) showDRes(dG.some(x=>x.m.n===tgt.n));
-    else $('rb').classList.remove('on');
-    $('gi').disabled=dOver;$('gbtn').disabled=dOver;
-    if(!dOver) foc();
+    if(dOver){
+      hideGameUI();
+      showDRes(dG.some(x=>x.m.n===tgt.n));
+    } else {
+      showGameUI('daily');
+      $('rb').classList.remove('on');
+      $('gi').disabled=false;$('gbtn').disabled=false;
+      foc();
+    }
   } else {
     $('rb').classList.remove('on');
-    if(sOver){clr();showSEnd();}
-    else{
+    if(sOver){
+      clr();
+      hideGameUI();
+      showSEnd();
+    } else {
+      showGameUI('survival');
       clr();
       if(!sCur) sInit();
       else sG.forEach(x=>{mkRow(x.m,x.f,sCur);mkCard(x.m,x.f,sCur);});
@@ -182,7 +208,11 @@ function loadD(){
     if(!s||s.date!==todayKey())return;
     for(const sv of (s.guesses||[])){const fr=CHARS.find(x=>x.n===sv.n);if(!fr)continue;dG.push({m:fr,f:cmp(fr,tgt)});}
     dOver=s.over||false;
-    if(mode==='daily'){dG.forEach(x=>{mkRow(x.m,x.f,tgt);mkCard(x.m,x.f,tgt);});updDots();if(dOver)showDRes(s.won);}
+    if(mode==='daily'){
+      dG.forEach(x=>{mkRow(x.m,x.f,tgt);mkCard(x.m,x.f,tgt);});
+      updDots();
+      if(dOver){ hideGameUI(); showDRes(s.won); }
+    }
   }catch(e){}
 }
 
@@ -197,6 +227,7 @@ function updDots(){
 }
 
 function showDRes(won){
+  hideGameUI();
   const b=$('rb');b.classList.add('on',won?'win':'lose');
   $('rttl').textContent=won?'⚔ BIEN JOUÉ !':'💀 ÉCHEC';
   $('rchar').textContent='Personnage : '+tgt.n;
@@ -227,7 +258,7 @@ function share(){
 function loadRec(){try{const s=JSON.parse(localStorage.getItem('bleachg_surv'));if(s)sRec=s.best||0;}catch(e){}}
 function saveRec(){try{localStorage.setItem('bleachg_surv',JSON.stringify({best:sRec}));}catch(e){}}
 function rndQ(){const a=CHARS.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function sInit(){sStr=0;sBst=0;sKil=0;sQ=rndQ();sQi=0;sOver=false;$('send').classList.remove('on');sNext();}
+function sInit(){sStr=0;sBst=0;sKil=0;sQ=rndQ();sQi=0;sOver=false;$('send').classList.remove('on');showGameUI('survival');sNext();}
 function sNext(){if(sQi>=sQ.length){sQ=rndQ();sQi=0;}sCur=sQ[sQi++];sG=[];clr();$('flash').classList.remove('on');$('gi').disabled=false;$('gbtn').disabled=false;foc();updSUI();}
 
 function updSUI(){
@@ -256,6 +287,8 @@ function sCorrect(){
 }
 
 function showSEnd(){
+  hideGameUI();
+  $('sbar').classList.remove('on');
   clr();$('send').classList.add('on');
   $('sedesc').innerHTML='Série de <em>'+sStr+'</em> — '+sKil+' personnage'+(sKil>1?'s':'')+'.';
   $('sek').textContent=sKil;$('seb').textContent=sBst;$('ser').textContent=sRec;
@@ -263,7 +296,11 @@ function showSEnd(){
   if(sCur){ setImg($('s-img'), sCur); $('s-img').alt=sCur.n; }
 }
 
-function sRestart(){sInit();}
+function sRestart(){
+  showGameUI('survival');
+  $('sbar').classList.add('on');
+  sInit();
+}
 
 function sShare(){
   const t='Bleach Character Guesser — Survie\nSérie : '+sStr+'\nTrouvés : '+sKil+'\nRecord : '+sRec+'\n\n🎮 Jouer sur https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
