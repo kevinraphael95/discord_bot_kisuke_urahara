@@ -233,7 +233,7 @@
 
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }
-  .rbanner-left img, .send-left img { width: 60%; margin: 0 auto; height: auto; object-fit: unset; }
+  .rbanner-left img, .send-left img { width: 55%; margin: 0 auto; height: auto; object-fit: unset; }
   .rbanner-right, .send-right { width: 100%; align-items: center; text-align: center; }
   .rbanner-right .xbtn,
   .send-right .r2btn,
