@@ -33,7 +33,7 @@ const CHARS = [
   // ============================================================
   // AMIS
   // ============================================================
-  {n:"Orihime Inoue",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1, img:"assets/personnages/orihime-inoue.png"},
+  {n:"Orihime Inoue",         r:"Fullbring", sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1, img:"assets/personnages/orihime-inoue.png"},
   {n:"Yasutora Sado",         r:"Fullbring", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"07/04", w:6,  l:4,  draw:0, img:"assets/personnages/yasutora-sado.png"},
   {n:"Uryuu Ishida",          r:"Quincy",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1, img:"assets/personnages/uryu-ishida.png"},
   
@@ -106,7 +106,7 @@ const CHARS = [
   {n:"Marechiyo Omaeda",      r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0, img:"assets/personnages/marechiyo-omaeda.png"},
   {n:"Izuru Kira",            r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0, img:"assets/personnages/izuru-kira.png"},
   {n:"Kiyone Kotetsu",        r:"Shinigami", sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",  bday:"22/09", w:1,  l:1,  draw:0, img:"assets/personnages/kiyone-kotetsu.png"},
-  {n:"Momo Hinamori",         r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Brun",   bday:"03/06", w:2,  l:3,  draw:0, img:"assets/personnages/momo-hinamori.png"},
+  {n:"Momo Hinamori",         r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"03/06", w:2,  l:3,  draw:0, img:"assets/personnages/momo-hinamori.png"},
   {n:"Renji Abarai",          r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0, img:"assets/personnages/renji-abarai.png"},
   {n:"Atau Rindo",            r:"Shinigami", sx:"M", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/atau-rindo.png"},
   {n:"Yuyu Yayahara",         r:"Shinigami", sx:"F", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",  bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/yuyu-yayahara.png"},
