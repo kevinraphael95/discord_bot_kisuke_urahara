@@ -103,6 +103,10 @@ async function logout() {
   currentUser = null;
   renderAuthBtn(null);
   closeUserMenu();
+
+  // Réinitialiser l'affichage daily
+  if (typeof clr === 'function') clr();
+  if (typeof updDots === 'function') { dG = []; dOver = false; updDots(); }
   if (typeof onAuthReady === 'function') onAuthReady();
 }
 
