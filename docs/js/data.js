@@ -15,8 +15,9 @@
 // "Arc Fullbringers (4)"                            — ch. 424–479
 // Les fullbringers
 // "Guerre Sanglante de Mille Ans (5)"               — ch. 480–686
-// NO BREATHES FROM HELL (6)
 // La guerre sanglante c'est sanglant
+// NO BREATHES FROM HELL (6)                         — ch. xxx
+// ouai ouai
 
 const CHARS = [
 
@@ -33,7 +34,7 @@ const CHARS = [
   // ============================================================
   // AMIS
   // ============================================================
-  {n:"Orihime Inoue",         r:"Humain",    sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1, img:"assets/personnages/orihime-inoue.png"},
+  {n:"Orihime Inoue",         r:"Fullbring", sx:"F", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1, img:"assets/personnages/orihime-inoue.png"},
   {n:"Yasutora Sado",         r:"Fullbring", sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"07/04", w:6,  l:4,  draw:0, img:"assets/personnages/yasutora-sado.png"},
   {n:"Uryuu Ishida",          r:"Quincy",    sx:"M", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1, img:"assets/personnages/uryu-ishida.png"},
   
@@ -94,7 +95,7 @@ const CHARS = [
   {n:"Retsu Unohana",         r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:5, st:"Mort",      hc:"Noir",   bday:"21/04", w:3,  l:1,  draw:0, img:"assets/personnages/retsu-unohana.png"},
   {n:"Sosuke Aizen",          r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:5, st:"Vivant",    hc:"Brun",   bday:"29/05", w:12, l:1,  draw:0, img:"assets/personnages/sosuke-aizen.png"},
   {n:"Sajin Komamura",        r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:4, st:"Incertain", hc:"Brun",   bday:"23/08", w:4,  l:3,  draw:0, img:"assets/personnages/sajin-komamura.png"},
-  {n:"Kaname Tousen",         r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:4, st:"Mort",      hc:"Brun",   bday:"13/10", w:3,  l:2,  draw:0, img:"assets/personnages/gin-ichimaru.png"},
+  {n:"Kaname Tousen",         r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:4, st:"Mort",      hc:"Brun",   bday:"13/10", w:3,  l:2,  draw:0, img:"assets/personnages/kaname-tousen.webp"},
   {n:"Gin Ichimaru",          r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:5, st:"Mort",      hc:"Gris",   bday:"10/09", w:4,  l:1,  draw:0, img:"assets/personnages/gin-ichimaru.png"},
   {n:"Jushiro Ukitake",       r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1, img:"assets/personnages/jushiro-ukitake.png"},
  
@@ -106,7 +107,7 @@ const CHARS = [
   {n:"Marechiyo Omaeda",      r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0, img:"assets/personnages/marechiyo-omaeda.png"},
   {n:"Izuru Kira",            r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0, img:"assets/personnages/izuru-kira.png"},
   {n:"Kiyone Kotetsu",        r:"Shinigami", sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",  bday:"22/09", w:1,  l:1,  draw:0, img:"assets/personnages/kiyone-kotetsu.png"},
-  {n:"Momo Hinamori",         r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Brun",   bday:"03/06", w:2,  l:3,  draw:0, img:"assets/personnages/momo-hinamori.png"},
+  {n:"Momo Hinamori",         r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"03/06", w:2,  l:3,  draw:0, img:"assets/personnages/momo-hinamori.png"},
   {n:"Renji Abarai",          r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0, img:"assets/personnages/renji-abarai.png"},
   {n:"Atau Rindo",            r:"Shinigami", sx:"M", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/atau-rindo.png"},
   {n:"Yuyu Yayahara",         r:"Shinigami", sx:"F", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",  bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/yuyu-yayahara.png"},
@@ -207,7 +208,7 @@ const CHARS = [
   // ============================================================
   // WANDENREICH
   // ============================================================
-  {n:"Yhwach",                r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:8,  l:1,  draw:0, img:"assets/personnages/yhwach.png"},
+  {n:"Yhwach",                r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Noir",   bday:"??/??", w:8,  l:1,  draw:0, img:"assets/personnages/yhwach.webp"},
   {n:"Jugram Haschwalth",     r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Blond",  bday:"05/11", w:5,  l:1,  draw:0, img:"assets/personnages/jugram-haschwalth.png"},
   {n:"Pernida Parnkgjas",     r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Chauve", bday:"19/01", w:3,  l:1,  draw:0, img:"assets/personnages/pernida-parnkgjas.png"},
   {n:"Askin Nakk Le Vaar",    r:"Quincy",    sx:"M", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Noir",   bday:"06/06", w:3,  l:1,  draw:0, img:"assets/personnages/askin-nakk-le-vaar.png"},
