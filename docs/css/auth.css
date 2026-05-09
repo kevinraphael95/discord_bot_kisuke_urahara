@@ -90,7 +90,6 @@
   cursor: pointer; padding: .65rem .9rem;
   display: flex; align-items: center; justify-content: center;
   transition: color .2s;
-  border-right: 1px solid var(--border);
   position: relative;
 }
 .auth-msw-btn:hover { color: var(--gold-lt); }
