@@ -272,6 +272,7 @@ let sQ = [], sQi = 0, sCur = null, sG = [], sSel = -1, sOver = false, sRec = 0;
 // ── Switch de mode ────────────────────────────────────────────
 function switchMode(m) {
   mode = m;
+  localStorage.setItem('bleachg_mode', m);
   $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
@@ -306,7 +307,8 @@ function switchMode(m) {
       } else {
         sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); });
       }
-      updSUI(); foc();
+      updSUI();
+      if (!/Mobi|Android/i.test(navigator.userAgent)) foc();
     }
   }
 }
@@ -624,8 +626,13 @@ document.addEventListener('click', e => { if (!e.target.closest('.acw')) $('acl'
 
 // ── INIT ─────────────────────────────────────────────────────
 loadRec();
-loadDaily();
-updDots();
-$('gi').disabled    = false;
-$('gbtn').disabled  = false;
-$('gi').placeholder = 'Entrez un personnage Bleach…';
+const _savedMode = localStorage.getItem('bleachg_mode');
+if (_savedMode === 'survival') {
+  switchMode('survival');
+} else {
+  loadDaily();
+  updDots();
+  $('gi').disabled    = false;
+  $('gbtn').disabled  = false;
+  $('gi').placeholder = 'Entrez un personnage Bleach…';
+}
