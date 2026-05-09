@@ -216,9 +216,11 @@ function loadDaily() {
     updDots();
     if (s.over) {
       dOver = true;
-      hideGameUI();
-      showDRes(s.won);
-    }
+      if (mode === 'daily') {
+        hideGameUI();
+        showDRes(s.won);
+      }
+}
   } catch(e) {}
 }
 
