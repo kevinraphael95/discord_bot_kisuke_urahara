@@ -57,7 +57,11 @@ function showGameUI(m) {
   $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
 }
 
-function foc() { setTimeout(() => $('gi').focus(), 60); }
+function foc() {
+  if (!/Mobi|Android/i.test(navigator.userAgent)) {
+    setTimeout(() => $('gi').focus(), 60);
+  }
+}
 
 // ── Modal règles ──────────────────────────────────────────────
 function showRules() {
