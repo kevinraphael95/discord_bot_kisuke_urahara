@@ -247,3 +247,10 @@
   .cell            { font-size: .5rem; min-height: 38px; }
   .cell:first-child { font-size: .56rem; }
 }
+
+/* ── Bouton règles dans .msw ─────────────────────────── */
+.rules-btn {
+  padding: .65rem 1rem;
+  border-right: 1px solid var(--border);
+  font-size: .95rem;
+}
