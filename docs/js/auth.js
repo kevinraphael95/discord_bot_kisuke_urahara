@@ -13,9 +13,8 @@ async function authInit() {
   const fullUrl = window.location.href;
   const hashIdx = fullUrl.indexOf('#');
   if (hashIdx !== -1) {
-    const fragment = fullUrl.slice(hashIdx + 1).replace(/^#/, ''); // gère ##
+    const fragment = fullUrl.slice(hashIdx + 1).replace(/^#/, '');
     if (fragment.includes('access_token')) {
-      // Réécrire l'URL proprement pour que Supabase parse le fragment
       const cleanUrl = window.location.pathname + '#' + fragment;
       window.history.replaceState(null, '', cleanUrl);
     }
@@ -41,6 +40,8 @@ async function authInit() {
 }
 
 // ── Charger progression daily depuis Supabase ────────────────
+// Si l'user est connecté et a des données Supabase pour aujourd'hui,
+// on les rejoue côté client (priorité sur localStorage).
 async function loadDailyFromSupabase() {
   if (!currentUser) return;
   const today = typeof todayKey === 'function' ? todayKey() : null;
@@ -56,20 +57,18 @@ async function loadDailyFromSupabase() {
 
   if (!data || !data.guesses || !data.guesses.length) return;
 
-  // Reconstituer l'état daily côté client
-  // guesses est stocké comme tableau de noms (strings)
-  const names = data.guesses;
-
-  // Attendre que CHARS et les fonctions de guesser.js soient dispo
+  // Reconstituer l'état daily côté client depuis Supabase
   function restore() {
     if (typeof CHARS === 'undefined' || typeof cmp === 'undefined' || typeof todayChar === 'undefined') {
       setTimeout(restore, 80);
       return;
     }
     const target = todayChar();
-    dG = [];
+    // Reset propre avant de rejouer
+    dG = []; dOver = false;
     clr();
-    for (const name of names) {
+
+    for (const name of data.guesses) {
       const m = CHARS.find(x => x.n === name);
       if (!m) continue;
       const f = cmp(m, target);
@@ -78,6 +77,17 @@ async function loadDailyFromSupabase() {
       mkCard(m, f, target);
     }
     updDots();
+
+    // Sync localStorage avec Supabase
+    try {
+      localStorage.setItem('bleachg25v2', JSON.stringify({
+        date:    today,
+        guesses: data.guesses,
+        over:    data.found || data.attempts >= MAX,
+        won:     data.found,
+      }));
+    } catch(e) {}
+
     const over = data.found || data.attempts >= MAX;
     if (over) {
       dOver = true;
@@ -104,16 +114,21 @@ async function logout() {
   renderAuthBtn(null);
   closeUserMenu();
 
-  // Réinitialiser l'état daily
-  dG = []; dOver = false;
+  // Réinitialiser l'affichage daily complet
   if (typeof clr === 'function') clr();
-  if (typeof updDots === 'function') updDots();
+  if (typeof updDots === 'function') {
+    dG = []; dOver = false;
+    updDots();
+  }
 
-  // Cacher le banner de fin, réafficher l'UI
+  // Cacher le banner de fin si affiché
   const rb = document.getElementById('rb');
   if (rb) rb.classList.remove('on', 'win', 'lose');
-  if (typeof showGameUI === 'function') showGameUI('daily');
 
+  // Recharger depuis localStorage (progression locale éventuelle)
+  if (typeof loadDaily === 'function') loadDaily();
+
+  // Réactiver le champ (mode libre, pas de lock)
   if (typeof onAuthReady === 'function') onAuthReady();
 }
 
