@@ -60,16 +60,26 @@ function showGameUI(m) {
 
 function foc() { setTimeout(() => $('gi').focus(), 60); }
 
-// ── Logique daily lock ────────────────────────────────────────
-// Appelée par auth.js dès que l'état auth est connu, et lors des switchMode
+// ── Auth ready (appelée par auth.js) ─────────────────────────
+// Le daily est libre sans login — onAuthReady ne lock plus rien.
+// Si tu veux réactiver le lock, décommente le bloc ci-dessous
+// et commente la version actuelle.
 function onAuthReady() {
   if (mode !== 'daily') return;
-  if (dOver) return; // partie terminée, champ déjà disabled
-  const locked = !currentUser;
-  $('gi').disabled    = locked;
-  $('gbtn').disabled  = locked;
-  $('gi').placeholder = locked ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
-  if (!locked) foc();
+  if (dOver) return;
+
+  // ── VERSION LIBRE (pas de lock) ──
+  $('gi').disabled    = false;
+  $('gbtn').disabled  = false;
+  $('gi').placeholder = 'Entrez un personnage Bleach…';
+  foc();
+
+  // ── VERSION AVEC LOCK (décommenter pour réactiver) ──
+  // const locked = !currentUser;
+  // $('gi').disabled    = locked;
+  // $('gbtn').disabled  = locked;
+  // $('gi').placeholder = locked ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
+  // if (!locked) foc();
 }
 
 // ── Utilitaires ───────────────────────────────────────────────
@@ -176,6 +186,41 @@ function mkCard(m, f, tgt) {
 
 function clr() { $('gr').innerHTML = ''; $('gc').innerHTML = ''; }
 
+// ── localStorage daily ────────────────────────────────────────
+const LS_KEY = 'bleachg25v2';
+
+function saveDaily() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      date:    todayKey(),
+      guesses: dG.map(x => x.m.n),
+      over:    dOver,
+      won:     dG.some(x => x.m.n === tgt.n),
+    }));
+  } catch(e) {}
+}
+
+function loadDaily() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_KEY));
+    if (!s || s.date !== todayKey()) return;
+    for (const name of s.guesses) {
+      const m = CHARS.find(x => x.n === name);
+      if (!m) continue;
+      const f = cmp(m, tgt);
+      dG.push({ m, f });
+      mkRow(m, f, tgt);
+      mkCard(m, f, tgt);
+    }
+    updDots();
+    if (s.over) {
+      dOver = true;
+      hideGameUI();
+      showDRes(s.won);
+    }
+  } catch(e) {}
+}
+
 // ── État ──────────────────────────────────────────────────────
 let mode = 'daily';
 
@@ -209,11 +254,10 @@ function switchMode(m) {
     } else {
       showGameUI('daily');
       $('rb').classList.remove('on');
-      // Laisser onAuthReady gérer l'état du champ
       onAuthReady();
     }
   } else {
-    // SURVIE : toujours libre, pas de login requis
+    // SURVIE : toujours libre
     $('rb').classList.remove('on');
     $('gi').disabled    = false;
     $('gbtn').disabled  = false;
@@ -277,7 +321,6 @@ function share() {
 }
 
 function subD() {
-  if (!currentUser) { showAuthModal(); return; }
   if (dOver) return;
   const inp = $('gi'); const v = inp.value.trim(); if (!v) return;
   const m = CHARS.find(x => x.n.toLowerCase() === v.toLowerCase());
@@ -287,10 +330,11 @@ function subD() {
   mkRow(m, f, tgt); mkCard(m, f, tgt); updDots();
   inp.value = ''; $('acl').innerHTML = ''; $('gi').focus();
   const won = m.n === tgt.n;
-  if (typeof submitScore === 'function') {
+  saveDaily();
+  if (typeof submitScore === 'function' && typeof currentUser !== 'undefined' && currentUser) {
     submitScore({ date: todayKey(), found: won, attempts: dG.length, mode: 'daily', guesses: dG.map(x => x.m.n) });
   }
-  if (won || dG.length >= MAX) { dOver = true; setTimeout(() => showDRes(won), 400); }
+  if (won || dG.length >= MAX) { dOver = true; saveDaily(); setTimeout(() => showDRes(won), 400); }
 }
 
 // ── Survie ────────────────────────────────────────────────────
@@ -393,7 +437,9 @@ function shake(inp, msg) {
   inp.animate([{ transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 240 });
   setTimeout(() => {
     inp.style.borderColor = '';
-    inp.placeholder = (mode === 'daily' && !currentUser) ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
+    inp.placeholder = 'Entrez un personnage Bleach…';
+    // ── VERSION AVEC LOCK (décommenter si lock réactivé) ──
+    // inp.placeholder = (mode === 'daily' && !currentUser) ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
   }, 1500);
 }
 
@@ -534,9 +580,13 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
 
 // ── INIT ─────────────────────────────────────────────────────
 loadRec();
+loadDaily();   // charge la progression du jour depuis localStorage
 updDots();
-// État initial du champ : on attend onAuthReady() appelé par auth.js
-// En attendant, on bloque par défaut en daily (auth.js résout ça rapidement)
-$('gi').disabled    = true;
-$('gbtn').disabled  = true;
-$('gi').placeholder = '🔒 Connectez-vous pour jouer';
+// Champ toujours actif (pas de lock par défaut)
+$('gi').disabled    = false;
+$('gbtn').disabled  = false;
+$('gi').placeholder = 'Entrez un personnage Bleach…';
+// ── VERSION AVEC LOCK (décommenter + commenter les 3 lignes ci-dessus pour réactiver) ──
+// $('gi').disabled    = true;
+// $('gbtn').disabled  = true;
+// $('gi').placeholder = '🔒 Connectez-vous pour jouer';
