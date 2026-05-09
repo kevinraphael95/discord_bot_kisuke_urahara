@@ -56,7 +56,6 @@ function showGameUI(m) {
   document.querySelector('.tw').style.display    = '';
   document.querySelector('.cards').style.display = '';
   $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
-  if (m === 'daily') $('dbar').style.display = 'flex';
 }
 
 function foc() { setTimeout(() => $('gi').focus(), 60); }
@@ -222,6 +221,54 @@ function loadDaily() {
   } catch(e) {}
 }
 
+// ── localStorage survie ───────────────────────────────────────
+const LS_SURV_KEY = 'bleachg_surv_state';
+
+function saveSurv() {
+  if (sOver || !sCur) return;
+  try {
+    localStorage.setItem(LS_SURV_KEY, JSON.stringify({
+      cur:     sCur.n,
+      str:     sStr,
+      bst:     sBst,
+      kil:     sKil,
+      guesses: sG.map(x => x.m.n),
+      queue:   sQ.map(x => x.n),
+      qi:      sQi,
+    }));
+  } catch(e) {}
+}
+
+function clearSurv() {
+  try { localStorage.removeItem(LS_SURV_KEY); } catch(e) {}
+}
+
+function loadSurv() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SURV_KEY));
+    if (!s || !s.cur) return false;
+    const cur = CHARS.find(x => x.n === s.cur);
+    if (!cur) return false;
+    sCur = cur;
+    sStr = s.str || 0;
+    sBst = s.bst || 0;
+    sKil = s.kil || 0;
+    sQi  = s.qi  || 0;
+    sQ   = (s.queue || []).map(n => CHARS.find(x => x.n === n)).filter(Boolean);
+    sG   = [];
+    for (const name of (s.guesses || [])) {
+      const m = CHARS.find(x => x.n === name);
+      if (!m) continue;
+      const f = cmp(m, sCur);
+      sG.push({ m, f });
+      mkRow(m, f, sCur);
+      mkCard(m, f, sCur);
+    }
+    updSUI();
+    return true;
+  } catch(e) { return false; }
+}
+
 // ── État ──────────────────────────────────────────────────────
 let mode = 'daily';
 
@@ -268,8 +315,11 @@ function switchMode(m) {
       clr(); hideGameUI(); showSEnd();
     } else {
       showGameUI('survival'); clr();
-      if (!sCur) sInit();
-      else sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); });
+      if (!sCur) {
+        if (!loadSurv()) sInit();
+      } else {
+        sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); });
+      }
       updSUI(); foc();
     }
   }
@@ -309,7 +359,7 @@ function tick() {
   const d = tom - now;
   $('nt').textContent =
     String(Math.floor(d / 3600000)).padStart(2, '0') + ':' +
-    String(Math.floor((d % 3600000) / 60000)).padStart(2, '0') + ':' +
+    String(Math.floor((d % 3600000) / 60000)).padStart(2, '00') + ':' +
     String(Math.floor((d % 60000) / 1000)).padStart(2, '0');
 }
 
@@ -346,6 +396,7 @@ function rndQ()     { const a = CHARS.slice(); for (let i = a.length - 1; i > 0;
 
 function sInit() {
   sStr = 0; sBst = 0; sKil = 0; sQ = rndQ(); sQi = 0; sOver = false;
+  clearSurv();
   $('send').classList.remove('on');
   showGameUI('survival');
   $('gi').disabled = false; $('gbtn').disabled = false;
@@ -356,6 +407,7 @@ function sInit() {
 function sNext() {
   if (sQi >= sQ.length) { sQ = rndQ(); sQi = 0; }
   sCur = sQ[sQi++]; sG = []; clr();
+  clearSurv();
   $('flash').classList.remove('on');
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
@@ -381,6 +433,7 @@ function showFlash(type, msg) {
 
 function sGameOver(name) {
   sOver = true;
+  clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
@@ -425,6 +478,7 @@ function subS() {
   const f = cmp(m, sCur); sG.push({ m, f });
   mkRow(m, f, sCur); mkCard(m, f, sCur);
   inp.value = ''; $('acl').innerHTML = ''; updSUI();
+  saveSurv();
   if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
   if (m.n === sCur.n) sCorrect();
   else if (sG.length >= MAX) sGameOver(sCur.n);
@@ -524,36 +578,37 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
   }
 
   function showToast(title) {
-      const vol = toast ? toast.querySelector('input[type=range]').value : 0.10;
-      if (toast) toast.remove();
-      toast = document.createElement('div');
-      toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
-      toast.innerHTML = `
-        <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
-        <div class="konami-title" style="font-size:.8rem;color:var(--white);line-height:1.3;word-break:break-word">${title}</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;min-width:0;accent-color:var(--gold);cursor:pointer">
-          <button class="konami-loop" style="background:${looping ? 'var(--gold-pale)' : 'none'};border:1px solid var(--border);color:${looping ? 'var(--gold-lt)' : 'var(--muted)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Non-stop">∞</button>
-          <button class="konami-rnd" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Aléatoire">🔀</button>
-          <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Stop">■</button>
-        </div>`;
-      const currentName = () => decodeURIComponent(player?.src?.split('/').pop() || '');
-      toast.querySelector('input[type=range]').addEventListener('input', function () { if (player) player.volume = this.value; });
-      toast.querySelector('.konami-loop').addEventListener('click', function () {
-        looping = !looping;
-        this.style.background = looping ? 'var(--gold-pale)' : 'none';
-        this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)';
-      });
-      toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(currentName())));
-      toast.querySelector('.konami-stop').addEventListener('click', () => {
-        looping = false;
-        if (player) { player.pause(); player.onended = null; player = null; }
-        toast.remove(); toast = null;
-      });
-      document.body.appendChild(toast);
-      if (player) player.volume = vol;
-    }
+    const vol = toast ? toast.querySelector('input[type=range]').value : 0.10;
+    if (toast) toast.remove();
+    toast = document.createElement('div');
+    toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
+    toast.innerHTML = `
+      <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
+      <div class="konami-title" style="font-size:.8rem;color:var(--white);line-height:1.3;word-break:break-word">${title}</div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;min-width:0;accent-color:var(--gold);cursor:pointer">
+        <button class="konami-loop" style="background:${looping ? 'var(--gold-pale)' : 'none'};border:1px solid var(--border);color:${looping ? 'var(--gold-lt)' : 'var(--muted)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Non-stop">∞</button>
+        <button class="konami-rnd" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Aléatoire">🔀</button>
+        <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Stop">■</button>
+      </div>`;
+    const currentName = () => decodeURIComponent(player?.src?.split('/').pop() || '');
+    toast.querySelector('input[type=range]').addEventListener('input', function () { if (player) player.volume = this.value; });
+    toast.querySelector('.konami-loop').addEventListener('click', function () {
+      looping = !looping;
+      this.style.background = looping ? 'var(--gold-pale)' : 'none';
+      this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)';
+    });
+    toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(currentName())));
+    toast.querySelector('.konami-stop').addEventListener('click', () => {
+      looping = false;
+      if (player) { player.pause(); player.onended = null; player = null; }
+      toast.remove(); toast = null;
+    });
+    document.body.appendChild(toast);
+    if (player) player.volume = vol;
+  }
 })();
+
 // ── FROMAGE ───────────────────────────────────────────────────
 (function () {
   const DURATION = 13000, EMOJI_COUNT = 22, EMOJIS = ['🫕', '🧀'];
@@ -612,7 +667,7 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
 
 // ── INIT ─────────────────────────────────────────────────────
 loadRec();
-loadDaily();   // charge la progression du jour depuis localStorage
+loadDaily();
 updDots();
 // Champ toujours actif (pas de lock par défaut)
 $('gi').disabled    = false;
