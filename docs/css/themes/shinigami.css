@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   THÈME : SHINIGAMI (bleu / or)
+   THÈME : SHINIGAMI
    Organisation :
    - Backgrounds / surfaces
    - Couleurs principales (Or / Reiatsu / Danger)
@@ -52,9 +52,9 @@
 
 
   /* === ÉTATS === */
-  --ok-bg: #1f4d36; --ok-bd: #2a8a5c; --ok-tx: #6ddba0; /* succès */
-  --ko-bg: #4d1208; --ko-bd: #a02010; --ko-tx: #ff8060; /* erreur */
-  --yw-bg: #4d3000; --yw-bd: #cc7700; --yw-tx: #ffbb30; /* warning */
+  --ok-bg: #0e2d1e; --ok-bd: #1a6b3e; --ok-tx: #4ade80; /* succès */
+  --ko-bg: #2d0a0a; --ko-bd: #8b1a1a; --ko-tx: #f87171; /* erreur */
+  --yw-bg: #2d1e00; --yw-bd: #b36b00; --yw-tx: #f59e0b; /* warning */
 
 
   /* === SPÉCIAL === */
