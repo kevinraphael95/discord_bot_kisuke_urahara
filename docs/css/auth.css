@@ -115,7 +115,6 @@
   cursor: pointer; padding: .65rem .9rem;
   display: flex; align-items: center; justify-content: center;
   transition: color .2s;
-  border-left: 1px solid var(--border);
 }
 .lb-msw-btn:hover { color: var(--gold-lt); }
 
