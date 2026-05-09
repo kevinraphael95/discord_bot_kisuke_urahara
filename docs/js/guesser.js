@@ -30,8 +30,8 @@ async function _processQueue() {
 }
 
 async function setImg(imgEl, char) {
-  if (char.img)             { imgEl.src = char.img; return; }
-  if (WIKI_IMGS[char.n])    { imgEl.src = WIKI_IMGS[char.n]; return; }
+  if (char.img)          { imgEl.src = char.img; return; }
+  if (WIKI_IMGS[char.n]) { imgEl.src = WIKI_IMGS[char.n]; return; }
   const slug = char.n.toLowerCase().normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '')
     .trim().replace(/\s+/g, '-');
@@ -48,7 +48,6 @@ function hideGameUI() {
   document.querySelector('.iz').style.display    = 'none';
   document.querySelector('.tw').style.display    = 'none';
   document.querySelector('.cards').style.display = 'none';
-  $('hpanel').classList.remove('on');
 }
 
 function showGameUI(m) {
@@ -60,26 +59,24 @@ function showGameUI(m) {
 
 function foc() { setTimeout(() => $('gi').focus(), 60); }
 
+// ── Modal règles ──────────────────────────────────────────────
+function showRules() {
+  const m = document.getElementById('rules-modal');
+  if (m) m.classList.add('on');
+}
+function hideRules() {
+  const m = document.getElementById('rules-modal');
+  if (m) m.classList.remove('on');
+}
+
 // ── Auth ready (appelée par auth.js) ─────────────────────────
-// Le daily est libre sans login — onAuthReady ne lock plus rien.
-// Si tu veux réactiver le lock, décommente le bloc ci-dessous
-// et commente la version actuelle.
 function onAuthReady() {
   if (mode !== 'daily') return;
   if (dOver) return;
-
-  // ── VERSION LIBRE (pas de lock) ──
   $('gi').disabled    = false;
   $('gbtn').disabled  = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   foc();
-
-  // ── VERSION AVEC LOCK (décommenter pour réactiver) ──
-  // const locked = !currentUser;
-  // $('gi').disabled    = locked;
-  // $('gbtn').disabled  = locked;
-  // $('gi').placeholder = locked ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
-  // if (!locked) foc();
 }
 
 // ── Utilitaires ───────────────────────────────────────────────
@@ -249,10 +246,7 @@ function loadSurv() {
     if (!s || !s.cur) return false;
     const cur = CHARS.find(x => x.n === s.cur);
     if (!cur) return false;
-    sCur = cur;
-    sStr = s.str || 0;
-    sBst = s.bst || 0;
-    sKil = s.kil || 0;
+    sCur = cur; sStr = s.str || 0; sBst = s.bst || 0; sKil = s.kil || 0;
     sQi  = s.qi  || 0;
     sQ   = (s.queue || []).map(n => CHARS.find(x => x.n === n)).filter(Boolean);
     sG   = [];
@@ -271,11 +265,7 @@ function loadSurv() {
 
 // ── État ──────────────────────────────────────────────────────
 let mode = 'daily';
-
-// Daily
-let tgt   = todayChar(), dG = [], dOver = false, dSel = -1;
-
-// Survie
+let tgt  = todayChar(), dG = [], dOver = false, dSel = -1;
 let sStr = 0, sBst = 0, sKil = 0;
 let sQ = [], sQi = 0, sCur = null, sG = [], sSel = -1, sOver = false, sRec = 0;
 
@@ -287,9 +277,6 @@ function switchMode(m) {
   $('btnS').classList.toggle('active', m === 'survival');
   $('sbar').classList.toggle('on', m === 'survival');
   $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
-  $('htitle').textContent  = m === 'daily' ? 'RÈGLES — QUOTIDIEN' : 'RÈGLES — SURVIE';
-  $('hd').style.display    = m === 'daily' ? '' : 'none';
-  $('hs').style.display    = m === 'survival' ? '' : 'none';
   $('flash').classList.remove('on');
   document.body.classList.toggle('survival-mode', m === 'survival');
 
@@ -306,7 +293,6 @@ function switchMode(m) {
       onAuthReady();
     }
   } else {
-    // SURVIE : toujours libre
     $('rb').classList.remove('on');
     $('gi').disabled    = false;
     $('gbtn').disabled  = false;
@@ -343,7 +329,7 @@ function showDRes(won) {
   hideGameUI();
   const b = $('rb');
   b.classList.add('on', won ? 'win' : 'lose');
-  $('rttl').textContent = won ? '⚔ BIEN JOUÉ !' : '💀 ÉCHEC';
+  $('rttl').textContent  = won ? '⚔ BIEN JOUÉ !' : '💀 ÉCHEC';
   $('rchar').textContent = 'Personnage : ' + tgt.n;
   $('rdesc').textContent = won
     ? tgt.n + ' trouvé en ' + dG.length + ' essai' + (dG.length > 1 ? 's' : '') + '.'
@@ -359,14 +345,14 @@ function tick() {
   const d = tom - now;
   $('nt').textContent =
     String(Math.floor(d / 3600000)).padStart(2, '0') + ':' +
-    String(Math.floor((d % 3600000) / 60000)).padStart(2, '00') + ':' +
+    String(Math.floor((d % 3600000) / 60000)).padStart(2, '0') + ':' +
     String(Math.floor((d % 60000) / 1000)).padStart(2, '0');
 }
 
 function share() {
   let t = 'Bleach Character Guesser ' + todayKey() + '\n' + dG.length + '/' + MAX + '\n\n';
   dG.forEach(x => { t += x.f.map(f => f.s === 'correct' ? '🟩' : f.s === 'close' ? '🟨' : '🟥').join('') + '\n'; });
-  t += '\n🎮 Jouer sur https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
+  t += '\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
   try { navigator.clipboard.writeText(t); } catch (e) {}
   const b = document.querySelector('.xbtn'); b.textContent = '✓ Copié !';
   setTimeout(() => b.textContent = '📋 Copier le résultat', 2000);
@@ -383,16 +369,16 @@ function subD() {
   inp.value = ''; $('acl').innerHTML = ''; $('gi').focus();
   const won = m.n === tgt.n;
   saveDaily();
-  if (typeof submitScore === 'function' && typeof currentUser !== 'undefined' && currentUser) {
+  if (typeof submitScore === 'function' && currentUser) {
     submitScore({ date: todayKey(), found: won, attempts: dG.length, mode: 'daily', guesses: dG.map(x => x.m.n) });
   }
   if (won || dG.length >= MAX) { dOver = true; saveDaily(); setTimeout(() => showDRes(won), 400); }
 }
 
 // ── Survie ────────────────────────────────────────────────────
-function loadRec()  { try { const s = JSON.parse(localStorage.getItem('bleachg_surv')); if (s) sRec = s.best || 0; } catch (e) {} }
-function saveRec()  { try { localStorage.setItem('bleachg_surv', JSON.stringify({ best: sRec })); } catch (e) {} }
-function rndQ()     { const a = CHARS.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function loadRec() { try { const s = JSON.parse(localStorage.getItem('bleachg_surv')); if (s) sRec = s.best || 0; } catch (e) {} }
+function saveRec() { try { localStorage.setItem('bleachg_surv', JSON.stringify({ best: sRec })); } catch (e) {} }
+function rndQ()    { const a = CHARS.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function sInit() {
   sStr = 0; sBst = 0; sKil = 0; sQ = rndQ(); sQi = 0; sOver = false;
@@ -432,8 +418,7 @@ function showFlash(type, msg) {
 }
 
 function sGameOver(name) {
-  sOver = true;
-  clearSurv();
+  sOver = true; clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
@@ -458,12 +443,10 @@ function showSEnd() {
   if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
 }
 
-function sRestart() {
-  showGameUI('survival'); $('sbar').classList.add('on'); sInit();
-}
+function sRestart() { showGameUI('survival'); $('sbar').classList.add('on'); sInit(); }
 
 function sShare() {
-  const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 Jouer sur https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
+  const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
   try { navigator.clipboard.writeText(t); } catch (e) {}
   const b = document.querySelector('.xbtn2'); b.textContent = '✓ Copié !';
   setTimeout(() => b.textContent = '📋 Copier le score', 2000);
@@ -484,19 +467,13 @@ function subS() {
   else if (sG.length >= MAX) sGameOver(sCur.n);
 }
 
-// ── Dispatch ──────────────────────────────────────────────────
 function sub() { mode === 'daily' ? subD() : subS(); }
 
 // ── Input / autocomplete ──────────────────────────────────────
 function shake(inp, msg) {
   inp.style.borderColor = 'var(--ko-bd)'; inp.placeholder = msg;
   inp.animate([{ transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 240 });
-  setTimeout(() => {
-    inp.style.borderColor = '';
-    inp.placeholder = 'Entrez un personnage Bleach…';
-    // ── VERSION AVEC LOCK (décommenter si lock réactivé) ──
-    // inp.placeholder = (mode === 'daily' && !currentUser) ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
-  }, 1500);
+  setTimeout(() => { inp.style.borderColor = ''; inp.placeholder = 'Entrez un personnage Bleach…'; }, 1500);
 }
 
 function onIn() {
@@ -536,7 +513,6 @@ function onKD(e) {
 }
 
 document.addEventListener('click', e => { if (!e.target.closest('.acw')) $('acl').innerHTML = ''; });
-function toggleHelp() { $('hpanel').classList.toggle('on'); }
 
 // ── KONAMI CODE ───────────────────────────────────────────────
 (function () {
@@ -544,13 +520,11 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
   const API    = 'https://api.github.com/repos/kevinraphael95/bleachmusics/contents/';
   const BASE   = 'https://raw.githubusercontent.com/kevinraphael95/bleachmusics/main/';
   let buf = [], player = null, toast = null, tracks = [], looping = false;
-
   document.addEventListener('keydown', function (e) {
     if (e.target === $('gi')) return;
     buf.push(e.key); if (buf.length > KONAMI.length) buf.shift();
     if (buf.join(',') === KONAMI.join(',')) { buf = []; triggerKonami(); }
   });
-
   async function triggerKonami() {
     if (!tracks.length) {
       try { const res = await fetch(API); const files = await res.json(); tracks = files.filter(f => f.name.endsWith('.mp3')).map(f => f.name); }
@@ -559,24 +533,15 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
     if (!tracks.length) return;
     playTrack(tracks[Math.floor(Math.random() * tracks.length)]);
   }
-
   function playTrack(name) {
     if (player) { player.pause(); player.onended = null; }
     player = new Audio(BASE + encodeURIComponent(name));
     player.volume = toast ? toast.querySelector('input[type=range]').value : 0.10;
     player.play().catch(() => {});
-    player.onended = () => {
-      if (looping) playTrack(randomOther(name));
-      else { toast?.remove(); toast = null; player = null; }
-    };
+    player.onended = () => { if (looping) playTrack(randomOther(name)); else { toast?.remove(); toast = null; player = null; } };
     showToast(name.replace('.mp3', ''));
   }
-
-  function randomOther(current) {
-    const others = tracks.filter(t => t !== current);
-    return others[Math.floor(Math.random() * others.length)] || current;
-  }
-
+  function randomOther(current) { const o = tracks.filter(t => t !== current); return o[Math.floor(Math.random() * o.length)] || current; }
   function showToast(title) {
     const vol = toast ? toast.querySelector('input[type=range]').value : 0.10;
     if (toast) toast.remove();
@@ -584,26 +549,18 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
     toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
     toast.innerHTML = `
       <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
-      <div class="konami-title" style="font-size:.8rem;color:var(--white);line-height:1.3;word-break:break-word">${title}</div>
+      <div style="font-size:.8rem;color:var(--white);line-height:1.3;word-break:break-word">${title}</div>
       <div style="display:flex;gap:4px;align-items:center">
         <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;min-width:0;accent-color:var(--gold);cursor:pointer">
-        <button class="konami-loop" style="background:${looping ? 'var(--gold-pale)' : 'none'};border:1px solid var(--border);color:${looping ? 'var(--gold-lt)' : 'var(--muted)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Non-stop">∞</button>
-        <button class="konami-rnd" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Aléatoire">🔀</button>
-        <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Stop">■</button>
+        <button class="konami-loop" style="background:${looping?'var(--gold-pale)':'none'};border:1px solid var(--border);color:${looping?'var(--gold-lt)':'var(--muted)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">∞</button>
+        <button class="konami-rnd"  style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">🔀</button>
+        <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">■</button>
       </div>`;
-    const currentName = () => decodeURIComponent(player?.src?.split('/').pop() || '');
+    const cn = () => decodeURIComponent(player?.src?.split('/').pop() || '');
     toast.querySelector('input[type=range]').addEventListener('input', function () { if (player) player.volume = this.value; });
-    toast.querySelector('.konami-loop').addEventListener('click', function () {
-      looping = !looping;
-      this.style.background = looping ? 'var(--gold-pale)' : 'none';
-      this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)';
-    });
-    toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(currentName())));
-    toast.querySelector('.konami-stop').addEventListener('click', () => {
-      looping = false;
-      if (player) { player.pause(); player.onended = null; player = null; }
-      toast.remove(); toast = null;
-    });
+    toast.querySelector('.konami-loop').addEventListener('click', function () { looping = !looping; this.style.background = looping ? 'var(--gold-pale)' : 'none'; this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)'; });
+    toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(cn())));
+    toast.querySelector('.konami-stop').addEventListener('click', () => { looping = false; if (player) { player.pause(); player.onended = null; player = null; } toast.remove(); toast = null; });
     document.body.appendChild(toast);
     if (player) player.volume = vol;
   }
@@ -669,11 +626,6 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
 loadRec();
 loadDaily();
 updDots();
-// Champ toujours actif (pas de lock par défaut)
 $('gi').disabled    = false;
 $('gbtn').disabled  = false;
 $('gi').placeholder = 'Entrez un personnage Bleach…';
-// ── VERSION AVEC LOCK (décommenter + commenter les 3 lignes ci-dessus pour réactiver) ──
-// $('gi').disabled    = true;
-// $('gbtn').disabled  = true;
-// $('gi').placeholder = '🔒 Connectez-vous pour jouer';
