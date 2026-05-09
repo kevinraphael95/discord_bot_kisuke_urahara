@@ -487,41 +487,71 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
   const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
   const API    = 'https://api.github.com/repos/kevinraphael95/bleachmusics/contents/';
   const BASE   = 'https://raw.githubusercontent.com/kevinraphael95/bleachmusics/main/';
-  let buf = [], player = null, toast = null, tracks = [];
+  let buf = [], player = null, toast = null, tracks = [], looping = false;
+
   document.addEventListener('keydown', function (e) {
     if (e.target === $('gi')) return;
     buf.push(e.key); if (buf.length > KONAMI.length) buf.shift();
     if (buf.join(',') === KONAMI.join(',')) { buf = []; triggerKonami(); }
   });
+
   async function triggerKonami() {
     if (!tracks.length) {
       try { const res = await fetch(API); const files = await res.json(); tracks = files.filter(f => f.name.endsWith('.mp3')).map(f => f.name); }
       catch (e) { tracks = []; }
     }
     if (!tracks.length) return;
-    const name = tracks[Math.floor(Math.random() * tracks.length)];
-    if (player) { player.pause(); player.currentTime = 0; }
-    player = new Audio(BASE + encodeURIComponent(name));
-    player.volume = 0.10; player.loop = false; player.play().catch(() => {});
-    showToast(name.replace('.mp3', ''), player);
+    playTrack(tracks[Math.floor(Math.random() * tracks.length)]);
   }
-  function showToast(title, audio) {
+
+  function playTrack(name) {
+    if (player) { player.pause(); player.onended = null; }
+    player = new Audio(BASE + encodeURIComponent(name));
+    player.volume = toast ? toast.querySelector('input[type=range]').value : 0.10;
+    player.play().catch(() => {});
+    player.onended = () => {
+      if (looping) playTrack(randomOther(name));
+      else { toast?.remove(); toast = null; player = null; }
+    };
+    showToast(name.replace('.mp3', ''));
+  }
+
+  function randomOther(current) {
+    const others = tracks.filter(t => t !== current);
+    return others[Math.floor(Math.random() * others.length)] || current;
+  }
+
+  function showToast(title) {
+    const vol = toast ? toast.querySelector('input[type=range]').value : 0.10;
     if (toast) toast.remove();
     toast = document.createElement('div');
-    toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
+    toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
     toast.innerHTML = `
       <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
-      <div style="font-size:.8rem;color:var(--white);line-height:1.3">${title}</div>
+      <div class="konami-title" style="font-size:.8rem;color:var(--white);line-height:1.3">${title}</div>
       <div style="display:flex;gap:.5rem;align-items:center">
-        <input type="range" min="0" max="1" step="0.05" value="0.10" style="flex:1;accent-color:var(--gold);cursor:pointer">
-        <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.7rem;padding:.2rem .5rem;border-radius:2px">■ Stop</button>
+        <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;accent-color:var(--gold);cursor:pointer">
+        <button class="konami-loop" style="background:${looping ? 'var(--gold-pale)' : 'none'};border:1px solid var(--border);color:${looping ? 'var(--gold-lt)' : 'var(--muted)'};cursor:pointer;font-size:.7rem;padding:.2rem .5rem;border-radius:2px" title="Non-stop">∞</button>
+        <button class="konami-rnd" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.7rem;padding:.2rem .5rem;border-radius:2px" title="Aléatoire">🔀</button>
+        <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.7rem;padding:.2rem .5rem;border-radius:2px" title="Stop">■</button>
       </div>`;
-    toast.querySelector('input[type=range]').addEventListener('input', function () { audio.volume = this.value; });
-    toast.querySelector('.konami-stop').addEventListener('click', function () { audio.pause(); audio.currentTime = 0; toast.remove(); toast = null; player = null; });
+    const currentName = () => decodeURIComponent(player?.src?.split('/').pop() || '');
+    toast.querySelector('input[type=range]').addEventListener('input', function () { if (player) player.volume = this.value; });
+    toast.querySelector('.konami-loop').addEventListener('click', function () {
+      looping = !looping;
+      this.style.background = looping ? 'var(--gold-pale)' : 'none';
+      this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)';
+    });
+    toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(currentName())));
+    toast.querySelector('.konami-stop').addEventListener('click', () => {
+      looping = false;
+      if (player) { player.pause(); player.onended = null; player = null; }
+      toast.remove(); toast = null;
+    });
     document.body.appendChild(toast);
+    if (player) player.volume = vol;
   }
 })();
-
 // ── FROMAGE ───────────────────────────────────────────────────
 (function () {
   const DURATION = 13000, EMOJI_COUNT = 22, EMOJIS = ['🫕', '🧀'];
