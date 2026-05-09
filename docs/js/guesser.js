@@ -55,6 +55,7 @@ function showGameUI(m) {
   document.querySelector('.iz').style.display    = 'flex';
   document.querySelector('.tw').style.display    = '';
   document.querySelector('.cards').style.display = '';
+  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
   if (m === 'daily') $('dbar').style.display = 'flex';
 }
 
@@ -238,6 +239,7 @@ function switchMode(m) {
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
   $('sbar').classList.toggle('on', m === 'survival');
+  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
   $('htitle').textContent  = m === 'daily' ? 'RÈGLES — QUOTIDIEN' : 'RÈGLES — SURVIE';
   $('hd').style.display    = m === 'daily' ? '' : 'none';
   $('hs').style.display    = m === 'survival' ? '' : 'none';
