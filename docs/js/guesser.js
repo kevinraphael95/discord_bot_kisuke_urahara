@@ -77,9 +77,18 @@ function hideRules() {
 // ── Auth ready (appelée par auth.js) ─────────────────────────
 function onAuthReady() {
   if (mode !== 'daily') return;
-  if (dOver) return;
-  $('gi').disabled    = false;
-  $('gbtn').disabled  = false;
+  clr();
+  dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+  updDots();
+  if (dOver) {
+    hideGameUI();
+    showDRes(dG.some(x => x.m.n === tgt.n));
+    return;
+  }
+  showGameUI('daily');
+  $('rb').classList.remove('on');
+  $('gi').disabled = false;
+  $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   foc();
 }
@@ -212,16 +221,7 @@ function loadDaily() {
       const f = cmp(m, tgt);
       dG.push({ m, f });
     }
-    if (s.over) {
-      dOver = true;
-      if (mode === 'daily') {
-        hideGameUI();
-        showDRes(s.won);
-      }
-    } else if (mode === 'daily') {
-      dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-      updDots();
-    }
+    if (s.over) dOver = true;
   } catch(e) {}
 }
 
@@ -640,10 +640,8 @@ if (_lastMode === 'survival') {
   else { updSUI(); foc(); }
 } else {
   loadDaily();
-  updDots();
-  $('gi').disabled    = false;
-  $('gbtn').disabled  = false;
-  $('gi').placeholder = 'Entrez un personnage Bleach…';
+  $('gi').disabled = true;
+  $('gbtn').disabled = true;
 }
 // ── VERSION AVEC LOCK (décommenter + commenter les 3 lignes ci-dessus pour réactiver) ──
 // $('gi').disabled    = true;
