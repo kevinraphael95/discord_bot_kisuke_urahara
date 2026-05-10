@@ -40,6 +40,7 @@ async function authInit() {
 // ── Charger progression daily depuis Supabase ────────────────
 async function loadDailyFromSupabase() {
   if (!currentUser) return;
+  if (typeof mode !== 'undefined' && mode !== 'daily') return;
   const today = typeof todayKey === 'function' ? todayKey() : null;
   if (!today) return;
 
