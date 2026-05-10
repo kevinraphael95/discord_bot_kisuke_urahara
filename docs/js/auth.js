@@ -54,47 +54,33 @@ async function loadDailyFromSupabase() {
 
   if (!data || !data.guesses || !data.guesses.length) return;
 
-  function restore() {
-    if (typeof CHARS === 'undefined' || typeof cmp === 'undefined' || typeof todayChar === 'undefined') {
-      setTimeout(restore, 80);
-      return;
-    }
-    const target = todayChar();
-    dG = []; dOver = false;
-    clr();
-
-    for (const name of data.guesses) {
-      const m = CHARS.find(x => x.n === name);
-      if (!m) continue;
-      const f = cmp(m, target);
-      dG.push({ m, f });
-      if (mode === 'daily') {
-        mkRow(m, f, target);
-        mkCard(m, f, target);
+  await new Promise(resolve => {
+    function restore() {
+      if (typeof CHARS === 'undefined' || typeof cmp === 'undefined' || typeof todayChar === 'undefined') {
+        setTimeout(restore, 80); return;
       }
-    }
-
-    if (mode === 'daily') updDots();
-
-    try {
-      localStorage.setItem('bleachg25v2', JSON.stringify({
-        date:    today,
-        guesses: data.guesses,
-        over:    data.found || data.attempts >= MAX,
-        won:     data.found,
-      }));
-    } catch(e) {}
-
-    const over = data.found || data.attempts >= MAX;
-    if (over) {
-      dOver = true;
-      if (mode === 'daily') {
-        hideGameUI();
-        showDRes(data.found);
+      const target = todayChar();
+      dG = []; dOver = false; clr();
+      for (const name of data.guesses) {
+        const m = CHARS.find(x => x.n === name);
+        if (!m) continue;
+        const f = cmp(m, target);
+        dG.push({ m, f });
+        if (mode === 'daily') { mkRow(m, f, target); mkCard(m, f, target); }
       }
+      if (mode === 'daily') updDots();
+      try {
+        localStorage.setItem('bleachg25v2', JSON.stringify({
+          date: today, guesses: data.guesses,
+          over: data.found || data.attempts >= MAX, won: data.found,
+        }));
+      } catch(e) {}
+      const over = data.found || data.attempts >= MAX;
+      if (over) { dOver = true; if (mode === 'daily') { hideGameUI(); showDRes(data.found); } }
+      resolve();
     }
-  }
-  restore();
+    restore();
+  });
 }
 
 // ── Login ────────────────────────────────────────────────────
