@@ -280,7 +280,6 @@ let sQ = [], sQi = 0, sCur = null, sG = [], sSel = -1, sOver = false, sRec = 0;
 function switchMode(m) {
   localStorage.setItem('bleachg_mode', m);
   mode = m;
-  localStorage.setItem('bleachg_mode', m);
   $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
@@ -291,27 +290,33 @@ function switchMode(m) {
   if (m === 'daily') {
     $('send').classList.remove('on'); clr();
     $('gi').disabled = true; $('gbtn').disabled = true;
+    showGameUI('daily');
+    $('rb').classList.remove('on');
     if (currentUser) {
       loadDailyFromSupabase().then(() => {
-        if (!dOver) {
-          showGameUI('daily');
-          $('rb').classList.remove('on');
-          onAuthReady();
-        }
+        if (!dOver) onAuthReady();
       });
     } else {
       dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
       updDots();
-      if (dOver) {
-        hideGameUI();
-        showDRes(dG.some(x => x.m.n === tgt.n));
-      } else {
-        showGameUI('daily');
-        $('rb').classList.remove('on');
-        onAuthReady();
-      }
+      if (dOver) { hideGameUI(); showDRes(dG.some(x => x.m.n === tgt.n)); }
+      else onAuthReady();
+    }
+  } else {
+    $('rb').classList.remove('on');
+    $('gi').disabled = false; $('gbtn').disabled = false;
+    $('gi').placeholder = 'Entrez un personnage Bleach…';
+    if (sOver) {
+      clr(); hideGameUI(); showSEnd();
+    } else {
+      showGameUI('survival'); clr();
+      if (!sCur) { if (!loadSurv()) sInit(); }
+      else { sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); }); }
+      updSUI();
+      if (!/Mobi|Android/i.test(navigator.userAgent)) foc();
     }
   }
+}
 
 // ── Daily ─────────────────────────────────────────────────────
 function updDots() {
