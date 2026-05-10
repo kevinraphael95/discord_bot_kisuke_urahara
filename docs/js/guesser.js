@@ -290,12 +290,14 @@ function switchMode(m) {
   if (m === 'daily') {
     $('send').classList.remove('on'); clr();
     $('gi').disabled = true; $('gbtn').disabled = true;
-    showGameUI('daily');
-    $('rb').classList.remove('on');
     if (currentUser) {
-      loadDailyFromSupabase().then(() => {
-        if (!dOver) onAuthReady();
-      });
+          loadDailyFromSupabase().then(() => {
+            if (!dOver) {
+              showGameUI('daily');
+              $('rb').classList.remove('on');
+              onAuthReady();
+            }
+          });
     } else {
       dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
       updDots();
