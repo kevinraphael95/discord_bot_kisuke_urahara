@@ -55,6 +55,7 @@ function showGameUI(m) {
   document.querySelector('.tw').style.display    = '';
   document.querySelector('.cards').style.display = '';
   $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
+  if (m === 'survival') $('sbar').classList.add('on');
 }
 
 function foc() {
@@ -210,14 +211,16 @@ function loadDaily() {
       if (!m) continue;
       const f = cmp(m, tgt);
       dG.push({ m, f });
-      mkRow(m, f, tgt);
-      mkCard(m, f, tgt);
     }
-    updDots();
     if (s.over) {
       dOver = true;
-      hideGameUI();
-      showDRes(s.won);
+      if (mode === 'daily') {
+        hideGameUI();
+        showDRes(s.won);
+      }
+    } else if (mode === 'daily') {
+      dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+      updDots();
     }
   } catch(e) {}
 }
@@ -275,6 +278,7 @@ let sQ = [], sQi = 0, sCur = null, sG = [], sSel = -1, sOver = false, sRec = 0;
 
 // ── Switch de mode ────────────────────────────────────────────
 function switchMode(m) {
+  localStorage.setItem('bleachg_mode', m);
   mode = m;
   localStorage.setItem('bleachg_mode', m);
   $('gi').value = ''; $('acl').innerHTML = '';
