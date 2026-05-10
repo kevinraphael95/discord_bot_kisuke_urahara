@@ -629,10 +629,24 @@ document.addEventListener('click', e => { if (!e.target.closest('.acw')) $('acl'
 })();
 
 // ── INIT ─────────────────────────────────────────────────────
+// ── INIT ─────────────────────────────────────────────────────
 loadRec();
-const _savedMode = localStorage.getItem('bleachg_mode');
-if (_savedMode === 'survival') {
-  switchMode('survival');
+
+const _lastMode = localStorage.getItem('bleachg_mode') || 'daily';
+
+if (_lastMode === 'survival') {
+  // Préparer le mode survie sans déclencher l'UI daily
+  mode = 'survival';
+  document.body.classList.add('survival-mode');
+  $('btnD').classList.remove('active');
+  $('btnS').classList.add('active');
+  $('sbar').classList.add('on');
+  $('dbar').style.display = 'none';
+  $('hd').style.display   = 'none';
+  $('hs').style.display   = '';
+  showGameUI('survival');
+  if (!loadSurv()) sInit();
+  else { updSUI(); foc(); }
 } else {
   loadDaily();
   updDots();
@@ -640,3 +654,7 @@ if (_savedMode === 'survival') {
   $('gbtn').disabled  = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
 }
+// ── VERSION AVEC LOCK (décommenter + commenter les 3 lignes ci-dessus pour réactiver) ──
+// $('gi').disabled    = true;
+// $('gbtn').disabled  = true;
+// $('gi').placeholder = '🔒 Connectez-vous pour jouer';
