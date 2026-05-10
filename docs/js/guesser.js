@@ -286,7 +286,6 @@ function switchMode(m) {
   $('btnS').classList.toggle('active', m === 'survival');
   $('sbar').classList.toggle('on', m === 'survival');
   $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
-  $('flash').classList.remove('on');
   document.body.classList.toggle('survival-mode', m === 'survival');
 
   if (m === 'daily') {
@@ -404,7 +403,6 @@ function sNext() {
   if (sQi >= sQ.length) { sQ = rndQ(); sQi = 0; }
   sCur = sQ[sQi++]; sG = []; clr();
   clearSurv();
-  $('flash').classList.remove('on');
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   foc(); updSUI();
@@ -420,17 +418,9 @@ function updSUI() {
   }
 }
 
-function showFlash(type, msg) {
-  const f = $('flash');
-  f.className = 'flash on ' + (type === 'ok' ? 'ok' : 'ko');
-  f.textContent = msg;
-  clearTimeout(f._t); f._t = setTimeout(() => f.classList.remove('on'), 2500);
-}
-
 function sGameOver(name) {
   sOver = true; clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
-  showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
   setTimeout(() => showSEnd(), 1500);
 }
@@ -439,7 +429,6 @@ function sCorrect() {
   sKil++; sStr++;
   if (sStr > sBst) sBst = sStr;
   if (sStr > sRec) { sRec = sStr; saveRec(); }
-  showFlash('ok', '✓ ' + sCur.n + ' trouvé' + (sStr >= 3 ? ' 🔥 ×' + sStr : ''));
   $('gi').disabled = true; $('gbtn').disabled = true; updSUI();
   setTimeout(() => sNext(), 1900);
 }
