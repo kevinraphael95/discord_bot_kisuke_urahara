@@ -646,8 +646,6 @@ if (_lastMode === 'survival') {
   $('btnS').classList.add('active');
   $('sbar').classList.add('on');
   $('dbar').style.display = 'none';
-  $('hd').style.display   = 'none';
-  $('hs').style.display   = '';
   showGameUI('survival');
   if (!loadSurv()) sInit();
   else { updSUI(); foc(); }
