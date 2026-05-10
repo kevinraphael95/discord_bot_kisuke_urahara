@@ -89,14 +89,13 @@ async function loadDailyFromSupabase() {
     } catch(e) {}
 
     const over = data.found || data.attempts >= MAX;
-    if (over) {
-      dOver = true;
-      hideGameUI();
-      showDRes(data.found);
-    }
-  }
-  restore();
-}
+        if (over) {
+          dOver = true;
+          if (mode === 'daily') {
+            hideGameUI();
+            showDRes(data.found);
+          }
+        }
 
 // ── Login ────────────────────────────────────────────────────
 async function loginWith(provider) {
