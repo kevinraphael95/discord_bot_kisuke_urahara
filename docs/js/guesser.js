@@ -292,6 +292,7 @@ function switchMode(m) {
     $('send').classList.remove('on'); clr();
     dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
     updDots();
+    if (currentUser) loadDailyFromSupabase(); // ← ajouter
     if (dOver) {
       hideGameUI();
       showDRes(dG.some(x => x.m.n === tgt.n));
