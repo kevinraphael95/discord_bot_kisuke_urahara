@@ -1,3 +1,58 @@
+async function authInit() {
+  // ... (le bloc hash, inchangé)
+
+  const { data: { session } } = await db.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    renderAuthBtn(session.user);
+    window.history.replaceState(null, '', window.location.pathname);
+    await loadDailyFromSupabase(); // onAuthReady est appelé dedans
+  } else {
+    if (typeof onAuthReady === 'function') onAuthReady(); // seulement si pas connecté
+  }
+
+  db.auth.onAuthStateChange(async (_event, session) => {
+    currentUser = session?.user || null;
+    renderAuthBtn(currentUser);
+    if (currentUser) await loadDailyFromSupabase();
+    else if (typeof onAuthReady === 'function') onAuthReady();
+  });
+}
+
+
+
+
+----
+
+async function loadDailyFromSupabase() {
+  if (!currentUser) return;
+  if (typeof mode !== 'undefined' && mode !== 'daily') return;
+  // ...
+  const { data } = await db.from('scores')...
+
+  if (!data || !data.guesses || !data.guesses.length) {
+    if (typeof onAuthReady === 'function') onAuthReady(); // ← ajout
+    return;
+  }
+
+  await new Promise(resolve => {
+    function restore() {
+      // ... (inchangé)
+      resolve();
+    }
+    restore();
+  });
+
+  if (typeof onAuthReady === 'function') onAuthReady(); // ← déplacé ici
+}
+
+
+
+
+
+// -------
+
+
 // ── auth.js — Supabase Auth + Leaderboard ────────────────────
 const SUPA_URL = 'https://nzhinbrmaemkwprbxqbt.supabase.co';
 const SUPA_KEY = 'sb_publishable_Jd5qpEcHJcx05etVqRphOg_DPUQZgNL';
