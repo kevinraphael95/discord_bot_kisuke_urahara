@@ -24,16 +24,16 @@ async function authInit() {
     currentUser = session.user;
     renderAuthBtn(session.user);
     window.history.replaceState(null, '', window.location.pathname);
-    await loadDailyFromSupabase();
+    await loadDailyFromSupabase(); // onAuthReady est appelé dedans
+  } else {
+    if (typeof onAuthReady === 'function') onAuthReady(); // seulement si pas connecté
   }
-
-  if (typeof onAuthReady === 'function') onAuthReady();
 
   db.auth.onAuthStateChange(async (_event, session) => {
     currentUser = session?.user || null;
     renderAuthBtn(currentUser);
-    if (typeof onAuthReady === 'function') onAuthReady();
     if (currentUser) await loadDailyFromSupabase();
+    else if (typeof onAuthReady === 'function') onAuthReady();
   });
 }
 
@@ -52,7 +52,10 @@ async function loadDailyFromSupabase() {
     .eq('mode', 'daily')
     .single();
 
-  if (!data || !data.guesses || !data.guesses.length) return;
+  if (!data || !data.guesses || !data.guesses.length) {
+    if (typeof onAuthReady === 'function') onAuthReady(); // ← ajout
+    return;
+  }
 
   await new Promise(resolve => {
     function restore() {
@@ -81,6 +84,8 @@ async function loadDailyFromSupabase() {
     }
     restore();
   });
+
+  if (typeof onAuthReady === 'function') onAuthReady(); // ← déplacé ici
 }
 
 // ── Login ────────────────────────────────────────────────────
