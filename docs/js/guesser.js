@@ -295,6 +295,7 @@ function loadSurv() {
 function switchMode(m) {
   localStorage.setItem('bleachg_mode', m);
   mode = m;
+  hideGameUI();
   $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
