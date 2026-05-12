@@ -18,6 +18,7 @@ let CHAR_MAP = new Map();
 let tgt   = null; // initialisé dans INIT
 let dG    = [];
 let dOver = false;
+let _authResolved = false;
 let dSel  = -1;
 let _tickID = null; // fix timer leak
 
@@ -99,6 +100,7 @@ function hideRules() { const m = $('rules-modal'); if (m) m.classList.remove('on
 // ── Auth ready (appelée par auth.js) ─────────────────────────
 function onAuthReady() {
   if (mode !== 'daily') return; // guard : ne rien faire si on est en survie
+  if (!_authResolved) return;
   clr();
   dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
   updDots();
@@ -685,6 +687,7 @@ if (_lastMode === 'survival') {
   if (!loadSurv()) sInit();
   else { updSUI(); foc(); }
 } else {
+  _authResolved = true;
   loadDaily();
   $('gi').disabled    = REQUIRE_AUTH;
   $('gbtn').disabled  = REQUIRE_AUTH;
