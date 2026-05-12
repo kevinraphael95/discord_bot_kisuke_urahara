@@ -304,6 +304,7 @@ function switchMode(m) {
   document.body.classList.toggle('survival-mode', m === 'survival');
 
   if (m === 'daily') {
+    $('dbar').style.display = 'none';
     $('send').classList.remove('on'); clr();
     $('gi').disabled = true; $('gbtn').disabled = true;
     if (typeof currentUser !== 'undefined' && currentUser) {
