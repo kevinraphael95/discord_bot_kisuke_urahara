@@ -308,12 +308,8 @@ function switchMode(m) {
     $('gi').disabled = true; $('gbtn').disabled = true;
     if (typeof currentUser !== 'undefined' && currentUser) {
       loadDailyFromSupabase().then(() => {
-        if (mode !== 'daily') return; // ── guard race condition ──
-        if (!dOver) {
-          showGameUI('daily');
-          $('rb').classList.remove('on');
-          onAuthReady();
-        }
+        if (mode !== 'daily') return;
+        onAuthReady();
       });
     } else {
       dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
