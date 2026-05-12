@@ -29,6 +29,7 @@ async function authInit() {
     window.history.replaceState(null, '', window.location.pathname);
     await loadDailyFromSupabase();
   } else {
+    _authResolved = true;
     if (typeof onAuthReady === 'function') onAuthReady();
   }
 
@@ -107,6 +108,7 @@ async function loadDailyFromSupabase() {
   }
 
   // Délègue tout le rendu à onAuthReady
+  _authResolved = true;
   if (typeof mode !== 'undefined' && mode === 'daily' && typeof onAuthReady === 'function') {
     onAuthReady();
   }
