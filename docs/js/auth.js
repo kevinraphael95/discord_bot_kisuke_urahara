@@ -32,7 +32,12 @@ async function authInit() {
     if (typeof onAuthReady === 'function') onAuthReady();
   }
 
+  // ── Guard : ignore le SIGNED_IN initial déjà traité par getSession ───────
   db.auth.onAuthStateChange(async (_event, session) => {
+    const newId = session?.user?.id || null;
+    const oldId = currentUser?.id   || null;
+    if (_event === 'SIGNED_IN' && newId === oldId) return;
+
     currentUser = session?.user || null;
     renderAuthBtn(currentUser);
     if (currentUser) {
