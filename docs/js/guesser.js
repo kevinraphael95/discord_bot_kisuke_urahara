@@ -1,11 +1,31 @@
 // ── guesser.js ───────────────────────────────────────────────
+// ── Config ────────────────────────────────────────────────────
+const REQUIRE_AUTH    = false; // true = lock le daily derrière le login
+const IMG_MAX_RETRIES = 2;     // tentatives max avant abandon image Jikan
+
 const COLS = [
-  {k:'r',  lb:'RACE'},   {k:'sx', lb:'SEXE'},   {k:'arc', lb:'ARC'},
-  {k:'af', lb:'AFFIL.'}, {k:'d',  lb:'FORCE'},  {k:'st',  lb:'STATUT'},
-  {k:'hc', lb:'CHEVEUX'},{k:'bday',lb:'ANNIV.'},{k:'wl',  lb:'COMBATS'},
+  {k:'r',   lb:'RACE'},    {k:'sx',  lb:'SEXE'},    {k:'arc', lb:'ARC'},
+  {k:'af',  lb:'AFFIL.'},  {k:'d',   lb:'FORCE'},   {k:'st',  lb:'STATUT'},
+  {k:'hc',  lb:'CHEVEUX'}, {k:'bday',lb:'ANNIV.'},  {k:'wl',  lb:'COMBATS'},
 ];
 const MAX = 8;
-const $ = id => document.getElementById(id);
+const $   = id => document.getElementById(id);
+
+// ── CHAR_MAP : O(1) lookup — construit dans INIT après data.js ────────────
+let CHAR_MAP = new Map();
+
+// ── État daily — tgt JAMAIS exposé globalement (window.tgt est vide) ──────
+let tgt   = null; // initialisé dans INIT
+let dG    = [];
+let dOver = false;
+let dSel  = -1;
+let _tickID = null; // fix timer leak
+
+// ── État survie ───────────────────────────────────────────────
+let sStr = 0, sBst = 0, sKil = 0;
+let sQ = [], sQi = 0, sCur = null, sG = [], sSel = -1, sOver = false, sRec = 0;
+
+let mode = 'daily';
 
 // ── Images ────────────────────────────────────────────────────
 const WIKI_IMGS   = {};
@@ -16,29 +36,37 @@ async function _processQueue() {
   if (_imgRunning) return;
   _imgRunning = true;
   while (_imgQueue.length) {
-    const { char, imgEl } = _imgQueue.shift();
+    const { char, imgEl, retries = 0 } = _imgQueue.shift();
     try {
       const r = await fetch(`https://api.jikan.moe/v4/characters?q=${encodeURIComponent(char.n)}&limit=1`);
       const d = await r.json();
       const url = d.data?.[0]?.images?.jpg?.image_url;
       if (url) { WIKI_IMGS[char.n] = url; imgEl.src = url; }
       else imgEl.style.display = 'none';
-    } catch { imgEl.style.display = 'none'; }
+    } catch {
+      // Retry avec limite
+      if (retries < IMG_MAX_RETRIES) {
+        _imgQueue.push({ char, imgEl, retries: retries + 1 });
+      } else {
+        imgEl.style.display = 'none';
+      }
+    }
     await new Promise(r => setTimeout(r, 350));
   }
   _imgRunning = false;
 }
 
 async function setImg(imgEl, char) {
-  if (char.img)             { imgEl.src = char.img; return; }
-  if (WIKI_IMGS[char.n])    { imgEl.src = WIKI_IMGS[char.n]; return; }
+  if (char.img)          { imgEl.src = char.img; return; }
+  if (WIKI_IMGS[char.n]) { imgEl.src = WIKI_IMGS[char.n]; return; }
   const slug = char.n.toLowerCase().normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '')
     .trim().replace(/\s+/g, '-');
   imgEl.src = `assets/personnages/${slug}.png`;
   imgEl.onerror = () => {
     imgEl.onerror = null; imgEl.src = '';
-    _imgQueue.push({ char, imgEl }); _processQueue();
+    _imgQueue.push({ char, imgEl, retries: 0 });
+    _processQueue();
   };
 }
 
@@ -48,38 +76,51 @@ function hideGameUI() {
   document.querySelector('.iz').style.display    = 'none';
   document.querySelector('.tw').style.display    = 'none';
   document.querySelector('.cards').style.display = 'none';
-  $('hpanel').classList.remove('on');
 }
 
 function showGameUI(m) {
   document.querySelector('.iz').style.display    = 'flex';
   document.querySelector('.tw').style.display    = '';
   document.querySelector('.cards').style.display = '';
-  if (m === 'daily') $('dbar').style.display = 'flex';
+  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
+  if (m === 'survival') $('sbar').classList.add('on');
 }
 
-function foc() { setTimeout(() => $('gi').focus(), 60); }
+function foc() {
+  if (!/Mobi|Android/i.test(navigator.userAgent)) {
+    setTimeout(() => $('gi').focus(), 60);
+  }
+}
+
+// ── Modal règles ──────────────────────────────────────────────
+function showRules() { const m = $('rules-modal'); if (m) m.classList.add('on'); }
+function hideRules() { const m = $('rules-modal'); if (m) m.classList.remove('on'); }
 
 // ── Auth ready (appelée par auth.js) ─────────────────────────
-// Le daily est libre sans login — onAuthReady ne lock plus rien.
-// Si tu veux réactiver le lock, décommente le bloc ci-dessous
-// et commente la version actuelle.
 function onAuthReady() {
-  if (mode !== 'daily') return;
-  if (dOver) return;
-
-  // ── VERSION LIBRE (pas de lock) ──
-  $('gi').disabled    = false;
-  $('gbtn').disabled  = false;
-  $('gi').placeholder = 'Entrez un personnage Bleach…';
-  foc();
-
-  // ── VERSION AVEC LOCK (décommenter pour réactiver) ──
-  // const locked = !currentUser;
-  // $('gi').disabled    = locked;
-  // $('gbtn').disabled  = locked;
-  // $('gi').placeholder = locked ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
-  // if (!locked) foc();
+  if (mode !== 'daily') return; // guard : ne rien faire si on est en survie
+  clr();
+  dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+  updDots();
+  if (dOver) {
+    hideGameUI();
+    showDRes(dG.some(x => x.m.n === tgt.n));
+    return;
+  }
+  showGameUI('daily');
+  $('rb').classList.remove('on');
+  if (REQUIRE_AUTH) {
+    const locked = !currentUser;
+    $('gi').disabled    = locked;
+    $('gbtn').disabled  = locked;
+    $('gi').placeholder = locked ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
+    if (!locked) foc();
+  } else {
+    $('gi').disabled    = false;
+    $('gbtn').disabled  = false;
+    $('gi').placeholder = 'Entrez un personnage Bleach…';
+    foc();
+  }
 }
 
 // ── Utilitaires ───────────────────────────────────────────────
@@ -96,7 +137,7 @@ function dayNum() {
   return Math.floor((t - s) / 86400000);
 }
 function todayChar() { const d = dayNum(); return seededShuffle(CHARS, d ^ 0xBEA6)[d % CHARS.length]; }
-function todayKey()  { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+function todayKey()  { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
 
 function bdayToDay(bday) {
   if (!bday || bday === '??/??') return null;
@@ -126,34 +167,30 @@ function cmp(m, t) {
   let bdDir = '';
   const mDay = bdayToDay(m.bday), tDay = bdayToDay(t.bday);
   if (!sameBd && mDay !== null && tDay !== null) bdDir = mDay < tDay ? '▲' : '▼';
+  const mi = ARC_ORDER.indexOf(m.arc), ti = ARC_ORDER.indexOf(t.arc);
   return [
-    { v: m.r,   s: m.r   === t.r   ? 'correct' : 'wrong', a: '' },
-    { v: m.sx,  s: m.sx  === t.sx  ? 'correct' : 'wrong', a: '' },
-    { v: m.arc, s: (() => {
-        if (m.arc === t.arc) return 'correct';
-        const mi = ARC_ORDER.indexOf(m.arc), ti = ARC_ORDER.indexOf(t.arc);
-        return (mi >= 0 && ti >= 0 && Math.abs(mi - ti) === 1) ? 'close' : 'wrong';
-      })(),
-      a: (() => {
-        if (m.arc === t.arc) return '';
-        const mi = ARC_ORDER.indexOf(m.arc), ti = ARC_ORDER.indexOf(t.arc);
-        if (mi < 0 || ti < 0) return '';
-        return mi < ti ? '▲' : '▼';
-      })()
-    },
-    { v: m.af,  s: m.af  === t.af  ? 'correct' : 'wrong', a: '' },
-    { v: '★'.repeat(m.d) + '☆'.repeat(5 - m.d), s: m.d === t.d ? 'correct' : dd === 1 ? 'close' : 'wrong', a: m.d < t.d ? '▲' : m.d > t.d ? '▼' : '' },
-    { v: m.st,  s: m.st  === t.st  ? 'correct' : 'wrong', a: '' },
-    { v: m.hc,  s: m.hc  === t.hc  ? 'correct' : 'wrong', a: '' },
-    { v: m.bday,s: sameBd ? 'correct' : sameMo ? 'close' : 'wrong', a: sameBd ? '' : bdDir },
-    { v: m.w + 'V/' + m.l + 'D', s: m.w === t.w && m.l === t.l ? 'correct' : dw <= 2 ? 'close' : 'wrong', a: m.w < t.w ? '▲' : m.w > t.w ? '▼' : '' },
+    { v: m.r,   s: m.r  === t.r  ? 'correct' : 'wrong', a: '' },
+    { v: m.sx,  s: m.sx === t.sx ? 'correct' : 'wrong', a: '' },
+    { v: m.arc,
+      s: m.arc === t.arc ? 'correct' : (mi >= 0 && ti >= 0 && Math.abs(mi - ti) === 1) ? 'close' : 'wrong',
+      a: m.arc === t.arc ? '' : (mi < 0 || ti < 0) ? '' : mi < ti ? '▲' : '▼' },
+    { v: m.af,  s: m.af === t.af ? 'correct' : 'wrong', a: '' },
+    { v: '★'.repeat(m.d) + '☆'.repeat(5 - m.d),
+      s: m.d === t.d ? 'correct' : dd === 1 ? 'close' : 'wrong',
+      a: m.d < t.d ? '▲' : m.d > t.d ? '▼' : '' },
+    { v: m.st,  s: m.st === t.st ? 'correct' : 'wrong', a: '' },
+    { v: m.hc,  s: m.hc === t.hc ? 'correct' : 'wrong', a: '' },
+    { v: m.bday, s: sameBd ? 'correct' : sameMo ? 'close' : 'wrong', a: sameBd ? '' : bdDir },
+    { v: m.w + 'V/' + m.l + 'D',
+      s: m.w === t.w && m.l === t.l ? 'correct' : dw <= 2 ? 'close' : 'wrong',
+      a: m.w < t.w ? '▲' : m.w > t.w ? '▼' : '' },
   ];
 }
 
 // ── Rendu ─────────────────────────────────────────────────────
-function mkRow(m, f, tgt) {
+function mkRow(m, f, target) {
   const row = document.createElement('div'); row.className = 'row';
-  const nc  = document.createElement('div'); nc.className  = 'cell ' + (m.n === tgt.n ? 'correct' : 'wrong');
+  const nc  = document.createElement('div'); nc.className  = 'cell ' + (m.n === target.n ? 'correct' : 'wrong');
   const ri  = document.createElement('img'); ri.className  = 'row-img'; setImg(ri, m);
   nc.appendChild(ri); nc.appendChild(document.createTextNode(m.n)); row.appendChild(nc);
   f.forEach(x => {
@@ -164,8 +201,8 @@ function mkRow(m, f, tgt) {
   $('gr').prepend(row);
 }
 
-function mkCard(m, f, tgt) {
-  const win  = m.n === tgt.n;
+function mkCard(m, f, target) {
+  const win  = m.n === target.n;
   const card = document.createElement('div'); card.className = 'card ' + (win ? 'ok' : 'ko');
   const top  = document.createElement('div'); top.className  = 'ctop';
   const ci   = document.createElement('img'); ci.className   = 'cimg'; setImg(ci, m);
@@ -187,7 +224,8 @@ function mkCard(m, f, tgt) {
 function clr() { $('gr').innerHTML = ''; $('gc').innerHTML = ''; }
 
 // ── localStorage daily ────────────────────────────────────────
-const LS_KEY = 'bleachg25v2';
+const LS_KEY      = 'bleachg25v2';
+const LS_SURV_KEY = 'bleachg_surv_state';
 
 function saveDaily() {
   try {
@@ -205,69 +243,91 @@ function loadDaily() {
     const s = JSON.parse(localStorage.getItem(LS_KEY));
     if (!s || s.date !== todayKey()) return;
     for (const name of s.guesses) {
-      const m = CHARS.find(x => x.n === name);
+      const m = CHAR_MAP.get(name.toLowerCase());
       if (!m) continue;
-      const f = cmp(m, tgt);
-      dG.push({ m, f });
-      mkRow(m, f, tgt);
-      mkCard(m, f, tgt);
+      dG.push({ m, f: cmp(m, tgt) });
     }
-    updDots();
-    if (s.over) {
-      dOver = true;
-      hideGameUI();
-      showDRes(s.won);
-    }
+    if (s.over) dOver = true;
   } catch(e) {}
 }
 
-// ── État ──────────────────────────────────────────────────────
-let mode = 'daily';
+// ── localStorage survie ───────────────────────────────────────
+function saveSurv() {
+  if (sOver || !sCur) return;
+  try {
+    localStorage.setItem(LS_SURV_KEY, JSON.stringify({
+      cur:     sCur.n,
+      str:     sStr, bst: sBst, kil: sKil,
+      guesses: sG.map(x => x.m.n),
+      queue:   sQ.map(x => x.n),
+      qi:      sQi,
+    }));
+  } catch(e) {}
+}
 
-// Daily
-let tgt   = todayChar(), dG = [], dOver = false, dSel = -1;
+function clearSurv() { try { localStorage.removeItem(LS_SURV_KEY); } catch(e) {} }
 
-// Survie
-let sStr = 0, sBst = 0, sKil = 0;
-let sQ = [], sQi = 0, sCur = null, sG = [], sSel = -1, sOver = false, sRec = 0;
+function loadSurv() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SURV_KEY));
+    if (!s || !s.cur) return false;
+    const cur = CHAR_MAP.get(s.cur.toLowerCase());
+    if (!cur) return false;
+    sCur = cur; sStr = s.str || 0; sBst = s.bst || 0; sKil = s.kil || 0; sQi = s.qi || 0;
+    sQ   = (s.queue || []).map(n => CHAR_MAP.get(n.toLowerCase())).filter(Boolean);
+    sG   = [];
+    for (const name of (s.guesses || [])) {
+      const m = CHAR_MAP.get(name.toLowerCase());
+      if (!m) continue;
+      const f = cmp(m, sCur);
+      sG.push({ m, f });
+      mkRow(m, f, sCur); mkCard(m, f, sCur);
+    }
+    if (!sCur) return false; // guard avant updSUI
+    updSUI();
+    return true;
+  } catch(e) { return false; }
+}
 
 // ── Switch de mode ────────────────────────────────────────────
 function switchMode(m) {
+  localStorage.setItem('bleachg_mode', m);
   mode = m;
   $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
   $('sbar').classList.toggle('on', m === 'survival');
-  $('htitle').textContent  = m === 'daily' ? 'RÈGLES — QUOTIDIEN' : 'RÈGLES — SURVIE';
-  $('hd').style.display    = m === 'daily' ? '' : 'none';
-  $('hs').style.display    = m === 'survival' ? '' : 'none';
-  $('flash').classList.remove('on');
+  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
   document.body.classList.toggle('survival-mode', m === 'survival');
 
   if (m === 'daily') {
     $('send').classList.remove('on'); clr();
-    dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-    updDots();
-    if (dOver) {
-      hideGameUI();
-      showDRes(dG.some(x => x.m.n === tgt.n));
+    $('gi').disabled = true; $('gbtn').disabled = true;
+    if (typeof currentUser !== 'undefined' && currentUser) {
+      loadDailyFromSupabase().then(() => {
+        if (mode !== 'daily') return; // ── guard race condition ──
+        if (!dOver) {
+          showGameUI('daily');
+          $('rb').classList.remove('on');
+          onAuthReady();
+        }
+      });
     } else {
-      showGameUI('daily');
-      $('rb').classList.remove('on');
-      onAuthReady();
+      dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+      updDots();
+      if (dOver) { hideGameUI(); showDRes(dG.some(x => x.m.n === tgt.n)); }
+      else onAuthReady();
     }
   } else {
-    // SURVIE : toujours libre
     $('rb').classList.remove('on');
-    $('gi').disabled    = false;
-    $('gbtn').disabled  = false;
+    $('gi').disabled = false; $('gbtn').disabled = false;
     $('gi').placeholder = 'Entrez un personnage Bleach…';
     if (sOver) {
       clr(); hideGameUI(); showSEnd();
     } else {
       showGameUI('survival'); clr();
-      if (!sCur) sInit();
-      else sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); });
+      if (!sCur) { if (!loadSurv()) sInit(); }
+      else { sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); }); }
       updSUI(); foc();
     }
   }
@@ -289,16 +349,20 @@ function updDots() {
 
 function showDRes(won) {
   hideGameUI();
+  // ── FIX timer leak : annule l'ancien interval avant d'en créer un nouveau ──
+  if (_tickID) { clearInterval(_tickID); _tickID = null; }
+
   const b = $('rb');
   b.classList.add('on', won ? 'win' : 'lose');
-  $('rttl').textContent = won ? '⚔ BIEN JOUÉ !' : '💀 ÉCHEC';
+  $('rttl').textContent  = won ? '⚔ BIEN JOUÉ !' : '💀 ÉCHEC';
   $('rchar').textContent = 'Personnage : ' + tgt.n;
   $('rdesc').textContent = won
-    ? tgt.n + ' trouvé en ' + dG.length + ' essai' + (dG.length > 1 ? 's' : '') + '.'
-    : tgt.n + ' · ' + tgt.r + ' · ' + tgt.st + ' · Cheveux : ' + tgt.hc + ' · ' + tgt.w + 'V/' + tgt.l + 'D · ' + tgt.bday;
+    ? `${tgt.n} trouvé en ${dG.length} essai${dG.length > 1 ? 's' : ''}.`
+    : `${tgt.n} · ${tgt.r} · ${tgt.st} · Cheveux : ${tgt.hc} · ${tgt.w}V/${tgt.l}D · ${tgt.bday}`;
   $('gi').disabled = true; $('gbtn').disabled = true;
   setImg($('r-img'), tgt); $('r-img').alt = tgt.n;
-  tick(); setInterval(tick, 1000);
+  tick();
+  _tickID = setInterval(tick, 1000);
 }
 
 function tick() {
@@ -312,10 +376,10 @@ function tick() {
 }
 
 function share() {
-  let t = 'Bleach Character Guesser ' + todayKey() + '\n' + dG.length + '/' + MAX + '\n\n';
+  let t = `Bleach Character Guesser ${todayKey()}\n${dG.length}/${MAX}\n\n`;
   dG.forEach(x => { t += x.f.map(f => f.s === 'correct' ? '🟩' : f.s === 'close' ? '🟨' : '🟥').join('') + '\n'; });
-  t += '\n🎮 Jouer sur https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
-  try { navigator.clipboard.writeText(t); } catch (e) {}
+  t += '\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
+  try { navigator.clipboard.writeText(t); } catch(e) {}
   const b = document.querySelector('.xbtn'); b.textContent = '✓ Copié !';
   setTimeout(() => b.textContent = '📋 Copier le résultat', 2000);
 }
@@ -323,7 +387,8 @@ function share() {
 function subD() {
   if (dOver) return;
   const inp = $('gi'); const v = inp.value.trim(); if (!v) return;
-  const m = CHARS.find(x => x.n.toLowerCase() === v.toLowerCase());
+  // CHAR_MAP O(1) au lieu de CHARS.find() O(n)
+  const m = CHAR_MAP.get(v.toLowerCase());
   if (!m) { shake(inp, 'Introuvable…'); return; }
   if (dG.find(x => x.m.n === m.n)) { shake(inp, 'Déjà essayé !'); return; }
   const f = cmp(m, tgt); dG.push({ m, f });
@@ -338,12 +403,13 @@ function subD() {
 }
 
 // ── Survie ────────────────────────────────────────────────────
-function loadRec()  { try { const s = JSON.parse(localStorage.getItem('bleachg_surv')); if (s) sRec = s.best || 0; } catch (e) {} }
-function saveRec()  { try { localStorage.setItem('bleachg_surv', JSON.stringify({ best: sRec })); } catch (e) {} }
-function rndQ()     { const a = CHARS.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function loadRec() { try { const s = JSON.parse(localStorage.getItem('bleachg_surv')); if (s) sRec = s.best || 0; } catch(e) {} }
+function saveRec() { try { localStorage.setItem('bleachg_surv', JSON.stringify({ best: sRec })); } catch(e) {} }
+function rndQ()    { const a = CHARS.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function sInit() {
   sStr = 0; sBst = 0; sKil = 0; sQ = rndQ(); sQi = 0; sOver = false;
+  clearSurv();
   $('send').classList.remove('on');
   showGameUI('survival');
   $('gi').disabled = false; $('gbtn').disabled = false;
@@ -354,7 +420,7 @@ function sInit() {
 function sNext() {
   if (sQi >= sQ.length) { sQ = rndQ(); sQi = 0; }
   sCur = sQ[sQi++]; sG = []; clr();
-  $('flash').classList.remove('on');
+  clearSurv();
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   foc(); updSUI();
@@ -370,16 +436,19 @@ function updSUI() {
   }
 }
 
+// ── Flash message (survie) ────────────────────────────────────
 function showFlash(type, msg) {
   const f = $('flash');
-  f.className = 'flash on ' + (type === 'ok' ? 'ok' : 'ko');
+  f.className   = 'flash on ' + (type === 'ok' ? 'ok' : 'ko');
   f.textContent = msg;
-  clearTimeout(f._t); f._t = setTimeout(() => f.classList.remove('on'), 2500);
+  clearTimeout(f._t);
+  f._t = setTimeout(() => f.classList.remove('on'), 2500);
 }
 
 function sGameOver(name) {
-  sOver = true;
+  sOver = true; clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
+  // ── FIX : feedback visuel immédiat avant l'écran game over ──
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
   setTimeout(() => showSEnd(), 1500);
@@ -389,7 +458,7 @@ function sCorrect() {
   sKil++; sStr++;
   if (sStr > sBst) sBst = sStr;
   if (sStr > sRec) { sRec = sStr; saveRec(); }
-  showFlash('ok', '✓ ' + sCur.n + ' trouvé' + (sStr >= 3 ? ' 🔥 ×' + sStr : ''));
+  showFlash('ok', `✓ ${sCur.n} trouvé${sStr >= 3 ? ' 🔥 ×' + sStr : ''}`);
   $('gi').disabled = true; $('gbtn').disabled = true; updSUI();
   setTimeout(() => sNext(), 1900);
 }
@@ -403,13 +472,11 @@ function showSEnd() {
   if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
 }
 
-function sRestart() {
-  showGameUI('survival'); $('sbar').classList.add('on'); sInit();
-}
+function sRestart() { showGameUI('survival'); $('sbar').classList.add('on'); sInit(); }
 
 function sShare() {
-  const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 Jouer sur https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
-  try { navigator.clipboard.writeText(t); } catch (e) {}
+  const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
+  try { navigator.clipboard.writeText(t); } catch(e) {}
   const b = document.querySelector('.xbtn2'); b.textContent = '✓ Copié !';
   setTimeout(() => b.textContent = '📋 Copier le score', 2000);
 }
@@ -417,33 +484,29 @@ function sShare() {
 function subS() {
   if (sOver || !sCur) return;
   const inp = $('gi'); const v = inp.value.trim(); if (!v) return;
-  const m = CHARS.find(x => x.n.toLowerCase() === v.toLowerCase());
+  const m = CHAR_MAP.get(v.toLowerCase());
   if (!m) { shake(inp, 'Introuvable…'); return; }
   if (sG.find(x => x.m.n === m.n)) { shake(inp, 'Déjà essayé !'); return; }
   const f = cmp(m, sCur); sG.push({ m, f });
   mkRow(m, f, sCur); mkCard(m, f, sCur);
   inp.value = ''; $('acl').innerHTML = ''; updSUI();
+  saveSurv();
   if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
   if (m.n === sCur.n) sCorrect();
   else if (sG.length >= MAX) sGameOver(sCur.n);
 }
 
-// ── Dispatch ──────────────────────────────────────────────────
 function sub() { mode === 'daily' ? subD() : subS(); }
 
-// ── Input / autocomplete ──────────────────────────────────────
-function shake(inp, msg) {
-  inp.style.borderColor = 'var(--ko-bd)'; inp.placeholder = msg;
-  inp.animate([{ transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 240 });
-  setTimeout(() => {
-    inp.style.borderColor = '';
-    inp.placeholder = 'Entrez un personnage Bleach…';
-    // ── VERSION AVEC LOCK (décommenter si lock réactivé) ──
-    // inp.placeholder = (mode === 'daily' && !currentUser) ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
-  }, 1500);
-}
+// ── Autocomplete avec debounce ─────────────────────────────────
+let _acTimer = null;
 
 function onIn() {
+  clearTimeout(_acTimer);
+  _acTimer = setTimeout(_doAC, 100);
+}
+
+function _doAC() {
   const v = $('gi').value.toLowerCase().trim();
   const l = $('acl'); l.innerHTML = '';
   if (mode === 'daily') dSel = -1; else sSel = -1;
@@ -458,7 +521,7 @@ function onIn() {
     i.onclick = () => { $('gi').value = x.n; l.innerHTML = ''; sub(); };
     l.appendChild(i);
   });
-  if (v === 'gay') triggerGay();
+  if (v === 'gay')     triggerGay();
   if (v === 'fromage') triggerFromage();
 }
 
@@ -480,7 +543,17 @@ function onKD(e) {
 }
 
 document.addEventListener('click', e => { if (!e.target.closest('.acw')) $('acl').innerHTML = ''; });
-function toggleHelp() { $('hpanel').classList.toggle('on'); }
+
+function shake(inp, msg) {
+  inp.style.borderColor = 'var(--ko-bd)'; inp.placeholder = msg;
+  inp.animate([{ transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 240 });
+  setTimeout(() => {
+    inp.style.borderColor = '';
+    inp.placeholder = (REQUIRE_AUTH && mode === 'daily' && typeof currentUser !== 'undefined' && !currentUser)
+      ? '🔒 Connectez-vous pour jouer'
+      : 'Entrez un personnage Bleach…';
+  }, 1500);
+}
 
 // ── KONAMI CODE ───────────────────────────────────────────────
 (function () {
@@ -488,70 +561,52 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
   const API    = 'https://api.github.com/repos/kevinraphael95/bleachmusics/contents/';
   const BASE   = 'https://raw.githubusercontent.com/kevinraphael95/bleachmusics/main/';
   let buf = [], player = null, toast = null, tracks = [], looping = false;
-
   document.addEventListener('keydown', function (e) {
     if (e.target === $('gi')) return;
     buf.push(e.key); if (buf.length > KONAMI.length) buf.shift();
     if (buf.join(',') === KONAMI.join(',')) { buf = []; triggerKonami(); }
   });
-
   async function triggerKonami() {
     if (!tracks.length) {
       try { const res = await fetch(API); const files = await res.json(); tracks = files.filter(f => f.name.endsWith('.mp3')).map(f => f.name); }
-      catch (e) { tracks = []; }
+      catch(e) { tracks = []; }
     }
     if (!tracks.length) return;
     playTrack(tracks[Math.floor(Math.random() * tracks.length)]);
   }
-
   function playTrack(name) {
     if (player) { player.pause(); player.onended = null; }
     player = new Audio(BASE + encodeURIComponent(name));
     player.volume = toast ? toast.querySelector('input[type=range]').value : 0.10;
     player.play().catch(() => {});
-    player.onended = () => {
-      if (looping) playTrack(randomOther(name));
-      else { toast?.remove(); toast = null; player = null; }
-    };
+    player.onended = () => { if (looping) playTrack(randomOther(name)); else { toast?.remove(); toast = null; player = null; } };
     showToast(name.replace('.mp3', ''));
   }
-
-  function randomOther(current) {
-    const others = tracks.filter(t => t !== current);
-    return others[Math.floor(Math.random() * others.length)] || current;
-  }
-
+  function randomOther(c) { const o = tracks.filter(t => t !== c); return o[Math.floor(Math.random() * o.length)] || c; }
   function showToast(title) {
-      const vol = toast ? toast.querySelector('input[type=range]').value : 0.10;
-      if (toast) toast.remove();
-      toast = document.createElement('div');
-      toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
-      toast.innerHTML = `
-        <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
-        <div class="konami-title" style="font-size:.8rem;color:var(--white);line-height:1.3;word-break:break-word">${title}</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;min-width:0;accent-color:var(--gold);cursor:pointer">
-          <button class="konami-loop" style="background:${looping ? 'var(--gold-pale)' : 'none'};border:1px solid var(--border);color:${looping ? 'var(--gold-lt)' : 'var(--muted)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Non-stop">∞</button>
-          <button class="konami-rnd" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Aléatoire">🔀</button>
-          <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0" title="Stop">■</button>
-        </div>`;
-      const currentName = () => decodeURIComponent(player?.src?.split('/').pop() || '');
-      toast.querySelector('input[type=range]').addEventListener('input', function () { if (player) player.volume = this.value; });
-      toast.querySelector('.konami-loop').addEventListener('click', function () {
-        looping = !looping;
-        this.style.background = looping ? 'var(--gold-pale)' : 'none';
-        this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)';
-      });
-      toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(currentName())));
-      toast.querySelector('.konami-stop').addEventListener('click', () => {
-        looping = false;
-        if (player) { player.pause(); player.onended = null; player = null; }
-        toast.remove(); toast = null;
-      });
-      document.body.appendChild(toast);
-      if (player) player.volume = vol;
-    }
+    const vol = toast ? toast.querySelector('input[type=range]').value : 0.10;
+    if (toast) toast.remove();
+    toast = document.createElement('div');
+    toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
+    toast.innerHTML = `
+      <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
+      <div style="font-size:.8rem;color:var(--white);line-height:1.3;word-break:break-word">${title}</div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;min-width:0;accent-color:var(--gold);cursor:pointer">
+        <button class="konami-loop" style="background:${looping?'var(--gold-pale)':'none'};border:1px solid var(--border);color:${looping?'var(--gold-lt)':'var(--muted)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">∞</button>
+        <button class="konami-rnd"  style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">🔀</button>
+        <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">■</button>
+      </div>`;
+    const cn = () => decodeURIComponent(player?.src?.split('/').pop() || '');
+    toast.querySelector('input[type=range]').addEventListener('input', function () { if (player) player.volume = this.value; });
+    toast.querySelector('.konami-loop').addEventListener('click', function () { looping = !looping; this.style.background = looping ? 'var(--gold-pale)' : 'none'; this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)'; });
+    toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(cn())));
+    toast.querySelector('.konami-stop').addEventListener('click', () => { looping = false; if (player) { player.pause(); player.onended = null; player = null; } toast.remove(); toast = null; });
+    document.body.appendChild(toast);
+    if (player) player.volume = vol;
+  }
 })();
+
 // ── FROMAGE ───────────────────────────────────────────────────
 (function () {
   const DURATION = 13000, EMOJI_COUNT = 22, EMOJIS = ['🫕', '🧀'];
@@ -609,14 +664,29 @@ function toggleHelp() { $('hpanel').classList.toggle('on'); }
 })();
 
 // ── INIT ─────────────────────────────────────────────────────
+// CHAR_MAP construit après chargement synchrone de data.js
+CHAR_MAP = new Map(CHARS.map(c => [c.n.toLowerCase(), c]));
+
+// tgt initialisé ici — jamais accessible via window.tgt
+tgt = todayChar();
+
 loadRec();
-loadDaily();   // charge la progression du jour depuis localStorage
-updDots();
-// Champ toujours actif (pas de lock par défaut)
-$('gi').disabled    = false;
-$('gbtn').disabled  = false;
-$('gi').placeholder = 'Entrez un personnage Bleach…';
-// ── VERSION AVEC LOCK (décommenter + commenter les 3 lignes ci-dessus pour réactiver) ──
-// $('gi').disabled    = true;
-// $('gbtn').disabled  = true;
-// $('gi').placeholder = '🔒 Connectez-vous pour jouer';
+
+const _lastMode = localStorage.getItem('bleachg_mode') || 'daily';
+
+if (_lastMode === 'survival') {
+  mode = 'survival';
+  document.body.classList.add('survival-mode');
+  $('btnD').classList.remove('active');
+  $('btnS').classList.add('active');
+  $('sbar').classList.add('on');
+  $('dbar').style.display = 'none';
+  showGameUI('survival');
+  if (!loadSurv()) sInit();
+  else { updSUI(); foc(); }
+} else {
+  loadDaily();
+  $('gi').disabled    = REQUIRE_AUTH;
+  $('gbtn').disabled  = REQUIRE_AUTH;
+  $('gi').placeholder = REQUIRE_AUTH ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
+}
