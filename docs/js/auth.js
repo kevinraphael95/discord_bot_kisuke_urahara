@@ -29,7 +29,6 @@ async function authInit() {
     window.history.replaceState(null, '', window.location.pathname);
     await loadDailyFromSupabase();
   } else {
-    // Pas connecté : lancer onAuthReady directement
     if (typeof onAuthReady === 'function') onAuthReady();
   }
 
@@ -45,10 +44,8 @@ async function authInit() {
 }
 
 // ── Charger progression daily depuis Supabase ─────────────────
-// Variables partagées avec guesser.js : dG, dOver, tgt (globales)
 async function loadDailyFromSupabase() {
   if (!currentUser) return;
-  // Ne rien faire si on est en mode survie au moment de la réponse
   if (typeof mode !== 'undefined' && mode !== 'daily') return;
 
   const today = typeof todayKey === 'function' ? todayKey() : null;
@@ -63,64 +60,48 @@ async function loadDailyFromSupabase() {
       .eq('mode', 'daily')
       .single();
 
-    if (!data || !data.guesses || !data.guesses.length) {
-      // Aucun score aujourd'hui : activer le jeu normalement
-      if (mode === 'daily' && typeof onAuthReady === 'function') onAuthReady();
-      return;
+    if (data?.guesses?.length) {
+      await new Promise(resolve => {
+        function restore() {
+          if (
+            typeof CHARS === 'undefined' ||
+            typeof cmp   === 'undefined' ||
+            typeof tgt   === 'undefined' ||
+            tgt === null
+          ) { setTimeout(restore, 80); return; }
+
+          // Remplir dG sans rien rendre — onAuthReady s'en charge
+          dG = [];
+          for (const name of data.guesses) {
+            const m = typeof CHAR_MAP !== 'undefined'
+              ? CHAR_MAP.get(name.toLowerCase())
+              : CHARS.find(x => x.n === name);
+            if (!m) continue;
+            dG.push({ m, f: cmp(m, tgt) });
+          }
+
+          dOver = data.found || data.attempts >= MAX;
+
+          try {
+            localStorage.setItem('bleachg25v2', JSON.stringify({
+              date:    today,
+              guesses: data.guesses,
+              over:    dOver,
+              won:     data.found,
+            }));
+          } catch(e) {}
+
+          resolve();
+        }
+        restore();
+      });
     }
-
-    await new Promise(resolve => {
-      function restore() {
-        if (
-          typeof CHARS === 'undefined' ||
-          typeof cmp   === 'undefined' ||
-          typeof tgt   === 'undefined' ||
-          tgt === null
-        ) { setTimeout(restore, 80); return; }
-
-        // Utilise les variables plates de guesser.js (dG, dOver, tgt)
-        dG = []; dOver = false; clr();
-
-        for (const name of data.guesses) {
-          // CHAR_MAP O(1) au lieu de CHARS.find()
-          const m = typeof CHAR_MAP !== 'undefined'
-            ? CHAR_MAP.get(name.toLowerCase())
-            : CHARS.find(x => x.n === name);
-          if (!m) continue;
-          const f = cmp(m, tgt);
-          dG.push({ m, f });
-          // N'afficher que si on est toujours en daily
-          if (typeof mode !== 'undefined' && mode === 'daily') {
-            mkRow(m, f, tgt); mkCard(m, f, tgt);
-          }
-        }
-
-        if (typeof mode !== 'undefined' && mode === 'daily') updDots();
-
-        try {
-          localStorage.setItem('bleachg25v2', JSON.stringify({
-            date: today, guesses: data.guesses,
-            over: data.found || data.attempts >= MAX, won: data.found,
-          }));
-        } catch(e) {}
-
-        const over = data.found || data.attempts >= MAX;
-        if (over) {
-          dOver = true;
-          if (typeof mode !== 'undefined' && mode === 'daily') {
-            hideGameUI(); showDRes(data.found);
-          }
-        }
-        resolve();
-      }
-      restore();
-    });
 
   } catch(e) {
     // Erreur réseau / pas de ligne : silencieux
   }
 
-  // ── FIX race condition : guard mode avant d'appeler onAuthReady ──
+  // Délègue tout le rendu à onAuthReady
   if (typeof mode !== 'undefined' && mode === 'daily' && typeof onAuthReady === 'function') {
     onAuthReady();
   }
@@ -207,16 +188,13 @@ function hideAuthModal() { const m = document.getElementById('auth-modal'); if (
 function skipAuth()      { hideAuthModal(); }
 
 // ── Soumission du score ───────────────────────────────────────
-// Validation côté client avant upsert Supabase
 async function submitScore({ date, found, attempts, mode, guesses }) {
   if (!currentUser) return;
 
-  // Validations de base — bloque les injections console
   if (!date || date !== (typeof todayKey === 'function' ? todayKey() : '')) return;
   if (typeof found !== 'boolean' || typeof attempts !== 'number') return;
   if (attempts < 1 || attempts > MAX) return;
   if (!Array.isArray(guesses) || guesses.length !== attempts) return;
-  // Chaque guess doit être un personnage connu
   if (typeof CHAR_MAP !== 'undefined') {
     if (!guesses.every(n => CHAR_MAP.has(n.toLowerCase()))) return;
   }
@@ -230,7 +208,7 @@ async function submitScore({ date, found, attempts, mode, guesses }) {
       { onConflict: 'user_id,date,mode' }
     );
     if (error) console.warn('[submitScore]', error.message);
-    else _lb.ts = 0; // invalide le cache leaderboard après un nouveau score
+    else _lb.ts = 0;
   } catch(err) {
     console.warn('[submitScore] réseau:', err.message);
   }
@@ -266,9 +244,8 @@ async function _fetchLeaderboard() {
 }
 
 async function loadLeaderboard() {
-  // Retourne le cache si encore frais
   if (_lb.data && !_lb.err && (Date.now() - _lb.ts < LB_TTL)) return _lb.data;
-  const rows = await _fetchLeaderboard(); // peut throw
+  const rows = await _fetchLeaderboard();
   _lb.data = rows; _lb.ts = Date.now(); _lb.err = false;
   return rows;
 }
@@ -309,7 +286,6 @@ async function showLeaderboard() {
         </div>`;
     }).join('');
   } catch(err) {
-    // Distingue erreur réseau de "vraiment aucun score"
     _lb.err = true;
     body.innerHTML = '<div class="lb-empty">Erreur de connexion. Réessayez dans quelques instants.</div>';
     console.warn('[leaderboard]', err.message);
