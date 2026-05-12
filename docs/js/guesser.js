@@ -103,13 +103,13 @@ function onAuthReady() {
   if (!_authResolved) return;
   clr();
   dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-  updDots();
   if (dOver) {
     hideGameUI();
     showDRes(dG.some(x => x.m.n === tgt.n));
     return;
   }
   showGameUI('daily');
+  updDots();
   $('rb').classList.remove('on');
   if (REQUIRE_AUTH) {
     const locked = !currentUser;
