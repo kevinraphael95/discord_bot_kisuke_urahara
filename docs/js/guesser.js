@@ -465,12 +465,10 @@ function sCorrect() {
 
 function showSEnd() {
   hideGameUI();
-  $('flash').classList.remove('on'); // ← cache le flash
-  $('sbar').classList.remove('on'); clr();
-  const el = $('send');
-  el.classList.remove('on');
-  void el.offsetWidth;
-  el.classList.add('on');
+  $('flash').classList.remove('on');
+  $('sbar').classList.remove('on');
+  clr();
+  $('send').classList.add('on');
   $('sedesc').innerHTML = 'Série de <em>' + sStr + '</em> — ' + sKil + ' personnage' + (sKil > 1 ? 's' : '') + '.';
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
   $('gi').disabled = true; $('gbtn').disabled = true;
