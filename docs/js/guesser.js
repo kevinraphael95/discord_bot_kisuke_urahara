@@ -427,6 +427,7 @@ function sNext() {
 }
 
 function updSUI() {
+  if (!sCur) return;
   $('sstreak').textContent = sStr; $('sbest').textContent = sRec;
   const el = $('sdots'); el.innerHTML = '';
   for (let i = 0; i < MAX; i++) {
@@ -448,7 +449,6 @@ function showFlash(type, msg) {
 function sGameOver(name) {
   sOver = true; clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
-  // ── FIX : feedback visuel immédiat avant l'écran game over ──
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
   setTimeout(() => showSEnd(), 1500);
@@ -468,7 +468,7 @@ function showSEnd() {
   $('send').classList.add('on');
   $('sedesc').innerHTML = 'Série de <em>' + sStr + '</em> — ' + sKil + ' personnage' + (sKil > 1 ? 's' : '') + '.';
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
-  $('gi').disabled = true; $('gbtn').disabled = true; updSUI();
+  $('gi').disabled = true; $('gbtn').disabled = true;
   if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
 }
 
