@@ -296,37 +296,45 @@ function switchMode(m) {
   localStorage.setItem('bleachg_mode', m);
   mode = m;
   hideGameUI();
-  $('gi').value = ''; $('acl').innerHTML = '';
+  $('gi').value = ''; 
+  $('acl').innerHTML = '';
+  
+  // Update des boutons
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
-  $('sbar').classList.toggle('on', m === 'survival');
-  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
+  
+  // Update des classes body
   document.body.classList.toggle('survival-mode', m === 'survival');
 
   if (m === 'daily') {
-      $('dbar').style.display = 'none';
-      $('send').classList.remove('on'); 
-      clr();
-      
-      // 1. Restaurer immédiatement ce qu'on a en mémoire locale
-      if (dG.length > 0) {
-          dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-      }
-  
-      // 2. Si connecté, on synchronise avec Supabase
-      if (typeof currentUser !== 'undefined' && currentUser) {
-        loadDailyFromSupabase();
+    $('sbar').classList.remove('on');
+    clr();
+    
+    // Restaurer l'affichage local immédiatement
+    if (dG.length > 0) {
+        dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+    }
+
+    // Synchronisation Supabase si possible
+    if (typeof currentUser !== 'undefined' && currentUser) {
+      loadDailyFromSupabase();
+    } else {
+      if (dOver) { 
+        showDRes(dG.some(x => x.m.n === tgt.n)); 
       } else {
-        // 3. Sinon on gère l'affichage standard
-        if (dOver) { 
-          hideGameUI(); 
-          showDRes(dG.some(x => x.m.n === tgt.n)); 
-        } else {
-          showGameUI('daily');
-          updDots();
-          onAuthReady(); 
-        }
+        showGameUI('daily');
+        updDots();
+        onAuthReady(); 
       }
+    }
+  } else {
+    // Mode Survie
+    $('sbar').classList.add('on');
+    showGameUI('survival');
+    if (!loadSurv()) sInit();
+    else { updSUI(); foc(); }
+  }
+}
 
 // ── Daily ─────────────────────────────────────────────────────
 function updDots() {
