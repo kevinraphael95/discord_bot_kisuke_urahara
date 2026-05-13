@@ -69,10 +69,14 @@ async function loadDailyFromSupabase() {
     if (data?.guesses?.length) {
       await new Promise(resolve => {
         function restore() {
-          if (typeof CHARS === 'undefined' || typeof cmp === 'undefined' || typeof tgt === 'undefined' || tgt === null) { 
-            setTimeout(restore, 80); return; 
-          }
+          if (
+            typeof CHARS === 'undefined' ||
+            typeof cmp   === 'undefined' ||
+            typeof tgt   === 'undefined' ||
+            tgt === null
+          ) { setTimeout(restore, 80); return; }
 
+          // Remplir dG sans rien rendre — onAuthReady s'en charge
           dG = [];
           for (const name of data.guesses) {
             const m = typeof CHAR_MAP !== 'undefined'
@@ -83,25 +87,28 @@ async function loadDailyFromSupabase() {
           }
 
           dOver = data.found || data.attempts >= MAX;
+
           try {
             localStorage.setItem('bleachg25v2', JSON.stringify({
-              date: today,
+              date:    today,
               guesses: data.guesses,
-              over: dOver,
-              won: data.found,
+              over:    dOver,
+              won:     data.found,
             }));
           } catch(e) {}
+
           resolve();
         }
         restore();
       });
     }
-  } catch(e) { }
 
-  // Marquer l'authentification comme traitée
+  } catch(e) {
+    // Erreur réseau / pas de ligne : silencieux
+  }
+
+  // Délègue tout le rendu à onAuthReady
   _authResolved = true;
-
-  // On force la mise à jour visuelle si on est en daily
   if (typeof mode !== 'undefined' && mode === 'daily' && typeof onAuthReady === 'function') {
     onAuthReady();
   }
