@@ -106,6 +106,17 @@ async function loadDailyFromSupabase() {
   } catch(e) {
     // Erreur réseau / pas de ligne : silencieux
   }
+  // Marquer l'authentification comme traitée
+    _authResolved = true;
+  
+    // Si on est en mode daily, on force la mise à jour visuelle
+    if (typeof mode !== 'undefined' && mode === 'daily') {
+      // Si on a récupéré des données de Supabase (dG n'est plus vide)
+      // on appelle onAuthReady qui va faire le clr() et le rendu
+      if (typeof onAuthReady === 'function') {
+        onAuthReady();
+      }
+    }
 
   // Délègue tout le rendu à onAuthReady
   _authResolved = true;
