@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   AUTH.CSS — modal connexion + bouton msw + leaderboard
+   AUTH.CSS — modal connexion + leaderboard
    Dépend de : base.css
    ═══════════════════════════════════════════════════════ */
 
@@ -64,9 +64,6 @@
 }
 .am-btn:hover { background: rgba(255,255,255,.09); border-color: var(--gold-line); }
 
-.am-google  { }
-.am-discord { }
-
 .am-skip {
   background: none; border: none;
   font-family: 'DM Sans', sans-serif; font-size: .76rem;
@@ -82,51 +79,12 @@
   margin: 0;
 }
 
-
-/* ── Bouton auth dans .msw ───────────────────────────── */
-.auth-msw-btn {
-  background: none; border: none;
-  color: var(--muted); font-size: 1rem;
-  cursor: pointer; padding: .65rem .9rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: color .2s;
-  border-right: 1px solid var(--border);
-  position: relative;
-}
-.auth-msw-btn:hover { color: var(--gold-lt); }
-.auth-msw-btn.connected { color: var(--gold-lt); }
-
-.auth-avatar {
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  border: 1.5px solid var(--gold-line);
-  object-fit: cover;
-}
-.auth-initials {
-  width: 24px; height: 24px; border-radius: 50%;
-  background: var(--gold-pale); border: 1.5px solid var(--gold-line);
-  display: flex; align-items: center; justify-content: center;
-  font-size: .65rem; font-weight: 700; color: var(--gold-lt);
-}
-
-/* Bouton leaderboard dans .msw */
-.lb-msw-btn {
-  background: none; border: none;
-  color: var(--muted); font-size: 1rem;
-  cursor: pointer; padding: .65rem .9rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: color .2s;
-  border-left: 1px solid var(--border);
-}
-.lb-msw-btn:hover { color: var(--gold-lt); }
-
-
 /* ── Menu utilisateur ────────────────────────────────── */
 .user-menu {
-  position: absolute; top: calc(100% + 6px); left: 0;
+  position: fixed;
   background: var(--panel); border: 1px solid var(--gold-line);
   padding: .9rem 1.1rem;
-  min-width: 200px; z-index: 500;
+  min-width: 200px; z-index: 9999;
   box-shadow: 0 8px 32px rgba(0,0,0,.6);
   animation: amRise .2s ease;
 }
@@ -142,7 +100,6 @@
   text-transform: uppercase; transition: all .2s;
 }
 .um-logout:hover { border-color: var(--ko-bd); color: var(--ko-tx); }
-
 
 /* ── Modal leaderboard ───────────────────────────────── */
 .lb-modal {
@@ -177,19 +134,15 @@
   flex-shrink: 0;
 }
 
-.lb-title {
-  display: flex; flex-direction: column; gap: 2px;
-}
+.lb-title { display: flex; flex-direction: column; gap: 2px; }
 .lb-title h2 {
   font-family: 'Shippori Mincho', serif;
   font-size: 1rem; font-weight: 800;
-  color: var(--white); margin: 0;
-  letter-spacing: .06em;
+  color: var(--white); margin: 0; letter-spacing: .06em;
 }
 .lb-title span {
   font-size: .65rem; color: var(--gold-lt);
-  letter-spacing: .1em; text-transform: uppercase;
-  font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
 }
 
 .lb-close {
@@ -199,10 +152,7 @@
 }
 .lb-close:hover { color: var(--white); }
 
-.lb-scroll {
-  overflow-y: auto; flex: 1;
-  padding: .8rem .8rem 1.2rem;
-}
+.lb-scroll { overflow-y: auto; flex: 1; padding: .8rem .8rem 1.2rem; }
 
 .lb-loading,
 .lb-empty {
@@ -220,18 +170,12 @@
 .lb-row:hover { background: var(--gold-pale); }
 .lb-row.lb-top { border-color: rgba(212,168,67,.15); background: rgba(212,168,67,.04); }
 
-.lb-pos {
-  width: 28px; text-align: center;
-  font-size: .9rem; flex-shrink: 0;
-}
-.lb-rank {
-  font-size: .7rem; color: var(--dim); font-weight: 600;
-}
+.lb-pos { width: 28px; text-align: center; font-size: .9rem; flex-shrink: 0; }
+.lb-rank { font-size: .7rem; color: var(--dim); font-weight: 600; }
 
 .lb-av {
   width: 30px; height: 30px; border-radius: 50%;
-  border: 1.5px solid var(--rim); object-fit: cover;
-  flex-shrink: 0;
+  border: 1.5px solid var(--rim); object-fit: cover; flex-shrink: 0;
 }
 .lb-av-init {
   display: flex; align-items: center; justify-content: center;
