@@ -219,8 +219,8 @@
 
 
 /* ── Écran game over (survie) ────────────────────────── */
-.send    { width: 100%; max-width: 660px; border: 1px solid var(--surv-bd); background: var(--surv-bg); display: none; flex-direction: column; }
-.send.on { display: flex; animation: rise .45s ease forwards; }
+.send    { width: 100%; max-width: 660px; border: 1px solid var(--surv-bd); background: var(--surv-bg); display: none; flex-direction: column; animation: rise .45s ease both; }
+.send.on { display: flex; }
 
 .send-inner { display: flex; width: 100%; min-height: 220px; }
 .send-left  { width: 50%; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.25); }
