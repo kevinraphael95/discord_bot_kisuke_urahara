@@ -451,7 +451,7 @@ function sGameOver(name) {
   if (sStr > sRec) { sRec = sStr; saveRec(); }
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
-  setTimeout(() => showSEnd(), 1500);
+  showSEnd(); // ← direct, sans setTimeout
 }
 
 function sCorrect() {
