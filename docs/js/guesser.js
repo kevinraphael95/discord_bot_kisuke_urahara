@@ -539,10 +539,10 @@ function subS() {
   const f = cmp(m, sCur); sG.push({ m, f });
   mkRow(m, f, sCur); mkCard(m, f, sCur);
   inp.value = ''; $('acl').innerHTML = ''; updSUI();
-  saveSurv();
   if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
   if (m.n === sCur.n) sCorrect();
   else if (sG.length >= MAX) sGameOver(sCur.n);
+  else saveSurv(); 
 }
 
 function sub() { mode === 'daily' ? subD() : subS(); }
