@@ -1,7 +1,7 @@
 // ── guesser.js ───────────────────────────────────────────────
 // ── Config ────────────────────────────────────────────────────
-const REQUIRE_AUTH    = false; // true = lock le daily derrière le login
-const IMG_MAX_RETRIES = 2;     // tentatives max avant abandon image Jikan
+const REQUIRE_AUTH    = false;
+const IMG_MAX_RETRIES = 2;
 
 const COLS = [
   {k:'r',   lb:'RACE'},    {k:'sx',  lb:'SEXE'},    {k:'arc', lb:'ARC'},
@@ -11,16 +11,15 @@ const COLS = [
 const MAX = 8;
 const $   = id => document.getElementById(id);
 
-// ── CHAR_MAP : O(1) lookup — construit dans INIT après data.js ────────────
 let CHAR_MAP = new Map();
 
-// ── État daily — tgt JAMAIS exposé globalement (window.tgt est vide) ──────
-let tgt   = null; // initialisé dans INIT
+// ── État daily ────────────────────────────────────────────────
+let tgt   = null;
 let dG    = [];
 let dOver = false;
 let _authResolved = false;
 let dSel  = -1;
-let _tickID = null; // fix timer leak
+let _tickID = null;
 
 // ── État survie ───────────────────────────────────────────────
 let sStr = 0, sBst = 0, sKil = 0;
@@ -45,7 +44,6 @@ async function _processQueue() {
       if (url) { WIKI_IMGS[char.n] = url; imgEl.src = url; }
       else imgEl.style.display = 'none';
     } catch {
-      // Retry avec limite
       if (retries < IMG_MAX_RETRIES) {
         _imgQueue.push({ char, imgEl, retries: retries + 1 });
       } else {
@@ -99,30 +97,68 @@ function hideRules() { const m = $('rules-modal'); if (m) m.classList.remove('on
 
 // ── Auth ready (appelée par auth.js) ─────────────────────────
 function onAuthReady() {
-  if (mode !== 'daily') return; // guard : ne rien faire si on est en survie
+  if (mode !== 'daily') return;
   if (!_authResolved) return;
+  _renderDaily();
+}
+
+// ── Render daily : re-render complet depuis dG ────────────────
+function _renderDaily() {
   clr();
   dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+
   if (dOver) {
     hideGameUI();
+    $('rb').classList.remove('on');
     showDRes(dG.some(x => x.m.n === tgt.n));
     return;
   }
+
+  $('send').classList.remove('on');
+  $('rb').classList.remove('on');
   showGameUI('daily');
   updDots();
-  $('rb').classList.remove('on');
-  if (REQUIRE_AUTH) {
-    const locked = !currentUser;
-    $('gi').disabled    = locked;
-    $('gbtn').disabled  = locked;
-    $('gi').placeholder = locked ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
-    if (!locked) foc();
+
+  if (REQUIRE_AUTH && !currentUser) {
+    $('gi').disabled    = true;
+    $('gbtn').disabled  = true;
+    $('gi').placeholder = '🔒 Connectez-vous pour jouer';
   } else {
     $('gi').disabled    = false;
     $('gbtn').disabled  = false;
     $('gi').placeholder = 'Entrez un personnage Bleach…';
     foc();
   }
+}
+
+// ── Render survie : re-render complet depuis sG ───────────────
+function _renderSurvival() {
+  clr();
+
+  if (sOver) {
+    hideGameUI();
+    $('sbar').classList.remove('on');
+    $('rb').classList.remove('on');
+    showSEnd();
+    return;
+  }
+
+  if (!sCur) {
+    // Aucun état sauvegardé — nouvelle partie
+    sInit();
+    return;
+  }
+
+  // Restaurer les guesses en cours
+  sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); });
+  $('rb').classList.remove('on');
+  $('send').classList.remove('on');
+  showGameUI('survival');
+  $('gi').disabled    = false;
+  $('gbtn').disabled  = false;
+  $('gi').placeholder = 'Entrez un personnage Bleach…';
+  updSUI();
+  foc();
 }
 
 // ── Utilitaires ───────────────────────────────────────────────
@@ -241,6 +277,7 @@ function saveDaily() {
 }
 
 function loadDaily() {
+  dG = []; dOver = false;
   try {
     const s = JSON.parse(localStorage.getItem(LS_KEY));
     if (!s || s.date !== todayKey()) return;
@@ -269,67 +306,65 @@ function saveSurv() {
 
 function clearSurv() { try { localStorage.removeItem(LS_SURV_KEY); } catch(e) {} }
 
+// Charge l'état survie depuis localStorage — retourne true si succès
 function loadSurv() {
   try {
     const s = JSON.parse(localStorage.getItem(LS_SURV_KEY));
     if (!s || !s.cur) return false;
     const cur = CHAR_MAP.get(s.cur.toLowerCase());
     if (!cur) return false;
-    sCur = cur; sStr = s.str || 0; sBst = s.bst || 0; sKil = s.kil || 0; sQi = s.qi || 0;
+    sCur = cur;
+    sStr = s.str || 0; sBst = s.bst || 0; sKil = s.kil || 0; sQi = s.qi || 0;
     sQ   = (s.queue || []).map(n => CHAR_MAP.get(n.toLowerCase())).filter(Boolean);
     sG   = [];
     for (const name of (s.guesses || [])) {
       const m = CHAR_MAP.get(name.toLowerCase());
       if (!m) continue;
-      const f = cmp(m, sCur);
-      sG.push({ m, f });
-      mkRow(m, f, sCur); mkCard(m, f, sCur);
+      sG.push({ m, f: cmp(m, sCur) });
     }
-    if (!sCur) return false; // guard avant updSUI
-    updSUI();
+    sOver = false;
     return true;
   } catch(e) { return false; }
 }
 
 // ── Switch de mode ────────────────────────────────────────────
 function switchMode(m) {
+  if (mode === m) return;
   localStorage.setItem('bleachg_mode', m);
   mode = m;
-  hideGameUI();
+
+  // Reset UI commun
   $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
-  $('sbar').classList.toggle('on', m === 'survival');
-  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
   document.body.classList.toggle('survival-mode', m === 'survival');
+  if (_tickID) { clearInterval(_tickID); _tickID = null; }
 
   if (m === 'daily') {
-    $('dbar').style.display = 'none';
-    $('send').classList.remove('on'); clr();
-    $('gi').disabled = true; $('gbtn').disabled = true;
+    $('sbar').classList.remove('on');
+    $('send').classList.remove('on');
+
+    // Recharger depuis Supabase si connecté, sinon depuis localStorage
     if (typeof currentUser !== 'undefined' && currentUser) {
+      $('gi').disabled = true; $('gbtn').disabled = true;
       loadDailyFromSupabase().then(() => {
         if (mode !== 'daily') return;
-        onAuthReady();
+        _renderDaily();
       });
     } else {
-      dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-      updDots();
-      if (dOver) { hideGameUI(); showDRes(dG.some(x => x.m.n === tgt.n)); }
-      else onAuthReady();
+      loadDaily();
+      _renderDaily();
     }
   } else {
+    $('sbar').classList.add('on');
     $('rb').classList.remove('on');
-    $('gi').disabled = false; $('gbtn').disabled = false;
-    $('gi').placeholder = 'Entrez un personnage Bleach…';
-    if (sOver) {
-      clr(); hideGameUI(); showSEnd();
-    } else {
-      showGameUI('survival'); clr();
-      if (!sCur) { if (!loadSurv()) sInit(); }
-      else { sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); }); }
-      updSUI(); foc();
+
+    // Charger l'état survie depuis localStorage
+    if (!loadSurv()) {
+      // Pas d'état sauvegardé — nouvelle partie
+      sOver = false; sCur = null; sG = [];
     }
+    _renderSurvival();
   }
 }
 
@@ -349,10 +384,10 @@ function updDots() {
 
 function showDRes(won) {
   hideGameUI();
-  // ── FIX timer leak : annule l'ancien interval avant d'en créer un nouveau ──
   if (_tickID) { clearInterval(_tickID); _tickID = null; }
 
   const b = $('rb');
+  b.classList.remove('win', 'lose');
   b.classList.add('on', won ? 'win' : 'lose');
   $('rttl').textContent  = won ? '⚔ BIEN JOUÉ !' : '💀 ÉCHEC';
   $('rchar').textContent = 'Personnage : ' + tgt.n;
@@ -387,7 +422,6 @@ function share() {
 function subD() {
   if (dOver) return;
   const inp = $('gi'); const v = inp.value.trim(); if (!v) return;
-  // CHAR_MAP O(1) au lieu de CHARS.find() O(n)
   const m = CHAR_MAP.get(v.toLowerCase());
   if (!m) { shake(inp, 'Introuvable…'); return; }
   if (dG.find(x => x.m.n === m.n)) { shake(inp, 'Déjà essayé !'); return; }
@@ -408,10 +442,12 @@ function saveRec() { try { localStorage.setItem('bleachg_surv', JSON.stringify({
 function rndQ()    { const a = CHARS.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function sInit() {
-  sStr = 0; sBst = 0; sKil = 0; sQ = rndQ(); sQi = 0; sOver = false;
+  sStr = 0; sBst = 0; sKil = 0; sQ = rndQ(); sQi = 0; sOver = false; sCur = null; sG = [];
   clearSurv();
   $('send').classList.remove('on');
+  $('rb').classList.remove('on');
   showGameUI('survival');
+  $('sbar').classList.add('on');
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   sNext();
@@ -421,6 +457,7 @@ function sNext() {
   if (sQi >= sQ.length) { sQ = rndQ(); sQi = 0; }
   sCur = sQ[sQi++]; sG = []; clr();
   clearSurv();
+  $('send').classList.remove('on');
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   foc(); updSUI();
@@ -431,12 +468,11 @@ function updSUI() {
   const el = $('sdots'); el.innerHTML = '';
   for (let i = 0; i < MAX; i++) {
     const d = document.createElement('div'); d.className = 'sdot';
-    if (i < sG.length) d.classList.add(sG[i] && sG[i].m.n === sCur.n ? 'win' : 'used');
+    if (i < sG.length) d.classList.add(sG[i] && sG[i].m.n === sCur?.n ? 'win' : 'used');
     el.appendChild(d);
   }
 }
 
-// ── Flash message (survie) ────────────────────────────────────
 function showFlash(type, msg) {
   const f = $('flash');
   f.className   = 'flash on ' + (type === 'ok' ? 'ok' : 'ko');
@@ -448,10 +484,14 @@ function showFlash(type, msg) {
 function sGameOver(name) {
   sOver = true; clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
-  // ── FIX : feedback visuel immédiat avant l'écran game over ──
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
-  setTimeout(() => showSEnd(), 1500);
+  setTimeout(() => {
+    if (mode !== 'survival') return;
+    hideGameUI();
+    $('sbar').classList.remove('on');
+    showSEnd();
+  }, 1500);
 }
 
 function sCorrect() {
@@ -459,20 +499,29 @@ function sCorrect() {
   if (sStr > sBst) sBst = sStr;
   if (sStr > sRec) { sRec = sStr; saveRec(); }
   showFlash('ok', `✓ ${sCur.n} trouvé${sStr >= 3 ? ' 🔥 ×' + sStr : ''}`);
-  $('gi').disabled = true; $('gbtn').disabled = true; updSUI();
-  setTimeout(() => sNext(), 1900);
+  $('gi').disabled = true; $('gbtn').disabled = true;
+  updSUI();
+  setTimeout(() => {
+    if (mode !== 'survival') return;
+    sNext();
+  }, 1900);
 }
 
 function showSEnd() {
-  hideGameUI(); $('sbar').classList.remove('on'); clr();
   $('send').classList.add('on');
   $('sedesc').innerHTML = 'Série de <em>' + sStr + '</em> — ' + sKil + ' personnage' + (sKil > 1 ? 's' : '') + '.';
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
-  $('gi').disabled = true; $('gbtn').disabled = true; updSUI();
+  $('gi').disabled = true; $('gbtn').disabled = true;
+  updSUI();
   if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
 }
 
-function sRestart() { showGameUI('survival'); $('sbar').classList.add('on'); sInit(); }
+function sRestart() {
+  $('send').classList.remove('on');
+  $('sbar').classList.add('on');
+  showGameUI('survival');
+  sInit();
+}
 
 function sShare() {
   const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
@@ -490,10 +539,10 @@ function subS() {
   const f = cmp(m, sCur); sG.push({ m, f });
   mkRow(m, f, sCur); mkCard(m, f, sCur);
   inp.value = ''; $('acl').innerHTML = ''; updSUI();
-  saveSurv();
   if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
   if (m.n === sCur.n) sCorrect();
   else if (sG.length >= MAX) sGameOver(sCur.n);
+  else saveSurv(); 
 }
 
 function sub() { mode === 'daily' ? subD() : subS(); }
@@ -663,13 +712,9 @@ function shake(inp, msg) {
   };
 })();
 
-// ── INIT ─────────────────────────────────────────────────────
-// CHAR_MAP construit après chargement synchrone de data.js
+// ── INIT ──────────────────────────────────────────────────────
 CHAR_MAP = new Map(CHARS.map(c => [c.n.toLowerCase(), c]));
-
-// tgt initialisé ici — jamais accessible via window.tgt
 tgt = todayChar();
-
 loadRec();
 
 const _lastMode = localStorage.getItem('bleachg_mode') || 'daily';
@@ -681,13 +726,21 @@ if (_lastMode === 'survival') {
   $('btnS').classList.add('active');
   $('sbar').classList.add('on');
   $('dbar').style.display = 'none';
-  showGameUI('survival');
-  if (!loadSurv()) sInit();
-  else { updSUI(); foc(); }
+
+  // Charger l'état survie
+  if (!loadSurv()) {
+    sOver = false; sCur = null; sG = [];
+  }
+  // auth.js appellera onAuthReady mais on est en survie — on render directement
+  _authResolved = true;
+  _renderSurvival();
+
 } else {
+  mode = 'daily';
+  // loadDaily() sera appelé après auth via onAuthReady ou directement ici si pas de session
   _authResolved = true;
   loadDaily();
-  $('gi').disabled    = REQUIRE_AUTH;
-  $('gbtn').disabled  = REQUIRE_AUTH;
-  $('gi').placeholder = REQUIRE_AUTH ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
+  // auth.js va appeler onAuthReady() après getSession() — si pas connecté il l'appelle aussi
+  // Mais on pré-render pour éviter l'écran vide en cas de latence auth
+  _renderDaily();
 }
