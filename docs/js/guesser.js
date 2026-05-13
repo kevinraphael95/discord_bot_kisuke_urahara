@@ -489,11 +489,12 @@ function subS() {
   if (sG.find(x => x.m.n === m.n)) { shake(inp, 'Déjà essayé !'); return; }
   const f = cmp(m, sCur); sG.push({ m, f });
   mkRow(m, f, sCur); mkCard(m, f, sCur);
-  inp.value = ''; $('acl').innerHTML = ''; updSUI();
+  inp.value = ''; $('acl').innerHTML = '';
   saveSurv();
-  if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
+  updSUI();
   if (m.n === sCur.n) sCorrect();
   else if (sG.length >= MAX) sGameOver(sCur.n);
+  else if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
 }
 
 function sub() { mode === 'daily' ? subD() : subS(); }
