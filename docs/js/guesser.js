@@ -465,14 +465,20 @@ function sCorrect() {
 
 function showSEnd() {
   hideGameUI(); $('sbar').classList.remove('on'); clr();
-  $('send').classList.add('on');
+  const el = $('send');
+  el.classList.remove('on');
+  void el.offsetWidth; // ← force reflow pour relancer l'animation
+  el.classList.add('on');
   $('sedesc').innerHTML = 'Série de <em>' + sStr + '</em> — ' + sKil + ' personnage' + (sKil > 1 ? 's' : '') + '.';
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
   $('gi').disabled = true; $('gbtn').disabled = true;
   if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
 }
 
-function sRestart() { showGameUI('survival'); $('sbar').classList.add('on'); sInit(); }
+function sRestart() {
+  $('send').classList.remove('on');
+  showGameUI('survival'); $('sbar').classList.add('on'); sInit();
+}
 
 function sShare() {
   const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
