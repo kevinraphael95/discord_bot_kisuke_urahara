@@ -304,34 +304,29 @@ function switchMode(m) {
   document.body.classList.toggle('survival-mode', m === 'survival');
 
   if (m === 'daily') {
-    $('dbar').style.display = 'none';
-    $('send').classList.remove('on'); clr();
-    $('gi').disabled = true; $('gbtn').disabled = true;
-    if (typeof currentUser !== 'undefined' && currentUser) {
-      loadDailyFromSupabase().then(() => {
-        if (mode !== 'daily') return;
-        onAuthReady();
-      });
-    } else {
-      dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-      updDots();
-      if (dOver) { hideGameUI(); showDRes(dG.some(x => x.m.n === tgt.n)); }
-      else onAuthReady();
-    }
-  } else {
-    $('rb').classList.remove('on');
-    $('gi').disabled = false; $('gbtn').disabled = false;
-    $('gi').placeholder = 'Entrez un personnage Bleach…';
-    if (sOver) {
-      clr(); hideGameUI(); showSEnd();
-    } else {
-      showGameUI('survival'); clr();
-      if (!sCur) { if (!loadSurv()) sInit(); }
-      else { sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); }); }
-      updSUI(); foc();
-    }
-  }
-}
+      $('dbar').style.display = 'none';
+      $('send').classList.remove('on'); 
+      clr();
+      
+      // 1. Restaurer immédiatement ce qu'on a en mémoire locale
+      if (dG.length > 0) {
+          dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+      }
+  
+      // 2. Si connecté, on synchronise avec Supabase
+      if (typeof currentUser !== 'undefined' && currentUser) {
+        loadDailyFromSupabase();
+      } else {
+        // 3. Sinon on gère l'affichage standard
+        if (dOver) { 
+          hideGameUI(); 
+          showDRes(dG.some(x => x.m.n === tgt.n)); 
+        } else {
+          showGameUI('daily');
+          updDots();
+          onAuthReady(); 
+        }
+      }
 
 // ── Daily ─────────────────────────────────────────────────────
 function updDots() {
