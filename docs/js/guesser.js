@@ -18,6 +18,7 @@ let CHAR_MAP = new Map();
 let tgt   = null; // initialisé dans INIT
 let dG    = [];
 let dOver = false;
+let _authResolved = false;
 let dSel  = -1;
 let _tickID = null; // fix timer leak
 
@@ -99,15 +100,16 @@ function hideRules() { const m = $('rules-modal'); if (m) m.classList.remove('on
 // ── Auth ready (appelée par auth.js) ─────────────────────────
 function onAuthReady() {
   if (mode !== 'daily') return; // guard : ne rien faire si on est en survie
+  if (!_authResolved) return;
   clr();
   dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-  updDots();
   if (dOver) {
     hideGameUI();
     showDRes(dG.some(x => x.m.n === tgt.n));
     return;
   }
   showGameUI('daily');
+  updDots();
   $('rb').classList.remove('on');
   if (REQUIRE_AUTH) {
     const locked = !currentUser;
@@ -293,6 +295,7 @@ function loadSurv() {
 function switchMode(m) {
   localStorage.setItem('bleachg_mode', m);
   mode = m;
+  hideGameUI();
   $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
@@ -301,16 +304,13 @@ function switchMode(m) {
   document.body.classList.toggle('survival-mode', m === 'survival');
 
   if (m === 'daily') {
+    $('dbar').style.display = 'none';
     $('send').classList.remove('on'); clr();
     $('gi').disabled = true; $('gbtn').disabled = true;
     if (typeof currentUser !== 'undefined' && currentUser) {
       loadDailyFromSupabase().then(() => {
-        if (mode !== 'daily') return; // ── guard race condition ──
-        if (!dOver) {
-          showGameUI('daily');
-          $('rb').classList.remove('on');
-          onAuthReady();
-        }
+        if (mode !== 'daily') return;
+        onAuthReady();
       });
     } else {
       dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
@@ -427,7 +427,6 @@ function sNext() {
 }
 
 function updSUI() {
-  if (!sCur) return;
   $('sstreak').textContent = sStr; $('sbest').textContent = sRec;
   const el = $('sdots'); el.innerHTML = '';
   for (let i = 0; i < MAX; i++) {
@@ -449,6 +448,7 @@ function showFlash(type, msg) {
 function sGameOver(name) {
   sOver = true; clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
+  // ── FIX : feedback visuel immédiat avant l'écran game over ──
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
   setTimeout(() => showSEnd(), 1500);
@@ -468,7 +468,7 @@ function showSEnd() {
   $('send').classList.add('on');
   $('sedesc').innerHTML = 'Série de <em>' + sStr + '</em> — ' + sKil + ' personnage' + (sKil > 1 ? 's' : '') + '.';
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
-  $('gi').disabled = true; $('gbtn').disabled = true;
+  $('gi').disabled = true; $('gbtn').disabled = true; updSUI();
   if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
 }
 
@@ -685,6 +685,7 @@ if (_lastMode === 'survival') {
   if (!loadSurv()) sInit();
   else { updSUI(); foc(); }
 } else {
+  _authResolved = true;
   loadDaily();
   $('gi').disabled    = REQUIRE_AUTH;
   $('gbtn').disabled  = REQUIRE_AUTH;
