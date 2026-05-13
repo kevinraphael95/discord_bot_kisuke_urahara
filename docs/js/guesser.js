@@ -427,7 +427,6 @@ function sNext() {
 }
 
 function updSUI() {
-  if (!sCur) return; // ← guard
   $('sstreak').textContent = sStr; $('sbest').textContent = sRec;
   const el = $('sdots'); el.innerHTML = '';
   for (let i = 0; i < MAX; i++) {
@@ -449,9 +448,10 @@ function showFlash(type, msg) {
 function sGameOver(name) {
   sOver = true; clearSurv();
   if (sStr > sRec) { sRec = sStr; saveRec(); }
+  // ── FIX : feedback visuel immédiat avant l'écran game over ──
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
-  showSEnd(); // ← direct, sans setTimeout
+  setTimeout(() => showSEnd(), 1500);
 }
 
 function sCorrect() {
@@ -464,21 +464,15 @@ function sCorrect() {
 }
 
 function showSEnd() {
-  hideGameUI();
-  $('flash').classList.remove('on');
-  $('sbar').classList.remove('on');
-  clr();
+  hideGameUI(); $('sbar').classList.remove('on'); clr();
   $('send').classList.add('on');
   $('sedesc').innerHTML = 'Série de <em>' + sStr + '</em> — ' + sKil + ' personnage' + (sKil > 1 ? 's' : '') + '.';
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
-  $('gi').disabled = true; $('gbtn').disabled = true;
+  $('gi').disabled = true; $('gbtn').disabled = true; updSUI();
   if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
 }
 
-function sRestart() {
-  $('send').classList.remove('on');
-  showGameUI('survival'); $('sbar').classList.add('on'); sInit();
-}
+function sRestart() { showGameUI('survival'); $('sbar').classList.add('on'); sInit(); }
 
 function sShare() {
   const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
@@ -495,12 +489,11 @@ function subS() {
   if (sG.find(x => x.m.n === m.n)) { shake(inp, 'Déjà essayé !'); return; }
   const f = cmp(m, sCur); sG.push({ m, f });
   mkRow(m, f, sCur); mkCard(m, f, sCur);
-  inp.value = ''; $('acl').innerHTML = '';
+  inp.value = ''; $('acl').innerHTML = ''; updSUI();
   saveSurv();
-  updSUI();
+  if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
   if (m.n === sCur.n) sCorrect();
   else if (sG.length >= MAX) sGameOver(sCur.n);
-  else if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
 }
 
 function sub() { mode === 'daily' ? subD() : subS(); }
