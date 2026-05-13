@@ -296,43 +296,40 @@ function switchMode(m) {
   localStorage.setItem('bleachg_mode', m);
   mode = m;
   hideGameUI();
-  $('gi').value = ''; 
-  $('acl').innerHTML = '';
-  
-  // Update des boutons
+  $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
-  
-  // Update des classes body
+  $('sbar').classList.toggle('on', m === 'survival');
+  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
   document.body.classList.toggle('survival-mode', m === 'survival');
 
   if (m === 'daily') {
-    $('sbar').classList.remove('on');
-    clr();
-    
-    // Restaurer l'affichage local immédiatement
-    if (dG.length > 0) {
-        dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-    }
-
-    // Synchronisation Supabase si possible
+    $('dbar').style.display = 'none';
+    $('send').classList.remove('on'); clr();
+    $('gi').disabled = true; $('gbtn').disabled = true;
     if (typeof currentUser !== 'undefined' && currentUser) {
-      loadDailyFromSupabase();
+      loadDailyFromSupabase().then(() => {
+        if (mode !== 'daily') return;
+        onAuthReady();
+      });
     } else {
-      if (dOver) { 
-        showDRes(dG.some(x => x.m.n === tgt.n)); 
-      } else {
-        showGameUI('daily');
-        updDots();
-        onAuthReady(); 
-      }
+      dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+      updDots();
+      if (dOver) { hideGameUI(); showDRes(dG.some(x => x.m.n === tgt.n)); }
+      else onAuthReady();
     }
   } else {
-    // Mode Survie
-    $('sbar').classList.add('on');
-    showGameUI('survival');
-    if (!loadSurv()) sInit();
-    else { updSUI(); foc(); }
+    $('rb').classList.remove('on');
+    $('gi').disabled = false; $('gbtn').disabled = false;
+    $('gi').placeholder = 'Entrez un personnage Bleach…';
+    if (sOver) {
+      clr(); hideGameUI(); showSEnd();
+    } else {
+      showGameUI('survival'); clr();
+      if (!sCur) { if (!loadSurv()) sInit(); }
+      else { sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); }); }
+      updSUI(); foc();
+    }
   }
 }
 
@@ -667,42 +664,30 @@ function shake(inp, msg) {
 })();
 
 // ── INIT ─────────────────────────────────────────────────────
+// CHAR_MAP construit après chargement synchrone de data.js
 CHAR_MAP = new Map(CHARS.map(c => [c.n.toLowerCase(), c]));
+
+// tgt initialisé ici — jamais accessible via window.tgt
 tgt = todayChar();
+
 loadRec();
 
-// Déterminer le mode au démarrage
 const _lastMode = localStorage.getItem('bleachg_mode') || 'daily';
-mode = _lastMode; 
 
-if (mode === 'survival') {
-    document.body.classList.add('survival-mode');
-    $('btnD').classList.remove('active');
-    $('btnS').classList.add('active');
-    $('sbar').classList.add('on');
-    $('dbar').style.display = 'none';
-    showGameUI('survival');
-    if (!loadSurv()) sInit();
-    else { updSUI(); foc(); }
-    
-    // On charge le daily en mémoire pour un switch fluide
-    loadDaily(); 
+if (_lastMode === 'survival') {
+  mode = 'survival';
+  document.body.classList.add('survival-mode');
+  $('btnD').classList.remove('active');
+  $('btnS').classList.add('active');
+  $('sbar').classList.add('on');
+  $('dbar').style.display = 'none';
+  showGameUI('survival');
+  if (!loadSurv()) sInit();
+  else { updSUI(); foc(); }
 } else {
-    // Mode Daily : On prépare l'affichage immédiat via LocalStorage
-    _authResolved = true; 
-    loadDaily(); 
-    
-    // CRUCIAL : On dessine les essais déjà présents
-    clr();
-    dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
-
-    if (dOver) {
-        hideGameUI();
-        showDRes(dG.some(x => x.m.n === tgt.n));
-    } else {
-        showGameUI('daily');
-        updDots();
-        // L'état (verrouillé ou non) sera ajusté par auth.js via onAuthReady
-        onAuthReady(); 
-    }
+  _authResolved = true;
+  loadDaily();
+  $('gi').disabled    = REQUIRE_AUTH;
+  $('gbtn').disabled  = REQUIRE_AUTH;
+  $('gi').placeholder = REQUIRE_AUTH ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
 }
