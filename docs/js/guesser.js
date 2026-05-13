@@ -664,30 +664,42 @@ function shake(inp, msg) {
 })();
 
 // ── INIT ─────────────────────────────────────────────────────
-// CHAR_MAP construit après chargement synchrone de data.js
 CHAR_MAP = new Map(CHARS.map(c => [c.n.toLowerCase(), c]));
-
-// tgt initialisé ici — jamais accessible via window.tgt
 tgt = todayChar();
-
 loadRec();
 
+// Déterminer le mode au démarrage
 const _lastMode = localStorage.getItem('bleachg_mode') || 'daily';
+mode = _lastMode; 
 
-if (_lastMode === 'survival') {
-  mode = 'survival';
-  document.body.classList.add('survival-mode');
-  $('btnD').classList.remove('active');
-  $('btnS').classList.add('active');
-  $('sbar').classList.add('on');
-  $('dbar').style.display = 'none';
-  showGameUI('survival');
-  if (!loadSurv()) sInit();
-  else { updSUI(); foc(); }
+if (mode === 'survival') {
+    document.body.classList.add('survival-mode');
+    $('btnD').classList.remove('active');
+    $('btnS').classList.add('active');
+    $('sbar').classList.add('on');
+    $('dbar').style.display = 'none';
+    showGameUI('survival');
+    if (!loadSurv()) sInit();
+    else { updSUI(); foc(); }
+    
+    // On charge le daily en mémoire pour un switch fluide
+    loadDaily(); 
 } else {
-  _authResolved = true;
-  loadDaily();
-  $('gi').disabled    = REQUIRE_AUTH;
-  $('gbtn').disabled  = REQUIRE_AUTH;
-  $('gi').placeholder = REQUIRE_AUTH ? '🔒 Connectez-vous pour jouer' : 'Entrez un personnage Bleach…';
+    // Mode Daily : On prépare l'affichage immédiat via LocalStorage
+    _authResolved = true; 
+    loadDaily(); 
+    
+    // CRUCIAL : On dessine les essais déjà présents
+    clr();
+    dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
+
+    if (dOver) {
+        hideGameUI();
+        showDRes(dG.some(x => x.m.n === tgt.n));
+    } else {
+        showGameUI('daily');
+        updDots();
+        // L'état (verrouillé ou non) sera ajusté par auth.js via onAuthReady
+        onAuthReady(); 
+    }
 }
