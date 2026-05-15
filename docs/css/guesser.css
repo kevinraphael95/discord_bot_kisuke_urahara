@@ -167,12 +167,12 @@
 .card.ok::before { background: linear-gradient(to bottom, var(--ok-bd), var(--ok-tx)); }
 .card.ko::before { background: linear-gradient(to bottom, var(--ko-bd), var(--ko-tx)); }
 
-.ctop  { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 60px; padding: 10px 13px 10px 17px; background: rgba(0,0,0,.3); border-bottom: 1px solid var(--border); }
-.cimg  { width: 52px; height: 58px; object-fit: cover; object-position: top center; border: 1px solid var(--rim); flex-shrink: 0; }
-.cname { font-family: 'Shippori Mincho', serif; font-size: .82rem; font-weight: 800; flex: 1; }
+.ctop  { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 10px 13px 10px 17px; background: rgba(0,0,0,.3); border-bottom: 1px solid var(--border); }
+.cinfo { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.cname { font-family: 'Shippori Mincho', serif; font-size: 1rem; font-weight: 800; }
 .cname.correct { color: var(--ok-tx); }
 .cname.wrong   { color: var(--ko-tx); }
-.cbadge { font-size: .6rem; color: var(--muted); text-align: right; line-height: 1.5; }
+.cbadge { font-size: .6rem; color: var(--muted); line-height: 1.4; }
 
 .cgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
 .cc    { background: var(--panel); padding: 7px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
