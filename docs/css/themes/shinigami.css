@@ -81,5 +81,10 @@
     transparent 100%
   );
 
+  /* === ?? === */
+  --ctop-bg:     rgba(0,0,0,.3);
+  --img-overlay: rgba(0,0,0,.25);
+  --sestat-bg:   rgba(1,1,8,.6);
+
   --nav-bg: rgba(40,45,52,.94); /* légèrement éclairci */
 }
