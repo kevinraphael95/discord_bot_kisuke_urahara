@@ -143,7 +143,7 @@
 .tw { width: 100%; overflow-x: auto; background: var(--panel); border: 1px solid var(--border); padding: 4px; }
 
 .th { display: grid; grid-template-columns: 145px repeat(9, 1fr); gap: 2px; margin-bottom: 4px; min-width: 800px; padding: 0 1px; }
-.th div { font-size: .62rem; font-weight: 600; letter-spacing: .08em; color: var(--muted); text-align: center; padding: 3px 2px; border-bottom: 1px solid rgba(30,127,232,.2); text-transform: uppercase; }
+.th div { font-size: .62rem; font-weight: 800; letter-spacing: .08em; color: var(--muted); text-align: center; padding: 3px 2px; border-bottom: 1px solid rgba(30,127,232,.2); text-transform: uppercase; }
 .th div:first-child { text-align: left; padding-left: 7px; }
 
 .row { display: grid; grid-template-columns: 145px repeat(9, 1fr); gap: 0; margin-bottom: 2px; min-width: 800px; animation: rowIn .35s cubic-bezier(.2,.8,.3,1) both; }
