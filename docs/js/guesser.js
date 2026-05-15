@@ -366,6 +366,7 @@ function switchMode(m) {
   if (m === 'daily') {
     $('sbar').classList.remove('on');
     $('send').classList.remove('on');
+    hideGameUI();
 
     if (typeof currentUser !== 'undefined' && currentUser) {
       $('gi').disabled = true; $('gbtn').disabled = true;
