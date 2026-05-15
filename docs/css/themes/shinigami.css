@@ -47,8 +47,8 @@
   /* === TEXTE === */
   --white: #f5f2ec; /* blanc */
   --text:  #dbd7d0; /* normal */
-  --muted: #a29e98; /* secondaire */
-  --dim:   #66625d; /* désactivé */
+  --muted: #f0ece6;
+  --dim:   #d4d0ca;
 
 
   /* === ÉTATS === */
@@ -80,6 +80,11 @@
     #1e7fe8 92%,
     transparent 100%
   );
+
+  /* === ?? === */
+  --ctop-bg:     rgba(0,0,0,.3);
+  --img-overlay: rgba(0,0,0,.25);
+  --sestat-bg:   rgba(1,1,8,.6);
 
   --nav-bg: rgba(40,45,52,.94); /* légèrement éclairci */
 }

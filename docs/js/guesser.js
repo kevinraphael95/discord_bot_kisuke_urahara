@@ -104,6 +104,7 @@ function onAuthReady() {
 
 // ── Render daily : re-render complet depuis dG ────────────────
 function _renderDaily() {
+  // FIX 2 : vider le tableau avant tout pour éviter le flash des rows survie
   clr();
   dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
 
@@ -135,6 +136,7 @@ function _renderDaily() {
 function _renderSurvival() {
   clr();
 
+  // FIX 3 : si game over persisté, afficher directement le banner de fin
   if (sOver) {
     hideGameUI();
     $('sbar').classList.remove('on');
@@ -144,16 +146,15 @@ function _renderSurvival() {
   }
 
   if (!sCur) {
-    // Aucun état sauvegardé — nouvelle partie
     sInit();
     return;
   }
 
-  // Restaurer les guesses en cours
   sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); });
   $('rb').classList.remove('on');
   $('send').classList.remove('on');
   showGameUI('survival');
+  $('sbar').classList.add('on');
   $('gi').disabled    = false;
   $('gbtn').disabled  = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
@@ -244,9 +245,11 @@ function mkCard(m, f, target) {
   const card = document.createElement('div'); card.className = 'card ' + (win ? 'ok' : 'ko');
   const top  = document.createElement('div'); top.className  = 'ctop';
   const ci   = document.createElement('img'); ci.className   = 'cimg'; setImg(ci, m);
+  const info = document.createElement('div'); info.className = 'cinfo';
   const nm   = document.createElement('div'); nm.className   = 'cname ' + (win ? 'correct' : 'wrong'); nm.textContent = m.n;
   const badge= document.createElement('div'); badge.className= 'cbadge'; badge.innerHTML = m.r + '<br>' + m.arc;
-  top.appendChild(ci); top.appendChild(nm); top.appendChild(badge); card.appendChild(top);
+  info.appendChild(nm); info.appendChild(badge);
+  top.appendChild(ci); top.appendChild(info); card.appendChild(top);
   const g = document.createElement('div'); g.className = 'cgrid';
   COLS.forEach((col, i) => {
     const x  = f[i];
@@ -304,13 +307,33 @@ function saveSurv() {
   } catch(e) {}
 }
 
+// FIX 3 : sauvegarder l'état game over avec le nom du perso
+function saveSurvOver() {
+  try {
+    localStorage.setItem(LS_SURV_KEY, JSON.stringify({
+      over:    true,
+      cur:     sCur?.n || '',
+      str:     sStr, bst: sBst, kil: sKil,
+    }));
+  } catch(e) {}
+}
+
 function clearSurv() { try { localStorage.removeItem(LS_SURV_KEY); } catch(e) {} }
 
-// Charge l'état survie depuis localStorage — retourne true si succès
 function loadSurv() {
   try {
     const s = JSON.parse(localStorage.getItem(LS_SURV_KEY));
     if (!s || !s.cur) return false;
+
+    // FIX 3 : si c'était un game over, restaurer l'état over
+    if (s.over) {
+      sOver = true;
+      sStr = s.str || 0; sBst = s.bst || 0; sKil = s.kil || 0;
+      sCur = CHAR_MAP.get(s.cur.toLowerCase()) || null;
+      sG = []; sQ = []; sQi = 0;
+      return true;
+    }
+
     const cur = CHAR_MAP.get(s.cur.toLowerCase());
     if (!cur) return false;
     sCur = cur;
@@ -333,7 +356,9 @@ function switchMode(m) {
   localStorage.setItem('bleachg_mode', m);
   mode = m;
 
-  // Reset UI commun
+  // FIX 2 : vider le tableau immédiatement au switch pour éviter le flash
+  clr();
+
   $('gi').value = ''; $('acl').innerHTML = '';
   $('btnD').classList.toggle('active', m === 'daily');
   $('btnS').classList.toggle('active', m === 'survival');
@@ -343,14 +368,22 @@ function switchMode(m) {
   if (m === 'daily') {
     $('sbar').classList.remove('on');
     $('send').classList.remove('on');
+    hideGameUI();
 
-    // Recharger depuis Supabase si connecté, sinon depuis localStorage
     if (typeof currentUser !== 'undefined' && currentUser) {
       $('gi').disabled = true; $('gbtn').disabled = true;
+      $('gi').placeholder = 'Chargement…';
+    
+      const timeout = setTimeout(() => {
+        $('gi').placeholder = 'Supabase est long à répondre…';
+      }, 3000);
+    
       loadDailyFromSupabase().then(() => {
+        clearTimeout(timeout);
         if (mode !== 'daily') return;
         _renderDaily();
       });
+
     } else {
       loadDaily();
       _renderDaily();
@@ -359,9 +392,7 @@ function switchMode(m) {
     $('sbar').classList.add('on');
     $('rb').classList.remove('on');
 
-    // Charger l'état survie depuis localStorage
     if (!loadSurv()) {
-      // Pas d'état sauvegardé — nouvelle partie
       sOver = false; sCur = null; sG = [];
     }
     _renderSurvival();
@@ -457,6 +488,7 @@ function sNext() {
   if (sQi >= sQ.length) { sQ = rndQ(); sQi = 0; }
   sCur = sQ[sQi++]; sG = []; clr();
   clearSurv();
+  const fl = $('flash'); if (fl) fl.classList.remove('on');
   $('send').classList.remove('on');
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
@@ -475,6 +507,7 @@ function updSUI() {
 
 function showFlash(type, msg) {
   const f = $('flash');
+  if (!f) return;
   f.className   = 'flash on ' + (type === 'ok' ? 'ok' : 'ko');
   f.textContent = msg;
   clearTimeout(f._t);
@@ -482,8 +515,9 @@ function showFlash(type, msg) {
 }
 
 function sGameOver(name) {
-  sOver = true; clearSurv();
+  sOver = true;
   if (sStr > sRec) { sRec = sStr; saveRec(); }
+  saveSurvOver(); // FIX 3 : persister le game over
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
   setTimeout(() => {
@@ -513,10 +547,16 @@ function showSEnd() {
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
   $('gi').disabled = true; $('gbtn').disabled = true;
   updSUI();
-  if (sCur) { setImg($('s-img'), sCur); $('s-img').alt = sCur.n; }
+  if (sCur) {
+    setImg($('s-img'), sCur); $('s-img').alt = sCur.n;
+    // FIX 3 : afficher le nom du personnage non trouvé
+    const seChar = $('se-char');
+    if (seChar) seChar.textContent = 'C\'était : ' + sCur.n;
+  }
 }
 
 function sRestart() {
+  clearSurv(); // FIX 3 : effacer l'état game over au redémarrage
   $('send').classList.remove('on');
   $('sbar').classList.add('on');
   showGameUI('survival');
@@ -542,7 +582,7 @@ function subS() {
   if (!/Mobi|Android/i.test(navigator.userAgent)) $('gi').focus();
   if (m.n === sCur.n) sCorrect();
   else if (sG.length >= MAX) sGameOver(sCur.n);
-  else saveSurv(); 
+  else saveSurv();
 }
 
 function sub() { mode === 'daily' ? subD() : subS(); }
@@ -727,20 +767,15 @@ if (_lastMode === 'survival') {
   $('sbar').classList.add('on');
   $('dbar').style.display = 'none';
 
-  // Charger l'état survie
   if (!loadSurv()) {
     sOver = false; sCur = null; sG = [];
   }
-  // auth.js appellera onAuthReady mais on est en survie — on render directement
   _authResolved = true;
   _renderSurvival();
 
 } else {
   mode = 'daily';
-  // loadDaily() sera appelé après auth via onAuthReady ou directement ici si pas de session
   _authResolved = true;
   loadDaily();
-  // auth.js va appeler onAuthReady() après getSession() — si pas connecté il l'appelle aussi
-  // Mais on pré-render pour éviter l'écran vide en cas de latence auth
   _renderDaily();
 }
