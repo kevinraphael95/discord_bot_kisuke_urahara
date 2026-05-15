@@ -149,9 +149,9 @@
 .row { display: grid; grid-template-columns: 145px repeat(9, 1fr); gap: 0; margin-bottom: 2px; min-width: 800px; animation: rowIn .35s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes rowIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ── FIX 1 : cases plus compactes ── */
+/* ── Cases ────────────────────── */
 .cell { background: var(--panel); border: 1px solid var(--rim); padding: 4px 2px; text-align: center; font-size: .62rem; font-weight: 500; min-height: 34px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
-.cell:first-child { text-align: left; justify-content: flex-start; padding-left: 7px; font-size: .67rem; }
+.cell:first-child { text-align: left; justify-content: flex-start; padding-left: 7px; font-size: .67rem; font-weight: 700; }
 .cell.correct { background: var(--ok-bg); border-color: var(--ok-bd); color: var(--ok-tx); }
 .cell.close   { background: var(--yw-bg); border-color: var(--yw-bd); color: var(--yw-tx); }
 .cell.wrong   { background: var(--ko-bg); border-color: var(--ko-bd); color: var(--ko-tx); }
@@ -169,7 +169,7 @@
 
 .ctop  { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 60px; padding: 10px 13px 10px 17px; background: rgba(0,0,0,.3); border-bottom: 1px solid var(--border); }
 .cimg  { width: 52px; height: 58px; object-fit: cover; object-position: top center; border: 1px solid var(--rim); flex-shrink: 0; }
-.cname { font-family: 'Shippori Mincho', serif; font-size: .82rem; font-weight: 700; flex: 1; }
+.cname { font-family: 'Shippori Mincho', serif; font-size: .82rem; font-weight: 800; flex: 1; }
 .cname.correct { color: var(--ok-tx); }
 .cname.wrong   { color: var(--ko-tx); }
 .cbadge { font-size: .6rem; color: var(--muted); text-align: right; line-height: 1.5; }
