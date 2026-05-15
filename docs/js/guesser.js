@@ -372,10 +372,18 @@ function switchMode(m) {
 
     if (typeof currentUser !== 'undefined' && currentUser) {
       $('gi').disabled = true; $('gbtn').disabled = true;
+      $('gi').placeholder = 'Chargement…';
+    
+      const timeout = setTimeout(() => {
+        $('gi').placeholder = 'Supabase est long à répondre…';
+      }, 3000);
+    
       loadDailyFromSupabase().then(() => {
+        clearTimeout(timeout);
         if (mode !== 'daily') return;
         _renderDaily();
       });
+
     } else {
       loadDaily();
       _renderDaily();
