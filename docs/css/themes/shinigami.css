@@ -47,8 +47,8 @@
   /* === TEXTE === */
   --white: #f5f2ec; /* blanc */
   --text:  #dbd7d0; /* normal */
-  --muted: #a29e98; /* secondaire */
-  --dim:   #66625d; /* désactivé */
+  --muted: #f0ece6;
+  --dim:   #d4d0ca;
 
 
   /* === ÉTATS === */
