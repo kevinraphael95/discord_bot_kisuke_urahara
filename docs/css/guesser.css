@@ -170,7 +170,7 @@
 .ctop  { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 10px 13px 10px 17px; background: rgba(0,0,0,.3); border-bottom: 1px solid var(--border); }
 .cimg  { width: 52px; height: 58px; object-fit: cover; object-position: top center; border: 1px solid var(--rim); flex-shrink: 0; }
 .cinfo { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
-.cname { font-family: 'Shippori Mincho', serif; font-size: 1rem; font-weight: 800; }
+.cname { font-family: 'Shippori Mincho', serif; font-size: 1.2rem; font-weight: 800; }
 .cname.correct { color: var(--ok-tx); }
 .cname.wrong   { color: var(--ko-tx); }
 .cbadge { font-size: .6rem; color: var(--muted); line-height: 1.4; }
