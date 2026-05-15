@@ -1,4 +1,16 @@
+/* ═══════════════════════════════════════════════════════
+   THÈME : QUINCY (clair)
+   Organisation :
+   - Backgrounds / surfaces
+   - Couleurs principales (Bleu / énergie / danger)
+   - Texte
+   - États UI (succès, erreur…)
+   - Effets & ambiance
+   - UI spécifique
+   ═══════════════════════════════════════════════════════ */
+
 [data-theme="quincy"] {
+
   /* === FONDS === */
   --void:    #f4f6f9;
   --deep:    #eceef2;
@@ -6,41 +18,49 @@
   --surface: #f7f8fa;
   --rim:     #d8dce4;
   --border:  rgba(0,0,0,.09);
+  
   /* === BLEU (accent principal) === */
   --gold:      #2563eb;
   --gold-lt:   #3b82f6;
   --gold-pale: rgba(59,130,246,.10);
   --gold-glow: rgba(59,130,246,.22);
   --gold-line: rgba(59,130,246,.20);
+  
   /* === REIATSU (énergie) === */
   --rei:       #1d4ed8;
   --rei-mid:   #3b82f6;
   --rei-lt:    #60a5fa;
   --rei-pale:  rgba(59,130,246,.12);
   --rei-glow:  rgba(59,130,246,.28);
+  
   /* === ROUGE (danger / erreur) === */
   --red:       #b91c1c;
   --red-lt:    #ef4444;
   --red-pale:  rgba(239,68,68,.10);
   --red-glow:  rgba(239,68,68,.22);
   --red-line:  rgba(239,68,68,.18);
+  
   /* === TEXTE === */
   --white:  #0f172a;
   --text:   #1e293b;
   --muted:  #4b5563;
   --dim:    #374151;
+  
   /* === ÉTATS === */
   --ok-bg: #f0fdf4; --ok-bd: #15803d; --ok-tx: #166534;
   --ko-bg: #fef2f2; --ko-bd: #dc2626; --ko-tx: #991b1b;
   --yw-bg: #fffbeb; --yw-bd: #d97706; --yw-tx: #92400e;
+  
   /* === SPÉCIAL === */
   --surv-bg: #eff6ff;
   --surv-bd: rgba(59,130,246,.30);
   --surv-tx: #1e3a8a;
+  
   /* === EFFETS === */
   --atmo-1: rgba(59,130,246,.08);
   --atmo-2: rgba(239,68,68,.04);
   --atmo-3: rgba(59,130,246,.04);
+  
   /* === UI === */
   --top-bar-grad: linear-gradient(
     90deg,
@@ -52,5 +72,14 @@
     #2563eb 92%,
     transparent 100%
   );
+
+  /* === ?? === */
+  --ctop-bg:     var(--surface);
+  --img-overlay: var(--surface);
+  --sestat-bg:   var(--gold-pale); 
+
+  
   --nav-bg: rgba(255,255,255,.97);
+
+  
 }
