@@ -444,7 +444,7 @@ function tick() {
 function share() {
   let t = `Bleach Character Guesser ${todayKey()}\n${dG.length}/${MAX}\n\n`;
   dG.forEach(x => { t += x.f.map(f => f.s === 'correct' ? '🟩' : f.s === 'close' ? '🟨' : '🟥').join('') + '\n'; });
-  t += '\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
+  t += '\nJouer sur 🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
   try { navigator.clipboard.writeText(t); } catch(e) {}
   const b = document.querySelector('.xbtn'); b.textContent = '✓ Copié !';
   setTimeout(() => b.textContent = '📋 Copier le résultat', 2000);
@@ -564,7 +564,7 @@ function sRestart() {
 }
 
 function sShare() {
-  const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\n🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
+  const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\nJouer sur 🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
   try { navigator.clipboard.writeText(t); } catch(e) {}
   const b = document.querySelector('.xbtn2'); b.textContent = '✓ Copié !';
   setTimeout(() => b.textContent = '📋 Copier le score', 2000);
