@@ -10,76 +10,69 @@
    ═══════════════════════════════════════════════════════ */
 
 [data-theme="quincy"] {
+  /* === FONDS (bleu nuit froid) === */
+  --void:    #0d1824;
+  --deep:    #111e2d;
+  --panel:   #162030;
+  --surface: #1a2638;
+  --rim:     rgba(180,210,255,.12);
+  --border:  rgba(180,210,255,.10);
 
-  /* === FONDS === */
-  --void:    #f4f6f9;
-  --deep:    #eceef2;
-  --panel:   #ffffff;
-  --surface: #f7f8fa;
-  --rim:     #d8dce4;
-  --border:  rgba(0,0,0,.09);
-  
-  /* === BLEU (accent principal) === */
-  --gold:      #2563eb;
-  --gold-lt:   #3b82f6;
-  --gold-pale: rgba(59,130,246,.10);
-  --gold-glow: rgba(59,130,246,.22);
-  --gold-line: rgba(59,130,246,.20);
-  
-  /* === REIATSU (énergie) === */
-  --rei:       #1d4ed8;
-  --rei-mid:   #3b82f6;
-  --rei-lt:    #60a5fa;
-  --rei-pale:  rgba(59,130,246,.12);
-  --rei-glow:  rgba(59,130,246,.28);
-  
-  /* === ROUGE (danger / erreur) === */
+  /* === BLEU QUINCY (Heilig Pfeil) === */
+  --gold:      #7eb8f7;
+  --gold-lt:   #a8d0ff;
+  --gold-pale: rgba(126,184,247,.10);
+  --gold-glow: rgba(126,184,247,.22);
+  --gold-line: rgba(126,184,247,.20);
+
+  /* === REIATSU === */
+  --rei:       #4a90e2;
+  --rei-mid:   #7eb8f7;
+  --rei-lt:    #b8d9ff;
+  --rei-pale:  rgba(126,184,247,.12);
+  --rei-glow:  rgba(126,184,247,.28);
+
+  /* === ROUGE === */
   --red:       #b91c1c;
   --red-lt:    #ef4444;
   --red-pale:  rgba(239,68,68,.10);
   --red-glow:  rgba(239,68,68,.22);
   --red-line:  rgba(239,68,68,.18);
-  
+
   /* === TEXTE === */
-  --white:  #0f172a;
-  --text:   #1e293b;
-  --muted:  #4b5563;
-  --dim:    #374151;
-  
+  --white:  #e8f2ff;
+  --text:   #c5daf5;
+  --muted:  #7a9fc0;
+  --dim:    #5a7fa0;
+
   /* === ÉTATS === */
-  --ok-bg: #f0fdf4; --ok-bd: #15803d; --ok-tx: #166534;
-  --ko-bg: #fef2f2; --ko-bd: #dc2626; --ko-tx: #991b1b;
-  --yw-bg: #fffbeb; --yw-bd: #d97706; --yw-tx: #92400e;
-  
-  /* === SPÉCIAL === */
-  --surv-bg: #eff6ff;
-  --surv-bd: rgba(59,130,246,.30);
-  --surv-tx: #1e3a8a;
-  
+  --ok-bg: rgba(16,185,129,.10); --ok-bd: #059669; --ok-tx: #6ee7b7;
+  --ko-bg: rgba(239,68,68,.10);  --ko-bd: #dc2626; --ko-tx: #fca5a5;
+  --yw-bg: rgba(245,158,11,.10); --yw-bd: #d97706; --yw-tx: #fcd34d;
+
+  /* === SURVIE === */
+  --surv-bg: rgba(74,144,226,.08);
+  --surv-bd: rgba(126,184,247,.25);
+  --surv-tx: #a8d0ff;
+
   /* === EFFETS === */
-  --atmo-1: rgba(59,130,246,.08);
-  --atmo-2: rgba(239,68,68,.04);
-  --atmo-3: rgba(59,130,246,.04);
-  
+  --atmo-1: rgba(126,184,247,.06);
+  --atmo-2: rgba(74,144,226,.04);
+  --atmo-3: rgba(126,184,247,.04);
+
   /* === UI === */
   --top-bar-grad: linear-gradient(
     90deg,
     transparent 0%,
-    #2563eb 15%,
-    #60a5fa 38%,
+    #4a90e2 15%,
+    #a8d0ff 38%,
     #1d4ed8 55%,
-    #60a5fa 75%,
-    #2563eb 92%,
+    #b8d9ff 75%,
+    #4a90e2 92%,
     transparent 100%
   );
-
-  /* === ?? === */
-  --ctop-bg:     var(--surface);
-  --img-overlay: var(--surface);
-  --sestat-bg:   var(--gold-pale); 
-
-  
-  --nav-bg: rgba(255,255,255,.97);
-
-  
+  --ctop-bg:     rgba(22,32,48,.8);
+  --img-overlay: rgba(13,24,36,.8);
+  --sestat-bg:   rgba(126,184,247,.07);
+  --nav-bg:      rgba(13,24,36,.97);
 }
