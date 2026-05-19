@@ -48,7 +48,6 @@ function afficherTrio() {
         carte.innerHTML = `
             <img src="${image}" alt="${perso.n}" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
             <h3>${perso.n}</h3>
-            <span class="badge">${perso.r}</span>
             <div class="buttons-list">
                 <button class="btn-choice fuck ${choix.fuck === perso.n ? 'active' : ''}" onclick="faireUnChoix('fuck', '${nomEchappe}')">💋 Fuck</button>
                 <button class="btn-choice marry ${choix.marry === perso.n ? 'active' : ''}" onclick="faireUnChoix('marry', '${nomEchappe}')">💍 Marry</button>
