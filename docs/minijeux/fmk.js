@@ -13,6 +13,7 @@ const EXCLUSIONS = [
     "Lilynette Gingerbuck", 
     "Loly Aivirrne", 
     "Mizuiro Kojima", 
+    "Momo Hinamori", 
     "Orihime Inoue", 
     "Riruka Dokugamine", 
     "Tatsuki Arisawa", 
