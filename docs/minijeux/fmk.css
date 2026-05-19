@@ -82,36 +82,50 @@
 
 /* --- ADAPTATION MOBILE UNIQUEMENT --- */
 @media (max-width: 700px) {
-    /* 1. On empile les cartes verticalement */
     .cards-container {
-        flex-direction: column !important;
-        align-items: center;
-        gap: 20px;
+        flex-direction: column !important; /* Empile les cartes verticalement */
+        align-items: stretch;
+        gap: 15px;
     }
 
-    /* 2. On ajuste la carte pour le format vertical */
     .card {
-        width: 100% !important; /* Prend toute la largeur disponible */
-        max-width: 300px;       /* Évite que ce soit trop large sur tablette */
+        display: flex !important;          /* Active la ligne horizontale */
+        flex-direction: row !important;    /* Image à gauche, contenu à droite */
+        align-items: center;               /* Centre verticalement */
+        width: 100% !important;
+        padding: 10px !important;
+        text-align: left;
     }
 
-    /* 3. Nom au-dessus (déjà le cas par défaut) */
+    /* Image à gauche */
+    .card img {
+        width: 80px !important;
+        height: 80px !important;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    /* Bloc contenant Nom + Boutons à droite de l'image */
+    .card > *:not(img) {
+        flex: 1; 
+    }
+
+    /* Le Nom reste au-dessus des boutons */
     .card h3 {
-        margin: 0 0 10px 0 !important;
+        margin: 0 0 8px 0 !important;
+        font-size: 1rem;
     }
 
-    /* 4. On force les boutons à s'aligner horizontalement sous le nom */
+    /* Les boutons restent dessous, en colonne comme sur PC */
     .buttons-list {
         display: flex !important;
-        flex-direction: row !important; /* Aligne Fuck, Marry, Kill côte à côte */
-        justify-content: space-between;
+        flex-direction: column !important; /* Garde l'ordre vertical des boutons */
         gap: 5px;
+        margin-top: 5px !important;
     }
 
-    /* 5. Ajustement des boutons pour qu'ils tiennent sur une ligne */
     .btn-choice {
-        flex: 1; /* Chaque bouton prend la même taille */
-        padding: 0.5rem 0.2rem !important;
+        padding: 0.3rem 0.5rem !important;
         font-size: 0.7rem !important;
     }
 }
