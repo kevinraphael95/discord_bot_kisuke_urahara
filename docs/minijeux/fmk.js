@@ -2,7 +2,7 @@ let trioActuel = [];
 let choix = { fuck: null, marry: null, kill: null };
 
 // Liste des personnages à exclure du jeu
-const EXCLUSIONS = ["Chizuru Honsho", "Ichigo Kurosaki", "Jinta Hanakari", "Karin Kurosaki", "Keigo Asano", "Mizuiro Kojima", "Orihime Inoue", "Tatsuki Arisawa", "Uryuu Ishida", "Ururu Tsumugiya", "Yasutora Sado", "Yukio Hans Vorarlberna", "Yuzu Kurosaki""];
+const EXCLUSIONS = ["Yuzu Kurosaki", "Karin Kurosaki", "Keigo Asano", "Mizuiro Kojima", "Tatsuki Arisawa"];
 
 function genererTrio() {
     choix = { fuck: null, marry: null, kill: null };
