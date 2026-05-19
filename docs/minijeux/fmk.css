@@ -81,46 +81,51 @@
 
 
 /* --- ADAPTATION MOBILE UNIQUEMENT --- */
+/* --- ADAPTATION MOBILE : Mise en liste horizontale --- */
 @media (max-width: 700px) {
-    /* 1. On passe la liste des cartes en verticale */
     .cards-container {
-        flex-direction: column !important;
-        align-items: center;
+        flex-direction: column !important; /* Empile les cartes verticalement */
+        align-items: stretch;
         gap: 15px;
     }
 
-    /* 2. On change la carte pour qu'elle soit horizontale */
     .card {
-        display: flex !important;           /* Passe en mode ligne */
-        flex-direction: row !important;     /* Image à gauche, contenu à droite */
-        align-items: center;
-        width: 95% !important;              /* Largeur quasi totale */
+        display: flex !important;          /* Active la ligne horizontale */
+        flex-direction: row !important;    /* Image à gauche, reste à droite */
+        align-items: center;               /* Centre verticalement */
+        width: 100% !important;
         padding: 10px !important;
         text-align: left;
     }
 
-    /* 3. Ajustement de l'image et du texte */
+    /* L'image reste à gauche */
     .card img {
-        width: 80px !important;             /* Image plus petite */
+        width: 80px !important;
         height: 80px !important;
         margin-right: 15px;
+        flex-shrink: 0;
     }
 
+    /* Le bloc texte + boutons à droite de l'image */
+    .card > *:not(img) {
+        flex: 1; /* Prend tout l'espace restant à droite */
+    }
+
+    /* Le nom reste au-dessus des boutons */
     .card h3 {
-        margin: 0 !important;
+        margin: 0 0 5px 0 !important;
         font-size: 1rem;
-        flex: 1;                            /* Prend l'espace disponible */
     }
 
-    /* 4. On aligne les boutons horizontalement à côté du nom */
+    /* Les boutons restent dans leur disposition originale */
     .buttons-list {
-        flex-direction: row !important;     /* Boutons en ligne */
+        flex-direction: column !important; /* Garde tes boutons empilés */
         gap: 5px;
-        margin-top: 0 !important;
+        margin-top: 5px !important;
     }
 
     .btn-choice {
-        padding: 0.4rem 0.5rem !important;  /* Boutons plus compacts */
-        font-size: 0.65rem !important;
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.7rem !important;
     }
 }
