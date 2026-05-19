@@ -10,6 +10,7 @@ const EXCLUSIONS = [
     "Jinta Hanakari", 
     "Karin Kurosaki", 
     "Keigo Asano", 
+    "Lilynette Gingerbuck", 
     "Mizuiro Kojima", 
     "Orihime Inoue", 
     "Riruka Dokugamine", 
