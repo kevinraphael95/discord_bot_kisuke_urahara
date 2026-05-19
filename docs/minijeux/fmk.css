@@ -81,7 +81,6 @@
 
 
 /* --- ADAPTATION MOBILE UNIQUEMENT --- */
-/* --- ADAPTATION MOBILE : Mise en liste horizontale --- */
 @media (max-width: 700px) {
     .cards-container {
         flex-direction: column !important; /* Empile les cartes verticalement */
@@ -91,14 +90,14 @@
 
     .card {
         display: flex !important;          /* Active la ligne horizontale */
-        flex-direction: row !important;    /* Image à gauche, reste à droite */
+        flex-direction: row !important;    /* Image à gauche, contenu à droite */
         align-items: center;               /* Centre verticalement */
         width: 100% !important;
         padding: 10px !important;
         text-align: left;
     }
 
-    /* L'image reste à gauche */
+    /* Image à gauche */
     .card img {
         width: 80px !important;
         height: 80px !important;
@@ -106,20 +105,21 @@
         flex-shrink: 0;
     }
 
-    /* Le bloc texte + boutons à droite de l'image */
+    /* Bloc contenant Nom + Boutons à droite de l'image */
     .card > *:not(img) {
-        flex: 1; /* Prend tout l'espace restant à droite */
+        flex: 1; 
     }
 
-    /* Le nom reste au-dessus des boutons */
+    /* Le Nom reste au-dessus des boutons */
     .card h3 {
-        margin: 0 0 5px 0 !important;
+        margin: 0 0 8px 0 !important;
         font-size: 1rem;
     }
 
-    /* Les boutons restent dans leur disposition originale */
+    /* Les boutons restent dessous, en colonne comme sur PC */
     .buttons-list {
-        flex-direction: column !important; /* Garde tes boutons empilés */
+        display: flex !important;
+        flex-direction: column !important; /* Garde l'ordre vertical des boutons */
         gap: 5px;
         margin-top: 5px !important;
     }
