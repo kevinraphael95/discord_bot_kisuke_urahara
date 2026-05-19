@@ -81,25 +81,27 @@
 
 
 /* --- ADAPTATION MOBILE UNIQUEMENT --- */
-@media (max-width: 700px) {
+@media (max-width: 600px) {
     .cards-container {
-        flex-wrap: nowrap !important; /* Force la ligne sur mobile */
-        overflow-x: auto;             /* Permet de faire défiler horizontalement */
-        gap: 10px;                    /* Espace réduit */
-        margin: 1rem 0;
+        flex-wrap: nowrap !important; /* Force les 3 cartes sur une ligne */
+        overflow-x: auto;             /* Active le défilement latéral */
+        justify-content: flex-start;  /* Aligne à gauche pour commencer le scroll */
+        padding: 0 10px 15px 10px;    /* Un peu d'air autour */
+        gap: 10px;                    /* Espace entre les cartes */
     }
 
     .card {
-        width: 130px;    /* Réduit la largeur sur mobile */
-        min-width: 130px; /* Empêche l'écrasement */
+        min-width: 140px; /* Les cartes ne se tassent pas */
+        width: 140px;     /* Taille fixe pour mobile */
         padding: 10px;
     }
 
     .card img {
-        height: 130px;   /* Réduit la hauteur de l'image */
+        height: 140px;    /* Ajuste la hauteur de l'image */
     }
-
-    .card h3 {
-        font-size: 0.85rem; /* Texte plus petit */
+    
+    /* Cache la barre de scroll pour faire plus "app" */
+    .cards-container::-webkit-scrollbar {
+        display: none; 
     }
 }
