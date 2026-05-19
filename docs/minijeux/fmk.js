@@ -11,6 +11,7 @@ const EXCLUSIONS = [
     "Keigo Asano", 
     "Mizuiro Kojima", 
     "Orihime Inoue", 
+    "Riruka Dokugamine",
     "Tatsuki Arisawa", 
     "Uryuu Ishida", 
     "Ururu Tsumugiya", 
