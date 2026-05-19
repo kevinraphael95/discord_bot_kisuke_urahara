@@ -5,6 +5,7 @@ let choix = { fuck: null, marry: null, kill: null };
 // Liste des personnages à exclure du jeu (mineurs)
 const EXCLUSIONS = [
     "Chizuru Honsho", 
+    "Hiyori Sarugaki", 
     "Ichigo Kurosaki", 
     "Jinta Hanakari", 
     "Karin Kurosaki", 
