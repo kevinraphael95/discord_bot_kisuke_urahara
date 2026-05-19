@@ -81,27 +81,46 @@
 
 
 /* --- ADAPTATION MOBILE UNIQUEMENT --- */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+    /* 1. On passe la liste des cartes en verticale */
     .cards-container {
-        flex-wrap: nowrap !important; /* Force les 3 cartes sur une ligne */
-        overflow-x: auto;             /* Active le défilement latéral */
-        justify-content: flex-start;  /* Aligne à gauche pour commencer le scroll */
-        padding: 0 10px 15px 10px;    /* Un peu d'air autour */
-        gap: 10px;                    /* Espace entre les cartes */
+        flex-direction: column !important;
+        align-items: center;
+        gap: 15px;
     }
 
+    /* 2. On change la carte pour qu'elle soit horizontale */
     .card {
-        min-width: 140px; /* Les cartes ne se tassent pas */
-        width: 140px;     /* Taille fixe pour mobile */
-        padding: 10px;
+        display: flex !important;           /* Passe en mode ligne */
+        flex-direction: row !important;     /* Image à gauche, contenu à droite */
+        align-items: center;
+        width: 95% !important;              /* Largeur quasi totale */
+        padding: 10px !important;
+        text-align: left;
     }
 
+    /* 3. Ajustement de l'image et du texte */
     .card img {
-        height: 140px;    /* Ajuste la hauteur de l'image */
+        width: 80px !important;             /* Image plus petite */
+        height: 80px !important;
+        margin-right: 15px;
     }
-    
-    /* Cache la barre de scroll pour faire plus "app" */
-    .cards-container::-webkit-scrollbar {
-        display: none; 
+
+    .card h3 {
+        margin: 0 !important;
+        font-size: 1rem;
+        flex: 1;                            /* Prend l'espace disponible */
+    }
+
+    /* 4. On aligne les boutons horizontalement à côté du nom */
+    .buttons-list {
+        flex-direction: row !important;     /* Boutons en ligne */
+        gap: 5px;
+        margin-top: 0 !important;
+    }
+
+    .btn-choice {
+        padding: 0.4rem 0.5rem !important;  /* Boutons plus compacts */
+        font-size: 0.65rem !important;
     }
 }
