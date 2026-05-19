@@ -3,34 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bleach Guessr - Fuck, Marry, Kill</title>
-<!-- empêcher le flash blanc aux changements de page : -->
+<title>Fuck, Marry, Kill — Bleach Manga Guesser</title>
 <script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
-<!-- no flash -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="avant-apres.css">
+<link rel="stylesheet" href="fmk.css">
 <script src="../js/nav.js" defer></script>
-<script src="avant-apres.js" defer></script>
+<script src="../js/data.js" defer></script>
+<script src="fmk.js" defer></script>
 </head>
 <body>
 
-    <div class="game-container">
-        <a href="../jeu.html" class="btn-back">⬅ Retour au menu</a>
-        
-        <h1>⚔️ FUCK, MARRY, KILL ⚔️</h1>
-        <p class="subtitle">Fais tes choix cruciaux parmi les personnages de Bleach !</p>
+<div class="atmo"></div>
+<div class="top-bar"></div>
 
-        <div id="fmk-zone" class="cards-container"></div>
+<div class="phdr">
+  <h1 class="pttl">
+    <span class="t1">Fais ton choix : <strong>Fuck</strong>, <strong>Marry</strong> ou <strong>Kill</strong> ?</span>
+  </h1>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+</div>
 
-        <div class="actions-zone">
-            <button id="btn-valider" class="btn-action btn-submit" onclick="validerChoix()">Valider mes choix 💥</button>
-            <button class="btn-action btn-next" onclick="genererTrio()">Changer de trio 🔁</button>
+<div class="tl-wrap">
+
+  <div id="gameBox">
+    <div class="images-row" id="fmkCardsRow"></div>
+
+    <div class="btn-row">
+      <div class="btn-row-left">
+        </div>
+      
+      <button class="btn-choice before" id="btnValider" onclick="validerChoix()" style="display: none;">
+        <span class="bc-icon">💥</span>
+        <span>Valider</span>
+      </button>
+      
+      <button class="btn-choice after" onclick="genererTrio()">
+        <span class="bc-icon">▶▶</span>
+        <span>Suivant</span>
+      </button>
+
+      <div class="btn-row-right">
         </div>
     </div>
+  </div>
 
-    <script src="../js/data.js"></script>
-    <script src="fmk.js"></script>
+  <div id="resultBox" style="display: none;">
+    <div style="display:flex; align-items:center; gap:.5rem; justify-content:center;">
+      <span class="res-emoji">🎯</span>
+      <span class="res-title">Choix Enregistrés !</span>
+    </div>
+    <div class="res-info" id="fmkSummary">
+      </div>
+    <button class="btn btn-gold" onclick="restart()">▶ Rejouer</button>
+  </div>
+
+</div>
+
 </body>
 </html>
