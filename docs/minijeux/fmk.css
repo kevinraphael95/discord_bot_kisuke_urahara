@@ -83,42 +83,49 @@
 /* --- ADAPTATION MOBILE UNIQUEMENT --- */
 @media (max-width: 700px) {
     .cards-container {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 15px !important;
+        flex-direction: column !important; /* Empile les cartes verticalement */
+        align-items: stretch;
+        gap: 15px;
     }
 
     .card {
-        display: flex !important;
-        flex-direction: row !important; /* Image à gauche, contenu à droite */
-        align-items: flex-start !important;
+        display: flex !important;          /* Active la ligne horizontale */
+        flex-direction: row !important;    /* Image à gauche, contenu à droite */
+        align-items: center;               /* Centre verticalement */
         width: 100% !important;
         padding: 10px !important;
+        text-align: left;
     }
 
+    /* Image à gauche */
     .card img {
         width: 80px !important;
         height: 80px !important;
-        margin-right: 15px !important;
+        margin-right: 15px;
         flex-shrink: 0;
     }
 
-    /* On force le contenu de droite (Nom + Boutons) à s'empiler */
-    .card h3, .card .buttons-list {
-        display: flex !important;
-        flex-direction: column !important;
-        margin: 0 !important;
-        width: 100% !important;
+    /* Bloc contenant Nom + Boutons à droite de l'image */
+    .card > *:not(img) {
+        flex: 1; 
     }
 
+    /* Le Nom reste au-dessus des boutons */
     .card h3 {
-        margin-bottom: 10px !important;
-        font-size: 1rem !important;
-        order: 1; /* Nom en premier */
+        margin: 0 0 8px 0 !important;
+        font-size: 1rem;
     }
 
+    /* Les boutons restent dessous, en colonne comme sur PC */
     .buttons-list {
-        order: 2; /* Boutons en deuxième (dessous) */
-        gap: 5px !important;
+        display: flex !important;
+        flex-direction: column !important; /* Garde l'ordre vertical des boutons */
+        gap: 5px;
+        margin-top: 5px !important;
+    }
+
+    .btn-choice {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.7rem !important;
     }
 }
