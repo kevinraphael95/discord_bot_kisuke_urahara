@@ -9,31 +9,38 @@
 .cards-container {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin: 2rem 0;
+    gap: 10px; /* Réduit un peu pour mieux passer */
+    flex-wrap: nowrap; /* EMPÊCHE LE PASSAGE À LA LIGNE */
+    margin: 1rem 0;
+    overflow-x: auto; /* Permet de scroller si ça dépasse */
+    padding-bottom: 10px;
 }
 
 .card {
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
-    padding: 15px;
-    width: 220px;
+    padding: 10px;
+    min-width: 110px; /* Largeur minimale pour garder 3 cartes lisibles */
+    width: 110px;    /* Largeur fixe sur mobile */
     transition: transform 0.2s, border-color 0.2s;
 }
 
 .card img {
     width: 100%;
-    height: 220px;
+    height: 110px; /* Ajuste la hauteur pour garder le ratio */
     object-fit: cover;
     background-color: var(--void);
 }
 
 .card h3 {
-    margin: 12px 0 6px 0;
+    margin: 8px 0 4px 0;
+    font-size: 0.8rem; /* Réduit la police pour éviter les débordements */
     font-family: 'Shippori Mincho', serif;
     color: var(--white);
+    white-space: nowrap; /* Empêche le nom de revenir à la ligne */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ajoute "..." si le nom est trop long */
 }
 
 /* Boutons de choix (les 3 options) */
