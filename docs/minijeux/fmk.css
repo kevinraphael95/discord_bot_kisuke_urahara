@@ -82,22 +82,22 @@
 
 /* --- ADAPTATION MOBILE UNIQUEMENT --- */
 @media (max-width: 700px) {
+    /* 1. Les cartes s'empilent verticalement */
     .cards-container {
-        flex-direction: column !important; /* Empile les cartes verticalement */
+        flex-direction: column !important;
         align-items: stretch;
         gap: 15px;
     }
 
+    /* 2. Chaque carte devient une ligne horizontale */
     .card {
-        display: flex !important;          /* Active la ligne horizontale */
-        flex-direction: row !important;    /* Image à gauche, contenu à droite */
-        align-items: center;               /* Centre verticalement */
+        display: flex !important;
+        flex-direction: row !important; /* Image à gauche, contenu à droite */
+        align-items: center;
         width: 100% !important;
-        padding: 10px !important;
-        text-align: left;
     }
 
-    /* Image à gauche */
+    /* 3. L'image est à gauche, petite */
     .card img {
         width: 80px !important;
         height: 80px !important;
@@ -105,27 +105,28 @@
         flex-shrink: 0;
     }
 
-    /* Bloc contenant Nom + Boutons à droite de l'image */
+    /* 4. Le bloc (Nom + Boutons) prend l'espace restant à droite */
     .card > *:not(img) {
-        flex: 1; 
+        display: flex;
+        flex-direction: column; /* Nom au-dessus, Boutons en-dessous */
+        flex: 1;
     }
 
-    /* Le Nom reste au-dessus des boutons */
+    /* 5. Le nom est au-dessus */
     .card h3 {
-        margin: 0 0 8px 0 !important;
+        margin: 0 0 5px 0 !important;
         font-size: 1rem;
     }
 
-    /* Les boutons restent dessous, en colonne comme sur PC */
+    /* 6. Les boutons sont en dessous, alignés horizontalement */
     .buttons-list {
         display: flex !important;
-        flex-direction: column !important; /* Garde l'ordre vertical des boutons */
+        flex-direction: row !important; /* F, M, K côte à côte */
         gap: 5px;
-        margin-top: 5px !important;
     }
 
     .btn-choice {
-        padding: 0.3rem 0.5rem !important;
+        padding: 0.2rem 0.4rem !important;
         font-size: 0.7rem !important;
     }
 }
