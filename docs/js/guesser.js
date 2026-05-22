@@ -647,8 +647,8 @@ function shake(inp, msg) {
 // ── KONAMI CODE ───────────────────────────────────────────────
 (function () {
   const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
-  const API    = 'https://api.github.com/repos/kevinraphael95/bleachmusics/contents/';
-  const BASE   = 'https://raw.githubusercontent.com/kevinraphael95/bleachmusics/main/';
+  const API    = 'https://api.github.com/repos/kevinraphael95/random-useful-stuff/bleachmusic/contents/';
+  const BASE   = 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/bleachmusic/main/';
   let buf = [], player = null, toast = null, tracks = [], looping = false;
   document.addEventListener('keydown', function (e) {
     if (e.target === $('gi')) return;
