@@ -651,7 +651,8 @@ function shake(inp, msg) {
   const BASE = 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/bleachmusic/';
   let buf = [], player = null, toast = null, tracks = [], looping = false;
   document.addEventListener('keydown', function (e) {
-    if (e.target === $('gi')) return;
+    // désactivé le truc qui empêche de faire le konami code si on est en train d'écrire une porposition
+    // if (e.target === $('gi')) return;
     buf.push(e.key); if (buf.length > KONAMI.length) buf.shift();
     if (buf.join(',') === KONAMI.join(',')) { buf = []; triggerKonami(); }
   });
