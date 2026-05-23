@@ -142,7 +142,7 @@ const CHARS = [
   // ESPADA (par numéro tatoué : 1 → 10)
   // ============================================================
   {n:"Coyote Starrk",         r:"Arrancar",  sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"19/01", w:4,  l:1,  draw:0, img:"assets/personnages/coyote-starrk.png"},
-  {n:"Lilynette Gingerbuck",  r:"Arrancar",  sx:"F", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:4, st:"Mort",      hc:"Vert",   bday:"19/01", w:2,  l:1,  draw:0, img:"assets/personnages/lilynette-gingerbuck.png"},
+  {n:"Lilynette Gingerbuck",  r:"Arrancar",  sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Vert",   bday:"19/01", w:2,  l:1,  draw:0, img:"assets/personnages/lilynette-gingerbuck.png"},
   {n:"Baraggan Louisenbairn", r:"Arrancar",  sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:5, st:"Mort",      hc:"Blanc",  bday:"09/02", w:3,  l:1,  draw:0, img:"assets/personnages/baraggan-louisenbairn.png"},
   {n:"Tier Harribel",         r:"Arrancar",  sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:5, st:"Vivant",    hc:"Blond",  bday:"25/07", w:3,  l:1,  draw:0, img:"assets/personnages/tier-harribel.png"},
   {n:"Ulquiorra Cifer",       r:"Arrancar",  sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"01/12", w:5,  l:1,  draw:0, img:"assets/personnages/ulquiorra-cifer.png"},
