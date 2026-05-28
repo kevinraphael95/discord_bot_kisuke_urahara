@@ -114,7 +114,7 @@ const CHARS = [
   {n:"Shuhei Hisagi",         r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0, img:"assets/personnages/shuhei-hisagi.png"},
   {n:"Mashiro Kuna",          r:"Vizard",    sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0, img:"assets/personnages/mashiro-kuna.png"},
   {n:"Rangiku Matsumoto",     r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"25/05", w:3,  l:3,  draw:0, img:"assets/personnages/rangiku-matsumoto.png"},
-  {n:"Ikkaku Madarame",       r:"Shinigami", sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0, img:"assets/personnages/ikkaku-madarame.png"},
+  {n:"Ikkaku Madarame",       r:"Shinigami", sx:"M", arc:"Soul Society : Le Sauvetage (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0, img:"assets/personnages/ikkaku-madarame.png"},
   {n:"Akon",                  r:"Shinigami", sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/akon.png"},
   {n:"Sentaro Kotsubaki",     r:"Shinigami", sx:"M", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"22/09", w:1,  l:1,  draw:0, img:"assets/personnages/sentaro-kotsubaki.png"},
  
@@ -122,14 +122,14 @@ const CHARS = [
   // GOTEI 13 — ANCIENS VICE-CAPITAINES
   // ============================================================
   {n:"Chojiro Sasakibe",      r:"Shinigami",                  sx:"M", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Blanc",  bday:"04/11", w:0,  l:1,  draw:0, img:"assets/personnages/chojiro-sasakibe.png"},
-  {n:"Yachiru Kusajishi",     r:"Shinigami",                  sx:"F", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1, img:"assets/personnages/yachiru-kusajishi.png"},
+  {n:"Yachiru Kusajishi",     r:"Shinigami",                  sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1, img:"assets/personnages/yachiru-kusajishi.png"},
   {n:"Nemu Kurotsuchi",       r:"Mod-Soul/Âme artificielle",  sx:"F", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0, img:"assets/personnages/nemu-kurotsuchi.png"},
  
   // ============================================================
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
   // ============================================================
-  {n:"Yumichika Ayasegawa",   r:"Shinigami", sx:"M", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"19/09", w:3,  l:1,  draw:0, img:"assets/personnages/yumichika-ayasegawa.png"},
-  {n:"Hanataro Yamada",       r:"Shinigami", sx:"M", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:1, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0, img:"assets/personnages/hanataro-yamada.png"},
+  {n:"Yumichika Ayasegawa",   r:"Shinigami", sx:"M", arc:"Soul Society : Le Sauvetage (2.1)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"19/09", w:3,  l:1,  draw:0, img:"assets/personnages/yumichika-ayasegawa.png"},
+  {n:"Hanataro Yamada",       r:"Shinigami", sx:"M", arc:"Soul Society : Le Sauvetage (2.1)", af:"Gotei 13",    d:1, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0, img:"assets/personnages/hanataro-yamada.png"},
  
   // ============================================================
   // VIZARDS (non promus à la fin)
@@ -142,7 +142,7 @@ const CHARS = [
   // ESPADA (par numéro tatoué : 1 → 10)
   // ============================================================
   {n:"Coyote Starrk",         r:"Arrancar",  sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"19/01", w:4,  l:1,  draw:0, img:"assets/personnages/coyote-starrk.png"},
-  {n:"Lilynette Gingerbuck",  r:"Arrancar",  sx:"F", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:4, st:"Mort",      hc:"Vert",   bday:"19/01", w:2,  l:1,  draw:0, img:"assets/personnages/lilynette-gingerbuck.png"},
+  {n:"Lilynette Gingerbuck",  r:"Arrancar",  sx:"F", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Vert",   bday:"19/01", w:2,  l:1,  draw:0, img:"assets/personnages/lilynette-gingerbuck.png"},
   {n:"Baraggan Louisenbairn", r:"Arrancar",  sx:"M", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:5, st:"Mort",      hc:"Blanc",  bday:"09/02", w:3,  l:1,  draw:0, img:"assets/personnages/baraggan-louisenbairn.png"},
   {n:"Tier Harribel",         r:"Arrancar",  sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:5, st:"Vivant",    hc:"Blond",  bday:"25/07", w:3,  l:1,  draw:0, img:"assets/personnages/tier-harribel.png"},
   {n:"Ulquiorra Cifer",       r:"Arrancar",  sx:"M", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"01/12", w:5,  l:1,  draw:0, img:"assets/personnages/ulquiorra-cifer.png"},
