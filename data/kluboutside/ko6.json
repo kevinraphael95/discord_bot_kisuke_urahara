@@ -1,504 +1,504 @@
 {
-  "questions": [
-    {
-      "id": 501,
+  "Questions": {
+    "501": {
+      "date": "2023.08.14",
       "question": "How old is Riruka? (At the time of the Lost Agent of the Shinigami arc.)",
-      "reponse": "She’s 15 years old."
+      "réponse": "She's 15 years old."
     },
-    {
-      "id": 502,
+    "502": {
+      "date": "2023.08.14",
       "question": "Sensei, when drawing manga, do you pretend to be the central character at that moment, before drawing? Or do you always maintain an objective perspective?",
-      "reponse": "Rather than getting into the role of the character, I draw them as if they were right in front of me. When I try to fully embody a character, I feel that the range of the character narrows because there are limits to my own perception."
+      "réponse": "Rather than getting into the role of the character, I draw them as if they were right in front of me. When I try to fully embody a character, I feel that the range of the character narrows because there are limits to my own perception."
     },
-    {
-      "id": 503,
-      "question": "Why is it called “Karakura Town”?",
-      "reponse": "The name comes from the mental image of an empty body with a missing soul (in other words, a corpse)."
+    "503": {
+      "date": "2023.08.21",
+      "question": "Why is it called \u201cKarakura Town\u201d?",
+      "réponse": "The name comes from the mental image of an empty body with a missing soul (in other words, a corpse)."
     },
-    {
-      "id": 504,
-      "question": "Among the Shinigami, there are some who hide the abilities of their own Zanpakutō, and there are some who remain silent about the fact that they can perform Bankai, but aren’t there any rules that require them to declare this information?",
-      "reponse": "Of course, they have an obligation to report on these things."
+    "504": {
+      "date": "2023.08.21",
+      "question": "Among the Shinigami, there are some who hide the abilities of their own Zanpakut\u014d, and there are some who remain silent about the fact that they can perform Bankai, but aren't there any rules that require them to declare this information?",
+      "réponse": "Of course, they have an obligation to report on these things."
     },
-    {
-      "id": 505,
-      "question": "With respect to BLEACH, I get the impression that there are few explanations of the situation or a character’s abilities which resemble a ‘voice from above’. Is there something you’re particular about with regard to this aspect?",
-      "reponse": "I feel like it kills the immersion so I make an effort to avoid using it. Though, I don’t particularly dislike this aspect when it comes to reading."
+    "505": {
+      "date": "2023.08.21",
+      "question": "With respect to BLEACH, I get the impression that there are few explanations of the situation or a character's abilities which resemble a 'voice from above'. Is there something you're particular about with regard to this aspect?",
+      "réponse": "I feel like it kills the immersion so I make an effort to avoid using it. Though, I don't particularly dislike this aspect when it comes to reading."
     },
-    {
-      "id": 506,
-      "question": "I love the Visored! While there may be differences in the balance of mastery or ineptitude over the Zankensoki, strictly speaking, who is the strongest among those eight when it comes to battle? If the ability of the Zanpakutō is direct attack type, I somehow feel that the user may not have an aptitude for Kidō too, so I would be glad if you could also tell me who is the most adept at Kidō, putting aside Hacchi!",
-      "reponse": "If we take “adept at Kidō” to mean “a wide range of Kidō variations can be used” then after Haachi, it’s Rose. As for who the strongest is, that’s hard to say because it depends on the conditions."
+    "506": {
+      "date": "2023.08.28",
+      "question": "I love the Visored! While there may be differences in the balance of mastery or ineptitude over the Zankensoki, strictly speaking, who is the strongest among those eight when it comes to battle? If the ability of the Zanpakut\u014d is direct attack type, I somehow feel that the user may not have an aptitude for Kid\u014d too, so I would be glad if you could also tell me who is the most adept at Kid\u014d, putting aside Hacchi!",
+      "réponse": "If we take \u201cadept at Kid\u014d\u201d to mean \u201ca wide range of Kid\u014d variations can be used\u201d then after Haachi, it's Rose. As for who the strongest is, that's hard to say because it depends on the conditions."
     },
-    {
-      "id": 507,
+    "507": {
+      "date": "2023.08.28",
       "question": "How did the Visored previously make a living? Also, Hiyori has a part-time job, but are Love and Hacchi working too?",
-      "reponse": "Hacchi collaborates with Tessai to develop Kidō goods for use in the Soul Society. Love works part-time at a second hand clothes store."
+      "réponse": "Hacchi collaborates with Tessai to develop Kid\u014d goods for use in the Soul Society. Love works part-time at a second hand clothes store."
     },
-    {
-      "id": 508,
-      "question": "What specific tasks does Kubo-sensei do when taking on the role of “supervisor” for things like Brave Souls, movies, anime, etc.? For things like Brave Souls, do you check and make corrections to the designs that have been submitted to you?",
-      "reponse": "The degree of supervision varies depending on the case, and that’s the way it is for Brave Souls too."
+    "508": {
+      "date": "2023.08.28",
+      "question": "What specific tasks does Kubo-sensei do when taking on the role of \u201csupervisor\u201d for things like Brave Souls, movies, anime, etc.? For things like Brave Souls, do you check and make corrections to the designs that have been submitted to you?",
+      "réponse": "The degree of supervision varies depending on the case, and that's the way it is for Brave Souls too."
     },
-    {
-      "id": 509,
-      "question": "It was explained within the story that Zaraki Kenpachi took a sword from a Shinigami, but if the Shinigami who had their sword taken were still alive and had achieved Shikai and Bankai, would they end up having a similar ability to Zaraki’s Nozarashi?",
-      "reponse": "That wouldn’t happen. Abilities can be overwritten prior to Shikai acquisition (and depending on the person, even after its acquisition)."
+    "509": {
+      "date": "2023.09.04",
+      "question": "It was explained within the story that Zaraki Kenpachi took a sword from a Shinigami, but if the Shinigami who had their sword taken were still alive and had achieved Shikai and Bankai, would they end up having a similar ability to Zaraki's Nozarashi?",
+      "réponse": "That wouldn't happen. Abilities can be overwritten prior to Shikai acquisition (and depending on the person, even after its acquisition)."
     },
-    {
-      "id": 510,
-      "question": "Rukia and Renji are a working couple, but did Ichika go to nursery school or a daycare center when she was very young, prior to entering the Shin'ō Academy?",
-      "reponse": "Even though they both took childcare leave, several nannies dispatched by the Kuchiki clan were always stationed at the Abarai residence."
+    "510": {
+      "date": "2023.09.04",
+      "question": "Rukia and Renji are a working couple, but did Ichika go to nursery school or a daycare center when she was very young, prior to entering the Shin'\u014d Academy?",
+      "réponse": "Even though they both took childcare leave, several nannies dispatched by the Kuchiki clan were always stationed at the Abarai residence."
     },
-    {
-      "id": 511,
-      "question": "Is the marriage rate low for the Captains and Vice-Captains of the Gotei 13? Are there any Captain class Shinigami we don’t know about who are actually married?",
-      "reponse": "There is no one among the current members. I feel like there aren’t many among that lot who seem capable of maintaining a married life…."
+    "511": {
+      "date": "2023.09.04",
+      "question": "Is the marriage rate low for the Captains and Vice-Captains of the Gotei 13? Are there any Captain class Shinigami we don't know about who are actually married?",
+      "réponse": "There is no one among the current members. I feel like there aren't many among that lot who seem capable of maintaining a married life\u2026."
     },
-    {
-      "id": 512,
-      "question": "Previously, in response to a question about the names of Hollows, you answered that “there is a person in charge of naming them”, but do they name each Hollow one by one? Or are these names only given to Hollows who have murdered Shinigami, or caused a great deal of damage to the Human World",
-      "reponse": "It’s the latter. Other Hollows are assigned numbers and such based on what is captured."
+    "512": {
+      "date": "2023.09.11",
+      "question": "Previously, in response to a question about the names of Hollows, you answered that \u201cthere is a person in charge of naming them\u201d, but do they name each Hollow one by one? Or are these names only given to Hollows who have murdered Shinigami, or caused a great deal of damage to the Human World?",
+      "réponse": "It's the latter. Other Hollows are assigned numbers and such based on what is captured."
     },
-    {
-      "id": 513,
-      "question": "About Unagiya Kaoru, he is the son of Unagiya Ikumi and who else? My personal prediction is that it’s Tsukishima-san!",
-      "reponse": "What a frightening prospect."
+    "513": {
+      "date": "2023.09.11",
+      "question": "About Unagiya Kaoru, he is the son of Unagiya Ikumi and who else? My personal prediction is that it's Tsukishima-san!",
+      "réponse": "What a frightening prospect."
     },
-    {
-      "id": 514,
+    "514": {
+      "date": "2023.09.11",
       "question": "Are all the artwork which appear in Guidelines on KlubOutside drawn by Kubo-sensei while your assistants draw the background and other elements?",
-      "reponse": "That’s right. Characters, drawn lettering and effects are my job, while the background, motion lines and screentones are my assistant’s job."
+      "réponse": "That's right. Characters, drawn lettering and effects are my job, while the background, motion lines and screentones are my assistant's job. I thought that if I continued drawing the motion lines by hand, I wouldn't be able to finish the whole piece so halfway through the series I decided to hand that over to my assistants."
     },
-    {
-      "id": 515,
-      "question": "It is mentioned that Urahara created his healing hot springs by imitating Kirinji’s baths, but do these baths still remain in Soul Society? Or did he go to the Soul King Palace and analyze them?",
-      "reponse": "A few still remain in a remote area of Rukongai."
+    "515": {
+      "date": "2023.09.18",
+      "question": "It is mentioned that Urahara created his healing hot springs by imitating Kirinji's baths, but do these baths still remain in Soul Society? Or did he go to the Soul King Palace and analyze them?",
+      "réponse": "A few still remain in a remote area of Rukongai."
     },
-    {
-      "id": 516,
-      "question": "Why does Bakudō #81. “Dankū” possess the anti-Hadō capability to “completely block Hadō numbered 89 and below”? I speculate that in the past, Shinigami who were skilled in Hadō numbered 89 and below had turned hostile, so Dankū was created as a countermeasure to that.",
-      "reponse": "That’s a good guess."
+    "516": {
+      "date": "2023.09.18",
+      "question": "Why does Bakud\u014d #81. \u201cDank\u016b\u201d possess the anti-Had\u014d capability to \u201ccompletely block Had\u014d numbered 89 and below\u201d? I speculate that in the past, Shinigami who were skilled in Had\u014d numbered 89 and below had turned hostile, so Dank\u016b was created as a countermeasure to that.",
+      "réponse": "That's a good guess."
     },
-    {
-      "id": 517,
-      "question": "Why does Orihime call Grimmjow “Grimmjow” but Ulquiorra “Ulquiorra-kun”?",
-      "reponse": "That’s because the atmosphere on their first meeting was not one where she was able to address Grimmjow with the -kun honorific. Though, I also think Ulquiorra is the same in that regard."
+    "517": {
+      "date": "2023.09.18",
+      "question": "Why does Orihime call Grimmjow \u201cGrimmjow\u201d but Ulquiorra \u201cUlquiorra-kun\u201d?",
+      "réponse": "That's because the atmosphere on their first meeting was not one where she was able to address Grimmjow with the -kun honorific. Though, I also think Ulquiorra is the same in that regard."
     },
-    {
-      "id": 518,
+    "518": {
+      "date": "2023.09.18",
       "question": "Please tell us the gender of Nianzol Weizol.",
-      "reponse": "You’ll know when you hear his voice in the anime, but he’s a man."
+      "réponse": "You'll know when you hear his voice in the anime, but he's a man."
     },
-    {
-      "id": 519,
-      "question": "Are the attack methods which utilize Gintō and the Medallion chant used by Ebern all techniques which are classified as “Kirchenlied”?",
-      "reponse": "“Kirchenlied” is the equivalent of a Shinigami’s “Kidō”, therefore that is the case for most techniques which correspond to a spell."
+    "519": {
+      "date": "2023.09.25",
+      "question": "Are the attack methods which utilize Gint\u014d and the Medallion chant used by Ebern all techniques which are classified as \u201cKirchenlied\u201d?",
+      "réponse": "\u201cKirchenlied\u201d is the equivalent of a Shinigami's \u201cKid\u014d\u201d, therefore that is the case for most techniques which correspond to a spell."
     },
-    {
-      "id": 520,
-      "question": "Does Driscoll’s Overkill become stronger based on the number of people killed from the time he received his Schrift to now? Or does the buff expire at the end of the battle or some other point?",
-      "reponse": "The buff is removed by sleeping, eating, or loss of consciousness."
+    "520": {
+      "date": "2023.09.25",
+      "question": "Does Driscoll's Overkill become stronger based on the number of people killed from the time he received his Schrift to now? Or does the buff expire at the end of the battle or some other point?",
+      "réponse": "The buff is removed by sleeping, eating, or loss of consciousness."
     },
-    {
-      "id": 521,
-      "question": "Are there any characters among the BLEACH cast who wear perfume, or has an image of their scent been decided upon in Kubo-sensei’s mind?",
-      "reponse": "I’ve been asked quite frequently to release perfume, so I’m starting to think it might be nice to do so. I don’t use perfumes but sometimes I’ll buy them when I want the bottle…."
+    "521": {
+      "date": "2023.09.25",
+      "question": "Are there any characters among the BLEACH cast who wear perfume, or has an image of their scent been decided upon in Kubo-sensei's mind? Recently, perfumes and fragrances that capture the image of one's favorite character or idol have been released regardless of whether they are fictional or real, so I wonder if we'll get some released out of the BLEACH universe as well.",
+      "réponse": "I've been asked quite frequently to release perfume, so I'm starting to think it might be nice to do so. I don't use perfumes but sometimes I'll buy them when I want the bottle\u2026."
     },
-    {
-      "id": 522,
-      "question": "Nimaiya Ōetsu makes the Asauchi, but did he create them with Shikai and Bankai in mind from the very outset?",
-      "reponse": "That is the correct order of events."
+    "522": {
+      "date": "2023.10.02",
+      "question": "Nimaiya \u014cetsu makes the Asauchi, but did he create them with Shikai and Bankai in mind from the very outset? Or did he realize that the shape and properties of the swords changed with each individual as they used it, and that phenomenon was then given the name Shikai and Bankai by the Monk?",
+      "réponse": "That is the correct order of events."
     },
-    {
-      "id": 523,
-      "question": "Shishigawara-kun’s Fullbring “Jackpot Knuckle” has a characteristic where the probability of hitting the jackpot ends up decreasing with continuous use, but will the probability of a jackpot be restored once it has already been decreased?",
-      "reponse": "There is a gradual recovery from misfortune (taking damage, etc.). Full recovery occurs when crossing over to the next day at midnight."
+    "523": {
+      "date": "2023.10.02",
+      "question": "Shishigawara-kun's Fullbring \u201cJackpot Knuckle\u201d has a characteristic where the probability of hitting the jackpot ends up decreasing with continuous use, but will the probability of a jackpot be restored once it has already been decreased? If it does, I would also like to know what the conditions are.",
+      "réponse": "There is a gradual recovery from misfortune (taking damage, etc.). Full recovery occurs when crossing over to the next day at midnight."
     },
-    {
-      "id": 524,
-      "question": "When did Hirako Shinji get his tongue pierced? It wasn’t pierced during The Past arc, was it…?",
-      "reponse": "I always forget to draw it, so I may not even include it anymore."
+    "524": {
+      "date": "2023.10.02",
+      "question": "When did Hirako Shinji get his tongue pierced? It wasn't pierced during The Past arc, was it\u2026?",
+      "réponse": "I always forget to draw it, so I may not even include it anymore."
     },
-    {
-      "id": 525,
+    "525": {
+      "date": "2023.10.09",
       "question": "Is the hierarchy of strength for the Bambies: Liltotto > Giselle > Meninas > Bambi > Candice?",
-      "reponse": "If they engage in battle with Blut, then that’s probably the order. If it’s a bare-handed fight then it’s: Liltotto → Meninas → Candice → Gigi → Bambi."
+      "réponse": "If they engage in battle with Blut, then that's probably the order. If it's a bare-handed fight then it's: Liltotto \u2192 Meninas \u2192 Candice \u2192 Gigi \u2192 Bambi."
     },
-    {
-      "id": 526,
+    "526": {
+      "date": "2023.10.09",
       "question": "Vice-Captain Madarame comes from a distinguished family, but what about 3rd seat Ayasegawa?",
-      "reponse": "Yumichika was an abandoned child from Rukongai."
+      "réponse": "Yumichika was an abandoned child from Rukongai."
     },
-    {
-      "id": 527,
+    "527": {
+      "date": "2023.10.09",
       "question": "When I look at Rickenbacker, I get a buddy-like vibe and at the same time a faint sense of some maternal quality, but do Dragons even have things like gender?",
-      "reponse": "They do. By the way, Rickenbacker is male."
+      "réponse": "They do. By the way, Rickenbacker is male."
     },
-    {
-      "id": 528,
-      "question": "The Kōtotsu was completely destroyed by Aizen, but after that, didn’t any problems arise within the Dangai?",
-      "reponse": "It will be restored within the next seven days."
+    "528": {
+      "date": "2023.10.16",
+      "question": "The K\u014dtotsu was completely destroyed by Aizen, but after that, didn't any problems arise within the Dangai? Are there multiple K\u014dtotsu, or perhaps it was restored through a self-purification function or something?",
+      "réponse": "It will be restored within the next seven days."
     },
-    {
-      "id": 529,
+    "529": {
+      "date": "2023.10.16",
       "question": "Urahara-san runs a small-time candy shop in the Human World, but is there some specific reason why he chose to open up a candy shop?",
-      "reponse": "It’s because Kisuke thought that candy shops were the best in that he could open and close the shop as he pleases, and even if he stocks strange items, it’s harder to suspect anything is out of the ordinary."
+      "réponse": "It's because Kisuke thought that candy shops were the best in that he could open and close the shop as he pleases, and even if he stocks strange items, it's harder to suspect anything is out of the ordinary."
     },
-    {
-      "id": 530,
-      "question": "Will there not be a BLEACH themed pachinko machine released?",
-      "reponse": "There are no such plans, but the staging aspect certainly sounds entertaining."
+    "530": {
+      "date": "2023.10.16",
+      "question": "Will there not be a BLEACH themed pachinko machine released? I'm just allowing myself to imagine that the staging effects and so on would be so fun, LOL.",
+      "réponse": "There are no such plans, but the staging aspect certainly sounds entertaining."
     },
-    {
-      "id": 531,
+    "531": {
+      "date": "2023.10.23",
       "question": "When Ichigo wears his sword, he carries Zangetsu on his back, but how is it held in place?",
-      "reponse": "The sash on the hilt is wrapped around the chain along with the blade."
+      "réponse": "The sash on the hilt is wrapped around the chain along with the blade."
     },
-    {
-      "id": 532,
+    "532": {
+      "date": "2023.10.23",
       "question": "Is Yukio unmarried in the Echoing Jaws of Hell arc?",
-      "reponse": "He’s unmarried. It doesn’t seem very likely that he’ll marry…."
+      "réponse": "He's unmarried. It doesn't seem very likely that he'll marry\u2026."
     },
-    {
-      "id": 533,
-      "question": "When I was looking at the art of BLEACH, I got the impression of ballet movements. Sensei, do you ever watch ballet?",
-      "reponse": "I sometimes watch Lausanne on TV, but I’m not very familiar with it. If anything, I suppose the sharp-tongued humor is the thing that I find interesting to watch."
+    "533": {
+      "date": "2023.10.23",
+      "question": "When I was looking at the art of BLEACH, I got the impression of ballet movements, like the way in which characters use the tips of their toes and the lower half of their bodies. Sensei, do you ever watch ballet?",
+      "réponse": "I sometimes watch Lausanne on TV, but I'm not very familiar with it. If anything, I suppose the sharp-tongued humor is the thing that I find interesting to watch."
     },
-    {
-      "id": 534,
-      "question": "Kotetsu Kiyone and Kotsubaki Sentarō share the same birthday, are they twins related by blood?",
-      "reponse": "They’re unrelated, but every year, they were made to sit side-by-side by Ukitake and celebrate their birthdays together."
+    "534": {
+      "date": "2023.10.30",
+      "question": "Kotetsu Kiyone and Kotsubaki Sentar\u014d share the same birthday, are they twins related by blood?",
+      "réponse": "They're unrelated, but every year, they were made to sit side-by-side by Ukitake and celebrate their birthdays together."
     },
-    {
-      "id": 535,
-      "question": "How do Arrancar acquire a Zanpakutō? Do their broken mask pieces transform into Zanpakutō after they become Arrancar?",
-      "reponse": "I’ll tell you because I don’t particularly feel like drawing it, but the torn part of the mask becomes the sword. So you are correct."
+    "535": {
+      "date": "2023.10.30",
+      "question": "How do Arrancar acquire a Zanpakut\u014d? Do their broken mask pieces transform into Zanpakut\u014d after they become Arrancar?",
+      "réponse": "I'll tell you because I don't particularly feel like drawing it, but the torn part of the mask becomes the sword. So you are correct."
     },
-    {
-      "id": 536,
-      "question": "During the Quincy invasion, Mayuri modified his room and clothes to make them glow so that they wouldn’t cast shadows, but wouldn’t a shadow be created in Nemu’s cleavage if left like that?",
-      "reponse": "Now that you mention it, that’s true…. I should have placed a glow stick or something between her breasts."
+    "536": {
+      "date": "2023.10.30",
+      "question": "During the Quincy invasion, Mayuri modified his room and clothes to make them glow so that they wouldn't cast shadows, but wouldn't a shadow be created in Nemu's cleavage if left like that? This is a serious question.",
+      "réponse": "Now that you mention it, that's true\u2026. I should have placed a glow stick or something between her breasts."
     },
-    {
-      "id": 537,
+    "537": {
+      "date": "2023.11.06",
       "question": "How did you feel when BLEACH was parodied in Gintama?",
-      "reponse": "When we first met, I was the one who told Sorachi-san “you can do whatever you want"…. Yet, he still apologized to me."
+      "réponse": "When we first met, I was the one who told Sorachi-san \u201cyou can do whatever you want\u201d\u2026. Yet, he still apologized to me."
     },
-    {
-      "id": 538,
-      "question": "Is Hikifune Kirio-san’s Tree of Life based on a similar principle to Kidō?",
-      "reponse": "It’s similar, but since it can only be used by one individual, I guess it’s something closer to Ganju’s Seppa…."
+    "538": {
+      "date": "2023.11.06",
+      "question": "Is Hikifune Kirio-san's Tree of Life based on a similar principle to Kid\u014d?",
+      "réponse": "It's similar, but since it can only be used by one individual, I guess it's something closer to Ganju's Seppa\u2026."
     },
-    {
-      "id": 539,
-      "question": "Findorr Calius adjusted his own strength by breaking his mask, but is it also possible to restore his broken mask and strength back to their original state.",
-      "reponse": "It’s possible. Even if it’s left alone, it will gradually return to its original state. It’s kind of like an injury."
+    "539": {
+      "date": "2023.11.06",
+      "question": "Findorr Calius adjusted his own strength by breaking his mask, but is it also possible to restore his broken mask and strength back to their original state?",
+      "réponse": "It's possible. Even if it's left alone, it will gradually return to its original state. It's kind of like an injury."
     },
-    {
-      "id": 540,
-      "question": "Would you consider composing something like another official spin-off that is drawn in a light-hearted and humorous manner?",
-      "reponse": "If someone else were to draw something amusing, I’d also like to see it."
+    "540": {
+      "date": "2023.11.13",
+      "question": "My prized possession is a copy of KaraBuri+ which I bought when I was in the 6th or 5th grade. Would you consider composing something like another official spin-off that is drawn in a light-hearted and humorous manner? I'd even like to see something similar to a Hueco Mundo version of KaraBuri!",
+      "réponse": "If someone else were to draw something amusing, I'd also like to see it."
     },
-    {
-      "id": 541,
-      "question": "I have a question about Ayon and Orihime’s abilities! After creating Ayon, if the arms of Apacci and the others were healed via Orihime’s powers, could something like an 'Ayon duplication bug’ occur?",
-      "reponse": "If the bodies of Apacci and co. can endure the rapid continuous regeneration process, a duplication bug is possible."
+    "541": {
+      "date": "2023.11.13",
+      "question": "I have a question about Ayon and Orihime's abilities! After creating Ayon, if the arms of Apacci and the others were healed via Orihime's powers, could something like an 'Ayon duplication bug' occur? If the arms of the three individuals who create Ayon are restored through Orihime's abilities, would Ayon also disappear? It's just a hypothetical scenario, but I'm intrigued.",
+      "réponse": "If the bodies of Apacci and co. can endure the rapid continuous regeneration process, a duplication bug is possible."
     },
-    {
-      "id": 542,
-      "question": "Can Minazuki’s size be changed at will?",
-      "reponse": "The size can vary considerably. The smallest size is around the size of a puppy."
+    "542": {
+      "date": "2023.11.13",
+      "question": "I was curious about the differences in size between Minazuki's first appearance, published in volume 18, and the time they landed on S\u014dkyoku Hill, published in volume 21. Can Minazuki's size be changed at will? Or did they become smaller as a result of the lifesaving measures Unohana gave Hitsugaya and Hinamori at the Seij\u014dt\u014dky\u014drin?",
+      "réponse": "The size can vary considerably. The smallest size is around the size of a puppy."
     },
-    {
-      "id": 543,
-      "question": "I totally want the shoes that Rabu is wearing in the new artwork. Are there any plans to turn them into merch in the future!!!!?",
-      "reponse": "I love shoes, so I’d be happy if merchandise in the form of shoes that a character is seen wearing could be sold, but I wonder if that can happen."
+    "543": {
+      "date": "2023.11.20",
+      "question": "I totally want the shoes that Rabu is wearing in the new artwork (color version) from the art exhibition. They're exceedingly stylish, are there any plans to turn them into merch in the future!!!!?",
+      "réponse": "I love shoes, so I'd be happy if merchandise in the form of shoes that a character is seen wearing could be sold, but I wonder if that can happen."
     },
-    {
-      "id": 544,
-      "question": "Quilge Opie used Ransōtengai, but no other Quincy were seen utilizing this technique. Is this simply because Quilge Opie has both the talent and understanding?",
-      "reponse": "That’s right. Quilge is the combat instructor of the Sternritter, and Quilge’s students can also be found among the current Wörtlich."
+    "544": {
+      "date": "2023.11.20",
+      "question": "Quilge Opie used Rans\u014dtengai, but no other Quincy were seen utilizing this technique. Is this simply because Quilge Opie has both the talent and understanding, and has therefore mastered Rans\u014dtengai?",
+      "réponse": "That's right. Quilge is the combat instructor of the Sternritter, and Quilge's students can also be found among the current W\u00f6rtlich."
     },
-    {
-      "id": 545,
-      "question": "Gin’s Bankai, Kamishini no Yari, had the ability to leave a piece of the sword within the body of his opponent... will the part that was lost through this process never return to its original state again?",
-      "reponse": "The part left inside the body is made of poison, and since the poison is a secretion of the sword, it will return to its original state after a certain amount of time."
+    "545": {
+      "date": "2023.11.20",
+      "question": "Gin's Bankai, Kamishini no Yari, had the ability to leave a piece of the sword within the body of his opponent, and then dissolve and break down cells with the poison inside the sword, but will the part that was lost through this process never return to its original state again just like other Bankai? Also, assuming it doesn't return, if this ability is used frequently, will the blade eventually be reduced to nothing meaning his Bankai is rendered unusable?",
+      "réponse": "The part left inside the body is made of poison, and since the poison is a secretion of the sword, it will return to its original state after a certain amount of time."
     },
-    {
-      "id": 546,
-      "question": "Each Division among the Gotei 13 has its own Squad Flower... but are there opportunities to study Hanakotoba as part of a Shinigami’s cultivation at the Academy?",
-      "reponse": "They learn about the Squad Flowers, but Izuru seems to be well-acquainted with things like Hanakotoba in a general sense."
+    "546": {
+      "date": "2023.11.27",
+      "question": "Each Division among the Gotei 13 has its own Squad Flower and a set meaning within Hanakotoba (*the Japanese language of flowers), but are there opportunities to study Hanakotoba as part of a Shinigami's cultivation at the Academy, for instance?",
+      "réponse": "They learn about the Squad Flowers, but Izuru seems to be well-acquainted with things like Hanakotoba in a general sense."
     },
-    {
-      "id": 547,
+    "547": {
+      "date": "2023.11.27",
       "question": "Are there any characters that you wanted to present as enemies even though they are allies, and are there any characters where the reverse is true?",
-      "reponse": "There isn’t any. Each character can only come to fit into their role because of the relationship they have with those around them."
+      "réponse": "There isn't any. Each character can only come to fit into their role because of the relationship they have with those around them."
     },
-    {
-      "id": 548,
+    "548": {
+      "date": "2023.11.27",
       "question": "Before the establishment of the Shinigami Research and Development Institute, was there no research institution in Soul Society?",
-      "reponse": "At one point, there was a group who, though unofficial, were close in that regard. That group disappeared and there was a period of time where no similar organization existed. Mayuri belonged to the first group. Senjumaru was their leader."
+      "réponse": "At one point, there was a group who, though unofficial, were close in that regard (in the sense that they created things). That group disappeared and there was a period of time where no similar organization existed. What was formally established after that is the Shinigami Research and Development Institute. Mayuri belonged to the first group. Senjumaru was their leader."
     },
-    {
-      "id": 549,
-      "question": "It is explained in the manga that Lloyd R, the younger brother, can imitate physical likeness and memories, but why is he able to use Yhwach’s abilities and weapons?",
-      "reponse": "Each Lloyd brother can either 'perfectly’ copy memories, or 'perfectly’ copy powers respectively, any aspect outside of that can be copied on a scale of 70-80%. This is because being able to copy only memories or only powers is of little use."
+    "549": {
+      "date": "2023.12.04",
+      "question": "It is explained in the manga that Lloyd R, the younger brother, can imitate physical likeness and memories, but why is he able to use Yhwach's abilities and weapons? Please tell us if he inherited his elder brother's ability, or if Yhwach granted him some of his own power, or perhaps there is some other reason?",
+      "réponse": "Each Lloyd brother can either 'perfectly' copy memories, or 'perfectly' copy powers respectively, any aspect outside of that can be copied on a scale of 70-80%. This is because being able to copy only memories or only powers is of little use."
     },
-    {
-      "id": 550,
+    "550": {
+      "date": "2023.12.04",
       "question": "Do you have a PS5?",
-      "reponse": "I don’t have one."
+      "réponse": "I don't have one."
     },
-    {
-      "id": 551,
-      "question": "What are the future plans for the floor of the 9th Division barracks which Mayuri destroyed with his eye beam in the one-shot?",
-      "reponse": "They’ll submit the bill to the 12th Division, and if that does work, they’ll submit the bill to the 1st Division, and if that still doesn’t work, then one way or another Shūhei will probably end up paying for it."
+    "551": {
+      "date": "2023.12.04",
+      "question": "What are the future plans for the floor of the 9th Division barracks which Mayuri destroyed with his eye beam in the one-shot? Will Hisagi and Kensei pay for the repairs?",
+      "réponse": "They'll submit the bill to the 12th Division, and if that does work, they'll submit the bill to the 1st Division, and if that still doesn't work, then one way or another Sh\u016bhei will probably end up paying for it."
     },
-    {
-      "id": 552,
-      "question": "Who is the President of the Shinigami Women’s Association by the time of the Echoing Jaws of Hell arc?",
-      "reponse": "The President is Rangiku and the Chairwoman is Yoruichi. By the way, Soifon calls herself Vice-Chairwoman without asking anyone."
+    "552": {
+      "date": "2023.12.11",
+      "question": "Who is the President of the Shinigami Women's Association by the time of the Echoing Jaws of Hell arc? I think the President is Lisa and the Supervising Chairwoman is Isane\u2026.",
+      "réponse": "The President is Rangiku and the Chairwoman is Yoruichi. By the way, Soifon calls herself Vice-Chairwoman without asking anyone."
     },
-    {
-      "id": 553,
-      "question": "Is the aspect of death governed by the Espada the same for different people, as long as they have the same number, like Harribel and Nelliel, for instance?",
-      "reponse": "It’s the same. Nelliel is also \"sacrifice”."
+    "553": {
+      "date": "2023.12.11",
+      "question": "Is the aspect of death governed by the Espada the same for different people, as long as they have the same number, like Harribel and Nelliel, for instance? If it's different, I'd like to know what it was for Nelliel when she was an Espada!",
+      "réponse": "It's the same. Nelliel is also \u201csacrifice\u201d."
     },
-    {
-      "id": 554,
-      "question": "Does sensei have an ability to sense the supernatural?",
-      "reponse": "I don’t. But I’ve been told a few times \"you must have a sixth sense, for sure!” But, I don’t."
+    "554": {
+      "date": "2023.12.11",
+      "question": "Does sensei have an ability to sense the supernatural? When I read Bleach for the first time, I allowed myself to think \u201cthe author definitely has a sixth sense!\u201d But do you really?",
+      "réponse": "I don't. But I've been told a few times \u201cyou must have a sixth sense, for sure!\u201d But, I don't."
     },
-    {
-      "id": 555,
-      "question": "If the posters will be expanded on in the future, will the designs from the Shibuya poster takeover be made into merch?",
-      "reponse": "I like those posters too, so I’m hoping they’ll sell well in the FC."
+    "555": {
+      "date": "2023.12.18",
+      "question": "Thank you for the wonderful posters at the art exhibition. I bought both the A and B collection. If the posters will be expanded on in the future, will the designs from the Shibuya poster takeover be made into merch?",
+      "réponse": "I like those posters too, so I'm hoping they'll sell well in the FC."
     },
-    {
-      "id": 556,
-      "question": "Does the blade grow as a Zanpakutō develops?",
-      "reponse": "The length of an Asauchi does not change, however when Shikai is used it will change in accordance with its development."
+    "556": {
+      "date": "2023.12.18",
+      "question": "Does the blade grow as a Zanpakut\u014d develops?",
+      "réponse": "The length of an Asauchi does not change, however when Shikai is used it will change in accordance with its development."
     },
-    {
-      "id": 557,
-      "question": "Is there some special relationship between the Komamura family and the Shihōin clan in BLEACH given that they are dogs and cats?",
-      "reponse": "“Komamura” is the surname given to him when he was taken in by Genryūsai, it is not associated with his family lineage."
+    "557": {
+      "date": "2023.12.18",
+      "question": "Is there some special relationship between the Komamura family and the Shih\u014din clan in BLEACH given that they are dogs and cats?",
+      "réponse": "\u201cKomamura\u201d is the surname given to him when he was taken in by Genry\u016bsai, it is not associated with his family lineage."
     },
-    {
-      "id": 558,
-      "question": "Were Yumichika and Yachiru’s hair ornaments made by Ikkaku?",
-      "reponse": "Yachiru’s hair ornament is handcrafted by Ikkaku. Yumichika bought his accessories himself."
+    "558": {
+      "date": "2023.12.25",
+      "question": "Were Yumichika and Yachiru's hair ornaments (or other accessories) made by Ikkaku?",
+      "réponse": "Yachiru's hair ornament is handcrafted by Ikkaku. Yumichika bought his accessories himself."
     },
-    {
-      "id": 559,
-      "question": "Did Mizuiro’s parents pay for his high school tuition?",
-      "reponse": "It was paid for with child-support payments from his father."
+    "559": {
+      "date": "2023.12.25",
+      "question": "Did Mizuiro's parents pay for his high school tuition?",
+      "réponse": "It was paid for with child-support payments from his father."
     },
-    {
-      "id": 560,
-      "question": "Does the position of Substitute Shinigami come without compensation?",
-      "reponse": "In the beginning, the position was without reward. After receiving the Substitute Badge, it’s now come to be that a reward will be deposited within a Seireitei account. Ichigo hasn’t been informed though."
+    "560": {
+      "date": "2023.12.25",
+      "question": "Does the position of Substitute Shinigami come without compensation? Do you gain some sort of reward? Ichigo is a high school student and doesn't seem the type to accept rewards as far as his personality is concerned, but I'm curious if there has ever been any offer of reward from the Gotei!",
+      "réponse": "In the beginning, the position was without reward. After receiving the Substitute Badge, it's now come to be that a reward will be deposited within a Seireitei account. Ichigo hasn't been informed though."
     },
-    {
-      "id": 561,
-      "question": "Will sensei be eating osechi during New Year’s?",
-      "reponse": "I eat it every year. Currently, I’m in the process of searching for osechi that suits my tastes. After all, you only get one chance a year."
+    "561": {
+      "date": "2024.01.01",
+      "question": "Will sensei be eating osechi during New Year's?",
+      "réponse": "I eat it every year. Currently, I'm in the process of searching for osechi that suits my tastes. After all, you only get one chance a year. If only we had a New Year holiday like three times a year."
     },
-    {
-      "id": 562,
-      "question": "When Don Kanonji first appeared, he was performing an exorcism at an abandoned hospital, was it Ishida who tried to stop Kanonji’s exorcism at the beginning?",
-      "reponse": "Yes."
+    "562": {
+      "date": "2024.01.01",
+      "question": "When Don Kanonji first appeared, he was performing an exorcism at an abandoned hospital, was it Ishida who tried to stop Kanonji's exorcism at the beginning?",
+      "réponse": "Yes."
     },
-    {
-      "id": 563,
-      "question": "I noticed something in the Echoing Jaws of Hell arc section of BLEACH EX. the “Taka” which came out with Rindō Atau’s Zanpakutō ability was “Washi” in the rough draft, right?",
-      "reponse": "I believe this was because eagle in sign language is the same as hawk and was derived from hawk to begin with, and also because hawks have a stronger Japanese image."
+    "563": {
+      "date": "2024.01.01",
+      "question": "I noticed something in the Echoing Jaws of Hell arc section of BLEACH EX. the \u201cTaka\u201d (*hawk) which came out with Rind\u014d Atau's Zanpakut\u014d ability was \u201cWashi\u201d (*eagle) in the rough draft, right? What was the reason for the change?",
+      "réponse": "I believe this was because eagle in sign language is the same as hawk and was derived from hawk to begin with, and also because hawks have a stronger Japanese image."
     },
-    {
-      "id": 564,
-      "question": "Ayon ended up being defeated both times in the story, but let’s assume he wasn’t defeated, would he continue to exist forever…?",
-      "reponse": "After a short while, he will self-destruct, and not long after that, the arms of Apacci and the others will grow back."
+    "564": {
+      "date": "2024.01.08",
+      "question": "Ayon ended up being defeated both times in the story, but let's assume he wasn't defeated, would he continue to exist forever\u2026? If so, that would be awfully frightening. I'm curious about what he got up to when summoned in the past!",
+      "réponse": "After a short while, he will self-destruct, and not long after that, the arms of Apacci and the others will grow back."
     },
-    {
-      "id": 565,
-      "question": "Due to the actions of PePe Waccabrada, Shūhei and Byakuya fought each other, but Byakuya behaved as if he were trying to avoid hurting Shūhei as much as possible. I feel that Byakuya’s views and personality have changed. What do you think?",
-      "reponse": "I think you’re right."
+    "565": {
+      "date": "2024.01.08",
+      "question": "Due to the actions of PePe Waccabrada, Sh\u016bhei and Byakuya fought each other, but Byakuya behaved as if he were trying to avoid hurting Sh\u016bhei as much as possible. Personally, I think that Byakuya before he met Ichigo would have killed Sh\u016bhei. It might be presumptuous of me to talk about Byakuya like I understand him, but as I read on, I feel that Byakuya's views and personality have changed. What do you think?",
+      "réponse": "I think you're right."
     },
-    {
-      "id": 566,
+    "566": {
+      "date": "2024.01.08",
       "question": "What time does sensei wake up every morning?",
-      "reponse": "I’ve been quite busy lately, so ten o'clock. I can’t even watch Love It! in real time anymore…."
+      "réponse": "I've been quite busy lately, so ten o'clock. I can't even watch Love It! in real time anymore\u2026."
     },
-    {
-      "id": 567,
-      "question": "Was it because her five older brothers had passed away that Soi Fon succeeded as the head of Fon family?",
-      "reponse": "The strongest person in that generation becomes the head of the family, regardless of gender."
+    "567": {
+      "date": "2024.01.15",
+      "question": "Was it because her five older brothers had passed away that Soi Fon succeeded as the head of Fon family? Or is there some kind of custom where a woman always becomes the head in the Fon family like a \u201cqueen bee\u201d?",
+      "réponse": "The strongest person in that generation becomes the head of the family, regardless of gender."
     },
-    {
-      "id": 568,
+    "568": {
+      "date": "2024.01.15",
       "question": "I would like to know the Shikai abilities of the three seated officers of the 3rd Division who were instantly killed by Bazz-B in volume 56!",
-      "reponse": "Those abilities which never got a chance to be showcased are a secret because I may use them somewhere else."
+      "réponse": "Those abilities which never got a chance to be showcased are a secret because I may use them somewhere else."
     },
-    {
-      "id": 569,
-      "question": "Kubo-sensei, you mentioned that you draw illustrations on the larger iPad pro, so I also want to try an iPad for the first time... I would like to hear about the types of brushes you use in Clip Studio Paint when line drawing and when adding color?",
-      "reponse": "I hope it becomes lighter. As for pens, I often use a pen called Kasure Kashi and for brushes I use one called Muk01. I separate the layers depending on my mood."
+    "569": {
+      "date": "2024.01.15",
+      "question": "Kubo-sensei, you mentioned that you draw illustrations on the larger iPad pro, so I also want to try an iPad for the first time, but looking back do you ever feel like there is something about it that could have been done better? Additionally, I would like to hear about the types of brushes you use in Clip Studio Paint when line drawing and when adding color, and also how you divide your drawing into layers!!!!",
+      "réponse": "I hope it becomes lighter. As for pens, I often use a pen called Kasure Kashi and for brushes I use one called Muk01. I separate the layers depending on my mood."
     },
-    {
-      "id": 570,
-      "question": "I would like to know the name of the technique that was used when Kirinji Tenjirō got behind Soi Fon. Is this because the Hohō used by Kirinji Tenjirō was not “Shunpo”?",
-      "reponse": "It’s the same Shunpo. Shunpo consists of a three stage process: Joritsu, Bakkyaku and Shunpo. Tenjirō is incredibly skilled at the second stage, “Bakkyaku”, which allows him to achieve unbelievable speeds."
+    "570": {
+      "date": "2024.01.22",
+      "question": "I would like to know the name of the technique that was used when Kirinji Tenj\u012br\u014d got behind Soi Fon. Although she's supposed to have top-class speed among the Gotei 13, Soi Fon couldn't read his movements at all, thinking \u201cwhat was that move just now\u2026!\u201d Is this because the Hoh\u014d used by Kirinji Tenj\u012br\u014d was not \u201cShunpo\u201d?",
+      "réponse": "It's the same Shunpo. Shunpo consists of a three stage process: Joritsu, Bakkyaku and Shunpo. Tenj\u012br\u014d is incredibly skilled at the second stage, \u201cBakkyaku\u201d, which allows him to achieve unbelievable speeds."
     },
-    {
-      "id": 571,
-      "question": "Can’t Orihime heal Izuru’s body?",
-      "reponse": "She may be able to heal him, but Izuru probably likes it that way…."
+    "571": {
+      "date": "2024.01.22",
+      "question": "Can't Orihime heal Izuru's body?",
+      "réponse": "She may be able to heal him, but Izuru probably likes it that way\u2026."
     },
-    {
-      "id": 572,
-      "question": "Did sensei have any involvement in selecting the songs and characters for Burikon: Bleach Concept Covers?",
-      "reponse": "I wasn’t involved at all, but I remember liking Mayuri and Nemu’s part."
+    "572": {
+      "date": "2024.01.22",
+      "question": "Did sensei have any involvement in selecting the songs and characters for Burikon: Bleach Concept Covers? Also, is there one in particular that you liked among the Burikon covers?",
+      "réponse": "I wasn't involved at all, but I remember liking Mayuri and Nemu's part."
     },
-    {
-      "id": 573,
-      "question": "What material is the Substitute Shinigami Badge made of?",
-      "reponse": "The Substitute’s Badge is made of metal. Iron would be too heavy for something of that size, so maybe aluminum would be a closer fit…?"
+    "573": {
+      "date": "2024.01.29",
+      "question": "What material is the Substitute Shinigami Badge made of? I want to make one myself as perfectly as I possibly can, so please tell me what it would look like in reality!",
+      "réponse": "The Substitute's Badge is made of metal. Iron would be too heavy for something of that size, so maybe aluminum would be a closer fit\u2026?"
     },
-    {
-      "id": 574,
+    "574": {
+      "date": "2024.01.29",
       "question": "Does Ise Nanao wear glasses because her eyesight has deteriorated by reading too many books? Or is it that the Ise clan are by nature a family with poor eyesight?",
-      "reponse": "It’s a family with poor eyesight."
+      "réponse": "It's a family with poor eyesight."
     },
-    {
-      "id": 575,
-      "question": "In volume 62, Urahara-san mentioned that the Quincy are “a race that have no 'antibodies’ at all to defend against Hollows.” Is Uryū special?",
-      "reponse": "Uryū is special."
+    "575": {
+      "date": "2024.01.29",
+      "question": "In volume 62, Urahara-san mentioned that the Quincy are \u201ca race that have no 'antibodies' at all to defend against Hollows.\u201d However, Ishida Ury\u016b was at the receiving end of Fornica r\u00e1s's abilities during his battle with Szayelaporro, and he had his lower arm torn off by Ulquiorra. Was this at a level that is not applicable to the \u201cerosion\u201d that Urahara-san talks about? Or is Ury\u016b special?",
+      "réponse": "Ury\u016b is special."
     },
-    {
-      "id": 576,
+    "576": {
+      "date": "2024.02.05",
       "question": "Why does Akon have horns on his head?",
-      "reponse": "They’re implants (transdermal implants)."
+      "réponse": "They're implants (transdermal implants)."
     },
-    {
-      "id": 577,
-      "question": "Dordoni, Cirucci, Luppi and Chuhlhourne were all revived at the hands of Mayuri-sama... is this perhaps the benevolence of Mayuri-sama?",
-      "reponse": "I too looked at and thought “who knew Mayuri could be so kind!""
+    "577": {
+      "date": "2024.02.05",
+      "question": "Dordoni, Cirucci, Luppi and Chuhlhourne were all revived at the hands of Mayuri-sama, but while the former three had suture marks on their faces, Chuhlhourne is the only one who had suture marks on his abdomen, is this perhaps the benevolence of Mayuri-sama?",
+      "réponse": "I too looked at and thought \u201cwho knew Mayuri could be so kind!\u201d"
     },
-    {
-      "id": 578,
-      "question": "If he were able to Hollowfy properly, would he have been able to manifest the mask with horns that covered his entire face as shown in the battle against Ulquiorra?",
-      "reponse": "If he were able to “properly” Hollowfy, then he would take on that form."
+    "578": {
+      "date": "2024.02.05",
+      "question": "In the scene where Ichigo is taught the Final Getsuga Tensh\u014d by Tensa Zangetsu, Ichigo is told \u201cyou feared taking on this form in which your mind is suppressed by your own destructive impulses, and as a result you've even become incapable of properly Hollowfying.\u201d However, if he were able to Hollowfy properly, would he have been able to manifest the mask with horns that covered his entire face as shown in the battle against Ulquiorra?",
+      "réponse": "If he were able to \u201cproperly\u201d Hollowfy, then he would take on that form."
     },
-    {
-      "id": 579,
+    "579": {
+      "date": "2024.02.12",
       "question": "While in the Dangai, what mechanism did Ulquiorra use to show Orihime the situation in the Human World as images via Garganta?",
-      "reponse": "There’s no lore about this at all!! What kind of system is it!? Ulquiorra!!?"
+      "réponse": "There's no lore about this at all!! What kind of system is it!? Ulquiorra!!?"
     },
-    {
-      "id": 580,
-      "question": "Among the spirits of her Shun Shun Rikka, Tsubaki is the only one who is rebellious towards his master. Is that a reaction stemming from Orihime’s dislike of conflict?",
-      "reponse": "That’s correct. How impressive, I didn’t expect someone to read so deeply into Rikka like this."
+    "580": {
+      "date": "2024.02.12",
+      "question": "Among the spirits of her Shun Shun Rikka, the ability belonging to Orihime, Tsubaki is the only one who is rebellious towards his master. Is that a reaction stemming from Orihime's dislike of conflict and hurting others given her personality?",
+      "réponse": "That's correct. How impressive, I didn't expect someone to read so deeply into Rikka like this."
     },
-    {
-      "id": 581,
-      "question": "Regarding Orihime’s ability, Shun Shun Rikka: Sōten Kisshun, is it that Shun Shun Rikka’s abilities come from Orihime’s own feelings of rejection and denial?",
-      "reponse": "You are more or less correct. The things that can be restored with Sōten Kisshun are, for the most part, what is visible to the eyes and what can be touched with the hands."
+    "581": {
+      "date": "2024.02.12",
+      "question": "Regarding Orihime's ability, Shun Shun Rikka: S\u014dten Kisshun, it is weak at recovering Reiroku because S\u014dten Kisshun is based on the rejection of events and Orihime rejects the form of a wounded individual. Is it that Shun Shun Rikka's abilities come from Orihime's own feelings of rejection and denial?",
+      "réponse": "You are more or less correct. The things that can be restored with S\u014dten Kisshun are, for the most part, what is visible to the eyes and what can be touched with the hands."
     },
-    {
-      "id": 582,
+    "582": {
+      "date": "2024.02.19",
       "question": "Kubo-sensei, is there a character in BLEACH that you consider to be closest to you in terms of your own personality?",
-      "reponse": "There isn’t. No one that I draw resembles me!"
+      "réponse": "There isn't. No one that I draw resembles me!"
     },
-    {
-      "id": 583,
-      "question": "Did Kūkaku somehow sense this connection between Ichigo and Isshin?",
-      "reponse": "Kūkaku has been aware of this through Ichigo’s Reiatsu since the beginning (volume 9). That’s why she let Ganju go with him. Of course, she also received a message from Kisuke at a later time."
+    "583": {
+      "date": "2024.02.19",
+      "question": "When K\u016bkaku sends Ichigo to the Soul King Palace in the Thousand-Year Blood War arc, she appears to be aware of the connection between Ichigo and Isshin saying \u201ceven if it means making uncle sad.\u201d Did K\u016bkaku somehow sense this, or was there some interaction between her and the Shiba clan or Shinigami she was acquainted with in places that are not depicted within the story?",
+      "réponse": "K\u016bkaku has been aware of this through Ichigo's Reiatsu since the beginning (volume 9). That's why she let Ganju go with him. Of course, she also received a message from Kisuke at a later time."
     },
-    {
-      "id": 584,
+    "584": {
+      "date": "2024.02.19",
       "question": "The masks of Loly Aivirrne and Menoly Mallia appear to have a design that forms a pair with the left and right eyes, perhaps they are Arrancar with a relationship like that of twin sisters?",
-      "reponse": "Although these two are not sisters, they have taken a sisterly vow and shaved down their masks in order to resemble each other."
+      "réponse": "Although these two are not sisters, they have taken a sisterly vow and shaved down their masks in order to resemble each other."
     },
-    {
-      "id": 585,
-      "question": "I believe there are works which publish illustrations drawn by readers in the tankōbon of the manga. Bleach didn’t have that, but is it that you have a certain preference towards your own tankōbon, Kubo-sensei?",
-      "reponse": "As a child, I was the type of kid who thought “I didn’t buy this to see drawings from readers” when looking at the illustration segment of the manga I used to read, so I didn’t do it with my own manga."
+    "585": {
+      "date": "2024.02.26",
+      "question": "I believe there are works which publish illustrations drawn by readers in the tank\u014dbon of the manga. Bleach didn't have that, but is it that you have a certain preference towards your own tank\u014dbon, Kubo-sensei?",
+      "réponse": "As a child, I was the type of kid who thought \u201cI didn't buy this to see drawings from readers\u201d when looking at the illustration segment of the manga I used to read, so I didn't do it with my own manga. However, I have kept all the illustrations that were sent to me during the series."
     },
-    {
-      "id": 586,
-      "question": "The Captains of the Zero Division are each given one of the five cities atop the Zeroban Riden, but if the number of Zero Division captains increased, will a new Zeroban Riden be added?",
-      "reponse": "The upper limit is 5 people."
+    "586": {
+      "date": "2024.02.26",
+      "question": "The Captains of the Zero Division are each given one of the five cities atop the Zeroban Riden, but if the number of Zero Division captains increased, will a new Zeroban Riden be added? Or is the capacity for Captains limited to 5 individuals in accordance with the number of Zeroban Riden?",
+      "réponse": "The upper limit is 5 people."
     },
-    {
-      "id": 587,
-      "question": "What does the “chain” in Tensa Zangetsu represent? Is it the Chain of Fate?",
-      "reponse": "“Tensa” means “to lock the heavens”, and it’s a chain used to link and secure two things together."
+    "587": {
+      "date": "2024.02.26",
+      "question": "What does the \u201cchain\u201d in Tensa Zangetsu (*Heavenly Chain Slaying Moon) represent? Is it the Chain of Fate?",
+      "réponse": "\u201cTensa\u201d means \u201cto lock the heavens\u201d, and it's a chain used to link and secure two things together."
     },
-    {
-      "id": 588,
-      "question": "What material is the black part of Riruka’s clothes made of?",
-      "reponse": "It’s stretch cotton."
+    "588": {
+      "date": "2024.03.04",
+      "question": "What material is the black part of Riruka's clothes made of?",
+      "réponse": "It's stretch cotton."
     },
-    {
-      "id": 589,
+    "589": {
+      "date": "2024.03.04",
       "question": "I would like to know the nationality of the Sternritter!!!",
-      "reponse": "In order to avoid a fixed nationality for the group as a whole, I name them in a way which appears to contain spellings from various regions."
+      "réponse": "In order to avoid a fixed nationality for the group as a whole, I name them in a way which appears to contain spellings from various regions."
     },
-    {
-      "id": 590,
+    "590": {
+      "date": "2024.03.04",
       "question": "In what way did Yamamoto and Unohana come to meet?",
-      "reponse": "I might draw it someday, so it’s a secret."
+      "réponse": "I might draw it someday, so it's a secret."
     },
-    {
-      "id": 591,
-      "question": "In his KaraBuri profile, it is noted that the food Hisagi dislikes is sea urchin, but where did he eat it?",
-      "reponse": "He ruined it for himself after eating the cheap sea urchin he could afford on his salary."
+    "591": {
+      "date": "2024.03.11",
+      "question": "In his KaraBuri profile, it is noted that the food Hisagi dislikes is sea urchin, but where did he eat it? Or perhaps he came to dislike it because he was teased about the fact that his hairstyle resembles a sea urchin?",
+      "réponse": "He ruined it for himself after eating the cheap sea urchin he could afford on his salary."
     },
-    {
-      "id": 592,
-      "question": "When Rangiku woke up from Hakufuku, she said “this sensation… it’s Hakufuku…” Could it be that she is acquainted with the feeling because Shinigami experience it during their time at the Shin'ō Academy?",
-      "reponse": "They experience this in class, but Rangiku also has the experience of falling victim to it."
+    "592": {
+      "date": "2024.03.11",
+      "question": "When Rangiku woke up from Hakufuku, she said \u201cthis sensation\u2026 it's Hakufuku\u2026\u201d Could it be that she is acquainted with the feeling because Shinigami experience it during their time at the Shin'\u014d Academy in Kid\u014d classes?",
+      "réponse": "They experience this in class, but Rangiku also has the experience of falling victim to it."
     },
-    {
-      "id": 593,
-      "question": "In the Thousand-Year Blood War arc, I believe Captain Komamura takes on a human-like form through the Humanization Technique, however, did he suddenly turn into a wolf after the battle because the technique’s time limit had expired?",
-      "reponse": "You are pretty much correct. The “Humanization Technique” is a technique that allows him to maintain a human form while withstanding his great-grandfather’s curse. The moment the purpose of Humanization becomes a selfish desire, the curse is forcibly fulfilled, and one transforms into a beast."
+    "593": {
+      "date": "2024.03.11",
+      "question": "In the Thousand-Year Blood War arc, I believe Captain Komamura takes on a human-like form through the Humanization Technique, however, did he suddenly turn into a wolf after the battle because the technique's time limit had expired? Or is it because Captain Komamura himself was consumed by a desire for revenge?",
+      "réponse": "You are pretty much correct. The \u201cHumanization Technique\u201d is a technique that allows him to maintain a human form while withstanding his great-grandfather's curse. The moment the purpose of Humanization becomes a selfish desire, the curse is forcibly fulfilled, and one transforms into a beast."
     },
-    {
-      "id": 594,
-      "question": "No matter how many times I read the manga, I still don’t quite understand the relationship between Nelliel and Nnoitra.",
-      "reponse": "Even if you don’t understand, it doesn’t mean you’re stupid. Just enjoy it when you do understand."
+    "594": {
+      "date": "2024.03.18",
+      "question": "No matter how many times I read the manga, I still don't quite understand the relationship between Nelliel and Nnoitra. I would like you to explain it in a way that even an idiot can understand.",
+      "réponse": "Even if you don't understand, it doesn't mean you're stupid. Just enjoy it when you do understand."
     },
-    {
-      "id": 595,
-      "question": "If “Qualkreis” is broadly classified as a Quincy tactic, could it also be considered one of the Kirchenlied?",
-      "reponse": "“Qualkreis” is one of the Quincy spells. “Kirchenlied” is not a classification, but a “chant” for “Sankt Zwinger”."
+    "595": {
+      "date": "2024.03.18",
+      "question": "If \u201cQualkreis\u201d is broadly classified as a Quincy tactic, could it also be considered one of the Kirchenlied? Please let me know if there is any lore around this.",
+      "réponse": "\u201cQualkreis\u201d is one of the Quincy spells. \u201cKirchenlied\u201d is not a classification, but a \u201cchant\u201d for \u201cSankt Zwinger\u201d."
     },
-    {
-      "id": 596,
-      "question": "During the Decisive Battle of Karakura Town, is it because of an illusion created by Kyōka Suigetsu that Mashiro’s mask broke away without her noticing the depletion of her own Reiatsu?",
-      "reponse": "It’s because Mashiro is just that kind of person who would allow a slip-up like that to happen."
+    "596": {
+      "date": "2024.03.18",
+      "question": "During the Decisive Battle of Karakura Town, is it because of an illusion created by Ky\u014dka Suigetsu that Mashiro's mask broke away without her noticing the depletion of her own Reiatsu?",
+      "réponse": "It's because Mashiro is just that kind of person who would allow a slip-up like that to happen."
     },
-    {
-      "id": 597,
+    "597": {
+      "date": "2024.03.25",
       "question": "Izuru was quite cheerful during his student days, so why did his personality become gloomy?",
-      "reponse": "Wait, he was cheerful…? Izuru has been gloomy since the minute he was born."
+      "réponse": "Wait, he was cheerful\u2026? Izuru has been gloomy since the minute he was born."
     },
-    {
-      "id": 598,
-      "question": "Captain Unohana named herself “Yachiru”, but her current name “Retsu”, is that originally her real name?",
-      "reponse": "“Retsu” is the name given to her by her father."
+    "598": {
+      "date": "2024.03.25",
+      "question": "Captain Unohana named herself \u201cYachiru\u201d, but her current name \u201cRetsu\u201d, is that originally her real name? Or is it that, after becoming \u201cYachiru\u201d, she named herself once again, this time to \u201cRetsu\u201d?",
+      "réponse": "\u201cRetsu\u201d is the name given to her by her father."
     },
-    {
-      "id": 599,
-      "question": "After absorbing Ayon, Quilge’s appearance steadily returns to its original form, but could this be because his Heiligenschein was destroyed by Ichigo?",
-      "reponse": "It’s because his Heiligenschein was destroyed and thus his “Piskiel” collapsed."
+    "599": {
+      "date": "2024.03.25",
+      "question": "After absorbing Ayon, Quilge's appearance steadily returns to its original form, but could this be because his Heiligenschein was destroyed by Ichigo, causing the abilities of his Vollst\u00e4ndig to gradually wear off?",
+      "réponse": "It's because his Heiligenschein was destroyed and thus his \u201cPiskiel\u201d collapsed. The essence of Quilge's \u201cPiskiel\u201d ability lies in the fact that he has the highest capacity for the capture and enslavement of Reishi among all Quincy."
     },
-    {
-      "id": 600,
-      "question": "I’m debating whether or not I should have my son take lessons in English conversation. Is sensei able to speak English?",
-      "reponse": "Since being able to speak English is an advantage, please allow him to learn it. I can’t speak it myself, though."
+    "600": {
+      "date": "2024.04.01",
+      "question": "I'm debating whether or not I should have my son take lessons in English conversation. Is sensei able to speak English?",
+      "réponse": "Since being able to speak English is an advantage, please allow him to learn it. I can't speak it myself, though."
     }
-  ]
+  }
 }
