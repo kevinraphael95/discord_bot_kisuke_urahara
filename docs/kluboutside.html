@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="css/minijeux.css">
 <script src="js/nav.js" defer></script>
 <style>
-  /* ── Layout KO ── */
   .ko-wrap {
     display: flex;
     gap: 1.5rem;
@@ -20,13 +19,12 @@
     margin: 0 auto;
   }
 
-  /* ── Sidebar ── */
   .ko-sidebar {
     display: flex;
     flex-direction: column;
     gap: .6rem;
-    min-width: 200px;
-    max-width: 220px;
+    min-width: 280px;
+    max-width: 300px;
     position: sticky;
     top: 1.5rem;
   }
@@ -81,9 +79,8 @@
     font-family: 'DM Sans', sans-serif;
     border: 1px solid transparent;
     transition: background .12s, border-color .12s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    line-height: 1.4;
     color: var(--color-text-secondary, rgba(255,255,255,.55));
   }
   .ko-item:hover {
@@ -96,7 +93,6 @@
     color: var(--color-text, #fff);
   }
 
-  /* ── Card ── */
   .ko-card {
     flex: 1;
     background: var(--color-surface, rgba(255,255,255,.04));
@@ -177,8 +173,9 @@
 
   @media (max-width: 640px) {
     .ko-wrap { flex-direction: column; }
-    .ko-sidebar { max-width: 100%; min-width: 0; position: static; }
-    .ko-list { max-height: 40vh; }
+    .ko-sidebar { max-width: 100%; min-width: 0; position: static; order: 2; }
+    .ko-card { order: 1; }
+    .ko-list { max-height: 35vh; }
   }
 </style>
 </head>
@@ -196,14 +193,12 @@
 <div class="content">
   <div class="ko-wrap">
 
-    <!-- Sidebar -->
     <div class="ko-sidebar">
       <input class="ko-search" type="text" placeholder="Rechercher…" id="koSearch">
       <button class="ko-btn-random" id="koRandom">🔀 Aléatoire</button>
       <div class="ko-list" id="koList"></div>
     </div>
 
-    <!-- Carte principale -->
     <div class="ko-card" id="koCard">
       <div class="ko-empty" id="koLoading">Chargement…</div>
     </div>
@@ -212,19 +207,15 @@
 </div>
 
 <script>
-// ── Config ──────────────────────────────────────────────
-// Adapte MAX_FILE si tu as plus de fichiers ko*.json
 const MAX_FILE = 10;
 const DATA_DIR = 'data/kluboutside/';
 const IMG_DIR  = 'assets/kluboutside/';
 const IMG_EXTS = ['png', 'jpg', 'jpeg', 'webp'];
 
-// ── State ────────────────────────────────────────────────
-let allQuestions = {}; // { "1": { date, question, réponse }, ... }
+let allQuestions = {};
 let keys         = [];
 let currentIndex = 0;
 
-// ── Chargement de tous les JSON ───────────────────────────
 async function loadAll() {
   const merged = {};
   for (let i = 1; i <= MAX_FILE; i++) {
@@ -238,7 +229,6 @@ async function loadAll() {
   return merged;
 }
 
-// ── Trouver l'image d'une question ───────────────────────
 async function findImage(key) {
   for (const ext of IMG_EXTS) {
     const url = `${IMG_DIR}ko${key}.${ext}`;
@@ -250,25 +240,20 @@ async function findImage(key) {
   return null;
 }
 
-// ── Rendu de la carte ─────────────────────────────────────
 async function renderCard(index) {
   currentIndex = index;
   const key = keys[index];
   const q   = allQuestions[key];
   const card = document.getElementById('koCard');
 
-  // Highlight sidebar
   document.querySelectorAll('.ko-item').forEach((el, i) => {
     el.classList.toggle('active', i === index);
   });
-  // Scroll sidebar item into view
   const activeEl = document.querySelector('.ko-item.active');
   if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
 
-  // Skeleton
   card.innerHTML = `<div class="ko-empty">Chargement…</div>`;
 
-  // Image (async)
   const imgUrl = await findImage(key);
 
   card.innerHTML = `
@@ -291,7 +276,6 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
 
-// ── Sidebar ───────────────────────────────────────────────
 function buildList(filter = '') {
   const list = document.getElementById('koList');
   list.innerHTML = '';
@@ -302,20 +286,18 @@ function buildList(filter = '') {
     if (f && !text.includes(f) && !key.includes(f)) return;
     const el = document.createElement('div');
     el.className = 'ko-item' + (i === currentIndex ? ' active' : '');
-    el.textContent = `#${key} — ${q.question?.slice(0, 40) || ''}…`;
+    el.textContent = `#${key} — ${q.question?.slice(0, 60) || ''}…`;
     el.addEventListener('click', () => renderCard(i));
     list.appendChild(el);
   });
 }
 
-// ── Init ─────────────────────────────────────────────────
 (async () => {
   allQuestions = await loadAll();
   keys = Object.keys(allQuestions).sort((a, b) => parseInt(a) - parseInt(b));
 
   if (!keys.length) {
     document.getElementById('koCard').innerHTML = '<div class="ko-empty">Aucune question trouvée.</div>';
-    document.getElementById('koLoading').textContent = 'Aucune question.';
     return;
   }
 
