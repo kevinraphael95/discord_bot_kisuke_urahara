@@ -1,5 +1,8 @@
 /* ── FMK — styles spécifiques, variables de base.css ── */
 
+/* ── Orbes : équilibre haut/bas ───────────────────────── */
+.orbs { margin-bottom: 1.4rem; }
+
 /* ── Layout principal ─────────────────────────────────── */
 #gameBox {
   display: flex;
@@ -68,17 +71,16 @@
 }
 
 .btn-choice .bc-icon { font-size: .9rem; }
-
-.btn-choice:hover { border-color: var(--gold-line); color: var(--gold-lt); }
+.btn-choice:hover  { border-color: var(--gold-line); color: var(--gold-lt); }
 .btn-choice:active { transform: scale(0.97); }
 
 /* États actifs */
-.btn-choice.active.fuck  { background: var(--red-pale);  border-color: var(--red-lt);  color: var(--white); }
-.btn-choice.active.marry { background: var(--gold-pale); border-color: var(--gold);    color: var(--gold-lt); }
-.btn-choice.active.kill  { background: rgba(255,255,255,.05); border-color: var(--muted); color: var(--muted); opacity: .6; }
+.btn-choice.active.fuck  { background: var(--red-pale);          border-color: var(--red-lt); color: var(--white); }
+.btn-choice.active.marry { background: var(--gold-pale);         border-color: var(--gold);   color: var(--gold-lt); }
+.btn-choice.active.kill  { background: rgba(255,255,255,.05);    border-color: var(--muted);  color: var(--muted); opacity: .6; }
 
 /* Boutons Valider / Suivant */
-.btn-choice.before:hover { border-color: #4a7fc9; background: rgba(74,127,201,.1); color: #7aaef0; }
+.btn-choice.before:hover { border-color: #4a7fc9; background: rgba(74,127,201,.1);  color: #7aaef0; }
 .btn-choice.after:hover  { border-color: #9b59b6; background: rgba(155,89,182,.1); color: #c9a0f0; }
 
 /* ── Result box ───────────────────────────────────────── */
@@ -97,7 +99,8 @@
 .res-emoji { font-size: 2.2rem; }
 .res-title {
   font-family: 'Shippori Mincho', serif;
-  font-size: 1.6rem; font-weight: 800;
+  font-size: 1.6rem;
+  font-weight: 800;
   color: var(--gold);
 }
 .res-info { font-size: .88rem; color: var(--muted); }
