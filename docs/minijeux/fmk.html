@@ -14,39 +14,28 @@
 <script src="fmk.js"></script>
 </head>
 <body>
-
 <div class="atmo"></div>
 <div class="top-bar"></div>
-
 <div class="phdr">
   <h1 class="pttl">
     <span class="t1"><strong>Fuck, Marry, Kill</strong></span>
   </h1>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
-
 <div class="tl-wrap">
-
   <div id="gameBox">
     <div class="cards-container" id="fmk-zone"></div>
-
     <div class="btn-row">
-      <div class="btn-row-left"></div>
-      
       <button class="btn-choice before" id="btn-valider" onclick="validerChoix()" style="display: none; padding: 0 1.5rem;">
         <span class="bc-icon">💥</span>
         <span>Valider</span>
       </button>
-      
       <button class="btn-choice after" onclick="genererTrio()">
         <span class="bc-icon">▶▶</span>
         <span>Suivant</span>
       </button>
-
-      <div class="btn-row-right"></div>
     </div>
   </div>
-
   <div id="resultBox" style="display: none;">
     <div style="display:flex; align-items:center; gap:.5rem; justify-content:center;">
       <span class="res-emoji">🎯</span>
@@ -55,8 +44,6 @@
     <div class="res-info" id="fmkSummary"></div>
     <button class="btn btn-gold" onclick="document.getElementById('resultBox').style.display='none'; document.getElementById('gameBox').style.display='block'; genererTrio();">▶ Rejouer</button>
   </div>
-
 </div>
-
 </body>
 </html>
