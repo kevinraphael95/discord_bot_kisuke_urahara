@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klub Outside — Questions</title>
+<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/minijeux.css">
+<script src="js/nav.js" defer></script>
+<style>
+  /* ── Layout KO ── */
+  .ko-wrap {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ── Sidebar ── */
+  .ko-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    min-width: 200px;
+    max-width: 220px;
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .ko-search {
+    width: 100%;
+    padding: .5rem .75rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, rgba(255,255,255,.12));
+    background: var(--color-surface, rgba(255,255,255,.05));
+    color: inherit;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .ko-search:focus {
+    border-color: var(--color-accent, #7c6f55);
+  }
+
+  .ko-btn-random {
+    width: 100%;
+    padding: .5rem .75rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, rgba(255,255,255,.12));
+    background: var(--color-surface, rgba(255,255,255,.05));
+    color: inherit;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: background .15s;
+    text-align: left;
+  }
+  .ko-btn-random:hover { background: var(--color-accent, #7c6f55); color: #fff; }
+
+  .ko-list {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: .25rem;
+  }
+  .ko-list::-webkit-scrollbar { width: 4px; }
+  .ko-list::-webkit-scrollbar-thumb { background: var(--color-border, rgba(255,255,255,.2)); border-radius: 4px; }
+
+  .ko-item {
+    padding: .45rem .75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .82rem;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid transparent;
+    transition: background .12s, border-color .12s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-secondary, rgba(255,255,255,.55));
+  }
+  .ko-item:hover {
+    background: var(--color-surface, rgba(255,255,255,.06));
+    color: var(--color-text, #fff);
+  }
+  .ko-item.active {
+    background: var(--color-surface, rgba(255,255,255,.1));
+    border-color: var(--color-accent, #7c6f55);
+    color: var(--color-text, #fff);
+  }
+
+  /* ── Card ── */
+  .ko-card {
+    flex: 1;
+    background: var(--color-surface, rgba(255,255,255,.04));
+    border: 1px solid var(--color-border, rgba(255,255,255,.1));
+    border-radius: 14px;
+    padding: 1.75rem 2rem;
+    min-height: 300px;
+  }
+
+  .ko-card-num {
+    font-family: 'Shippori Mincho', serif;
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, rgba(255,255,255,.45));
+    margin-bottom: .4rem;
+  }
+
+  .ko-card-date {
+    font-size: .78rem;
+    color: var(--color-text-secondary, rgba(255,255,255,.45));
+    margin-bottom: 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .ko-card-question {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .ko-card-answer {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary, rgba(255,255,255,.75));
+    border-left: 2px solid var(--color-accent, #7c6f55);
+    padding-left: 1rem;
+  }
+
+  .ko-card-img {
+    margin-top: 1.5rem;
+    border-radius: 10px;
+    max-width: 100%;
+    display: block;
+  }
+
+  .ko-card-nav {
+    display: flex;
+    gap: .75rem;
+    margin-top: 1.75rem;
+    justify-content: flex-end;
+  }
+
+  .ko-nav-btn {
+    padding: .45rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, rgba(255,255,255,.15));
+    background: transparent;
+    color: inherit;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .ko-nav-btn:hover { background: var(--color-surface, rgba(255,255,255,.08)); }
+  .ko-nav-btn:disabled { opacity: .3; cursor: default; }
+
+  .ko-empty {
+    color: var(--color-text-secondary, rgba(255,255,255,.4));
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .ko-wrap { flex-direction: column; }
+    .ko-sidebar { max-width: 100%; min-width: 0; position: static; }
+    .ko-list { max-height: 40vh; }
+  }
+</style>
+</head>
+<body>
+<div class="atmo"></div>
+<div class="top-bar"></div>
+<div class="phdr">
+  <h1 class="pttl">
+    <span class="t1">Klub Outside</span>
+  </h1>
+  <p class="psub">Les questions et réponses de la FAQ du Klub Outside.</p>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+</div>
+
+<div class="content">
+  <div class="ko-wrap">
+
+    <!-- Sidebar -->
+    <div class="ko-sidebar">
+      <input class="ko-search" type="text" placeholder="Rechercher…" id="koSearch">
+      <button class="ko-btn-random" id="koRandom">🔀 Aléatoire</button>
+      <div class="ko-list" id="koList"></div>
+    </div>
+
+    <!-- Carte principale -->
+    <div class="ko-card" id="koCard">
+      <div class="ko-empty" id="koLoading">Chargement…</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────
+// Adapte MAX_FILE si tu as plus de fichiers ko*.json
+const MAX_FILE = 10;
+const DATA_DIR = 'data/kluboutside/';
+const IMG_DIR  = 'assets/kluboutside/';
+const IMG_EXTS = ['png', 'jpg', 'jpeg', 'webp'];
+
+// ── State ────────────────────────────────────────────────
+let allQuestions = {}; // { "1": { date, question, réponse }, ... }
+let keys         = [];
+let currentIndex = 0;
+
+// ── Chargement de tous les JSON ───────────────────────────
+async function loadAll() {
+  const merged = {};
+  for (let i = 1; i <= MAX_FILE; i++) {
+    try {
+      const r = await fetch(`${DATA_DIR}ko${i}.json`);
+      if (!r.ok) break;
+      const data = await r.json();
+      Object.assign(merged, data.Questions || {});
+    } catch { break; }
+  }
+  return merged;
+}
+
+// ── Trouver l'image d'une question ───────────────────────
+async function findImage(key) {
+  for (const ext of IMG_EXTS) {
+    const url = `${IMG_DIR}ko${key}.${ext}`;
+    try {
+      const r = await fetch(url, { method: 'HEAD' });
+      if (r.ok) return url;
+    } catch {}
+  }
+  return null;
+}
+
+// ── Rendu de la carte ─────────────────────────────────────
+async function renderCard(index) {
+  currentIndex = index;
+  const key = keys[index];
+  const q   = allQuestions[key];
+  const card = document.getElementById('koCard');
+
+  // Highlight sidebar
+  document.querySelectorAll('.ko-item').forEach((el, i) => {
+    el.classList.toggle('active', i === index);
+  });
+  // Scroll sidebar item into view
+  const activeEl = document.querySelector('.ko-item.active');
+  if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+
+  // Skeleton
+  card.innerHTML = `<div class="ko-empty">Chargement…</div>`;
+
+  // Image (async)
+  const imgUrl = await findImage(key);
+
+  card.innerHTML = `
+    <div class="ko-card-num">Question n°${key} · ${index + 1} / ${keys.length}</div>
+    <div class="ko-card-date">📅 ${q.date || '—'}</div>
+    <div class="ko-card-question">${escHtml(q.question || '—')}</div>
+    <div class="ko-card-answer">${escHtml(q.réponse || '—')}</div>
+    ${imgUrl ? `<img class="ko-card-img" src="${imgUrl}" alt="Illustration question ${key}">` : ''}
+    <div class="ko-card-nav">
+      <button class="ko-nav-btn" id="koPrev" ${index === 0 ? 'disabled' : ''}>◀ Précédent</button>
+      <button class="ko-nav-btn" id="koNext" ${index === keys.length - 1 ? 'disabled' : ''}>Suivant ▶</button>
+    </div>
+  `;
+
+  document.getElementById('koPrev')?.addEventListener('click', () => renderCard(currentIndex - 1));
+  document.getElementById('koNext')?.addEventListener('click', () => renderCard(currentIndex + 1));
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ── Sidebar ───────────────────────────────────────────────
+function buildList(filter = '') {
+  const list = document.getElementById('koList');
+  list.innerHTML = '';
+  const f = filter.toLowerCase();
+  keys.forEach((key, i) => {
+    const q = allQuestions[key];
+    const text = (q.question || '').toLowerCase();
+    if (f && !text.includes(f) && !key.includes(f)) return;
+    const el = document.createElement('div');
+    el.className = 'ko-item' + (i === currentIndex ? ' active' : '');
+    el.textContent = `#${key} — ${q.question?.slice(0, 40) || ''}…`;
+    el.addEventListener('click', () => renderCard(i));
+    list.appendChild(el);
+  });
+}
+
+// ── Init ─────────────────────────────────────────────────
+(async () => {
+  allQuestions = await loadAll();
+  keys = Object.keys(allQuestions).sort((a, b) => parseInt(a) - parseInt(b));
+
+  if (!keys.length) {
+    document.getElementById('koCard').innerHTML = '<div class="ko-empty">Aucune question trouvée.</div>';
+    document.getElementById('koLoading').textContent = 'Aucune question.';
+    return;
+  }
+
+  buildList();
+  renderCard(0);
+
+  document.getElementById('koSearch').addEventListener('input', e => {
+    buildList(e.target.value);
+  });
+
+  document.getElementById('koRandom').addEventListener('click', () => {
+    const i = Math.floor(Math.random() * keys.length);
+    renderCard(i);
+    buildList(document.getElementById('koSearch').value);
+  });
+})();
+</script>
+</body>
+</html>
