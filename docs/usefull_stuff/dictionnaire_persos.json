@@ -1,0 +1,39 @@
+{
+  "personnalites": [
+    "Agressif", "Altruiste", "Ambitieux", "Amical", "Amusant", "Anxieux",
+    "Arrogant", "Autoritaire", "Bienveillant", "Calme", "Charismatique",
+    "Compétitif", "Courageux", "Cruel", "Curieux", "Déterminé",
+    "Égoïste", "Émotif", "Fidèle", "Froid", "Généreux",
+    "Impulsif", "Indépendant", "Jaloux", "Juste", "Loyal",
+    "Manipulateur", "Mystérieux", "Narcissique", "Noble", "Optimiste",
+    "Protecteur", "Réaliste", "Réfléchi", "Réservé", "Sage",
+    "Sanguin", "Sérieux", "Sociable", "Stratège", "Stoïque",
+    "Têtu", "Travailleur"
+  ],
+  "races": {
+    "Humains": [
+      "Humain",
+      "Fullbringer",
+      "Quincy",
+      "Bount"
+    ],
+    "Esprits": [
+      "Plus",
+      "Shinigami",
+      "Visored",
+      "Hollow",
+      "Arrancar",
+      "Zanpakutō Spirit",
+      "Gikon",
+      "Modified Soul",
+      "Blank",
+      "Tōjū"
+    ],
+    "Autres": [
+      "Transcendant",
+      "Divin",
+      "Togabito",
+      "Kushanāda"
+    ]
+  }
+}
