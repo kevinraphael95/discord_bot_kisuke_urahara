@@ -83,8 +83,13 @@
 .btn-choice.before:hover { border-color: #4a7fc9; background: rgba(74,127,201,.1); color: #7aaef0; }
 .btn-choice.after:hover  { border-color: #9b59b6; background: rgba(155,89,182,.1); color: #c9a0f0; }
 
-/* ── Ligne boutons bas — centrage ─────────────────────── */
-.btn-row { justify-content: center; }
+/* ── Ligne boutons bas ────────────────────────────────── */
+.btn-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+}
 
 /* ── Result box ───────────────────────────────────────── */
 #resultBox {
