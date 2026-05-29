@@ -4,6 +4,7 @@
     { href: 'reiatsu.html', label: 'Reiatsu' },
     { href: 'guesser.html', label: 'Character Guesser' },
     { href: 'minijeux.html', label: 'Minijeux' },
+    { href: 'kluboutside.html', label: 'Klub Outside' },
     { href: 'install.html', label: 'Installation' },
   ];
 
