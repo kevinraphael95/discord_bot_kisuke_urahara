@@ -1,7 +1,6 @@
 (function () {
   const pages = [
     { href: 'commandes.html', label: 'Commandes' },
-    { href: 'reiatsu.html', label: 'Reiatsu' },
     { href: 'guesser.html', label: 'Character Guesser' },
     { href: 'minijeux.html', label: 'Minijeux' },
     { href: 'kluboutside.html', label: 'Klub Outside' },
