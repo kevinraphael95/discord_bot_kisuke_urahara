@@ -319,7 +319,7 @@ nav {
 /* ── ORBES ───────────────────────────────────────────── */
 .orbs {
   display: flex; justify-content: center; gap: 8px;
-  margin: 1.4rem 0 0;
+  margin: 1.4rem 0 1.4rem;
   opacity: 0; animation: rise .6s .55s forwards;
 }
 .orb {
