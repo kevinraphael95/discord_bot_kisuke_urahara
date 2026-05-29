@@ -1,0 +1,68 @@
+/* ═══════════════════════════════════════════════════════
+   PAGE : COMMANDS — commandes.css
+   Dépend de : base.css
+   ═══════════════════════════════════════════════════════ */
+
+.content {
+  position: relative; z-index: 1;
+  max-width: 1020px; margin: 0 auto;
+  padding: 0 3rem 6rem;
+  opacity: 0; animation: rise .7s .3s forwards;
+}
+
+.search-wrap { position: relative; max-width: 460px; margin: 0 auto 2.5rem; }
+.search-icon { position:absolute; left:.85rem; top:50%; transform:translateY(-50%); color:var(--gold); font-size:.85rem; pointer-events:none; }
+.search-inp  {
+  width:100%; background:var(--panel); border:1px solid var(--border);
+  color:var(--white); font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:400;
+  padding:.8rem 1rem .8rem 2.5rem; outline:none; transition:border-color .2s;
+}
+.search-inp:focus { border-color: var(--gold-line); }
+.search-inp::placeholder { color: var(--dim); }
+
+.cat { margin-bottom: 2px; }
+.cat-hdr {
+  display: flex; align-items: center; gap: .9rem; padding: .78rem 1.2rem;
+  background: var(--panel); border: 1px solid var(--border);
+  cursor: pointer; user-select: none; transition: background .2s;
+}
+.cat-hdr:hover { background: var(--surface); }
+.cat-icon  { font-size: 1.15rem; flex-shrink: 0; }
+.cat-name  {
+  font-family: 'Shippori Mincho', serif; font-weight: 700;
+  font-size: .8rem; letter-spacing: .08em; color: var(--gold-lt);
+  text-transform: uppercase; flex: 1;
+}
+.cat-count { font-size: .7rem; color: var(--muted); }
+.cat-arrow { color: var(--gold); font-size: .7rem; transition: transform .25s; }
+.cat-hdr.open .cat-arrow { transform: rotate(90deg); }
+
+.cmd-list { display:none; flex-direction:column; border:1px solid var(--border); border-top:none; }
+.cmd-list.open { display:flex; }
+
+.cmd {
+  display: grid; grid-template-columns: 200px 1fr;
+  background: var(--deep); padding: .85rem 1.2rem; gap: .9rem; align-items: start;
+  transition: background .15s; border-bottom: 1px solid var(--border);
+}
+.cmd:last-child { border-bottom: none; }
+.cmd:hover      { background: var(--panel); }
+.cmd-name  { font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 600; color: var(--rei-lt); }
+.cmd-desc  { font-size: .85rem; color: var(--text); line-height: 1.55; }
+.cmd-admin .cmd-name { color: var(--gold-lt); }
+.cmd-admin { border-left: 2px solid rgba(212,168,67,.3); }
+.cmd-usage {
+  grid-column: 1 / -1; font-size: .72rem; color: var(--text);
+  background: var(--rei-pale); border: 1px solid rgba(30,127,232,.15);
+  padding: .3rem .75rem; margin-top: .3rem;
+}
+
+@media (max-width: 700px) {
+  .content  { padding: 0 1rem 4rem; }
+  .cmd      { grid-template-columns: 1fr; gap: .3rem; }
+  .cmd-usage{ grid-column: 1; }
+}
+@media (min-width: 701px) and (max-width: 1024px) {
+  .content { padding: 0 1.8rem 5rem; }
+  .cmd     { grid-template-columns: 160px 1fr; }
+}
