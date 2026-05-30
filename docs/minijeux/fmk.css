@@ -18,54 +18,47 @@
   flex-wrap: wrap;
 }
 
-/* MODIFIÉ : flex-direction row pour image à gauche */
 .card {
   background: var(--panel);
   border: 1px solid var(--gold-line);
   padding: .8rem;
-  width: 100%;
+  width: 220px;
   display: flex;
-  flex-direction: row; 
-  align-items: center;
-  gap: .8rem;
+  flex-direction: column;
+  gap: .5rem;
 }
 
-/* MODIFIÉ : taille fixe et flex-shrink pour qu'elle reste à gauche */
 .card img {
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: 220px;
   object-fit: cover;
   background: var(--void);
   display: block;
-  flex-shrink: 0;
 }
 
-/* NOM PLUS GRAND */
 .card h3 {
   font-family: 'Shippori Mincho', serif;
-  font-size: 1.8rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--white);
   margin: 0;
   text-align: center;
 }
 
-/* BOUTONS SUR UNE LIGNE */
+/* ── Boutons de choix dans les cartes ─────────────────── */
 .buttons-list {
   display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  width: 100%;
+  flex-direction: column;
+  gap: .35rem;
 }
 
 .btn-choice {
-  flex: 1;
-  padding: 0.6rem 0.4rem;
+  padding: .45rem 1rem;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--muted);
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.8rem;
+  font-size: .75rem;
   font-weight: 500;
   cursor: pointer;
   transition: border-color .15s, background .15s, color .15s;
@@ -82,9 +75,9 @@
 .btn-choice:active { transform: scale(0.97); }
 
 /* États actifs */
-.btn-choice.active.fuck  { background: var(--red-pale); border-color: var(--red-lt); color: var(--white); }
-.btn-choice.active.marry { background: var(--gold-pale); border-color: var(--gold); color: var(--gold-lt); }
-.btn-choice.active.kill  { background: rgba(255,255,255,.05); border-color: var(--muted); color: var(--muted); opacity: .6; }
+.btn-choice.active.fuck  { background: var(--red-pale);       border-color: var(--red-lt); color: var(--white); }
+.btn-choice.active.marry { background: var(--gold-pale);      border-color: var(--gold);   color: var(--gold-lt); }
+.btn-choice.active.kill  { background: rgba(255,255,255,.05); border-color: var(--muted);  color: var(--muted); opacity: .6; }
 
 /* ── Ligne boutons bas ────────────────────────────────── */
 .btn-row {
@@ -134,19 +127,35 @@
     align-items: stretch;
   }
 
-  /* MODIFIÉ : forcé en row pour garder image à gauche sur mobile */
   .card {
-    flex-direction: row !important;
-    padding: 1rem;
-    gap: 0.8rem;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    padding: .6rem;
+    gap: .8rem;
   }
 
   .card img {
-    width: 80px !important;
-    height: 80px !important;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
   }
 
+  .card > *:not(img) { flex: 1; }
+
   .card h3 {
-    font-size: 1.2rem;
+    font-size: .95rem;
+    text-align: left;
+    margin-bottom: .4rem;
+  }
+
+  .btn-choice {
+    padding: .3rem .5rem;
+    font-size: .7rem;
+  }
+
+  .btn-row .btn-choice {
+    width: auto;
+    flex: 1;
   }
 }
