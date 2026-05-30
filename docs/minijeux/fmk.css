@@ -121,6 +121,7 @@
 .res-info strong { color: var(--text); font-weight: 500; }
 
 /* ── Responsive ───────────────────────────────────────── */
+/* ── Responsive : Modifié pour Nom au-dessus des boutons horizontaux sur mobile ── */
 @media (max-width: 700px) {
   .cards-container {
     flex-direction: column;
@@ -129,7 +130,7 @@
 
   .card {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start; /* Aligné en haut */
     width: 100%;
     padding: .6rem;
     gap: .8rem;
@@ -141,31 +142,28 @@
     flex-shrink: 0;
   }
 
-  /* Conteneur pour le nom et les boutons */
+  /* Conteneur principal pour le texte et les boutons à droite */
   .card > *:not(img) { 
     flex: 1; 
     display: flex; 
-    flex-direction: column;
+    flex-direction: column; /* Empile le nom ET la liste de boutons */
+    gap: 0.4rem;
   }
 
-  /* MODIF : Boutons en ligne horizontal uniquement sur mobile */
-  .card .buttons-list {
-    flex-direction: row;
+  /* Force les boutons à rester horizontaux dans leur conteneur */
+  .buttons-list {
+    flex-direction: row; 
+    gap: 0.3rem;
   }
 
   .card h3 {
     font-size: .95rem;
     text-align: left;
-    margin-bottom: .4rem;
+    margin: 0;
   }
 
   .btn-choice {
     padding: .3rem .5rem;
     font-size: .7rem;
-  }
-
-  .btn-row .btn-choice {
-    width: auto;
-    flex: 1;
   }
 }
