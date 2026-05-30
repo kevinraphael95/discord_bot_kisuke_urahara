@@ -1,22 +1,19 @@
-<!-- … -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Installation — Kisuke Urahara Bot</title>
-<!-- empecher le flash blanc aux changements de page : -->
 <script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
-<!-- no flash -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/installation.css">
 <script src="js/nav.js" defer></script>
 <style>
-.content{position:relative;z-index:1;max-width:840px;margin:0 auto;padding:0 3rem 6rem;opacity:0;animation:rise .7s .3s forwards;}
-@media(max-width:700px){.content{padding:0 1rem 4rem;}}
-@media(min-width:701px) and (max-width:1024px){.content{padding:0 1.8rem 5rem;}}
+.content { position: relative; z-index: 1; max-width: 840px; margin: 0 auto; padding: 0 3rem 6rem; opacity: 0; animation: rise .7s .3s forwards; }
+@media (max-width: 700px)                    { .content { padding: 0 1rem 4rem; } }
+@media (min-width: 701px) and (max-width: 1024px) { .content { padding: 0 1.8rem 5rem; } }
 </style>
 </head>
 <body>
@@ -28,84 +25,102 @@
   <h1 class="pttl">
     <span class="t1">Installation</span>
   </h1>
-  <p class="psub">Comment installer le bot Kisuke Urahara.</p>
+  <p class="psub">Comment installer et configurer le bot Kisuke Urahara sur ta machine.</p>
   <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 </div>
 
 <div class="content">
   <div class="steps">
 
+    <!-- ── Étape 1 : Prérequis ── -->
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
         <p class="step-title">Prérequis</p>
-        <p class="step-desc">Assure-toi d'avoir les outils suivants installés sur ta machine.</p>
+        <p class="step-desc">Assure-toi d'avoir les outils suivants installés sur ta machine avant de commencer.</p>
         <div class="req-list">
           <span class="req-tag">Python 3.10+</span>
           <span class="req-tag">pip</span>
           <span class="req-tag">Git</span>
-          <span class="req-tag">Compte Discord Dev</span>
+          <span class="req-tag">Compte Discord Developer</span>
         </div>
       </div>
     </div>
 
+    <!-- ── Étape 2 : Cloner le dépôt ── -->
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
         <p class="step-title">Cloner le dépôt</p>
-        <p class="step-desc">Clone le projet depuis GitHub dans ton répertoire de travail.</p>
+        <p class="step-desc">Clone le projet depuis GitHub dans le répertoire de ton choix, puis place-toi dedans.</p>
         <div class="code-block">git clone https://github.com/kevinraphael95/discord_bot_kisuke_urahara.git</div>
         <div class="code-block">cd discord_bot_kisuke_urahara</div>
       </div>
     </div>
 
+    <!-- ── Étape 3 : Dépendances ── -->
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
         <p class="step-title">Installer les dépendances</p>
-        <p class="step-desc">Installe les librairies Python requises via pip.</p>
+        <p class="step-desc">Installe toutes les librairies Python requises listées dans <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">requirements.txt</code>.</p>
         <div class="code-block">pip install -r requirements.txt</div>
       </div>
     </div>
 
+    <!-- ── Étape 4 : Variables d'environnement ── -->
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
         <p class="step-title">Configurer les variables d'environnement</p>
-        <p class="step-desc">Crée un fichier <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">.env</code> à la racine du projet et renseigne ces variables.</p>
+        <p class="step-desc">Crée un fichier <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">.env</code> à la racine du projet et renseigne les variables suivantes.</p>
         <div class="env-grid">
-          <div class="env-row"><span class="env-key">COMMAND_PREFIX</span><span class="env-val">Préfixe du bot</span></div>
-          <div class="env-row"><span class="env-key">DISCORD_APP_ID</span><span class="env-val">ID de ton serveur</span></div>
-          <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token du bot Discord</span></div>
-          <div class="env-row"><span class="env-key">GPT_OSS_API_KEY</span><span class="env-val">API GPT OSS</span></div>
-          <div class="env-row"><span class="env-key">ADMIN_PASSWORD</span><span class="env-val">?</span></div>
-          <div class="env-row"><span class="env-key">ADMIN_PORT</span><span class="env-val">?</span></div>
-          <div class="env-row"><span class="env-key">ADMIN_SECRET</span><span class="env-val">?</span></div>
+          <div class="env-row">
+            <span class="env-key">COMMAND_PREFIX</span>
+            <span class="env-val">Préfixe des commandes texte (ex : <code>!!</code>)</span>
+          </div>
+          <div class="env-row">
+            <span class="env-key">DISCORD_APP_ID</span>
+            <span class="env-val">ID de l'application Discord (Developer Portal)</span>
+          </div>
+          <div class="env-row">
+            <span class="env-key">DISCORD_TOKEN</span>
+            <span class="env-val">Token secret du bot Discord</span>
+          </div>
+          <div class="env-row">
+            <span class="env-key">GPT_OSS_API_KEY</span>
+            <span class="env-val">Clé API pour le modèle GPT open-source</span>
+          </div>
+          <div class="env-row">
+            <span class="env-key">ADMIN_PASSWORD</span>
+            <span class="env-val">Mot de passe pour accéder au panel admin</span>
+          </div>
+          <div class="env-row">
+            <span class="env-key">ADMIN_PORT</span>
+            <span class="env-val">Port du panel admin Flask (ex : <code>5050</code>)</span>
+          </div>
+          <div class="env-row">
+            <span class="env-key">ADMIN_SECRET</span>
+            <span class="env-val">Clé secrète pour les sessions Flask</span>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- ── Étape 5 : Lancer le bot ── -->
     <div class="step">
       <div class="step-num">5</div>
       <div class="step-body">
         <p class="step-title">Lancer le bot</p>
-        <p class="step-desc">Démarre le bot.</p>
+        <p class="step-desc">Lance le bot directement avec Python :</p>
         <div class="code-block">python bot.py</div>
-
-        <p class="step-desc">ou</p>
-        <div class="code-block">bash start.sh</div>        
-        
+        <p class="step-desc">Ou via le script de démarrage complet (recommandé), qui initialise aussi le tunnel Cloudflare pour le panel admin :</p>
+        <div class="code-block">bash start.sh</div>
       </div>
     </div>
 
   </div>
 </div>
 
-<!--  
-<footer>
-  <p class="foot-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
-</footer>
--->
-  
 </body>
 </html>
