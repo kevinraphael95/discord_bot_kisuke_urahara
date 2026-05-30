@@ -18,22 +18,26 @@
   flex-wrap: wrap;
 }
 
+/* MODIFIÉ : flex-direction row pour image à gauche */
 .card {
   background: var(--panel);
   border: 1px solid var(--gold-line);
-  padding: 1rem;
+  padding: .8rem;
   width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+  flex-direction: row; 
+  align-items: center;
+  gap: .8rem;
 }
 
+/* MODIFIÉ : taille fixe et flex-shrink pour qu'elle reste à gauche */
 .card img {
-  width: 100%;
-  height: 220px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   background: var(--void);
   display: block;
+  flex-shrink: 0;
 }
 
 /* NOM PLUS GRAND */
@@ -130,19 +134,19 @@
     align-items: stretch;
   }
 
+  /* MODIFIÉ : forcé en row pour garder image à gauche sur mobile */
   .card {
-    flex-direction: column;
-    width: 100%;
+    flex-direction: row !important;
     padding: 1rem;
     gap: 0.8rem;
   }
 
   .card img {
-    width: 100%;
-    height: 200px;
+    width: 80px !important;
+    height: 80px !important;
   }
 
   .card h3 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
   }
 }
