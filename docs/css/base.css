@@ -37,8 +37,8 @@
   --nav-height:     60px;
   --top-bar-height: 2px;
   --content-max:    1200px;
-  --radius-sm:      2px;
-  --radius-md:      6px;
+  --radius-sm:      6px;
+  --radius-md:      14px;
 
   /* — Transitions — */
   --t-fast:  .15s ease;
@@ -101,7 +101,7 @@ body {
   position: fixed; inset: 0;
   z-index: var(--z-atmo); pointer-events: none;
   background:
-    radial-gradient(ellipse 90% 55% at 50%  -5%, var(--atmo-1) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 55% at 50%  20%, var(--atmo-1) 0%, transparent 60%),
     radial-gradient(ellipse 40% 60% at 100% 55%, var(--atmo-2) 0%, transparent 55%),
     radial-gradient(ellipse 35% 35% at   0% 70%, var(--atmo-3) 0%, transparent 55%);
   transition: background var(--t-theme);
