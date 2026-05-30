@@ -128,8 +128,8 @@
   }
 
   .card {
-    flex-direction: row;
-    align-items: center; /* Aligne tout au centre verticalement par rapport à l'image */
+    flex-direction: row; /* Image à gauche, reste à droite */
+    align-items: flex-start; /* Aligne le bloc en haut */
     width: 100%;
     padding: .6rem;
     gap: .8rem;
@@ -141,18 +141,18 @@
     flex-shrink: 0;
   }
 
-  /* Ce conteneur force le titre au-dessus des boutons */
+  /* Conteneur du Nom et des Boutons */
   .card > *:not(img) { 
-    flex: 1; 
     display: flex; 
-    flex-direction: column; /* Empile le titre et la liste de boutons */
-    gap: 0.4rem;
+    flex-direction: column; /* Nom au-dessus des boutons */
+    gap: 0.5rem;
+    flex: 1;
   }
 
-  /* Force les boutons à être en ligne (horizontal) dans leur zone */
+  /* Liste des boutons en horizontal */
   .buttons-list {
-    flex-direction: row; 
-    gap: 0.3rem;
+    flex-direction: row; /* Boutons en ligne */
+    gap: 0.4rem;
   }
 
   .card h3 {
@@ -161,10 +161,14 @@
     margin: 0;
   }
 
-  /* Ajuste la taille des boutons pour qu'ils tiennent sur la ligne */
   .btn-choice {
-    padding: .3rem .4rem;
-    font-size: 0.6rem;
-    flex: 1; /* Permet aux boutons de se répartir l'espace */
+    padding: 0.3rem 0.5rem;
+    font-size: 0.65rem;
+    flex: 1; /* Chaque bouton prend la même largeur */
+  }
+
+  .btn-row .btn-choice {
+    width: auto;
+    flex: 1;
   }
 }
