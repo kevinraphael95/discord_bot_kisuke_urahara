@@ -18,19 +18,19 @@
   flex-wrap: wrap;
 }
 
-/* MODIFIÉ : flex-direction row pour image à gauche partout */
+/* MODIFIÉ : flex-direction row par défaut pour image à gauche partout */
 .card {
   background: var(--panel);
   border: 1px solid var(--gold-line);
   padding: .8rem;
   width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-direction: row; 
   align-items: center;
   gap: .8rem;
 }
 
-/* MODIFIÉ : taille fixe 80px et flex-shrink: 0 pour qu'elle ne bouge pas */
+/* MODIFIÉ : taille fixe 80px et flex-shrink: 0 pour qu'elle reste à gauche */
 .card img {
   width: 80px;
   height: 80px;
@@ -50,10 +50,12 @@
 }
 
 /* ── Boutons de choix dans les cartes ─────────────────── */
+/* MODIFIÉ : flex-direction row pour boutons horizontaux */
 .buttons-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: .35rem;
+  flex-wrap: wrap;
 }
 
 .btn-choice {
