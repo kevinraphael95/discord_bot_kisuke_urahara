@@ -1,10 +1,10 @@
 (function () {
   const pages = [
+    { href: 'install.html', label: 'Installation' },
     { href: 'commandes.html', label: 'Commandes' },
     { href: 'guesser.html', label: 'Character Guesser' },
     { href: 'minijeux.html', label: 'Minijeux' },
     { href: 'kluboutside.html', label: 'Klub Outside' },
-    { href: 'install.html', label: 'Installation' },
   ];
 
   const themes = [
