@@ -128,8 +128,8 @@
   }
 
   .card {
-    flex-direction: row; /* Image à gauche, reste à droite */
-    align-items: flex-start; /* Aligne le contenu en haut */
+    flex-direction: row;
+    align-items: flex-start;
     width: 100%;
     padding: .6rem;
     gap: .8rem;
@@ -141,7 +141,6 @@
     flex-shrink: 0;
   }
 
-  /* Ce conteneur global gère l'empilement (Nom puis Boutons) */
   .card > *:not(img) { 
     flex: 1; 
     display: flex; 
@@ -149,9 +148,8 @@
     gap: 0.5rem;
   }
 
-  /* Ce conteneur gère l'alignement horizontal des boutons */
   .buttons-list {
-    flex-direction: row; 
+    flex-direction: column;
     gap: 0.3rem;
   }
 
@@ -164,7 +162,7 @@
   .btn-choice {
     padding: .3rem .4rem;
     font-size: 0.65rem;
-    flex: 1; /* Répartit les boutons horizontalement */
+    flex: 1;
   }
 
   .btn-row .btn-choice {
