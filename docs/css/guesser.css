@@ -145,7 +145,7 @@
   border: 1px solid var(--border);
   background: var(--panel);
   border-radius: 12px;
-  overflow: hidden;
+  /* overflow: hidden; */
   transition: border-color .2s, box-shadow .2s;
 }
 .iz:focus-within {
