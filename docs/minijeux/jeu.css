@@ -230,3 +230,5 @@ canvas {
   .game-left, .result-left { flex: 0 0 auto; width: 100%; }
   #resultImg { border-right: none; border-bottom: 1px solid var(--gold-line); max-height: 280px; }
 }
+
+.orbs { margin-top: 0; }
