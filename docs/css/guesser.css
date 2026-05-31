@@ -60,7 +60,7 @@
   transition: color .2s; position: relative;
   border-radius: 30px;
 }
-.auth-msw-btn:hover    { color: var(--gold-lt); background: var(--gold-pale); }
+.auth-msw-btn:hover     { color: var(--gold-lt); background: var(--gold-pale); }
 .auth-msw-btn.connected { color: var(--gold-lt); }
 
 .lb-msw-btn {
@@ -73,7 +73,7 @@
 }
 .lb-msw-btn:hover { color: var(--gold-lt); background: var(--gold-pale); }
 
-.auth-avatar   {
+.auth-avatar {
   width: clamp(20px, 2vw, 24px); height: clamp(20px, 2vw, 24px);
   border-radius: 50%; border: 1.5px solid var(--gold-line); object-fit: cover;
 }
@@ -95,7 +95,7 @@
 .dbar .cnt { color: var(--gold-lt); font-weight: 600; }
 
 .dots { display: flex; gap: clamp(3px, .5vw, 5px); }
-.dot  {
+.dot {
   width: clamp(7px, 1vw, 9px); height: clamp(7px, 1vw, 9px);
   border-radius: 50%; background: var(--panel); border: 1px solid var(--rim); transition: all .3s;
 }
@@ -103,12 +103,10 @@
 .dot.win  { background: var(--ok-bd); border-color: var(--ok-tx); box-shadow: 0 0 5px var(--ok-glow, rgba(74,222,128,.3)); }
 .dot.lose { background: var(--ko-bd); border-color: var(--ko-tx); }
 
-/* ── Barre survie — 3 stat cards ─────────────────────── */
+/* ── Barre survie ────────────────────────────────────── */
 .sbar {
   display: none;
   width: 100%; max-width: 560px;
-  background: transparent;
-  border: none;
   padding: 0;
   gap: clamp(4px, 0.8vw, 8px);
   align-items: stretch;
@@ -117,7 +115,7 @@
 }
 .sbar.on { display: flex; }
 
-/* Styles unifiés pour forcer une hauteur identique et réduite */
+/* Les 3 blocs ont exactement la même taille */
 .sv, .sdots-w {
   flex: 1;
   display: flex;
@@ -128,16 +126,14 @@
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: clamp(6px, 1vw, 10px);
-  padding: 0 clamp(10px, 1.5vw, 16px) !important;
-  height: 42px !important;
-  min-height: 42px !important;
+  padding: 0 clamp(10px, 1.5vw, 16px);
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
-/* Contenu des cartes stats */
-.sv { gap: 6px; flex-direction: row; white-space: nowrap;
-      padding: clamp(8px, 1.2vw, 12px) clamp(12px, 2vw, 18px) !important;
-      min-height: 42px !important; height: auto !important; }
 .sv-n {
   font-family: 'Shippori Mincho', serif;
   font-size: clamp(.9rem, 1.4vw, 1.1rem);
@@ -147,23 +143,11 @@
   font-size: clamp(.72rem, 1vw, .82rem);
   font-weight: 600; color: var(--muted); text-transform: uppercase;
 }
-
-.sv-n {
-  font-family: 'Shippori Mincho', serif;
-  font-size: clamp(.9rem, 1.4vw, 1.1rem);
-  font-weight: 800;
-  color: var(--gold);
-  line-height: 1;
-}
-
-
 .svdiv { display: none; }
 
-/* Contenu des points */
-.sdots-w { gap: 2px !important; }
-.sdots { display: flex; gap: 3px !important; }
+.sdots { display: flex; gap: 3px; }
 .sdot {
-  width: 6px !important; height: 6px !important;
+  width: 6px; height: 6px;
   border-radius: 50%; background: var(--panel); border: 1px solid var(--rei-pale);
   transition: all .3s;
 }
@@ -200,7 +184,7 @@
 .survival-mode .iz:focus-within { border-color: var(--rei-pale); box-shadow: 0 0 0 3px var(--rei-pale); }
 
 .acw { position: relative; flex: 1; }
-.gi  {
+.gi {
   width: 100%; background: transparent; border: none;
   color: var(--white); font-family: 'DM Sans', sans-serif;
   font-size: clamp(.75rem, 1.1vw, .85rem);
@@ -318,7 +302,7 @@
 /* ── Cards mobile ────────────────────────────────────── */
 .cards { display: none; flex-direction: column; gap: clamp(7px, 1.2vw, 9px); width: 100%; }
 
-.card         {
+.card {
   background: var(--panel); border: 1px solid var(--border);
   border-radius: clamp(8px, 1.5vw, 12px);
   overflow: hidden; animation: rowIn .35s cubic-bezier(.2,.8,.3,1) both; position: relative;
@@ -327,13 +311,13 @@
 .card.ok::before { background: linear-gradient(to bottom, var(--ok-bd), var(--ok-tx)); }
 .card.ko::before { background: linear-gradient(to bottom, var(--ko-bd), var(--ko-tx)); }
 
-.ctop  {
+.ctop {
   display: flex; align-items: center; gap: clamp(7px, 1.2vw, 10px);
   min-height: clamp(50px, 8vw, 60px);
   padding: clamp(7px, 1.2vw, 10px) clamp(10px, 1.8vw, 13px) clamp(7px, 1.2vw, 10px) clamp(13px, 2vw, 17px);
   background: var(--ctop-bg); border-bottom: 1px solid var(--border);
 }
-.cimg  {
+.cimg {
   width: clamp(42px, 7vw, 52px); height: clamp(46px, 7.5vw, 58px);
   object-fit: cover; object-position: top center;
   border: 1px solid var(--rim); border-radius: 6px; flex-shrink: 0;
@@ -345,7 +329,7 @@
 .cbadge { font-size: clamp(.55rem, .9vw, .6rem); color: var(--muted); line-height: 1.4; }
 
 .cgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
-.cc    {
+.cc {
   background: var(--panel);
   padding: clamp(6px, 1vw, 8px) clamp(3px, .5vw, 4px);
   display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -368,7 +352,7 @@
 .cc.wrong   .cv { color: var(--ko-tx); }
 
 /* ── Banner résultat quotidien ───────────────────────── */
-.rbanner      {
+.rbanner {
   width: 100%; max-width: 660px; border: 1px solid; display: none;
   flex-direction: column; animation: rise .45s ease both;
   border-radius: clamp(8px, 1.2vw, 12px); overflow: hidden;
@@ -388,7 +372,7 @@
 }
 .rbanner-right .xbtn { align-self: flex-start; }
 
-.rttl  {
+.rttl {
   font-family: 'Shippori Mincho', serif;
   font-size: clamp(.8rem, 1.3vw, 1rem);
   font-weight: 800; letter-spacing: .08em;
@@ -412,7 +396,7 @@
 .xbtn:hover { background: var(--gold-pale); border-color: var(--gold); }
 
 /* ── Game over survie ────────────────────────────────── */
-.send    {
+.send {
   width: 100%; max-width: 660px; border: 1px solid var(--surv-bd);
   background: var(--surv-bg); display: none;
   flex-direction: column; animation: rise .45s ease both;
@@ -440,7 +424,7 @@
 .se-char { font-family: 'Shippori Mincho', serif; font-size: clamp(.72rem, 1.1vw, .85rem); font-weight: 700; color: var(--surv-tx); opacity: .85; }
 
 .sestats { display: flex; gap: clamp(5px, .8vw, 8px); justify-content: center; flex-wrap: nowrap; }
-.sestat  {
+.sestat {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding: clamp(6px, 1vw, 9px) clamp(9px, 1.5vw, 13px);
   background: var(--sestat-bg);
@@ -481,7 +465,7 @@
   .cards { display: flex; }
   .sestats { gap: 4px; }
   .sestat  { padding: 5px 7px; }
-  .sbar { gap: 6px; }
+  .sbar    { gap: 6px; }
 
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }
@@ -492,6 +476,6 @@
 
 @media (min-width: 701px) and (max-width: 900px) {
   .th, .row { grid-template-columns: 105px repeat(9, 1fr); min-width: 640px; }
-  .cell            { font-size: .5rem; min-height: 32px; }
+  .cell             { font-size: .5rem; min-height: 32px; }
   .cell:first-child { font-size: .56rem; }
 }
