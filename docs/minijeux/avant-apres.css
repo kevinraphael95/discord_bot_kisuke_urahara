@@ -1,3 +1,11 @@
+/* ═══════════════════════════════════════════════════════
+   AVANT OU APRÈS — avant-apres.css
+   Dépend de : base.css
+   ═══════════════════════════════════════════════════════ */
+
+/* ── WRAPPER PRINCIPAL ───────────────────────────────── */
+/* padding-top: 0 pour ne pas ajouter d'espace sous les orbes
+   (base.css gère déjà le margin-bottom des orbes)          */
 .tl-wrap {
   position: relative; z-index: 1;
   max-width: 1000px; margin: 0 auto;
@@ -5,6 +13,7 @@
   display: flex; flex-direction: column; gap: 1.2rem;
 }
 
+/* ── STAT BOX ────────────────────────────────────────── */
 .sstat {
   background: var(--panel); border: 1px solid var(--gold-line);
   padding: .45rem .9rem; text-align: center;
@@ -14,6 +23,7 @@
 .sstat .sv { font-family: 'Shippori Mincho', serif; font-size: .95rem; font-weight: 700; color: var(--gold); display: block; }
 .sstat .sl { font-size: .52rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
 
+/* ── ÉCRAN DE CHARGEMENT ─────────────────────────────── */
 #loadBox {
   background: var(--panel); border: 1px solid var(--gold-line);
   padding: 3rem 1.5rem; text-align: center;
@@ -24,14 +34,18 @@
 .prog-wrap { width: 160px; height: 1px; background: var(--border); }
 .prog-fill { height: 100%; background: var(--gold); transition: width .4s; width: 0%; }
 
+/* ── ZONE DE JEU ─────────────────────────────────────── */
 #gameBox {
   display: none; flex-direction: column; gap: 1.2rem;
 }
 
+/* ── GRILLE DES DEUX IMAGES ──────────────────────────── */
+/* 3 colonnes : image gauche | séparateur VS | image droite */
 .images-row {
   display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center;
 }
 
+/* ── CARTE IMAGE ─────────────────────────────────────── */
 .img-card {
   border: 1px solid var(--gold-line);
   background: var(--deep, #0a0a0f);
@@ -41,6 +55,7 @@
   width: 100%; max-height: 420px; object-fit: contain;
   display: block; background: #000;
 }
+/* Label flottant en haut de l'image */
 .img-label {
   position: absolute; top: 0; left: 0; right: 0;
   padding: .35rem .7rem;
@@ -49,6 +64,7 @@
   font-family: 'DM Sans', sans-serif;
 }
 
+/* ── SÉPARATEUR VS ───────────────────────────────────── */
 .vs-divider {
   display: flex; flex-direction: column; align-items: center; gap: .4rem;
   color: var(--muted);
@@ -59,6 +75,8 @@
   font-size: .85rem; color: var(--muted);
 }
 
+/* ── BARRE DE BOUTONS ────────────────────────────────── */
+/* Les boutons Avant/Après sont centrés, stats en absolu à gauche */
 .btn-row {
   display: flex;
   justify-content: center;
@@ -68,23 +86,16 @@
   position: relative;
   width: 100%;
 }
-
 .btn-row-left {
-  position: absolute;
-  left: 0;
-  display: flex;
-  gap: .5rem;
-  align-items: stretch;
+  position: absolute; left: 0;
+  display: flex; gap: .5rem; align-items: stretch;
 }
-
 .btn-row-right {
-  position: absolute;
-  right: 0;
-  display: flex;
-  gap: .5rem;
-  align-items: stretch;
+  position: absolute; right: 0;
+  display: flex; gap: .5rem; align-items: stretch;
 }
 
+/* ── BOUTONS AVANT / APRÈS ───────────────────────────── */
 .btn-choice {
   padding: .45rem 1rem;
   border: 1px solid var(--border);
@@ -98,18 +109,20 @@
 }
 .btn-choice .bc-icon { font-size: .95rem; }
 .btn-choice .bc-label { display: none; }
-
 .btn-choice.before:hover { border-color: #4a7fc9; background: rgba(74,127,201,.1); color: #7aaef0; }
 .btn-choice.after:hover  { border-color: #9b59b6; background: rgba(155,89,182,.1); color: #c9a0f0; }
 .btn-choice:active { transform: scale(0.97); }
 
+/* ── BARRE DE SÉRIE ──────────────────────────────────── */
 .streak-bar {
   text-align: center; font-size: .75rem; color: var(--muted);
 }
 .streak-dots { display: flex; gap: 5px; justify-content: center; margin-top: .4rem; flex-wrap: wrap; }
+/* Point de série — inactif par défaut, actif en vert brillant */
 .sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-bd, #4caf82); opacity: .25; transition: opacity .3s; }
 .sdot.active { opacity: 1; box-shadow: 0 0 5px var(--ok-bd, #4caf82); }
 
+/* ── ÉCRAN RÉSULTAT ──────────────────────────────────── */
 #resultBox {
   background: var(--panel); border: 1px solid var(--ko-bd, #c95c4c);
   padding: .8rem 1.5rem;
@@ -124,6 +137,7 @@
 .res-info strong { color: var(--text); font-weight: 500; }
 .res-record { font-family: 'Shippori Mincho', serif; font-size: .95rem; color: var(--gold); }
 
+/* ── ÉCRAN ERREUR ────────────────────────────────────── */
 #errorBox {
   background: var(--panel); border: 1px solid var(--ko-bd, #c95c4c);
   padding: 2rem 1.5rem; text-align: center;
@@ -131,19 +145,22 @@
 }
 #errMsg { color: var(--muted); font-size: .88rem; }
 
+/* ── BOUTONS GÉNÉRIQUES ──────────────────────────────── */
 .btn { padding: .65rem 1.5rem; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .15s; border: 1px solid var(--border); background: var(--panel); color: var(--text); letter-spacing: .03em; }
 .btn-gold { border-color: var(--gold); color: var(--gold); background: transparent; }
 .btn-gold:hover { background: rgba(201,168,76,.1); }
 .btn-ghost { color: var(--muted); }
 .btn-ghost:hover { color: var(--text); border-color: var(--border); }
 
+/* ── ANIMATION SPINNER ───────────────────────────────── */
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── RESPONSIVE ──────────────────────────────────────── */
 @media (max-width: 640px) {
-  .images-row { grid-template-columns: 1fr; }
-  .vs-divider { flex-direction: row; }
+  .images-row { grid-template-columns: 1fr; }        /* images empilées */
+  .vs-divider { flex-direction: row; }               /* VS horizontal */
   .vs-line { width: 36px; height: 1px; }
   .tl-wrap { padding: 1rem 1rem 3rem; }
   .btn-row { flex-wrap: wrap; }
-  .btn-row .sstat { display: none; }
+  .btn-row .sstat { display: none; }                 /* stats cachées sur mobile */
 }
