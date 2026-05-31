@@ -356,7 +356,16 @@ function showQuestion(label) {
 /* ── RÉPONSE JOUEUR ──────────────────────────────────── */
 function answer(rep) {
   if (rep === "sais_pas") {
-    nextQuestion();
+    const skippedKey = currentQ.key;
+    askedKeys.add(skippedKey);
+    const q = bestQuestion();
+    askedKeys.delete(skippedKey);
+    if (!q) {
+      const top = pool.reduce((a, b) => (b.w > a.w ? b : a), pool[0]);
+      return guessChar(top);
+    }
+    currentQ = q;
+    showQuestion(q.label);
     return;
   }
 
