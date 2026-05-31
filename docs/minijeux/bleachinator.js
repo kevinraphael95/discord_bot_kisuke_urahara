@@ -112,19 +112,19 @@ const QUESTIONS = [
   },
   {
     key: "d_high",
-    label: "Ton personnage est-il <strong>très puissant</strong> (dangerosité ≥ 4) ?",
+    label: "Ton personnage est-il <strong>très puissant</strong> (dangerosité ≥ 4/5) ?",
     getValue: c => c.d >= 4 ? "oui" : "non",
     match: "oui"
   },
   {
     key: "d_max",
-    label: "Ton personnage est-il au <strong>sommet de la puissance</strong> (dangerosité 5) ?",
+    label: "Ton personnage est-il au <strong>sommet de la puissance</strong> (dangerosité 5/5) ?",
     getValue: c => c.d === 5 ? "oui" : "non",
     match: "oui"
   },
   {
     key: "d_low",
-    label: "Ton personnage est-il <strong>peu puissant</strong> (dangerosité ≤ 2) ?",
+    label: "Ton personnage est-il <strong>peu puissant</strong> (dangerosité ≤ 2/5) ?",
     getValue: c => c.d <= 2 ? "oui" : "non",
     match: "oui"
   },
