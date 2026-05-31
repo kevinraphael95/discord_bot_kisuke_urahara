@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bleachinator — Je devine ton personnage</title>
+<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="bleachinator.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="atmo"></div>
+<div class="top-bar"></div>
+<div class="phdr">
+  <h1 class="pttl">
+    <span class="t1">Bleachinator</span>
+  </h1>
+  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+</div>
+
+<div class="bi-wrap">
+
+  <!-- ÉCRAN INTRO -->
+  <div id="introBox">
+    <div class="bi-panel">
+      <div class="bi-avatar">🧠</div>
+      <p class="bi-speech">Pense à un personnage de Bleach… Je vais le trouver en <strong>5 questions</strong> maximum. Si j'échoue, tu gagnes !</p>
+      <button class="btn btn-gold" onclick="startGame()">C'est parti !</button>
+    </div>
+  </div>
+
+  <!-- ÉCRAN JEU -->
+  <div id="gameBox" style="display:none">
+    <div class="bi-progress">
+      <div class="bi-dots" id="biDots"></div>
+      <div class="bi-counter"><span id="qNum">1</span>/5</div>
+    </div>
+    <div class="bi-panel">
+      <div class="bi-avatar" id="biEmoji">🤔</div>
+      <p class="bi-speech" id="biQuestion">…</p>
+      <div class="bi-btns" id="biBtns"></div>
+    </div>
+    <div class="bi-hint" id="biHint"></div>
+  </div>
+
+  <!-- ÉCRAN RÉSULTAT BOT GAGNE -->
+  <div id="winBox" style="display:none">
+    <div class="bi-panel bi-panel-win">
+      <div class="bi-avatar">😏</div>
+      <p class="bi-speech" id="winMsg">C'était <strong id="winName"></strong> !</p>
+      <div class="bi-stats">
+        <div class="sstat"><span class="sv" id="wQuestions">0</span><span class="sl">Questions</span></div>
+        <div class="sstat"><span class="sv" id="wStreak">0</span><span class="sl">Série bot 🔥</span></div>
+        <div class="sstat"><span class="sv" id="wTotal">0</span><span class="sl">Parties</span></div>
+      </div>
+      <button class="btn btn-gold" onclick="restart()">Rejouer</button>
+    </div>
+  </div>
+
+  <!-- ÉCRAN RÉSULTAT BOT PERD -->
+  <div id="loseBox" style="display:none">
+    <div class="bi-panel bi-panel-lose">
+      <div class="bi-avatar">😤</div>
+      <p class="bi-speech" id="loseMsg">Hm… je sèche. C'était qui ?</p>
+      <div class="bi-name-input">
+        <select id="nameSelect"></select>
+        <button class="btn btn-gold" onclick="confirmName()">Confirmer</button>
+      </div>
+      <div class="bi-stats">
+        <div class="sstat"><span class="sv" id="lStreak">0</span><span class="sl">Série bot 🔥</span></div>
+        <div class="sstat"><span class="sv" id="lTotal">0</span><span class="sl">Parties</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../minijeux/data.js"></script>
+<script src="bleachinator.js"></script>
+</body>
+</html>
