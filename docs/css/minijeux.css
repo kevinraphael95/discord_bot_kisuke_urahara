@@ -1,60 +1,167 @@
-.content { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; position: relative; z-index: 1; }
+/* ═══════════════════════════════════════════════════════
+   PAGE : MINI-JEUX — minijeux.css
+   Dépend de : base.css
+   ═══════════════════════════════════════════════════════ */
 
+/* ── WRAPPER PRINCIPAL ───────────────────────────────── */
+.content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 clamp(.9rem, 2.5vw, 1.5rem) clamp(2.5rem, 5vw, 4rem);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── LABEL DE SECTION ────────────────────────────────── */
 .sec-lbl {
-  font-size: .62rem; letter-spacing: .15em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 1rem;
+  font-size: clamp(.55rem, .8vw, .62rem);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: clamp(.6rem, 1.2vw, 1rem);
 }
 
+/* ── GRILLE DES CARDS ────────────────────────────────── */
 .games-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 1px; background: var(--gold-line); border: 1px solid var(--gold-line);
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 1.2vw, 12px);
+  background: transparent;
+  border: none;
 }
 
+/* ── CARD INDIVIDUELLE ───────────────────────────────── */
 .game-card {
-  background: var(--panel); padding: 2rem 1.6rem;
-  text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: .8rem;
-  position: relative; overflow: hidden; transition: background .25s;
-  opacity: 0; animation: rise .6s forwards;
+  background: var(--panel);
+  padding: clamp(1.3rem, 2.5vw, 2rem) clamp(1rem, 2vw, 1.6rem);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(.5rem, 1vw, .8rem);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: clamp(7px, 1.1vw, 10px);
+  transition: background .25s, border-color .25s, box-shadow .25s, transform .25s;
+  opacity: 0;
+  animation: rise .6s forwards;
 }
+
 .game-card:nth-child(1) { animation-delay: .3s; }
 .game-card:nth-child(2) { animation-delay: .45s; }
+.game-card:nth-child(3) { animation-delay: .6s; }
 
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity .35s;
+}
 .game-card::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
   background: linear-gradient(90deg, var(--gold), var(--gold2, #f0cc7a));
-  transform: scaleX(0); transition: transform .35s;
+  transform: scaleX(0);
+  transition: transform .35s;
 }
-.game-card:hover { background: var(--surface); }
-.game-card:hover::after { transform: scaleX(1); }
 
-.game-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; }
-.game-icon { font-size: 2rem; line-height: 1; }
+.game-card:hover {
+  background: var(--surface);
+  border-color: var(--gold-line);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
+  transform: translateY(-3px);
+}
+.game-card:hover::before { opacity: 1; }
+.game-card:hover::after  { transform: scaleX(1); }
+
+/* ── EN-TÊTE DE CARD ─────────────────────────────────── */
+.game-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(.5rem, 1vw, .8rem);
+}
+
+.game-icon {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1;
+}
+
 .game-badge {
-  font-family: 'DM Sans', sans-serif; font-size: .58rem; letter-spacing: .12em;
-  text-transform: uppercase; padding: .2rem .55rem;
-  border: 1px solid var(--gold-line); color: var(--gold); white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(.5rem, .75vw, .58rem);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: clamp(.14rem, .25vw, .2rem) clamp(.45rem, .8vw, .6rem);
+  border: 1px solid var(--gold-line);
+  color: var(--gold);
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
+/* ── NOM DU JEU ──────────────────────────────────────── */
 .game-name {
-  font-family: 'Shippori Mincho', serif; font-weight: 700;
-  font-size: 1.1rem; color: var(--gold);
+  font-family: 'Shippori Mincho', serif;
+  font-weight: 700;
+  font-size: clamp(.9rem, 1.5vw, 1.1rem);
+  color: var(--gold);
 }
-.game-desc { font-size: .9rem; color: var(--muted); line-height: 1.6; flex: 1; }
 
+/* ── DESCRIPTION ─────────────────────────────────────── */
+.game-desc {
+  font-size: clamp(.78rem, 1.2vw, .9rem);
+  color: var(--muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* ── FOOTER DE CARD ──────────────────────────────────── */
 .game-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  border-top: 1px solid var(--gold-line); padding-top: .8rem; margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-top: clamp(.5rem, .9vw, .8rem);
+  margin-top: auto;
 }
-.game-meta { font-size: .78rem; color: var(--muted); font-style: italic; }
+
+.game-meta {
+  font-size: clamp(.66rem, 1vw, .78rem);
+  color: var(--muted);
+  font-style: italic;
+}
+
 .game-arrow {
-  font-family: 'DM Sans', sans-serif; font-size: .72rem; letter-spacing: .08em;
-  color: var(--gold); opacity: 0; transform: translateX(-6px); transition: all .3s;
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(.62rem, .95vw, .72rem);
+  letter-spacing: .08em;
+  color: var(--gold);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all .3s;
 }
-.game-card:hover .game-arrow { opacity: 1; transform: translateX(0); }
+.game-card:hover .game-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
 
-@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* ── ANIMATION D'ENTRÉE ──────────────────────────────── */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
 
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  .games-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 600px) {
   .games-grid { grid-template-columns: 1fr; }
+  .game-card  { padding: 1.5rem 1.2rem; }
 }

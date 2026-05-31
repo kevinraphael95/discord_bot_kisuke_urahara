@@ -1,131 +1,130 @@
-/* Harmonisation avec base.css */
-.game-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
+/* ═══════════════════════════════════════════════════════
+   FMK — fmk.css
+   Dépend de : base.css
+   ═══════════════════════════════════════════════════════ */
+
+#gameBox {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(.7rem, 1.5vw, 1.2rem);
 }
 
+/* ── CARTES ──────────────────────────────────────────── */
 .cards-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin: 2rem 0;
+  display: flex;
+  justify-content: center;
+  gap: clamp(.6rem, 1.2vw, 1rem);
+  flex-wrap: wrap;
 }
 
 .card {
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 15px;
-    width: 220px;
-    transition: transform 0.2s, border-color 0.2s;
+  background: var(--panel);
+  border: 1px solid var(--gold-line);
+  padding: clamp(.5rem, 1vw, .8rem);
+  width: clamp(160px, 20vw, 220px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(.3rem, .7vw, .5rem);
 }
 
 .card img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    background-color: var(--void);
+  width: 100%;
+  height: clamp(140px, 18vw, 220px);
+  object-fit: cover;
+  background: var(--void);
+  display: block;
 }
 
 .card h3 {
-    margin: 12px 0 6px 0;
-    font-family: 'Shippori Mincho', serif;
-    color: var(--white);
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(.85rem, 1.3vw, 1rem);
+  font-weight: 700;
+  color: var(--white);
+  margin: 0;
+  text-align: center;
 }
 
-/* Boutons de choix (les 3 options) */
+/* ── BOUTONS DE CHOIX ────────────────────────────────── */
 .buttons-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(.22rem, .5vw, .35rem);
 }
 
 .btn-choice {
-    background: var(--void);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 0.6rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  padding: clamp(.32rem, .7vw, .45rem) clamp(.6rem, 1.3vw, 1rem);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(.65rem, 1vw, .75rem);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(.25rem, .5vw, .4rem);
+  text-transform: uppercase;
+  letter-spacing: .05em;
 }
 
-.btn-choice:hover { border-color: var(--gold-line); color: var(--gold-lt); }
+.btn-choice .bc-icon { font-size: clamp(.75rem, 1.2vw, .9rem); }
+.btn-choice:hover  { border-color: var(--gold-line); color: var(--gold-lt); }
+.btn-choice:active { transform: scale(0.97); }
 
-/* États actifs (utilisant tes variables de base.css) */
-.btn-choice.active.fuck { background: var(--red-pale); border-color: var(--red-lt); color: var(--white); }
-.btn-choice.active.marry { background: var(--gold-pale); border-color: var(--gold); color: var(--gold-lt); }
-.btn-choice.active.kill { background: rgba(255,255,255,.05); border-color: var(--muted); opacity: 0.6; }
+.btn-choice.active.fuck  { background: var(--red-pale);        border-color: var(--red-lt); color: var(--white); }
+.btn-choice.active.marry { background: var(--gold-pale);       border-color: var(--gold);   color: var(--gold-lt); }
+.btn-choice.active.kill  { background: rgba(255,255,255,.05); border-color: var(--muted);  color: var(--muted); opacity: .6; }
 
-/* Zone d'action (Valider/Changer) */
-.actions-zone { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
-
-.btn-action {
-    padding: .75rem 2rem;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    cursor: pointer;
-    text-transform: uppercase;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
+/* ── BARRE DE BOUTONS ────────────────────────────────── */
+.btn-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(.3rem, .7vw, .5rem);
+  margin-top: clamp(.3rem, .7vw, .5rem);
+  padding-top: clamp(.6rem, 1.2vw, 1rem);
 }
 
-.btn-submit { background: var(--gold); color: var(--void); border-color: var(--gold); }
+.btn-row .btn-choice {
+  width: clamp(110px, 14vw, 160px);
+  padding: clamp(.4rem, .9vw, .6rem) clamp(.6rem, 1.3vw, 1rem);
+}
 
+/* ── ÉCRAN RÉSULTAT ──────────────────────────────────── */
+#resultBox {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(.25rem, .6vw, .4rem);
+  text-align: center;
+  background: var(--panel);
+  border: 1px solid var(--gold-line);
+  padding: clamp(1rem, 2.2vw, 1.5rem);
+  animation: rise .3s ease;
+}
 
-/* --- ADAPTATION MOBILE UNIQUEMENT --- */
+.res-emoji { font-size: clamp(1.7rem, 3vw, 2.2rem); }
+.res-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+  font-weight: 800;
+  color: var(--gold);
+}
+.res-info { font-size: clamp(.76rem, 1.2vw, .88rem); color: var(--muted); }
+.res-info strong { color: var(--text); font-weight: 500; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
 @media (max-width: 700px) {
-    .cards-container {
-        flex-direction: column !important; /* Empile les cartes verticalement */
-        align-items: stretch;
-        gap: 15px;
-    }
-
-    .card {
-        display: flex !important;          /* Active la ligne horizontale */
-        flex-direction: row !important;    /* Image à gauche, contenu à droite */
-        align-items: center;               /* Centre verticalement */
-        width: 100% !important;
-        padding: 10px !important;
-        text-align: left;
-    }
-
-    /* Image à gauche */
-    .card img {
-        width: 80px !important;
-        height: 80px !important;
-        margin-right: 15px;
-        flex-shrink: 0;
-    }
-
-    /* Bloc contenant Nom + Boutons à droite de l'image */
-    .card > *:not(img) {
-        flex: 1; 
-    }
-
-    /* Le Nom reste au-dessus des boutons */
-    .card h3 {
-        margin: 0 0 8px 0 !important;
-        font-size: 1rem;
-    }
-
-    /* Les boutons restent dessous, en colonne comme sur PC */
-    .buttons-list {
-        display: flex !important;
-        flex-direction: column !important; /* Garde l'ordre vertical des boutons */
-        gap: 5px;
-        margin-top: 5px !important;
-    }
-
-    .btn-choice {
-        padding: 0.3rem 0.5rem !important;
-        font-size: 0.7rem !important;
-    }
+  .cards-container { flex-direction: column; align-items: stretch; }
+  .card { flex-direction: row; align-items: flex-start; width: 100%; padding: .6rem; gap: .8rem; }
+  .card img { width: 80px; height: 80px; flex-shrink: 0; }
+  .card h3 { font-size: 1.2rem; text-align: center; margin: 0; }
+  .card-body { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+  .buttons-list { flex-direction: row; gap: 0.4rem; }
+  .btn-choice { padding: .5rem .3rem; font-size: 0.75rem; flex: 1; }
+  .btn-row .btn-choice { width: auto; flex: 1; }
 }

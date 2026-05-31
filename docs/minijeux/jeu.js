@@ -113,7 +113,6 @@ async function fetchAniList(mediaIds, dataNames, imageMap) {
 }
 
 /* ── AUTOCOMPLETE ──────────────────────────────────────────── */
-/* ── AUTOCOMPLETE (version améliorée comme guesser.js) ── */
 function initAutocomplete() {
   const input = $("guessInput");
   const box = $("autocompleteBox");
@@ -129,19 +128,15 @@ function initAutocomplete() {
     }
 
     const guessed = new Set(sessionGuesses.map(g => normalize(g.name)));
-    const escaped = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    
-    // Filtrer les personnages
+
     const matches = allNames
       .filter(name => name.toLowerCase().includes(val) && !guessed.has(normalize(name)))
       .slice(0, 8);
-    
-    const re = new RegExp(`(${escaped})`, "gi");
 
     matches.forEach(name => {
       const div = document.createElement("div");
       div.className = "ac-item";
-      div.innerHTML = name.replace(re, `<span class="ac-highlight">$1</span>`);
+      div.textContent = name;
       div.onclick = () => {
         input.value = name;
         box.style.display = "none";
