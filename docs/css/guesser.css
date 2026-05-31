@@ -111,31 +111,37 @@
   border: none;
   padding: 0;
   gap: clamp(4px, 0.8vw, 8px);
-  align-items: center; /* Changé de stretch à center */
+  align-items: stretch; /* Changé en stretch pour que tous les blocs prennent la même hauteur */
   justify-content: center;
   flex-wrap: nowrap;
 }
 .sbar.on { display: flex; }
 
-.sv {
+.sv, .sdots-w {
   flex: 1;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0; /* Supprimé le gap entre le nombre et le titre */
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; /* Centre le contenu verticalement */
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: clamp(6px, 1vw, 10px);
-  /* Padding vertical drastiquement réduit */
-  padding: clamp(0.1rem, 0.2vw, 0.3rem) clamp(0.3rem, 0.6vw, 0.5rem);
+  padding: clamp(0.2rem, 0.4vw, 0.5rem);
+  min-height: 60px; /* Force une hauteur minimale commune */
 }
+
+/* Nettoyage spécifique pour les éléments internes */
+.sv { gap: 0; }
+.sdots-w { gap: clamp(4px, .6vw, 6px); }
 
 .sv-n {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(0.8rem, 1.4vw, 1.2rem); /* Taille légèrement réduite */
+  font-size: clamp(0.8rem, 1.4vw, 1.2rem);
   font-weight: 800; color: var(--gold); line-height: 1;
 }
 
 .sv-l {
-  font-size: clamp(0.4rem, 0.6vw, 0.5rem); /* Texte plus petit */
+  font-size: clamp(0.4rem, 0.6vw, 0.5rem);
   font-weight: 600; letter-spacing: .08em; color: var(--muted); text-transform: uppercase;
 }
 
