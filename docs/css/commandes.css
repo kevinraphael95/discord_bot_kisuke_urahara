@@ -5,23 +5,27 @@
 .content {
   position: relative; z-index: 1;
   max-width: 1020px; margin: 0 auto;
-  padding: 0 3rem 6rem;
+  padding: 0 clamp(1rem, 3.5vw, 3rem) clamp(3.5rem, 7vw, 6rem);
   opacity: 0; animation: rise .7s .3s forwards;
 }
-
+ 
 /* ── SEARCH ──────────────────────────────────────────── */
-.search-wrap { position: relative; max-width: 460px; margin: 0 auto 2.5rem; }
+.search-wrap {
+  position: relative; max-width: 460px;
+  margin: 0 auto clamp(1.5rem, 3vw, 2.5rem);
+}
 .search-icon {
-  position: absolute; left: .85rem; top: 50%;
+  position: absolute; left: clamp(.65rem, 1.1vw, .85rem); top: 50%;
   transform: translateY(-50%);
-  color: var(--gold); font-size: .85rem; pointer-events: none;
+  color: var(--gold); font-size: clamp(.72rem, 1.1vw, .85rem); pointer-events: none;
 }
 .search-inp {
   width: 100%; background: var(--panel); border: 1px solid var(--border);
   color: var(--white); font-family: 'DM Sans', sans-serif;
-  font-size: .82rem; font-weight: 400;
-  padding: .85rem 1rem .85rem 2.5rem;
-  outline: none; border-radius: 4px;
+  font-size: clamp(.72rem, 1.1vw, .82rem); font-weight: 400;
+  padding: clamp(.6rem, 1.1vw, .85rem) clamp(.75rem, 1.3vw, 1rem)
+           clamp(.6rem, 1.1vw, .85rem) clamp(1.8rem, 2.8vw, 2.5rem);
+  outline: none; border-radius: clamp(3px, .5vw, 4px);
   transition: border-color .2s, box-shadow .2s;
 }
 .search-inp:focus {
@@ -29,16 +33,15 @@
   box-shadow: 0 0 0 3px var(--gold-pale);
 }
 .search-inp::placeholder { color: var(--dim); }
-
+ 
 /* ── CATÉGORIE ───────────────────────────────────────── */
-.cat { margin-bottom: 6px; border-radius: 6px; overflow: hidden; }
-
+.cat { margin-bottom: clamp(4px, .6vw, 6px); border-radius: clamp(4px, .6vw, 6px); overflow: hidden; }
 .cat-hdr {
-  display: flex; align-items: center; gap: .9rem;
-  padding: .9rem 1.4rem;
+  display: flex; align-items: center; gap: clamp(.6rem, 1.1vw, .9rem);
+  padding: clamp(.65rem, 1.1vw, .9rem) clamp(.9rem, 1.8vw, 1.4rem);
   background: var(--panel); border: 1px solid var(--border);
   cursor: pointer; user-select: none;
-  border-radius: 6px;
+  border-radius: clamp(4px, .6vw, 6px);
   transition: background .2s, border-color .2s;
   position: relative; overflow: hidden;
 }
@@ -47,25 +50,24 @@
   position: absolute; left: 0; top: 0; bottom: 0;
   width: 3px;
   background: var(--cat-accent, var(--gold));
-  border-radius: 0;
 }
 .cat-hdr:hover { background: var(--surface); border-color: var(--gold-line); }
-.cat-hdr.open  { border-radius: 6px 6px 0 0; }
-
-.cat-icon { font-size: 1.15rem; flex-shrink: 0; }
+.cat-hdr.open  { border-radius: clamp(4px, .6vw, 6px) clamp(4px, .6vw, 6px) 0 0; }
+.cat-icon { font-size: clamp(.95rem, 1.5vw, 1.15rem); flex-shrink: 0; }
 .cat-name {
   font-family: 'Shippori Mincho', serif; font-weight: 700;
-  font-size: .85rem; letter-spacing: .1em; color: var(--gold-lt);
+  font-size: clamp(.72rem, 1.1vw, .85rem); letter-spacing: .1em; color: var(--gold-lt);
   text-transform: uppercase; flex: 1;
 }
 .cat-count {
-  font-size: .65rem; color: var(--muted);
+  font-size: clamp(.55rem, .8vw, .65rem); color: var(--muted);
   background: var(--surface); border: 1px solid var(--border);
-  padding: .15rem .55rem; border-radius: 20px; letter-spacing: .04em;
+  padding: clamp(.1rem, .2vw, .15rem) clamp(.38rem, .7vw, .55rem);
+  border-radius: 20px; letter-spacing: .04em;
 }
-.cat-arrow { color: var(--gold); font-size: .8rem; transition: transform .25s; }
+.cat-arrow { color: var(--gold); font-size: clamp(.68rem, 1vw, .8rem); transition: transform .25s; }
 .cat-hdr.open .cat-arrow { transform: rotate(90deg); }
-
+ 
 /* ── COULEURS PAR CATÉGORIE ──────────────────────────── */
 .cat[data-id="admin"]   .cat-hdr { --cat-accent: var(--gold); }
 .cat[data-id="bleach"]  .cat-hdr { --cat-accent: var(--rei-mid); }
@@ -73,20 +75,21 @@
 .cat[data-id="general"] .cat-hdr { --cat-accent: var(--muted); }
 .cat[data-id="jeux"]    .cat-hdr { --cat-accent: var(--rei-lt); }
 .cat[data-id="reiatsu"] .cat-hdr { --cat-accent: #7b6fff; }
-
+ 
 /* ── LISTE COMMANDES ─────────────────────────────────── */
 .cmd-list {
   display: none; flex-direction: column;
   border: 1px solid var(--border); border-top: none;
-  border-radius: 0 0 6px 6px; overflow: hidden;
+  border-radius: 0 0 clamp(4px, .6vw, 6px) clamp(4px, .6vw, 6px); overflow: hidden;
 }
 .cmd-list.open { display: flex; }
-
+ 
 /* ── COMMANDE ────────────────────────────────────────── */
 .cmd {
-  display: grid; grid-template-columns: 210px 1fr;
-  background: var(--deep); padding: .9rem 1.4rem;
-  gap: .9rem; align-items: start;
+  display: grid; grid-template-columns: clamp(140px, 18vw, 210px) 1fr;
+  background: var(--deep);
+  padding: clamp(.65rem, 1.1vw, .9rem) clamp(.9rem, 1.8vw, 1.4rem);
+  gap: clamp(.6rem, 1.1vw, .9rem); align-items: start;
   border-bottom: 1px solid var(--border);
   transition: background .15s, padding-left .15s;
   position: relative;
@@ -94,39 +97,37 @@
 .cmd:last-child { border-bottom: none; }
 .cmd:hover {
   background: var(--panel);
-  padding-left: 1.8rem;
+  padding-left: clamp(1.2rem, 2.2vw, 1.8rem);
 }
-
 .cmd-name {
   font-family: 'DM Sans', sans-serif;
-  font-size: .78rem; font-weight: 600;
+  font-size: clamp(.68rem, 1vw, .78rem); font-weight: 600;
   color: var(--rei-lt);
-  display: flex; align-items: center; gap: .4rem;
+  display: flex; align-items: center; gap: clamp(.3rem, .5vw, .4rem);
 }
 .cmd-name::before {
   content: '·';
   color: var(--gold); opacity: .5;
-  font-size: 1.1rem; line-height: 1;
-  flex-shrink: 0;
+  font-size: clamp(.95rem, 1.4vw, 1.1rem); line-height: 1; flex-shrink: 0;
 }
-
-.cmd-desc { font-size: .85rem; color: var(--text); line-height: 1.6; }
-
+.cmd-desc { font-size: clamp(.74rem, 1.1vw, .85rem); color: var(--text); line-height: 1.6; }
+ 
 /* ── ADMIN ───────────────────────────────────────────── */
 .cmd-admin .cmd-name { color: var(--gold-lt); }
 .cmd-admin .cmd-name::before { opacity: 1; }
-
+ 
 /* ── USAGE ───────────────────────────────────────────── */
 .cmd-usage {
   grid-column: 1 / -1;
-  font-size: .72rem; font-family: 'DM Sans', monospace;
+  font-size: clamp(.62rem, .9vw, .72rem); font-family: 'DM Sans', monospace;
   color: var(--rei-lt);
   background: var(--rei-pale); border: 1px solid rgba(30, 127, 232, .15);
   border-left: 2px solid var(--rei-mid);
-  padding: .35rem .85rem; margin-top: .35rem;
-  border-radius: 0 4px 4px 0;
+  padding: clamp(.25rem, .5vw, .35rem) clamp(.6rem, 1.2vw, .85rem);
+  margin-top: clamp(.25rem, .5vw, .35rem);
+  border-radius: 0 clamp(3px, .5vw, 4px) clamp(3px, .5vw, 4px) 0;
 }
-
+ 
 /* ── RESPONSIVE ──────────────────────────────────────── */
 @media (max-width: 700px) {
   .content   { padding: 0 1rem 4rem; }
