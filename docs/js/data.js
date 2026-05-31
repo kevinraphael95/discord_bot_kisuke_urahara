@@ -103,14 +103,14 @@ const CHARS = [
   // GOTEI 13 — VICE-CAPITAINES
   // ============================================================
   {n:"Nanao Ise",             r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"07/07", w:2,  l:1,  draw:0, img:"assets/personnages/nanao-ise.png"},
-  {n:"Genshiro Okikiba",      r:"Shinigami", sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blanc",  bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/genshiro-okikiba.png"},
+  {n:"Genshiro Okikiba",      r:"Shinigami", sx:"M", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blanc",  bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/genshiro-okikiba.png"},
   {n:"Marechiyo Omaeda",      r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"05/05", w:1,  l:2,  draw:0, img:"assets/personnages/marechiyo-omaeda.png"},
   {n:"Izuru Kira",            r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Incertain", hc:"Blond",  bday:"27/03", w:3,  l:3,  draw:0, img:"assets/personnages/izuru-kira.png"},
   {n:"Kiyone Kotetsu",        r:"Shinigami", sx:"F", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",  bday:"22/09", w:1,  l:1,  draw:0, img:"assets/personnages/kiyone-kotetsu.png"},
   {n:"Momo Hinamori",         r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"03/06", w:2,  l:3,  draw:0, img:"assets/personnages/momo-hinamori.png"},
   {n:"Renji Abarai",          r:"Shinigami", sx:"M", arc:"Le Shinigami Remplaçant (1)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Rouge",  bday:"31/08", w:7,  l:5,  draw:0, img:"assets/personnages/renji-abarai.png"},
   {n:"Atau Rindo",            r:"Shinigami", sx:"M", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/atau-rindo.png"},
-  {n:"Yuyu Yayahara",         r:"Shinigami", sx:"F", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:2, st:"Vivant",    hc:"Blond",  bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/yuyu-yayahara.png"},
+  {n:"Yuyu Yayahara",         r:"Shinigami", sx:"F", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/yuyu-yayahara.png"},
   {n:"Shuhei Hisagi",         r:"Shinigami", sx:"M", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0, img:"assets/personnages/shuhei-hisagi.png"},
   {n:"Mashiro Kuna",          r:"Vizard",    sx:"F", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0, img:"assets/personnages/mashiro-kuna.png"},
   {n:"Rangiku Matsumoto",     r:"Shinigami", sx:"F", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"25/05", w:3,  l:3,  draw:0, img:"assets/personnages/rangiku-matsumoto.png"},
