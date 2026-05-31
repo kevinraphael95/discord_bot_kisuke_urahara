@@ -7,61 +7,51 @@
 .content {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 0 1.5rem 4rem;
+  padding: 0 clamp(.9rem, 2.5vw, 1.5rem) clamp(2.5rem, 5vw, 4rem);
   position: relative;
   z-index: 1;
 }
 
-/* ── LABEL DE SECTION (optionnel) ────────────────────── */
+/* ── LABEL DE SECTION ────────────────────────────────── */
 .sec-lbl {
-  font-size: .62rem;
+  font-size: clamp(.55rem, .8vw, .62rem);
   letter-spacing: .15em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 1rem;
+  margin-bottom: clamp(.6rem, 1.2vw, 1rem);
 }
 
 /* ── GRILLE DES CARDS ────────────────────────────────── */
-/* 3 colonnes égales sur desktop, gap entre les cards    */
 .games-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: clamp(8px, 1.2vw, 12px);
   background: transparent;
   border: none;
 }
 
 /* ── CARD INDIVIDUELLE ───────────────────────────────── */
-/* Flex colonne pour que le footer colle toujours en bas */
 .game-card {
   background: var(--panel);
-  padding: 2rem 1.6rem;
+  padding: clamp(1.3rem, 2.5vw, 2rem) clamp(1rem, 2vw, 1.6rem);
   text-decoration: none;
   color: inherit;
   display: flex;
   flex-direction: column;
-  gap: .8rem;
+  gap: clamp(.5rem, 1vw, .8rem);
   position: relative;
   overflow: hidden;
-
-  /* Bordure arrondie + couleur subtile */
   border: 1px solid var(--border);
-  border-radius: 10px;
-
-  /* Transitions fluides sur hover */
+  border-radius: clamp(7px, 1.1vw, 10px);
   transition: background .25s, border-color .25s, box-shadow .25s, transform .25s;
-
-  /* Animation d'entrée en fade+slide */
   opacity: 0;
   animation: rise .6s forwards;
 }
 
-/* Délais échelonnés pour l'animation d'entrée */
 .game-card:nth-child(1) { animation-delay: .3s; }
 .game-card:nth-child(2) { animation-delay: .45s; }
 .game-card:nth-child(3) { animation-delay: .6s; }
 
-/* Ligne dorée en haut de la card (visible au hover) */
 .game-card::before {
   content: '';
   position: absolute;
@@ -71,8 +61,6 @@
   opacity: 0;
   transition: opacity .35s;
 }
-
-/* Ligne dorée en bas de la card (scale au hover) */
 .game-card::after {
   content: '';
   position: absolute;
@@ -83,40 +71,37 @@
   transition: transform .35s;
 }
 
-/* ── ÉTATS HOVER ─────────────────────────────────────── */
 .game-card:hover {
   background: var(--surface);
   border-color: var(--gold-line);
   box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
-  transform: translateY(-3px); /* légère élévation */
+  transform: translateY(-3px);
 }
-.game-card:hover::before { opacity: 1; }         /* ligne haut apparaît */
-.game-card:hover::after  { transform: scaleX(1); } /* ligne bas se déploie */
+.game-card:hover::before { opacity: 1; }
+.game-card:hover::after  { transform: scaleX(1); }
 
-/* ── EN-TÊTE DE CARD (icône + badge) ─────────────────── */
+/* ── EN-TÊTE DE CARD ─────────────────────────────────── */
 .game-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: .8rem;
+  gap: clamp(.5rem, 1vw, .8rem);
 }
 
-/* Grande icône emoji */
 .game-icon {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
   line-height: 1;
 }
 
-/* Badge type de jeu (Quiz, Versus, Pixel…) */
 .game-badge {
   font-family: 'DM Sans', sans-serif;
-  font-size: .58rem;
+  font-size: clamp(.5rem, .75vw, .58rem);
   letter-spacing: .12em;
   text-transform: uppercase;
-  padding: .2rem .6rem;
+  padding: clamp(.14rem, .25vw, .2rem) clamp(.45rem, .8vw, .6rem);
   border: 1px solid var(--gold-line);
   color: var(--gold);
-  border-radius: 20px; /* pill arrondi */
+  border-radius: 20px;
   white-space: nowrap;
 }
 
@@ -124,14 +109,13 @@
 .game-name {
   font-family: 'Shippori Mincho', serif;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: clamp(.9rem, 1.5vw, 1.1rem);
   color: var(--gold);
 }
 
 /* ── DESCRIPTION ─────────────────────────────────────── */
-/* flex:1 pour pousser le footer vers le bas */
 .game-desc {
-  font-size: .9rem;
+  font-size: clamp(.78rem, 1.2vw, .9rem);
   color: var(--muted);
   line-height: 1.6;
   flex: 1;
@@ -143,21 +127,19 @@
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--border);
-  padding-top: .8rem;
+  padding-top: clamp(.5rem, .9vw, .8rem);
   margin-top: auto;
 }
 
-/* Infos secondaires en italique */
 .game-meta {
-  font-size: .78rem;
+  font-size: clamp(.66rem, 1vw, .78rem);
   color: var(--muted);
   font-style: italic;
 }
 
-/* Flèche "Jouer →" — apparaît en slide au hover */
 .game-arrow {
   font-family: 'DM Sans', sans-serif;
-  font-size: .72rem;
+  font-size: clamp(.62rem, .95vw, .72rem);
   letter-spacing: .08em;
   color: var(--gold);
   opacity: 0;
@@ -176,12 +158,9 @@
 }
 
 /* ── RESPONSIVE ──────────────────────────────────────── */
-/* Tablette : 2 colonnes */
 @media (max-width: 900px) {
   .games-grid { grid-template-columns: repeat(2, 1fr); }
 }
-
-/* Mobile : 1 colonne, padding réduit */
 @media (max-width: 600px) {
   .games-grid { grid-template-columns: 1fr; }
   .game-card  { padding: 1.5rem 1.2rem; }
