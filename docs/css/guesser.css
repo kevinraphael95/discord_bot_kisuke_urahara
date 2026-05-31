@@ -87,8 +87,8 @@
 .sbar {
   display: none;
   width: 100%; max-width: 560px;
-  background: transparent; /* Fond transparent */
-  border: none;            /* Pas de bordure */
+  background: transparent;
+  border: none;
   padding: 0;
   gap: 10px;
   align-items: stretch;
@@ -96,15 +96,15 @@
   flex-wrap: nowrap;
 }
 .sbar.on { display: flex; }
-.sbar::before { display: none; } /* Enlève le dégradé */
+.sbar::before { display: none; }
 
 /* Les 3 blocs de stats deviennent des cards */
 .sv {
   flex: 1;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  background: var(--panel);      /* Applique le fond */
-  border: 1px solid var(--border); /* Applique la bordure */
-  border-radius: 12px;           /* Coins arrondis */
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   padding: .9rem .5rem;
 }
 .sv-n {
