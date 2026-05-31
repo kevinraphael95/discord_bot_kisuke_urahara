@@ -1,9 +1,8 @@
 /* ═══════════════════════════════════════════════════════
    BLEACHINATOR — bleachinator.js
-   Questions 100% dynamiques générées depuis CHARS
+   Partition optimale 50/50 par propriété
    ═══════════════════════════════════════════════════════ */
 
-/* ── ÉTAT ────────────────────────────────────────────── */
 let pool       = [];
 let asked      = 0;
 let botStreak  = 0;
@@ -13,161 +12,141 @@ let askedKeys  = new Set();
 
 const MAX_Q = 7;
 
-/* ── LABELS LISIBLES ─────────────────────────────────── */
-const LABELS = {
-  r:   { _: "Ton personnage est-il de la race <strong>{v}</strong> ?",
-          "Shinigami":                "Ton personnage est-il un <strong>Shinigami</strong> ?",
-          "Vizard":                   "Ton personnage est-il un <strong>Vizard</strong> ?",
-          "Arrancar":                 "Ton personnage est-il un <strong>Arrancar</strong> ?",
-          "Quincy":                   "Ton personnage est-il un <strong>Quincy</strong> ?",
-          "Humain":                   "Ton personnage est-il un <strong>Humain</strong> (sans pouvoir spécial) ?",
-          "Fullbring":                "Ton personnage est-il un <strong>Fullbring</strong> ?",
-          "Hollow":                   "Ton personnage est-il un <strong>Hollow pur</strong> (pas Arrancar) ?",
-          "Mod-Soul/Âme artificielle":"Ton personnage est-il une <strong>âme artificielle / Mod-Soul</strong> ?",
-  },
-  sx:  { "M": "Ton personnage est-il <strong>masculin</strong> ?",
-          "F": "Ton personnage est-il <strong>féminin</strong> ?",
-  },
-  af:  { _: "Ton personnage appartient-il à <strong>{v}</strong> ?",
-          "Gotei 13":     "Ton personnage appartient-il (ou a-t-il appartenu) au <strong>Gotei 13</strong> ?",
-          "Wandenreich":  "Ton personnage appartient-il au <strong>Wandenreich</strong> ?",
-          "Espada":       "Ton personnage est-il (ou a-t-il été) une <strong>Espada</strong> ?",
-          "Karakura":     "Ton personnage vient-il de <strong>Karakura</strong> ?",
-          "Division Zero":"Ton personnage fait-il partie de la <strong>Division Zéro</strong> ?",
-          "Indépendant":  "Ton personnage est-il <strong>indépendant</strong> (Urahara Shop, Vizards non promus…) ?",
-          "Hueco Mundo":  "Ton personnage réside-t-il à <strong>Hueco Mundo</strong> (hors Espada) ?",
-          "Xcution":      "Ton personnage fait-il partie du groupe <strong>Xcution</strong> ?",
-  },
-  st:  { "Vivant":    "Ton personnage est-il <strong>vivant</strong> à la fin de l'histoire ?",
-          "Mort":      "Ton personnage est-il <strong>mort définitivement</strong> ?",
-          "Incertain": "Le statut de ton personnage est-il <strong>incertain</strong> à la fin ?",
-  },
-  hc:  { _: "Ton personnage a-t-il les <strong>cheveux {v}</strong> ?",
-          "Chauve": "Ton personnage est-il <strong>chauve</strong> ?",
-          "Noir":   "Ton personnage a-t-il les <strong>cheveux noirs</strong> ?",
-          "Blond":  "Ton personnage a-t-il les <strong>cheveux blonds</strong> ?",
-          "Blanc":  "Ton personnage a-t-il les <strong>cheveux blancs</strong> ?",
-          "Gris":   "Ton personnage a-t-il les <strong>cheveux gris</strong> ?",
-          "Brun":   "Ton personnage a-t-il les <strong>cheveux bruns</strong> ?",
-          "Roux":   "Ton personnage a-t-il les <strong>cheveux roux</strong> ?",
-          "Rouge":  "Ton personnage a-t-il les <strong>cheveux rouges</strong> ?",
-          "Rose":   "Ton personnage a-t-il les <strong>cheveux roses</strong> ?",
-          "Violet": "Ton personnage a-t-il les <strong>cheveux violets</strong> ?",
-          "Vert":   "Ton personnage a-t-il les <strong>cheveux verts</strong> ?",
-          "Bleu":   "Ton personnage a-t-il les <strong>cheveux bleus</strong> ?",
-  },
-  arc: { _: "Ton personnage est-il introduit dans l'arc <strong>{v}</strong> ?",
-          "Le Shinigami Remplaçant (1)":                    "Ton personnage apparaît-il dès <strong>l'arc 1</strong> (Shinigami Remplaçant) ?",
-          "Soul Society : L'Invasion (2.1)":                "Ton personnage est-il introduit dans <strong>Soul Society — L'Invasion</strong> ?",
-          "Soul Society : Le Sauvetage (2.2)":              "Ton personnage est-il introduit dans <strong>Soul Society — Le Sauvetage</strong> ?",
-          "Arrancar : Invasion du monde des humains (3.1)": "Ton personnage est-il introduit dans <strong>l'Invasion du monde des humains</strong> ?",
-          "Arrancar : Invasion du Hueco Mundo (3.2)":       "Ton personnage est-il introduit lors de <strong>l'Invasion de Hueco Mundo</strong> ?",
-          "Arrancar : Bataille de Karakura (3.3)":          "Ton personnage est-il introduit lors de la <strong>Bataille de Karakura</strong> ?",
-          "Arc Fullbringers (4)":                           "Ton personnage est-il introduit dans l'<strong>arc Fullbringers</strong> ?",
-          "Guerre Sanglante de Mille Ans (5)":              "Ton personnage est-il introduit dans la <strong>Guerre Sanglante de Mille Ans</strong> ?",
-          "NO BREATHES FROM HELL (6)":                      "Ton personnage est-il introduit dans <strong>No Breathes from Hell</strong> ?",
-  },
-};
-
-/* ── QUESTIONS NUMÉRIQUES (seuils) ───────────────────── */
-// Générées dynamiquement selon les valeurs réelles du pool
-const NUMERIC_FIELDS = [
-  { key: "d", label_gte: v => `Ton personnage a-t-il une <strong>dangerosité ≥ ${v}</strong> ?`,
-               label_lte: v => `Ton personnage a-t-il une <strong>dangerosité ≤ ${v}</strong> ?` },
-  { key: "w", label_gte: v => `Ton personnage a-t-il <strong>remporté ≥ ${v} combat${v>1?"s":""}</strong> ?`,
-               label_lte: v => `Ton personnage a-t-il <strong>remporté ≤ ${v} combat${v>1?"s":""}</strong> ?` },
+/* ── PROPRIÉTÉS INTERROGEABLES ───────────────────────── */
+const FIELDS = [
+  { key: "sx",  label: v => `Ton personnage est-il <strong>${v === "M" ? "masculin" : "féminin"}</strong> ?` },
+  { key: "r",   label: v => `Ton personnage est-il de race <strong>${v}</strong> ?` },
+  { key: "af",  label: v => `Ton personnage appartient-il à <strong>${v}</strong> ?` },
+  { key: "st",  label: v => `Le statut de ton personnage est-il <strong>${v}</strong> ?` },
+  { key: "hc",  label: v => v === "Chauve" ? "Ton personnage est-il <strong>chauve</strong> ?" : `Ton personnage a-t-il les <strong>cheveux ${v.toLowerCase()}</strong> ?` },
+  { key: "arc", label: v => `Ton personnage est-il introduit dans <strong>${v}</strong> ?` },
 ];
 
-/* ── GÉNÉRATION DYNAMIQUE DES QUESTIONS ──────────────── */
-function generateQuestions(currentPool) {
-  const questions = [];
+const NUMERIC_FIELDS = [
+  { key: "d", label_gte: v => `Ton personnage a-t-il une <strong>dangerosité ≥ ${v}</strong> ?` },
+  { key: "w", label_gte: v => `Ton personnage a-t-il remporté <strong>≥ ${v} combat${v>1?"s":""}</strong> ?` },
+];
 
-  // Questions catégorielles : une question par valeur distincte dans le pool
-  for (const field of ["r", "sx", "af", "st", "hc", "arc"]) {
-    const values = [...new Set(currentPool.map(c => c[field]))];
-    // Ne générer que si la valeur divise le pool (pas tout d'un côté)
-    for (const val of values) {
-      const key = `${field}__${val}`;
-      const yes = currentPool.filter(c => c[field] === val).length;
-      if (yes === 0 || yes === currentPool.length) continue;
-
-      const labelMap = LABELS[field] || {};
-      const label = labelMap[val]
-        || (labelMap._ ? labelMap._.replace("{v}", val) : `Ton personnage a-t-il <strong>${field} = ${val}</strong> ?`);
-
-      questions.push({
-        key,
-        label,
-        getValue: c => c[field] === val ? "oui" : "non",
-        match: "oui",
-      });
-    }
-  }
-
-  // Questions numériques : seuils dynamiques
-  for (const nf of NUMERIC_FIELDS) {
-    const vals = [...new Set(currentPool.map(c => c[nf.key]))].sort((a,b)=>a-b);
-    // Tester chaque valeur comme seuil ≥ et ≤
-    for (const v of vals) {
-      // ≥ v
-      const key_gte = `${nf.key}_gte_${v}`;
-      const yes_gte = currentPool.filter(c => c[nf.key] >= v).length;
-      if (yes_gte > 0 && yes_gte < currentPool.length) {
-        questions.push({
-          key: key_gte,
-          label: nf.label_gte(v),
-          getValue: c => c[nf.key] >= v ? "oui" : "non",
-          match: "oui",
-        });
-      }
-      // ≤ v
-      const key_lte = `${nf.key}_lte_${v}`;
-      const yes_lte = currentPool.filter(c => c[nf.key] <= v).length;
-      if (yes_lte > 0 && yes_lte < currentPool.length) {
-        questions.push({
-          key: key_lte,
-          label: nf.label_lte(v),
-          getValue: c => c[nf.key] <= v ? "oui" : "non",
-          match: "oui",
-        });
-      }
-    }
-  }
-
-  return questions;
-}
-
-/* ── ENTROPIE DE SHANNON ─────────────────────────────── */
+/* ── ENTROPIE ────────────────────────────────────────── */
 function entropy(yes, total) {
   if (yes === 0 || yes === total) return 0;
-  const p = yes / total;
-  const q = 1 - p;
+  const p = yes / total, q = 1 - p;
   return -(p * Math.log2(p) + q * Math.log2(q));
 }
 
-/* ── MEILLEURE QUESTION ──────────────────────────────── */
+/* ── MEILLEURE PARTITION PAR CHAMP ──────────────────── */
+// Pour un champ donné, trouve le sous-ensemble de valeurs
+// qui partitionne le pool le plus proche de 50/50
+function bestPartitionForField(field) {
+  const n = pool.length;
+  // Grouper les persos par valeur
+  const groups = {};
+  for (const c of pool) {
+    const v = c[field.key];
+    if (!groups[v]) groups[v] = [];
+    groups[v].push(c);
+  }
+  const vals = Object.keys(groups);
+  if (vals.length < 2) return null;
+
+  // Chercher le sous-ensemble de valeurs dont le total est le plus proche de n/2
+  // Pour éviter 2^n on utilise une approche greedy : trier par taille et remplir
+  const target = n / 2;
+  const sorted = vals.slice().sort((a, b) => groups[a].length - groups[b].length);
+
+  let bestSubset = null, bestDist = Infinity;
+
+  // Tester toutes les combinaisons (n de valeurs distinct est petit ~2-9 max)
+  const total = vals.length;
+  for (let mask = 1; mask < (1 << total) - 1; mask++) {
+    let count = 0;
+    const subset = [];
+    for (let i = 0; i < total; i++) {
+      if (mask & (1 << i)) { count += groups[vals[i]].length; subset.push(vals[i]); }
+    }
+    const dist = Math.abs(count - target);
+    if (dist < bestDist) { bestDist = dist; bestSubset = { subset, count }; }
+  }
+
+  if (!bestSubset) return null;
+
+  const { subset, count } = bestSubset;
+  const ent = entropy(count, n);
+  if (ent === 0) return null;
+
+  // Label : si un seul élément dans le subset, label précis ; sinon liste
+  let label;
+  if (subset.length === 1) {
+    label = field.label(subset[0]);
+  } else if (total - subset.length === 1) {
+    // Complément = 1 valeur → poser la question sur le complément (plus court)
+    const complement = vals.find(v => !subset.includes(v));
+    label = field.label(complement);
+    // Inverser : oui = complément
+    return {
+      key: `${field.key}__NOT__${complement}`,
+      label: field.label(complement),
+      entropy: ent,
+      getValue: c => !subset.includes(c[field.key]) ? "oui" : "non",
+      match: "oui",
+    };
+  } else {
+    const names = subset.join(", ");
+    label = `Ton personnage fait-il partie de ce groupe : <strong>${names}</strong> ?`;
+  }
+
+  return {
+    key: `${field.key}__${subset.sort().join("|")}`,
+    label,
+    entropy: ent,
+    getValue: c => subset.includes(c[field.key]) ? "oui" : "non",
+    match: "oui",
+  };
+}
+
+/* ── MEILLEURE QUESTION NUMÉRIQUE ────────────────────── */
+function bestNumericQuestion(nf) {
+  const vals = [...new Set(pool.map(c => c[nf.key]))].sort((a, b) => a - b);
+  const n = pool.length;
+  let best = null, bestEnt = -1;
+  for (const v of vals) {
+    const yes = pool.filter(c => c[nf.key] >= v).length;
+    if (yes === 0 || yes === n) continue;
+    const e = entropy(yes, n);
+    if (e > bestEnt) { bestEnt = e; best = { v, yes, e }; }
+  }
+  if (!best) return null;
+  return {
+    key: `${nf.key}_gte_${best.v}`,
+    label: nf.label_gte(best.v),
+    entropy: best.e,
+    getValue: c => c[nf.key] >= best.v ? "oui" : "non",
+    match: "oui",
+  };
+}
+
+/* ── SÉLECTION DE LA MEILLEURE QUESTION ──────────────── */
 function bestQuestion() {
-  const candidates = generateQuestions(pool).filter(q => !askedKeys.has(q.key));
+  const candidates = [];
+
+  for (const field of FIELDS) {
+    const q = bestPartitionForField(field);
+    if (q && !askedKeys.has(q.key)) candidates.push(q);
+  }
+  for (const nf of NUMERIC_FIELDS) {
+    const q = bestNumericQuestion(nf);
+    if (q && !askedKeys.has(q.key)) candidates.push(q);
+  }
+
   if (!candidates.length) return null;
 
   // Trier par entropie décroissante
-  candidates.sort((a, b) => {
-    const ya = pool.filter(c => a.getValue(c) === a.match).length;
-    const yb = pool.filter(c => b.getValue(c) === b.match).length;
-    return entropy(yb, pool.length) - entropy(ya, pool.length);
-  });
+  candidates.sort((a, b) => b.entropy - a.entropy);
 
-  // Parmi le top (entropie très proche du max), choisir aléatoirement
-  // pour varier un peu tout en restant optimal
-  const best = candidates[0];
-  const bestScore = entropy(pool.filter(c => best.getValue(c) === best.match).length, pool.length);
-  const TOP_BAND = 0.05; // tolérance pour la variation
-  const topCandidates = candidates.filter(q => {
-    const y = pool.filter(c => q.getValue(c) === q.match).length;
-    return bestScore - entropy(y, pool.length) <= TOP_BAND;
-  });
-
-  return topCandidates[Math.floor(Math.random() * topCandidates.length)];
+  // Variation légère : choisir aléatoirement parmi le top à entropie quasi-égale
+  const TOP = 0.04;
+  const top = candidates.filter(q => candidates[0].entropy - q.entropy <= TOP);
+  return top[Math.floor(Math.random() * top.length)];
 }
 
 /* ── INIT ────────────────────────────────────────────── */
