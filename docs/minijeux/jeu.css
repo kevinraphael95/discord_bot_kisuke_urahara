@@ -3,80 +3,92 @@
    Dépend de : base.css
    ═══════════════════════════════════════════════════════ */
 
-/* ── WRAPPER PRINCIPAL ───────────────────────────────── */
-/* padding-top: 0 pour ne pas ajouter d'espace sous les orbes */
 .pg-wrap {
   position: relative; z-index: 1;
   max-width: 980px; margin: 0 auto;
-  padding: 0 3rem 4rem;
-  display: flex; flex-direction: column; gap: 1.2rem;
+  padding: 0 clamp(1rem, 3.5vw, 3rem) clamp(2.5rem, 5vw, 4rem);
+  display: flex; flex-direction: column;
+  gap: clamp(.7rem, 1.5vw, 1.2rem);
 }
 
 /* ── ÉCRAN DE CHARGEMENT ─────────────────────────────── */
 #loadBox {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: .8rem; min-height: 340px;
+  gap: clamp(.5rem, 1vw, .8rem);
+  min-height: clamp(220px, 35vw, 340px);
   text-align: center; color: var(--muted);
 }
 .spinner {
-  width: 36px; height: 36px;
+  width: clamp(28px, 4vw, 36px); height: clamp(28px, 4vw, 36px);
   border: 2px solid var(--gold-line); border-top-color: var(--gold);
   border-radius: 50%; animation: spinner-spin .8s linear infinite;
 }
 @keyframes spinner-spin { to { transform: rotate(360deg); } }
 
 /* ── LAYOUT DU JEU ───────────────────────────────────── */
-/* Canvas à gauche (fixe 400px), inputs à droite (flex) */
 #gameBox {
-  display: none; flex-direction: row; gap: 1.4rem;
+  display: none; flex-direction: row;
+  gap: clamp(.8rem, 1.8vw, 1.4rem);
 }
 .game-left {
-  flex: 0 0 400px; max-width: 100%;
-  display: flex; flex-direction: column; gap: .8rem;
+  flex: 0 0 clamp(260px, 35vw, 400px); max-width: 100%;
+  display: flex; flex-direction: column;
+  gap: clamp(.5rem, 1vw, .8rem);
 }
 .game-right {
-  flex: 1; display: flex; flex-direction: column; gap: .8rem; min-width: 0;
+  flex: 1; display: flex; flex-direction: column;
+  gap: clamp(.5rem, 1vw, .8rem); min-width: 0;
 }
 
 /* ── CANVAS PIXELISÉ ─────────────────────────────────── */
 .canvas-card {
-  border: 1px solid var(--gold-line); background: var(--void); padding: .3rem .5rem;
+  border: 1px solid var(--gold-line); background: var(--void);
+  padding: clamp(.2rem, .5vw, .3rem) clamp(.3rem, .7vw, .5rem);
 }
-/* image-rendering: pixelated pour garder l'effet pixel net */
 canvas {
-  width: 100%; max-height: 380px; display: block;
+  width: 100%; max-height: clamp(240px, 35vw, 380px); display: block;
   transition: opacity .15s; image-rendering: pixelated;
 }
 
-/* ── STATS (série, record, résolution) ───────────────── */
-.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
-.sstat { background: var(--panel); border: 1px solid var(--gold-line); padding: .5rem; text-align: center; }
-.sv { color: var(--gold); font-weight: 700; display: block; font-size: 1.1rem; }
-.sl { font-size: .6rem; color: var(--muted); letter-spacing: .04em; }
+/* ── STATS ───────────────────────────────────────────── */
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(.3rem, .7vw, .5rem);
+}
+.sstat {
+  background: var(--panel); border: 1px solid var(--gold-line);
+  padding: clamp(.35rem, .7vw, .5rem); text-align: center;
+}
+.sv { color: var(--gold); font-weight: 700; display: block; font-size: clamp(.85rem, 1.5vw, 1.1rem); }
+.sl { font-size: clamp(.52rem, .75vw, .6rem); color: var(--muted); letter-spacing: .04em; }
 
 /* ── INDICE ──────────────────────────────────────────── */
 .hint {
-  font-size: .8rem; color: var(--muted); text-align: center;
+  font-size: clamp(.68rem, 1.1vw, .8rem); color: var(--muted); text-align: center;
   min-height: 18px; padding: .2rem 0; border-top: 1px solid var(--border);
 }
 
 /* ── INPUT + BOUTON VALIDER ──────────────────────────── */
-.input-row { display: flex; gap: .5rem; position: relative; }
+.input-row { display: flex; gap: clamp(.3rem, .7vw, .5rem); position: relative; }
 #guessInput {
   flex: 1; background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); padding: .6rem .8rem;
-  font-family: 'DM Sans', sans-serif; font-size: .9rem;
+  color: var(--text);
+  padding: clamp(.45rem, .9vw, .6rem) clamp(.6rem, 1.1vw, .8rem);
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(.78rem, 1.2vw, .9rem);
   outline: none; transition: border-color .15s;
 }
 #guessInput:focus    { border-color: var(--gold-line); }
 #guessInput:disabled { opacity: .4; cursor: not-allowed; }
 
 .btn-sm {
-  font-family: 'DM Sans', sans-serif; padding: .6rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  padding: clamp(.45rem, .9vw, .6rem) clamp(.65rem, 1.3vw, 1rem);
   border: 1px solid var(--gold-line); background: transparent; color: var(--gold);
-  cursor: pointer; font-size: .78rem; font-weight: 600;
-  letter-spacing: .06em; text-transform: uppercase;
+  cursor: pointer;
+  font-size: clamp(.66rem, 1vw, .78rem);
+  font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
   transition: background .15s, color .15s; white-space: nowrap;
 }
 .btn-sm:hover  { background: var(--gold-pale); }
@@ -87,64 +99,71 @@ canvas {
 .autocomplete {
   position: absolute; top: 100%; left: 0; right: 0;
   background: var(--panel); border: 1px solid var(--gold-line); border-top: none;
-  max-height: 220px; overflow-y: auto; z-index: 10; display: none;
+  max-height: clamp(150px, 25vw, 220px); overflow-y: auto; z-index: 10; display: none;
 }
 .ac-item {
-  padding: .55rem .7rem; cursor: pointer; font-size: .85rem;
+  padding: clamp(.38rem, .8vw, .55rem) clamp(.5rem, .9vw, .7rem);
+  cursor: pointer;
+  font-size: clamp(.74rem, 1.1vw, .85rem);
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: .4rem;
+  display: flex; align-items: center; gap: clamp(.25rem, .5vw, .4rem);
   transition: background .1s, color .1s;
 }
 .ac-item:hover, .ac-item.active { background: var(--gold-pale); color: var(--gold-lt); }
-/* Item déjà proposé : grisé et non cliquable */
 .ac-item.already-guessed { opacity: .35; cursor: not-allowed; pointer-events: none; }
 .ac-item.already-guessed::after { content: "déjà proposé"; font-size: .68rem; color: var(--muted); margin-left: auto; }
 .ac-highlight { color: var(--gold); font-weight: 700; }
 
 /* ── COMPTEUR DE TENTATIVES ──────────────────────────── */
-.attempts-bar { font-size: .74rem; color: var(--muted); text-align: right; }
+.attempts-bar { font-size: clamp(.62rem, .95vw, .74rem); color: var(--muted); text-align: right; }
 .attempts-bar span { color: var(--gold); font-weight: 600; }
 
-/* ── HISTORIQUE DES PROPOSITIONS ────────────────────── */
-.guesses-section { display: flex; flex-direction: column; gap: .5rem; flex: 1; }
+/* ── HISTORIQUE ──────────────────────────────────────── */
+.guesses-section { display: flex; flex-direction: column; gap: clamp(.3rem, .7vw, .5rem); flex: 1; }
 .guesses-label {
-  font-size: .65rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase;
-  padding-bottom: .35rem; border-bottom: 1px solid var(--gold-line);
+  font-size: clamp(.55rem, .85vw, .65rem); color: var(--muted);
+  letter-spacing: .1em; text-transform: uppercase;
+  padding-bottom: clamp(.22rem, .5vw, .35rem); border-bottom: 1px solid var(--gold-line);
 }
 .guesses-list {
-  display: flex; flex-direction: column; gap: .3rem;
-  overflow-y: auto; max-height: 300px;
+  display: flex; flex-direction: column; gap: clamp(.2rem, .4vw, .3rem);
+  overflow-y: auto; max-height: clamp(200px, 28vw, 300px);
 }
 .guess-item {
-  display: flex; align-items: center; gap: .5rem;
+  display: flex; align-items: center; gap: clamp(.3rem, .6vw, .5rem);
   background: var(--panel); border: 1px solid var(--border);
-  padding: .4rem .65rem; font-size: .84rem; animation: guess-in .15s ease;
+  padding: clamp(.28rem, .6vw, .4rem) clamp(.45rem, .9vw, .65rem);
+  font-size: clamp(.72rem, 1.1vw, .84rem);
+  animation: guess-in .15s ease;
 }
 @keyframes guess-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-.guess-icon { font-size: .75rem; flex-shrink: 0; }
+.guess-icon { font-size: clamp(.62rem, .95vw, .75rem); flex-shrink: 0; }
 .guess-wrong .guess-icon::before { content: "✗"; color: var(--red-lt, #e05555); }
-.no-guesses { font-size: .8rem; color: var(--muted); font-style: italic; padding: .3rem 0; }
+.no-guesses { font-size: clamp(.68rem, 1vw, .8rem); color: var(--muted); font-style: italic; padding: .3rem 0; }
 
 /* ── ÉCRAN RÉSULTAT ──────────────────────────────────── */
 #resultBox {
-  display: none; flex-direction: row; gap: 1.4rem;
+  display: none; flex-direction: row;
+  gap: clamp(.8rem, 1.8vw, 1.4rem);
   border: 1px solid var(--gold-line); background: var(--panel);
   animation: rise .3s ease; overflow: hidden;
 }
-.result-left { flex: 0 0 400px; max-width: 100%; }
+.result-left { flex: 0 0 clamp(200px, 30vw, 400px); max-width: 100%; }
 #resultImg {
   width: 100%; height: 100%; object-fit: cover;
   display: block; border-right: 1px solid var(--gold-line);
 }
 .result-right {
   flex: 1; display: flex; flex-direction: column;
-  justify-content: center; gap: .9rem; padding: 2rem 1.6rem; min-width: 0;
+  justify-content: center;
+  gap: clamp(.5rem, 1.2vw, .9rem);
+  padding: clamp(1.2rem, 2.5vw, 2rem) clamp(1rem, 2vw, 1.6rem);
+  min-width: 0;
 }
-.res-title  { font-size: 1.5rem; }
-.res-name   { font-family: 'Shippori Mincho', serif; font-size: 1.4rem; font-weight: 700; color: var(--gold); }
-.res-guesses { font-size: .8rem; color: var(--muted); }
+.res-title  { font-size: clamp(1.1rem, 2vw, 1.5rem); }
+.res-name   { font-family: 'Shippori Mincho', serif; font-size: clamp(1.1rem, 1.9vw, 1.4rem); font-weight: 700; color: var(--gold); }
+.res-guesses { font-size: clamp(.68rem, 1.1vw, .8rem); color: var(--muted); }
 
-/* ── ANIMATIONS ──────────────────────────────────────── */
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* ── RESPONSIVE ──────────────────────────────────────── */
