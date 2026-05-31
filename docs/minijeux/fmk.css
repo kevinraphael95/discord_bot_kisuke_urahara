@@ -1,8 +1,5 @@
 /* ── FMK — styles spécifiques, variables de base.css ── */
 
-/* ── Orbes : équilibre haut/bas ───────────────────────── */
-.orbs { margin-bottom: 1.4rem; }
-
 /* ── Layout principal ─────────────────────────────────── */
 #gameBox {
   display: flex;
@@ -171,3 +168,5 @@
     flex: 1;
   }
 }
+
+.orbs { margin-top: 0; }
