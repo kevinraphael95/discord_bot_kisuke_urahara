@@ -133,18 +133,39 @@
 }
 
 /* Contenu des cartes stats */
-.sv { gap: 0; }
+.sv {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: clamp(6px, 1vw, 10px);
+  padding: clamp(8px, 1.2vw, 12px) clamp(12px, 2vw, 18px) !important;
+  min-height: 42px !important;
+  height: auto !important;
+  white-space: nowrap;
+}
+
+.sv-l {
+  font-size: clamp(.72rem, 1vw, .82rem);
+  font-weight: 600;
+  letter-spacing: .05em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
 .sv-n {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(0.75rem, 1.2vw, 1rem);
-  font-weight: 800; color: var(--gold);
+  font-size: clamp(.9rem, 1.4vw, 1.1rem);
+  font-weight: 800;
+  color: var(--gold);
   line-height: 1;
 }
-.sv-l {
-  font-size: 0.4rem;
-  font-weight: 600; letter-spacing: .08em; color: var(--muted); text-transform: uppercase;
-  margin-top: 1px;
-}
+
+
 .svdiv { display: none; }
 
 /* Contenu des points */
