@@ -457,7 +457,7 @@
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 700px) {
   .gwrap { padding: .5rem .7rem 4rem; gap: 8px; }
-  .mbtn  { padding: 1rem 1.2rem; font-size: .85rem; letter-spacing: .03em; }
+  .mbtn  { padding: .7rem .9rem; font-size: .78rem; letter-spacing: .03em; }
   .rules-btn { padding: .5rem .75rem; }
   .gi    { font-size: .78rem; padding: .75rem .8rem; }
   .gbtn  { min-width: 68px; font-size: .66rem; padding: 0 .8rem; }
