@@ -466,6 +466,8 @@
   .sestats { gap: 4px; }
   .sestat  { padding: 5px 7px; }
   .sbar    { gap: 6px; }
+  .cname  { font-size: 1.4rem; }
+  .cbadge { display: none; }
 
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }
