@@ -455,24 +455,30 @@
 
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 700px) {
-  .gwrap { padding: .5rem .7rem 4rem; gap: 8px; }
-  .mbtn  { padding: .55rem .9rem; font-size: .82rem; letter-spacing: .03em; }
-  .rules-btn { padding: .5rem .75rem; }
-  .gi    { font-size: .78rem; padding: .75rem .8rem; }
-  .gbtn  { min-width: 68px; font-size: .66rem; padding: 0 .8rem; }
+  .gwrap { padding: .5rem .7rem 4rem; gap: 12px; }
+  .mbtn  { padding: .7rem 1.2rem; font-size: 0.95rem; }
+  .rules-btn { padding: .7rem 1rem; font-size: 1rem; }
+  .gi    { font-size: 1rem; padding: 1rem; }
+  .gbtn  { min-width: 80px; font-size: 0.85rem; padding: 0 1rem; }
+  
   .tw    { display: none; }
   .cards { display: flex; }
-  .sestats { gap: 4px; }
-  .sestat  { padding: 5px 7px; }
-  .sbar    { gap: 6px; }
-  .cname  { font-size: 1.4rem; }
+  
+  /* C'est ici que ça change pour tes cases de jeu */
+  .cname { font-size: 1.6rem !important; }
+  .cv    { font-size: 1.1rem !important; font-weight: 800 !important; }
+  .cl    { font-size: 0.8rem !important; }
   .cbadge { display: none; }
+  
+  .sestats { gap: 6px; }
+  .sestat  { padding: 8px 10px; }
+  .sbar    { gap: 8px; }
 
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }
-  .rbanner-left img, .send-left img { width: 55%; margin: 0 auto; height: auto; object-fit: unset; }
-  .rbanner-right, .send-right { width: 100%; align-items: center; text-align: center; }
-  .rbanner-right .xbtn, .send-right .r2btn, .send-right .xbtn2 { align-self: center; }
+  .rbanner-left img, .send-left img { width: 60%; margin: 0 auto; height: auto; }
+  .rbanner-right, .send-right { width: 100%; align-items: center; text-align: center; padding: 1.5rem; }
+  .rbanner-right .xbtn, .send-right .r2btn, .send-right .xbtn2 { align-self: center; font-size: 1rem !important; }
 }
 
 @media (min-width: 701px) and (max-width: 900px) {
