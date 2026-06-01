@@ -46,7 +46,7 @@
 .mbtn.surv.active { color: var(--surv-tx, var(--rei-lt)); background: var(--rei-pale); border-color: rgba(30,127,232,.25); }
 
 .rules-btn {
-  padding: clamp(.38rem, .7vw, .55rem) clamp(.6rem, 1vw, 1rem);
+  padding: clamp(.15rem, .3vw, .25rem) clamp(.6rem, 1vw, 1rem);
   font-size: clamp(.8rem, 1.2vw, .95rem);
   border-radius: 30px;
 }
