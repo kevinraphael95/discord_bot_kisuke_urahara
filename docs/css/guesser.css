@@ -454,7 +454,6 @@
 .xbtn2:hover { background: var(--rei-pale); }
 
 /* ── Responsive ──────────────────────────────────────── */
-/* ── Responsive Mobile (Corrigé pour lisibilité) ── */
 @media (max-width: 700px) {
   .gwrap { padding: .5rem .7rem 4rem; gap: 8px; }
   .mbtn  { padding: .55rem .9rem; font-size: .82rem; letter-spacing: .03em; }
@@ -466,28 +465,18 @@
   .sestats { gap: 4px; }
   .sestat  { padding: 5px 7px; }
   .sbar    { gap: 6px; }
-
-  /* Modifications demandées */
   .cname  { font-size: 1.4rem; }
   .cbadge { display: none; }
-  .cl     { font-size: 0.6rem !important; } /* Titre case un peu plus grand */
-  .cv     { font-size: 0.85rem !important; font-weight: bold; } /* Réponse plus grande */
 
-  /* Bannières de fin */
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }
   .rbanner-left img, .send-left img { width: 55%; margin: 0 auto; height: auto; object-fit: unset; }
-  .rbanner-right, .send-right { width: 100%; align-items: center; text-align: center; padding: 10px; }
-  
-  /* Texte des bannières un peu plus grand */
-  .rttl, .se-t { font-size: 1.1rem !important; }
-  .rdesc, .se-s { font-size: 0.9rem !important; }
-  
-  .rbanner-right .xbtn, .send-right .r2btn, .send-right .xbtn2 { align-self: center; font-size: 0.8rem; }
+  .rbanner-right, .send-right { width: 100%; align-items: center; text-align: center; }
+  .rbanner-right .xbtn, .send-right .r2btn, .send-right .xbtn2 { align-self: center; }
 }
 
 @media (min-width: 701px) and (max-width: 900px) {
   .th, .row { grid-template-columns: 105px repeat(9, 1fr); min-width: 640px; }
-  .cell              { font-size: .5rem; min-height: 32px; }
+  .cell             { font-size: .5rem; min-height: 32px; }
   .cell:first-child { font-size: .56rem; }
 }
