@@ -126,9 +126,9 @@
   border: 1px solid var(--border);
   border-radius: clamp(6px, 1vw, 10px);
   padding: 0 clamp(10px, 1.5vw, 16px);
-  height: 42px;
-  min-height: 42px;
-  max-height: 42px;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
   white-space: nowrap;
   box-sizing: border-box;
 }
@@ -456,7 +456,7 @@
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 700px) {
   .gwrap { padding: .5rem .7rem 4rem; gap: 8px; }
-  .mbtn  { padding: .4rem .8rem; font-size: .78rem; letter-spacing: .03em; }
+  .mbtn  { padding: .55rem .9rem; font-size: .82rem; letter-spacing: .03em; }
   .rules-btn { padding: .5rem .75rem; }
   .gi    { font-size: .78rem; padding: .75rem .8rem; }
   .gbtn  { min-width: 68px; font-size: .66rem; padding: 0 .8rem; }
