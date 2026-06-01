@@ -467,6 +467,8 @@
   .sbar    { gap: 6px; }
   .cname  { font-size: 1.4rem; }
   .cbadge { display: none; }
+  .cv { font-size: .8rem; }
+  .cl { font-size: .6rem; }
 
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }
