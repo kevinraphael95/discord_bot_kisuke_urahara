@@ -31,7 +31,7 @@
   font-size: clamp(.6rem, .9vw, .76rem);
   font-weight: 600;
   letter-spacing: .05em;
-  padding: clamp(.3rem, .5vw, .4rem) clamp(.5rem, 1vw, 1rem);
+  padding: clamp(.15rem, .3vw, .25rem) clamp(.5rem, 1vw, 1rem);
   border: none; background: transparent; color: var(--muted);
   cursor: pointer; transition: all .2s; text-transform: uppercase;
   position: relative; border-radius: 30px;
@@ -115,7 +115,6 @@
 }
 .sbar.on { display: flex; }
 
-/* Les 3 blocs ont exactement la même taille */
 .sv, .sdots-w {
   flex: 1;
   display: flex;
@@ -457,7 +456,7 @@
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 700px) {
   .gwrap { padding: .5rem .7rem 4rem; gap: 8px; }
-  .mbtn  { padding: 1rem 1.2rem; font-size: .85rem; letter-spacing: .03em; }
+  .mbtn  { padding: .4rem .8rem; font-size: .78rem; letter-spacing: .03em; }
   .rules-btn { padding: .5rem .75rem; }
   .gi    { font-size: .78rem; padding: .75rem .8rem; }
   .gbtn  { min-width: 68px; font-size: .66rem; padding: 0 .8rem; }
