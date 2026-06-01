@@ -31,7 +31,7 @@
   font-size: clamp(.6rem, .9vw, .76rem);
   font-weight: 600;
   letter-spacing: .05em;
-  padding: clamp(.38rem, .7vw, .55rem) clamp(.7rem, 1.4vw, 1.4rem);
+  padding: clamp(.3rem, .5vw, .4rem) clamp(.5rem, 1vw, 1rem);
   border: none; background: transparent; color: var(--muted);
   cursor: pointer; transition: all .2s; text-transform: uppercase;
   position: relative; border-radius: 30px;
