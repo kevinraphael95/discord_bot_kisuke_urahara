@@ -223,8 +223,8 @@
   padding: clamp(3px, .5vw, 4px) clamp(10px, 1.5vw, 13px);
   min-height: clamp(46px, 6vw, 56px);
   cursor: pointer;
-  font-size: clamp(.68rem, 1vw, .76rem);
-  font-weight: 500; color: var(--text); transition: background .1s;
+  font-size: clamp(.85rem, 1.3vw, 1rem);
+  font-weight: 700; color: var(--white); transition: background .1s;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: clamp(6px, 1vw, 9px);
 }
