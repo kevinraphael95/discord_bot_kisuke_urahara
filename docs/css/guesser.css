@@ -345,7 +345,7 @@
 .cc.close   .cl { color: var(--yw-bd); }
 .cc.wrong   .cl { color: var(--ko-bd); }
 
-.cv { font-size: clamp(.6rem, .95vw, .68rem); font-weight: 600; text-align: center; line-height: 1.3; }
+.cv { font-size: clamp(.72rem, .95vw, .68rem); font-weight: 600; text-align: center; line-height: 1.3; }
 .cc.correct .cv { color: var(--ok-tx); }
 .cc.close   .cv { color: var(--yw-tx); }
 .cc.wrong   .cv { color: var(--ko-tx); }
