@@ -31,7 +31,7 @@
   font-size: clamp(.6rem, .9vw, .76rem);
   font-weight: 600;
   letter-spacing: .05em;
-  padding: clamp(.38rem, .7vw, .55rem) clamp(.7rem, 1.4vw, 1.4rem);
+  padding: clamp(.15rem, .3vw, .25rem) clamp(.5rem, 1vw, 1rem);
   border: none; background: transparent; color: var(--muted);
   cursor: pointer; transition: all .2s; text-transform: uppercase;
   position: relative; border-radius: 30px;
@@ -46,7 +46,7 @@
 .mbtn.surv.active { color: var(--surv-tx, var(--rei-lt)); background: var(--rei-pale); border-color: rgba(30,127,232,.25); }
 
 .rules-btn {
-  padding: clamp(.38rem, .7vw, .55rem) clamp(.6rem, 1vw, 1rem);
+  padding: clamp(.15rem, .3vw, .25rem) clamp(.6rem, 1vw, 1rem);
   font-size: clamp(.8rem, 1.2vw, .95rem);
   border-radius: 30px;
 }
@@ -55,7 +55,7 @@
   background: none; border: none;
   color: var(--muted); font-size: clamp(.82rem, 1.2vw, 1rem);
   cursor: pointer;
-  padding: clamp(.38rem, .7vw, .55rem) clamp(.55rem, 1vw, .85rem);
+  padding: clamp(.15rem, .3vw, .25rem) clamp(.55rem, 1vw, .85rem);
   display: flex; align-items: center; justify-content: center;
   transition: color .2s; position: relative;
   border-radius: 30px;
@@ -67,7 +67,7 @@
   background: none; border: none;
   color: var(--muted); font-size: clamp(.82rem, 1.2vw, 1rem);
   cursor: pointer;
-  padding: clamp(.38rem, .7vw, .55rem) clamp(.55rem, 1vw, .85rem);
+  padding: clamp(.15rem, .3vw, .25rem) clamp(.55rem, 1vw, .85rem);
   display: flex; align-items: center; justify-content: center;
   transition: color .2s; border-radius: 30px;
 }
@@ -115,7 +115,6 @@
 }
 .sbar.on { display: flex; }
 
-/* Les 3 blocs ont exactement la même taille */
 .sv, .sdots-w {
   flex: 1;
   display: flex;
@@ -127,9 +126,9 @@
   border: 1px solid var(--border);
   border-radius: clamp(6px, 1vw, 10px);
   padding: 0 clamp(10px, 1.5vw, 16px);
-  height: 42px;
-  min-height: 42px;
-  max-height: 42px;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
   white-space: nowrap;
   box-sizing: border-box;
 }
@@ -224,8 +223,8 @@
   padding: clamp(3px, .5vw, 4px) clamp(10px, 1.5vw, 13px);
   min-height: clamp(46px, 6vw, 56px);
   cursor: pointer;
-  font-size: clamp(.68rem, 1vw, .76rem);
-  font-weight: 500; color: var(--text); transition: background .1s;
+  font-size: clamp(.85rem, 1.3vw, 1rem);
+  font-weight: 700; color: var(--white); transition: background .1s;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: clamp(6px, 1vw, 9px);
 }
@@ -346,7 +345,7 @@
 .cc.close   .cl { color: var(--yw-bd); }
 .cc.wrong   .cl { color: var(--ko-bd); }
 
-.cv { font-size: clamp(.6rem, .95vw, .68rem); font-weight: 600; text-align: center; line-height: 1.3; }
+.cv { font-size: clamp(.72rem, .95vw, .68rem); font-weight: 600; text-align: center; line-height: 1.3; }
 .cc.correct .cv { color: var(--ok-tx); }
 .cc.close   .cv { color: var(--yw-tx); }
 .cc.wrong   .cv { color: var(--ko-tx); }
@@ -374,13 +373,13 @@
 
 .rttl {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(.8rem, 1.3vw, 1rem);
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
   font-weight: 800; letter-spacing: .08em;
 }
 .rbanner.win  .rttl { color: var(--ok-tx); }
 .rbanner.lose .rttl { color: var(--ko-tx); }
-.rchar { font-family: 'Shippori Mincho', serif; font-size: clamp(.75rem, 1.1vw, .88rem); font-weight: 700; color: var(--gold-lt); }
-.rdesc { color: var(--text); font-size: clamp(.74rem, 1.1vw, .86rem); line-height: 1.65; }
+.rchar { font-family: 'Shippori Mincho', serif; font-size: clamp(.92rem, 1.3vw, 1.05rem); font-weight: 700; color: var(--gold-lt); }
+.rdesc { color: var(--text); font-size: clamp(.88rem, 1.3vw, 1rem); line-height: 1.65; }
 .ntmr      { font-size: clamp(.6rem, .9vw, .7rem); color: var(--muted); }
 .ntmr span { color: var(--gold-lt); font-weight: 600; }
 
@@ -417,10 +416,10 @@
 
 .se-t {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(.9rem, 1.5vw, 1.1rem);
+  font-size: clamp(1.05rem, 1.7vw, 1.3rem);
   font-weight: 800; letter-spacing: .08em; color: var(--surv-tx);
 }
-.se-s { color: var(--text); font-size: clamp(.75rem, 1.1vw, .88rem); line-height: 1.7; }
+.se-s { color: var(--text); font-size: clamp(.88rem, 1.3vw, 1rem); line-height: 1.7; }
 .se-char { font-family: 'Shippori Mincho', serif; font-size: clamp(.72rem, 1.1vw, .85rem); font-weight: 700; color: var(--surv-tx); opacity: .85; }
 
 .sestats { display: flex; gap: clamp(5px, .8vw, 8px); justify-content: center; flex-wrap: nowrap; }
@@ -457,7 +456,7 @@
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 700px) {
   .gwrap { padding: .5rem .7rem 4rem; gap: 8px; }
-  .mbtn  { padding: .5rem .75rem; font-size: .68rem; letter-spacing: .03em; }
+  .mbtn  { padding: .55rem .9rem; font-size: .82rem; letter-spacing: .03em; }
   .rules-btn { padding: .5rem .75rem; }
   .gi    { font-size: .78rem; padding: .75rem .8rem; }
   .gbtn  { min-width: 68px; font-size: .66rem; padding: 0 .8rem; }
@@ -466,6 +465,8 @@
   .sestats { gap: 4px; }
   .sestat  { padding: 5px 7px; }
   .sbar    { gap: 6px; }
+  .cname  { font-size: 1.4rem; }
+  .cbadge { display: none; }
 
   .rbanner-inner, .send-inner { flex-direction: column; }
   .rbanner-left,  .send-left  { width: 100%; }

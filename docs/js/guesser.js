@@ -605,8 +605,7 @@ function _doAC() {
     const i = document.createElement('div'); i.className = 'aci';
     const img = document.createElement('img'); img.className = 'aci-img'; setImg(img, x);
     const txt = document.createElement('span'); txt.textContent = x.n;
-    const badge = document.createElement('span'); badge.className = 'acb'; badge.textContent = x.r + ' · ' + x.st;
-    i.appendChild(img); i.appendChild(txt); i.appendChild(badge);
+    i.appendChild(img); i.appendChild(txt);
     i.onclick = () => { $('gi').value = x.n; l.innerHTML = ''; sub(); };
     l.appendChild(i);
   });
