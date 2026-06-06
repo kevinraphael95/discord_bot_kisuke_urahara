@@ -3,13 +3,13 @@ Liste des Commandes
 ### 📂 Admin
 - **adminpanel :** 🔒 Affiche le lien du panneau admin.
 - **commandslist :** Génère un .md avec toutes les commandes et les envoie en fichier.
-- **kisukevol :** 🌀 Kisuke vole 10% du Reiatsu d’un membre comme un joueur normal.
+- **kisukevol :** 🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal.
 - **reiatsuadmin :** (Admin) Gère le Reiatsu : set, unset, change, spawn, speed.
 - **say_as :** (Admin) Fait répéter un message par le bot comme si c'était un autre membre.
 Usage: !say_as <mention|id|pseudo> <message>
 - **sync :** Synchronise les commandes slash (serveur ou global).
 - **testgame :** Tester un mini-jeu via son numéro ou 'all'.
-- **testtache :** 🕹️ Teste toutes les épreuves pour la commandes hollow.
+- **testtache :** 🕹️ Teste toutes les épreuves pour la commande hollow.
 
 ### 📂 Bleach
 - **bleachship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
@@ -24,7 +24,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **versus :** ⚔️ Lance un combat interactif contre le bot.
 
 ### 📂 Fun&Random
-- **calc :** Calculatrice scientifique interactive
+- **calc :** Calculatrice scientifique interactive.
 - **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
 - **gay :** 🌈 Calcule ton taux de gaytitude.
 - **pizza :** 🍕 Génère une pizza aléatoire.
