@@ -1,10 +1,22 @@
+# ─── Discord ───────────────────────────────────────────────────────────────────
 discord.py>=2.0.0
+
+# ─── Serveur web ───────────────────────────────────────────────────────────────
 flask
-numpy
-openai
-psutil
-pyspellchecker[fr]
-python-dateutil
-python-dotenv>=1.0.0
-requests
 cloudflared
+
+# ─── IA & API ──────────────────────────────────────────────────────────────────
+openai
+requests
+
+# ─── Utilitaires ───────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+python-dateutil
+psutil
+numpy
+
+# ─── Langue & orthographe ──────────────────────────────────────────────────────
+pyspellchecker[fr]
+
+# ─── Génération d'images ───────────────────────────────────────────────────────
+qrcode[pil]
