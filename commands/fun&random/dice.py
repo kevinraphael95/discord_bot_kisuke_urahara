@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎲 dice.py — Commande /dice et !dice
 # Objectif : Lance des dés personnalisés au format NdX (ex: 2d6, 1d20, 4d100)
-# Catégorie : 🕹️ Jeux
+# Catégorie : Fun&Random
 # Accès : Tous
 # Cooldown : 1 utilisation / 2 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
