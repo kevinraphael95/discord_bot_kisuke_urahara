@@ -1,0 +1,145 @@
+{
+  "nom": "Kenpachi Zaraki",
+  "type": ["Combat"],
+  "genre": "Homme",
+  "sexualite": "Hétéro",
+  "personnalite": ["Agressif", "Sanguin", "Compétitif", "Courageux", "Loyal", "Impulsif"],
+  "race": ["Shinigami"],
+  "stats_base": {
+    "pv": 200,
+    "attaque": 150,
+    "defense": 120,
+    "special": 30,
+    "special_def": 80,
+    "rapidite": 75
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Coup Brut",
+          "description": "Frappe d'une violence extrême — même sans Shikai ni Bankai, Kenpachi est plus fort que la plupart des capitaines.",
+          "puissance": 80,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 25,
+          "statut": null
+        },
+        {
+          "nom": "Kenpachi Sans Patch",
+          "description": "Retire son patch absorbant le reiatsu — libère sa pression spirituelle réelle, terrifiante.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 5,
+          "boosts": {"attaque": 3, "defense": 2}
+        },
+        {
+          "nom": "Charge Dévastatrice",
+          "description": "Ruée frontale à vitesse fulgurante malgré sa taille — personne ne peut tenir le choc.",
+          "puissance": 90,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Rugissement du Kenpachi",
+          "description": "Libération de pression spirituelle brute — fait reculer et trembler tout ce qui l'entoure.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 10,
+          "statut": "Paralysie"
+        }
+      ]
+    },
+    "Shikai": {
+      "bonus": {"attaque": 30, "defense": 15},
+      "activation": "Bois, Nozarashi !",
+      "attaques": [
+        {
+          "nom": "Couperet Géant",
+          "description": "Nozarashi sous forme de hache de guerre massive — coupe à travers tout, même l'espace lui-même.",
+          "puissance": 130,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Fissure Spatiale",
+          "description": "Tranche l'espace lui-même pour traverser les défenses absolues.",
+          "puissance": 110,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 8,
+          "statut": null
+        },
+        {
+          "nom": "Frappe de Météore",
+          "description": "Puissance suffisante pour détruire un météore d'un seul coup.",
+          "puissance": 120,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 8,
+          "statut": null
+        },
+        {
+          "nom": "Instinct de Tueur",
+          "description": "Le soif de combat de Kenpachi amplifie tous ses paramètres — il est plus fort face à un ennemi puissant.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Combat",
+          "pp_max": 10,
+          "boosts": {"attaque": 2, "rapidite": 1}
+        }
+      ]
+    },
+    "Bankai": {
+      "bonus": {"attaque": 50, "defense": 30, "pv": 50},
+      "activation": "Bankai !",
+      "attaques": [
+        {
+          "nom": "Coup d'Oni",
+          "description": "Transformation démonique complète — frappe d'une force qui peut couper un géant en deux d'une distance.",
+          "puissance": 160,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Onde de Bankai",
+          "description": "L'activation seule génère une vague d'énergie qui rase les bâtiments alentour.",
+          "puissance": 130,
+          "categorie": "Spécial",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Massacre",
+          "description": "Déchaînement total sans aucune retenue — ampute, écrase, dévaste en une fraction de seconde.",
+          "puissance": 145,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Corps de Démon",
+          "description": "La peau rouge d'Oni absorbe les dommages et amplifie encore la puissance de frappe.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Combat",
+          "pp_max": 5,
+          "boosts": {"attaque": 3, "defense": 3}
+        }
+      ]
+    }
+  },
+  "images": []
+}
