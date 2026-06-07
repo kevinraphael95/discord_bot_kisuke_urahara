@@ -6,12 +6,12 @@
   "personnalite": ["Bienveillant", "Protecteur", "Altruiste", "Amical", "Émotif", "Courageux"],
   "race": ["Humain", "Fullbringer"],
   "stats_base": {
-    "pv": 120,
-    "attaque": 40,
-    "defense": 85,
-    "special": 90,
-    "special_def": 100,
-    "rapidite": 35
+    "pv": 115,
+    "attaque": 35,
+    "defense": 90,
+    "special": 95,
+    "special_def": 105,
+    "rapidite": 40
   },
   "formes": {
     "Normal": {
@@ -20,7 +20,7 @@
       "attaques": [
         {
           "nom": "Santen Kesshun",
-          "description": "Bouclier triangulaire formé par Hinagiku, Lily et Baigon qui repousse les attaques.",
+          "description": "Bouclier triangulaire formé par Hinagiku, Lily et Baigon — repousse toute attaque.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
@@ -29,67 +29,70 @@
         },
         {
           "nom": "Sōten Kisshun",
-          "description": "Barrière de guérison invoquant Ayame et Shun'ō pour restaurer les PV.",
-          "puissance": 30,
+          "description": "Barrière de guérison d'Ayame et Shun'ō — restaure les PV et rejette tout dommage.",
+          "puissance": 35,
           "categorie": "Soin",
           "type": "Fée",
           "pp_max": 15
         },
         {
           "nom": "Koten Zanshun",
-          "description": "Attaque de Tsubaki rejetant la fusion de la matière pour trancher l’ennemi.",
+          "description": "Tsubaki tranche l'ennemi en rejetant la fusion de la matière — attaque précise et pénétrante.",
           "puissance": 60,
           "categorie": "Physique",
           "type": "Fée",
-          "pp_max": 10
+          "pp_max": 10,
+          "statut": null
         },
         {
           "nom": "Shiten Kōshun",
-          "description": "Bouclier réactif : absorbe l’impact et renvoie l’énergie sous forme d’explosion.",
+          "description": "Bouclier réactif qui absorbe l'impact et renvoie l'énergie en explosion sur l'attaquant.",
           "puissance": 75,
           "categorie": "Spécial",
           "type": "Fée",
-          "pp_max": 10
+          "pp_max": 10,
+          "statut": null
         }
       ]
     },
     "Fullbring Awakened": {
-      "bonus": {"special": 20, "defense": 15},
-      "activation": "Fullbring activé !",
+      "bonus": {"special": 20, "defense": 15, "special_def": 10},
+      "activation": "Shun'ō, Ayame — Fullbring activé !",
       "attaques": [
         {
-          "nom": "Sōten Kisshun (Perfect)",
-          "description": "Version avancée : restaure une grande quantité de PV et élimine les altérations.",
-          "puissance": 60,
+          "nom": "Sōten Kisshun Parfait",
+          "description": "Restauration complète — guérit même les blessures considérables et élimine les altérations.",
+          "puissance": 65,
           "categorie": "Soin",
           "type": "Fée",
           "pp_max": 10
         },
         {
-          "nom": "Santen Kesshun (Dôme Sacré)",
-          "description": "Bouclier dôme amélioré protégeant tout le terrain allié.",
+          "nom": "Dôme Sacré",
+          "description": "Version dôme du Santen Kesshun — protection totale sur l'ensemble du terrain.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Fée",
           "pp_max": 5,
-          "boosts": {"defense": 3}
+          "boosts": {"defense": 3, "special_def": 2}
         },
         {
           "nom": "Tsubaki Burst",
-          "description": "Tsubaki attaque avec toute sa puissance rejetée, traversant la défense ennemie.",
-          "puissance": 90,
+          "description": "Tsubaki libère toute sa puissance — perce les défenses ennemies les plus solides.",
+          "puissance": 95,
           "categorie": "Spécial",
           "type": "Fée",
-          "pp_max": 10
+          "pp_max": 10,
+          "statut": null
         },
         {
           "nom": "Reject Reality",
-          "description": "Orihime nie un événement : réduit drastiquement les dégâts subis au prochain tour.",
-          "puissance": 0,
-          "categorie": "Statut",
+          "description": "Orihime nie la réalité d'un événement — annule les dégâts subis et restaure une partie des PV.",
+          "puissance": 40,
+          "categorie": "Soin",
           "type": "Fée",
           "pp_max": 5,
-          "boosts": {"special_def": 3}
+          "statut": null
         }
       ]
     }
