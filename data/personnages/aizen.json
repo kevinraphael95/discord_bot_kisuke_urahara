@@ -6,11 +6,11 @@
   "personnalite": ["Manipulateur", "Stratège", "Narcissique", "Calme", "Autoritaire", "Ambitieux"],
   "race": ["Shinigami", "Transcendant"],
   "stats_base": {
-    "pv": 140,
-    "attaque": 105,
-    "defense": 100,
-    "special": 130,
-    "special_def": 110,
+    "pv": 145,
+    "attaque": 110,
+    "defense": 105,
+    "special": 135,
+    "special_def": 115,
     "rapidite": 100
   },
   "formes": {
@@ -19,40 +19,40 @@
       "activation": "",
       "attaques": [
         {
-          "nom": "Coup de sabre",
-          "description": "Maîtrise absolue du Zanjutsu — frappe que personne ne peut bloquer sans subir de dégâts.",
-          "puissance": 65,
+          "nom": "Maîtrise du Zanjutsu",
+          "description": "Aizen est un maître absolu de l'épée — il combat simultanément Zanjutsu et Hakuda, frappe d'une main et donne des coups de pied de l'autre avec une dextérité parfaite. Chaque frappe est calculée, jamais inutile.",
+          "puissance": 70,
           "categorie": "Physique",
           "type": "Normal",
-          "pp_max": 25,
+          "pp_max": 20,
           "statut": null
         },
         {
           "nom": "Hadō #90 Kurohitsugi",
-          "description": "Cercueil noir — espace-temps distordu qui broie la cible de l'intérieur.",
-          "puissance": 100,
+          "description": "Cercueil noir — distorsion de l'espace-temps entourant la cible en multiples lances et murs noirs. Aizen le lance sans incantation à pleine puissance. Seul un Shinigami avec le double de reiatsu d'un capitaine ordinaire peut le résister.",
+          "puissance": 110,
           "categorie": "Spécial",
           "type": "Ténèbres",
           "pp_max": 5,
           "statut": null
         },
         {
-          "nom": "Bakudō #99 Kin",
-          "description": "Restriction ultime — lier l'ennemi dans des bandelettes de reiatsu impossibles à briser.",
+          "nom": "Caja Negación",
+          "description": "Cube Arrancar — piège l'ennemi dans une dimension parallèle dont il ne peut s'échapper. Même les ennemis bien plus puissants y sont enfermés, juste pour une durée plus courte.",
           "puissance": 0,
           "categorie": "Statut",
-          "type": "Normal",
+          "type": "Ténèbres",
           "pp_max": 5,
           "statut": "Paralysie"
         },
         {
-          "nom": "Pression Spirituelle Écrasante",
-          "description": "Aizen libère une fraction de son reiatsu — la différence de niveau est palpable, presque paralysante.",
+          "nom": "Pression Spirituelle d'Aizen",
+          "description": "Aizen libère une fraction de son reiatsu — si dense et écrasant que la simple proximité de sa présence paralyse. Il n'a besoin d'aucun soin ou repos malgré les blessures subies.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Illusion",
           "pp_max": 10,
-          "boosts": {"attaque": 2, "special": 2}
+          "boosts": {"attaque": 2, "special": 2, "special_def": 1}
         }
       ]
     },
@@ -61,8 +61,8 @@
       "activation": "Brise-toi, Kyōka Suigetsu !",
       "attaques": [
         {
-          "nom": "Hypnose Complète",
-          "description": "Contrôle total des cinq sens — l'ennemi ne peut plus distinguer le réel de l'illusion, pour toujours.",
+          "nom": "Kanzen Saimin — Hypnose Complète",
+          "description": "Quiconque a vu Kyōka Suigetsu être libéré est sous contrôle total des cinq sens pour toujours. Aizen peut leur faire voir, entendre, sentir, toucher et goûter n'importe quoi. L'hypnose reste active même si la victime sait qu'elle est hypnotisée — absolument irréversible de l'extérieur.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Illusion",
@@ -71,7 +71,7 @@
         },
         {
           "nom": "Lame Fantôme",
-          "description": "Frappe depuis une position qui n'existe pas — l'ennemi esquive une illusion et reçoit le vrai coup.",
+          "description": "Frappe depuis une position qui n'existe pas — l'ennemi reçoit une blessure sans jamais voir d'où elle vient. L'hypnose fait percevoir une attaque frontale alors que le coup vient dans le dos.",
           "puissance": 100,
           "categorie": "Physique",
           "type": "Illusion",
@@ -79,8 +79,8 @@
           "statut": null
         },
         {
-          "nom": "Illusion de Dégâts",
-          "description": "Fait croire à l'ennemi qu'il a subi des blessures mortelles — confusion et paralysie psychologique.",
+          "nom": "Miroir, Fleur, Lune dans l'Eau",
+          "description": "Illusion parfaite de blessures mortelles — la cible croit mourir alors qu'Aizen n'a pas bougé. Désorientation psychologique totale. Les Vizards et les capitaines y succombent également.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Illusion",
@@ -88,8 +88,8 @@
           "statut": "Confusion"
         },
         {
-          "nom": "Miroir Brisé",
-          "description": "Désactive l'hypnose — révèle la réalité, désorientant violemment l'ennemi qui revient à lui.",
+          "nom": "Désactivation — Brise-toi",
+          "description": "Aizen désactive volontairement le Shikai — l'illusion se brise comme du verre. La révélation soudaine de la réalité désoriente violemment les cibles qui reviennent à elles.",
           "puissance": 85,
           "categorie": "Spécial",
           "type": "Illusion",
@@ -98,22 +98,13 @@
         }
       ]
     },
-    "Fusion Hōgyoku": {
-      "bonus": {"attaque": 30, "special": 30, "defense": 25, "rapidite": 20},
-      "activation": "Hōgyoku — éveille-toi !",
+    "Chrysalide Hōgyoku": {
+      "bonus": {"attaque": 20, "special": 20, "defense": 20, "rapidite": 15},
+      "activation": "Hōgyoku — éveille-toi pleinement !",
       "attaques": [
         {
-          "nom": "Hadō #90 Sans Incantation",
-          "description": "Kurohitsugi lancé sans incantation — puissance maximale, vitesse d'exécution instantanée.",
-          "puissance": 140,
-          "categorie": "Spécial",
-          "type": "Ténèbres",
-          "pp_max": 5,
-          "statut": null
-        },
-        {
-          "nom": "Corps Transcendant",
-          "description": "Le Hōgyoku régénère les blessures d'Aizen en temps réel — presque impossible à tuer.",
+          "nom": "Régénération du Hōgyoku",
+          "description": "Le Hōgyoku régénère en temps réel toutes les blessures d'Aizen, y compris celles d'attaques qui annulent la régénération. Même Mugetsu d'Ichigo n'a été qu'un sursis — il était en train de régénérer pendant le scellement.",
           "puissance": 80,
           "categorie": "Soin",
           "type": "Illusion",
@@ -121,22 +112,31 @@
           "statut": null
         },
         {
-          "nom": "Onde de Destruction",
-          "description": "Explosion de reiatsu pur qui rase tout dans un rayon immense — dépassant tout capitaine connu.",
-          "puissance": 135,
+          "nom": "Évolution Réactive",
+          "description": "Le Hōgyoku adapte Aizen en temps réel face aux menaces — chaque fois qu'il est mis en danger, une nouvelle transformation augmente ses capacités et résistances sur le champ.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Illusion",
+          "pp_max": 5,
+          "boosts": {"attaque": 2, "special": 2, "defense": 2, "special_def": 2}
+        },
+        {
+          "nom": "Désintégration Moléculaire",
+          "description": "Forme papillon finale — Aizen peut désintégrer n'importe quelle matière à distance. Aucun bouclier physique, aucune barrière de Kido ne peut tenir face à cette capacité.",
+          "puissance": 140,
           "categorie": "Spécial",
           "type": "Illusion",
           "pp_max": 5,
           "statut": null
         },
         {
-          "nom": "Évolution Forcée",
-          "description": "Le Hōgyoku amplifie en temps réel les capacités d'Aizen selon les besoins du combat.",
-          "puissance": 0,
-          "categorie": "Statut",
-          "type": "Illusion",
+          "nom": "Hadō #90 Instantané",
+          "description": "Kurohitsugi sans incantation, sans geste préparatoire, puissance maximale — Aizen le lance comme un réflexe. Même Urahara, Isshin et Yoruichi ensemble n'ont pas pu le stopper dans cet état.",
+          "puissance": 145,
+          "categorie": "Spécial",
+          "type": "Ténèbres",
           "pp_max": 3,
-          "boosts": {"attaque": 3, "special": 3, "defense": 2}
+          "statut": null
         }
       ]
     }
