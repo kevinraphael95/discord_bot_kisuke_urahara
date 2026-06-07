@@ -1,0 +1,145 @@
+{
+  "nom": "Byakuya Kuchiki",
+  "type": ["Vent"],
+  "genre": "Homme",
+  "sexualite": "Hétéro",
+  "personnalite": ["Noble", "Froid", "Réfléchi", "Stoïque", "Juste", "Loyal"],
+  "race": ["Shinigami"],
+  "stats_base": {
+    "pv": 120,
+    "attaque": 85,
+    "defense": 90,
+    "special": 110,
+    "special_def": 95,
+    "rapidite": 110
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Senka",
+          "description": "Shunpo derrière l'ennemi en un éclair, deux frappes scellant les points Saketsu et Hakusui — coupe l'ennemi de son reiatsu. Si rapide qu'on ne sait pas si l'attaque vient de face ou de derrière.",
+          "puissance": 70,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 15,
+          "statut": "Paralysie"
+        },
+        {
+          "nom": "Utsusemi",
+          "description": "Technique de Shunpo du corps vide — se déplace à une vitesse si grande qu'il laisse un afterimage. L'ennemi frappe une illusion.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 15,
+          "boosts": {"rapidite": 2, "defense": 1}
+        },
+        {
+          "nom": "Hadō #81 Danku",
+          "description": "Mur de Kido transparent d'un niveau de protection extrême — bloque presque n'importe quel sort adverse sans incantation.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Lumière",
+          "pp_max": 10,
+          "boosts": {"special_def": 3}
+        },
+        {
+          "nom": "Hadō #4 Byakurai",
+          "description": "Éclair blanc concentré tiré du bout du doigt — Byakuya le lance sans incantation avec une puissance de niveau capitaine.",
+          "puissance": 55,
+          "categorie": "Spécial",
+          "type": "Foudre",
+          "pp_max": 20,
+          "statut": null
+        }
+      ]
+    },
+    "Shikai": {
+      "bonus": {"special": 15, "rapidite": 5},
+      "activation": "Disperse, Senbonzakura !",
+      "attaques": [
+        {
+          "nom": "Pétales de Cerisier",
+          "description": "La lame se dissout en mille micro-lames en forme de pétales de cerisier, contrôlées mentalement. Elles attaquent et défendent simultanément — presque impossible à esquiver.",
+          "puissance": 85,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Bouclier de Lames",
+          "description": "Byakuya concentre les pétales autour de son corps en bouclier dense. Zone de sécurité maintenue autour de lui — les lames ne l'atteignent jamais lui-même.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Vent",
+          "pp_max": 15,
+          "boosts": {"defense": 2, "special_def": 2}
+        },
+        {
+          "nom": "Nuage Tranchant",
+          "description": "Les pétales tourbillonnent autour de l'ennemi comme un nuage de lames — attaque de toutes les directions à la fois, aucun angle mort.",
+          "puissance": 90,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Concentration Noble",
+          "description": "Byakuya réorganise mentalement ses lames pour préparer une frappe décisive — calme absolu, reiatsu comprimé.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 10,
+          "boosts": {"special": 2}
+        }
+      ]
+    },
+    "Bankai": {
+      "bonus": {"special": 25, "rapidite": 10, "defense": 10},
+      "activation": "Bankai — Senbonzakura Kageyoshi !",
+      "attaques": [
+        {
+          "nom": "Senkei : Ikka Senjinka",
+          "description": "Forme vraie du Bankai — les pétales se condensent en milliers d'épées lumineuses en colonnes. Byakuya attaque avec toutes simultanément, laissant zéro chance de survie. Utilisé uniquement pour un duel juré.",
+          "puissance": 135,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Gōkei",
+          "description": "Formation sphérique d'innombrables lames tourbillonnant autour de l'ennemi comme un nuage, puis s'abattant de tous les angles — aucune fuite possible. L'explosion résultante oblige même Byakuya à fuir en Shunpo.",
+          "puissance": 125,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Shūkei : Hakuteiken",
+          "description": "Attaque finale absolue — toutes les lames condensées en une unique épée d'une blancheur impériale, avec des ailes de reiatsu. Puissance de coupe maximale. L'épée prend la forme d'un oiseau blanc de lumière.",
+          "puissance": 145,
+          "categorie": "Physique",
+          "type": "Lumière",
+          "pp_max": 3,
+          "statut": null
+        },
+        {
+          "nom": "Dôme de Pétales",
+          "description": "Les pétales forment une sphère impénétrable autour de Byakuya — le flux de lames absorbe et dévie toute attaque entrante.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Vent",
+          "pp_max": 5,
+          "boosts": {"defense": 3, "special_def": 3}
+        }
+      ]
+    }
+  },
+  "images": []
+}

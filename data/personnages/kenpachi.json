@@ -1,0 +1,145 @@
+{
+  "nom": "Kenpachi Zaraki",
+  "type": ["Combat"],
+  "genre": "Homme",
+  "sexualite": "Hétéro",
+  "personnalite": ["Agressif", "Sanguin", "Compétitif", "Courageux", "Loyal", "Impulsif"],
+  "race": ["Shinigami"],
+  "stats_base": {
+    "pv": 210,
+    "attaque": 145,
+    "defense": 130,
+    "special": 20,
+    "special_def": 75,
+    "rapidite": 70
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Frappe à Une Main",
+          "description": "Kenpachi se bat toujours d'une main pour prolonger le combat et ne pas tuer trop vite. Même retenue, sa puissance dépasse celle de la plupart des capitaines. Icchigo ne pouvait pas le blesser sans voir ses mains saigner.",
+          "puissance": 75,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 30,
+          "statut": null
+        },
+        {
+          "nom": "Ryōdan",
+          "description": "Kendo à deux mains — technique utilisée exceptionnellement contre Nnoitra. Un coup vertical avec les deux mains génère une onde de choc si puissante qu'elle coupe l'ennemi en deux.",
+          "puissance": 110,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Reiatsu Libéré — Patch Retiré",
+          "description": "Retire le patch qui absorbe en continu son reiatsu. La libération soudaine terrifiante est si dense qu'elle devient visible — certains sont paralysés au seul contact de cette pression. Utilisé uniquement contre des ennemis valables.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 3,
+          "boosts": {"attaque": 3, "defense": 2, "rapidite": 1}
+        },
+        {
+          "nom": "Onde de Choc de Reiatsu",
+          "description": "Concentre juste assez de reiatsu pour le projeter en onde explosive — rayon de destruction massif quand lancée à deux mains.",
+          "puissance": 80,
+          "categorie": "Spécial",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": null
+        }
+      ]
+    },
+    "Shikai": {
+      "bonus": {"attaque": 35, "defense": 20},
+      "activation": "Bois, Nozarashi !",
+      "attaques": [
+        {
+          "nom": "Couperet de Nozarashi",
+          "description": "Nozarashi prend la forme d'une hache de guerre géante. Sa puissance de coupe est telle qu'il a détruit un météore d'un seul coup et peut trancher l'espace lui-même.",
+          "puissance": 130,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Fissure Spatiale",
+          "description": "Nozarashi tranche l'espace lui-même — permet de traverser le vide créé par Gremmy ou toute barrière dimensionnelle. Aucune défense physique ne peut arrêter cette coupure.",
+          "puissance": 115,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 8,
+          "statut": null
+        },
+        {
+          "nom": "Destruction de Météore",
+          "description": "Un seul coup de Nozarashi a détruit un météore de la taille du Seireitei invoqué par Gremmy. Puissance brute absolue — canalise toute la force de Kenpachi en un impact.",
+          "puissance": 140,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Instinct du Kenpachi",
+          "description": "Plus l'ennemi est fort, plus Kenpachi est fort. Sa soif de combat amplifie ses capacités face à un adversaire digne — il devient plus dangereux au fil du combat.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Combat",
+          "pp_max": 10,
+          "boosts": {"attaque": 2, "defense": 1}
+        }
+      ]
+    },
+    "Bankai": {
+      "bonus": {"attaque": 50, "defense": 30, "rapidite": 15},
+      "activation": "Bankai !",
+      "attaques": [
+        {
+          "nom": "Frappe d'Oni",
+          "description": "Transformation en démon rouge aux marques noires et cornes — Kenpachi n'a plus conscience que de tuer. D'un seul coup il a renversé un Gerard Valkyrie gigantesque, puis lui a arraché le bras et l'a coupé en deux depuis une distance.",
+          "puissance": 160,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Onde d'Activation",
+          "description": "L'activation du Bankai seule génère une vague d'énergie qui rase les bâtiments environnants. Dégâts de zone massifs même sans frapper.",
+          "puissance": 120,
+          "categorie": "Spécial",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Démembrement",
+          "description": "En mode Oni, Kenpachi ampute, écrase et dévaste en une fraction de seconde — sa puissance a surpassé un Schutzstaffel dans sa Vollständig complète.",
+          "puissance": 145,
+          "categorie": "Physique",
+          "type": "Combat",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Corps de Démon",
+          "description": "La peau rouge d'Oni agit comme une armure vivante — absorbe les impacts et amplifie chaque frappe. Mode berserk total : aucune retenue, aucune stratégie, que de la destruction.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Combat",
+          "pp_max": 5,
+          "boosts": {"attaque": 3, "defense": 3}
+        }
+      ]
+    }
+  },
+  "images": []
+}
