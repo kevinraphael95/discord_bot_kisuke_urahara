@@ -26,8 +26,10 @@ Usage: !say_as <mention|id|pseudo> <message>
 ### 📂 Fun&Random
 - **calc :** Calculatrice scientifique interactive.
 - **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
+- **dice :** 🎲 Lance des dés. Ex: !dice 2d6, !dice 1d20
 - **gay :** 🌈 Calcule ton taux de gaytitude.
 - **pizza :** 🍕 Génère une pizza aléatoire.
+- **qrcode :** 📷 Génère un QR code depuis un texte ou une URL.
 - **ship :** 💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2
 - **sorting :** Trie 12 barres en longueurs différentes selon un algorithme.
 
@@ -40,14 +42,18 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
 
 ### 📂 Jeux
+- **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
 - **capitales :** Devine la capitale d'un pays
 - **compte_est_bon :** Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
 - **drapeaux :** Devine le pays à partir d'un drapeau
 - **entrainementcerebral :** Entraînement cérébral composé de 5 mini-jeux.
 - **formes :** Jouez au mini-jeu mémoire avec des formes et couleurs.
+- **lightsout :** Pas de description.
 - **mastermind :** Jouer au Mastermind interactif.
+- **mot_contraint :** Jeu : trouve un mot qui commence et finit par des lettres données.
 - **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
+- **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
 - **pendu :** Démarre une partie du jeu du pendu.
 - **pressing :** Lance le jeu Pressing Under Pressure !
 - **pressingtop :** Voir le classement
