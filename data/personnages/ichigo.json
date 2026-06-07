@@ -4,14 +4,14 @@
   "genre": "Homme",
   "sexualite": "Hétéro",
   "personnalite": ["Courageux", "Déterminé", "Protecteur", "Impulsif", "Bienveillant", "Altruiste"],
-  "race": ["Humain", "Fullbring", "Shinigami", "Hollow", "Arrancar", "Vizard", "Quincy", "Transcendant"],
+  "race": ["Humain", "Fullbringer", "Shinigami", "Hollow", "Vizard", "Quincy", "Transcendant"],
   "stats_base": {
-    "pv": 130,
-    "attaque": 100,
-    "defense": 80,
+    "pv": 150,
+    "attaque": 105,
+    "defense": 85,
     "special": 90,
     "special_def": 75,
-    "rapidite": 95
+    "rapidite": 100
   },
   "formes": {
     "Normal": {
@@ -29,7 +29,7 @@
         },
         {
           "nom": "Getsuga Tenshō",
-          "description": "Vague d'énergie spirituelle de base.",
+          "description": "Vague d'énergie spirituelle condensée à la pointe de Zangetsu, en forme de croissant de lune.",
           "puissance": 65,
           "categorie": "Spécial",
           "type": "Ténèbres",
@@ -38,7 +38,7 @@
         },
         {
           "nom": "Shunpo",
-          "description": "Déplacement rapide pour esquiver ou se repositionner.",
+          "description": "Déplacement éclair pour esquiver ou se repositionner.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Normal",
@@ -47,7 +47,7 @@
         },
         {
           "nom": "Soin léger",
-          "description": "Restaure un peu de PV.",
+          "description": "Récupération de vitalité par concentration spirituelle.",
           "puissance": 30,
           "categorie": "Soin",
           "type": "Normal",
@@ -62,7 +62,7 @@
       "attaques": [
         {
           "nom": "Getsuga Tenshō Amélioré",
-          "description": "Version plus puissante du Getsuga Tenshō, tranchant et projetant l'énergie.",
+          "description": "Version renforcée du Getsuga, tranchante et projetant une énergie ténébreuse dense.",
           "puissance": 80,
           "categorie": "Spécial",
           "type": "Ténèbres",
@@ -71,16 +71,16 @@
         },
         {
           "nom": "Getsuga Jūjishō",
-          "description": "Combinaison de deux Getsuga en une attaque en croix très puissante.",
-          "puissance": 90,
+          "description": "Double Getsuga fusionné en croix, dévastation concentrée sur une zone.",
+          "puissance": 95,
           "categorie": "Spécial",
           "type": "Ténèbres",
           "pp_max": 10,
           "statut": null
         },
         {
-          "nom": "Shunpo amélioré",
-          "description": "Déplacement instantané pour surprendre l'ennemi.",
+          "nom": "Shunpo Amélioré",
+          "description": "Déplacement instantané impossible à anticiper.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Normal",
@@ -89,7 +89,7 @@
         },
         {
           "nom": "Soin moyen",
-          "description": "Restaure modérément les PV.",
+          "description": "Restauration modérée par canalisation du reiatsu.",
           "puissance": 50,
           "categorie": "Soin",
           "type": "Normal",
@@ -99,13 +99,13 @@
       ]
     },
     "Bankai": {
-      "bonus": {"attaque": 20, "rapidite": 15},
+      "bonus": {"attaque": 20, "rapidite": 20, "special": 10},
       "activation": "Tensa Zangetsu !",
       "attaques": [
         {
           "nom": "Getsuga Tenshō Ultime",
-          "description": "Getsuga extrêmement puissant et rapide capable de dévaster des zones entières.",
-          "puissance": 110,
+          "description": "Getsuga comprimé et ultra-rapide capable de dévaster des zones entières.",
+          "puissance": 115,
           "categorie": "Spécial",
           "type": "Ténèbres",
           "pp_max": 5,
@@ -113,8 +113,8 @@
         },
         {
           "nom": "Cero Hollow Dévastateur",
-          "description": "Énergie Hollow concentrée très destructive.",
-          "puissance": 100,
+          "description": "Énergie Hollow condensée libérée en onde destructrice.",
+          "puissance": 105,
           "categorie": "Spécial",
           "type": "Spectre",
           "pp_max": 5,
@@ -122,16 +122,16 @@
         },
         {
           "nom": "Shunpo Suprême",
-          "description": "Déplacement ultra-rapide pour esquiver et attaquer avec précision.",
+          "description": "Vitesse transcendant les limites humaines, quasi-téléportation.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Normal",
           "pp_max": 10,
-          "boosts": {"rapidite": 2}
+          "boosts": {"rapidite": 3}
         },
         {
           "nom": "Blut Vene",
-          "description": "Défense Quincy qui protège contre les attaques et réduit la perte de PV.",
+          "description": "Réseau Quincy renforcé dans les veines, réduisant massivement les dégâts reçus.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Ténèbres",
@@ -140,13 +140,13 @@
         }
       ]
     },
-    "Hollow Fusion": {
-      "bonus": {"attaque": 25, "special": 20, "rapidite": 10},
-      "activation": "Fusion Hollow !",
+    "Vizard": {
+      "bonus": {"attaque": 15, "special": 15, "defense": 10},
+      "activation": "Masque Hollow !",
       "attaques": [
         {
           "nom": "Gran Rey Cero",
-          "description": "Puissante attaque d'énergie Hollow violette, capable de blesser des adversaires surpuissants.",
+          "description": "Cero hybride Hollow/Shinigami, violette et dévastatrice, capable de blesser des adversaires surpuissants.",
           "puissance": 120,
           "categorie": "Spécial",
           "type": "Spectre",
@@ -154,17 +154,59 @@
           "statut": null
         },
         {
+          "nom": "Getsuga Tenshō Obscur",
+          "description": "Getsuga imprégné d'énergie Hollow noir et rouge, encore plus destructeur.",
+          "puissance": 110,
+          "categorie": "Spécial",
+          "type": "Ténèbres",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Rugissement Hollow",
+          "description": "Explosion de pression spirituelle qui terrorise et paralyse l'ennemi.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Spectre",
+          "pp_max": 5,
+          "statut": "Paralysie"
+        },
+        {
+          "nom": "Régénération Hollow",
+          "description": "Facteur de régénération Hollow : restaure rapidement les PV perdus.",
+          "puissance": 60,
+          "categorie": "Soin",
+          "type": "Spectre",
+          "pp_max": 5,
+          "statut": null
+        }
+      ]
+    },
+    "Hollow Fusion": {
+      "bonus": {"attaque": 30, "special": 25, "rapidite": 15},
+      "activation": "Fusion Hollow totale !",
+      "attaques": [
+        {
           "nom": "Getsuga-Tenshō Combiné",
-          "description": "Combinaison de Getsuga Tenshō et Gran Rey Cero en une attaque massive et destructrice.",
-          "puissance": 130,
+          "description": "Fusion ultime de Getsuga Tenshō et Gran Rey Cero en une onde massive et dévastatrice.",
+          "puissance": 135,
           "categorie": "Spécial",
           "type": "Ténèbres",
           "pp_max": 3,
           "statut": null
         },
         {
+          "nom": "Cero Oscuras",
+          "description": "Le Cero le plus puissant, d'une obscurité absolue, effaçant tout sur son passage.",
+          "puissance": 125,
+          "categorie": "Spécial",
+          "type": "Spectre",
+          "pp_max": 3,
+          "statut": null
+        },
+        {
           "nom": "Shunpo Extrême",
-          "description": "Vitesse Hollow décuplée pour esquiver ou attaquer instantanément.",
+          "description": "Vitesse Hollow décuplée, imperceptible à l'œil nu.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Normal",
@@ -173,8 +215,8 @@
         },
         {
           "nom": "Soin Hollow",
-          "description": "Restaure considérablement les PV grâce à l'énergie Hollow.",
-          "puissance": 80,
+          "description": "Régénération Hollow massive grâce à la fusion totale.",
+          "puissance": 85,
           "categorie": "Soin",
           "type": "Normal",
           "pp_max": 5,
