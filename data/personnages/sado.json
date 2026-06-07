@@ -1,17 +1,17 @@
 {
-  "nom": "Sado Yasutora",
+  "nom": "Yasutora Sado",
   "type": ["Combat"],
   "genre": "Homme",
   "sexualite": "Hétéro",
-  "personnalite": ["Calme", "Protecteur", "Loyal", "Déterminé", "Généreux"],
+  "personnalite": ["Protecteur", "Loyal", "Stoïque", "Bienveillant", "Courageux", "Réservé"],
   "race": ["Humain", "Fullbringer"],
   "stats_base": {
-    "pv": 140,
-    "attaque": 100,
-    "defense": 85,
-    "special": 50,
-    "special_def": 60,
-    "rapidite": 65
+    "pv": 145,
+    "attaque": 110,
+    "defense": 100,
+    "special": 40,
+    "special_def": 70,
+    "rapidite": 55
   },
   "formes": {
     "Normal": {
@@ -19,77 +19,124 @@
       "activation": "",
       "attaques": [
         {
-          "nom": "Chad Catapult",
-          "description": "Projette un allié pour le repositionner stratégiquement.",
+          "nom": "Poing Droit",
+          "description": "Coup de poing massif d'une force surhumaine.",
+          "puissance": 50,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 30,
+          "statut": null
+        },
+        {
+          "nom": "El Escudo",
+          "description": "Bras droit utilisé comme bouclier — absorbe les dégâts et renforce la défense.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Combat",
-          "pp_max": 10
+          "pp_max": 20,
+          "boosts": {"defense": 2}
         },
         {
-          "nom": "Grua Tirar",
-          "description": "Projette un ennemi avec la force d'un seoi-nage surdimensionné.",
+          "nom": "Charge",
+          "description": "Ruée frontale avec toute la puissance corporelle.",
           "puissance": 60,
           "categorie": "Physique",
-          "type": "Combat",
-          "pp_max": 10
+          "type": "Normal",
+          "pp_max": 20,
+          "statut": null
         },
         {
-          "nom": "Uppercut Blindé",
-          "description": "Coup ascendant puissant utilisant sa force et son endurance.",
-          "puissance": 70,
-          "categorie": "Physique",
-          "type": "Combat",
-          "pp_max": 15
-        },
-        {
-          "nom": "Stance du Géant",
-          "description": "Renforce sa posture pour réduire les dégâts reçus.",
+          "nom": "Résistance",
+          "description": "Concentration sur la résistance — réduit les prochains dégâts reçus.",
           "puissance": 0,
           "categorie": "Statut",
-          "type": "Combat",
-          "pp_max": 10,
-          "boosts": { "defense": 1, "special_def": 1 }
+          "type": "Normal",
+          "pp_max": 15,
+          "boosts": {"defense": 1, "special_def": 1}
         }
       ]
     },
-
-    "Fullbring Awakened": {
-      "bonus": { "attaque": 30, "defense": 20, "rapidite": 15 },
-      "activation": "Fullbring activé !",
+    "Brazo Derecha de Gigante": {
+      "bonus": {"defense": 15, "attaque": 10},
+      "activation": "Brazo Derecha de Gigante !",
       "attaques": [
         {
-          "nom": "El Directo",
-          "description": "Coup de poing droit surpuissant, pouvant aussi être projeté comme attaque à distance.",
-          "puissance": 95,
+          "nom": "Bras du Géant",
+          "description": "Le bras droit blindé frappe avec une force dévastatrice amplifiée par le Fullbring.",
+          "puissance": 80,
           "categorie": "Physique",
           "type": "Combat",
-          "pp_max": 10
+          "pp_max": 15,
+          "statut": null
         },
         {
-          "nom": "Défensive Shield Form",
-          "description": "Bras droit transformé en bouclier massif pour encaisser ou frapper.",
-          "puissance": 70,
-          "categorie": "Physique",
+          "nom": "Tir d'Énergie Spirituelle",
+          "description": "Onde d'énergie Hollow projetée depuis la main — tir à distance dévastateur.",
+          "puissance": 75,
+          "categorie": "Spécial",
+          "type": "Spectre",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Bouclier du Géant",
+          "description": "Le bras droit évolue en bouclier — forme défensive vraie, protège massivement.",
+          "puissance": 0,
+          "categorie": "Statut",
           "type": "Combat",
           "pp_max": 10,
-          "boosts": { "defense": 2 }
+          "boosts": {"defense": 3}
         },
+        {
+          "nom": "Résistance Fullbring",
+          "description": "L'énergie Hollow renforce tout le corps, absorbant les impacts.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Spectre",
+          "pp_max": 10,
+          "boosts": {"defense": 2, "special_def": 2}
+        }
+      ]
+    },
+    "Deux Bras": {
+      "bonus": {"attaque": 25, "defense": 20, "special": 15},
+      "activation": "Brazo Izquierda del Diablo !",
+      "attaques": [
         {
           "nom": "La Muerte",
-          "description": "Coup fatal du bras gauche, concentrant l’énergie des cinq doigts.",
-          "puissance": 120,
+          "description": "Frappe ultime du Bras du Diable — énergie concentrée sur le poing gauche en impact fatal.",
+          "puissance": 130,
           "categorie": "Physique",
-          "type": "Combat",
-          "pp_max": 5
+          "type": "Spectre",
+          "pp_max": 5,
+          "statut": null
         },
         {
-          "nom": "Canon Gigante",
-          "description": "Décharge massive de Reiatsu à longue portée combinant les deux bras.",
+          "nom": "Bras du Diable",
+          "description": "Le bras gauche condense l'énergie Hollow en un poing dévastateur.",
+          "puissance": 100,
+          "categorie": "Physique",
+          "type": "Spectre",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Double Impact",
+          "description": "Combinaison des deux bras — frappe droite défensive suivie d'un crochet gauche offensif.",
           "puissance": 110,
-          "categorie": "Spécial",
+          "categorie": "Physique",
           "type": "Combat",
-          "pp_max": 5
+          "pp_max": 8,
+          "statut": null
+        },
+        {
+          "nom": "Rempart du Géant",
+          "description": "Position de garde totale — encaisse n'importe quelle attaque sans reculer.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Combat",
+          "pp_max": 5,
+          "boosts": {"defense": 3, "special_def": 3}
         }
       ]
     }
