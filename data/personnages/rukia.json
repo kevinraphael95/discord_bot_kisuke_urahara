@@ -3,15 +3,15 @@
   "type": ["Glace"],
   "genre": "Femme",
   "sexualite": "Hétéro",
-  "personnalite": ["Déterminé", "Courageux", "Sérieux", "Loyal", "Stoïque"],
+  "personnalite": ["Courageux", "Déterminé", "Loyal", "Froid", "Noble", "Protecteur"],
   "race": ["Shinigami"],
   "stats_base": {
-    "pv": 100,
-    "attaque": 50,
-    "defense": 60,
-    "special": 80,
-    "special_def": 70,
-    "rapidite": 75
+    "pv": 110,
+    "attaque": 70,
+    "defense": 75,
+    "special": 100,
+    "special_def": 85,
+    "rapidite": 80
   },
   "formes": {
     "Normal": {
@@ -19,115 +19,124 @@
       "activation": "",
       "attaques": [
         {
-          "nom": "Zanjutsu Expert",
-          "description": "Attaque au sabre basée sur son haut niveau de maîtrise.",
-          "puissance": 60,
+          "nom": "Coup d'épée",
+          "description": "Attaque physique rapide au sabre scellé.",
+          "puissance": 40,
           "categorie": "Physique",
           "type": "Normal",
-          "pp_max": 15
+          "pp_max": 30,
+          "statut": null
+        },
+        {
+          "nom": "Hadō #33 Sōkatsui",
+          "description": "Kido de destruction — onde de flamme bleue projetée sur l'ennemi.",
+          "puissance": 60,
+          "categorie": "Spécial",
+          "type": "Feu",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Bakudō #61 Rikujōkōrō",
+          "description": "Kido de restriction — six lances de lumière clouent l'ennemi sur place.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 10,
+          "statut": "Paralysie"
         },
         {
           "nom": "Shunpo",
-          "description": "Déplacement ultra-rapide pour esquiver ou surprendre l'adversaire.",
+          "description": "Déplacement-éclair des Shinigami.",
           "puissance": 0,
           "categorie": "Statut",
-          "type": "Glace",
-          "pp_max": 10,
-          "boosts": {"rapidite": 2}
-        },
-        {
-          "nom": "Hakuda",
-          "description": "Combat au corps-à-corps maîtrisé, même en Gigai dépouillé.",
-          "puissance": 50,
-          "categorie": "Physique",
           "type": "Normal",
-          "pp_max": 10
-        },
-        {
-          "nom": "Esquive Agile",
-          "description": "Permet d’éviter automatiquement une attaque de l’adversaire.",
-          "puissance": 0,
-          "categorie": "Statut",
-          "type": "Glace",
-          "pp_max": 5
+          "pp_max": 20,
+          "boosts": {"rapidite": 1}
         }
       ]
     },
     "Shikai": {
-      "bonus": {"special": 10, "attaque": 10},
-      "activation": "Shikai activé : Sode no Shirayuki !",
+      "bonus": {"special": 15, "rapidite": 5},
+      "activation": "Danse, Sode no Shirayuki !",
       "attaques": [
         {
-          "nom": "Some no Mai, Tsukishiro",
-          "description": "Gèle tout dans un cercle autour de l'adversaire, puis brise la glace.",
-          "puissance": 80,
-          "categorie": "Spécial",
-          "type": "Glace",
-          "pp_max": 10
-        },
-        {
-          "nom": "Tsugi no Mai, Hakuren",
-          "description": "Vague glaciale massive qui encaisse et gèle tout sur son passage.",
-          "puissance": 100,
-          "categorie": "Spécial",
-          "type": "Glace",
-          "pp_max": 5
-        },
-        {
-          "nom": "San no Mai, Shirafune",
-          "description": "Crée une lame de glace prolongée qui gèle la zone autour du contact.",
+          "nom": "Première Danse : Tsukishiro",
+          "description": "Cercle de gel instantané sous les pieds de l'ennemi — tout ce qu'il touche gèle.",
           "puissance": 75,
           "categorie": "Spécial",
           "type": "Glace",
-          "pp_max": 10
+          "pp_max": 15,
+          "statut": "Gel"
         },
         {
-          "nom": "Ice-Rope Connection",
-          "description": "Extension de glace pour attaquer à distance avec les pouvoirs du Shikai.",
-          "puissance": 60,
+          "nom": "Deuxième Danse : Hakuren",
+          "description": "Vague d'énergie glaciale projetée en ligne droite qui ensevelit l'ennemi sous la glace.",
+          "puissance": 85,
           "categorie": "Spécial",
           "type": "Glace",
-          "pp_max": 10
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Troisième Danse : Shirafune",
+          "description": "Colonne de glace reconstituant la lame, qui transperce l'ennemi et gèle tout le terrain.",
+          "puissance": 90,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 8,
+          "statut": "Gel"
+        },
+        {
+          "nom": "Corde de Glace",
+          "description": "Extension de glace reliant la main à l'épée pour attaquer à distance.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Glace",
+          "pp_max": 10,
+          "boosts": {"special": 2}
         }
       ]
     },
     "Bankai": {
-      "bonus": {"special": 30, "attaque": 20},
-      "activation": "Bankai activé : Hakka no Togame !",
+      "bonus": {"special": 30, "defense": 20, "special_def": 20},
+      "activation": "Bankai — Hakka no Togame !",
       "attaques": [
         {
-          "nom": "Hakka no Togame",
-          "description": "Vague glaciale à zéro absolu, gelant tout sur son passage.",
+          "nom": "Pilier de Zéro Absolu",
+          "description": "Émission massive de froid à zéro absolu — tout ce qui est touché devient une sculpture de glace qui se désintègre.",
           "puissance": 130,
           "categorie": "Spécial",
           "type": "Glace",
-          "pp_max": 5
-        },
-        {
-          "nom": "Shunpo Expert",
-          "description": "Augmente fortement la rapidité, difficile à atteindre.",
-          "puissance": 0,
-          "categorie": "Statut",
-          "type": "Glace",
           "pp_max": 5,
-          "boosts": {"rapidite": 3}
+          "statut": "Gel"
         },
         {
-          "nom": "Sōten Kisshun",
-          "description": "Bouclier glacé renforcé, augmente fortement la défense.",
-          "puissance": 0,
-          "categorie": "Statut",
-          "type": "Glace",
-          "pp_max": 5,
-          "boosts": {"defense": 2}
-        },
-        {
-          "nom": "Freeze Touch",
-          "description": "Le simple contact avec Rukia peut commencer à geler l'adversaire.",
-          "puissance": 70,
+          "nom": "Onde Glaciale",
+          "description": "Shockwave de zéro absolu couvrant toute la zone — gel instantané à large portée.",
+          "puissance": 110,
           "categorie": "Spécial",
           "type": "Glace",
-          "pp_max": 10
+          "pp_max": 5,
+          "statut": "Gel"
+        },
+        {
+          "nom": "Armure de Glace",
+          "description": "Le corps de Rukia atteint le zéro absolu — elle gèle tout ce qui la touche physiquement.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Glace",
+          "pp_max": 5,
+          "boosts": {"defense": 3, "special_def": 3}
+        },
+        {
+          "nom": "Immunité aux Altérations",
+          "description": "Le froid absolu gèle et neutralise tout poison, brûlure ou statut entrant dans son corps.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Glace",
+          "pp_max": 3,
+          "boosts": {"special_def": 2}
         }
       ]
     }
