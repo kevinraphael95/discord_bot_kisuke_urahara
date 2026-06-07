@@ -6,10 +6,10 @@
   "personnalite": ["Sérieux", "Déterminé", "Froid", "Réfléchi", "Protecteur", "Travailleur"],
   "race": ["Shinigami"],
   "stats_base": {
-    "pv": 115,
-    "attaque": 80,
-    "defense": 85,
-    "special": 110,
+    "pv": 110,
+    "attaque": 75,
+    "defense": 80,
+    "special": 115,
     "special_def": 90,
     "rapidite": 90
   },
@@ -19,50 +19,50 @@
       "activation": "",
       "attaques": [
         {
-          "nom": "Coup de sabre",
-          "description": "Frappe précise — Hitsugaya maîtrise le Zanjutsu à un niveau de capitaine.",
+          "nom": "Zanjutsu de Capitaine",
+          "description": "Hitsugaya est un maître de l'épée malgré son jeune âge — rarement obligé d'utiliser son Shikai tellement sa maîtrise à l'état scellé est déjà supérieure.",
           "puissance": 50,
           "categorie": "Physique",
           "type": "Normal",
-          "pp_max": 30,
+          "pp_max": 25,
           "statut": null
         },
         {
-          "nom": "Pression Glaciale",
-          "description": "Son reiatsu est si froid qu'il gèle l'environnement autour de lui passivement.",
+          "nom": "Ryōjin Hyōheki",
+          "description": "Génère un mur de protection en tissant finement des fils de glace ensemble — barrière quasi-indestructible utilisée notamment contre les flammes de Bazz-B.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Glace",
           "pp_max": 15,
-          "statut": "Gel"
+          "boosts": {"defense": 3}
+        },
+        {
+          "nom": "Gunchō Tsurara",
+          "description": "Gèle l'eau ambiante puis fait basculer Hyōrinmaru en arc — décharge une nuée de poignards de glace sur la cible.",
+          "puissance": 55,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 20,
+          "statut": null
         },
         {
           "nom": "Shunpo",
-          "description": "Déplacement rapide de capitaine.",
+          "description": "Déplacement-éclair de capitaine — Hitsugaya peut le combiner avec ses attaques de glace.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Normal",
           "pp_max": 20,
           "boosts": {"rapidite": 1}
-        },
-        {
-          "nom": "Hadō #33 Sōkatsui",
-          "description": "Onde de Kido de destruction bleue tirée à pleine main.",
-          "puissance": 55,
-          "categorie": "Spécial",
-          "type": "Feu",
-          "pp_max": 15,
-          "statut": null
         }
       ]
     },
     "Shikai": {
-      "bonus": {"special": 15, "defense": 10},
+      "bonus": {"special": 20, "defense": 10},
       "activation": "Règne sur les cieux givrés, Hyōrinmaru !",
       "attaques": [
         {
-          "nom": "Dragon de Glace",
-          "description": "Dragon de glace et d'eau surgissant de la lame — engloutit et congèle l'ennemi.",
+          "nom": "Dragon de Glace (Tensō Jūrin)",
+          "description": "Contrôle de la glace et de l'eau dans l'atmosphère — un dragon de glace surgit de la lame et fonce sur l'ennemi pour l'engloutir et le geler. Hyōrinmaru est le plus puissant zanpakutō de type glace de toute la Soul Society.",
           "puissance": 90,
           "categorie": "Spécial",
           "type": "Glace",
@@ -70,17 +70,8 @@
           "statut": "Gel"
         },
         {
-          "nom": "Tenso Jurin",
-          "description": "Contrôle météorologique — gèle l'eau dans l'atmosphère, blizzard couvrant toute la zone.",
-          "puissance": 80,
-          "categorie": "Spécial",
-          "type": "Glace",
-          "pp_max": 10,
-          "statut": "Gel"
-        },
-        {
           "nom": "Rokui Hyōketsujin",
-          "description": "Cinq cristaux de glace posés en pentagone — piège tout ennemi qui entre dans la zone sous une colonne de glace.",
+          "description": "Pose cinq cristaux de neige en pentagonale au sol — piège dissimulé. Quand l'ennemi entre dans la zone, chaque cristal envoie une ligne de glace qui les recouvre d'une colonne de glace massive.",
           "puissance": 75,
           "categorie": "Spécial",
           "type": "Glace",
@@ -88,55 +79,64 @@
           "statut": "Paralysie"
         },
         {
-          "nom": "Ryōjin Hyōheki",
-          "description": "Mur de glace tressée — barrière défensive quasi-indestructible.",
+          "nom": "Hyōryū Senbi + Zekkū",
+          "description": "Balaye la lame en arc et crée un croissant de glace tranchant, puis le contrôle à distance pour le rediriger sur l'ennemi même après le tir.",
+          "puissance": 80,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 12,
+          "statut": null
+        },
+        {
+          "nom": "Shinku Taso Hyōheki",
+          "description": "Mur de glace multicouche sous vide, créé avec la cendre de Haineko — résiste même aux flammes du Sternritter Bazz-B.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Glace",
-          "pp_max": 10,
-          "boosts": {"defense": 3}
+          "pp_max": 8,
+          "boosts": {"defense": 2, "special_def": 2}
         }
       ]
     },
     "Bankai": {
-      "bonus": {"special": 25, "defense": 20, "rapidite": 10},
+      "bonus": {"special": 25, "defense": 15, "rapidite": 10},
       "activation": "Bankai — Daiguren Hyōrinmaru !",
       "attaques": [
         {
+          "nom": "Ryūsenka",
+          "description": "Hitsugaya poignarde l'ennemi — une explosion de glace massive jaillit du point de contact, emprisonnant la cible dans la glace. Il la brise ensuite avec l'ennemi dedans.",
+          "puissance": 100,
+          "categorie": "Physique",
+          "type": "Glace",
+          "pp_max": 10,
+          "statut": "Gel"
+        },
+        {
+          "nom": "Sennen Hyōrō",
+          "description": "Prison de glace millénaire — des piliers de glace immenses jaillissent du sol et encerclent l'ennemi, puis se referment sur lui en l'écrasant. Nécessite de l'eau dans l'atmosphère.",
+          "puissance": 110,
+          "categorie": "Spécial",
+          "type": "Glace",
+          "pp_max": 8,
+          "statut": "Paralysie"
+        },
+        {
           "nom": "Hyōten Hyakkasō",
-          "description": "Blizzard de cent fleurs de glace tombant du ciel — gèle tout ce qu'elles touchent sur une immense zone.",
-          "puissance": 125,
+          "description": "Cent fleurs des cieux glacés — un trou s'ouvre dans les nuages, une neige abondante tombe sur l'ennemi. Chaque flocon se transforme en fleur de glace sur son corps. Quand le centième pétale tombe, la vie de la cible s'éteint.",
+          "puissance": 130,
           "categorie": "Spécial",
           "type": "Glace",
           "pp_max": 5,
           "statut": "Gel"
         },
         {
-          "nom": "Dragon de Glace Ultime",
-          "description": "Dragon de glace massif à l'échelle d'un bâtiment — se régénère à l'infini tant qu'il y a de l'eau dans l'air.",
-          "puissance": 115,
-          "categorie": "Spécial",
-          "type": "Glace",
-          "pp_max": 5,
-          "statut": null
-        },
-        {
-          "nom": "Armure du Dragon",
-          "description": "Armure de glace sur tout le corps de Hitsugaya — gèle instantanément tout ce qui le touche.",
-          "puissance": 0,
-          "categorie": "Statut",
-          "type": "Glace",
-          "pp_max": 5,
-          "boosts": {"defense": 3, "special_def": 2}
-        },
-        {
-          "nom": "Bankai Adulte",
-          "description": "Maturité complète du Bankai — Hitsugaya prend sa forme adulte, puissance et vitesse décuplées.",
+          "nom": "Daiguren Complet — Forme Adulte",
+          "description": "Quand le dernier pétale de fleur de glace tombe, le Bankai atteint sa maturité — Hitsugaya prend sa forme adulte. Gèle instantanément tout ce qui le touche, régénère tant qu'il y a de l'eau dans l'air. Même le bouclier auto-réparateur de Gerard échoue contre ce gel.",
           "puissance": 0,
           "categorie": "Statut",
           "type": "Glace",
           "pp_max": 3,
-          "boosts": {"special": 3, "rapidite": 3, "attaque": 2}
+          "boosts": {"special": 3, "attaque": 2, "rapidite": 2}
         }
       ]
     }
