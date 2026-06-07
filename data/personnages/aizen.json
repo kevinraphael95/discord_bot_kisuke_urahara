@@ -1,0 +1,145 @@
+{
+  "nom": "Sōsuke Aizen",
+  "type": ["Illusion"],
+  "genre": "Homme",
+  "sexualite": "Hétéro",
+  "personnalite": ["Manipulateur", "Stratège", "Narcissique", "Calme", "Autoritaire", "Ambitieux"],
+  "race": ["Shinigami", "Transcendant"],
+  "stats_base": {
+    "pv": 140,
+    "attaque": 105,
+    "defense": 100,
+    "special": 130,
+    "special_def": 110,
+    "rapidite": 100
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Coup de sabre",
+          "description": "Maîtrise absolue du Zanjutsu — frappe que personne ne peut bloquer sans subir de dégâts.",
+          "puissance": 65,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 25,
+          "statut": null
+        },
+        {
+          "nom": "Hadō #90 Kurohitsugi",
+          "description": "Cercueil noir — espace-temps distordu qui broie la cible de l'intérieur.",
+          "puissance": 100,
+          "categorie": "Spécial",
+          "type": "Ténèbres",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Bakudō #99 Kin",
+          "description": "Restriction ultime — lier l'ennemi dans des bandelettes de reiatsu impossibles à briser.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 5,
+          "statut": "Paralysie"
+        },
+        {
+          "nom": "Pression Spirituelle Écrasante",
+          "description": "Aizen libère une fraction de son reiatsu — la différence de niveau est palpable, presque paralysante.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Illusion",
+          "pp_max": 10,
+          "boosts": {"attaque": 2, "special": 2}
+        }
+      ]
+    },
+    "Shikai": {
+      "bonus": {"special": 20, "special_def": 15},
+      "activation": "Brise-toi, Kyōka Suigetsu !",
+      "attaques": [
+        {
+          "nom": "Hypnose Complète",
+          "description": "Contrôle total des cinq sens — l'ennemi ne peut plus distinguer le réel de l'illusion, pour toujours.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Illusion",
+          "pp_max": 3,
+          "statut": "Confusion"
+        },
+        {
+          "nom": "Lame Fantôme",
+          "description": "Frappe depuis une position qui n'existe pas — l'ennemi esquive une illusion et reçoit le vrai coup.",
+          "puissance": 100,
+          "categorie": "Physique",
+          "type": "Illusion",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Illusion de Dégâts",
+          "description": "Fait croire à l'ennemi qu'il a subi des blessures mortelles — confusion et paralysie psychologique.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Illusion",
+          "pp_max": 8,
+          "statut": "Confusion"
+        },
+        {
+          "nom": "Miroir Brisé",
+          "description": "Désactive l'hypnose — révèle la réalité, désorientant violemment l'ennemi qui revient à lui.",
+          "puissance": 85,
+          "categorie": "Spécial",
+          "type": "Illusion",
+          "pp_max": 5,
+          "statut": null
+        }
+      ]
+    },
+    "Fusion Hōgyoku": {
+      "bonus": {"attaque": 30, "special": 30, "defense": 25, "rapidite": 20},
+      "activation": "Hōgyoku — éveille-toi !",
+      "attaques": [
+        {
+          "nom": "Hadō #90 Sans Incantation",
+          "description": "Kurohitsugi lancé sans incantation — puissance maximale, vitesse d'exécution instantanée.",
+          "puissance": 140,
+          "categorie": "Spécial",
+          "type": "Ténèbres",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Corps Transcendant",
+          "description": "Le Hōgyoku régénère les blessures d'Aizen en temps réel — presque impossible à tuer.",
+          "puissance": 80,
+          "categorie": "Soin",
+          "type": "Illusion",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Onde de Destruction",
+          "description": "Explosion de reiatsu pur qui rase tout dans un rayon immense — dépassant tout capitaine connu.",
+          "puissance": 135,
+          "categorie": "Spécial",
+          "type": "Illusion",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Évolution Forcée",
+          "description": "Le Hōgyoku amplifie en temps réel les capacités d'Aizen selon les besoins du combat.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Illusion",
+          "pp_max": 3,
+          "boosts": {"attaque": 3, "special": 3, "defense": 2}
+        }
+      ]
+    }
+  },
+  "images": []
+}
