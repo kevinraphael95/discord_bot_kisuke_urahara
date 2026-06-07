@@ -1,16 +1,16 @@
 {
   "nom": "Uryū Ishida",
-  "type": ["Électrik"],
+  "type": ["Lumière"],
   "genre": "Homme",
   "sexualite": "Hétéro",
-  "personnalite": ["Intelligent", "Calme", "Déterminé", "Stratégique", "Protecteur"],
-  "race": ["Humain", "Quincy", "Transcendant"],
+  "personnalite": ["Réfléchi", "Froid", "Stratège", "Déterminé", "Loyal", "Sérieux"],
+  "race": ["Humain", "Quincy"],
   "stats_base": {
-    "pv": 90,
-    "attaque": 50,
-    "defense": 50,
-    "special": 85,
-    "special_def": 70,
+    "pv": 105,
+    "attaque": 55,
+    "defense": 60,
+    "special": 110,
+    "special_def": 90,
     "rapidite": 95
   },
   "formes": {
@@ -19,81 +19,127 @@
       "activation": "",
       "attaques": [
         {
-          "nom": "Seele Schneider",
-          "description": "Attaque rapide avec l’arc Quincy classique.",
-          "puissance": 60,
-          "categorie": "Spécial",
-          "type": "Électrik",
-          "pp_max": 15
-        },
-        {
           "nom": "Heilig Pfeil",
-          "description": "Flèche spirituelle tirée à distance.",
+          "description": "Flèche d'énergie spirituelle Quincy — précision absolue, touche à coup sûr.",
           "puissance": 50,
           "categorie": "Spécial",
-          "type": "Électrik",
-          "pp_max": 20
+          "type": "Lumière",
+          "pp_max": 30,
+          "statut": null
         },
         {
-          "nom": "Flèche rapide",
-          "description": "Prépare une flèche plus rapide, augmentant la vitesse.",
+          "nom": "Hirenkyaku",
+          "description": "Déplacement sur une plateforme d'eau spirituelle — vitesse égale au Shunpo.",
           "puissance": 0,
           "categorie": "Statut",
-          "type": "Électrik",
-          "pp_max": 15,
+          "type": "Normal",
+          "pp_max": 20,
           "boosts": {"rapidite": 1}
         },
         {
-          "nom": "Blut Vene",
-          "description": "Renforce la défense grâce à l’énergie spirituelle dans le sang.",
+          "nom": "Gintō : Sprenger",
+          "description": "Explosion d'énergie spirituelle concentrée via des tubes de gintō.",
+          "puissance": 70,
+          "categorie": "Spécial",
+          "type": "Lumière",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Blut Arterie",
+          "description": "Réseau Quincy offensif renforcé dans les veines — augmente la puissance des attaques.",
           "puissance": 0,
           "categorie": "Statut",
-          "type": "Électrik",
-          "pp_max": 5,
-          "boosts": {"defense": 2}
+          "type": "Lumière",
+          "pp_max": 15,
+          "boosts": {"special": 2}
+        }
+      ]
+    },
+    "Quincy Bow": {
+      "bonus": {"special": 15, "rapidite": 10},
+      "activation": "Arc Quincy — invoqué !",
+      "attaques": [
+        {
+          "nom": "Heilig Pfeil Concentré",
+          "description": "Flèche chargée à pleine puissance — perfore les défenses ennemies.",
+          "puissance": 85,
+          "categorie": "Spécial",
+          "type": "Lumière",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Tir Courbe",
+          "description": "Uryū contrôle la trajectoire de ses flèches après les avoir tirées — impossible à esquiver.",
+          "puissance": 80,
+          "categorie": "Spécial",
+          "type": "Lumière",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Seele Schneider",
+          "description": "Lame vibrant à 3 millions de fois par seconde — coupe et vole le reiatsu de l'ennemi.",
+          "puissance": 75,
+          "categorie": "Physique",
+          "type": "Lumière",
+          "pp_max": 10,
+          "statut": null
+        },
+        {
+          "nom": "Négation d'Attaque",
+          "description": "Flèche tirée avec précision pour intercepter et annuler le projectile ennemi.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Lumière",
+          "pp_max": 10,
+          "boosts": {"special_def": 2}
         }
       ]
     },
     "Vollständig": {
-      "bonus": {"attaque": 20, "special": 20, "rapidite": 20},
-      "activation": "Vollständig, Antithesis !",
+      "bonus": {"special": 30, "rapidite": 20, "special_def": 15},
+      "activation": "Quincy : Vollständig — Antithèse !",
       "attaques": [
         {
-          "nom": "Antithèse",
-          "description": "Inverse complètement tout ce qui s'est produit entre deux cibles.",
-          "puissance": 0,
-          "categorie": "Statut",
-          "type": "Électrik",
-          "pp_max": 5,
-          "statut": "Antithèse"
-        },
-        {
-          "nom": "Heilig Bogen",
-          "description": "Arc Quincy ultime, très puissant et rapide.",
-          "puissance": 90,
-          "categorie": "Spécial",
-          "type": "Électrik",
-          "pp_max": 10
-        },
-        {
-          "nom": "Composite Heilig Pfeil",
-          "description": "Combine plusieurs flèches pour créer une flèche géante perforante.",
+          "nom": "Licht Regen",
+          "description": "Pluie de 1200 flèches de lumière en une seconde — saturation totale de la zone.",
           "puissance": 120,
           "categorie": "Spécial",
-          "type": "Électrik",
-          "pp_max": 3
+          "type": "Lumière",
+          "pp_max": 5,
+          "statut": null
         },
         {
-          "nom": "Reishi Cage",
-          "description": "Crée une cage de flèches autour de l’ennemi et explose en forme de symbole Quincy.",
-          "puissance": 80,
+          "nom": "Staubewolken",
+          "description": "Immense flèche combinée en forme de croix Quincy — puissance comparable au Getsuga Jūjishō d'Ichigo.",
+          "puissance": 115,
           "categorie": "Spécial",
-          "type": "Électrik",
+          "type": "Lumière",
           "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Federzwinger",
+          "description": "Cage pentagonale d'énergie emprisonnant l'ennemi et drainant son reiatsu — interdit le Shikai et le Bankai.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Lumière",
+          "pp_max": 3,
           "statut": "Paralysie"
+        },
+        {
+          "nom": "Antithèse",
+          "description": "Pouvoir A de Sternritter — inverse tous les dégâts et effets entre lui et sa cible.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Lumière",
+          "pp_max": 3,
+          "statut": "Antithèse"
         }
       ]
     }
   },
-  "images": ["https://example.com/uryu.png"]
+  "images": []
 }
