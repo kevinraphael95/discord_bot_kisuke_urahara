@@ -1,0 +1,145 @@
+{
+  "nom": "Byakuya Kuchiki",
+  "type": ["Vent"],
+  "genre": "Homme",
+  "sexualite": "Hétéro",
+  "personnalite": ["Noble", "Froid", "Réfléchi", "Stoïque", "Juste", "Loyal"],
+  "race": ["Shinigami"],
+  "stats_base": {
+    "pv": 120,
+    "attaque": 90,
+    "defense": 85,
+    "special": 105,
+    "special_def": 90,
+    "rapidite": 105
+  },
+  "formes": {
+    "Normal": {
+      "bonus": {},
+      "activation": "",
+      "attaques": [
+        {
+          "nom": "Coup de sabre",
+          "description": "Frappe précise et létale, presque invisible à l'œil nu.",
+          "puissance": 55,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 25,
+          "statut": null
+        },
+        {
+          "nom": "Senka",
+          "description": "Technique de Shunpo — se place dans le dos de l'ennemi et scelle son âme en deux frappes.",
+          "puissance": 70,
+          "categorie": "Physique",
+          "type": "Normal",
+          "pp_max": 10,
+          "statut": "Paralysie"
+        },
+        {
+          "nom": "Hadō #4 Byakurai",
+          "description": "Éclair blanc concentré tiré du bout du doigt — précision mortelle.",
+          "puissance": 50,
+          "categorie": "Spécial",
+          "type": "Foudre",
+          "pp_max": 20,
+          "statut": null
+        },
+        {
+          "nom": "Shunpo Maître",
+          "description": "Déplacement à une vitesse quasi-divine, enseigné par Yoruichi elle-même.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 20,
+          "boosts": {"rapidite": 2}
+        }
+      ]
+    },
+    "Shikai": {
+      "bonus": {"special": 15, "rapidite": 10},
+      "activation": "Disperse, Senbonzakura !",
+      "attaques": [
+        {
+          "nom": "Pétales de Lame",
+          "description": "Milliers de micro-lames en forme de pétales de cerisier contrôlées mentalement — impossible à esquiver.",
+          "puissance": 85,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 15,
+          "statut": null
+        },
+        {
+          "nom": "Mur de Lames",
+          "description": "Bouclier de pétales absorbant toutes les attaques entrantes.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Vent",
+          "pp_max": 10,
+          "boosts": {"defense": 3}
+        },
+        {
+          "nom": "Vortex de Cerisier",
+          "description": "Tourbillon de pétales tranchants englobant l'ennemi de toutes parts.",
+          "puissance": 90,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 10,
+          "statut": "Saignement"
+        },
+        {
+          "nom": "Concentration",
+          "description": "Byakuya focalise son reiatsu — prépare une attaque décisive.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Normal",
+          "pp_max": 10,
+          "boosts": {"special": 2}
+        }
+      ]
+    },
+    "Bankai": {
+      "bonus": {"special": 25, "rapidite": 15, "defense": 15},
+      "activation": "Bankai — Senbonzakura Kageyoshi !",
+      "attaques": [
+        {
+          "nom": "Senkei",
+          "description": "Forme vraie du Bankai — des milliers d'épées lumineuses encerclent l'ennemi en colonne tournante, sans échappatoire.",
+          "puissance": 130,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Gōkei",
+          "description": "Toutes les lames se referment sur l'ennemi en sphère — destruction totale en un instant.",
+          "puissance": 120,
+          "categorie": "Spécial",
+          "type": "Vent",
+          "pp_max": 5,
+          "statut": null
+        },
+        {
+          "nom": "Shūkei : Hakuteiken",
+          "description": "Toutes les lames condensées en une unique épée de lumière blanche — frappe finale absolue.",
+          "puissance": 140,
+          "categorie": "Physique",
+          "type": "Lumière",
+          "pp_max": 3,
+          "statut": null
+        },
+        {
+          "nom": "Bouclier de Pétales",
+          "description": "Les pétales forment un dôme impénétrable autour de Byakuya.",
+          "puissance": 0,
+          "categorie": "Statut",
+          "type": "Vent",
+          "pp_max": 5,
+          "boosts": {"defense": 3, "special_def": 3}
+        }
+      ]
+    }
+  },
+  "images": []
+}
