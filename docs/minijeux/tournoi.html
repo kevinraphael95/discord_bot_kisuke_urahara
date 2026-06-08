@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Bracket Tournament — Bleach</title>
-
 <script>
 const t = localStorage.getItem('shinigami-theme');
 document.documentElement.setAttribute(
@@ -13,24 +11,17 @@ document.documentElement.setAttribute(
   ['shinigami','quincy'].includes(t) ? t : 'shinigami'
 );
 </script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="tournoi.css">
-
 <script src="../js/nav.js" defer></script>
 <script src="../js/data.js"></script>
 <script src="tournoi.js" defer></script>
-
 </head>
-
 <body>
-
 <div class="atmo"></div>
 <div class="top-bar"></div>
-
 <div class="phdr">
   <h1 class="pttl">
     <span class="t1"><strong>Bracket Tournament</strong></span>
@@ -41,13 +32,23 @@ document.documentElement.setAttribute(
     <div class="orb"></div>
   </div>
 </div>
-
 <div class="tl-wrap">
 
+  <!-- ── GAME BOX ── -->
   <div id="gameBox">
+
+    <!-- round header -->
+    <div id="roundHeader">
+      <div id="roundLabel">Tour 1 · Match 1/8</div>
+      <div id="roundTitle">Huitièmes de finale</div>
+      <div id="progressBar"><div id="progressFill" style="width:0%"></div></div>
+    </div>
 
     <!-- ⚔️ MATCH AREA -->
     <div id="matchZone" class="cards-container"></div>
+
+    <!-- info sous les cartes -->
+    <div id="matchInfo"></div>
 
     <!-- CONTROLS -->
     <div class="btn-row">
@@ -59,26 +60,21 @@ document.documentElement.setAttribute(
 
   </div>
 
-  <!-- 🏆 RESULT -->
+  <!-- ── RESULT BOX ── -->
   <div id="resultBox" style="display:none;">
-
     <div style="display:flex; align-items:center; gap:.5rem; justify-content:center;">
       <span class="res-emoji">🏆</span>
       <span class="res-title">Winner</span>
     </div>
-
     <div id="winnerDisplay"></div>
-
     <div class="btn-row">
       <button class="btn-choice after" onclick="startTournament()">
         <span class="bc-icon">▶▶</span>
         <span>Rejouer</span>
       </button>
     </div>
-
   </div>
 
 </div>
-
 </body>
 </html>
