@@ -44,6 +44,7 @@ function showMatch() {
   const match = round[currentMatch];
   if (!match) { nextRound(); return; }
 
+  // bye automatique
   if (match.length === 1) {
     winners.push(match[0]);
     currentMatch++;
@@ -51,10 +52,10 @@ function showMatch() {
     return;
   }
 
+  // header
   const rName = ROUND_NAMES[roundNumber] || `Tour ${roundNumber + 1}`;
-  const matchNum = currentMatch + 1;
   document.getElementById('roundLabel').textContent =
-    `Tour ${roundNumber + 1} · Match ${matchNum}/${totalMatchesInRound}`;
+    `Tour ${roundNumber + 1} · Match ${currentMatch + 1}/${totalMatchesInRound}`;
   document.getElementById('roundTitle').textContent = rName;
   document.getElementById('progressFill').style.width =
     (currentMatch / totalMatchesInRound * 100) + '%';
@@ -65,18 +66,23 @@ function showMatch() {
       ? `${remaining} match${remaining > 1 ? 's' : ''} restant${remaining > 1 ? 's' : ''} dans ce tour`
       : 'Dernier match du tour !';
 
+  // cartes — nom au-dessus, image, bouton en bas
   match.forEach((perso, index) => {
     const img = perso.img ? `../${perso.img}` : '../assets/personnages/default.png';
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <img src="${img}" alt="${perso.n}" loading="lazy">
       <div class="card-body">
         <h3>${perso.n}</h3>
+      </div>
+      <img src="${img}" alt="${perso.n}" loading="lazy">
+      <div class="card-footer">
         <button class="btn-choice" data-action="pick" data-index="${index}">⚔️ Choisir</button>
       </div>
     `;
     zone.appendChild(card);
+
+    // VS entre les deux
     if (index === 0) {
       const vs = document.createElement('div');
       vs.className = 'vs-label';
@@ -108,10 +114,10 @@ function endTournament(winner) {
   const img = winner.img ? `../${winner.img}` : '../assets/personnages/default.png';
   document.getElementById('winnerDisplay').innerHTML = `
     <div class="card">
-      <img src="${img}" alt="${winner.n}">
       <div class="card-body">
         <h3>${winner.n}</h3>
       </div>
+      <img src="${img}" alt="${winner.n}">
     </div>
   `;
 }
