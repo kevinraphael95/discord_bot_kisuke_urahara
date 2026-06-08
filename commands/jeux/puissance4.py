@@ -30,7 +30,7 @@ COL_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", 
 # 🧩 Logique du plateau
 # ────────────────────────────────────────────────────────────────────────────────
 def make_board():
-    return [[EMPTY] * COLS for _ in range(ROWS)]
+    return [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
 
 def drop_token(board, col, token):
     for row in range(ROWS - 1, -1, -1):
@@ -40,24 +40,28 @@ def drop_token(board, col, token):
     return -1
 
 def check_win(board, token):
+    # horizontal
     for r in range(ROWS):
         for c in range(COLS - 3):
-            if all(board[r][c + i] == token for i in range(4)):
+            if all(board[r][c+i] == token for i in range(4)):
                 return True
 
+    # vertical
     for r in range(ROWS - 3):
         for c in range(COLS):
-            if all(board[r + i][c] == token for i in range(4)):
+            if all(board[r+i][c] == token for i in range(4)):
                 return True
 
+    # diag ↘
     for r in range(ROWS - 3):
         for c in range(COLS - 3):
-            if all(board[r + i][c + i] == token for i in range(4)):
+            if all(board[r+i][c+i] == token for i in range(4)):
                 return True
 
-    for r in range(ROWS - 3):
-        for c in range(3, COLS):
-            if all(board[r + i][c - i] == token for i in range(4)):
+    # diag ↙
+    for r in range(3, ROWS):
+        for c in range(COLS - 3):
+            if all(board[r-i][c+i] == token for i in range(4)):
                 return True
 
     return False
@@ -69,7 +73,7 @@ def available_cols(board):
     return [c for c in range(COLS) if board[0][c] == EMPTY]
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🤖 IA simple
+# 🤖 IA SIMPLE
 # ────────────────────────────────────────────────────────────────────────────────
 def bot_move(board):
     bot = TOKENS[1]
@@ -94,7 +98,7 @@ def bot_move(board):
     return min(cols, key=lambda c: abs(c - COLS // 2))
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧩 VIEW DU JEU
+# 🧩 VIEW
 # ────────────────────────────────────────────────────────────────────────────────
 class Puissance4View(View):
     def __init__(self, player1, player2=None, vs_bot=True):
@@ -113,10 +117,6 @@ class Puissance4View(View):
             self.add_item(ColumnButton(i, self))
 
     @property
-    def current_player(self):
-        return self.player1 if self.turn == 0 else self.player2
-
-    @property
     def current_token(self):
         return TOKENS[self.turn]
 
@@ -126,22 +126,12 @@ class Puissance4View(View):
         return header + "\n" + "\n".join(rows)
 
     def embed(self):
-        name2 = "🤖 Bot" if self.vs_bot else (self.player2.display_name if self.player2 else "?")
-
-        e = discord.Embed(
+        p2 = "🤖 Bot" if self.vs_bot else self.player2.display_name
+        return discord.Embed(
             title="🟡🔴 Puissance 4",
-            description=f"🔴 {self.player1.display_name} vs 🟡 {name2}\n\n{self.render()}",
+            description=f"🔴 {self.player1.display_name} vs 🟡 {p2}\n\n{self.render()}",
             color=discord.Color.gold()
         )
-
-        if not self.game_over:
-            if self.turn == 0:
-                txt = f"🔴 Tour de {self.player1.display_name}"
-            else:
-                txt = f"🟡 Tour de {'Bot' if self.vs_bot else self.player2.display_name}"
-            e.set_footer(text=txt)
-
-        return e
 
     async def update(self):
         if self.message and not self.game_over:
@@ -198,10 +188,10 @@ class Puissance4View(View):
         if winner is None:
             e.add_field(name="Résultat", value="🤝 Match nul")
         elif winner == TOKENS[0]:
-            e.add_field(name="Résultat", value=f"🏆 {self.player1.display_name} gagne")
+            e.add_field(name="Résultat", value=f"🏆 {self.player1.display_name}")
         else:
             name = "Bot" if self.vs_bot else self.player2.display_name
-            e.add_field(name="Résultat", value=f"🏆 {name} gagne")
+            e.add_field(name="Résultat", value=f"🏆 {name}")
 
         await interaction.response.edit_message(embed=e, view=self)
 
@@ -220,13 +210,13 @@ class ColumnButton(Button):
         if v.game_over:
             return await safe_respond(interaction, "Partie terminée", ephemeral=True)
 
-        if v.vs_bot:
-            if interaction.user != v.player1:
-                return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
-        else:
-            expected = v.player1 if v.turn == 0 else v.player2
-            if interaction.user != expected:
-                return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
+        expected = v.player1 if v.turn == 0 else v.player2
+
+        if v.vs_bot and interaction.user != v.player1:
+            return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
+
+        if not v.vs_bot and interaction.user != expected:
+            return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
 
         await v.play(interaction, self.col)
 
@@ -237,24 +227,24 @@ class Puissance4(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # PREFIX : si pas d'argument => SOLO
     @commands.command(name="puissance4", aliases=["p4"])
-    async def p4(self, ctx, mode="solo"):
-        await self.start(ctx.channel, ctx.author, mode)
+    async def p4(self, ctx, mode: str = "solo"):
+        mode = mode.lower()
 
-    @app_commands.command(name="puissance4")
-    async def slash(self, interaction, mode="solo"):
-        await self.start_slash(interaction, mode)
-
-    async def start(self, channel, author, mode):
         if mode == "multi":
-            view = JoinView(author)
-            await safe_send(channel, "Clique pour rejoindre", view=view)
+            view = JoinView(ctx.author)
+            await safe_send(ctx.channel, "Clique pour rejoindre", view=view)
         else:
-            view = Puissance4View(author, vs_bot=True)
-            msg = await safe_send(channel, embed=view.embed(), view=view)
+            view = Puissance4View(ctx.author, vs_bot=True)
+            msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
             view.message = msg
 
-    async def start_slash(self, interaction, mode):
+    # SLASH
+    @app_commands.command(name="puissance4")
+    async def slash(self, interaction, mode: str = "solo"):
+        mode = mode.lower()
+
         if mode == "multi":
             view = JoinView(interaction.user)
             await interaction.response.send_message("Clique pour rejoindre", view=view)
@@ -277,15 +267,18 @@ class JoinView(View):
             return await safe_respond(interaction, "Impossible", ephemeral=True)
 
         view = Puissance4View(self.p1, interaction.user, vs_bot=False)
-        await interaction.response.edit_message(embed=view.embed(), view=view)
+        msg = await interaction.response.edit_message(embed=view.embed(), view=view)
         view.message = interaction.message
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔌 Setup du Cog
+# 🔌 SETUP (IMPORTANT — inchangé comme tu voulais)
 # ────────────────────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
+
     cog = Puissance4(bot)
+
     for command in cog.get_commands():
         if not hasattr(command, "category"):
             command.category = "Jeux"
+
     await bot.add_cog(cog)
