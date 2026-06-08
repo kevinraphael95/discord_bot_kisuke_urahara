@@ -33,6 +33,9 @@ def make_board():
     return [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
 
 def drop_token(board, col, token):
+    if col < 0 or col >= COLS:
+        return -1
+
     for row in range(ROWS - 1, -1, -1):
         if board[row][col] == EMPTY:
             board[row][col] = token
@@ -94,31 +97,6 @@ def bot_move(board):
     return min(cols, key=lambda c: abs(c - COLS // 2))
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔵 BOUTON
-# ────────────────────────────────────────────────────────────────────────────────
-class ColumnButton(Button):
-    def __init__(self, col, view):
-        super().__init__(emoji=COL_EMOJIS[col], style=discord.ButtonStyle.secondary)
-        self.col = col
-        self.view_ref = view
-
-    async def callback(self, interaction):
-        v = self.view_ref
-
-        if v.game_over:
-            return await safe_respond(interaction, "Partie terminée", ephemeral=True)
-
-        if v.vs_bot:
-            if interaction.user != v.player1:
-                return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
-        else:
-            expected = v.player1 if v.turn == 0 else v.player2
-            if interaction.user != expected:
-                return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
-
-        await v.play(interaction, self.col)
-
-# ────────────────────────────────────────────────────────────────────────────────
 # 🧩 VIEW
 # ────────────────────────────────────────────────────────────────────────────────
 class Puissance4View(View):
@@ -159,6 +137,9 @@ class Puissance4View(View):
             await safe_edit(self.message, embed=self.embed(), view=self)
 
     async def play(self, interaction, col):
+        if self.game_over:
+            return
+
         token = self.current_token
 
         row = drop_token(self.board, col, token)
@@ -166,10 +147,10 @@ class Puissance4View(View):
             return await safe_respond(interaction, "Colonne pleine", ephemeral=True)
 
         if check_win(self.board, token):
-            return await self.end(token)
+            return await self.end(interaction, token)
 
         if is_full(self.board):
-            return await self.end(None)
+            return await self.end(interaction, None)
 
         self.turn = 1 - self.turn
         await self.update()
@@ -178,29 +159,32 @@ class Puissance4View(View):
             await interaction.response.defer()
 
         if self.vs_bot and self.turn == 1:
-            await self.bot_turn()
+            await self.bot_turn(interaction)
 
-    async def bot_turn(self):
+    async def bot_turn(self, interaction):
         if self.game_over:
             return
 
         col = bot_move(self.board)
         if col is None:
-            return await self.end(None)
+            return await self.end(interaction, None)
 
         token = self.current_token
         drop_token(self.board, col, token)
 
         if check_win(self.board, token):
-            return await self.end(token)
+            return await self.end(interaction, token)
 
         if is_full(self.board):
-            return await self.end(None)
+            return await self.end(interaction, None)
 
         self.turn = 0
         await self.update()
 
-    async def end(self, winner):
+    async def end(self, interaction, winner):
+        if self.game_over:
+            return
+
         self.game_over = True
         self.stop()
 
@@ -217,8 +201,33 @@ class Puissance4View(View):
             name = "Bot" if self.vs_bot else self.player2.display_name
             e.add_field(name="Résultat", value=f"🏆 {name}")
 
-        if self.message:
-            await self.message.edit(embed=e, view=self)
+        await safe_edit(self.message or interaction.message, embed=e, view=self)
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔵 BOUTON
+# ────────────────────────────────────────────────────────────────────────────────
+class ColumnButton(Button):
+    def __init__(self, col, view):
+        super().__init__(emoji=COL_EMOJIS[col], style=discord.ButtonStyle.secondary)
+        self.col = col
+        self.view_ref = view
+
+    async def callback(self, interaction):
+        v = self.view_ref
+
+        if v.game_over:
+            return await safe_respond(interaction, "Partie terminée", ephemeral=True)
+
+        expected = v.player1 if v.turn == 0 else v.player2
+
+        if v.vs_bot:
+            if interaction.user != v.player1:
+                return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
+        else:
+            if interaction.user != expected:
+                return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
+
+        await v.play(interaction, self.col)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 COG
@@ -229,16 +238,50 @@ class Puissance4(commands.Cog):
 
     @commands.command(name="puissance4", aliases=["p4"])
     async def p4(self, ctx, mode: str = "solo"):
-        view = Puissance4View(ctx.author, vs_bot=True)
-        msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
-        view.message = msg
+        mode = mode.lower()
+
+        if mode in ["multi", "m"]:
+            view = JoinView(ctx.author)
+            await safe_send(ctx.channel, "Clique sur le bouton pour rejoindre 👇", view=view)
+        else:
+            view = Puissance4View(ctx.author, vs_bot=True)
+            msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
+            view.message = msg
 
     @app_commands.command(name="puissance4")
     async def slash(self, interaction, mode: str = "solo"):
-        view = Puissance4View(interaction.user, vs_bot=True)
-        await interaction.response.send_message(embed=view.embed(), view=view)
-        view.message = await interaction.original_response()
+        mode = mode.lower()
 
+        if mode in ["multi", "m"]:
+            view = JoinView(interaction.user)
+            await interaction.response.send_message("Clique sur le bouton pour rejoindre 👇", view=view)
+        else:
+            view = Puissance4View(interaction.user, vs_bot=True)
+            await interaction.response.send_message(embed=view.embed(), view=view)
+            view.message = await interaction.original_response()
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🎛️ JOIN VIEW
+# ────────────────────────────────────────────────────────────────────────────────
+class JoinView(View):
+    def __init__(self, p1):
+        super().__init__(timeout=60)
+        self.p1 = p1
+
+    @discord.ui.button(label="🎮 Rejoindre la partie", style=discord.ButtonStyle.green)
+    async def join(self, interaction, button):
+        if interaction.user == self.p1:
+            return await safe_respond(interaction, "Tu ne peux pas jouer contre toi-même", ephemeral=True)
+
+        view = Puissance4View(self.p1, interaction.user, vs_bot=False)
+
+        await interaction.response.edit_message(
+            content="🎮 Partie lancée !",
+            embed=view.embed(),
+            view=view
+        )
+
+        view.message = interaction.message
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 SETUP
