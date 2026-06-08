@@ -1,30 +1,33 @@
-/* ══════════════════════════════════════════════════════
-   BRACKET — GAME LOGIC
-   même style que FMK
-   ══════════════════════════════════════════════ */
+/* ══ BRACKET — GAME LOGIC ══ */
 
 let pool = [];
 let round = [];
 let winners = [];
 let currentMatch = 0;
+let roundNumber = 0;
+let totalMatchesInRound = 0;
 
-/* ── INIT TOURNOI ── */
+const ROUND_NAMES = ['Huitièmes de finale', 'Quarts de finale', 'Demi-finales', 'Finale'];
+
+/* ── INIT ── */
 function startTournament() {
   document.getElementById('gameBox').style.display = 'block';
   document.getElementById('resultBox').style.display = 'none';
-
   if (typeof CHARS === 'undefined') return;
-
   pool = shuffle([...CHARS]).slice(0, 16);
+  roundNumber = 0;
+  buildRound(pool);
+}
 
+function buildRound(chars) {
   round = [];
   winners = [];
   currentMatch = 0;
-
-  for (let i = 0; i < 16; i += 2) {
-    round.push([pool[i], pool[i + 1]]);
+  for (let i = 0; i < chars.length; i += 2) {
+    if (chars[i + 1]) round.push([chars[i], chars[i + 1]]);
+    else round.push([chars[i]]);
   }
-
+  totalMatchesInRound = round.length;
   showMatch();
 }
 
@@ -39,100 +42,86 @@ function showMatch() {
   zone.innerHTML = '';
 
   const match = round[currentMatch];
+  if (!match) { nextRound(); return; }
 
-  if (!match) {
-    nextRound();
+  if (match.length === 1) {
+    winners.push(match[0]);
+    currentMatch++;
+    showMatch();
     return;
   }
 
+  const rName = ROUND_NAMES[roundNumber] || `Tour ${roundNumber + 1}`;
+  document.getElementById('roundLabel').textContent =
+    `Tour ${roundNumber + 1} · Match ${currentMatch + 1}/${totalMatchesInRound}`;
+  document.getElementById('roundTitle').textContent = rName;
+  document.getElementById('progressFill').style.width =
+    (currentMatch / totalMatchesInRound * 100) + '%';
+
+  const remaining = totalMatchesInRound - currentMatch - 1;
+  document.getElementById('matchInfo').textContent =
+    remaining > 0
+      ? `${remaining} match${remaining > 1 ? 's' : ''} restant${remaining > 1 ? 's' : ''} dans ce tour`
+      : 'Dernier match du tour !';
+
   match.forEach((perso, index) => {
-
-    const image = perso.img
-      ? `../${perso.img}`
-      : '../assets/personnages/default.png';
-
+    const img = perso.img ? `../${perso.img}` : '../assets/personnages/default.png';
     const card = document.createElement('div');
     card.className = 'card';
-
     card.innerHTML = `
-      <img src="${image}" alt="${perso.n}">
-      <h3>${perso.n}</h3>
-
-      <button class="btn-choice" data-action="pick" data-index="${index}">
-        ⚔️ Choisir
-      </button>
+      <img src="${img}" alt="${perso.n}" loading="lazy">
+      <div class="card-body">
+        <h3>${perso.n}</h3>
+        <button class="btn-choice" data-action="pick" data-index="${index}">⚔️ Choisir</button>
+      </div>
     `;
-
     zone.appendChild(card);
+
+    if (index === 0) {
+      const vs = document.createElement('div');
+      vs.className = 'vs-label';
+      vs.textContent = 'VS';
+      zone.appendChild(vs);
+    }
   });
 }
 
-/* ── CHOIX JOUEUR ── */
+/* ── CHOIX ── */
 function pickWinner(index) {
-  const match = round[currentMatch];
-  winners.push(match[index]);
-
+  winners.push(round[currentMatch][index]);
   currentMatch++;
-
-  if (currentMatch >= round.length) {
-    nextRound();
-  } else {
-    showMatch();
-  }
+  if (currentMatch >= round.length) nextRound();
+  else showMatch();
 }
 
 /* ── ROUND SUIVANT ── */
 function nextRound() {
-
-  if (winners.length === 1) {
-    return endTournament();
-  }
-
-  const newRound = [];
-
-  for (let i = 0; i < winners.length; i += 2) {
-    if (winners[i + 1]) {
-      newRound.push([winners[i], winners[i + 1]]);
-    } else {
-      newRound.push([winners[i]]);
-    }
-  }
-
-  round = newRound;
-  winners = [];
-  currentMatch = 0;
-
-  showMatch();
+  if (winners.length === 1) { endTournament(winners[0]); return; }
+  roundNumber++;
+  buildRound(winners);
 }
 
 /* ── FIN ── */
-function endTournament() {
-  const winner = winners[0] || round[0][0];
-
+function endTournament(winner) {
   document.getElementById('gameBox').style.display = 'none';
   document.getElementById('resultBox').style.display = 'flex';
-
+  const img = winner.img ? `../${winner.img}` : '../assets/personnages/default.png';
   document.getElementById('winnerDisplay').innerHTML = `
     <div class="card">
-      <img src="../${winner.img}">
-      <h3>${winner.n}</h3>
+      <img src="${img}" alt="${winner.n}">
+      <div class="card-body">
+        <h3>${winner.n}</h3>
+      </div>
     </div>
   `;
 }
 
-/* ── LISTENER GLOBAL (comme FMK) ── */
+/* ── LISTENER GLOBAL ── */
 document.addEventListener('click', (e) => {
-
-  const btn = e.target.closest('[data-action]');
+  const btn = e.target.closest('[data-action="pick"]');
   if (!btn) return;
-
-  const action = btn.dataset.action;
-  const index = parseInt(btn.dataset.index);
-
-  if (action === 'pick') {
-    pickWinner(index);
-  }
+  pickWinner(parseInt(btn.dataset.index));
 });
 
-/* ── INIT ── */
+/* ── AUTO START ── */
 window.addEventListener('load', startTournament);
