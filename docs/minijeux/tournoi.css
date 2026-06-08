@@ -48,7 +48,7 @@
 
 /* ── cartes ── */
 #matchZone .card {
-  width: clamp(130px, 22vw, 170px);
+  width: clamp(150px, 24vw, 190px);
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -59,33 +59,37 @@
   transform: scale(1.03);
   border-color: var(--gold-line);
 }
+
+/* nom au-dessus de l'image */
+#matchZone .card-body {
+  padding: .55rem .75rem .35rem;
+}
+#matchZone .card-body h3 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: .88rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  color: var(--text, #e8e0d0);
+}
+
+/* image fixe identique */
 #matchZone .card img {
   width: 100%;
-  height: 180px;
+  height: 190px;
   object-fit: cover;
   object-position: top center;
   flex-shrink: 0;
   display: block;
 }
-#matchZone .card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: .65rem .75rem;
-  gap: .5rem;
+
+/* bouton ancré en bas */
+#matchZone .card-footer {
+  padding: .5rem .75rem .65rem;
 }
-#matchZone .card-body h3 {
-  flex: 1;
-  font-family: 'Shippori Mincho', serif;
-  font-size: .9rem;
-  font-weight: 700;
-  text-align: center;
-  margin: 0;
-}
-#matchZone .btn-choice {
+#matchZone .card-footer .btn-choice {
   width: 100%;
-  flex-shrink: 0;
-  padding: .4rem .6rem;
+  padding: .42rem .6rem;
   font-size: .8rem;
 }
 
@@ -148,25 +152,32 @@
   align-items: center;
 }
 #winnerDisplay .card {
-  width: clamp(140px, 30vw, 190px);
+  width: clamp(150px, 32vw, 210px);
   display: flex;
   flex-direction: column;
   border-color: var(--gold-line);
   overflow: hidden;
 }
-#winnerDisplay .card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-}
 #winnerDisplay .card-body {
-  padding: .75rem 1rem;
+  padding: .55rem .75rem .35rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .5rem;
+}
+#winnerDisplay .card-body h3 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: .9rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  color: var(--text, #e8e0d0);
+}
+#winnerDisplay .card img {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
 }
 
 /* ── animation entrée ── */
