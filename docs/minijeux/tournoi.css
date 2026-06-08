@@ -1,5 +1,6 @@
 /* ═══ BRACKET TOURNAMENT ═══ */
 
+/* ── round header ── */
 #roundHeader {
   display: flex;
   flex-direction: column;
@@ -39,156 +40,23 @@
 /* ── match zone ── */
 #matchZone {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  gap: clamp(1.5rem, 3vw, 3rem);
+  gap: clamp(1rem, 2.5vw, 2rem);
   flex-wrap: wrap;
 }
 
-/* ── cartes ── */
-#matchZone .card {
-  width: clamp(150px, 22vw, 200px);
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: transform .2s ease, border-color .2s ease;
-  overflow: hidden;
-  border-radius: 10px;
-}
-#matchZone .card:hover {
-  transform: scale(1.03);
-  border-color: var(--gold-line);
-}
-
-/* image grande, prend toute la place */
-#matchZone .card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-  flex-shrink: 0;
-}
-
-/* nom + bouton en bas */
-#matchZone .card-body {
+/* ── wrapper perso (label + carte) ── */
+.perso-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: .45rem;
-  padding: .6rem .7rem .7rem;
 }
-#matchZone .card-body h3 {
+
+/* nom AU-DESSUS de la carte, hors de la carte */
+.card-label {
   font-family: 'Shippori Mincho', serif;
   font-size: .88rem;
   font-weight: 700;
-  text-align: center;
-  margin: 0;
-  color: var(--text, #e8e0d0);
-}
-#matchZone .card-body .btn-choice {
-  width: 100%;
-  padding: .42rem .6rem;
-  font-size: .8rem;
-}
-
-/* ── VS label ── */
-.vs-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  align-self: center;
-  font-family: 'Shippori Mincho', serif;
-  font-weight: 800;
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-  color: var(--gold);
-  opacity: .6;
-  user-select: none;
-}
-
-/* ── match info ── */
-#matchInfo {
-  margin-top: 1rem;
-  font-size: .72rem;
-  color: var(--muted, rgba(232,224,208,.5));
-  text-align: center;
-  letter-spacing: .04em;
-}
-
-/* ── restart centré ── */
-#gameBox .btn-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-/* ── result box ── */
-#resultBox {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.2rem;
-  padding: 1.5rem 0;
-}
-#resultBox .res-emoji {
-  font-size: 1.6rem;
-}
-#resultBox .res-title {
-  font-family: 'Shippori Mincho', serif;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--gold);
-}
-#resultBox .btn-row {
-  display: flex;
-  justify-content: center;
-}
-
-/* ── winner display ── */
-#winnerDisplay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-#winnerDisplay .card {
-  width: clamp(150px, 32vw, 210px);
-  display: flex;
-  flex-direction: column;
-  border-color: var(--gold-line);
-  overflow: hidden;
-  border-radius: 10px;
-}
-#winnerDisplay .card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-}
-#winnerDisplay .card-body {
-  padding: .6rem .75rem .7rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .4rem;
-}
-#winnerDisplay .card-body h3 {
-  font-family: 'Shippori Mincho', serif;
-  font-size: .9rem;
-  font-weight: 700;
-  text-align: center;
-  margin: 0;
-  color: var(--text, #e8e0d0);
-}
-
-/* ── animation entrée ── */
-@keyframes fadeInMatch {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-#matchZone .card {
-  animation: fadeInMatch .25s ease both;
-}
-#matchZone .card:nth-child(3) {
-  animation-delay: .08s;
-}
+  text-align
