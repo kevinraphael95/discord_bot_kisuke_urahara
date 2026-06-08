@@ -1,18 +1,24 @@
 # ────────────────────────────────────────────────────────────────────────────────
-# 📌 puissance4.py — Puissance 4 Ultra Pro
+# 📌 puissance4.py — Commande interactive !puissance4 /puissance4
+# Objectif : Jeu Puissance 4 via boutons Discord avec mode solo (vs bot) et multi
+# Catégorie : Jeux
+# Accès : Public
+# Cooldown : 1 utilisation / 15 secondes / utilisateur
 # ────────────────────────────────────────────────────────────────────────────────
 
+# ────────────────────────────────────────────────────────────────────────────────
+# 📦 Imports nécessaires
+# ────────────────────────────────────────────────────────────────────────────────
 import discord
+from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
-import copy
 import random
-import asyncio
 
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎨 CONSTANTES
+# 🎨 Constantes du jeu
 # ────────────────────────────────────────────────────────────────────────────────
 ROWS = 6
 COLS = 7
@@ -21,23 +27,17 @@ TOKENS = ["🔴", "🟡"]
 COL_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 BOARD CORE
+# 🧩 Logique du plateau
 # ────────────────────────────────────────────────────────────────────────────────
 def make_board():
     return [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
 
-def available_cols(board):
-    return [c for c in range(COLS) if board[0][c] == EMPTY]
-
 def drop_token(board, col, token):
-    for r in range(ROWS - 1, -1, -1):
-        if board[r][col] == EMPTY:
-            board[r][col] = token
-            return r
+    for row in range(ROWS - 1, -1, -1):
+        if board[row][col] == EMPTY:
+            board[row][col] = token
+            return row
     return -1
-
-def is_full(board):
-    return all(board[0][c] != EMPTY for c in range(COLS))
 
 def check_win(board, token):
     for r in range(ROWS):
@@ -62,108 +62,70 @@ def check_win(board, token):
 
     return False
 
+def is_full(board):
+    return all(board[0][c] != EMPTY for c in range(COLS))
+
+def available_cols(board):
+    return [c for c in range(COLS) if board[0][c] == EMPTY]
+
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 IA ULTRA (minimax + heuristique)
+# 🤖 IA SIMPLE
 # ────────────────────────────────────────────────────────────────────────────────
-def score_position(board, token):
-    score = 0
-    center = COLS // 2
-
-    # centre bonus
-    for r in range(ROWS):
-        if board[r][center] == token:
-            score += 3
-
-    return score
-
-
-def minimax(board, depth, alpha, beta, maximizing, token, enemy):
-    valid = available_cols(board)
-
-    if depth == 0 or not valid:
-        return score_position(board, token), None
-
-    if maximizing:
-        best_score = -999999
-        best_col = random.choice(valid)
-
-        for col in valid:
-            temp = copy.deepcopy(board)
-            drop_token(temp, col, token)
-
-            if check_win(temp, token):
-                return 100000, col
-
-            score, _ = minimax(temp, depth-1, alpha, beta, False, token, enemy)
-
-            if score > best_score:
-                best_score = score
-                best_col = col
-
-            alpha = max(alpha, score)
-            if beta <= alpha:
-                break
-
-        return best_score, best_col
-
-    else:
-        best_score = 999999
-        best_col = random.choice(valid)
-
-        for col in valid:
-            temp = copy.deepcopy(board)
-            drop_token(temp, col, enemy)
-
-            if check_win(temp, enemy):
-                return -100000, col
-
-            score, _ = minimax(temp, depth-1, alpha, beta, True, token, enemy)
-
-            if score < best_score:
-                best_score = score
-                best_col = col
-
-            beta = min(beta, score)
-            if beta <= alpha:
-                break
-
-        return best_score, best_col
-
-
 def bot_move(board):
-    _, col = minimax(board, 3, -999999, 999999, True, TOKENS[1], TOKENS[0])
-    return col if col is not None else random.choice(available_cols(board))
+    bot = TOKENS[1]
+    player = TOKENS[0]
+
+    cols = available_cols(board)
+    if not cols:
+        return None
+
+    for col in cols:
+        b = [row[:] for row in board]
+        drop_token(b, col, bot)
+        if check_win(b, bot):
+            return col
+
+    for col in cols:
+        b = [row[:] for row in board]
+        drop_token(b, col, player)
+        if check_win(b, player):
+            return col
+
+    return min(cols, key=lambda c: abs(c - COLS // 2))
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎮 VIEW
+# 🧩 VIEW
 # ────────────────────────────────────────────────────────────────────────────────
 class Puissance4View(View):
-    def __init__(self, p1, p2=None, vs_bot=True):
+    def __init__(self, player1, player2=None, vs_bot=True):
         super().__init__(timeout=300)
 
-        self.p1 = p1
-        self.p2 = p2
+        self.player1 = player1
+        self.player2 = player2
         self.vs_bot = vs_bot
 
         self.board = make_board()
         self.turn = 0
-        self.game_over = False
         self.message = None
+        self.game_over = False
 
         for i in range(COLS):
             self.add_item(ColumnButton(i, self))
 
+    @property
     def current_token(self):
         return TOKENS[self.turn]
 
     def render(self):
-        return "".join(COL_EMOJIS) + "\n" + "\n".join("".join(r) for r in self.board)
+        header = "".join(COL_EMOJIS)
+        rows = ["".join(r) for r in self.board]
+        return header + "\n" + "\n".join(rows)
 
     def embed(self):
-        enemy = "🤖 Bot" if self.vs_bot else self.p2.display_name
+        p2 = "🤖 Bot" if self.vs_bot else self.player2.display_name
         return discord.Embed(
             title="🟡🔴 Puissance 4",
-            description=f"{self.p1.display_name} vs {enemy}\n\n{self.render()}",
+            description=f"🔴 {self.player1.display_name} vs 🟡 {p2}\n\n{self.render()}",
             color=discord.Color.gold()
         )
 
@@ -171,30 +133,8 @@ class Puissance4View(View):
         if self.message and not self.game_over:
             await safe_edit(self.message, embed=self.embed(), view=self)
 
-    # ───────────────────────────────────────────────────────────────────────────
-    # 🎬 DROP ANIMATION
-    # ───────────────────────────────────────────────────────────────────────────
-    async def animated_drop(self, col, token):
-        temp = copy.deepcopy(self.board)
-
-        for r in range(ROWS):
-            if r > 0:
-                temp[r-1][col] = EMPTY
-            if r < ROWS:
-                temp[r][col] = token
-
-            if self.message:
-                await safe_edit(self.message, embed=self.embed(), view=self)
-                await asyncio.sleep(0.05)
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 🎯 GAME LOGIC
-# ────────────────────────────────────────────────────────────────────────────────
     async def play(self, interaction, col):
-        if self.game_over:
-            return
-
-        token = self.current_token()
+        token = self.current_token
 
         row = drop_token(self.board, col, token)
         if row == -1:
@@ -213,13 +153,14 @@ class Puissance4View(View):
             await interaction.response.defer()
 
         if self.vs_bot and self.turn == 1:
-            await asyncio.sleep(0.4)
             await self.bot_turn(interaction)
 
     async def bot_turn(self, interaction):
         col = bot_move(self.board)
-        token = self.current_token()
+        if col is None:
+            return await self.end(interaction, None)
 
+        token = self.current_token
         drop_token(self.board, col, token)
 
         if check_win(self.board, token):
@@ -243,15 +184,15 @@ class Puissance4View(View):
         if winner is None:
             e.add_field(name="Résultat", value="🤝 Match nul")
         elif winner == TOKENS[0]:
-            e.add_field(name="Résultat", value=f"🏆 {self.p1.display_name}")
+            e.add_field(name="Résultat", value=f"🏆 {self.player1.display_name}")
         else:
-            name = "🤖 Bot" if self.vs_bot else self.p2.display_name
+            name = "Bot" if self.vs_bot else self.player2.display_name
             e.add_field(name="Résultat", value=f"🏆 {name}")
 
         await interaction.response.edit_message(embed=e, view=self)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔵 BUTTON
+# 🔵 BOUTON
 # ────────────────────────────────────────────────────────────────────────────────
 class ColumnButton(Button):
     def __init__(self, col, view):
@@ -265,13 +206,13 @@ class ColumnButton(Button):
         if v.game_over:
             return await safe_respond(interaction, "Partie terminée", ephemeral=True)
 
-        if v.vs_bot:
-            if interaction.user != v.p1:
-                return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
-        else:
-            expected = v.p1 if v.turn == 0 else v.p2
-            if interaction.user != expected:
-                return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
+        expected = v.player1 if v.turn == 0 else v.player2
+
+        if v.vs_bot and interaction.user != v.player1:
+            return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
+
+        if not v.vs_bot and interaction.user != expected:
+            return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
 
         await v.play(interaction, self.col)
 
@@ -283,21 +224,51 @@ class Puissance4(commands.Cog):
         self.bot = bot
 
     @commands.command(name="puissance4", aliases=["p4"])
-    async def p4(self, ctx, mode="solo"):
-        await self.start(ctx.channel, ctx.author, mode)
+    async def p4(self, ctx, mode: str = "solo"):
+        mode = mode.lower()
 
-    async def start(self, channel, author, mode):
         if mode == "multi":
-            await safe_send(channel, "Mode multi pas inclus ici (ajout possible)")
+            view = JoinView(ctx.author)
+            await safe_send(ctx.channel, "Clique pour rejoindre", view=view)
         else:
-            view = Puissance4View(author, vs_bot=True)
-            msg = await safe_send(channel, embed=view.embed(), view=view)
+            view = Puissance4View(ctx.author, vs_bot=True)
+            msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
             view.message = msg
 
+    @app_commands.command(name="puissance4")
+    async def slash(self, interaction, mode: str = "solo"):
+        mode = mode.lower()
+
+        if mode == "multi":
+            view = JoinView(interaction.user)
+            await interaction.response.send_message("Clique pour rejoindre", view=view)
+        else:
+            view = Puissance4View(interaction.user, vs_bot=True)
+            await interaction.response.send_message(embed=view.embed(), view=view)
+            view.message = await interaction.original_response()
+
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔌 SETUP PRO
+# 🎛️ JOIN VIEW
+# ────────────────────────────────────────────────────────────────────────────────
+class JoinView(View):
+    def __init__(self, p1):
+        super().__init__(timeout=60)
+        self.p1 = p1
+
+    @discord.ui.button(label="Rejoindre", style=discord.ButtonStyle.green)
+    async def join(self, interaction, button):
+        if interaction.user == self.p1:
+            return await safe_respond(interaction, "Impossible", ephemeral=True)
+
+        view = Puissance4View(self.p1, interaction.user, vs_bot=False)
+        await interaction.response.edit_message(embed=view.embed(), view=view)
+        view.message = interaction.message
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔌 SETUP
 # ────────────────────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
+
     cog = Puissance4(bot)
 
     for command in cog.get_commands():
