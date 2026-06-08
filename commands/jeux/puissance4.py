@@ -14,6 +14,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
 import random
+import asyncio
 
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 
@@ -69,7 +70,7 @@ def available_cols(board):
     return [c for c in range(COLS) if board[0][c] == EMPTY]
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🤖 IA SIMPLE
+# 🤖 IA SIMPLE (SAFE)
 # ────────────────────────────────────────────────────────────────────────────────
 def bot_move(board):
     bot = TOKENS[1]
@@ -79,18 +80,21 @@ def bot_move(board):
     if not cols:
         return None
 
+    # win immédiat
     for col in cols:
-        b = [row[:] for row in board]
+        b = [r[:] for r in board]
         drop_token(b, col, bot)
         if check_win(b, bot):
             return col
 
+    # blocage
     for col in cols:
-        b = [row[:] for row in board]
+        b = [r[:] for r in board]
         drop_token(b, col, player)
         if check_win(b, player):
             return col
 
+    # centre bias
     return min(cols, key=lambda c: abs(c - COLS // 2))
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -108,6 +112,8 @@ class Puissance4View(View):
         self.turn = 0
         self.message = None
         self.game_over = False
+
+        self._lock = asyncio.Lock()
 
         for i in range(COLS):
             self.add_item(ColumnButton(i, self))
@@ -133,46 +139,64 @@ class Puissance4View(View):
         if self.message and not self.game_over:
             await safe_edit(self.message, embed=self.embed(), view=self)
 
+    # ───────────────────────────────────────────────────────────────────────────
+    # 🎮 CORE PLAY (THREAD SAFE)
+    # ───────────────────────────────────────────────────────────────────────────
     async def play(self, interaction, col):
-        token = self.current_token
+        async with self._lock:
 
-        row = drop_token(self.board, col, token)
-        if row == -1:
-            return await safe_respond(interaction, "Colonne pleine", ephemeral=True)
+            if self.game_over:
+                return
 
-        if check_win(self.board, token):
-            return await self.end(interaction, token)
+            if not interaction.response.is_done():
+                await interaction.response.defer()
 
-        if is_full(self.board):
-            return await self.end(interaction, None)
+            token = self.current_token
 
-        self.turn = 1 - self.turn
-        await self.update()
+            row = drop_token(self.board, col, token)
+            if row == -1:
+                return await safe_respond(interaction, "Colonne pleine", ephemeral=True)
 
-        if not interaction.response.is_done():
-            await interaction.response.defer()
+            if check_win(self.board, token):
+                return await self.end(interaction, token)
 
-        if self.vs_bot and self.turn == 1:
-            await self.bot_turn(interaction)
+            if is_full(self.board):
+                return await self.end(interaction, None)
+
+            self.turn = 1 - self.turn
+            await self.update()
+
+            if self.vs_bot and self.turn == 1 and not self.game_over:
+                await asyncio.sleep(0.25)
+                await self.bot_turn(interaction)
 
     async def bot_turn(self, interaction):
-        col = bot_move(self.board)
-        if col is None:
-            return await self.end(interaction, None)
+        async with self._lock:
 
-        token = self.current_token
-        drop_token(self.board, col, token)
+            if self.game_over:
+                return
 
-        if check_win(self.board, token):
-            return await self.end(interaction, token)
+            col = bot_move(self.board)
+            if col is None:
+                return await self.end(interaction, None)
 
-        if is_full(self.board):
-            return await self.end(interaction, None)
+            token = self.current_token
 
-        self.turn = 0
-        await self.update()
+            drop_token(self.board, col, token)
+
+            if check_win(self.board, token):
+                return await self.end(interaction, token)
+
+            if is_full(self.board):
+                return await self.end(interaction, None)
+
+            self.turn = 0
+            await self.update()
 
     async def end(self, interaction, winner):
+        if self.game_over:
+            return
+
         self.game_over = True
         self.stop()
 
@@ -206,13 +230,13 @@ class ColumnButton(Button):
         if v.game_over:
             return await safe_respond(interaction, "Partie terminée", ephemeral=True)
 
-        expected = v.player1 if v.turn == 0 else v.player2
-
-        if v.vs_bot and interaction.user != v.player1:
-            return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
-
-        if not v.vs_bot and interaction.user != expected:
-            return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
+        if v.vs_bot:
+            if interaction.user != v.player1:
+                return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
+        else:
+            expected = v.player1 if v.turn == 0 else v.player2
+            if interaction.user != expected:
+                return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
 
         await v.play(interaction, self.col)
 
