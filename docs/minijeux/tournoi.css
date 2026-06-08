@@ -1,6 +1,5 @@
 /* ═══ BRACKET TOURNAMENT ═══ */
 
-/* ── round header ── */
 #roundHeader {
   display: flex;
   flex-direction: column;
@@ -40,29 +39,44 @@
 /* ── match zone ── */
 #matchZone {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
-  gap: clamp(1rem, 2.5vw, 2rem);
+  gap: clamp(1.5rem, 3vw, 3rem);
   flex-wrap: wrap;
 }
 
 /* ── cartes ── */
 #matchZone .card {
-  width: clamp(150px, 24vw, 190px);
+  width: clamp(150px, 22vw, 200px);
   display: flex;
   flex-direction: column;
   cursor: pointer;
   transition: transform .2s ease, border-color .2s ease;
   overflow: hidden;
+  border-radius: 10px;
 }
 #matchZone .card:hover {
   transform: scale(1.03);
   border-color: var(--gold-line);
 }
 
-/* nom au-dessus de l'image */
+/* image grande, prend toute la place */
+#matchZone .card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* nom + bouton en bas */
 #matchZone .card-body {
-  padding: .55rem .75rem .35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45rem;
+  padding: .6rem .7rem .7rem;
 }
 #matchZone .card-body h3 {
   font-family: 'Shippori Mincho', serif;
@@ -72,22 +86,7 @@
   margin: 0;
   color: var(--text, #e8e0d0);
 }
-
-/* image fixe identique */
-#matchZone .card img {
-  width: 100%;
-  height: 190px;
-  object-fit: cover;
-  object-position: top center;
-  flex-shrink: 0;
-  display: block;
-}
-
-/* bouton ancré en bas */
-#matchZone .card-footer {
-  padding: .5rem .75rem .65rem;
-}
-#matchZone .card-footer .btn-choice {
+#matchZone .card-body .btn-choice {
   width: 100%;
   padding: .42rem .6rem;
   font-size: .8rem;
@@ -101,7 +100,7 @@
   align-self: center;
   font-family: 'Shippori Mincho', serif;
   font-weight: 800;
-  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
   color: var(--gold);
   opacity: .6;
   user-select: none;
@@ -116,7 +115,7 @@
   letter-spacing: .04em;
 }
 
-/* ── bouton restart centré ── */
+/* ── restart centré ── */
 #gameBox .btn-row {
   display: flex;
   justify-content: center;
@@ -157,12 +156,21 @@
   flex-direction: column;
   border-color: var(--gold-line);
   overflow: hidden;
+  border-radius: 10px;
+}
+#winnerDisplay .card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
 }
 #winnerDisplay .card-body {
-  padding: .55rem .75rem .35rem;
+  padding: .6rem .75rem .7rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: .4rem;
 }
 #winnerDisplay .card-body h3 {
   font-family: 'Shippori Mincho', serif;
@@ -172,18 +180,11 @@
   margin: 0;
   color: var(--text, #e8e0d0);
 }
-#winnerDisplay .card img {
-  width: 100%;
-  height: 210px;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-}
 
 /* ── animation entrée ── */
 @keyframes fadeInMatch {
   from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0);   }
+  to   { opacity: 1; transform: translateY(0); }
 }
 #matchZone .card {
   animation: fadeInMatch .25s ease both;
