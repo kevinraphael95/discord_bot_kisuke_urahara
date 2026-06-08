@@ -65,4 +65,63 @@ function showMatch() {
       : 'Dernier match du tour !';
 
   match.forEach((perso, index) => {
-    const img = perso.img ? `../${perso.img}` :
+    const img = perso.img ? `../${perso.img}` : '../assets/personnages/default.png';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${img}" alt="${perso.n}" loading="lazy">
+      <div class="card-body">
+        <h3>${perso.n}</h3>
+        <button class="btn-choice" data-action="pick" data-index="${index}">⚔️ Choisir</button>
+      </div>
+    `;
+    zone.appendChild(card);
+
+    if (index === 0) {
+      const vs = document.createElement('div');
+      vs.className = 'vs-label';
+      vs.textContent = 'VS';
+      zone.appendChild(vs);
+    }
+  });
+}
+
+/* ── CHOIX ── */
+function pickWinner(index) {
+  winners.push(round[currentMatch][index]);
+  currentMatch++;
+  if (currentMatch >= round.length) nextRound();
+  else showMatch();
+}
+
+/* ── ROUND SUIVANT ── */
+function nextRound() {
+  if (winners.length === 1) { endTournament(winners[0]); return; }
+  roundNumber++;
+  buildRound(winners);
+}
+
+/* ── FIN ── */
+function endTournament(winner) {
+  document.getElementById('gameBox').style.display = 'none';
+  document.getElementById('resultBox').style.display = 'flex';
+  const img = winner.img ? `../${winner.img}` : '../assets/personnages/default.png';
+  document.getElementById('winnerDisplay').innerHTML = `
+    <div class="card">
+      <img src="${img}" alt="${winner.n}">
+      <div class="card-body">
+        <h3>${winner.n}</h3>
+      </div>
+    </div>
+  `;
+}
+
+/* ── LISTENER GLOBAL ── */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action="pick"]');
+  if (!btn) return;
+  pickWinner(parseInt(btn.dataset.index));
+});
+
+/* ── AUTO START ── */
+window.addEventListener('load', startTournament);
