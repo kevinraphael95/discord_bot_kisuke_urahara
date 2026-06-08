@@ -79,25 +79,22 @@ def bot_move(board):
     if not cols:
         return None
 
-    # win direct bot
     for col in cols:
         b = [row[:] for row in board]
         drop_token(b, col, bot)
         if check_win(b, bot):
             return col
 
-    # block player
     for col in cols:
         b = [row[:] for row in board]
         drop_token(b, col, player)
         if check_win(b, player):
             return col
 
-    # center play
     return min(cols, key=lambda c: abs(c - COLS // 2))
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔵 BOUTON (DOIT ÊTRE AVANT LA VIEW)
+# 🔵 BOUTON
 # ────────────────────────────────────────────────────────────────────────────────
 class ColumnButton(Button):
     def __init__(self, col, view):
@@ -111,13 +108,11 @@ class ColumnButton(Button):
         if v.game_over:
             return await safe_respond(interaction, "Partie terminée", ephemeral=True)
 
-        # check turn
-        expected = v.player1 if v.turn == 0 else v.player2
-
         if v.vs_bot:
             if interaction.user != v.player1:
                 return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
         else:
+            expected = v.player1 if v.turn == 0 else v.player2
             if interaction.user != expected:
                 return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
 
@@ -171,10 +166,10 @@ class Puissance4View(View):
             return await safe_respond(interaction, "Colonne pleine", ephemeral=True)
 
         if check_win(self.board, token):
-            return await self.end(interaction, token)
+            return await self.end(token)
 
         if is_full(self.board):
-            return await self.end(interaction, None)
+            return await self.end(None)
 
         self.turn = 1 - self.turn
         await self.update()
@@ -183,26 +178,29 @@ class Puissance4View(View):
             await interaction.response.defer()
 
         if self.vs_bot and self.turn == 1:
-            await self.bot_turn(interaction)
+            await self.bot_turn()
 
-    async def bot_turn(self, interaction):
+    async def bot_turn(self):
+        if self.game_over:
+            return
+
         col = bot_move(self.board)
         if col is None:
-            return await self.end(interaction, None)
+            return await self.end(None)
 
         token = self.current_token
         drop_token(self.board, col, token)
 
         if check_win(self.board, token):
-            return await self.end(interaction, token)
+            return await self.end(token)
 
         if is_full(self.board):
-            return await self.end(interaction, None)
+            return await self.end(None)
 
         self.turn = 0
         await self.update()
 
-    async def end(self, interaction, winner):
+    async def end(self, winner):
         self.game_over = True
         self.stop()
 
@@ -219,7 +217,8 @@ class Puissance4View(View):
             name = "Bot" if self.vs_bot else self.player2.display_name
             e.add_field(name="Résultat", value=f"🏆 {name}")
 
-        await interaction.response.edit_message(embed=e, view=self)
+        if self.message:
+            await self.message.edit(embed=e, view=self)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 COG
@@ -230,44 +229,16 @@ class Puissance4(commands.Cog):
 
     @commands.command(name="puissance4", aliases=["p4"])
     async def p4(self, ctx, mode: str = "solo"):
-        mode = mode.lower()
-
-        if mode == "multi":
-            view = JoinView(ctx.author)
-            await safe_send(ctx.channel, "Clique pour rejoindre", view=view)
-        else:
-            view = Puissance4View(ctx.author, vs_bot=True)
-            msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
-            view.message = msg
+        view = Puissance4View(ctx.author, vs_bot=True)
+        msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
+        view.message = msg
 
     @app_commands.command(name="puissance4")
     async def slash(self, interaction, mode: str = "solo"):
-        mode = mode.lower()
+        view = Puissance4View(interaction.user, vs_bot=True)
+        await interaction.response.send_message(embed=view.embed(), view=view)
+        view.message = await interaction.original_response()
 
-        if mode == "multi":
-            view = JoinView(interaction.user)
-            await interaction.response.send_message("Clique pour rejoindre", view=view)
-        else:
-            view = Puissance4View(interaction.user, vs_bot=True)
-            await interaction.response.send_message(embed=view.embed(), view=view)
-            view.message = await interaction.original_response()
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ JOIN VIEW
-# ────────────────────────────────────────────────────────────────────────────────
-class JoinView(View):
-    def __init__(self, p1):
-        super().__init__(timeout=60)
-        self.p1 = p1
-
-    @discord.ui.button(label="Rejoindre", style=discord.ButtonStyle.green)
-    async def join(self, interaction, button):
-        if interaction.user == self.p1:
-            return await safe_respond(interaction, "Impossible", ephemeral=True)
-
-        view = Puissance4View(self.p1, interaction.user, vs_bot=False)
-        await interaction.response.edit_message(embed=view.embed(), view=view)
-        view.message = interaction.message
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 SETUP
