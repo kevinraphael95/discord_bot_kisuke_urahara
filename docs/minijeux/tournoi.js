@@ -14,7 +14,6 @@ function startTournament() {
   document.getElementById('gameBox').style.display = 'block';
   document.getElementById('resultBox').style.display = 'none';
   if (typeof CHARS === 'undefined') return;
-
   pool = shuffle([...CHARS]).slice(0, 16);
   roundNumber = 0;
   buildRound(pool);
@@ -26,7 +25,7 @@ function buildRound(chars) {
   currentMatch = 0;
   for (let i = 0; i < chars.length; i += 2) {
     if (chars[i + 1]) round.push([chars[i], chars[i + 1]]);
-    else round.push([chars[i]]); // bye automatique si impair
+    else round.push([chars[i]]);
   }
   totalMatchesInRound = round.length;
   showMatch();
@@ -45,7 +44,6 @@ function showMatch() {
   const match = round[currentMatch];
   if (!match) { nextRound(); return; }
 
-  // bye automatique (1 seul perso dans le match)
   if (match.length === 1) {
     winners.push(match[0]);
     currentMatch++;
@@ -53,23 +51,22 @@ function showMatch() {
     return;
   }
 
-  // header round + progression
   const rName = ROUND_NAMES[roundNumber] || `Tour ${roundNumber + 1}`;
   const matchNum = currentMatch + 1;
   document.getElementById('roundLabel').textContent =
     `Tour ${roundNumber + 1} · Match ${matchNum}/${totalMatchesInRound}`;
   document.getElementById('roundTitle').textContent = rName;
-  const pct = ((currentMatch) / totalMatchesInRound) * 100;
-  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressFill').style.width =
+    (currentMatch / totalMatchesInRound * 100) + '%';
 
   const remaining = totalMatchesInRound - currentMatch - 1;
   document.getElementById('matchInfo').textContent =
-    remaining > 0 ? `${remaining} match${remaining > 1 ? 's' : ''} restant${remaining > 1 ? 's' : ''} dans ce tour` : 'Dernier match du tour !';
+    remaining > 0
+      ? `${remaining} match${remaining > 1 ? 's' : ''} restant${remaining > 1 ? 's' : ''} dans ce tour`
+      : 'Dernier match du tour !';
 
-  // cartes
   match.forEach((perso, index) => {
     const img = perso.img ? `../${perso.img}` : '../assets/personnages/default.png';
-
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -80,8 +77,6 @@ function showMatch() {
       </div>
     `;
     zone.appendChild(card);
-
-    // VS entre les deux cartes
     if (index === 0) {
       const vs = document.createElement('div');
       vs.className = 'vs-label';
