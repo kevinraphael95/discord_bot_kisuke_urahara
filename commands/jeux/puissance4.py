@@ -14,6 +14,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
 import random
+
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -22,17 +23,19 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond
 ROWS = 6
 COLS = 7
 EMPTY = "⬛"
-TOKENS = ["🔴", "🟡"]  # Joueur 1 = 🔴, Joueur 2 / Bot = 🟡
+TOKENS = ["🔴", "🟡"]
 COL_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧩 Logique du plateau
 # ────────────────────────────────────────────────────────────────────────────────
 def make_board():
-    return [[EMPTY] * COLS for _ in range(ROWS)]
+    return [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
 
 def drop_token(board, col, token):
-    """Pose le jeton dans la colonne. Retourne la ligne utilisée ou -1 si pleine."""
+    if col < 0 or col >= COLS:
+        return -1
+
     for row in range(ROWS - 1, -1, -1):
         if board[row][col] == EMPTY:
             board[row][col] = token
@@ -40,27 +43,26 @@ def drop_token(board, col, token):
     return -1
 
 def check_win(board, token):
-    """Vérifie si le token a gagné."""
-    # Horizontale
     for r in range(ROWS):
         for c in range(COLS - 3):
-            if all(board[r][c + i] == token for i in range(4)):
+            if all(board[r][c+i] == token for i in range(4)):
                 return True
-    # Verticale
+
     for r in range(ROWS - 3):
         for c in range(COLS):
-            if all(board[r + i][c] == token for i in range(4)):
+            if all(board[r+i][c] == token for i in range(4)):
                 return True
-    # Diagonale ↘
+
     for r in range(ROWS - 3):
         for c in range(COLS - 3):
-            if all(board[r + i][c + i] == token for i in range(4)):
+            if all(board[r+i][c+i] == token for i in range(4)):
                 return True
-    # Diagonale ↙
-    for r in range(ROWS - 3):
-        for c in range(3, COLS):
-            if all(board[r + i][c - i] == token for i in range(4)):
+
+    for r in range(3, ROWS):
+        for c in range(COLS - 3):
+            if all(board[r-i][c+i] == token for i in range(4)):
                 return True
+
     return False
 
 def is_full(board):
@@ -70,280 +72,225 @@ def available_cols(board):
     return [c for c in range(COLS) if board[0][c] == EMPTY]
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🤖 IA du bot (algo minimax simplifié)
+# 🤖 IA SIMPLE
 # ────────────────────────────────────────────────────────────────────────────────
 def bot_move(board):
-    """Choisit la meilleure colonne pour le bot."""
-    bot_token = TOKENS[1]
-    player_token = TOKENS[0]
+    bot = TOKENS[1]
+    player = TOKENS[0]
 
-    # 1. Gagner si possible
-    for col in available_cols(board):
+    cols = available_cols(board)
+    if not cols:
+        return None
+
+    for col in cols:
         b = [row[:] for row in board]
-        drop_token(b, col, bot_token)
-        if check_win(b, bot_token):
+        drop_token(b, col, bot)
+        if check_win(b, bot):
             return col
 
-    # 2. Bloquer le joueur
-    for col in available_cols(board):
+    for col in cols:
         b = [row[:] for row in board]
-        drop_token(b, col, player_token)
-        if check_win(b, player_token):
+        drop_token(b, col, player)
+        if check_win(b, player):
             return col
 
-    # 3. Préférer le centre, sinon aléatoire
-    preferred = sorted(available_cols(board), key=lambda c: abs(c - COLS // 2))
-    return preferred[0] if preferred else random.choice(available_cols(board))
+    return min(cols, key=lambda c: abs(c - COLS // 2))
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧩 Vue principale du jeu Puissance 4
+# 🧩 VIEW
 # ────────────────────────────────────────────────────────────────────────────────
 class Puissance4View(View):
-    def __init__(self, player1: discord.User, player2: discord.User | None, vs_bot: bool):
-        """
-        player1 = lanceur du jeu (🔴)
-        player2 = second joueur en mode multi (🟡), None en mode solo
-        vs_bot  = True → le bot joue en 🟡
-        """
+    def __init__(self, player1, player2=None, vs_bot=True):
         super().__init__(timeout=300)
+
         self.player1 = player1
         self.player2 = player2
         self.vs_bot = vs_bot
+
         self.board = make_board()
-        self.current_turn = 0  # 0 = player1, 1 = player2/bot
+        self.turn = 0
         self.message = None
         self.game_over = False
 
-        for col in range(COLS):
-            self.add_item(ColumnButton(col, self))
-
-    @property
-    def current_player(self):
-        return self.player1 if self.current_turn == 0 else self.player2
+        for i in range(COLS):
+            self.add_item(ColumnButton(i, self))
 
     @property
     def current_token(self):
-        return TOKENS[self.current_turn]
+        return TOKENS[self.turn]
 
-    def build_board_str(self):
-        rows = ["".join(row) for row in self.board]
+    def render(self):
         header = "".join(COL_EMOJIS)
+        rows = ["".join(r) for r in self.board]
         return header + "\n" + "\n".join(rows)
 
-    def build_embed(self):
-        p1_name = self.player1.display_name
-        p2_name = "🤖 Kisuke" if self.vs_bot else (self.player2.display_name if self.player2 else "?")
-
-        if self.vs_bot:
-            title = f"🔴 {p1_name} vs 🟡 {p2_name}"
-        else:
-            title = f"🔴 {p1_name} vs 🟡 {p2_name}"
-
-        embed = discord.Embed(
-            title=f"🟡🔴 Puissance 4 — {title}",
-            description=self.build_board_str(),
+    def embed(self):
+        p2 = "🤖 Bot" if self.vs_bot else self.player2.display_name
+        return discord.Embed(
+            title="🟡🔴 Puissance 4",
+            description=f"🔴 {self.player1.display_name} vs 🟡 {p2}\n\n{self.render()}",
             color=discord.Color.gold()
         )
 
-        if not self.game_over:
-            if self.current_turn == 0:
-                turn_text = f"{self.current_token} C'est ton tour, **{p1_name}** !"
-            elif self.vs_bot:
-                turn_text = f"{self.current_token} Le bot réfléchit..."
-            else:
-                turn_text = f"{self.current_token} C'est ton tour, **{p2_name}** !"
-            embed.set_footer(text=turn_text)
-
-        return embed
-
-    async def update_message(self):
+    async def update(self):
         if self.message and not self.game_over:
-            await safe_edit(self.message, embed=self.build_embed(), view=self)
+            await safe_edit(self.message, embed=self.embed(), view=self)
 
-    async def play_column(self, interaction: discord.Interaction, col: int):
-        """Joue dans la colonne col, gère le tour et l'éventuelle réponse du bot."""
+    async def play(self, interaction, col):
+        if self.game_over:
+            return
+
         token = self.current_token
+
         row = drop_token(self.board, col, token)
         if row == -1:
-            return await safe_respond(interaction, "❗ Cette colonne est pleine !", ephemeral=True)
+            return await safe_respond(interaction, "Colonne pleine", ephemeral=True)
 
-        # Vérif victoire ou nul
         if check_win(self.board, token):
-            await self.end_game(interaction, winner_token=token)
-            return
+            return await self.end(interaction, token)
+
         if is_full(self.board):
-            await self.end_game(interaction, winner_token=None)
+            return await self.end(interaction, None)
+
+        self.turn = 1 - self.turn
+        await self.update()
+
+        if not interaction.response.is_done():
+            await interaction.response.defer()
+
+        if self.vs_bot and self.turn == 1:
+            await self.bot_turn(interaction)
+
+    async def bot_turn(self, interaction):
+        if self.game_over:
             return
 
-        # Changer de tour
-        self.current_turn = 1 - self.current_turn
-        await self.update_message()
-        try:
-            await interaction.response.defer()
-        except discord.InteractionResponded:
-            pass
-
-        # Tour du bot
-        if self.vs_bot and self.current_turn == 1:
-            await self.do_bot_turn(interaction)
-
-    async def do_bot_turn(self, interaction: discord.Interaction):
         col = bot_move(self.board)
+        if col is None:
+            return await self.end(interaction, None)
+
         token = self.current_token
         drop_token(self.board, col, token)
 
         if check_win(self.board, token):
-            await self.end_game(interaction, winner_token=token)
-            return
+            return await self.end(interaction, token)
+
         if is_full(self.board):
-            await self.end_game(interaction, winner_token=None)
+            return await self.end(interaction, None)
+
+        self.turn = 0
+        await self.update()
+
+    async def end(self, interaction, winner):
+        if self.game_over:
             return
 
-        self.current_turn = 0
-        await self.update_message()
-
-    async def end_game(self, interaction: discord.Interaction, winner_token: str | None):
         self.game_over = True
         self.stop()
-        for item in self.children:
-            item.disabled = True
 
-        embed = self.build_embed()
+        for c in self.children:
+            c.disabled = True
 
-        if winner_token is None:
-            result = "🤝 Match nul ! Le plateau est plein."
-            embed.color = discord.Color.grayed_out()
-        elif winner_token == TOKENS[0]:
-            result = f"🎉 **{self.player1.display_name}** a gagné !"
-            embed.color = discord.Color.red()
+        e = self.embed()
+
+        if winner is None:
+            e.add_field(name="Résultat", value="🤝 Match nul")
+        elif winner == TOKENS[0]:
+            e.add_field(name="Résultat", value=f"🏆 {self.player1.display_name}")
         else:
-            name = "🤖 Kisuke" if self.vs_bot else (self.player2.display_name if self.player2 else "?")
-            result = f"🎉 **{name}** a gagné !"
-            embed.color = discord.Color.yellow()
+            name = "Bot" if self.vs_bot else self.player2.display_name
+            e.add_field(name="Résultat", value=f"🏆 {name}")
 
-        embed.add_field(name="🏁 Résultat", value=result, inline=False)
-
-        try:
-            await interaction.response.edit_message(embed=embed, view=self)
-        except discord.InteractionResponded:
-            await interaction.edit_original_response(embed=embed, view=self)
+        await safe_edit(self.message or interaction.message, embed=e, view=self)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔵 Bouton de colonne
+# 🔵 BOUTON
 # ────────────────────────────────────────────────────────────────────────────────
 class ColumnButton(Button):
-    def __init__(self, col: int, view_ref: Puissance4View):
-        super().__init__(emoji=COL_EMOJIS[col], style=discord.ButtonStyle.secondary, row=0)
+    def __init__(self, col, view):
+        super().__init__(emoji=COL_EMOJIS[col], style=discord.ButtonStyle.secondary)
         self.col = col
-        self.view_ref = view_ref
+        self.view_ref = view
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction):
         v = self.view_ref
-        if v.game_over:
-            return await safe_respond(interaction, "La partie est terminée.", ephemeral=True)
 
-        # Vérif joueur autorisé
+        if v.game_over:
+            return await safe_respond(interaction, "Partie terminée", ephemeral=True)
+
+        expected = v.player1 if v.turn == 0 else v.player2
+
         if v.vs_bot:
             if interaction.user != v.player1:
-                return await safe_respond(interaction, "⛔ Ce jeu ne t'appartient pas.", ephemeral=True)
+                return await safe_respond(interaction, "Pas ton jeu", ephemeral=True)
         else:
-            # mode multi : seul le joueur dont c'est le tour peut jouer
-            expected = v.player1 if v.current_turn == 0 else v.player2
-            if v.player2 is None:
-                # Partie pas encore rejointe
-                return await safe_respond(interaction, "⛔ En attente du second joueur.", ephemeral=True)
             if interaction.user != expected:
-                return await safe_respond(interaction, f"⛔ C'est au tour de **{expected.display_name}**.", ephemeral=True)
+                return await safe_respond(interaction, "Pas ton tour", ephemeral=True)
 
-        await v.play_column(interaction, self.col)
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 🎛️ Vue d'invitation (mode multi — attente du second joueur)
-# ────────────────────────────────────────────────────────────────────────────────
-class JoinView(View):
-    def __init__(self, player1: discord.User):
-        super().__init__(timeout=60)
-        self.player1 = player1
-
-    @discord.ui.button(label="Rejoindre la partie 🟡", style=discord.ButtonStyle.success)
-    async def join(self, interaction: discord.Interaction, button: Button):
-        if interaction.user == self.player1:
-            return await safe_respond(interaction, "⛔ Tu ne peux pas jouer contre toi-même.", ephemeral=True)
-        self.stop()
-        view = Puissance4View(self.player1, interaction.user, vs_bot=False)
-        embed = view.build_embed()
-        await interaction.response.edit_message(embed=embed, view=view)
-        view.message = interaction.message
+        await v.play(interaction, self.col)
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧠 Cog principal
+# 🧠 COG
 # ────────────────────────────────────────────────────────────────────────────────
 class Puissance4(commands.Cog):
-    """Puissance 4 interactif avec commandes prefix et slash."""
-
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="puissance4", aliases=["p4", "c4"], help="Jouer au Puissance 4.")
-    @commands.cooldown(1, 15, commands.BucketType.user)
-    async def prefix_puissance4(self, ctx: commands.Context, mode: str = "solo"):
-        """
-        mode = "solo" → contre le bot
-        mode = "multi" → attend qu'un autre joueur rejoigne
-        """
-        await self._start_game(ctx.channel, ctx.author, mode)
+    @commands.command(name="puissance4", aliases=["p4"])
+    async def p4(self, ctx, mode: str = "solo"):
+        mode = mode.lower()
 
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
-    @app_commands.command(name="puissance4", description="Jouer au Puissance 4.")
-    @app_commands.describe(mode="Mode de jeu : solo (vs bot) ou multi (vs joueur)")
-    @app_commands.checks.cooldown(1, 15.0, key=lambda i: i.user.id)
-    async def slash_puissance4(self, interaction: discord.Interaction, mode: str = "solo"):
-        await self._start_game_slash(interaction, mode)
-
-    # ────────────────────────────────────────────────────────────────────────────
-    # 🔧 Helpers internes
-    # ────────────────────────────────────────────────────────────────────────────
-    async def _start_game(self, channel, author: discord.User, mode: str):
-        if mode.lower() == "multi":
-            embed = discord.Embed(
-                title="🟡🔴 Puissance 4 — Mode Multi",
-                description=f"**{author.display_name}** lance une partie !\nClique sur le bouton pour rejoindre en 🟡.",
-                color=discord.Color.orange()
-            )
-            view = JoinView(author)
-            msg = await safe_send(channel, embed=embed, view=view)
+        if mode in ["multi", "m"]:
+            view = JoinView(ctx.author)
+            await safe_send(ctx.channel, "Clique sur le bouton pour rejoindre 👇", view=view)
         else:
-            view = Puissance4View(author, None, vs_bot=True)
-            embed = view.build_embed()
-            msg = await safe_send(channel, embed=embed, view=view)
+            view = Puissance4View(ctx.author, vs_bot=True)
+            msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
             view.message = msg
 
-    async def _start_game_slash(self, interaction: discord.Interaction, mode: str):
-        if mode.lower() == "multi":
-            embed = discord.Embed(
-                title="🟡🔴 Puissance 4 — Mode Multi",
-                description=f"**{interaction.user.display_name}** lance une partie !\nClique sur le bouton pour rejoindre en 🟡.",
-                color=discord.Color.orange()
-            )
+    @app_commands.command(name="puissance4")
+    async def slash(self, interaction, mode: str = "solo"):
+        mode = mode.lower()
+
+        if mode in ["multi", "m"]:
             view = JoinView(interaction.user)
-            await interaction.response.send_message(embed=embed, view=view)
+            await interaction.response.send_message("Clique sur le bouton pour rejoindre 👇", view=view)
         else:
-            view = Puissance4View(interaction.user, None, vs_bot=True)
-            embed = view.build_embed()
-            await interaction.response.send_message(embed=embed, view=view)
+            view = Puissance4View(interaction.user, vs_bot=True)
+            await interaction.response.send_message(embed=view.embed(), view=view)
             view.message = await interaction.original_response()
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔌 Setup du Cog
+# 🎛️ JOIN VIEW
+# ────────────────────────────────────────────────────────────────────────────────
+class JoinView(View):
+    def __init__(self, p1):
+        super().__init__(timeout=60)
+        self.p1 = p1
+
+    @discord.ui.button(label="🎮 Rejoindre la partie", style=discord.ButtonStyle.green)
+    async def join(self, interaction, button):
+        if interaction.user == self.p1:
+            return await safe_respond(interaction, "Tu ne peux pas jouer contre toi-même", ephemeral=True)
+
+        view = Puissance4View(self.p1, interaction.user, vs_bot=False)
+
+        await interaction.response.edit_message(
+            content="🎮 Partie lancée !",
+            embed=view.embed(),
+            view=view
+        )
+
+        view.message = interaction.message
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🔌 SETUP
 # ────────────────────────────────────────────────────────────────────────────────
 async def setup(bot: commands.Bot):
     cog = Puissance4(bot)
+
     for command in cog.get_commands():
         if not hasattr(command, "category"):
             command.category = "Jeux"
+
     await bot.add_cog(cog)
