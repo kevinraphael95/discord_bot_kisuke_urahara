@@ -1,3 +1,8 @@
+/* ═══════════════════════════════════════════════════════
+   PAGE : KLUBH OUTSIDE — kluboutside.css
+   Dépend de : base.css
+   ═══════════════════════════════════════════════════════ */
+
 .ko-wrap {
   display: flex;
   gap: 1.5rem;
