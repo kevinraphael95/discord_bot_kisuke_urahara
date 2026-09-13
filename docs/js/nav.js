@@ -28,6 +28,8 @@
   const savedTheme = validThemes.includes(saved) ? saved : 'shinigami';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
+  const activeTheme = themes.find(t => t.id === savedTheme) || themes[0];
+
   // ── ACTIVE PAGE ──
   function isActive(href) {
     return current === href;
@@ -44,13 +46,13 @@
     return `<a href="${prefix}${p.href}"${active} onclick="closeNav()">${p.label}</a>`;
   }).join('');
 
-  // Theme : boutons plats inline, plus de menu flottant
-  function renderThemeLinks(theme, containerClass) {
-    return themes.map(t => {
-      const active = t.id === theme ? ' active' : '';
-      return `<button class="${containerClass}${active}" data-theme="${t.id}">${t.icon} ${t.label}</button>`;
-    }).join('');
-  }
+  const themeOptions = themes.map(t =>
+    `<button class="theme-opt" data-theme="${t.id}">${t.icon} ${t.label}</button>`
+  ).join('');
+
+  const drawerThemeOptions = themes.map(t =>
+    `<button class="drawer-theme-opt" data-theme="${t.id}">${t.icon} ${t.label}</button>`
+  ).join('');
 
   // ── INSERT NAV ──
   document.body.insertAdjacentHTML('afterbegin', `
@@ -64,8 +66,15 @@
   </ul>
 
   <div class="nav-right">
-    <div class="theme-links" id="themeLinks">
-      ${renderThemeLinks(savedTheme, 'theme-link')}
+    <div class="theme-switcher">
+      <button id="themeToggle" class="theme-toggle">
+        ${activeTheme.icon} ${activeTheme.label}
+      </button>
+
+      <div id="themeMenu" class="theme-menu">
+        <div class="theme-menu-title">Thème</div>
+        ${themeOptions}
+      </div>
     </div>
 
     <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
@@ -75,25 +84,41 @@
 <div class="drawer" id="drawer">
   ${drawerLinks}
   <div class="drawer-theme-section">
-    <div class="drawer-theme-btns" id="drawerThemeLinks">
-      ${renderThemeLinks(savedTheme, 'drawer-theme-opt')}
+    <div class="drawer-theme-label">Thème visuel</div>
+    <div class="drawer-theme-btns">
+      ${drawerThemeOptions}
     </div>
   </div>
 </div>
 `);
 
-  // ── THEME LOGIC (un seul clic, plus de menu à ouvrir/fermer) ──
+  // ── THEME LOGIC ──
+  const themeToggle = document.getElementById('themeToggle');
+  const themeMenu = document.getElementById('themeMenu');
+
+  themeToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    themeMenu.classList.toggle('open');
+  });
+
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-theme]');
-    if (!btn) return;
 
-    const theme = btn.dataset.theme;
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('shinigami-theme', theme);
+    if (btn) {
+      const theme = btn.dataset.theme;
 
-    document.querySelectorAll('.theme-link, .drawer-theme-opt').forEach(b => {
-      b.classList.toggle('active', b.dataset.theme === theme);
-    });
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('shinigami-theme', theme);
+
+      const t = themes.find(x => x.id === theme);
+      themeToggle.textContent = `${t.icon} ${t.label}`;
+
+      themeMenu.classList.remove('open');
+    }
+
+    if (!e.target.closest('.theme-switcher')) {
+      themeMenu.classList.remove('open');
+    }
   });
 
   // ── DRAWER ──
@@ -106,5 +131,8 @@
     document.getElementById('ham').classList.remove('open');
     document.getElementById('drawer').classList.remove('open');
   };
+
+
+  
 
 })();
