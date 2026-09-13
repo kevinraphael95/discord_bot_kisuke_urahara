@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════
-   KISUKE URAHARA BOT — base.css  v2.1
+   KISUKE URAHARA BOT — base.css  v3.0
    Variables · Reset · Nav · Footer · Utilitaires globaux
+   Look épuré / arrondi (pilules, bordures fines, moins de glow)
    ═══════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Noto+Serif+JP:wght@300;700&display=swap');
@@ -32,13 +33,17 @@
   --space-xl: clamp(3rem, 6vw, 5rem);
 
   /* — Layout — */
-  --nav-height:     clamp(50px, 6vw, 60px);
+  --nav-height:     clamp(56px, 7vw, 68px);
   --top-bar-height: 2px;
   --content-max:    1200px;
-  --radius-sm:      clamp(4px, .6vw, 6px);
-  --radius-md:      clamp(10px, 1.4vw, 14px);
 
-  /* — Transitions — */
+  /* — Rayons : échelle plus ronde, pilules pour nav/boutons — */
+  --radius-sm:   clamp(6px, .9vw, 10px);
+  --radius-md:   clamp(14px, 2vw, 22px);
+  --radius-lg:   clamp(20px, 3vw, 32px);
+  --radius-full: 999px;
+
+  /* — Transitions (plus courtes, sans lift/glow) — */
   --t-fast:  .15s ease;
   --t-base:  .2s ease;
   --t-slow:  .35s cubic-bezier(.4, 0, .2, 1);
@@ -92,14 +97,14 @@ body {
   }
 }
 
-/* ── ATMOSPHERE ──────────────────────────────────────── */
+/* ── ATMOSPHERE (adoucie) ────────────────────────────── */
 .atmo {
   position: fixed; inset: 0;
   z-index: var(--z-atmo); pointer-events: none;
   background:
-    radial-gradient(ellipse 90% 55% at 50%  20%, var(--atmo-1) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 100% 55%, var(--atmo-2) 0%, transparent 55%),
-    radial-gradient(ellipse 35% 35% at   0% 70%, var(--atmo-3) 0%, transparent 55%);
+    radial-gradient(ellipse 80% 45% at 50%  15%, var(--atmo-1) 0%, transparent 55%),
+    radial-gradient(ellipse 35% 50% at 100% 55%, var(--atmo-2) 0%, transparent 50%),
+    radial-gradient(ellipse 30% 30% at   0% 70%, var(--atmo-3) 0%, transparent 50%);
   transition: background var(--t-theme);
 }
 
@@ -109,7 +114,7 @@ body {
   width: 100%; height: var(--top-bar-height);
   z-index: var(--z-topbar);
   background: var(--top-bar-grad);
-  opacity: .8;
+  opacity: .7;
   transition: background var(--t-theme);
 }
 
@@ -121,9 +126,7 @@ nav {
   padding: 0 var(--space-lg);
   display: flex; align-items: center; justify-content: space-between;
   background: var(--nav-bg, rgba(14, 16, 20, .94));
-  border-bottom: 1px solid var(--gold-line);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
   transition: border-color var(--t-base);
   overflow: visible;
 }
@@ -140,25 +143,25 @@ nav {
 .nav-logo:hover { color: var(--gold-lt); }
 .nav-logo span  { font-size: .75em; opacity: .55; }
 
-.nav-links { display: flex; gap: clamp(.1rem, .3vw, .2rem); list-style: none; }
+/* Pilule qui englobe les liens, dans l'esprit "pill nav" du site de référence */
+.nav-links {
+  display: flex; gap: clamp(.1rem, .3vw, .2rem); list-style: none;
+  padding: clamp(.2rem, .4vw, .3rem);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
 .nav-links a {
   font-family: var(--font-sans);
   font-size: var(--text-sm); font-weight: 500;
   color: var(--muted); text-decoration: none;
   letter-spacing: .04em;
   padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   transition: color var(--t-base), background var(--t-base);
-  position: relative;
 }
-.nav-links a:hover  { color: var(--white); background: rgba(255, 255, 255, .05); }
+.nav-links a:hover  { color: var(--white); background: rgba(255, 255, 255, .06); }
 .nav-links a.active { color: var(--gold-lt); background: var(--gold-pale); }
-.nav-links a.active::after {
-  content: '';
-  position: absolute; bottom: -1px;
-  left: var(--space-sm); right: var(--space-sm);
-  height: 1px; background: var(--gold);
-}
 
 .nav-right { display: flex; align-items: center; gap: clamp(.3rem, .6vw, .5rem); }
 
@@ -170,7 +173,7 @@ nav {
   color: var(--muted); cursor: pointer;
   font-size: clamp(.78rem, 1.1vw, .9rem);
   padding: clamp(.28rem, .5vw, .35rem) clamp(.42rem, .7vw, .55rem);
-  border-radius: var(--radius-sm); line-height: 1;
+  border-radius: var(--radius-full); line-height: 1;
   transition: border-color var(--t-base), color var(--t-base);
 }
 .theme-toggle:hover { border-color: var(--gold-line); color: var(--gold-lt); }
@@ -179,11 +182,11 @@ nav {
   display: none; position: absolute;
   top: calc(100% + 8px); right: 0;
   z-index: var(--z-menu);
-  background: var(--panel); border: 1px solid var(--gold-line);
+  background: var(--panel); border: 1px solid var(--border);
   padding: clamp(.5rem, .9vw, .7rem);
   flex-direction: column; gap: clamp(.3rem, .5vw, .4rem);
   min-width: clamp(110px, 12vw, 130px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, .5);
+  border-radius: var(--radius-md);
   animation: rise .2s ease;
 }
 .theme-menu.open { display: flex; }
@@ -205,6 +208,7 @@ nav {
   color: var(--text); cursor: pointer;
   padding: clamp(.35rem, .6vw, .45rem) clamp(.6rem, 1vw, .75rem);
   text-align: left; width: 100%;
+  border-radius: var(--radius-sm);
   display: flex; align-items: center; gap: clamp(.35rem, .6vw, .5rem);
   transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
 }
@@ -214,9 +218,9 @@ nav {
 /* ── HAMBURGER ───────────────────────────────────────── */
 .ham {
   display: none; flex-direction: column; gap: 5px;
-  background: rgba(0, 0, 0, .25);
-  border: 1px solid rgba(255, 255, 255, .15);
-  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
   cursor: pointer;
   padding: clamp(6px, 1vw, 8px) clamp(8px, 1.2vw, 10px);
   z-index: var(--z-menu);
@@ -236,9 +240,7 @@ nav {
   position: fixed; top: 0; left: 0; right: 0;
   z-index: var(--z-drawer);
   background: var(--void);
-  border-bottom: 1px solid var(--gold-line);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
   padding: 4.5rem var(--space-md) 2rem;
   display: flex; flex-direction: column;
   transform: translateY(-110%);
@@ -277,6 +279,7 @@ nav {
   background: var(--surface); border: 1px solid var(--border);
   color: var(--text); cursor: pointer;
   padding: clamp(.32rem, .6vw, .4rem) clamp(.6rem, 1vw, .75rem);
+  border-radius: var(--radius-full);
   display: flex; align-items: center; gap: .4rem;
   transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
 }
@@ -331,11 +334,11 @@ nav {
 .orb {
   width: clamp(5px, .7vw, 6px); height: clamp(5px, .7vw, 6px);
   border-radius: 50%;
-  background: var(--rei-mid); box-shadow: 0 0 8px var(--rei-glow);
+  background: var(--rei-mid);
   animation: pulse 2.8s ease-in-out infinite;
 }
-.orb:nth-child(2) { animation-delay: .4s; background: var(--gold);   box-shadow: 0 0 8px var(--gold-glow); }
-.orb:nth-child(3) { animation-delay: .8s; background: var(--red-lt); box-shadow: 0 0 8px var(--red-glow);  }
+.orb:nth-child(2) { animation-delay: .4s; background: var(--gold);   }
+.orb:nth-child(3) { animation-delay: .8s; background: var(--red-lt); }
 
 /* ── DIVIDER ─────────────────────────────────────────── */
 .divider {
@@ -346,7 +349,7 @@ nav {
 .divider::before,
 .divider::after {
   content: ''; flex: 1; height: 1px;
-  background: linear-gradient(to right, transparent, var(--red-pale), var(--gold-line), transparent);
+  background: linear-gradient(to right, transparent, var(--border), transparent);
 }
 .div-sym {
   font-family: var(--font-serif);
@@ -369,38 +372,42 @@ nav {
 }
 .sec-lbl::after { transform: scaleX(-1); }
 
-/* ── BOUTONS ─────────────────────────────────────────── */
+/* ── BOUTONS — pilules avec bordure, façon référence ──── */
 .btn {
   font-family: var(--font-sans);
   font-size: var(--text-sm); font-weight: 600;
-  letter-spacing: .08em; text-transform: uppercase;
-  padding: clamp(.55rem, 1vw, .78rem) clamp(1.2rem, 2.5vw, 2rem);
+  letter-spacing: .04em;
+  padding: clamp(.6rem, 1.1vw, .85rem) clamp(1.4rem, 2.8vw, 2.2rem);
   text-decoration: none;
-  display: inline-block; border: 1px solid transparent;
-  border-radius: var(--radius-sm); cursor: pointer;
-  transition: background var(--t-base), border-color var(--t-base),
-              color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
+  display: inline-block; border: 1px solid var(--border);
+  border-radius: var(--radius-full); cursor: pointer;
+  transition: background var(--t-base), border-color var(--t-base), color var(--t-base);
 }
-.btn:active { transform: translateY(0) !important; }
 
 .btn-gold {
   background: var(--gold); color: var(--void); border-color: var(--gold);
 }
 .btn-gold:hover {
   background: var(--gold-lt); border-color: var(--gold-lt);
-  box-shadow: 0 0 28px var(--gold-glow); transform: translateY(-2px);
 }
 
 .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border); }
 .btn-ghost:hover {
-  color: var(--white); border-color: rgba(255, 255, 255, .20);
-  transform: translateY(-2px);
+  color: var(--white); border-color: var(--gold-line);
+}
+
+/* ── CARTES — utilitaire générique, bordure fine + coin arrondi ── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
 }
 
 /* ── FOOTER ──────────────────────────────────────────── */
 footer {
   position: relative; z-index: var(--z-content);
-  border-top: 1px solid var(--gold-line);
+  border-top: 1px solid var(--border);
   padding: clamp(1.2rem, 2.5vw, 2rem) var(--space-lg);
   display: flex; justify-content: space-between; align-items: center;
   flex-wrap: wrap; gap: clamp(.6rem, 1.2vw, 1rem);
@@ -415,7 +422,11 @@ footer {
   text-decoration: none; text-transform: uppercase;
   transition: color var(--t-base);
 }
-.foot-links a:hover { color: var(--gold); }
+.foot-links a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: .3rem;
+}
 
 /* ── SCROLLBAR ───────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 4px; height: 4px; }
