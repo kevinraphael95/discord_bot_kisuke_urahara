@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kisuke Admin — Auth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <div class="glyph">Kisuke Admin</div>
+  <div class="box">
+    <div class="box-title">Accès</div>
+    <div class="box-sub">Panneau d'administration</div>
+    {% if error %}<div class="error">⚠ {{ error }}</div>{% endif %}
+    <form method="POST">
+      <label class="field-label">Mot de passe</label>
+      <input type="password" name="password" placeholder="••••••••••••" autofocus>
+      <button type="submit" class="btn-submit">Connexion</button>
+    </form>
+  </div>
+  <div class="footer-line">v2.0 · Système réservé</div>
+</div>
+</body>
+</html>
