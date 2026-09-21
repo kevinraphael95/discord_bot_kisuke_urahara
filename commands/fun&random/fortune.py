@@ -33,10 +33,11 @@ FALLBACK_FORTUNES = [
 async def fetch_fortune(session: aiohttp.ClientSession):
     """Appelle l'API et retourne (texte, lucky_numbers, from_fallback). Retombe sur un fallback local si l'API échoue."""
     try:
-        async with session.get(FORTUNE_API_URL, timeout=aiohttp.ClientTimeout(total=8)) as resp:
+        async with session.get(FORTUNE_API_URL, timeout=aiohttp.ClientTimeout(total=25)) as resp:
             if resp.status == 200:
                 data = await resp.json()
-                cookie = data.get("cookie", {})
+                # L'API renvoie la clé "cookies" (pas "cookie") même pour une seule prédiction
+                cookie = data.get("cookies") or data.get("cookie") or {}
                 text = cookie.get("fortune")
                 lucky_numbers = cookie.get("luckyNumbers")
                 if text:
@@ -105,5 +106,5 @@ async def setup(bot: commands.Bot):
     cog = Fortune(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun&Random"
+            command.category = "Fun"
     await bot.add_cog(cog)
