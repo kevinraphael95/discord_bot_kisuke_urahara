@@ -3,7 +3,11 @@
 # ⚡ Kisuke Urahara
 
 **Kisuke Urahara** est un bot Discord multifonction inspiré de l’univers de *Bleach*.
-Il propose des mini-jeux, des commandes utilitaires, un système évolutif de collecte de **Reiatsu**, ainsi que plusieurs mécaniques interactives pour animer un serveur.
+Il propose des commandes générales et "utiles", quelques commandes "divertissantes", des mini-jeux inintéressants, un système de collecte de **Reiatsu** inintéressant aussi et quelques commandes liées à Bleach.
+
+# Installation
+
+Débrouillez vous
 
 🔗 [Site / Présentation](https://kevinraphael95.github.io/discord_bot_kisuke_urahara/)
 
