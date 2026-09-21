@@ -51,8 +51,8 @@ async def fetch_fortune(session: aiohttp.ClientSession):
 
 def build_embed(fortune_text: str, lucky_numbers: list, from_fallback: bool = False):
     embed = discord.Embed(
-        title="🥠 Fortune Cookie",
-        description=f"*You crack open the cookie...*\n\n**{fortune_text}**",
+        title="🥠 Cookie Fortune",
+        description=f"*Tu ouvres le cookie...*\n\n**{fortune_text}**",
         color=discord.Color.gold()
     )
     if lucky_numbers:
