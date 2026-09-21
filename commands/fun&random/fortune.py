@@ -106,5 +106,5 @@ async def setup(bot: commands.Bot):
     cog = Fortune(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun"
+            command.category = "Fun&Random"
     await bot.add_cog(cog)
