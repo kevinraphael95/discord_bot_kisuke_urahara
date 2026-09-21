@@ -20,6 +20,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from discord import app_commands
+import aiohttp
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Modules internes
@@ -58,6 +59,7 @@ bot = commands.Bot(
     intents=intents,
     help_command=None
 )
+bot.aiohttp_session = None  # sera initialisée dans on_ready
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Chargement dynamique des commandes depuis /commands/*
@@ -89,10 +91,12 @@ async def load_tasks():
                 print(f"❌ Failed to load task {path}: {e}")
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🔔 On Ready : présence
+# 🔔 On Ready : présence et création de la session aiohttp
 # ────────────────────────────────────────────────────────────────────────────────
 @bot.event
 async def on_ready():
+    if bot.aiohttp_session is None:
+        bot.aiohttp_session = aiohttp.ClientSession()  # ✅ Créée dans le loop
     print(f"✅ Connecté en tant que {bot.user.name}")
     await bot.change_presence(
         activity=discord.Activity(
@@ -169,6 +173,13 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
         await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
 # ────────────────────────────────────────────────────────────────────────────────
+# 🔒 Nettoyage aiohttp
+# ────────────────────────────────────────────────────────────────────────────────
+async def cleanup_aiohttp():
+    if bot.aiohttp_session and not bot.aiohttp_session.closed:
+        await bot.aiohttp_session.close()
+
+# ────────────────────────────────────────────────────────────────────────────────
 # 🚀 Lancement
 # ────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
@@ -185,6 +196,9 @@ if __name__ == "__main__":
         await load_commands()
         await load_tasks()
         set_bot(bot)
-        await bot.start(TOKEN)
+        try:
+            await bot.start(TOKEN)
+        finally:
+            await cleanup_aiohttp()
 
     asyncio.run(start())
