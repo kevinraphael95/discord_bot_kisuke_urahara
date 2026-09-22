@@ -81,7 +81,7 @@ class Inspire(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="inspire")
+    @commands.command(name="inspire", help="Reçois une citation inspirante... très inspirante.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_inspire(self, ctx: commands.Context):
         await self._send_inspire(ctx.channel)
