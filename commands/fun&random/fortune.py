@@ -94,7 +94,7 @@ class Fortune(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
-    @commands.command(name="fortune")
+    @commands.command(name="fortune", help="Ouvre un biscuit chinois et découvre ta prédiction.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_fortune(self, ctx: commands.Context):
         await self._send_fortune(ctx.channel)
