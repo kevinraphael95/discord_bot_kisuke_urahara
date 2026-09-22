@@ -37,7 +37,7 @@ async def fetch_inspiro_image(session: aiohttp.ClientSession):
 
 def build_embed(image_url: str):
     embed = discord.Embed(
-        title="✨ Sagesse divine",
+        title="✨ Citation inspirante",
         color=discord.Color.purple()
     )
     embed.set_image(url=image_url)
