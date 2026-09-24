@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 discord_utils.py — Fonctions utilitaires sécurisées pour Discord
 # Objectif : Fournir des fonctions send/edit/respond optimisées avec gestion du rate-limit
-# Version : ✅ Optimisée et robuste, backoff exponentiel, logs clairs
+# Version : ✅ Optimisée et robuste, backoff basé sur retry_after, logs clairs
 # ────────────────────────────────────────────────────────────────────────────────
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -29,7 +29,9 @@ async def _discord_action(action_func, *args, retry=3, delay=0.3, **kwargs):
             return result
         except HTTPException as e:
             if e.status == 429:
-                wait_time = 10 * attempt  # backoff exponentiel
+                # Utilise le délai exact renvoyé par Discord (retry_after) plutôt qu'un délai deviné :
+                # trop court, on retente en boucle contre le rate-limit ; trop long, on ralentit le bot pour rien.
+                wait_time = e.retry_after if getattr(e, "retry_after", None) else 10 * attempt
                 print(f"[RateLimit] {action_func.__name__} → 429 Too Many Requests. Pause {wait_time}s...")
                 await asyncio.sleep(wait_time)
             else:
@@ -45,6 +47,10 @@ async def _discord_action(action_func, *args, retry=3, delay=0.3, **kwargs):
 # ────────────────────────────────────────────────────────────────────────────────
 async def safe_send(channel: discord.abc.Messageable, content=None, **kwargs):
     return await _discord_action(channel.send, content=content, **kwargs)
+
+async def safe_create_webhook(channel: discord.abc.GuildChannel, **kwargs):
+    """Crée un webhook en toute sécurité (retry/backoff 429 identique aux autres actions)."""
+    return await _discord_action(channel.create_webhook, **kwargs)
 
 async def safe_edit(message: discord.Message, content=None, **kwargs):
     return await _discord_action(message.edit, content=content, **kwargs)
