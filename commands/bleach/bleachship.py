@@ -146,55 +146,21 @@ class BleachShipCommand(commands.Cog):
             "embed": discord.Embed | None,
             "persos": list,               # tous les persos chargés (pour le bouton "Nouveau ship")
             "error": str | None,          # message d'erreur bloquant (pas assez de persos)
-            "warning": str | None,        # avertissement non bloquant (nom invalide -> fallback random)
         }
         """
         persos = [p for p in (load_character(n) for n in list_characters()) if p is not None]
         if len(persos) < 2:
-            return {"embed": None, "persos": persos, "error": "❌ Il faut au moins deux personnages pour créer un ship.", "warning": None}
+            return {"embed": None, "persos": persos, "error": "❌ Il faut au moins deux personnages pour créer un ship."}
 
-        warnings = []
-
-        def resolve(name):
-            if not name:
-                return None
-            char = load_character(name)
-            if char is None:
-                warnings.append(f"⚠️ Personnage `{name}` introuvable, un personnage aléatoire a été choisi à la place.")
-            return char
-
-        p1 = resolve(p1_name)
-        p2 = resolve(p2_name)
-
-        # Complète avec des choix aléatoires distincts pour les slots manquants
-        deja_choisis = [p for p in (p1, p2) if p is not None]
-        noms_deja_choisis = {p["nom"] for p in deja_choisis}
-        candidats = [p for p in persos if p["nom"] not in noms_deja_choisis]
-
-        if p1 is None:
-            if not candidats:
-                candidats = persos
-            p1 = random.choice(candidats)
-            candidats = [p for p in candidats if p["nom"] != p1["nom"]]
-
-        if p2 is None:
-            if not candidats:
-                candidats = [p for p in persos if p["nom"] != p1["nom"]] or persos
-            p2 = random.choice(candidats)
-
-        # Garde-fou final : jamais le même personnage des deux côtés
-        if p1["nom"] == p2["nom"]:
-            alternatives = [p for p in persos if p["nom"] != p1["nom"]]
-            if alternatives:
-                p2 = random.choice(alternatives)
+        p1 = (load_character(p1_name) if p1_name else None) or random.choice(persos)
+        # p2 est tiré parmi les persos différents de p1 pour éviter un ship avec soi-même
+        p2 = load_character(p2_name) if p2_name else None
+        if p2 is None or p2["nom"] == p1["nom"]:
+            autres = [p for p in persos if p["nom"] != p1["nom"]]
+            p2 = random.choice(autres) if autres else p1
 
         embed = generate_ship_embed(p1, p2)
-        return {
-            "embed": embed,
-            "persos": persos,
-            "error": None,
-            "warning": "\n".join(warnings) if warnings else None,
-        }
+        return {"embed": embed, "persos": persos, "error": None}
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -207,8 +173,7 @@ class BleachShipCommand(commands.Cog):
         if result["error"]:
             return await safe_respond(interaction, result["error"], ephemeral=True)
         view = BleachShipView(result["persos"], interaction.user)
-        content = result["warning"] or discord.utils.MISSING
-        await safe_respond(interaction, content=content, embed=result["embed"], view=view)
+        await safe_respond(interaction, embed=result["embed"], view=view)
         view.message = await interaction.original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -221,8 +186,6 @@ class BleachShipCommand(commands.Cog):
         if result["error"]:
             return await safe_send(ctx.channel, result["error"])
         view = BleachShipView(result["persos"], ctx.author)
-        if result["warning"]:
-            await safe_send(ctx.channel, result["warning"])
         view.message = await safe_send(ctx.channel, embed=result["embed"], view=view)
 
 # ────────────────────────────────────────────────────────────────────────────────
