@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 bleachship.py — Commande interactive /bleachship et !bleachship (alias !bship)
 # Objectif : Tester la compatibilité entre deux personnages de Bleach
 # Catégorie : Bleach
 # Accès : Public
 # Cooldown : 1 utilisation / 3 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import json
 import os
 import random
@@ -20,9 +20,9 @@ from discord.ui import View, button
 
 from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followup, safe_interact
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Gestion des personnages
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CHAR_DIR = os.path.join("data", "personnages")
 
 def load_character(name: str):
@@ -38,9 +38,9 @@ def list_characters():
     files = os.listdir(CHAR_DIR)
     return [f.replace(".json", "") for f in files if f.endswith(".json")]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧮 Calcul du score de compatibilité
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def compatibilite_amoureuse(p1, p2):
     def peut_aimer(person, cible):
         if person["sexualite"].lower() == "hétéro":
@@ -98,9 +98,9 @@ def generate_ship_embed(p1, p2):
     embed.set_image(url=p2["image"])
     return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — View avec bouton régénération
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class BleachShipView(View):
     def __init__(self, persos: list, author: discord.User | discord.Member):
@@ -126,9 +126,9 @@ class BleachShipView(View):
         new_embed = generate_ship_embed(p1, p2)
         await safe_interact(interaction, edit=True, embed=new_embed, view=self)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class BleachShipCommand(commands.Cog):
     """Commandes /bleachship et !bleachship — Teste la compatibilité entre deux personnages de Bleach."""
@@ -136,9 +136,9 @@ class BleachShipCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def _build_ship(self, p1_name: str | None, p2_name: str | None):
         """
         Charge les personnages, calcule le ship et retourne un dict :
@@ -162,9 +162,9 @@ class BleachShipCommand(commands.Cog):
         embed = generate_ship_embed(p1, p2)
         return {"embed": embed, "persos": persos, "error": None}
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="bleachship",description="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @app_commands.describe(p1="Nom du premier personnage", p2="Nom du second personnage")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
@@ -176,9 +176,9 @@ class BleachShipCommand(commands.Cog):
         await safe_respond(interaction, embed=result["embed"], view=view)
         view.message = await interaction.original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="bleachship",aliases=["bship"],help="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_bleachship(self, ctx: commands.Context, p1: str = None, p2: str = None):
@@ -188,9 +188,9 @@ class BleachShipCommand(commands.Cog):
         view = BleachShipView(result["persos"], ctx.author)
         view.message = await safe_send(ctx.channel, embed=result["embed"], view=view)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = BleachShipCommand(bot)
     for command in cog.get_commands():
