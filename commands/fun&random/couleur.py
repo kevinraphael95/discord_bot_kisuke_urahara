@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 couleur.py — Commande interactive !couleur et /couleur
 # Objectif : Afficher une couleur aléatoire avec ses codes HEX et RGB dans un embed Discord
 # Catégorie : Fun&Random
 # Accès : Public
 # Cooldown : 1 utilisation / 3 sec / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import random
 import json
 import logging
@@ -21,9 +21,9 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Accès base de données locale
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def db_valider_quete(user_id: int) -> int | None:
     """
     Vérifie si la quête 'couleur' est déjà validée pour l'utilisateur.
@@ -62,9 +62,9 @@ def db_valider_quete(user_id: int) -> int | None:
         log.exception("[couleur] Erreur validation quête SQLite : %s", e)
         return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Vue interactive avec bouton "Nouvelle couleur"
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class CouleurView(discord.ui.View):
     def __init__(self, author: discord.User | discord.Member):
         super().__init__(timeout=60)
@@ -99,18 +99,18 @@ class CouleurView(discord.ui.View):
         if self.message:
             await safe_edit(self.message, view=self)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class CouleurCommand(commands.Cog):
     """Commandes /couleur et !couleur — Génère une couleur aléatoire avec codes HEX et RGB."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne — validation de la quête
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _valider_quete(
         self,
         user:        discord.User | discord.Member,
@@ -141,9 +141,9 @@ class CouleurCommand(commands.Cog):
         else:
             await safe_send(user, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="couleur",
         description="Affiche une couleur aléatoire avec un aperçu visuel et ses codes HEX & RGB."
@@ -158,9 +158,9 @@ class CouleurCommand(commands.Cog):
 
         await self._valider_quete(interaction.user, channel=interaction.channel, interaction=interaction)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(
         name="couleur",
         help="🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB."
@@ -173,9 +173,9 @@ class CouleurCommand(commands.Cog):
 
         await self._valider_quete(ctx.author, channel=ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = CouleurCommand(bot)
     for command in cog.get_commands():
