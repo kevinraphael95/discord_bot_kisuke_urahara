@@ -1,20 +1,20 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 init_db.py
 # Objectif : Initialiser la base SQLite locale Reiatsu (Bleach)
 # Catégorie : 🧠 Utils
 # Accès : Tous
 # Cooldown : /
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import os
 import sqlite3
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Configuration SQLite
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DB_DIR = "database"
 REIATSU_DB_PATH = os.path.join(DB_DIR, "reiatsu.db")
 
@@ -26,16 +26,16 @@ def get_conn():
     return sqlite3.connect(REIATSU_DB_PATH)
 
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Initialisation des tables
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def init_db():
     """Crée les tables Reiatsu si elles n'existent pas."""
 
     conn = get_conn()
     cursor = conn.cursor()
 
-    # ─── Table reiatsu ─────────────────────────────
+    # === Table reiatsu =============================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reiatsu (
         user_id INTEGER PRIMARY KEY,
@@ -61,7 +61,7 @@ def init_db():
     """)
 
 
-    # ─── Table reiatsu_config ──────────────────────
+    # === Table reiatsu_config ======================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reiatsu_config (
         guild_id INTEGER PRIMARY KEY,
@@ -80,7 +80,7 @@ def init_db():
     """)
 
 
-    # ─── Table mots_trouves ────────────────────────
+    # === Table mots_trouves ========================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS mots_trouves (
         user_id INTEGER PRIMARY KEY,
@@ -95,7 +95,7 @@ def init_db():
     ON mots_trouves(user_id)
     """)
 
-    # ─── Table steam_keys ────────────────────────────
+    # === Table steam_keys ============================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS steam_keys (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,7 +114,7 @@ def init_db():
 
 
 
-    # ─── Table rpg_players ────────────────────────────────────────────────────
+    # === Table rpg_players ====================================================
     # Équivalent SQLite du schéma Supabase :
     #   user_id BIGINT PK, zone INT default 13, stats JSONB, cooldowns JSONB,
     #   effects JSONB, unlocked_zones JSONB default '["1"]',
@@ -136,7 +136,7 @@ def init_db():
     ON rpg_players(user_id)
     """)
 
-    # ─── Table gardens ────────────────────────────────────────────────────────
+    # === Table gardens ========================================================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS gardens (
         user_id         INTEGER PRIMARY KEY,
@@ -154,7 +154,7 @@ def init_db():
     """)
 
 
-    # ─── Table config ─────────────────────────────
+    # === Table config =============================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS config (
         key   TEXT PRIMARY KEY,
@@ -162,7 +162,7 @@ def init_db():
     )
     """)    
 
-    # ─── Table top entrainement cererbral ─────────────────────────────
+    # === Table top entrainement cererbral =============================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS kawashima_scores (
         id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -180,9 +180,9 @@ def init_db():
     conn.close()
 
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔹 Si lancé directement
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 if __name__ == "__main__":
     init_db()
     print(f"✅ Base Reiatsu initialisée : {REIATSU_DB_PATH}")
