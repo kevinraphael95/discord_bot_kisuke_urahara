@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 scans.py — Commande interactive /scans et !scans
 # Objectif : Lire des scans depuis data/images/scans/<nom_scan>
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 commande toutes les 5s par utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import logging
 import os
 
@@ -21,9 +21,9 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_delete
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Gestion des scans
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 SCANS_FOLDER = os.path.join("assets", "scans")
 
 def get_folders():
@@ -43,9 +43,9 @@ def get_pages(scan):
         log.exception("[scans] Impossible de charger %s : %s", target, e)
         return []
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Menu déroulant pour choisir le scan
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class FolderSelect(Select):
     def __init__(self, cog, interaction_user):
@@ -76,9 +76,9 @@ class FolderSelectView(View):
         if self.message:
             await safe_edit(self.message, content="⏳ Menu expiré.", view=None)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Pagination des pages
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class ScanView(View):
     def __init__(self, bot, scan, pages, start_page=1, user=None):
@@ -132,9 +132,9 @@ class ScanView(View):
         if self.message:
             await safe_edit(self.message, view=self)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class ScansBleach(commands.Cog):
     """
@@ -143,9 +143,9 @@ class ScansBleach(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _start_scan(self, channel, user, scan, start_page=1):
         available = get_folders()
         if scan not in available:
@@ -166,9 +166,9 @@ class ScansBleach(commands.Cog):
         embed.set_image(url=f"attachment://{pages[start_page - 1]}")
         view.message = await safe_send(channel, embed=embed, file=file, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="scans",description="📖 Lire un scan de Bleach.")
     @app_commands.describe(scan="Nom du scan dans data/images/scans/", page="Page de départ")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
@@ -183,9 +183,9 @@ class ScansBleach(commands.Cog):
         await self._start_scan(interaction.channel, interaction.user, scan, start_page=page)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="scans",help="📖 Lire un scan de Bleach.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_scans(self, ctx: commands.Context, scan: str | None = None, page: int = 1):
@@ -196,9 +196,9 @@ class ScansBleach(commands.Cog):
             return
         await self._start_scan(ctx.channel, ctx.author, scan, start_page=page)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ScansBleach(bot)
     for command in cog.get_commands():
