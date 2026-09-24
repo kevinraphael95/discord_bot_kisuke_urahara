@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 tram_probleme.py — Commande /tram_probleme et !tram_probleme
 # Objectif : Quiz interactif du dilemme du tramway avec choix du mode (court / complet)
 # Catégorie : Fun
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -17,9 +17,9 @@ import json
 import random
 import os
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class TramProbleme(commands.Cog):
     """Commande /tram_probleme et !tram_probleme — Quiz du dilemme du tramway"""
 
@@ -30,9 +30,9 @@ class TramProbleme(commands.Cog):
         # ⚡ Charge le JSON une fois au démarrage
         self.questions = self.load_questions()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Chargement du JSON
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def load_questions(self):
         try:
             with open(self.questions_path, "r", encoding="utf-8") as f:
@@ -42,9 +42,9 @@ class TramProbleme(commands.Cog):
             print(f"[ERREUR JSON] {e}")
             return []
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="tram_probleme",
         description="Teste ta morale dans un quiz absurde du dilemme du tramway."
@@ -53,26 +53,26 @@ class TramProbleme(commands.Cog):
     async def slash_tram_probleme(self, interaction: discord.Interaction):
         await self.run_tram_quiz(interaction)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="tram_probleme", aliases=["tp"], help="Teste ta morale dans un quiz absurde du dilemme du tramway.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_tram_probleme(self, ctx: commands.Context):
         await self.run_tram_quiz(ctx)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔧 Helper : récupère l'id de l'auteur, que ce soit un ctx ou une interaction
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @staticmethod
     def _author_id(ctx_or_inter):
         if isinstance(ctx_or_inter, discord.Interaction):
             return ctx_or_inter.user.id
         return ctx_or_inter.author.id
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🎮 Fonction principale
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def run_tram_quiz(self, ctx_or_inter):
         is_inter = isinstance(ctx_or_inter, discord.Interaction)
         send = safe_respond if is_inter else safe_send
@@ -92,9 +92,9 @@ class TramProbleme(commands.Cog):
         total_saved = {"humain": 0, "enfant": 0, "pa": 0, "animal": 0, "robot": 0}
         total_killed = {"humain": 0, "enfant": 0, "pa": 0, "animal": 0, "robot": 0}
 
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         # Message d'intro avec choix du mode
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         embed = discord.Embed(
             title="🚋 Dilemme du Tramway",
             description=(
@@ -142,9 +142,9 @@ class TramProbleme(commands.Cog):
             await edit(msg, embed=embed, view=None)
             return
 
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         # Préparation des questions selon le mode choisi
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         questions = list(questions_all)
         if story:
             total_q = len(questions)
@@ -152,9 +152,9 @@ class TramProbleme(commands.Cog):
             random.shuffle(questions)
             total_q = min(5, len(questions))
 
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         # Boucle des questions
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         quiz_aborted = False
 
         for i, question in enumerate(questions[:total_q], start=1):
@@ -255,9 +255,9 @@ class TramProbleme(commands.Cog):
             if quiz_aborted:
                 return
 
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         # Résultats finaux
-        # ──────────────────────────────────────────────────────────────
+        # ==============================================================
         embed = discord.Embed(
             title="🎉 Résultats du Dilemme du Tramway",
             color=discord.Color.green()
@@ -293,9 +293,9 @@ class TramProbleme(commands.Cog):
 
         await edit(msg, embed=embed, view=None)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = TramProbleme(bot)
     for command in cog.get_commands():
