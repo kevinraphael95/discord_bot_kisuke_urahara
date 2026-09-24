@@ -62,7 +62,7 @@ class TestTache(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH (Admin Only)
     # ============================================================================
-    @app_commands.command(name="testtache", description="🕹️ Teste toutes les épreuves pour la commande hollow.")
+    @app_commands.command(name="testtache", description="(Admin) 🕹️ Teste toutes les épreuves pour la commande hollow.")
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
@@ -81,7 +81,7 @@ class TestTache(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX (Admin Only)
     # ============================================================================
-    @commands.command(name="testtache", help="🕹️ Teste toutes les épreuves pour la commande hollow.")
+    @commands.command(name="testtache", help="(Admin) 🕹️ Teste toutes les épreuves pour la commande hollow.")
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 10.0, commands.BucketType.user)
