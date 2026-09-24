@@ -139,14 +139,62 @@ class BleachShipCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction interne commune
     # ────────────────────────────────────────────────────────────────────────────
-    def _build_ship(self, p1_name: str | None, p2_name: str | None) -> tuple[discord.Embed, BleachShipView, list] | None:
-        """Charge les personnages, calcule le ship et retourne l'embed + la view."""
+    def _build_ship(self, p1_name: str | None, p2_name: str | None):
+        """
+        Charge les personnages, calcule le ship et retourne un dict :
+        {
+            "embed": discord.Embed | None,
+            "persos": list,               # tous les persos chargés (pour le bouton "Nouveau ship")
+            "error": str | None,          # message d'erreur bloquant (pas assez de persos)
+            "warning": str | None,        # avertissement non bloquant (nom invalide -> fallback random)
+        }
+        """
         persos = [p for p in (load_character(n) for n in list_characters()) if p is not None]
         if len(persos) < 2:
-            return None
-        p1 = (load_character(p1_name) if p1_name else None) or random.choice(persos)
-        p2 = (load_character(p2_name) if p2_name else None) or random.choice(persos)
-        return generate_ship_embed(p1, p2), persos
+            return {"embed": None, "persos": persos, "error": "❌ Il faut au moins deux personnages pour créer un ship.", "warning": None}
+
+        warnings = []
+
+        def resolve(name):
+            if not name:
+                return None
+            char = load_character(name)
+            if char is None:
+                warnings.append(f"⚠️ Personnage `{name}` introuvable, un personnage aléatoire a été choisi à la place.")
+            return char
+
+        p1 = resolve(p1_name)
+        p2 = resolve(p2_name)
+
+        # Complète avec des choix aléatoires distincts pour les slots manquants
+        deja_choisis = [p for p in (p1, p2) if p is not None]
+        noms_deja_choisis = {p["nom"] for p in deja_choisis}
+        candidats = [p for p in persos if p["nom"] not in noms_deja_choisis]
+
+        if p1 is None:
+            if not candidats:
+                candidats = persos
+            p1 = random.choice(candidats)
+            candidats = [p for p in candidats if p["nom"] != p1["nom"]]
+
+        if p2 is None:
+            if not candidats:
+                candidats = [p for p in persos if p["nom"] != p1["nom"]] or persos
+            p2 = random.choice(candidats)
+
+        # Garde-fou final : jamais le même personnage des deux côtés
+        if p1["nom"] == p2["nom"]:
+            alternatives = [p for p in persos if p["nom"] != p1["nom"]]
+            if alternatives:
+                p2 = random.choice(alternatives)
+
+        embed = generate_ship_embed(p1, p2)
+        return {
+            "embed": embed,
+            "persos": persos,
+            "error": None,
+            "warning": "\n".join(warnings) if warnings else None,
+        }
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
@@ -156,12 +204,12 @@ class BleachShipCommand(commands.Cog):
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_bleachship(self, interaction: discord.Interaction, p1: str = None, p2: str = None):
         result = self._build_ship(p1, p2)
-        if result is None:
-            return await safe_respond(interaction, "❌ Il faut au moins deux personnages pour créer un ship.", ephemeral=True)
-        embed, persos = result
-        view          = BleachShipView(persos, interaction.user)
-        await safe_respond(interaction, embed=embed, view=view)
-        view.message  = await interaction.original_response()
+        if result["error"]:
+            return await safe_respond(interaction, result["error"], ephemeral=True)
+        view = BleachShipView(result["persos"], interaction.user)
+        content = result["warning"] or discord.utils.MISSING
+        await safe_respond(interaction, content=content, embed=result["embed"], view=view)
+        view.message = await interaction.original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
@@ -170,11 +218,12 @@ class BleachShipCommand(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_bleachship(self, ctx: commands.Context, p1: str = None, p2: str = None):
         result = self._build_ship(p1, p2)
-        if result is None:
-            return await safe_send(ctx.channel, "❌ Il faut au moins deux personnages pour créer un ship.")
-        embed, persos = result
-        view          = BleachShipView(persos, ctx.author)
-        view.message  = await safe_send(ctx.channel, embed=embed, view=view)
+        if result["error"]:
+            return await safe_send(ctx.channel, result["error"])
+        view = BleachShipView(result["persos"], ctx.author)
+        if result["warning"]:
+            await safe_send(ctx.channel, result["warning"])
+        view.message = await safe_send(ctx.channel, embed=result["embed"], view=view)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
