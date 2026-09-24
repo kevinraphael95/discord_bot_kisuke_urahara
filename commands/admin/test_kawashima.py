@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 test_kawashima.py — Tester un mini-jeu par numéro ou tous les jeux
 # Objectif : Lister tous les mini-jeux, paginer si nécessaire et les tester facilement
 # Catégorie : Admin
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import asyncio
 import inspect
 
@@ -19,15 +19,15 @@ from discord.ext import commands
 from utils import kawashima_games
 from utils.discord_utils import safe_send, safe_edit, safe_interact
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # ⚙️ Constantes
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 PAGE_SIZE    = 10
 GAME_TIMEOUT = 30
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class TestKawashima(commands.Cog):
     """
@@ -43,26 +43,26 @@ class TestKawashima(commands.Cog):
                 self.games[title] = func
         self.sorted_titles = sorted(self.games.keys())
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="testgame",description="Tester un mini-jeu via son numéro ou 'all' pour tous.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_testgame(self, interaction: discord.Interaction, choix: str = None):
         await safe_interact(interaction, "Chargement du quizz...", ephemeral=True)
         await self.run_game(interaction, choix)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="testgame",aliases=["tg"],help="Tester un mini-jeu via son numéro ou 'all'.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_testgame(self, ctx: commands.Context, choix: str = None):
         await self.run_game(ctx, choix)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def run_game(self, ctx_or_interaction, choix: str | int = None):
         """Affiche la liste paginée, lance un mini-jeu ou tous les jeux ('all')."""
         if isinstance(ctx_or_interaction, discord.Interaction):
@@ -72,7 +72,7 @@ class TestKawashima(commands.Cog):
             send = lambda *a, **kw: safe_send(ctx_or_interaction, *a, **kw)
             user = ctx_or_interaction.author
 
-        # ─── Option ALL ───
+        # === Option ALL ===
         if isinstance(choix, str) and choix.lower() == "all":
             results = []
             for i, title in enumerate(self.sorted_titles, start=1):
@@ -107,7 +107,7 @@ class TestKawashima(commands.Cog):
             )
             return await send(embed=summary_embed)
 
-        # ─── Pagination si aucun choix ───
+        # === Pagination si aucun choix ===
         if choix is None:
             pages = [
                 self.sorted_titles[i:i + PAGE_SIZE]
@@ -154,11 +154,11 @@ class TestKawashima(commands.Cog):
             )
             return await send(embed=embed, view=page_view)
 
-        # ─── Vérification numéro ───
+        # === Vérification numéro ===
         if not str(choix).isdigit() or not 1 <= int(choix) <= len(self.sorted_titles):
             return await send(f"⚠️ Numéro invalide ! Choisis entre **1** et **{len(self.sorted_titles)}**, ou 'all'.")
 
-        # ─── Lancer le mini-jeu choisi ───
+        # === Lancer le mini-jeu choisi ===
         game_name = self.sorted_titles[int(choix) - 1]
         game_func = self.games[game_name]
 
@@ -194,9 +194,9 @@ class TestKawashima(commands.Cog):
         )
         await send(embed=result_embed)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = TestKawashima(bot)
     for command in cog.get_commands():
