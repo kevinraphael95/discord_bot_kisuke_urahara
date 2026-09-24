@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 keylottery.py — Commande interactive /scratchkey et !scratchkey
 # Objectif : Ticket à gratter avec 10 boutons et remise en jeu d'une clé Steam
 # Catégorie : Reiatsu
 # Accès : Public
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -18,22 +18,22 @@ import sqlite3
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 from utils.init_db import REIATSU_DB_PATH
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Constantes
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 SCRATCH_COST = 250
 NB_BUTTONS = 10
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Fonctions DB
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def get_conn():
     return sqlite3.connect(REIATSU_DB_PATH)
 
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Ticket à gratter
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ScratchTicketView(View):
 
     def __init__(self, author_id: int, message: discord.Message = None, parent=None):
@@ -66,9 +66,9 @@ class ScratchTicketView(View):
             await safe_edit(self.message, embed=embed, view=self)
 
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔹 Bouton Miser
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class BetButton(Button):
 
     def __init__(self, parent_view: ScratchTicketView):
@@ -90,9 +90,9 @@ class BetButton(Button):
         await interaction.response.edit_message(view=self.parent_view)
 
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔹 Boutons du ticket
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ScratchButton(Button):
 
     def __init__(self, index: int, parent: ScratchTicketView):
@@ -136,15 +136,15 @@ class ScratchButton(Button):
         self.parent_view.stop()
 
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ScratchKey(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ───────────── Gestion Reiatsu ─────────────
+    # ============= Gestion Reiatsu =============
     async def _get_reiatsu(self, user_id: int) -> int:
         conn = get_conn()
         cursor = conn.cursor()
@@ -160,7 +160,7 @@ class ScratchKey(commands.Cog):
         conn.commit()
         conn.close()
 
-    # ───────────── Gestion Steam Keys ─────────────
+    # ============= Gestion Steam Keys =============
     async def _get_all_steam_keys(self):
         conn = get_conn()
         cursor = conn.cursor()
@@ -188,7 +188,7 @@ class ScratchKey(commands.Cog):
         conn.commit()
         conn.close()
 
-    # ───────────── Envoi Ticket ─────────────
+    # ============= Envoi Ticket =============
     async def _send_ticket(self, channel, user, user_id: int):
         reiatsu_points = await self._get_reiatsu(user_id)
         keys_dispo = await self._get_all_steam_keys()
@@ -214,7 +214,7 @@ class ScratchKey(commands.Cog):
         view.message = message
         return view
 
-    # ───────────── Gestion Résultat ─────────────
+    # ============= Gestion Résultat =============
     async def _handle_result(self, interaction, result_type: str, user_id: int):
         reiatsu_points = await self._get_reiatsu(user_id)
 
@@ -238,9 +238,9 @@ class ScratchKey(commands.Cog):
             except discord.Forbidden:
                 await safe_send(interaction.channel, "⚠️ Impossible d'envoyer un DM.")
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────       
+    # ============================================================================       
     @app_commands.command(name="keylottery", description="Ticket à gratter : tente ta chance")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.user.id))
     async def slash_scratchkey(self, interaction: discord.Interaction):
@@ -250,9 +250,9 @@ class ScratchKey(commands.Cog):
         if view.value:
             await self._handle_result(view.last_interaction, view.value, interaction.user.id)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────     
+    # ============================================================================     
     @commands.command(name="keylottery", aliases=["kl"], help="Ticket à gratter : tente ta chance")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_scratchkey(self, ctx: commands.Context):
@@ -265,9 +265,9 @@ class ScratchKey(commands.Cog):
                     self.channel = channel
             await self._handle_result(Dummy(ctx.author, ctx.channel), view.value, ctx.author.id)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ScratchKey(bot)
     for command in cog.get_commands():
