@@ -82,7 +82,7 @@ class ReiatsuView(View):
             points = entry["points"]
             user = interaction.guild.get_member(user_id) if interaction.guild else None
             name = user.display_name if user else f"Utilisateur ({user_id})"
-            description += f"**{i}. {name}** — {points} points\n"
+            description += f"**{i}. {name}** - {points} points\n"
 
         embed = discord.Embed(
             title="📊 Classement Reiatsu",
