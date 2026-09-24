@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 memory_formes.py — Commande Memory : retenir et choisir les formes
 # Objectif : Jouer à un mini jeu mémoire avec une gridview de boutons
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ import random
 import asyncio
 from utils.discord_utils import safe_send
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class MemoryFormes(commands.Cog):
     """
     Commande /formes et !formes — Jouez au mini-jeu mémoire
@@ -32,9 +32,9 @@ class MemoryFormes(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="formes",
         description="Jouez au mini-jeu mémoire avec des formes et couleurs."
@@ -43,17 +43,17 @@ class MemoryFormes(commands.Cog):
     async def slash_memory_formes(self, interaction: discord.Interaction):
         await self.start_game(interaction)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="formes", help="Jouez au mini-jeu mémoire avec des formes et couleurs.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_memory_formes(self, ctx: commands.Context):
         await self.start_game(ctx)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction principale du jeu
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def start_game(self, ctx_or_interaction):
         is_interaction = isinstance(ctx_or_interaction, discord.Interaction)
         user = ctx_or_interaction.user if is_interaction else ctx_or_interaction.author
@@ -63,7 +63,7 @@ class MemoryFormes(commands.Cog):
         sequence = random.sample(self.FORMS, random.randint(4, 6))
         sequence_str = " ".join([s[0] for s in sequence])
 
-        # ── Compte à rebours + affichage de la séquence
+        # == Compte à rebours + affichage de la séquence
         countdown_text = f"👁️ **Retenez cette suite !**\n\n{sequence_str}\n\n"
 
         if is_interaction:
@@ -102,9 +102,9 @@ class MemoryFormes(commands.Cog):
             view.game_message = msg
 
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # 🔹 View personnalisée
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 class MemoryView(discord.ui.View):
     def __init__(self, forms, sequence, user_id):
         super().__init__(timeout=45)
@@ -177,9 +177,9 @@ class MemoryView(discord.ui.View):
                 pass
 
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # 🔹 Bouton mémoire — ajouter une forme
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 class MemoryButton(discord.ui.Button):
     def __init__(self, symbol, color):
         super().__init__(label=symbol, style=discord.ButtonStyle.secondary)
@@ -203,9 +203,9 @@ class MemoryButton(discord.ui.Button):
         await view.check_win(interaction)
 
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # 🔹 Bouton supprimer la dernière forme
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 class DeleteLastButton(discord.ui.Button):
     def __init__(self):
         super().__init__(label="⬅️ Supprimer", style=discord.ButtonStyle.danger, row=4)
@@ -223,9 +223,9 @@ class DeleteLastButton(discord.ui.Button):
         await view.refresh_message(interaction)
 
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 async def setup(bot: commands.Bot):
     cog = MemoryFormes(bot)
     for command in cog.get_commands():
