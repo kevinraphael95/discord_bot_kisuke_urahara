@@ -1,23 +1,23 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 say.py — Commande interactive /say et !say
 # Objectif : Faire répéter un message par le bot, avec options combinables (*embed, *as_me, *chuchotte, ...)
 # Catégorie : Général
 # Accès : Public
 # Cooldown : 1 utilisation / 5 sec / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 import re
 from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_delete, safe_respond, safe_create_webhook
 
-# ──────────────────────────────────────────────────────────────
+# ==============================================================
 # 🔹 Vue pour les messages secrets
-# ──────────────────────────────────────────────────────────────
+# ==============================================================
 class SecretMessageView(discord.ui.View):
     def __init__(self, target_user: discord.User, secret_message: str):
         super().__init__(timeout=1920)  # 32 minutes
@@ -36,18 +36,18 @@ class SecretMessageView(discord.ui.View):
             child.disabled = True
         self.stop()
 
-# ──────────────────────────────────────────────────────────────
+# ==============================================================
 # 🧠 Cog principal
-# ──────────────────────────────────────────────────────────────
+# ==============================================================
 class Say(commands.Cog):
     """Commande /say et !say — Faire répéter un message par le bot, avec options modulables."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     # 🔧 Parsing des options
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     def parse_options(self, raw_message: str):
         options = {"embed": False, "as_user": False, "chuchotte": False}
         opts_pattern = r"^(?:\*(embed|e|as_me|am|me|chuchotte|ch)\s*)+"
@@ -63,9 +63,9 @@ class Say(commands.Cog):
             raw_message = raw_message[len(opts_part):]
         return options, raw_message
 
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     # 🔹 Envoi normal
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     async def _say_message(self, channel: discord.abc.Messageable, message: str, embed: bool = False):
         if not message:
             return
@@ -78,9 +78,9 @@ class Say(commands.Cog):
         else:
             await safe_send(channel, message, allowed_mentions=discord.AllowedMentions.none())
 
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     # 🔹 Envoi "as user"
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     async def _say_as_user(self, channel: discord.TextChannel, user: discord.User, message: str, embed: bool = False):
         if not message:
             return
@@ -100,9 +100,9 @@ class Say(commands.Cog):
         finally:
             await webhook.delete()
 
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     # 🔹 Remplacement emojis custom (avec affichage correct)
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     def _replace_custom_emojis(self, channel, message: str) -> str:
         message = re.sub(r"<:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
         message = re.sub(r"<a:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
@@ -121,9 +121,9 @@ class Say(commands.Cog):
             flags=re.IGNORECASE
         )
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @app_commands.command(
         name="say",
         description="Fait répéter un message par le bot, avec options combinables (*embed, *as_me, *chuchotte, ...)."
@@ -152,9 +152,9 @@ class Say(commands.Cog):
             await self._say_message(interaction.channel, clean_message, embed)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @commands.command(
         name="say",
         help="Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !"
@@ -176,9 +176,9 @@ class Say(commands.Cog):
             await self._say_message(ctx.channel, clean_message, options["embed"])
         await safe_delete(ctx.message)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Say(bot)
     for command in cog.get_commands():
