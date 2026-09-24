@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 say_as.py — Commande interactive /say_as et !say_as
 # Objectif : Faire répéter un message par le bot comme si c'était un autre membre (mention, ID ou pseudo)
 # Catégorie : Admin
 # Accès : Admin uniquement
 # Cooldown : 1 utilisation / 5 sec / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import re
 
 import discord
@@ -17,9 +17,9 @@ from discord.ext import commands
 
 from utils.discord_utils import safe_send, safe_delete, safe_followup, safe_create_webhook
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class SayAs(commands.Cog):
     """Commandes /say_as et !say_as — Fait répéter un message par le bot comme si c'était un autre membre."""
@@ -27,9 +27,9 @@ class SayAs(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonctions internes communes
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _resolve_user(self, guild: discord.Guild, query: str):
         """Résout un membre à partir d'une mention, d'un ID ou d'un pseudo."""
         mention_match = re.match(r"<@!?(\d+)>", query)
@@ -80,9 +80,9 @@ class SayAs(commands.Cog):
         finally:
             await webhook.delete()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="say_as",description="(Admin) Fait répéter un message par le bot comme si c'était un autre membre.")
     @app_commands.describe(user="Membre ciblé (mention, ID ou pseudo)", message="Message à répéter")
     @app_commands.checks.has_permissions(administrator=True)
@@ -96,9 +96,9 @@ class SayAs(commands.Cog):
         await self._send_as(interaction.channel, target, message)
         await safe_followup(interaction, f"✅ Message envoyé en tant que **{target.display_name}**.", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="say_as",aliases=["sa"],help="(Admin) Fait répéter un message par le bot comme si c'était un autre membre.\n"
              "Usage: !say_as <mention|id|pseudo> <message>"
     )
@@ -112,9 +112,9 @@ class SayAs(commands.Cog):
         await self._send_as(ctx.channel, target, message)
         await safe_delete(ctx.message)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = SayAs(bot)
     for command in cog.get_commands():
