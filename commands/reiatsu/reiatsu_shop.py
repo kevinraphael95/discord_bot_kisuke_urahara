@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 reiatsushop.py — Commande /reiatsushop et !reiatsushop
 # Objectif : Acheter des effets du ReiatsuShop et les activer immédiatement sur un membre
 # Catégorie : Reiatsu
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import asyncio
 import sqlite3
 import json
@@ -21,9 +21,9 @@ from utils.reiatsu_utils import ensure_profile
 import datetime
 import random
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ SQLite
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DB_PATH = os.path.join("database", "reiatsu.db")
 
 def get_conn():
@@ -56,9 +56,9 @@ def db_update_points(user_id: int, points: int):
     conn.commit()
     conn.close()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ReiatsuShop(commands.Cog):
     """Commande /reiatsushop et !reiatsushop — Affiche le shop et applique les effets"""
 
@@ -85,9 +85,9 @@ class ReiatsuShop(commands.Cog):
         self.load_effects_from_db()
         self.clean_expired_effects.start()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Chargement des effets depuis la DB
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def load_effects_from_db(self):
         conn = get_conn()
         cursor = conn.cursor()
@@ -116,26 +116,26 @@ class ReiatsuShop(commands.Cog):
                     elif key == "mute":
                         self.active_effects["mute"][user_id] = {"guild_id": guild_id, "end_time": end_time}
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────    
+    # ============================================================================    
     @app_commands.command(name="reiatsushop", description="Affiche le shop et achète des effets")
     async def slash_reiatsushop(self, interaction: discord.Interaction, effect: str = None,
                                  member: discord.Member = None, new_nick: str = None):
         await self.handle_shop(interaction, effect, member, new_nick, is_slash=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────      
+    # ============================================================================      
     @commands.command(name="reiatsushop", aliases=["rtsshop"], help="Affiche le shop et achète des effets")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_reiatsushop(self, ctx: commands.Context, effect: str = None,
                                   member: discord.Member = None, *, new_nick: str = None):
         await self.handle_shop(ctx, effect, member, new_nick, is_slash=False)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Handler commun
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def handle_shop(self, ctx_or_inter, effect, member, new_nick, is_slash: bool):
         send_func = safe_respond if is_slash else safe_send
         user = ctx_or_inter.user if is_slash else ctx_or_inter.author
@@ -189,9 +189,9 @@ class ReiatsuShop(commands.Cog):
         )
         await send_func(ctx_or_inter, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Application des effets
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def apply_effect(self, member: discord.Member, effect: str, guild_id: int, new_nick: str = None):
         item = self.shop_items[{"zomb": "zombification", "mute": "mute_temp", "rename": "rename_2j"}[effect]]
         start_time = datetime.datetime.utcnow()
@@ -224,9 +224,9 @@ class ReiatsuShop(commands.Cog):
         # Supprimer automatiquement après la durée
         asyncio.create_task(self._remove_effect_after(member.id, effect, item["duration"]))
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Helpers internes pour effets
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _apply_rename(self, member: discord.Member, new_nick: str):
         try:
             await member.edit(nick=new_nick)
@@ -256,9 +256,9 @@ class ReiatsuShop(commands.Cog):
         ]
         db_set_shop_effets(user_id, effects)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Listeners pour fallback et effets actifs
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:
@@ -306,9 +306,9 @@ class ReiatsuShop(commands.Cog):
         finally:
             await webhook.delete()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Nettoyage périodique
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @tasks.loop(minutes=5)
     async def clean_expired_effects(self):
         now = datetime.datetime.utcnow()
@@ -339,17 +339,17 @@ class ReiatsuShop(commands.Cog):
     async def before_clean_expired_effects(self):
         await self.bot.wait_until_ready()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Helper pour formater la durée
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def format_duration(self, seconds: int) -> str:
         days, remainder = divmod(seconds, 86400)
         hours, _ = divmod(remainder, 3600)
         return " ".join(filter(None, [f"{days}j" if days else "", f"{hours}h" if hours else ""])) or "0h"
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ReiatsuShop(bot)
     for command in cog.get_commands():
