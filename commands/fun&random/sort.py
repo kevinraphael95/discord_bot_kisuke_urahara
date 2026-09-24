@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # sorting.py — Visualisation d'algorithmes de tri /sorting et !sorting
 # Objectif : Visualiser différents algorithmes de tri en temps réel dans Discord
 # Catégorie : Fun
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 import random
 import asyncio
@@ -17,9 +17,9 @@ from discord.ext import commands
 from utils.discord_utils import safe_send, safe_respond
 from utils.algorithms import algorithms as all_algos  # ✅ Import des algorithmes
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # Visualisation des barres
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def render_bars(data, highlight_indices=None, max_length=None):
     """
     Génère une représentation visuelle des barres pour Discord.
@@ -43,9 +43,9 @@ def render_bars(data, highlight_indices=None, max_length=None):
         lines.append(bar)
     return "\n".join(lines)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Sorting(commands.Cog):
     """Commande /sorting et !sorting — Visualise un algorithme de tri en temps réel"""
     def __init__(self, bot: commands.Bot):
@@ -107,26 +107,26 @@ class Sorting(commands.Cog):
         embed.add_field(name="🧮 Itérations totales", value=f"{iteration}", inline=False)
         await send(embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="sorting",description="Visualise un algorithme de tri en temps réel.")
     @app_commands.describe(algorithme="Trie 12 barres en longueurs différentes selon un algorithme.")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_sorting(self, interaction: discord.Interaction, algorithme: str = None):
         await self.handle_sorting(interaction, algorithme)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="sorting", aliases=["sort"], help="Trie 12 barres en longueurs différentes selon un algorithme.")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_sorting(self, ctx: commands.Context, *, algorithme: str = None):
         await self.handle_sorting(ctx.channel, algorithme)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # Gestion logique commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def handle_sorting(self, channel_or_interaction, algorithme: str = None):
         algos_list = sorted(self.algorithms.keys())
         algo_dict = {str(i + 1): name for i, name in enumerate(algos_list)}
@@ -172,9 +172,9 @@ class Sorting(commands.Cog):
 
         await self.visualize_sorting(channel_or_interaction, algo_name)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Sorting(bot)
     for command in cog.get_commands():
