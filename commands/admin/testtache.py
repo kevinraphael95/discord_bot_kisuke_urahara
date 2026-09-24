@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 testtache.py — Commande simple /testtache et !testtache
 # Objectif : Tester les 3 épreuves interactives (mini-jeux)
 # Catégorie : Admin
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ from discord.ext import commands
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 from utils.taches import TACHES
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class TestTache(commands.Cog):
     """
@@ -27,9 +27,9 @@ class TestTache(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _run_taches(self, ctx_or_interaction, msg: discord.Message, embed: discord.Embed):
         """Lance toutes les tâches et met à jour l'embed au fur et à mesure."""
         async def update_embed(e: discord.Embed):
@@ -58,9 +58,9 @@ class TestTache(commands.Cog):
         )
         await safe_edit(msg, embed=result)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="testtache",description="🕹️ Teste toutes les épreuves pour la commande hollow.")
     @app_commands.checks.cooldown(rate=1, per=10.0, key=lambda i: i.user.id)
     async def slash_testtache(self, interaction: discord.Interaction):
@@ -74,9 +74,9 @@ class TestTache(commands.Cog):
         msg = await interaction.original_response()
         await self._run_taches(interaction, msg, embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="testtache",help="🕹️ Teste toutes les épreuves pour la commande hollow.")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_testtache(self, ctx: commands.Context):
@@ -89,9 +89,9 @@ class TestTache(commands.Cog):
         msg = await safe_send(ctx.channel, embed=embed)
         await self._run_taches(ctx, msg, embed)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = TestTache(bot)
     for command in cog.get_commands():
