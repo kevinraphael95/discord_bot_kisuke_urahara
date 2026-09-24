@@ -13,7 +13,7 @@ import discord
 import re
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_delete, safe_respond
+from utils.discord_utils import safe_send, safe_delete, safe_respond, safe_create_webhook
 
 # ──────────────────────────────────────────────────────────────
 # 🔹 Vue pour les messages secrets
@@ -87,7 +87,10 @@ class Say(commands.Cog):
         message = self._replace_custom_emojis(channel, message)
         if len(message) > 2000:
             message = message[:1997] + "..."
-        webhook = await channel.create_webhook(name=f"tmp-{user.name}")
+        webhook = await safe_create_webhook(channel, name=f"tmp-{user.name}")
+        if webhook is None:
+            return await safe_send(channel, "❌ Impossible de créer le webhook pour ce message (rate-limit ou permissions).")
+
         try:
             if embed:
                 embed_obj = discord.Embed(description=message, color=discord.Color.blurple())
