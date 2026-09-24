@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ─── Config ────────────────────────────────────────────────────────────────────
+# === Config ====================================================================
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin1234")
 SECRET_KEY     = os.getenv("FLASK_SECRET", "bleach_urahara_secret")
 DB_PATH        = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database", "reiatsu.db")
@@ -24,7 +24,7 @@ DB_PATH        = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = SECRET_KEY
 
-# ─── Auth ──────────────────────────────────────────────────────────────────────
+# === Auth ======================================================================
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -34,7 +34,7 @@ def login_required(f):
     return decorated
 
 
-# ─── Routes pages ──────────────────────────────────────────────────────────────
+# === Routes pages ==============================================================
 @app.route("/", methods=["GET"])
 @login_required
 def index():
@@ -58,7 +58,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-# ─── API : Tables (liste dynamique) ───────────────────────────────────────────
+# === API : Tables (liste dynamique) ===========================================
 def get_all_tables():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
@@ -86,7 +86,7 @@ def api_tables():
     return jsonify({"tables": get_all_tables()})
 
 
-# ─── API : Table ───────────────────────────────────────────────────────────────
+# === API : Table ===============================================================
 @app.route("/api/table/<table_name>")
 @login_required
 def api_table(table_name):
@@ -144,7 +144,7 @@ def api_edit():
         return jsonify({"ok": False, "error": str(e)})
 
 
-# ─── API : SQL ─────────────────────────────────────────────────────────────────
+# === API : SQL =================================================================
 @app.route("/api/sql", methods=["POST"])
 @login_required
 def api_sql():
@@ -168,7 +168,7 @@ def api_sql():
         return jsonify({"error": str(e)})
 
 
-# ─── API : Logs ────────────────────────────────────────────────────────────────
+# === API : Logs ================================================================
 @app.route("/api/logs")
 @login_required
 def api_logs():
@@ -184,7 +184,7 @@ def api_logs_clear():
     return jsonify({"ok": True})
 
 
-# ─── API : Actions ─────────────────────────────────────────────────────────────
+# === API : Actions =============================================================
 _bot_ref = None
 
 
@@ -262,6 +262,6 @@ def restart_bot_process():
     os.kill(os.getpid(), 9)
 
 
-# ─── Lancement Flask (dans un thread) ─────────────────────────────────────────
+# === Lancement Flask (dans un thread) =========================================
 def run_admin(port=5050):
     app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
