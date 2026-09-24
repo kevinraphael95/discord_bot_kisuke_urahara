@@ -215,26 +215,6 @@ class ReiatsuSpawner(commands.Cog):
             asyncio.create_task(
                 self._delete_fake_after_delay(channel, message.id, owner_id)
             )
-        else:
-            spawn_speed  = self._get_spawn_speed(guild_id)
-            min_d, max_d = SPAWN_SPEED_RANGES.get(spawn_speed, SPAWN_SPEED_RANGES[DEFAULT_SPAWN_SPEED])
-            next_delay   = random.randint(min_d, max_d)
-
-            self.cursor.execute("""
-                UPDATE reiatsu_config
-                SET is_spawn = 1,
-                    last_spawn_at = ?,
-                    message_id = ?,
-                    spawn_delay = ?
-                WHERE guild_id = ?
-            """, (_now_iso(), message.id, next_delay, guild_id))
-
-        self.conn.commit()
-
-        if is_fake:
-            asyncio.create_task(
-                self._delete_fake_after_delay(channel, message.id, owner_id)
-            )
 
     # ──────────────────────────────────────────────────────────────
     def _get_spawn_speed(self, guild_id: int) -> str:
@@ -273,26 +253,6 @@ class ReiatsuSpawner(commands.Cog):
             (owner_id,)
         )
         self.conn.commit()
-
-    # ──────────────────────────────────────────────────────────────
-    # 🔹 Spawn faux reiatsu pour les Illusionnistes actifs
-    # ──────────────────────────────────────────────────────────────
-    async def _spawn_faux_reiatsu(self, channel: discord.TextChannel, guild_id: int):
-        self.cursor.execute("""
-            SELECT user_id FROM reiatsu
-            WHERE classe = 'Illusionniste'
-            AND active_skill = 1
-            AND fake_spawn_id IS NULL
-        """)
-        players = self.cursor.fetchall()
-
-        for player in players:
-            await self._spawn_message(
-                channel,
-                guild_id=guild_id,
-                is_fake=True,
-                owner_id=player["user_id"]
-            )
 
     # ──────────────────────────────────────────────────────────────
     # 🔹 Calcul du gain lors d'une absorption
