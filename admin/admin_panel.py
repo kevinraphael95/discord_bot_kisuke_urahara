@@ -250,7 +250,7 @@ def api_action(action):
 
 def restart_bot_process():
     print("🔄 Redémarrage complet via start.sh...")
-    start_sh = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start.sh")
+    start_sh = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "start.sh")
     subprocess.Popen(
         ["bash", start_sh],
         stdout=subprocess.DEVNULL,
