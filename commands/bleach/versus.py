@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 versus.py — Commande interactive /versus et !versus
 # Objectif : Combat interactif style Pokémon avec barres de PV et PP
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import asyncio
 import json
 import os
@@ -20,9 +20,9 @@ from discord.ext import commands
 
 from utils.discord_utils import safe_send, safe_interact, safe_edit
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Gestion des personnages
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CHAR_DIR = os.path.join("assets", "personnages")
 
 def load_character(name: str):
@@ -69,9 +69,9 @@ def barre_pv(current, maximum, length=20):
     filled = int(current / maximum * length)
     return f"🟥{'█' * filled}{'⬜' * (length - filled)} {current}/{maximum} PV"
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class VersusCommand(commands.Cog):
     """
@@ -80,9 +80,9 @@ class VersusCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _run_combat(self, channel: discord.abc.Messageable):
         persos = [p for p in (load_character(n) for n in list_characters()) if p]
         if len(persos) < 2:
@@ -179,9 +179,9 @@ class VersusCommand(commands.Cog):
         view         = AttackView()
         view.message = await safe_send(channel, embed=create_embed(view.narratif), view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="versus",description="⚔️ Lance un combat interactif contre le bot.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_versus(self, interaction: discord.Interaction):
@@ -189,17 +189,17 @@ class VersusCommand(commands.Cog):
         await self._run_combat(interaction.channel)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="versus",help="⚔️ Lance un combat interactif contre le bot.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_versus(self, ctx: commands.Context):
         await self._run_combat(ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = VersusCommand(bot)
     for command in cog.get_commands():
