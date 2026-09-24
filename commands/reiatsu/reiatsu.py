@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 reiatsu.py — Commande interactive /reiatsu et !reiatsu
 # Objectif : Affiche les informations de spawn Reiatsu du serveur et le classement global
 # Catégorie : Reiatsu
 # Accès : Public
 # Cooldown : 1 utilisation / 3 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
@@ -21,9 +21,9 @@ from discord.ui import Button, View
 from utils.discord_utils import safe_respond, safe_send
 from utils.init_db import get_conn
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Constantes
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 SPAWN_SPEED_INTERVALS = {
     "Ultra_Rapide": "1-5 minutes",
     "Rapide": "5-20 minutes",
@@ -31,9 +31,9 @@ SPAWN_SPEED_INTERVALS = {
     "Lent": "5-10 heures",
 }
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Helpers DB
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def _query(sql: str, params: tuple = ()):
     """Exécute une requête SQL en lecture avec accès aux colonnes par nom (sqlite3.Row)."""
     conn = get_conn()
@@ -51,9 +51,9 @@ def get_server_config(guild_id: int):
 def get_classement():
     return _query("SELECT user_id, points FROM reiatsu ORDER BY points DESC LIMIT 10")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Vue Reiatsu (bouton persistant + lien spawn)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ReiatsuView(View):
     """Bouton Classement (accessible à tout le monde) + lien optionnel vers le spawn en cours."""
 
@@ -91,9 +91,9 @@ class ReiatsuView(View):
         )
         await safe_respond(interaction, embed=embed)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ReiatsuCommand(commands.Cog):
     """Commande /reiatsu et !reiatsu — Affiche les infos de spawn du serveur et le classement"""
 
@@ -101,9 +101,9 @@ class ReiatsuCommand(commands.Cog):
         self.bot = bot
         self.bot.add_view(ReiatsuView())  # enregistrement du bouton persistant
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_server_info(self, channel, guild: discord.Guild):
         config = get_server_config(guild.id)
 
@@ -161,9 +161,9 @@ class ReiatsuCommand(commands.Cog):
         view = ReiatsuView(spawn_link=spawn_link)
         await safe_send(channel, embed=embed, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="reiatsu",
         description="💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.",
@@ -174,9 +174,9 @@ class ReiatsuCommand(commands.Cog):
         await self._send_server_info(interaction.channel, interaction.guild)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(
         name="reiatsu",
         aliases=["rts"],
@@ -186,9 +186,9 @@ class ReiatsuCommand(commands.Cog):
     async def prefix_reiatsu(self, ctx: commands.Context):
         await self._send_server_info(ctx.channel, ctx.guild)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ReiatsuCommand(bot)
     for command in cog.get_commands():
