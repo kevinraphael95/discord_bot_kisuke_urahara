@@ -1,4 +1,4 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 capitales.py — Commande interactive /capitales et !capitales
 # Objectif : Deviner la capitale d'un pays
 # Modes : Solo (1 joueur, 2 minutes) et Multi (plusieurs joueurs, 2 minutes)
@@ -6,11 +6,11 @@
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -18,9 +18,9 @@ from discord.ui import View, Modal, TextInput, Button
 import random, asyncio, unicodedata
 from utils.discord_utils import safe_send, safe_respond, safe_edit
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Liste des pays et leurs capitales
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CAPITALS = {
     "Afghanistan": "Kaboul",
     "Afrique du Sud": "Pretoria",
@@ -219,9 +219,9 @@ def normalize_text(text: str) -> str:
         if unicodedata.category(c) != 'Mn'
     ).strip()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📝 Modal (formulaire de réponse)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class AnswerModal(Modal, title="🖊️ Devine la capitale"):
     def __init__(self, country: str, winners: list, multi: bool, quiz_msg: discord.Message, view: View):
         super().__init__(timeout=None)
@@ -261,9 +261,9 @@ class AnswerModal(Modal, title="🖊️ Devine la capitale"):
         else:
             await interaction.response.send_message("❌ Mauvaise réponse !", ephemeral=True)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Vue interactive
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class CapitalQuizView(View):
     def __init__(self, country: str, winners: list, multi: bool, quiz_msg: discord.Message = None):
         super().__init__(timeout=None)
@@ -277,9 +277,9 @@ class CapitalQuizView(View):
     async def answer_button(self, interaction: discord.Interaction, button: Button):
         await interaction.response.send_modal(AnswerModal(self.country, self.winners, self.multi, self.quiz_msg, self))
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Capitales(commands.Cog):
     """Commande /capitales et !capitales — Deviner la capitale d'un pays"""
     SOLO_TIME = 120
@@ -334,9 +334,9 @@ class Capitales(commands.Cog):
             child.disabled = True
         await quiz_msg.edit(embed=embed, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @app_commands.command(name="capitales", description="Devine la capitale d'un pays")
     @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
@@ -351,9 +351,9 @@ class Capitales(commands.Cog):
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @commands.command(name="capitales", help="Devine la capitale d'un pays")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_capitales(self, ctx: commands.Context, *, arg: str = None):
@@ -364,9 +364,9 @@ class Capitales(commands.Cog):
             print(f"[ERREUR !capitales] {e}")
             await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Capitales(bot)
     for command in cog.get_commands():
