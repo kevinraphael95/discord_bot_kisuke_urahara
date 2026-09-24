@@ -1,6 +1,13 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
+// 📌 main.js — Script principal du panel admin Kisuke
+// Objectif : Logique front (onglets, base de données, SQL, logs, actions) du panel admin
+// Catégorie : Admin
+// Accès : Admin uniquement (chargé par templates/main.html)
+// ================================================================================
+
+// ================================================================================
+// 🛠️ UTILS
+// ================================================================================
 
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -22,9 +29,9 @@ function clock() {
 }
 setInterval(clock, 1000); clock();
 
-// ══════════════════════════════════════════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
+// 📂 TABS
+// ================================================================================
 function showTab(name, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -39,9 +46,9 @@ function showTab(name, btn) {
   if (name === 'logs') loadLogs();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// DATABASE
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
+// 🗄️ DATABASE
+// ================================================================================
 let currentData = [], currentCols = [], currentTableName = '', currentPk = '';
 let sortCol = null, sortDir = 1;
 let rawLogs = [];
@@ -159,9 +166,9 @@ function filterRows() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// MODAL EDIT
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
+// ✏️ MODAL EDIT
+// ================================================================================
 function openEdit(table, pk, pkVal, col, val) {
   document.getElementById('editTable').value = table;
   document.getElementById('editPk').value = pk;
@@ -204,9 +211,9 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ══════════════════════════════════════════════════════════════════════════════
-// SQL
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
+// ◈ SQL
+// ================================================================================
 function quickSQL(q) {
   showTab('sql', document.querySelector('[data-tab=sql]'));
   document.getElementById('sqlQuery').value = q;
@@ -238,9 +245,10 @@ async function runSQL() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// LOGS
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
+// ▤ LOGS
+// ================================================================================
+const LOG_REFRESH_INTERVAL_MS = 6000; // 6s : compromis entre réactivité et charge/bruit
 let autoRefreshTimer = null;
 
 async function loadLogs() {
@@ -290,7 +298,7 @@ function clearLogs() {
 function toggleAutoRefresh() {
   const on = document.getElementById('autoRefresh').checked;
   clearInterval(autoRefreshTimer);
-  if (on) autoRefreshTimer = setInterval(loadLogs, 2000);
+  if (on) autoRefreshTimer = setInterval(loadLogs, LOG_REFRESH_INTERVAL_MS);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -320,8 +328,8 @@ async function doAction(action, btn) {
   if (btn) btn.disabled = false;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
 // INIT
-// ══════════════════════════════════════════════════════════════════════════════
+// ================================================================================
 loadTableList();
-autoRefreshTimer = setInterval(loadLogs, 2000);
+autoRefreshTimer = setInterval(loadLogs, LOG_REFRESH_INTERVAL_MS);
