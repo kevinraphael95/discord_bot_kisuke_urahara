@@ -55,10 +55,24 @@ echo ""
 # ────────────────────────────────────────────────────────────────────────────────
 # 🤖 Lancement du Bot Discord
 # ────────────────────────────────────────────────────────────────────────────────
-echo "🤖 Lancement du bot..."
-python bot.py
+# setsid + nohup détachent complètement le bot de ce terminal : fermer
+# Termux (ou cette session bash) ne tue plus le bot, que tu aies lancé
+# start.sh toi-même à la main ou via le bouton /bot_control.
+# Les logs partent dans bot.log au lieu de s'afficher directement ici —
+# utilise `tail -f bot.log` pour les voir en direct depuis n'importe
+# quelle session Termux.
+echo "🤖 Lancement du bot (détaché, logs dans bot.log)..."
+setsid nohup python bot.py > bot.log 2>&1 < /dev/null &
+disown
+BOT_PID=$!
+
+echo ""
+echo "✅ Bot lancé en arrière-plan (PID $BOT_PID)"
+echo "📄 Logs : tail -f bot.log"
+echo ""
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🧹 Nettoyage à la fermeture
+# 🧹 Note
 # ────────────────────────────────────────────────────────────────────────────────
-kill $TUNNEL_PID 2>/dev/null
+# Le bot et le tunnel tournent maintenant indépendamment de ce script :
+# start.sh peut se terminer (ou le terminal se fermer) sans les couper.
