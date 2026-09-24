@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 admin_panel.py
 # Objectif : Afficher un embed avec un bouton vers le panneau admin
 # Catégorie : Admin
 # Accès : Admin uniquement
 # Cooldown : 5s
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import logging
 import discord
 from discord import app_commands
@@ -20,9 +20,9 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Accès base de données locale
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def db_get_tunnel_url() -> str | None:
     """Récupère l'URL du tunnel Cloudflare stockée en base."""
@@ -37,9 +37,9 @@ def db_get_tunnel_url() -> str | None:
         log.exception("[admin_panel] Erreur lecture tunnel_url : %s", e)
         return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — View avec bouton
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class AdminPanelView(View):
     """View contenant le bouton vers le panneau admin."""
@@ -51,9 +51,9 @@ class AdminPanelView(View):
             style=discord.ButtonStyle.link
         ))
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class AdminPanelCog(commands.Cog):
     """Commandes /adminpanel et !adminpanel — Affiche le lien vers le panneau admin."""
@@ -61,9 +61,9 @@ class AdminPanelCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def _build_embed_and_view(self) -> tuple[discord.Embed, AdminPanelView | None]:
         """Construit l'embed et la view en lisant l'URL depuis la base."""
         url   = db_get_tunnel_url()
@@ -85,9 +85,9 @@ class AdminPanelCog(commands.Cog):
         embed.add_field(name="🌐 URL active", value=f"`{url}`", inline=False)
         return embed, AdminPanelView(url)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="adminpanel",description="Afficher le lien du panneau admin.")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
@@ -100,9 +100,9 @@ class AdminPanelCog(commands.Cog):
             ephemeral=True
         )
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="adminpanel",help="🔒 Affiche le lien du panneau admin.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -110,9 +110,9 @@ class AdminPanelCog(commands.Cog):
         embed, view = self._build_embed_and_view()
         await safe_send(ctx.channel, embed=embed, view=view)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = AdminPanelCog(bot)
     for command in cog.get_commands():
