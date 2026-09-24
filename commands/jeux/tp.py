@@ -1,6 +1,6 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📌 tram_probleme.py — Commande /tram_probleme et !tram_probleme
-# Objectif : Quiz interactif du dilemme du tramway avec bouton "Commencer" et "Continuer"
+# Objectif : Quiz interactif du dilemme du tramway avec choix du mode (court / complet)
 # Catégorie : Fun
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
@@ -49,35 +49,43 @@ class TramProbleme(commands.Cog):
         name="tram_probleme",
         description="Teste ta morale dans un quiz absurde du dilemme du tramway."
     )
-    @app_commands.describe(story="Active le mode histoire complète (enchaînement total des questions).")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_tram_probleme(self, interaction: discord.Interaction, story: bool = False):
-        await self.run_tram_quiz(interaction, story)
+    async def slash_tram_probleme(self, interaction: discord.Interaction):
+        await self.run_tram_quiz(interaction)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande PREFIX
     # ────────────────────────────────────────────────────────────────────────────
     @commands.command(name="tram_probleme", aliases=["tp"], help="Teste ta morale dans un quiz absurde du dilemme du tramway.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_tram_probleme(self, ctx: commands.Context, *args):
-        story = any(arg.lower() in ["story", "histoire", "mode_story"] for arg in args)
-        await self.run_tram_quiz(ctx, story)
+    async def prefix_tram_probleme(self, ctx: commands.Context):
+        await self.run_tram_quiz(ctx)
+
+    # ────────────────────────────────────────────────────────────────────────────
+    # 🔧 Helper : récupère l'id de l'auteur, que ce soit un ctx ou une interaction
+    # ────────────────────────────────────────────────────────────────────────────
+    @staticmethod
+    def _author_id(ctx_or_inter):
+        if isinstance(ctx_or_inter, discord.Interaction):
+            return ctx_or_inter.user.id
+        return ctx_or_inter.author.id
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🎮 Fonction principale
     # ────────────────────────────────────────────────────────────────────────────
-    async def run_tram_quiz(self, ctx_or_inter, story: bool = False):
+    async def run_tram_quiz(self, ctx_or_inter):
         is_inter = isinstance(ctx_or_inter, discord.Interaction)
         send = safe_respond if is_inter else safe_send
         edit = safe_edit
+        author_id = self._author_id(ctx_or_inter)
 
-        questions = list(self.questions)
-        if not questions:
+        def is_author(interaction: discord.Interaction) -> bool:
+            return interaction.user.id == author_id
+
+        questions_all = list(self.questions)
+        if not questions_all:
             await send(ctx_or_inter, "❌ Aucune question trouvée dans le JSON.")
             return
-
-        if not story:
-            random.shuffle(questions)
 
         utilitarisme = 0
         deontologie = 0
@@ -85,48 +93,69 @@ class TramProbleme(commands.Cog):
         total_killed = {"humain": 0, "enfant": 0, "pa": 0, "animal": 0, "robot": 0}
 
         # ──────────────────────────────────────────────────────────────
-        # Message d’intro avec bouton "Commencer"
+        # Message d'intro avec choix du mode
         # ──────────────────────────────────────────────────────────────
         embed = discord.Embed(
             title="🚋 Dilemme du Tramway",
             description=(
                 "Bienvenue dans le test moral ultime.\n"
                 "Tu devras faire des choix... difficiles.\n\n"
-                f"🧩 Mode story : {'✅ Activé (ordre fixe)' if story else '❌ Désactivé (aléatoire)'}\n\n"
-                "Appuie sur **▶️ Commencer** quand tu es prêt."
+                "Choisis ton mode de jeu :\n"
+                "🏃 **Mode court** — 5 dilemmes tirés au hasard\n"
+                "📖 **Mode complet** — tous les dilemmes, dans l'ordre"
             ),
             color=discord.Color.orange()
         )
 
         view_start = discord.ui.View(timeout=60)
         started = False
+        story = False
 
-        async def start_callback(interaction):
-            nonlocal started
-            started = True
-            try:
-                await interaction.response.defer()
-            except:
-                pass
-            view_start.stop()
+        async def make_start_callback(is_story: bool):
+            async def _callback(interaction: discord.Interaction):
+                nonlocal started, story
+                if not is_author(interaction):
+                    await interaction.response.send_message("❌ Ce n'est pas ton quiz !", ephemeral=True)
+                    return
+                started = True
+                story = is_story
+                try:
+                    await interaction.response.defer()
+                except Exception:
+                    pass
+                view_start.stop()
+            return _callback
 
-        start_button = discord.ui.Button(label="▶️ Commencer", style=discord.ButtonStyle.green)
-        start_button.callback = start_callback
-        view_start.add_item(start_button)
+        short_button = discord.ui.Button(label="🏃 Mode court (5 dilemmes)", style=discord.ButtonStyle.green)
+        full_button = discord.ui.Button(label="📖 Mode complet", style=discord.ButtonStyle.blurple)
+        short_button.callback = await make_start_callback(False)
+        full_button.callback = await make_start_callback(True)
+        view_start.add_item(short_button)
+        view_start.add_item(full_button)
 
         msg = await send(ctx_or_inter, embed=embed, view=view_start)
         await view_start.wait()
 
         if not started:
-            embed.description = "⛔ Le tram s’arrête... tu n’as pas pris le départ à temps."
+            embed.description = "⛔ Le tram s'arrête... tu n'as pas choisi de mode à temps."
             embed.color = discord.Color.red()
             await edit(msg, embed=embed, view=None)
             return
 
         # ──────────────────────────────────────────────────────────────
+        # Préparation des questions selon le mode choisi
+        # ──────────────────────────────────────────────────────────────
+        questions = list(questions_all)
+        if story:
+            total_q = len(questions)
+        else:
+            random.shuffle(questions)
+            total_q = min(5, len(questions))
+
+        # ──────────────────────────────────────────────────────────────
         # Boucle des questions
         # ──────────────────────────────────────────────────────────────
-        total_q = len(questions) if story else min(5, len(questions))
+        quiz_aborted = False
 
         for i, question in enumerate(questions[:total_q], start=1):
             embed.title = f"🚨 Question {i}/{total_q}"
@@ -142,7 +171,10 @@ class TramProbleme(commands.Cog):
                 button = discord.ui.Button(label=opt["text"], style=discord.ButtonStyle.primary)
 
                 async def callback(interaction, choice=opt):
-                    nonlocal utilitarisme, deontologie, answered
+                    nonlocal utilitarisme, deontologie, answered, quiz_aborted
+                    if not is_author(interaction):
+                        await interaction.response.send_message("❌ Ce n'est pas ton quiz !", ephemeral=True)
+                        return
                     if answered:
                         return
                     answered = True
@@ -153,7 +185,7 @@ class TramProbleme(commands.Cog):
 
                     try:
                         await interaction.response.defer()
-                    except:
+                    except Exception:
                         pass
 
                     # Score moral
@@ -182,10 +214,13 @@ class TramProbleme(commands.Cog):
 
                     async def continue_callback(inter2):
                         nonlocal next_question
+                        if not is_author(inter2):
+                            await inter2.response.send_message("❌ Ce n'est pas ton quiz !", ephemeral=True)
+                            return
                         next_question = True
                         try:
                             await inter2.response.defer()
-                        except:
+                        except Exception:
                             pass
                         continue_view.stop()
 
@@ -196,6 +231,13 @@ class TramProbleme(commands.Cog):
                     embed.set_footer(text="Appuie sur ➡️ Continuer pour passer à la suite.")
                     await edit(msg, embed=embed, view=continue_view)
                     await continue_view.wait()
+
+                    if not next_question:
+                        # Timeout sur le bouton "Continuer" → on arrête le quiz proprement
+                        quiz_aborted = True
+                        embed.set_footer(text="⛔ Temps écoulé, le tram s'arrête ici.")
+                        await edit(msg, embed=embed, view=None)
+
                     view.stop()
 
                 button.callback = callback
@@ -205,9 +247,12 @@ class TramProbleme(commands.Cog):
             await view.wait()
 
             if not answered:
-                embed.description = "⛔ Le tram s’arrête... tu n’as pas répondu à temps."
+                embed.description = "⛔ Le tram s'arrête... tu n'as pas répondu à temps."
                 embed.color = discord.Color.red()
                 await edit(msg, embed=embed, view=None)
+                return
+
+            if quiz_aborted:
                 return
 
         # ──────────────────────────────────────────────────────────────
