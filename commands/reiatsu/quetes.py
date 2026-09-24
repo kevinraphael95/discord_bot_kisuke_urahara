@@ -1,22 +1,22 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 quetes.py — Commande /quetes et !quetes
 # Objectif : Afficher la liste des quêtes et leur état d’avancement
 # Catégorie : Reiatsu
 # Accès : Public
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
 from utils.reiatsu_utils import ensure_profile  # ⚡ Utilitaire pour les profils joueurs
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📜 Liste des quêtes disponibles
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 ALL_QUESTS = {
     "couleur": "Faire une fois la commande couleur",
     "pizza": "Faire une fois la commande pizza",
@@ -26,9 +26,9 @@ ALL_QUESTS = {
     "bmoji": "Réussi le minijeu de la commande bmoji"
 }
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class QuetesCommand(commands.Cog):
     """
     Commande /quetes et !quetes — Affiche la liste des quêtes et leur statut
@@ -36,9 +36,9 @@ class QuetesCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="quetes",
         description="Affiche la liste de toutes les quêtes et ton niveau actuel."
@@ -46,9 +46,9 @@ class QuetesCommand(commands.Cog):
     async def slash_quetes(self, interaction: discord.Interaction):
         await self._show_quetes(interaction)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(
         name="quetes",
         help="🎮 Affiche la liste des quêtes et ton niveau actuel."
@@ -56,9 +56,9 @@ class QuetesCommand(commands.Cog):
     async def prefix_quetes(self, ctx: commands.Context):
         await self._show_quetes(ctx)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔧 Fonction commune d’affichage
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _show_quetes(self, source):
         """Affiche la liste des quêtes terminées et non terminées pour un joueur."""
         try:
@@ -97,9 +97,9 @@ class QuetesCommand(commands.Cog):
             else:
                 await safe_send(source, msg)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = QuetesCommand(bot)
     for command in cog.get_commands():
