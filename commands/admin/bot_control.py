@@ -110,9 +110,12 @@ class ControlView(View):
                 title="♻️ Reload Cogs",
                 color=discord.Color.green() if not echoues else discord.Color.orange()
             )
+            reussis_texte = "\n".join(reussis) or "Aucun"
+            if len(reussis_texte) > 1000:
+                reussis_texte = reussis_texte[:1000] + "\n... (tronqué)"
             embed.add_field(
                 name=f"✅ Rechargés ({len(reussis)})",
-                value="\n".join(reussis) or "Aucun",
+                value=reussis_texte,
                 inline=False
             )
             if echoues:
@@ -138,8 +141,26 @@ class ControlView(View):
         await interaction.response.edit_message(view=self)
         await interaction.followup.send("🔁 Redémarrage du bot en cours...")
 
-        await self.bot.close()
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+        try:
+            # ⚠️ Ne PAS faire "await self.bot.close()" ici : ça termine
+            # bot.start(), ce qui fait sortir asyncio.run() dans bot.py, qui
+            # annule alors TOUTES les tâches en cours (dont celle-ci) avant
+            # que os.execv() ait pu s'exécuter — le process se termine
+            # proprement sans jamais redémarrer (race condition).
+            # os.execv() remplace le process instantanément, pas besoin de
+            # fermer proprement la connexion avant.
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        except Exception as e:
+            # Si on arrive ici, execv a échoué : on ne veut pas rester
+            # bloqué en "busy" pour toujours.
+            print(f"[Restart] os.execv a échoué : {e}")
+            self.busy = False
+            for child in self.children:
+                child.disabled = False
+            await safe_edit(self.message, view=self)
+            await interaction.followup.send(f"❌ Le redémarrage a échoué : `{e}`")
 
 # ================================================================================
 # 🧠 Cog principal
