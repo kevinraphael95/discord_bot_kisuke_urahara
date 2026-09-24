@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 qrcode.py — Commande simple /qrcode et !qrcode
 # Objectif : Génère un QR code depuis un texte ou une URL et l'envoie en image
 # Catégorie : Fun&Random
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ import qrcode
 import io
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Fonction utilitaire pour générer le QR code et l'embed
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def generer_qrcode_embed(texte: str, author: discord.User | discord.Member) -> tuple[discord.Embed, discord.File]:
     qr = qrcode.QRCode(
         version=None,
@@ -51,18 +51,18 @@ def generer_qrcode_embed(texte: str, author: discord.User | discord.Member) -> t
 
     return embed, file
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class QRCodeCommand(commands.Cog):
     """Commande /qrcode et !qrcode — Génère un QR code depuis un texte ou une URL."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="qrcode", description="📷 Génère un QR code depuis un texte ou une URL.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)  # Cooldown 5s par utilisateur
     @app_commands.describe(texte="Le texte ou l'URL à encoder dans le QR code")
@@ -81,9 +81,9 @@ class QRCodeCommand(commands.Cog):
             print(f"[ERREUR /qrcode] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="qrcode", help="📷 Génère un QR code depuis un texte ou une URL.")
     @commands.cooldown(1, 5, commands.BucketType.user)  # Cooldown 5s par utilisateur
     async def prefix_qrcode(self, ctx: commands.Context, *, texte: str = None):
@@ -103,9 +103,9 @@ class QRCodeCommand(commands.Cog):
             print(f"[ERREUR !qrcode] {e}")
             await safe_send(ctx, "❌ Une erreur est survenue.")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = QRCodeCommand(bot)
     for command in cog.get_commands():
