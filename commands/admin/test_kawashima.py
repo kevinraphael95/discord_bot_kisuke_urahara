@@ -2,7 +2,7 @@
 # 📌 test_kawashima.py — Tester un mini-jeu par numéro ou tous les jeux
 # Objectif : Lister tous les mini-jeux, paginer si nécessaire et les tester facilement
 # Catégorie : Admin
-# Accès : Tous
+# Accès : Admin uniquement
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ================================================================================
 
@@ -46,7 +46,9 @@ class TestKawashima(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="testgame",description="Tester un mini-jeu via son numéro ou 'all' pour tous.")
+    @app_commands.command(name="testgame",description="(Admin) Tester un mini-jeu via son numéro ou 'all' pour tous.")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_testgame(self, interaction: discord.Interaction, choix: str = None):
         await safe_interact(interaction, "Chargement du quizz...", ephemeral=True)
@@ -55,7 +57,8 @@ class TestKawashima(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="testgame",aliases=["tg"],help="Tester un mini-jeu via son numéro ou 'all'.")
+    @commands.command(name="testgame",aliases=["tg"],help="(Admin) Tester un mini-jeu via son numéro ou 'all'.")
+    @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_testgame(self, ctx: commands.Context, choix: str = None):
         await self.run_game(ctx, choix)
