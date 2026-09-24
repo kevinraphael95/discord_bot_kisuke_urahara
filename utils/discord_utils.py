@@ -1,19 +1,19 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 discord_utils.py — Fonctions utilitaires sécurisées pour Discord
 # Objectif : Fournir des fonctions send/edit/respond optimisées avec gestion du rate-limit
 # Version : ✅ Optimisée et robuste, backoff basé sur retry_after, logs clairs
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import asyncio
 import discord
 from discord.errors import HTTPException
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🛡️ Gestion centralisée des appels Discord avec backoff 429
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def _discord_action(action_func, *args, retry=3, delay=0.3, **kwargs):
     """
     Exécute une action Discord sécurisée avec gestion du rate-limit et des exceptions.
@@ -42,9 +42,9 @@ async def _discord_action(action_func, *args, retry=3, delay=0.3, **kwargs):
     print(f"[Erreur] {action_func.__name__} → Échec après {retry+1} tentatives")
     return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📩 Fonctions publiques sécurisées
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def safe_send(channel: discord.abc.Messageable, content=None, **kwargs):
     return await _discord_action(channel.send, content=content, **kwargs)
 
