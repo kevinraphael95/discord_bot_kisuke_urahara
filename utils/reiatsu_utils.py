@@ -1,21 +1,21 @@
-# --------------------------------------------------------------------------------
+# ================================================================================
 # 📌 reiatsu_utils.py — Fonctions utilitaires pour les profils Reiatsu
 # Objectif : Centraliser la création et vérification des profils joueurs
 # Catégorie : Utils
 # Accès : Tous
-# --------------------------------------------------------------------------------
+# ================================================================================
 
-# --------------------------------------------------------------------------------
+# ================================================================================
 # 📦 Imports nécessaires
-# --------------------------------------------------------------------------------
+# ================================================================================
 import sqlite3
 import os
 import datetime
 import json
 
-# --------------------------------------------------------------------------------
+# ================================================================================
 # 🗄️ Configuration SQLite
-# --------------------------------------------------------------------------------
+# ================================================================================
 DB_PATH = os.path.join("database", "reiatsu.db")
 
 
@@ -24,9 +24,9 @@ def get_conn():
     return sqlite3.connect(DB_PATH)
 
 
-# --------------------------------------------------------------------------------
+# ================================================================================
 # 🔹 Création d’un profil joueur si inexistant
-# --------------------------------------------------------------------------------
+# ================================================================================
 def ensure_profile(user_id: int, username: str) -> dict:
     """
     Vérifie si un joueur a un profil Reiatsu.
@@ -42,7 +42,7 @@ def ensure_profile(user_id: int, username: str) -> dict:
     cursor.execute("SELECT * FROM reiatsu WHERE user_id = ?", (user_id,))
     row = cursor.fetchone()
 
-    # --- Profil existant ---------------------------
+    # === Profil existant ===========================
     if row:
         columns = [column[0] for column in cursor.description]
         profile = dict(zip(columns, row))
@@ -54,7 +54,7 @@ def ensure_profile(user_id: int, username: str) -> dict:
         conn.close()
         return profile
 
-    # --- Création automatique ----------------------
+    # === Création automatique =====================
     cursor.execute("""
         INSERT INTO reiatsu (
             user_id,
@@ -96,17 +96,17 @@ def ensure_profile(user_id: int, username: str) -> dict:
     }
 
 
-# --------------------------------------------------------------------------------
+# ================================================================================
 # 🔹 Vérifie si le joueur a choisi une classe
-# --------------------------------------------------------------------------------
+# ================================================================================
 def has_class(profile: dict) -> bool:
     """Retourne True si le joueur a choisi une classe Reiatsu."""
     return bool(profile.get("classe"))
 
 
-# --------------------------------------------------------------------------------
+# ================================================================================
 # 🔹 Récupère le cooldown restant d’un skill
-# --------------------------------------------------------------------------------
+# ================================================================================
 def get_skill_cooldown(profile: dict, classe_config: dict) -> float:
     """
     Calcule le cooldown restant en heures pour le skill du joueur.
