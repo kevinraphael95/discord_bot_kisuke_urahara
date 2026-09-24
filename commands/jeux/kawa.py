@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 entrainement_cerebral.py — Commande /cerebral et !cerebral
 # Objectif : Lancer 5 mini-jeux aléatoires style Professeur Kawashima avec score arcade
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -24,9 +24,9 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Accès base de données locale
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def db_save_score(user_id: int, username: str, score: int):
     """Enregistre un score Kawashima dans la table kawashima_scores."""
@@ -99,9 +99,9 @@ def db_valider_quete(user_id: int) -> int | None:
         log.exception("[cerebral] Erreur validation quête SQLite : %s", e)
         return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class EntrainementCerebral(commands.Cog):
     """Mode arcade — Entraînement cérébral avec classement global."""
@@ -117,9 +117,9 @@ class EntrainementCerebral(commands.Cog):
                 titre = getattr(func, "title", func.__name__.replace("_", " ").title())
                 self.minijeux.append((f"{emoji} {titre}", func))
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne — validation de la quête
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _valider_quete(
         self,
         user:            discord.User | discord.Member,
@@ -157,9 +157,9 @@ class EntrainementCerebral(commands.Cog):
         except Exception as e:
             log.exception("[cerebral] Erreur envoi embed quête : %s", e)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(
         name="entrainementcerebral",
         aliases=["ec", "kawashima", "k"],
@@ -181,9 +181,9 @@ class EntrainementCerebral(commands.Cog):
             log.exception("[!cerebral] Erreur non gérée : %s", error)
             await ctx.send("❌ Une erreur est survenue.")
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="cerebral",
         description="Entraînement cérébral composé de 5 mini-jeux."
@@ -205,9 +205,9 @@ class EntrainementCerebral(commands.Cog):
             log.exception("[/cerebral] Erreur non gérée : %s", error)
             await interaction.followup.send("❌ Une erreur est survenue.", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Lancement du mode arcade
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def run_arcade(self, ctx_or_interaction, multiplayer=False):
         guild    = getattr(ctx_or_interaction, "guild", None)
         guild_id = guild.id if guild else None
@@ -381,7 +381,7 @@ class EntrainementCerebral(commands.Cog):
 
                 await asyncio.sleep(1.5)
 
-            # ─── Résultats finaux ─────────────────────────────────────────────
+            # === Résultats finaux =============================================
             for player in active_players:
                 if player.id not in total_score:
                     continue
@@ -413,11 +413,11 @@ class EntrainementCerebral(commands.Cog):
                 )
                 await send(embed=final_embed)
 
-                # ─── Sauvegarde score solo ─────────────────────────────────
+                # === Sauvegarde score solo =================================
                 if not multiplayer:
                     db_save_score(player.id, player.name, total)
 
-                # ─── Validation quête ──────────────────────────────────────
+                # === Validation quête ======================================
                 await self._valider_quete(
                     player,
                     total,
@@ -429,9 +429,9 @@ class EntrainementCerebral(commands.Cog):
             if guild_id:
                 self.active_sessions.discard(guild_id)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Classement global
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def show_leaderboard(self, ctx_or_interaction):
         embed   = discord.Embed(
             title="🏆 Entraînement cérébral — Top 10",
@@ -451,9 +451,9 @@ class EntrainementCerebral(commands.Cog):
         else:
             await ctx_or_interaction.send(embed=embed)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = EntrainementCerebral(bot)
     for command in cog.get_commands():
