@@ -120,12 +120,9 @@ class ControlView(View):
             embed = self._base_embed(
                 discord.Color.green() if not echoues else discord.Color.orange()
             )
-            reussis_texte = "\n".join(reussis) or "Aucun"
-            if len(reussis_texte) > 1000:
-                reussis_texte = reussis_texte[:1000] + "\n... (tronqué)"
             embed.add_field(
-                name=f"♻️ Rechargés ({len(reussis)})",
-                value=reussis_texte,
+                name="♻️ Reload Cogs",
+                value=f"✅ {len(reussis)} rechargé(s) — ❌ {len(echoues)} échec(s)",
                 inline=False
             )
             if echoues:
