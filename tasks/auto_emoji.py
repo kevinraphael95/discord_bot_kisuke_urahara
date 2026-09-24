@@ -12,6 +12,8 @@ import discord
 from discord.ext import commands
 import re
 
+from utils.discord_utils import safe_create_webhook
+
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
 # ────────────────────────────────────────────────────────────────────────────────
@@ -77,7 +79,12 @@ class AutoEmoji(commands.Cog):
             return
 
         # Identique à _say_as_user dans say.py : webhook temporaire créé puis supprimé
-        webhook = await message.channel.create_webhook(name=f"tmp-{message.author.name}")
+        webhook = await safe_create_webhook(message.channel, name=f"tmp-{message.author.name}")
+        if webhook is None:
+            # Rate-limit ou permissions manquantes : on laisse le message original tel quel
+            # plutôt que de le supprimer sans pouvoir le reposter.
+            return
+
         try:
             await webhook.send(
                 content=new_content,
