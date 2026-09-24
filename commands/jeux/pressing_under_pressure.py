@@ -1,4 +1,4 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 pressing_under_pressure.py
 # Objectif : Mini-jeu troll inspiré de The Impossible Quiz. Énigmes aléatoires
 #            avec timer live, vies, streaks, combo, troll events, classement.
@@ -6,11 +6,11 @@
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -24,9 +24,9 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎨 Constantes
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DATA_JSON_PATH   = os.path.join("data", "pressing_puzzles.json")
 SCORES_JSON_PATH = os.path.join("data", "pressing_scores.json")
 
@@ -72,9 +72,9 @@ PHASE_COLORS = {
     "intro":    discord.Color.blurple(),
 }
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 💾 Scores persistants
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def load_scores() -> dict:
     try:
         with open(SCORES_JSON_PATH, "r", encoding="utf-8") as f:
@@ -103,9 +103,9 @@ def update_score(user_id: int, username: str, puzzles_done: int, won: bool) -> N
     scores[uid] = entry
     save_scores(scores)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement des énigmes
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def load_puzzles() -> list:
     try:
         with open(DATA_JSON_PATH, "r", encoding="utf-8") as f:
@@ -117,9 +117,9 @@ def load_puzzles() -> list:
         log.error("[PUP] JSON invalide : %s", e)
         return []
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧩 PuzzleState — état d'une énigme en cours
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class PuzzleState:
     """Encapsule toute la logique mutable d'une énigme."""
 
@@ -150,9 +150,9 @@ class PuzzleState:
             case "double_penalty": self.double_penalty = True
             case _:               pass   # fausse alerte / distraction
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Vue — bouton unique, recyclé pour toute la partie
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class PressView(discord.ui.View):
     """Vue réutilisée pour toute la partie. On rebind l'état à chaque énigme."""
 
@@ -191,9 +191,9 @@ class PressView(discord.ui.View):
         s.press_count += 1
         await interaction.response.defer()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class PressingUnderPressure(commands.Cog):
     """Commande /pressing et !pressing — Jeu troll Pressing Under Pressure."""
 
@@ -201,9 +201,9 @@ class PressingUnderPressure(commands.Cog):
         self.bot      = bot
         self.sessions: set[int] = set()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔧 Helpers visuels
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @staticmethod
     def _timer_bar(total: int, remaining: int) -> str:
         return "🟩" * max(0, remaining) + "⬜" * max(0, total - remaining)
@@ -217,9 +217,9 @@ class PressingUnderPressure(commands.Cog):
         d = max(1, min(5, difficulty))
         return "⭐" * d + "☆" * (5 - d)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔧 Logique énigme
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @staticmethod
     def _prepare_puzzle(base: dict) -> dict:
         """Copie le puzzle et varie légèrement la valeur de clics."""
@@ -289,9 +289,9 @@ class PressingUnderPressure(commands.Cog):
             case "random":           return "🎲 La réponse est **aléatoire**. Tout peut marcher… ou pas."
             case _:                  return "❓ Fais ce qui te semble logique."
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🖼️ Construction de l'embed
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def _build_embed(
         self,
         state:         PuzzleState,
@@ -332,9 +332,9 @@ class PressingUnderPressure(commands.Cog):
         embed.set_footer(text="Pressing Under Pressure • Inspiré de Donitz / itch.io")
         return embed
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🎯 Boucle d'une énigme — édite le message existant
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _run_puzzle(
         self,
         msg:           discord.Message,
@@ -399,9 +399,9 @@ class PressingUnderPressure(commands.Cog):
         await asyncio.sleep(2)
         return lives, combo
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🏁 Partie complète — UN seul message édité du début à la fin
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _run_full_game(
         self,
         channel: discord.abc.Messageable,
@@ -504,9 +504,9 @@ class PressingUnderPressure(commands.Cog):
         finally:
             self.sessions.discard(user.id)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🏅 Classement
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_leaderboard(self, channel: discord.abc.Messageable) -> None:
         scores = load_scores()
         if not scores:
@@ -535,9 +535,9 @@ class PressingUnderPressure(commands.Cog):
         embed.set_footer(text="Pressing Under Pressure • Inspiré de Donitz / itch.io")
         await safe_send(channel, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="pressing", description="Lance le jeu Pressing Under Pressure !")
     @app_commands.describe(action="Lancer une partie ou voir le classement")
     @app_commands.choices(action=[
@@ -556,9 +556,9 @@ class PressingUnderPressure(commands.Cog):
         else:
             await self._run_full_game(interaction.channel, interaction.user)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="pressing", aliases=["pup"], help="Lance le jeu Pressing Under Pressure !")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_pressing(self, ctx: commands.Context):
@@ -569,9 +569,9 @@ class PressingUnderPressure(commands.Cog):
     async def prefix_pressing_top(self, ctx: commands.Context):
         await self._send_leaderboard(ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = PressingUnderPressure(bot)
     for command in cog.get_commands():
