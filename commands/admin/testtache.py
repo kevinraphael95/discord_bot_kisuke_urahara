@@ -2,7 +2,7 @@
 # 📌 testtache.py — Commande simple /testtache et !testtache
 # Objectif : Tester les 3 épreuves interactives (mini-jeux)
 # Catégorie : Admin
-# Accès : Tous
+# Accès : Administrateurs uniquement
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
 # ================================================================================
 
@@ -23,6 +23,7 @@ from utils.taches import TACHES
 class TestTache(commands.Cog):
     """
     Commandes /testtache et !testtache — Teste automatiquement toutes les tâches.
+    Réservé aux Administrateurs.
     """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -59,9 +60,12 @@ class TestTache(commands.Cog):
         await safe_edit(msg, embed=result)
 
     # ============================================================================
-    # 🔹 Commande SLASH
+    # 🔹 Commande SLASH (Admin Only)
     # ============================================================================
-    @app_commands.command(name="testtache",description="🕹️ Teste toutes les épreuves pour la commande hollow.")
+    @app_commands.command(name="testtache", description="🕹️ Teste toutes les épreuves pour la commande hollow.")
+    @app_commands.guild_only()
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=10.0, key=lambda i: i.user.id)
     async def slash_testtache(self, interaction: discord.Interaction):
         embed = discord.Embed(
@@ -75,9 +79,11 @@ class TestTache(commands.Cog):
         await self._run_taches(interaction, msg, embed)
 
     # ============================================================================
-    # 🔹 Commande PREFIX
+    # 🔹 Commande PREFIX (Admin Only)
     # ============================================================================
-    @commands.command(name="testtache",help="🕹️ Teste toutes les épreuves pour la commande hollow.")
+    @commands.command(name="testtache", help="🕹️ Teste toutes les épreuves pour la commande hollow.")
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_testtache(self, ctx: commands.Context):
         embed = discord.Embed(
@@ -88,6 +94,16 @@ class TestTache(commands.Cog):
         embed.add_field(name="Préparation...", value="Détection des tâches...", inline=False)
         msg = await safe_send(ctx.channel, embed=embed)
         await self._run_taches(ctx, msg, embed)
+
+    # ============================================================================
+    # ⚠️ Gestion des erreurs de permission (Optionnel mais recommandé)
+    # ============================================================================
+    @prefix_testtache.error
+    async def prefix_testtache_error(self, ctx: commands.Context, error: Exception):
+        if isinstance(error, commands.MissingPermissions):
+            await safe_send(ctx, "❌ Seuls les administrateurs peuvent exécuter cette commande.")
+        elif isinstance(error, commands.NoPrivateMessage):
+            await safe_send(ctx, "❌ Cette commande ne peut pas être utilisée en message privé.")
 
 # ================================================================================
 # 🔌 Setup du Cog
