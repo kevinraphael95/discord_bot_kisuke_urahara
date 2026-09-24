@@ -1,15 +1,15 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 choisir_classe.py — Commande interactive !classe /classe
 # Objectif : Afficher toutes les classes Reiatsu sur une seule page
 #             et permettre au joueur d’en choisir une via un bouton
 # Catégorie : Reiatsu
 # Accès : Public
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -21,9 +21,9 @@ from datetime import datetime, timezone
 
 from utils.discord_utils import safe_send, safe_respond, safe_edit
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement de la configuration Reiatsu
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 REIATSU_CONFIG_PATH = os.path.join("data", "reiatsu_config.json")
 DB_PATH = os.path.join("database", "reiatsu.db")
 
@@ -42,9 +42,9 @@ def load_reiatsu_config():
 config = load_reiatsu_config()
 CLASSES = list(config.get("CLASSES", {}).items())
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Liste complète des classes avec boutons
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ClasseSelectView(View):
     def __init__(self, user_id: int):
         super().__init__(timeout=60)
@@ -144,9 +144,9 @@ class ClasseSelectView(View):
             except:
                 pass
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ChoisirClasse(commands.Cog):
     """Commande !classe ou /classe — Choisir sa classe Reiatsu via une vue complète"""
 
@@ -154,9 +154,9 @@ class ChoisirClasse(commands.Cog):
         self.bot = bot
         self.config = config
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Envoi du menu interactif
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     async def _send_menu(self, channel: discord.abc.Messageable, user_id: int):
         view = ClasseSelectView(user_id)
         await view.check_active_skill()
@@ -188,17 +188,17 @@ class ChoisirClasse(commands.Cog):
         message = await safe_send(channel, embed=embed, view=view)
         view.message = message
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     @commands.command(name="classe", help="Choisir sa classe Reiatsu")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def classe_prefix(self, ctx: commands.Context):
         await self._send_menu(ctx.channel, ctx.author.id)
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     @app_commands.command(name="classe", description="Choisir sa classe Reiatsu")
     async def classe_slash(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -208,9 +208,9 @@ class ChoisirClasse(commands.Cog):
         except discord.Forbidden:
             pass
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ChoisirClasse(bot)
     for command in cog.get_commands():
