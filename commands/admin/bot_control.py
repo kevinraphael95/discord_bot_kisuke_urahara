@@ -162,8 +162,8 @@ class ControlView(View):
             # port échoue alors silencieusement, et l'admin panel devient
             # inaccessible après ce type de redémarrage.
             #
-            # À la place, on relance start.sh dans un process totalement
-            # séparé (comme le fait déjà le panel web dans admin_panel.py),
+            # À la place, on relance start.sh (qui gère lui-même le
+            # détachement du bot et la redirection des logs vers bot.log),
             # puis on tue le process courant avec SIGKILL. Ça garantit un
             # vrai redémarrage propre : tunnel Cloudflare + admin panel +
             # bot repartent tous à zéro, sans fd hérité.
