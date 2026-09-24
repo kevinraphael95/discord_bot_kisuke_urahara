@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 fortune.py
 # Objectif : Ouvrir un biscuit chinois et révéler une prédiction (via API externe)
 # Catégorie : Fun
 # Accès : Tous
 # Cooldown : 5s / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ import aiohttp
 
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Appel API
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 FORTUNE_API_URL = "https://fortunecookies-i3p5.onrender.com/fortune/"
 
 # Fallback local si l'API est down (pas de dépendance externe critique)
@@ -61,9 +61,9 @@ def build_embed(fortune_text: str, lucky_numbers: list, from_fallback: bool = Fa
         embed.set_footer(text="⚠️ API indisponible — prédiction de secours")
     return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Fortune(commands.Cog):
     """
     Commande /fortune et !fortune — Ouvre un biscuit chinois porte-bonheur
@@ -71,18 +71,18 @@ class Fortune(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_fortune(self, channel: discord.abc.Messageable):
         async with channel.typing():
             fortune_text, lucky_numbers, from_fallback = await fetch_fortune(self.bot.aiohttp_session)
         embed = build_embed(fortune_text, lucky_numbers, from_fallback)
         await safe_send(channel, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="fortune", description="Ouvre un biscuit chinois et découvre ta prédiction.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_fortune(self, interaction: discord.Interaction):
@@ -91,17 +91,17 @@ class Fortune(commands.Cog):
         embed = build_embed(fortune_text, lucky_numbers, from_fallback)
         await safe_respond(interaction, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="fortune", help="Ouvre un biscuit chinois et découvre ta prédiction.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_fortune(self, ctx: commands.Context):
         await self._send_fortune(ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Fortune(bot)
     for command in cog.get_commands():
