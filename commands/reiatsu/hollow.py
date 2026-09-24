@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 hollow.py — Commande interactive !hollow / /hollow
 # Objectif : Faire apparaître un Hollow, attaquer (1 reiatsu), réussir 3 tâches.
 # Catégorie : Reiatsu
 # Accès : Public
 # Cooldown : 1 utilisation / 10 sec / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import os
 
 import discord
@@ -20,15 +20,15 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond
 from utils.init_db import get_conn
 from utils.taches import lancer_3_taches
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Constantes
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 HOLLOW_IMAGE_PATH = os.path.join("assets", "hollows", "hollow0.jpg")
 REIATSU_COST = 1
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Helpers DB (via get_conn() de init_db)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def get_points(user_id: int) -> int:
     conn = get_conn()
     cursor = conn.cursor()
@@ -47,9 +47,9 @@ def remove_points(user_id: int, amount: int):
     conn.commit()
     conn.close()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Bouton d'attaque
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class HollowView(View):
     def __init__(self, author: discord.Member, embed: discord.Embed):
         super().__init__(timeout=60)
@@ -110,18 +110,18 @@ class AttackButton(Button):
         result.set_footer(text=f"Combat terminé pour {self.author.display_name}")
         await interaction.edit_original_response(embed=result, view=None)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Hollow(commands.Cog):
     """👹 Combat contre un Hollow — dépense du reiatsu et réussis 3 épreuves !"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _start_hollow(self, channel: discord.abc.Messageable, author: discord.Member):
         if not os.path.isfile(HOLLOW_IMAGE_PATH):
             return await safe_send(channel, "❌ Image du Hollow introuvable.")
@@ -145,9 +145,9 @@ class Hollow(commands.Cog):
         view = HollowView(author, embed)
         view.message = await safe_send(channel, embed=embed, file=file, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="hollow",
         description="👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis)."
@@ -158,17 +158,17 @@ class Hollow(commands.Cog):
         await self._start_hollow(interaction.channel, interaction.user)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="hollow", help="👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_hollow(self, ctx: commands.Context):
         await self._start_hollow(ctx.channel, ctx.author)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Hollow(bot)
     for command in cog.get_commands():
