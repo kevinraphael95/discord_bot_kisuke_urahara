@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 division.py — Commande interactive /division et !division
 # Objectif : Déterminer ta division dans le Gotei 13 via un QCM avec boutons
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import json
 import logging
 import os
@@ -24,9 +24,9 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement des données JSON
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DATA_JSON_PATH = os.path.join("data", "divisions_quiz.json")
 
 def load_division_data() -> dict:
@@ -38,9 +38,9 @@ def load_division_data() -> dict:
         log.exception("[division] Impossible de charger %s : %s", DATA_JSON_PATH, e)
         return {}
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Accès base de données locale
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def db_valider_quete(user_id: int) -> int | None:
     """
@@ -80,9 +80,9 @@ def db_valider_quete(user_id: int) -> int | None:
         log.exception("[division] Erreur validation quête SQLite : %s", e)
         return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Vue interactive pour les questions (A/B/C/D)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class QuizView(discord.ui.View):
     def __init__(self, answers: list, author: discord.User | discord.Member, timeout: int = 60):
@@ -111,9 +111,9 @@ class QuizButton(discord.ui.Button):
         await safe_interact(interaction, view=view, edit=True)
         view.stop()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class Division(commands.Cog):
     """Commandes /division et !division — Détermine ta division dans le Gotei 13."""
@@ -121,9 +121,9 @@ class Division(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonctions internes communes
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _valider_quete(self, user: discord.User | discord.Member, channel: discord.abc.Messageable | None = None):
         """Valide la quête 'division' et envoie un embed de félicitations si nécessaire."""
         new_lvl = db_valider_quete(user.id)
@@ -180,7 +180,7 @@ class Division(commands.Cog):
 
             personality_counter.update(view.selected_traits)
 
-        # ─── Résultat final ───
+        # === Résultat final ===
         division_scores = {
             div: sum(personality_counter[trait] for trait in info["traits"])
             for div, info in divisions.items()
@@ -198,9 +198,9 @@ class Division(commands.Cog):
         await safe_edit(message, embed=embed_result, view=None)
         await self._valider_quete(author, channel=channel)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="division",description="Réponds à un QCM pour savoir dans quelle division du Gotei 13 tu serais.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_division(self, interaction: discord.Interaction):
@@ -208,17 +208,17 @@ class Division(commands.Cog):
         await self._run_quiz(interaction.channel, interaction.user)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="division",help="Détermine ta division dans le Gotei 13.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_division(self, ctx: commands.Context):
         await self._run_quiz(ctx.channel, ctx.author)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Division(bot)
     for command in cog.get_commands():
