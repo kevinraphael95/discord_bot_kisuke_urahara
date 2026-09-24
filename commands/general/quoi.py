@@ -1,5 +1,5 @@
 # ================================================================================
-# 📌 feur.py
+# 📌 quoi.py
 # Objectif : Répond "feur"
 # Catégorie : Général
 # Accès : Tous
