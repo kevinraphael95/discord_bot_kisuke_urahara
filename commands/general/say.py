@@ -128,20 +128,19 @@ class Say(commands.Cog):
     @app_commands.describe(
         message="Message à répéter",
         embed="Envoyer dans un embed",
-        as_user="Parler comme vous"
+        as_user="Parler comme vous",
+        user="Destinataire du message secret (requis avec *chuchotte)"
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_say(self, interaction: discord.Interaction, message: str, embed: bool = False, as_user: bool = False):
+    async def slash_say(self, interaction: discord.Interaction, message: str, embed: bool = False, as_user: bool = False, user: discord.Member = None):
         await interaction.response.defer()
         options, clean_message = self.parse_options(message)
         if options["chuchotte"]:
-            mention = next((m for m in interaction.message.mentions), None)
-            if not mention:
-                await safe_respond(interaction, "❌ Tu dois mentionner une personne pour *chuchotte.", ephemeral=True)
+            if user is None:
+                await safe_respond(interaction, "❌ Tu dois choisir un utilisateur (paramètre `user`) pour *chuchotte.", ephemeral=True)
                 return
-            secret_text = clean_message.replace(mention.mention, "").strip()
-            view = SecretMessageView(mention, secret_text)
-            await interaction.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
+            view = SecretMessageView(user, clean_message)
+            await interaction.channel.send(f"🔒 Message secret pour {user.mention}", view=view)
             await interaction.delete_original_response()
             return
         if as_user:
