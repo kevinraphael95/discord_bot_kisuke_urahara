@@ -15,7 +15,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_delete, safe_followup
+from utils.discord_utils import safe_send, safe_delete, safe_followup, safe_create_webhook
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal
@@ -67,7 +67,10 @@ class SayAs(commands.Cog):
         if len(message) > 2000:
             message = message[:1997] + "..."
 
-        webhook = await channel.create_webhook(name=f"tmp-{target.name}")
+        webhook = await safe_create_webhook(channel, name=f"tmp-{target.name}")
+        if webhook is None:
+            return await safe_send(channel, "❌ Impossible de créer le webhook pour ce message (rate-limit ou permissions).")
+
         try:
             await webhook.send(
                 content=message,
