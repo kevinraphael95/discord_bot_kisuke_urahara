@@ -15,7 +15,7 @@ from discord.ext import commands
 from discord.ui import View, Button
 import random
 import re
-from utils.discord_utils import safe_send, safe_respond, safe_delete
+from utils.discord_utils import safe_send, safe_respond
 
 # ================================================================================
 # 🎮 View pour la pagination
@@ -132,17 +132,15 @@ class EmojiCommand(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(
+    @commands.command(
         name="emoji",
-        description="Montre un ou plusieurs emojis du serveur ou de tous les serveurs."
+        aliases=["e"],
+        help="Montre un ou plusieurs emojis du serveur ou de tous les serveurs.",
+        description="Affiche les emojis demandés ou tous les emojis du serveur (animés puis non animés) si aucun argument."
     )
-    @app_commands.describe(emojis="Noms des emojis à afficher, séparés par des espaces ou répétés (ex: :woah::woah:)")
-    @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)
-    async def slash_emoji(self, interaction: discord.Interaction, *, emojis: str = ""):
-        await interaction.response.defer()
-        emoji_inputs = self._parse_emoji_input((emojis,))
-        await self._send_emojis_safe(interaction.channel, interaction.guild, emoji_inputs)
-        await interaction.delete_original_response()
+    @commands.cooldown(rate=1, per=3, type=commands.BucketType.user)
+    async def prefix_emoji(self, ctx: commands.Context, *emoji_names):
+        await self._send_emojis_safe(ctx.channel, ctx.guild, emoji_names)
 
     @slash_emoji.autocomplete("emojis")
     async def autocomplete_emojis(self, interaction: discord.Interaction, current: str):
