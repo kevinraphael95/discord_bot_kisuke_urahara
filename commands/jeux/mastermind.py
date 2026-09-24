@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 mastermind2.py — Commande interactive !mastermind /mastermind
 # Objectif : Jeu de logique Mastermind via boutons Discord avec mode solo/multi
 # Catégorie : Jeux
 # Accès : Public
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,14 +16,14 @@ from discord.ui import View, Button
 import random
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎨 Liste des couleurs utilisables
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 COLORS = ["🟥", "🟦", "🟩", "🟨", "🟪", "🟧"]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🟢 Liste des difficultés pour faciliter la modification
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DIFFICULTIES = [
     {"label": "Facile", "code_length": 3, "corruption": False},
     {"label": "Normal", "code_length": 4, "corruption": False},
@@ -31,9 +31,9 @@ DIFFICULTIES = [
     {"label": "Cauchemar", "code_length": random.randint(8, 10), "corruption": True},
 ]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧩 Vue principale du jeu Mastermind
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class MastermindView(View):
     def __init__(self, author: discord.User | None, code_length: int, corruption: bool):
         """
@@ -157,9 +157,9 @@ class MastermindView(View):
         except discord.InteractionResponded:
             await interaction.edit_original_response(embed=embed, view=self)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔵 Boutons interactifs
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ColorButton(Button):
     def __init__(self, color: str, view_ref: MastermindView):
         super().__init__(style=discord.ButtonStyle.secondary, emoji=color)
@@ -205,9 +205,9 @@ class ValidateButton(Button):
             return await safe_respond(interaction, "⚠️ Nombre de couleurs insuffisant.", ephemeral=True)
         await self.view_ref.make_attempt(interaction)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Menu de sélection de difficulté
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class DifficultyView(View):
     def __init__(self, author: discord.User | None, mode: str = "solo"):
         """
@@ -232,18 +232,18 @@ class DifficultyButton(Button):
         await interaction.response.edit_message(embed=embed, view=view)
         view.message = interaction.message
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Mastermind(commands.Cog):
     """Mastermind interactif avec commandes prefix et slash."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="mastermind", aliases=["mm"], help="Jouer au Mastermind interactif.")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def prefix_mastermind(self, ctx: commands.Context, mode: str = "solo"):
@@ -259,9 +259,9 @@ class Mastermind(commands.Cog):
         )
         await safe_send(ctx.channel, embed=embed, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="mastermind",description="Jouer au Mastermind interactif.")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
@@ -274,9 +274,9 @@ class Mastermind(commands.Cog):
         )
         await interaction.response.send_message(embed=embed, view=view)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Mastermind(bot)
     for command in cog.get_commands():
