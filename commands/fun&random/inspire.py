@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 inspire.py
 # Objectif : Génère une "citation inspirante" absurde via InspiroBot
 # Catégorie : Fun&Random
 # Accès : Tous
 # Cooldown : 5s / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ import aiohttp
 
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Appel API
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 INSPIROBOT_API_URL = "https://inspirobot.me/api?generate=true"
 
 async def fetch_inspiro_image(session: aiohttp.ClientSession):
@@ -44,9 +44,9 @@ def build_embed(image_url: str):
     embed.set_footer(text="inspirobot.me")
     return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Inspire(commands.Cog):
     """
     Commande /inspire et !inspire — Génère une "citation inspirante" complètement absurde
@@ -54,9 +54,9 @@ class Inspire(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_inspire(self, channel: discord.abc.Messageable):
         async with channel.typing():
             image_url, ok = await fetch_inspiro_image(self.bot.aiohttp_session)
@@ -65,9 +65,9 @@ class Inspire(commands.Cog):
             return
         await safe_send(channel, embed=build_embed(image_url))
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="inspire", description="Reçois une citation inspirante... très inspirante.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_inspire(self, interaction: discord.Interaction):
@@ -78,17 +78,17 @@ class Inspire(commands.Cog):
             return
         await safe_respond(interaction, embed=build_embed(image_url))
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="inspire", help="Reçois une citation inspirante... très inspirante.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_inspire(self, ctx: commands.Context):
         await self._send_inspire(ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Inspire(bot)
     for command in cog.get_commands():
