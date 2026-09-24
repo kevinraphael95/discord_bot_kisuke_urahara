@@ -1,4 +1,4 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 drapeaux.py — Commande interactive /drapeaux et !drapeaux
 # Objectif : Deviner le pays à partir d'un drapeau aléatoire (tous les pays)
 # Modes : Solo (1 joueur, 2 minutes) et Multi (plusieurs joueurs, 2 minutes)
@@ -6,11 +6,11 @@
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -18,9 +18,9 @@ import random, asyncio, unicodedata
 
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Liste complète des pays et codes ISO (inchangée)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 COUNTRIES = {
     "Afghanistan": "af", "Afrique du Sud": "za", "Albanie": "al", "Algérie": "dz",
     "Allemagne": "de", "Andorre": "ad", "Angola": "ao", "Antigua-et-Barbuda": "ag",
@@ -83,9 +83,9 @@ def normalize_text(text: str) -> str:
         if unicodedata.category(c) != 'Mn'
     ).strip()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📝 Modal (formulaire de réponse)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class AnswerModal(discord.ui.Modal, title="🖊️ Devine le pays"):
     def __init__(self, country: str, winners: list, multi: bool, quiz_msg: discord.Message, view: discord.ui.View):
         super().__init__(timeout=None)
@@ -127,9 +127,9 @@ class AnswerModal(discord.ui.Modal, title="🖊️ Devine le pays"):
         else:
             await interaction.response.send_message("❌ Mauvaise réponse !", ephemeral=True)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Vue interactive — bouton "Répondre"
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class FlagQuizView(discord.ui.View):
     def __init__(self, country: str, winners: list, multi: bool, quiz_msg: discord.Message = None):
         super().__init__(timeout=None)
@@ -143,9 +143,9 @@ class FlagQuizView(discord.ui.View):
     async def answer_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(AnswerModal(self.country, self.winners, self.multi, self.quiz_msg, self))
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Drapeaux(commands.Cog):
     """Commande /drapeaux et !drapeaux — Deviner le pays à partir d'un drapeau"""
 
@@ -200,9 +200,9 @@ class Drapeaux(commands.Cog):
 
         await quiz_msg.edit(embed=embed, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     @app_commands.command(name="drapeaux", description="Devine le pays à partir d'un drapeau")
     @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
@@ -218,9 +218,9 @@ class Drapeaux(commands.Cog):
             print(f"[ERREUR /drapeaux] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     @commands.command(name="drapeaux", help="Devine le pays à partir d'un drapeau")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_drapeaux(self, ctx: commands.Context, *, arg: str = None):
@@ -233,9 +233,9 @@ class Drapeaux(commands.Cog):
             print(f"[ERREUR !drapeaux] {e}")
             await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Drapeaux(bot)
     for command in cog.get_commands():
