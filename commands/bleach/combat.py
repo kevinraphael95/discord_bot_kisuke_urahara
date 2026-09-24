@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 combat.py — Commande interactive /combat et !combat
 # Objectif : Combat style Pokémon complet avec statuts et formes évolutives
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import json
 import os
 import random
@@ -19,9 +19,9 @@ from discord.ext import commands
 
 from utils.discord_utils import safe_send, safe_respond, safe_interact
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Gestion des personnages et combat
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CHAR_DIR    = os.path.join("data", "personnages")
 COMBAT_FILE = os.path.join("data", "combat.json")
 
@@ -69,9 +69,9 @@ def attaque_disponible(p: dict):
     """Retourne les attaques avec PP > 0."""
     return [a for a in p["formes"][p["forme_actuelle"]]["attaques"] if a["PP"] > 0]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔧 Gestion des statuts
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def appliquer_statut(p: dict, narratif: list):
     """Applique les effets des statuts sur le personnage."""
     if not p["statut"]:
@@ -110,9 +110,9 @@ def appliquer_statut(p: dict, narratif: list):
         narratif.append(f"{s['emoji']} **{p['nom']}** subit {deg} PV de brûlure et attaque réduite !")
     return False
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔧 Calcul et application des dégâts
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def calcul_degats(a, d, atk):
     """Calcul des dégâts style Pokémon."""
     if atk["categorie"] == "Physique":
@@ -133,14 +133,14 @@ def calcul_degats(a, d, atk):
 def appliquer_attaque(a, d, atk, narratif):
     """Applique une attaque (Soin / Statut / Dégâts / Antithèse / Boost)."""
 
-    # ─── Soin ───
+    # === Soin ===
     if atk["categorie"] == "Soin":
         soin   = atk["puissance"]
         a["pv"] = min(a["stats_base"]["pv"], a["pv"] + soin)
         narratif.append(f"{CATEGORIE_EMOJI['Soin']} **{a['nom']}** utilise *{atk['nom']}* et récupère {soin} PV !")
         return
 
-    # ─── Statut ───
+    # === Statut ===
     if atk["categorie"] == "Statut" and atk.get("statut") != "Antithèse":
         narratif.append(f"{CATEGORIE_EMOJI['Statut']} **{a['nom']}** utilise *{atk['nom']}* !")
         if atk.get("statut"):
@@ -154,7 +154,7 @@ def appliquer_attaque(a, d, atk, narratif):
                 narratif.append(f"⚡ **{target['nom']}** voit sa statistique **{stat}** {'augmentée' if value > 0 else 'diminuée'} !")
         return
 
-    # ─── Antithèse ───
+    # === Antithèse ===
     if atk.get("statut") == "Antithèse":
         a["pv"],     d["pv"]     = d["pv"],     a["pv"]
         a["boosts"], d["boosts"] = d["boosts"], a["boosts"]
@@ -162,7 +162,7 @@ def appliquer_attaque(a, d, atk, narratif):
         narratif.append(f"🔁 **{a['nom']}** active *{atk['nom']}* ! Tous les effets entre **{a['nom']}** et **{d['nom']}** sont inversés !")
         return
 
-    # ─── Offensif ───
+    # === Offensif ===
     degats, mult, crit = calcul_degats(a, d, atk)
     d["pv"] -= degats
     emoji_type = TYPE_EMOJI.get(atk["type"], "")
@@ -174,9 +174,9 @@ def appliquer_attaque(a, d, atk, narratif):
     if atk.get("statut") and atk["statut"] not in ["Antithèse"]:
         d["statut"] = atk["statut"]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔧 Forme suivante (évolution en combat)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def forme_suivante(p: dict):
     """Gestion de l'évolution en combat."""
     formes = list(p["formes"].keys())
@@ -186,9 +186,9 @@ def forme_suivante(p: dict):
         return f"✨ **{p['nom']}** passe en **{p['forme_actuelle']}** !"
     return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class CombatCommand(commands.Cog):
     """Commandes /combat et !combat — Combat style Pokémon complet avec statuts et formes évolutives."""
@@ -196,9 +196,9 @@ class CombatCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _run_combat(self, channel: discord.abc.Messageable):
         persos = [p for p in (load_character(n) for n in list_characters()) if p]
         if len(persos) < 2:
@@ -236,7 +236,7 @@ class CombatCommand(commands.Cog):
                 continue
             break
 
-        # ─── Pagination du narratif ───
+        # === Pagination du narratif ===
         PAGINATION_TAILLE = 3500
         texte_combat = "\n".join(narratif)
         pages = [texte_combat[i:i + PAGINATION_TAILLE] for i in range(0, len(texte_combat), PAGINATION_TAILLE)]
@@ -270,9 +270,9 @@ class CombatCommand(commands.Cog):
 
         await safe_send(channel, embed=embed, view=PagesView())
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="combat",description="⚔️ Combat style Pokémon entre 2 persos.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_combat(self, interaction: discord.Interaction):
@@ -280,17 +280,17 @@ class CombatCommand(commands.Cog):
         await self._run_combat(interaction.channel)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="combat",help="⚔️ Combat style Pokémon entre 2 persos.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_combat(self, ctx: commands.Context):
         await self._run_combat(ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = CombatCommand(bot)
     for command in cog.get_commands():
