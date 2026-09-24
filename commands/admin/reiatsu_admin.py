@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 ReiatsuAdmin.py — Commande interactive /reiatsuadmin et !reiatsuadmin / !rtsa
 # Objectif : Gérer les paramètres Reiatsu (définir, supprimer un salon, ou modifier les points d'un membre)
 # Catégorie : Admin
 # Accès : Administrateur
 # Cooldown : 1 utilisation / 5 secondes / utilisateur (sauf spawn : 3s)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import asyncio
 import json
 import logging
@@ -25,9 +25,9 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement du JSON global
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CONFIG_PATH = os.path.join("data", "reiatsu_config.json")
 with open(CONFIG_PATH, "r", encoding="utf-8") as f:
     CONFIG = json.load(f)
@@ -35,9 +35,9 @@ with open(CONFIG_PATH, "r", encoding="utf-8") as f:
 SPAWN_SPEED_RANGES  = CONFIG["SPAWN_SPEED_RANGES"]
 DEFAULT_SPAWN_SPEED = CONFIG["DEFAULT_SPAWN_SPEED"]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — View boutons vitesse (partagée prefix + slash)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def build_speed_embed(current_speed_name: str, current_delay: int) -> discord.Embed:
     embed = discord.Embed(
@@ -105,9 +105,9 @@ class SpeedView(ui.View):
             except Exception:
                 pass
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class ReiatsuAdmin(commands.Cog):
     """
@@ -116,9 +116,9 @@ class ReiatsuAdmin(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonctions internes communes
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _set_logic(self, guild_id: int, channel_id: int) -> str:
         now_iso       = datetime.utcnow().isoformat()
         delay         = random.randint(*SPAWN_SPEED_RANGES[DEFAULT_SPAWN_SPEED])
@@ -194,9 +194,9 @@ class ReiatsuAdmin(commands.Cog):
         except asyncio.TimeoutError:
             await safe_send(channel, "⏳ Le Reiatsu s'est dissipé dans l'air... personne ne l'a absorbé.")
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Groupe SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     rtsa_slash = app_commands.Group(
         name="reiatsuadmin",
         description="(Admin) Gère le Reiatsu : set, unset, change, spawn, speed."
@@ -257,9 +257,9 @@ class ReiatsuAdmin(commands.Cog):
         await safe_respond(interaction, embed=embed, view=view)
         view.message = await interaction.original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Groupe PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.group(name="reiatsuadmin",aliases=["rtsa"],invoke_without_command=True,help="(Admin) Gère le Reiatsu : set, unset, change, spawn, speed.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
@@ -327,9 +327,9 @@ class ReiatsuAdmin(commands.Cog):
         message      = await safe_send(ctx, embed=embed, view=view)
         view.message = message
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ReiatsuAdmin(bot)
     for command in cog.get_commands():
