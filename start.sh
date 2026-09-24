@@ -42,7 +42,7 @@ PYTHONPATH=. python -c "from utils.init_db import init_db; init_db(); print('✅
 # 🔗 Lancement du Tunnel Cloudflare + sauvegarde URL en base
 # ────────────────────────────────────────────────────────────────────────────────
 echo "🌐 Lancement de Cloudflare Tunnel sur le port $ADMIN_PORT..."
-PYTHONPATH=. python save_tunnel_url.py $ADMIN_PORT &
+PYTHONPATH=. python admin/save_tunnel_url.py $ADMIN_PORT &
 TUNNEL_PID=$!
 
 # Attente que l'URL soit capturée et sauvegardée
