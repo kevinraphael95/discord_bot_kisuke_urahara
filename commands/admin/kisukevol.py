@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 kisukevol.py — Commande admin /kisukevol et !kisukevol
 # Objectif : Kisuke vole aléatoirement 10% du Reiatsu d'un membre du serveur
 # Catégorie : Admin
 # Accès : Admin uniquement
 # Cooldown : 1 utilisation / 10 secondes / administrateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import logging
 import random
 from datetime import datetime, timedelta, timezone
@@ -23,16 +23,16 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # ⚙️ Paramètres de configuration
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 VOL_COOLDOWN_HOURS = 24
 VOL_PROBA_VOLEUR   = 0.67
 VOL_PROBA_AUTRE    = 0.25
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class KisukeVol(commands.Cog):
     """
@@ -42,9 +42,9 @@ class KisukeVol(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _kisukevol_logic(self, channel: discord.abc.Messageable, guild: discord.Guild):
         conn   = get_conn()
         cursor = conn.cursor()
@@ -165,9 +165,9 @@ class KisukeVol(commands.Cog):
         conn.commit()
         conn.close()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="kisukevol",description="🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal.")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=10.0, key=lambda i: i.user.id)
@@ -176,18 +176,18 @@ class KisukeVol(commands.Cog):
         await self._kisukevol_logic(interaction.channel, interaction.guild)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="kisukevol",aliases=["kvol"],help="🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_kisukevol(self, ctx: commands.Context):
         await self._kisukevol_logic(ctx.channel, ctx.guild)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = KisukeVol(bot)
     for command in cog.get_commands():
