@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     init_logger()
 
-    from admin_panel import run_admin, set_bot
+    from admin.admin_panel import run_admin, set_bot
     admin_thread = threading.Thread(target=run_admin, args=(ADMIN_PORT,), daemon=True)
     admin_thread.start()
     print(f"🌐 Panel admin lancé sur http://localhost:{ADMIN_PORT}")
