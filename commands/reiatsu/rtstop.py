@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 reiatsutop.py — Commande interactive /reiatsutop et !reiatsutop
 # Objectif : Affiche le classement global Reiatsu (Top 20) + position de l'utilisateur
 # Catégorie : Reiatsu
 # Accès : Public
 # Cooldown : 1 utilisation / 3 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 import sqlite3
 import time
@@ -16,25 +16,25 @@ from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Configuration SQLite
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DB_PATH = "database/reiatsu.db"
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🏅 Médailles pour le podium
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ReiatsuTopCommand(commands.Cog):
     """Commande /reiatsutop et !reiatsutop — Affiche le Top 20 Reiatsu et la position de l'utilisateur"""
 
     COOLDOWN = 3
 
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -43,7 +43,7 @@ class ReiatsuTopCommand(commands.Cog):
 
         self.user_cooldowns = {}
 
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     async def _check_cooldown(self, user_id: int):
         now = time.time()
         last = self.user_cooldowns.get(user_id, 0)
@@ -52,12 +52,12 @@ class ReiatsuTopCommand(commands.Cog):
         self.user_cooldowns[user_id] = now
         return 0
 
-    # ──────────────────────────────────────────────────────────────
+    # ==============================================================
     async def _send_top(self, channel_or_interaction, author: discord.Member, guild: discord.Guild):
 
         user_id = author.id
 
-        # ── Récupération du Top 20 ──
+        # == Récupération du Top 20 ==
         try:
             self.cursor.execute("""
                 SELECT user_id, points
@@ -79,7 +79,7 @@ class ReiatsuTopCommand(commands.Cog):
                 return await channel_or_interaction.response.send_message(msg, ephemeral=True)
             return await safe_send(channel_or_interaction, msg)
 
-        # ── Construction du classement ──
+        # == Construction du classement ==
         description = ""
         user_in_top = False
 
@@ -95,7 +95,7 @@ class ReiatsuTopCommand(commands.Cog):
             if uid == user_id:
                 user_in_top = True
 
-        # ── Position de l'utilisateur s'il n'est pas dans le Top 20 ──
+        # == Position de l'utilisateur s'il n'est pas dans le Top 20 ==
         footer_extra = ""
         if not user_in_top:
             try:
@@ -116,10 +116,10 @@ class ReiatsuTopCommand(commands.Cog):
                 if user_row:
                     rank = (row["rank"] if row else 0) + 1
                     points = user_row["points"]
-                    description += f"\n{'─' * 30}\n"
+                    description += f"\n{'=' * 30}\n"
                     description += f"📍 **Ta position** : #{rank} — {points} pts\n"
                 else:
-                    description += f"\n{'─' * 30}\n"
+                    description += f"\n{'=' * 30}\n"
                     description += "📍 **Ta position** : Non classé (0 pts)\n"
 
             except Exception as e:
@@ -140,9 +140,9 @@ class ReiatsuTopCommand(commands.Cog):
         else:
             await safe_send(channel_or_interaction, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commandes SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="reiatsutop",
         description="📊 Affiche le Top 20 Reiatsu et ta position dans le classement global."
@@ -164,9 +164,9 @@ class ReiatsuTopCommand(commands.Cog):
             interaction.guild
         )
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commandes PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(
         name="reiatsutop",
         aliases=["rtst"],
@@ -188,9 +188,9 @@ class ReiatsuTopCommand(commands.Cog):
             ctx.guild
         )
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ReiatsuTopCommand(bot)
     for command in cog.get_commands():
