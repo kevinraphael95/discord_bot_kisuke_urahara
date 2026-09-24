@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 motssecrets.py — Jeu des Mots Secrets multijoueur
 # Objectif : Pendant 3 minutes, tout le monde peut proposer un mot secret pour gagner du Reiatsu
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -23,9 +23,9 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement des données JSON
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 MOTS_PATH = Path("data/motssecrets.json")
 
 def load_mots() -> list:
@@ -39,9 +39,9 @@ def load_mots() -> list:
 
 MOTS = load_mots()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Accès base de données locale
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def db_get_mots_trouves(user_id: int) -> list:
     """Récupère la liste des IDs de mots déjà trouvés par l'utilisateur."""
@@ -106,9 +106,9 @@ def db_add_reiatsu(user_id: int, username: str, points: int = 10):
     except Exception as e:
         log.exception("[motssecrets] Erreur ajout reiatsu : %s", e)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class MotsSecretsMulti(commands.Cog):
     """Jeu des Mots Secrets Multijoueur — Pendant 3 minutes, proposez des mots pour gagner du Reiatsu."""
@@ -117,15 +117,15 @@ class MotsSecretsMulti(commands.Cog):
         self.bot          = bot
         self.active_games = {}  # channel_id : end_time
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne — normalisation
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def normalize(self, text: str) -> str:
         return text.strip().lower()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne — démarrage du jeu
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def start_game(self, channel: discord.TextChannel):
         """Démarre un nouveau jeu de 3 minutes dans le channel."""
         if channel.id in self.active_games:
@@ -157,9 +157,9 @@ class MotsSecretsMulti(commands.Cog):
 
         asyncio.create_task(stop_later())
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne — vérification d'un mot proposé
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def handle_guess(self, message: discord.Message):
         """Vérifie si le mot proposé est un mot secret et attribue les points."""
         mot_propose = self.normalize(message.content[1:])
@@ -186,9 +186,9 @@ class MotsSecretsMulti(commands.Cog):
             f"✅ Bravo {message.author.mention} ! Tu as trouvé un mot secret et gagnes **10 Reiatsu** 🎉"
         )
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="motsecret",description="Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_motsecret(self, interaction: discord.Interaction):
@@ -203,9 +203,9 @@ class MotsSecretsMulti(commands.Cog):
             log.exception("[/motsecret] Erreur non gérée : %s", error)
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="motsecret",aliases=["motssecrets", "ms"],help="Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_motsecret(self, ctx: commands.Context):
@@ -219,9 +219,9 @@ class MotsSecretsMulti(commands.Cog):
             log.exception("[!motsecret] Erreur non gérée : %s", error)
             await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🎧 Événement — Proposition de mot
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:
@@ -234,9 +234,9 @@ class MotsSecretsMulti(commands.Cog):
             return  # ignore "." ou "*" seuls
         await self.handle_guess(message)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = MotsSecretsMulti(bot)
     for command in cog.get_commands():
