@@ -1,12 +1,12 @@
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # utils/algorithms.py — Tous les algorithmes de tri asynchrones
 # Règle : UNIQUEMENT des swaps data[i], data[j] = data[j], data[i]
 #         Jamais de copie intermédiaire, jamais de insert/pop
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # Tris classiques
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 async def bubble_sort(data):
     n = len(data)
     for i in range(n):
@@ -174,9 +174,9 @@ async def comb_sort(data):
 comb_sort.desc = "Amélioration de Bubble Sort avec un gap variable."
 
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # Expérimentaux — réécrits en swaps purs
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 async def pair_sum_sort(data):
     """
     Odd-Even / Brick Sort : passe alternativement sur les paires (0,1),(2,3)...
@@ -278,9 +278,9 @@ async def flashy_sort(data):
 flashy_sort.desc = "Heap Sort visuellement spectaculaire avec heapify entièrement async."
 
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # Dictionnaire global pour import
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 algorithms = {
     "Bubble Sort":      bubble_sort,
     "Cocktail Sort":    cocktail_sort,
