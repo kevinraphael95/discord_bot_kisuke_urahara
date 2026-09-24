@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 reiatsuprofil.py — Commande interactive /reiatsuprofil et !reiatsuprofil
 # Objectif : Affiche le profil Reiatsu d’un joueur (classe, compétences, cooldowns)
 # Catégorie : Reiatsu
 # Accès : Tous
 # Cooldown : 5 secondes
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -21,9 +21,9 @@ import sqlite3
 from utils.discord_utils import safe_send, safe_respond
 from utils.reiatsu_utils import ensure_profile  # ✅ Ajout pour auto-création profil
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement des classes depuis JSON
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CONFIG_JSON_PATH = os.path.join("data", "reiatsu_config.json")
 DB_PATH = "database/reiatsu.db"
 
@@ -39,18 +39,18 @@ def load_classes():
         print(f"[ERREUR JSON] Impossible de charger {CONFIG_JSON_PATH} : {e}")
         return {}
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ReiatsuProfil(commands.Cog):
     """Commande /reiatsuprofil et !reiatsuprofil — Affiche le profil personnel Reiatsu d’un joueur"""
     
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_profil(self, channel_or_interaction, author, target_user):
         user = target_user or author
         user_id = int(user.id)
@@ -174,9 +174,9 @@ class ReiatsuProfil(commands.Cog):
         else:
             await safe_send(channel_or_interaction, embed=embed)
 
-    # ────────────────────────────────────────────────────────────
+    # ============================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────
+    # ============================================================
     @app_commands.command(
         name="reiatsuprofil",
         description="💠 Affiche ton profil Reiatsu détaillé."
@@ -186,9 +186,9 @@ class ReiatsuProfil(commands.Cog):
     async def slash_profil(self, interaction: discord.Interaction, member: discord.Member = None):
         await self._send_profil(interaction, interaction.user, member)
 
-    # ────────────────────────────────────────────────────────────
+    # ============================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────
+    # ============================================================
     @commands.command(
         name="reiatsuprofil",
         aliases=["rtsp", "rtsprofil", "profil", "p"],
@@ -198,9 +198,9 @@ class ReiatsuProfil(commands.Cog):
     async def prefix_profil(self, ctx: commands.Context, member: discord.Member = None):
         await self._send_profil(ctx.channel, ctx.author, member)
 
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────
+# ================================================================
 async def setup(bot: commands.Bot):
     cog = ReiatsuProfil(bot)
     for command in cog.get_commands():
