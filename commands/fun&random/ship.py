@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 ship.py — Commande interactive /ship et !ship (membres du serveur)
 # Objectif : Shipper deux membres du serveur avec un score déterministe permanent
 # Catégorie : Fun&Random
 # Accès : Tous
 # Cooldown : 1 utilisation / 3 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import hashlib
 import logging
 
@@ -20,9 +20,9 @@ from utils.discord_utils import safe_send
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧮 Calcul du score déterministe (basé sur les IDs Discord)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def calculer_score(id1: int, id2: int) -> int:
     """
@@ -60,9 +60,9 @@ def build_bar(score: int) -> str:
     filled = round(score / 10)
     return "❤️" * filled + "🖤" * (10 - filled)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🖼️ Génération de l'embed
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def generate_ship_embed(u1: discord.Member | discord.User, u2: discord.Member | discord.User) -> discord.Embed:
     """Construit et retourne l'embed du ship entre u1 et u2."""
@@ -80,9 +80,9 @@ def generate_ship_embed(u1: discord.Member | discord.User, u2: discord.Member | 
     embed.set_footer(text="⚠️ Ce score est définitif et immuable — l'univers a parlé.")
     return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class ShipCommand(commands.Cog):
     """Commandes /ship et !ship — Shipper deux membres du serveur."""
@@ -90,9 +90,9 @@ class ShipCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_ship(
         self,
         channel: discord.abc.Messageable,
@@ -108,9 +108,9 @@ class ShipCommand(commands.Cog):
 
         await safe_send(channel, embed=generate_ship_embed(u1, u2))
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="ship",description="💘 Calcule la compatibilité entre deux membres du serveur.")
     @app_commands.describe(membre1="Premier membre (toi par défaut si un seul membre fourni)",membre2="Second membre (optionnel)")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
@@ -119,17 +119,17 @@ class ShipCommand(commands.Cog):
         await self._send_ship(interaction.channel, interaction.user, membre1, membre2)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="ship",help="💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_ship(self, ctx: commands.Context, membre1: discord.Member, membre2: discord.Member = None):
         await self._send_ship(ctx.channel, ctx.author, membre1, membre2)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = ShipCommand(bot)
     for command in cog.get_commands():
