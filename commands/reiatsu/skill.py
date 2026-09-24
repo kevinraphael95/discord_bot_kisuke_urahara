@@ -159,7 +159,9 @@ class Skill(commands.Cog):
 
                     if now_dt < next_cd:
                         restant = next_cd - now_dt
-                        h, m = divmod(int(restant.total_seconds() // 60), 60)
+                        # restant.seconds exclut déjà les jours (contrairement à total_seconds()),
+                        # donc h/m ici sont bien le reliquat après extraction de restant.days.
+                        h, m = divmod(restant.seconds // 60, 60)
                         cooldown_text = f"⏳ {restant.days}j {h}h{m}m" if restant.days else f"⏳ {h}h{m}m"
 
                 except Exception:
