@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 quincy_hollow_shinigami.py — Quincy / Hollow / Shinigami (Pierre/Feuille/Ciseaux)
 # Objectif : Jouer à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️ en vs Bot ou vs Joueur
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import random
 from typing import Optional
 
@@ -18,9 +18,9 @@ from discord.ext import commands
 
 from utils.discord_utils import safe_send, safe_respond, safe_interact, safe_edit
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧰 Constantes & utilitaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CHOICES = ["quincy", "hollow", "shinigami"]
 EMOJI   = {"quincy": "🏹", "hollow": "👹", "shinigami": "⚔️"}
 
@@ -47,9 +47,9 @@ def build_result_embed(player_choice: str, bot_choice: str, result: str, footer:
     embed.set_footer(text=footer)
     return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Bouton de choix vs bot
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class SoloChoiceButton(discord.ui.Button):
     def __init__(self, choice_key: str, author_id: int):
@@ -75,9 +75,9 @@ class SoloChoiceButton(discord.ui.Button):
         await safe_interact(interaction, embed=embed, view=self.view, edit=True)
         self.view.stop()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Bouton de choix en duel
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class ChoiceButton(discord.ui.Button):
     def __init__(self, choice_key: str, owner_id: int):
@@ -106,9 +106,9 @@ class ChoiceButton(discord.ui.Button):
         if len(view.choices) == 2 and all(k in view.choices for k in (view.challenger_id, view.opponent_id)):
             await view.finish_game(interaction)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Bouton accepter/décliner
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class AcceptDeclineButton(discord.ui.Button):
     def __init__(self, accept: bool, challenger_id: int, opponent_id: int):
@@ -148,9 +148,9 @@ class ChallengeView(discord.ui.View):
         self.add_item(AcceptDeclineButton(True,  challenger_id, opponent_id))
         self.add_item(AcceptDeclineButton(False, challenger_id, opponent_id))
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ UI — Vue de duel joueur vs joueur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class DuelView(discord.ui.View):
     def __init__(self, bot: commands.Bot, challenger_id: int, opponent_id: int, channel, timeout: float = 120.0):
@@ -235,9 +235,9 @@ class DuelView(discord.ui.View):
         await safe_send(self.channel, embed=embed)
         self.stop()
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class QuincyHollowShinigami(commands.Cog):
     """
@@ -246,9 +246,9 @@ class QuincyHollowShinigami(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def _build_vs_bot_view(self, author_id: int) -> tuple[discord.Embed, discord.ui.View]:
         embed = discord.Embed(
             title="🎮 Quincy / Hollow / Shinigami — VS BOT",
@@ -270,9 +270,9 @@ class QuincyHollowShinigami(commands.Cog):
         view = ChallengeView(self.bot, challenger_id, opponent_id, channel=channel)
         return embed, view
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="shifumi",description="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️ — précisez un adversaire pour défier.")
     @app_commands.describe(opponent="Mentionner un membre pour le défier (optionnel).")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
@@ -288,9 +288,9 @@ class QuincyHollowShinigami(commands.Cog):
         embed, view = self._build_challenge_view(interaction.user.id, opponent.id, interaction.channel)
         await safe_respond(interaction, embed=embed, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="shifumi",aliases=["sfm", "pfc"],help="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_quincy_hollow_shinigami(self, ctx: commands.Context, member: Optional[discord.Member] = None):
@@ -305,9 +305,9 @@ class QuincyHollowShinigami(commands.Cog):
         embed, view = self._build_challenge_view(ctx.author.id, member.id, ctx.channel)
         await safe_send(ctx.channel, embed=embed, view=view)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = QuincyHollowShinigami(bot)
     for command in cog.get_commands():
