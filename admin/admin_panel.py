@@ -255,15 +255,13 @@ def api_action(action):
 
 
 def restart_bot_process():
+    # start.sh se charge lui-même de détacher le bot (setsid) et de rediriger
+    # ses logs vers bot.log — pas besoin de le refaire ici. On lance juste
+    # start.sh normalement, puis on tue ce process-ci (l'ancien bot.py, qui
+    # tient ce panel admin dans un thread).
     print("🔄 Redémarrage complet via start.sh...")
     start_sh = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "start.sh")
-    subprocess.Popen(
-        ["bash", start_sh],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        close_fds=True,
-        start_new_session=True
-    )
+    subprocess.Popen(["bash", start_sh])
     time.sleep(1)
     os.kill(os.getpid(), 9)
 
