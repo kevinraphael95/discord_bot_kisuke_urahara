@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 gay.py — Commande simple /gay et !gay
 # Objectif : Calcule un taux de gaytitude fixe et fun pour un utilisateur Discord
 # Catégorie : 🌈 Fun&Random
 # Accès : Tous
 # Cooldown : 1 utilisation / 3 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ import hashlib
 import random
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Fonction utilitaire pour calculer le score et générer l'embed
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def calculer_gaytitude_embed(member: discord.Member) -> discord.Embed:
     user_id = str(member.id).encode()
     hash_val = hashlib.md5(user_id).digest()
@@ -71,18 +71,18 @@ def calculer_gaytitude_embed(member: discord.Member) -> discord.Embed:
 
     return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class GayCommand(commands.Cog):
     """Commande /gay et !gay — Calcule un taux de gaytitude fixe et fun."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="gay",description="🌈 Calcule ton taux de gaytitude.")
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)  # Cooldown 3s par utilisateur
     @app_commands.describe(member="Utilisateur pour qui calculer la gaytitude (optionnel)")
@@ -98,9 +98,9 @@ class GayCommand(commands.Cog):
             print(f"[ERREUR /gay] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="gay",help="🌈 Calcule ton taux de gaytitude.")
     @commands.cooldown(1, 3, commands.BucketType.user)  # Cooldown 3s par utilisateur
     async def prefix_gay(self, ctx: commands.Context, member: discord.Member = None):
@@ -115,9 +115,9 @@ class GayCommand(commands.Cog):
             print(f"[ERREUR !gay] {e}")
             await safe_send(ctx, "❌ Une erreur est survenue.")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = GayCommand(bot)
     for command in cog.get_commands():
