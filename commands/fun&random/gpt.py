@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 gpt.py — Commande /gpt et !!gpt : Chat libre avec GPT-OSS (Cloud NVIDIA)
 # Objectif : Permettre une conversation libre avec le modèle GPT-OSS hébergé sur le cloud NVIDIA.
 # Catégorie : Fun&Random
 # Accès : Tous
 # Cooldown : 1 utilisation / 4 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ import asyncio
 from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
 from utils.gpt_oss_client import get_simple_response     # 🔗 Client GPT-OSS
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class GPTChat(commands.Cog):
     """
     Commande /gpt et !!gpt — conversation libre avec le modèle GPT-OSS (Cloud NVIDIA)
@@ -26,9 +26,9 @@ class GPTChat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH : /gpt <message>
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="gpt",description="Chat libre avec le modèle GPT-OSS (Cloud NVIDIA)")
     @app_commands.describe(prompt="Message ou question à envoyer au modèle.")
     @app_commands.checks.cooldown(1, 4.0, key=lambda i: i.user.id)
@@ -36,9 +36,9 @@ class GPTChat(commands.Cog):
         """Commande slash — conversation libre avec GPT-OSS"""
         await self._handle_gpt_request(interaction=interaction, prompt=prompt)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX : !!gpt <message>
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="gpt", help="Chat libre avec le modèle GPT-OSS (Cloud NVIDIA)")
     @commands.cooldown(1, 4.0, commands.BucketType.user)
     async def prefix_gpt(self, ctx: commands.Context, *, prompt: str = None):
@@ -55,14 +55,14 @@ class GPTChat(commands.Cog):
             return
         await self._handle_gpt_request(ctx=ctx, prompt=prompt)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # ⚙️ Traitement principal de la requête GPT
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _handle_gpt_request(self, ctx: commands.Context = None, interaction: discord.Interaction = None, prompt: str = None):
         """Gère la logique commune entre la commande slash et préfixe"""
         user = (ctx.author if ctx else interaction.user)
 
-        # ─────────────── Limite de longueur du prompt ───────────────
+        # =============== Limite de longueur du prompt ===============
         if len(prompt) > 90:
             msg = (
                 f"⚠️ Ton message dépasse la limite de **90 caractères**.\n"
@@ -75,7 +75,7 @@ class GPTChat(commands.Cog):
             # 🔄 Exécution du modèle sur un thread asynchrone
             response = await asyncio.to_thread(get_simple_response, prompt)
 
-            # ─────────────── Vérifications de sécurité ───────────────
+            # =============== Vérifications de sécurité ===============
             if not response or response.startswith("⚠️"):
                 response = "⚠️ Réponse vide ou erreur du modèle."
             elif len(response) > 500:
@@ -94,9 +94,9 @@ class GPTChat(commands.Cog):
             response
         )
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🪶 Méthodes utilitaires internes
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send(self, ctx: commands.Context, interaction: discord.Interaction, title: str, description: str):
         """Envoi automatique selon le type d’appel (slash ou prefix)"""
         embed = self._build_embed(title, description)
@@ -120,9 +120,9 @@ class GPTChat(commands.Cog):
         embed.set_footer(text="GPT-OSS NVIDIA • Cloud")
         return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = GPTChat(bot)
     for command in cog.get_commands():
