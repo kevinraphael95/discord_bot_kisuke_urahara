@@ -9,6 +9,7 @@
 # ────────────────────────────────────────────────────────────────────────────────
 # 📦 Imports nécessaires
 # ────────────────────────────────────────────────────────────────────────────────
+import sqlite3
 from datetime import datetime, timedelta, timezone
 
 import discord
@@ -33,31 +34,31 @@ SPAWN_SPEED_INTERVALS = {
 # ────────────────────────────────────────────────────────────────────────────────
 # 🗄️ Helpers DB
 # ────────────────────────────────────────────────────────────────────────────────
-def get_server_config(guild_id: int):
+def _query(sql: str, params: tuple = ()):
+    """Exécute une requête SQL en lecture avec accès aux colonnes par nom (sqlite3.Row)."""
     conn = get_conn()
-    conn.row_factory = __import__("sqlite3").Row
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM reiatsu_config WHERE guild_id = ?", (guild_id,))
-    row = cursor.fetchone()
-    conn.close()
-    return row
-
-def get_classement():
-    conn = get_conn()
-    conn.row_factory = __import__("sqlite3").Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT user_id, points FROM reiatsu ORDER BY points DESC LIMIT 10")
+    cursor.execute(sql, params)
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def get_server_config(guild_id: int):
+    rows = _query("SELECT * FROM reiatsu_config WHERE guild_id = ?", (guild_id,))
+    return rows[0] if rows else None
+
+def get_classement():
+    return _query("SELECT user_id, points FROM reiatsu ORDER BY points DESC LIMIT 10")
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🎛️ UI — Vue Reiatsu (bouton persistant + lien spawn)
 # ────────────────────────────────────────────────────────────────────────────────
 class ReiatsuView(View):
-    def __init__(self, author: discord.Member = None, spawn_link: str = None):
+    """Bouton Classement (accessible à tout le monde) + lien optionnel vers le spawn en cours."""
+
+    def __init__(self, spawn_link: str = None):
         super().__init__(timeout=None)
-        self.author = author
 
         if spawn_link:
             self.add_item(
@@ -70,9 +71,6 @@ class ReiatsuView(View):
 
     @discord.ui.button(label="📊 Classement", style=discord.ButtonStyle.primary, custom_id="reiatsu:classement")
     async def classement_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.author and interaction.user != self.author:
-            return await safe_respond(interaction, "❌ Tu ne peux pas utiliser ce bouton.", ephemeral=True)
-
         classement = get_classement()
 
         if not classement:
@@ -106,7 +104,7 @@ class ReiatsuCommand(commands.Cog):
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Fonction interne commune
     # ────────────────────────────────────────────────────────────────────────────
-    async def _send_server_info(self, channel, author: discord.Member, guild: discord.Guild):
+    async def _send_server_info(self, channel, guild: discord.Guild):
         config = get_server_config(guild.id)
 
         salon_text = "❌"
@@ -160,7 +158,7 @@ class ReiatsuCommand(commands.Cog):
         )
         embed.set_footer(text="💠 Utilise `!!tutoreiatsu` ou `!!tutorts` pour en savoir plus sur le Reiatsu.")
 
-        view = ReiatsuView(author, spawn_link=spawn_link)
+        view = ReiatsuView(spawn_link=spawn_link)
         await safe_send(channel, embed=embed, view=view)
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -173,7 +171,7 @@ class ReiatsuCommand(commands.Cog):
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_reiatsu(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        await self._send_server_info(interaction.channel, interaction.user, interaction.guild)
+        await self._send_server_info(interaction.channel, interaction.guild)
         await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -186,7 +184,7 @@ class ReiatsuCommand(commands.Cog):
     )
     @commands.cooldown(1, 3.0, commands.BucketType.user)
     async def prefix_reiatsu(self, ctx: commands.Context):
-        await self._send_server_info(ctx.channel, ctx.author, ctx.guild)
+        await self._send_server_info(ctx.channel, ctx.guild)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🔌 Setup du Cog
