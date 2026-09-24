@@ -1,15 +1,15 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 skill.py — Commande interactive /skill et !skill
 # Objectif : Afficher et activer la compétence active du joueur
 # (Illusionniste, Voleur, Absorbeur, Parieur)
 # Catégorie : Reiatsu
 # Accès : Tous
 # Cooldown : 12h (8h pour Illusionniste)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -23,17 +23,17 @@ import sqlite3
 from utils.discord_utils import safe_send, safe_respond
 from utils.reiatsu_utils import ensure_profile, has_class
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ SQLite
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DB_PATH = os.path.join("database", "reiatsu.db")
 
 def get_conn():
     return sqlite3.connect(DB_PATH)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement de la configuration Reiatsu
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 REIATSU_CONFIG_PATH = os.path.join("data", "reiatsu_config.json")
 
 def load_reiatsu_config():
@@ -45,9 +45,9 @@ def load_reiatsu_config():
         print(f"[ERREUR JSON] Impossible de charger {REIATSU_CONFIG_PATH} : {e}")
         return {}
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal : Skill
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Skill(commands.Cog):
     """Commande /skill et !skill — Active la compétence active du joueur."""
 
@@ -56,9 +56,9 @@ class Skill(commands.Cog):
         self.config = load_reiatsu_config()
         self.skill_locks = {}
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🏆 Validation de la quête "skill"
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     async def valider_quete_skill(self, user: discord.User, channel=None):
         """Valide la quête 'Première utilisation du skill'."""
         try:
@@ -99,9 +99,9 @@ class Skill(commands.Cog):
         except Exception as e:
             print(f"[ERREUR validation quête skill] {e}")
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Fonction interne : activation du skill
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     async def _activate_skill(self, user: discord.User, channel: discord.abc.Messageable, interaction: discord.Interaction = None):
         if user.id not in self.skill_locks:
             self.skill_locks[user.id] = asyncio.Lock()
@@ -181,7 +181,7 @@ class Skill(commands.Cog):
 
             now_iso = datetime.utcnow().isoformat()
 
-            # ───────────── Illusionniste ─────────────
+            # ============= Illusionniste =============
             if classe == "Illusionniste":
 
                 conn = get_conn()
@@ -224,7 +224,7 @@ class Skill(commands.Cog):
                 await self.valider_quete_skill(user, channel)
                 return
 
-            # ───────────── Voleur ─────────────
+            # ============= Voleur =============
             elif classe == "Voleur":
 
                 conn = get_conn()
@@ -246,7 +246,7 @@ class Skill(commands.Cog):
                 await self.valider_quete_skill(user, channel)
                 return
 
-            # ───────────── Absorbeur ─────────────
+            # ============= Absorbeur =============
             elif classe == "Absorbeur":
 
                 conn = get_conn()
@@ -268,7 +268,7 @@ class Skill(commands.Cog):
                 await self.valider_quete_skill(user, channel)
                 return
 
-            # ───────────── Parieur ─────────────
+            # ============= Parieur =============
             elif classe == "Parieur":
 
                 mise = 30
@@ -327,9 +327,9 @@ class Skill(commands.Cog):
                 await self.valider_quete_skill(user, channel)
                 return
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     @app_commands.command(name="skill", description="Active la compétence de ta classe Reiatsu.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_skill(self, interaction: discord.Interaction):
@@ -337,17 +337,17 @@ class Skill(commands.Cog):
         await self._activate_skill(interaction.user, interaction.channel, interaction)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────
+    # ========================================================================
     @commands.command(name="skill", help="Active la compétence de ta classe Reiatsu.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_skill(self, ctx: commands.Context):
         await self._activate_skill(ctx.author, ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Skill(bot)
     for command in cog.get_commands():
