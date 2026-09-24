@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 anagramme.py — Commande interactive /anagramme et !anagramme
 # Objectif : Jeu de l'anagramme avec embed, tentatives limitées et feedback
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
@@ -16,14 +16,14 @@ import random, aiohttp, unicodedata, asyncio
 from spellchecker import SpellChecker
 from utils.discord_utils import safe_send, safe_edit
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Initialisation du spellchecker français
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 spell = SpellChecker(language='fr')
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Fonction pour récupérer un mot français aléatoire
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def get_random_french_word(length: int | None = None) -> str:
     url = "https://trouve-mot.fr/api/random"
     if length:
@@ -39,15 +39,15 @@ async def get_random_french_word(length: int | None = None) -> str:
         print(f"[ERREUR API Anagramme] {e}")
     return "PYTHON"
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Vérification d’un mot via SpellChecker
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def is_valid_word(word: str) -> bool:
     return word.lower() in spell.word_frequency
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎮 Vue principale du jeu
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class AnagrammeView:
     """Classe représentant une partie d'Anagramme"""
 
@@ -161,9 +161,9 @@ class AnagrammeView:
                     await safe_edit(self.message, embed=self.build_embed())
                 break
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Anagramme(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -191,9 +191,9 @@ class Anagramme(commands.Cog):
             view = self.active_games[message.channel.id]
             await view.process_guess(message.channel, content, message.author.display_name, message.author.id)
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @app_commands.command(name="anagramme", description="Lance une partie d'Anagramme (multi = tout le monde peut jouer)")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
     async def slash_anagramme(self, interaction: discord.Interaction, mode: str = "solo"):
@@ -201,16 +201,16 @@ class Anagramme(commands.Cog):
         await self._start_game(interaction.channel, author_id=interaction.user.id, mode=mode)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @commands.command(name="anagramme", help="Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.")
     async def prefix_anagramme(self, ctx: commands.Context, mode: str = "solo"):
         await self._start_game(ctx.channel, author_id=ctx.author.id, mode=mode)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Anagramme(bot)
     for command in cog.get_commands():
