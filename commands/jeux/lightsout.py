@@ -1,13 +1,13 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 💡 lightsout.py — Commande interactive !lightsout et /lightsout
 # Objectif : Jeu "Lights Out" avec grille de boutons interactifs (toujours résoluble)
 # Catégorie : Jeux
 # Accès : Public
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
@@ -15,17 +15,17 @@ import asyncio
 import numpy as np
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Constantes du jeu
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 TAILLE_GRILLE = 5
 INACTIVITE_MAX = 180
 COULEUR_ACTIVE = 0xFFD700
 COULEUR_INACTIVE = 0x2F3136
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧩 Classe LightsOutGame
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class LightsOutGame:
     """Gestion de la grille et des règles du jeu Lights Out."""
     def __init__(self, size: int = TAILLE_GRILLE, mode: str = "solo"):
@@ -73,9 +73,9 @@ class LightsOutGame:
         embed.add_field(name="État", value=status, inline=False)
         return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Classe LightsOutView
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class LightsOutView(discord.ui.View):
     def __init__(self, game: LightsOutGame, parent_cog, channel_id: int, player_id: int | None = None):
         super().__init__(timeout=None)
@@ -119,9 +119,9 @@ class LightsOutView(discord.ui.View):
                 self.parent_cog.sessions.pop(self.channel_id, None)
         return callback
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🕹️ Classe LightsOutSession
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class LightsOutSession:
     """Représente une session active de jeu Lights Out dans un salon."""
     def __init__(self, game: LightsOutGame, message: discord.Message, mode: str = "solo", author_id: int | None = None):
@@ -131,9 +131,9 @@ class LightsOutSession:
         self.last_activity = asyncio.get_event_loop().time()
         self.author_id = author_id
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧩 Cog principal — LightsOut
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class LightsOut(commands.Cog):
     """
     Commande !lightsout et /lightsout — Lancer une partie de Lights Out
@@ -146,23 +146,23 @@ class LightsOut(commands.Cog):
     def cog_unload(self):
         self.verif_inactivite.cancel()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="lightsout", aliases=["lo"])
     async def lightsout_cmd(self, ctx: commands.Context, mode: str = ""):
         await self.start_game(ctx.channel, ctx.author.id, mode, ctx)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="lightsout", description="Lancer une partie de Lights Out")
     async def slash_lightsout(self, interaction: discord.Interaction, mode: str = ""):
         await self.start_game(interaction.channel, interaction.user.id, mode, interaction)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Méthode commune pour lancer une partie
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def start_game(self, channel, author_id: int, mode: str, ctx_or_interaction):
         mode = mode.lower()
         if mode not in ("multi", "m"):
@@ -186,9 +186,9 @@ class LightsOut(commands.Cog):
         session = LightsOutSession(game, message, mode=mode, author_id=author_id)
         self.sessions[channel_id] = session
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Vérification d’inactivité
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @tasks.loop(seconds=30)
     async def verif_inactivite(self):
         now = asyncio.get_event_loop().time()
@@ -201,9 +201,9 @@ class LightsOut(commands.Cog):
             if session:
                 await safe_send(session.message.channel, "⏰ Partie terminée pour inactivité (3 minutes sans action).")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = LightsOut(bot)
     for command in cog.get_commands():
