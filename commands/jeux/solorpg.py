@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 solorpg.py — Commande Solo RPG / Livres dont vous êtes le héros
 # Objectif : Permet de choisir une histoire et de progresser dedans
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,9 +16,9 @@ import json
 import os
 from utils.discord_utils import safe_send, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal : SoloRPG
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class SoloRPG(commands.Cog):
     """
     Commande /solorpg et !solorpg — Choisis une histoire et progresse dedans.
@@ -30,9 +30,9 @@ class SoloRPG(commands.Cog):
         self.histoires_path = "data/solorpg"
         self.histoires = self.load_histoires()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Chargement des histoires
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def load_histoires(self):
         """Charge tous les fichiers JSON depuis data/solorpg"""
         histoires = {}
@@ -52,16 +52,16 @@ class SoloRPG(commands.Cog):
 
         return histoires
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Affichage d'une étape
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def afficher_etape(self, ctx_or_interaction, histoire, page, historique=None):
         """Affiche une page avec ses choix et gère les boutons de navigation."""
         contenu = histoire.get("contenu", [])
         if historique is None:
             historique = []
 
-        # ── Fin de l'histoire ──
+        # == Fin de l'histoire ==
         if page > len(contenu) or page <= 0:
             embed = discord.Embed(
                 title=histoire.get("titre", "Histoire inconnue"),
@@ -78,14 +78,14 @@ class SoloRPG(commands.Cog):
         texte = etape.get("texte", "...")
         options = etape.get("options", [])
 
-        # ── Création de l'embed ──
+        # == Création de l'embed ==
         embed = discord.Embed(
             title=f"{histoire['titre']} — Page {page}",
             description=texte,
             color=discord.Color.blurple()
         )
 
-        # ── Ajout des choix dans l'embed ──
+        # == Ajout des choix dans l'embed ==
         if options:
             desc_choix = "\n".join(
                 [f"`{i+1}` — {opt['texte']} *(→ Page {opt.get('suivant', page+1)})*"
@@ -95,7 +95,7 @@ class SoloRPG(commands.Cog):
         else:
             embed.add_field(name="Aucun choix disponible", value="Fin de cette branche.", inline=False)
 
-        # ── Vue (boutons interactifs) ──
+        # == Vue (boutons interactifs) ==
         view = discord.ui.View(timeout=None)
 
         # Boutons de choix (affichés par numéro de page)
@@ -135,9 +135,9 @@ class SoloRPG(commands.Cog):
             except discord.errors.InteractionResponded:
                 await ctx_or_interaction.edit_original_response(embed=embed, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Menu de sélection d'histoire (Slash)
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="solorpg", description="Commence une histoire Solo RPG interactive.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_solorpg(self, interaction: discord.Interaction):
@@ -163,9 +163,9 @@ class SoloRPG(commands.Cog):
         view.add_item(select)
         await safe_respond(interaction, "✨ Choisis une histoire à explorer :", view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande préfixe (!solorpg)
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="solorpg")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_solorpg(self, ctx: commands.Context):
@@ -191,9 +191,9 @@ class SoloRPG(commands.Cog):
         view.add_item(select)
         await safe_send(ctx.channel, "✨ Choisis une histoire à explorer :", view=view)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = SoloRPG(bot)
     for command in cog.get_commands():
