@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 perso.py — Commande interactive /perso et !perso
 # Objectif : Affiche la fiche d'un personnage Bleach depuis un JSON
 # Catégorie : Bleach
 # Accès : Tous
 # Cooldown : 5s par utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import json
 import os
 import random
@@ -19,9 +19,9 @@ from discord.ext import commands
 
 from utils.discord_utils import safe_send
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Dossier contenant les JSON des personnages
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 CHAR_DIR = os.path.join("data", "personnages")
 
 def load_character(name: str):
@@ -36,9 +36,9 @@ def list_characters():
     """Liste tous les personnages disponibles."""
     return [f.replace(".json", "") for f in os.listdir(CHAR_DIR) if f.endswith(".json")]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class Perso(commands.Cog):
     """Commandes /perso et !perso — Affiche la fiche d'un personnage."""
@@ -46,9 +46,9 @@ class Perso(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_character(self, channel: discord.abc.Messageable, name: str = None):
         if not name:
             name = random.choice(list_characters())
@@ -67,7 +67,7 @@ class Perso(commands.Cog):
         embed.add_field(name="Race(s)",      value=", ".join(char.get("race",         ["N/A"])), inline=False)
         embed.add_field(name="Type(s)",      value=", ".join(char.get("type",         ["N/A"])), inline=False)
 
-        # ─── Stats ───
+        # === Stats ===
         stats       = char.get("stats_base", {})
         total_stats = sum(stats.get(k, 0) for k in ["pv", "attaque", "defense", "special", "special_def", "rapidite"])
         embed.add_field(
@@ -84,7 +84,7 @@ class Perso(commands.Cog):
             inline=False
         )
 
-        # ─── Formes + attaques ───
+        # === Formes + attaques ===
         for forme_name, forme in char.get("formes", {}).items():
             attaques_text_list = []
             for atk in forme.get("attaques", []):
@@ -110,7 +110,7 @@ class Perso(commands.Cog):
                 inline=False
             )
 
-        # ─── Image ───
+        # === Image ===
         images     = char.get("images") or []
         image_path = images[0] if images else "data/images/image_par_defaut.jpg"
 
@@ -124,9 +124,9 @@ class Perso(commands.Cog):
         else:
             await safe_send(channel, embed=embed)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="perso",description="Affiche la fiche d'un personnage Bleach.")
     @app_commands.describe(name="Nom du personnage (laisser vide pour aléatoire)")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
@@ -135,17 +135,17 @@ class Perso(commands.Cog):
         await self._send_character(interaction.channel, name)
         await interaction.delete_original_response()
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="perso",help="Affiche la fiche d'un personnage Bleach.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_perso(self, ctx: commands.Context, *, name: str = None):
         await self._send_character(ctx.channel, name)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Perso(bot)
     for command in cog.get_commands():
