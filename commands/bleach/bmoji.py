@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 bmoji.py — Commande interactive !bmoji + /bmoji
 # Objectif : Deviner quel personnage Bleach se cache derrière un emoji
 # Catégorie : Bleach
 # Accès : Public
 # Cooldown : 1 utilisation / 5s / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import json
 import logging
 import os
@@ -23,9 +23,9 @@ from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📂 Chargement des données JSON
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 DATA_JSON_PATH = os.path.join("data", "bleach_emojis.json")
 
 def load_characters() -> list:
@@ -37,9 +37,9 @@ def load_characters() -> list:
         log.exception("[bmoji] Impossible de charger %s : %s", DATA_JSON_PATH, e)
         return []
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🗄️ Accès base de données locale
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 def db_valider_quete(user_id: int) -> int | None:
     """
@@ -79,9 +79,9 @@ def db_valider_quete(user_id: int) -> int | None:
         log.exception("[bmoji] Erreur validation quête SQLite : %s", e)
         return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
 class BMojiCommand(commands.Cog):
     """Commandes /bmoji et !bmoji — Devine le personnage Bleach caché derrière des emojis."""
@@ -89,9 +89,9 @@ class BMojiCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _valider_quete_bmoji(self, user: discord.User | discord.Member, channel: discord.abc.Messageable):
         """Valide la quête 'bmoji' et envoie un embed de félicitations si nécessaire."""
         new_lvl = db_valider_quete(user.id)
@@ -181,25 +181,25 @@ class BMojiCommand(commands.Cog):
             else:
                 await safe_send(target.channel, result_msg)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="bmoji",description="Devine quel personnage Bleach se cache derrière ces emojis.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def bmoji_slash(self, interaction: discord.Interaction):
         await self._run_bmoji(interaction)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="bmoji",help="Devine quel personnage Bleach se cache derrière ces emojis.")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def bmoji_prefix(self, ctx: commands.Context):
         await self._run_bmoji(ctx)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = BMojiCommand(bot)
     for command in cog.get_commands():
