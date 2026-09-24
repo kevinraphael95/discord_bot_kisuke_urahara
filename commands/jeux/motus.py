@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 motus.py — Commande interactive /motus et !motus
 # Objectif : Jeu du Motus avec embed, tentatives limitées et feedback coloré
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -19,14 +19,14 @@ import unicodedata
 from spellchecker import SpellChecker
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Initialisation du spellchecker français
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 spell = SpellChecker(language='fr')
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Fonction pour récupérer un mot français aléatoire
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def get_random_french_word(length: int | None = None) -> str:
     """Récupère un mot français aléatoire depuis l'API trouve-mot.fr"""
     url = "https://trouve-mot.fr/api/random"
@@ -43,16 +43,16 @@ async def get_random_french_word(length: int | None = None) -> str:
         print(f"[ERREUR API Motus] {e}")
     return "PYTHON"
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Fonction pour vérifier qu’un mot existe via SpellChecker
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def is_valid_word(word: str) -> bool:
     """Retourne True si le mot est reconnu par SpellChecker"""
     return word.lower() in spell.word_frequency
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Modal pour proposer un mot
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class MotusModal(Modal):
     def __init__(self, parent_view):
         super().__init__(title="Propose un mot")
@@ -70,9 +70,9 @@ class MotusModal(Modal):
         guess = self.word_input.value.strip().upper()
         await self.parent_view.process_guess(interaction, guess)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Vue principale avec boutons (Proposer + Indice)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class MotusView(View):
     def __init__(self, target_word: str, max_attempts: int | None = None, author_id: int | None = None):
         super().__init__(timeout=180)
@@ -98,14 +98,14 @@ class MotusView(View):
         self.hint_button = HintButton(self)
         self.add_item(self.hint_button)
 
-    # ───────────── Helper pour enlever accents ─────────────
+    # ============= Helper pour enlever accents =============
     def remove_accents(self, text: str) -> str:
         return ''.join(
             c for c in unicodedata.normalize('NFD', text)
             if unicodedata.category(c) != 'Mn'
         ).upper()
 
-    # ───────────── Feedback visuel ─────────────
+    # ============= Feedback visuel =============
     def create_feedback_line(self, entry: dict) -> str:
         word = entry['word']
         is_hint = entry.get('hint', False)
@@ -130,7 +130,7 @@ class MotusView(View):
 
         return f"{letters}\n{' '.join(colors)}"
 
-    # ───────────── Vérifie un essai ─────────────
+    # ============= Vérifie un essai =============
     def evaluate_guess(self, word: str) -> list[str]:
         result = [None] * len(word)
         target_counts = {}
@@ -220,9 +220,9 @@ class MotusView(View):
         embed.set_footer(text=f"⏳ Temps écoulé ! Le mot était {self.target_word}.")
         await safe_edit(self.message, embed=embed, view=self)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Bouton Proposer
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class MotusButton(Button):
     def __init__(self, parent_view: MotusView):
         super().__init__(label="Proposer un mot", style=discord.ButtonStyle.primary)
@@ -233,9 +233,9 @@ class MotusButton(Button):
             return await interaction.response.send_message("❌ Seul le lanceur peut proposer un mot.", ephemeral=True)
         await interaction.response.send_modal(MotusModal(self.parent_view))
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Bouton Indice
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class HintButton(Button):
     def __init__(self, parent_view: MotusView):
         super().__init__(label="Indice", style=discord.ButtonStyle.secondary)
@@ -268,9 +268,9 @@ class HintButton(Button):
         await safe_edit(pv.message, embed=pv.build_embed(), view=pv)
         await interaction.response.send_message(f"🔎 Indice utilisé — lettre **{pv.target_word[idx]}** révélée.", ephemeral=True)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Motus(commands.Cog):
     """Commande /motus et !motus — Lance une partie de Motus"""
     def __init__(self, bot: commands.Bot):
@@ -309,9 +309,9 @@ class Motus(commands.Cog):
             print(f"[ERREUR !motus] {e}")
             await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Motus(bot)
     for command in cog.get_commands():
