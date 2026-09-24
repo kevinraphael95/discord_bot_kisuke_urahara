@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 compte_est_bon.py — Jeu interactif /compte_est_bon et !compte_est_bon
 # Objectif : Reproduire le jeu "Le Compte est Bon" avec calculs et proposition
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import re
 import random
 import asyncio
@@ -18,9 +18,9 @@ from discord.ext import commands
 from discord.ui import View, Button, Modal, TextInput
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎮 Fonctions utilitaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 def generate_numbers():
     """Génère 6 nombres (2 grands + 4 petits) et un objectif (100-999)."""
     grands = [25, 50, 75, 100]
@@ -41,9 +41,9 @@ def safe_eval(expr: str):
     except Exception:
         return None
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Interface — Modal & Bouton
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class PropositionModal(Modal):
     def __init__(self, parent_view: "CompteBonView", numbers: list, target: int):
         super().__init__(title="🧮 Proposer un calcul")
@@ -155,9 +155,9 @@ class CompteBonView(View):
         except Exception:
             pass
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class CompteEstBon(commands.Cog):
     """
     Commande /compte_est_bon et !compte_est_bon — Reproduit le jeu "Le Compte est Bon"
@@ -165,9 +165,9 @@ class CompteEstBon(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Lancement du jeu (utilisé par slash et prefix)
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _start_game(self, channel: discord.abc.Messageable, author: discord.User = None, multi: bool = False):
         numbers, target = generate_numbers()
         embed = discord.Embed(
@@ -195,9 +195,9 @@ class CompteEstBon(commands.Cog):
         except Exception:
             pass
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(name="compte_est_bon",description="Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)")
     @app_commands.describe(mode="Écris 'multi' pour activer le mode multijoueur.")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
@@ -207,18 +207,18 @@ class CompteEstBon(commands.Cog):
         await safe_respond(interaction, "🎮 Jeu lancé ! Regarde le canal pour participer.", ephemeral=True)
         await self._start_game(interaction.channel, author=interaction.user, multi=multi)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="compte_est_bon", aliases=["lceb", "lecompteestbon"], help="Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_compte(self, ctx: commands.Context, mode: str = None):
         multi = bool(mode and mode.lower() in ["multi", "m"])
         await self._start_game(ctx.channel, author=ctx.author, multi=multi)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = CompteEstBon(bot)
     for command in cog.get_commands():
