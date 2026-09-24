@@ -84,7 +84,7 @@ class ControlView(View):
             errors = (stderr or b"").decode(errors="ignore").strip()
 
             texte = output or "(aucune sortie)"
-            if errors:
+            if errors and proc.returncode != 0:
                 texte += f"\n\n⚠️ stderr:\n{errors}"
             if len(texte) > 1000:
                 texte = texte[:1000] + "\n... (tronqué)"
