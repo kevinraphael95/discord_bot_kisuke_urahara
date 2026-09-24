@@ -57,12 +57,22 @@ class ControlView(View):
             await safe_edit(self.message, view=self)
 
     # ────────────────────────────────────────────────────────────────────────
+    # 🔹 Base de l'embed du panneau (titre + description fixes)
+    # ────────────────────────────────────────────────────────────────────────
+    def _base_embed(self, color: discord.Color = discord.Color.blurple()) -> discord.Embed:
+        return discord.Embed(
+            title="🛠️ Panneau de contrôle du bot",
+            description="Choisis une action ci-dessous.",
+            color=color
+        )
+
+    # ────────────────────────────────────────────────────────────────────────
     # 🔹 Git Pull
     # ────────────────────────────────────────────────────────────────────────
     @discord.ui.button(label="Git Pull", style=discord.ButtonStyle.blurple, emoji="🔄")
     async def git_pull(self, interaction: discord.Interaction, button: Button):
         self.busy = True
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer()
         try:
             proc = await asyncio.create_subprocess_exec(
                 "git", "pull",
@@ -76,17 +86,18 @@ class ControlView(View):
             texte = output or "(aucune sortie)"
             if errors:
                 texte += f"\n\n⚠️ stderr:\n{errors}"
-            if len(texte) > 1800:
-                texte = texte[:1800] + "\n... (tronqué)"
+            if len(texte) > 1000:
+                texte = texte[:1000] + "\n... (tronqué)"
 
-            embed = discord.Embed(
-                title="🔄 Git Pull",
-                description=f"```\n{texte}\n```",
-                color=discord.Color.green() if proc.returncode == 0 else discord.Color.red()
+            embed = self._base_embed(
+                discord.Color.green() if proc.returncode == 0 else discord.Color.red()
             )
-            await interaction.followup.send(embed=embed)
+            embed.add_field(name="🔄 Git Pull", value=f"```\n{texte}\n```", inline=False)
+            await safe_edit(self.message, embed=embed, view=self)
         except Exception as e:
-            await interaction.followup.send(f"❌ Erreur pendant le git pull : `{e}`")
+            embed = self._base_embed(discord.Color.red())
+            embed.add_field(name="🔄 Git Pull", value=f"❌ Erreur : `{e}`", inline=False)
+            await safe_edit(self.message, embed=embed, view=self)
         finally:
             self.busy = False
 
@@ -96,7 +107,7 @@ class ControlView(View):
     @discord.ui.button(label="Reload Cogs", style=discord.ButtonStyle.green, emoji="♻️")
     async def reload_cogs(self, interaction: discord.Interaction, button: Button):
         self.busy = True
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer()
         try:
             reussis, echoues = [], []
             for ext in list(self.bot.extensions.keys()):
@@ -106,15 +117,14 @@ class ControlView(View):
                 except Exception as e:
                     echoues.append(f"{ext} → `{e}`")
 
-            embed = discord.Embed(
-                title="♻️ Reload Cogs",
-                color=discord.Color.green() if not echoues else discord.Color.orange()
+            embed = self._base_embed(
+                discord.Color.green() if not echoues else discord.Color.orange()
             )
             reussis_texte = "\n".join(reussis) or "Aucun"
             if len(reussis_texte) > 1000:
                 reussis_texte = reussis_texte[:1000] + "\n... (tronqué)"
             embed.add_field(
-                name=f"✅ Rechargés ({len(reussis)})",
+                name=f"♻️ Rechargés ({len(reussis)})",
                 value=reussis_texte,
                 inline=False
             )
@@ -124,9 +134,11 @@ class ControlView(View):
                     value="\n".join(echoues)[:1000],
                     inline=False
                 )
-            await interaction.followup.send(embed=embed)
+            await safe_edit(self.message, embed=embed, view=self)
         except Exception as e:
-            await interaction.followup.send(f"❌ Erreur pendant le reload : `{e}`")
+            embed = self._base_embed(discord.Color.red())
+            embed.add_field(name="♻️ Reload Cogs", value=f"❌ Erreur : `{e}`", inline=False)
+            await safe_edit(self.message, embed=embed, view=self)
         finally:
             self.busy = False
 
@@ -138,8 +150,10 @@ class ControlView(View):
         self.busy = True
         for child in self.children:
             child.disabled = True
-        await interaction.response.edit_message(view=self)
-        await interaction.followup.send("🔁 Redémarrage du bot en cours...")
+
+        embed = self._base_embed(discord.Color.orange())
+        embed.add_field(name="🔁 Redémarrage", value="En cours...", inline=False)
+        await interaction.response.edit_message(embed=embed, view=self)
 
         try:
             # ⚠️ Ne PAS faire "await self.bot.close()" ici : ça termine
@@ -159,8 +173,9 @@ class ControlView(View):
             self.busy = False
             for child in self.children:
                 child.disabled = False
-            await safe_edit(self.message, view=self)
-            await interaction.followup.send(f"❌ Le redémarrage a échoué : `{e}`")
+            embed = self._base_embed(discord.Color.red())
+            embed.add_field(name="🔁 Redémarrage", value=f"❌ Échec : `{e}`", inline=False)
+            await safe_edit(self.message, embed=embed, view=self)
 
 # ================================================================================
 # 🧠 Cog principal
@@ -172,12 +187,8 @@ class BotControl(commands.Cog):
         self.bot = bot
 
     async def _send_panel(self, channel: discord.abc.Messageable, author: discord.abc.User):
-        embed = discord.Embed(
-            title="🛠️ Panneau de contrôle du bot",
-            description="Choisis une action ci-dessous.",
-            color=discord.Color.blurple()
-        )
         view = ControlView(self.bot, author.id)
+        embed = view._base_embed()
         view.message = await safe_send(channel, embed=embed, view=view)
 
     # ================================================================================
