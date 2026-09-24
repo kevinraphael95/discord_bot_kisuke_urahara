@@ -1,15 +1,15 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 devinelenombre.py — Commande interactive /devinelenombre et !devinelenombre
 # Objectif : Deviner un nombre entre 0 et 100
 # Modes : Solo (1 joueur) et Multi (plusieurs joueurs)
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -18,9 +18,9 @@ import random
 import asyncio
 from utils.discord_utils import safe_send, safe_edit, safe_respond
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Modal pour proposer un nombre
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class DevinelenombreModal(Modal):
     def __init__(self, parent_view):
         super().__init__(title="Propose un nombre")
@@ -41,9 +41,9 @@ class DevinelenombreModal(Modal):
             return await interaction.response.send_message("❌ Ce n'est pas un nombre valide.", ephemeral=True)
         await self.parent_view.process_guess(interaction, guess)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Vue principale avec boutons
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class DevinelenombreView(View):
     SOLO_TIME = 120
     MULTI_TIME = 120
@@ -120,9 +120,9 @@ class DevinelenombreView(View):
             embed.set_footer(text=f"⏳ Temps écoulé ! Le nombre était {self.target}.")
             await safe_edit(self.message, embed=embed, view=self)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎛️ Bouton Proposer
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class ProposeNombreButton(Button):
     def __init__(self, parent_view: DevinelenombreView):
         super().__init__(label="Proposer un nombre", style=discord.ButtonStyle.primary)
@@ -133,9 +133,9 @@ class ProposeNombreButton(Button):
             return await interaction.response.send_message("❌ Seul le lanceur peut proposer un nombre.", ephemeral=True)
         await interaction.response.send_modal(DevinelenombreModal(self.parent_view))
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class Devinelenombre(commands.Cog):
     """Commande /devinelenombre et !devinelenombre — Deviner un nombre entre 0 et 100"""
 
@@ -150,9 +150,9 @@ class Devinelenombre(commands.Cog):
         view.message = await safe_send(channel, embed=embed, view=view)
         asyncio.create_task(view.start_timer())
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @app_commands.command(name="devinelenombre", description="Devine un nombre entre 0 et 100")
     @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
@@ -166,9 +166,9 @@ class Devinelenombre(commands.Cog):
             print(f"[ERREUR /devinelenombre] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────────
+    # ================================================================================
     @commands.command(name="devinelenombre", help="Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_devinelenombre(self, ctx: commands.Context, mode: str = None):
@@ -179,9 +179,9 @@ class Devinelenombre(commands.Cog):
             print(f"[ERREUR !devinelenombre] {e}")
             await safe_send(ctx.channel, "❌ Une erreur est survenue.")
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = Devinelenombre(bot)
     for command in cog.get_commands():
