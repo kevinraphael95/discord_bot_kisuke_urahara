@@ -4,6 +4,9 @@
 # Les templates (HTML) sont dans templates/, le CSS/JS dans static/.
 # ================================================================================
 
+# ================================================================================
+# 📦 Imports nécessaires
+# ================================================================================
 import os
 import sqlite3
 import subprocess
@@ -15,6 +18,9 @@ from flask import Flask, render_template, request, redirect, session, jsonify, u
 from dotenv import load_dotenv
 
 load_dotenv()
+
+import logging
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
 # === Config ====================================================================
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin1234")
