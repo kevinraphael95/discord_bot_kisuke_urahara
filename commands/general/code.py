@@ -1,22 +1,22 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 code.py — Commande simple /code et !code
 # Objectif : Affiche un lien cliquable vers le code source du bot
 # Catégorie : Général
 # Accès : Public
 # Cooldown : Paramétrable par commande
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
 from utils.discord_utils import safe_send, safe_respond  
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal avec centralisation erreurs et cooldowns
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class CodeCommand(commands.Cog):
     """
     Commande /code et !code — Affiche un lien vers le code source du bot
@@ -25,9 +25,9 @@ class CodeCommand(commands.Cog):
         self.bot = bot
         self.github_url = "https://github.com/kevinraphael95/kisuke"
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonction interne commune
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     async def _send_code_safe(self, channel: discord.abc.Messageable):
         """Envoie l’embed avec le bouton GitHub."""
         embed = discord.Embed(
@@ -43,9 +43,9 @@ class CodeCommand(commands.Cog):
 
         await safe_send(channel, embed=embed, view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="code",
         description="Affiche un lien cliquable vers le code source du bot."
@@ -56,18 +56,18 @@ class CodeCommand(commands.Cog):
         await self._send_code_safe(interaction.channel)
         await safe_respond(interaction, "✅ Voici le code source :", ephemeral=True)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(name="code", help="Affiche un lien vers le code source du bot.")
     @commands.cooldown(1, 3.0, commands.BucketType.user)
     async def prefix_code(self, ctx: commands.Context):
         """Commande préfixe principale."""
         await self._send_code_safe(ctx.channel)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = CodeCommand(bot)
     for command in cog.get_commands():
