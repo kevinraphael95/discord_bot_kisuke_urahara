@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 emoji_command.py — Commande interactive !emoji / !e et /emoji
 # Objectif : Afficher un ou plusieurs emojis du serveur via une commande
 # Catégorie : Général
 # Accès : Public
 # Cooldown : 1 utilisation / 3 sec / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -17,9 +17,9 @@ import random
 import re
 from utils.discord_utils import safe_send, safe_respond, safe_delete
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎮 View pour la pagination
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class EmojiPaginator(View):
     """View interactive pour naviguer entre plusieurs pages d'emojis."""
 
@@ -41,18 +41,18 @@ class EmojiPaginator(View):
         self.index = (self.index + 1) % len(self.pages)
         await self.update(interaction)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class EmojiCommand(commands.Cog):
     """Commande !emoji / !e et /emoji — Affiche un ou plusieurs emojis du serveur."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Fonctions internes
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     def _parse_emoji_input(self, raw_input: tuple[str]) -> list[str]:
         joined = "".join(raw_input)
         return re.findall(r":([a-zA-Z0-9_]+):", joined)
@@ -115,9 +115,9 @@ class EmojiCommand(commands.Cog):
             view = EmojiPaginator(pages)
             await safe_send(channel, embed=pages[0], view=view)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande PREFIX
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @commands.command(
         name="emoji",
         aliases=["e"],
@@ -129,9 +129,9 @@ class EmojiCommand(commands.Cog):
         await safe_delete(ctx.message)
         await self._send_emojis_safe(ctx.channel, ctx.guild, emoji_names)
 
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     # 🔹 Commande SLASH
-    # ────────────────────────────────────────────────────────────────────────────
+    # ============================================================================
     @app_commands.command(
         name="emoji",
         description="Montre un ou plusieurs emojis du serveur ou de tous les serveurs."
@@ -149,9 +149,9 @@ class EmojiCommand(commands.Cog):
         suggestions = [e.name for e in interaction.guild.emojis if e.available]
         return [app_commands.Choice(name=s, value=s) for s in suggestions if current.lower() in s.lower()][:25]
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = EmojiCommand(bot)
     for command in cog.get_commands():
