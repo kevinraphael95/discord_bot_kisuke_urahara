@@ -27,7 +27,9 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **calc :** Calculatrice scientifique interactive.
 - **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
 - **dice :** 🎲 Lance des dés. Ex: !dice 2d6, !dice 1d20
+- **fortune :** Ouvre un biscuit chinois et découvre ta prédiction.
 - **gay :** 🌈 Calcule ton taux de gaytitude.
+- **inspire :** Reçois une citation inspirante... très inspirante.
 - **pizza :** 🍕 Génère une pizza aléatoire.
 - **qrcode :** 📷 Génère un QR code depuis un texte ou une URL.
 - **ship :** 💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2
@@ -57,6 +59,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **pendu :** Démarre une partie du jeu du pendu.
 - **pressing :** Lance le jeu Pressing Under Pressure !
 - **pressingtop :** Voir le classement
+- **puissance4 :** Pas de description.
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
 - **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
 
@@ -72,3 +75,4 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **reiatsuvol :** 💠 Vole du Reiatsu à quelqu'un.
 - **skill :** Active la compétence de ta classe Reiatsu.
 - **tutoreiatsu :** Affiche le tutoriel complet pour les nouveaux joueurs.
+
