@@ -113,6 +113,28 @@ def api_table(table_name):
     return jsonify({"columns": columns, "rows": rows, "pk": pk_col})
 
 
+# === API : Suppression d'une table =============================================
+@app.route("/api/table/<table_name>/delete", methods=["POST"])
+@login_required
+def api_table_delete(table_name):
+    """
+    Supprime définitivement une table de la base (DROP TABLE).
+    Le nom de table est validé contre la liste réelle des tables (whitelist)
+    avant toute exécution SQL, pour éviter toute injection.
+    """
+    if table_name not in get_all_tables():
+        return jsonify({"ok": False, "error": "Table non autorisée"}), 403
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        cur.execute(f"DROP TABLE IF EXISTS {table_name}")
+        conn.commit()
+        conn.close()
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
+
+
 @app.route("/api/edit", methods=["POST"])
 @login_required
 def api_edit():
