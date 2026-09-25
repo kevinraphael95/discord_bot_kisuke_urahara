@@ -40,6 +40,7 @@ log = logging.getLogger(__name__)  # ✅ Ajout manquant
 TOKEN = os.getenv("DISCORD_TOKEN")
 COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
 ADMIN_PORT = int(os.getenv("ADMIN_PORT", "5050"))
+GITHUB_URL = "https://github.com/kevinraphael95/kisuke"
 
 def get_prefix(bot, message):
     return COMMAND_PREFIX
@@ -134,6 +135,11 @@ async def on_message(message):
         view.add_item(discord.ui.Button(
             label="🌐 Site / Présentation",
             url="https://kevinraphael95.github.io/discord_bot_kisuke_urahara/index.html",
+            style=discord.ButtonStyle.link
+        ))
+        view.add_item(discord.ui.Button(
+            label="📂 Code source",
+            url=GITHUB_URL,
             style=discord.ButtonStyle.link
         ))
 
