@@ -1,6 +1,6 @@
 // ================================================================================
 // 📌 main.js — Script principal du panel admin Kisuke
-// Objectif : Logique front (onglets, base de données, SQL, logs, actions) du panel admin
+// Objectif : Logique front (onglets, thème, base de données, SQL, logs, actions)
 // Catégorie : Admin
 // Accès : Admin uniquement (chargé par templates/main.html)
 // ================================================================================
@@ -30,6 +30,45 @@ function clock() {
 setInterval(clock, 1000); clock();
 
 // ================================================================================
+// 🌗 THÈME CLAIR / SOMBRE
+// ================================================================================
+function initTheme() {
+  const saved = localStorage.getItem('kisuke-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcon(saved);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('kisuke-theme', next);
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀' : '☾';
+}
+
+initTheme();
+
+// ================================================================================
+// 📱 SIDEBAR MOBILE
+// ================================================================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+function closeSidebarIfMobile() {
+  if (window.innerWidth <= 900) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+}
+
+// ================================================================================
 // 📂 TABS
 // ================================================================================
 function showTab(name, btn) {
@@ -44,6 +83,7 @@ function showTab(name, btn) {
   if (sideIdx[name] !== undefined) links[sideIdx[name]]?.classList.add('active');
   if (name === 'db') loadTable();
   if (name === 'logs') loadLogs();
+  closeSidebarIfMobile();
 }
 
 // ================================================================================
@@ -57,14 +97,28 @@ async function loadTableList() {
   const res = await fetch('/api/tables');
   const data = await res.json();
   const sel = document.getElementById('tableSelect');
+  const previous = sel.value;
   sel.innerHTML = data.tables.map(t => `<option value="${t}">${t}</option>`).join('');
   document.getElementById('sb-table-count').textContent = data.tables.length;
+  // Reste sur la table précédente si elle existe encore, sinon prend la première
+  if (data.tables.includes(previous)) sel.value = previous;
   loadTable();
 }
 
 async function loadTable() {
   const table = document.getElementById('tableSelect').value;
-  if (!table) return;
+  if (!table) {
+    // Plus aucune table (ex: dernière supprimée) → on vide l'affichage
+    currentData = []; currentCols = []; currentTableName = ''; currentPk = '';
+    document.getElementById('tableHead').innerHTML = '';
+    document.getElementById('tableBody').innerHTML = '';
+    document.getElementById('ti-table').textContent = '—';
+    document.getElementById('bc-table').textContent = 'Base de données';
+    document.getElementById('ti-pk').textContent = '';
+    document.getElementById('ti-count').textContent = '0 entrée';
+    document.getElementById('db-stats-grid').innerHTML = '';
+    return;
+  }
   document.getElementById('ti-table').textContent = table;
   document.getElementById('bc-table').textContent = table;
   const res = await fetch('/api/table/' + table);
@@ -167,6 +221,41 @@ function filterRows() {
 }
 
 // ================================================================================
+// 🗑️ SUPPRESSION DE TABLE
+// ================================================================================
+function confirmDeleteTable() {
+  const table = document.getElementById('tableSelect').value;
+  if (!table) { toast('Aucune table sélectionnée', 'err'); return; }
+
+  document.getElementById('modal-confirm-text').textContent =
+    `Supprimer définitivement la table "${table}" et toutes ses données ? Cette action est irréversible.`;
+
+  const btn = document.getElementById('modal-confirm-btn');
+  btn.textContent = 'Supprimer';
+  btn.onclick = () => {
+    deleteTable(table);
+    document.getElementById('modal-confirm').style.display = 'none';
+  };
+
+  document.getElementById('modal-confirm').style.display = 'flex';
+}
+
+async function deleteTable(table) {
+  try {
+    const res = await fetch('/api/table/' + table + '/delete', {method:'POST'});
+    const data = await res.json();
+    if (data.ok) {
+      toast('✓ Table "' + table + '" supprimée', 'ok');
+      loadTableList();
+    } else {
+      toast('✕ ' + data.error, 'err');
+    }
+  } catch (e) {
+    toast('✕ Erreur réseau', 'err');
+  }
+}
+
+// ================================================================================
 // ✏️ MODAL EDIT
 // ================================================================================
 function openEdit(table, pk, pkVal, col, val) {
@@ -240,8 +329,11 @@ async function runSQL() {
     html += `</tbody></table></div>`;
     html += `<div style="margin-top:8px;font-size:10px;color:var(--dim2);font-family:'Syne Mono',monospace">${data.rows.length} résultat(s)</div>`;
     el.innerHTML = html;
+    // Si la requête SQL touchait une table qui vient d'être DROP/CREATE, on resynchronise la liste
+    if (/drop\s+table|create\s+table/i.test(q)) loadTableList();
   } else {
     el.innerHTML = `<div style="background:var(--void);border:1px solid var(--green);border-left:3px solid var(--green);padding:12px 16px;color:var(--green);font-size:11px;margin-top:4px">✓ ${esc(data.message)}</div>`;
+    if (/drop\s+table|create\s+table/i.test(q)) loadTableList();
   }
 }
 
@@ -305,6 +397,14 @@ function toggleAutoRefresh() {
 // ACTIONS
 // ══════════════════════════════════════════════════════════════════════════════
 function confirmRestart() {
+  document.getElementById('modal-confirm-text').textContent =
+    'Cette action va redémarrer le process du bot. Continuer ?';
+  const btn = document.getElementById('modal-confirm-btn');
+  btn.textContent = 'Redémarrer';
+  btn.onclick = () => {
+    doAction('restart_bot', btn);
+    document.getElementById('modal-confirm').style.display = 'none';
+  };
   document.getElementById('modal-confirm').style.display = 'flex';
 }
 
