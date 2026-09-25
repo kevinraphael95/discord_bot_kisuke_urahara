@@ -240,7 +240,8 @@ class EntrainementCerebral(commands.Cog):
                 "Appuie sur le bouton ci-dessous quand tu es prêt à commencer."
             )
 
-            start_embed = discord.Embed(
+            # ✅ Un seul embed et un seul message, réutilisés et édités pour tout l'entraînement
+            embed = discord.Embed(
                 title=f"🧠 Entraînement cérébral — {title_mode}",
                 description=description_text,
                 color=discord.Color.blurple()
@@ -261,10 +262,9 @@ class EntrainementCerebral(commands.Cog):
                             return await interaction.response.send_message("🚫 Maximum 10 joueurs atteint.", ephemeral=True)
                         ready_users.append(interaction.user)
                         participants = ", ".join([u.name for u in ready_users])
-                        embed = discord.Embed(
-                            title=f"🧠 Entraînement cérébral — {title_mode}",
-                            description=f"Participants prêts : {participants}\n\nAppuyez sur le bouton pour rejoindre (30s restantes)...",
-                            color=discord.Color.blurple()
+                        embed.description = (
+                            f"Participants prêts : {participants}\n\n"
+                            "Appuyez sur le bouton pour rejoindre (30s restantes)..."
                         )
                         await interaction.response.edit_message(embed=embed, view=self)
                     else:
@@ -273,9 +273,9 @@ class EntrainementCerebral(commands.Cog):
                         button.disabled = True
                         button.label    = "✅ C'est parti !"
                         try:
-                            await interaction.response.edit_message(view=self)
+                            await interaction.response.edit_message(embed=embed, view=self)
                         except discord.InteractionResponded:
-                            await interaction.message.edit(view=self)
+                            await interaction.message.edit(embed=embed, view=self)
                         self.clicked = True
                         self.ready_event.set()
 
@@ -287,56 +287,51 @@ class EntrainementCerebral(commands.Cog):
                         self.ready_event.set()
 
             view      = ReadyButton()
-            msg_start = await send(embed=start_embed, view=view)
+            msg_state = await send(embed=embed, view=view)  # 🔒 message unique pour tout le déroulé
             await view.ready_event.wait()
 
             if not multiplayer and not view.clicked:
-                timeout_embed = discord.Embed(
-                    title="⏰ Temps écoulé",
-                    description="Personne n'a cliqué à temps. Relance la commande pour rejouer !",
-                    color=discord.Color.red()
-                )
-                return await msg_start.edit(embed=timeout_embed, view=None)
+                embed.title       = "⏰ Temps écoulé"
+                embed.description = "Personne n'a cliqué à temps. Relance la commande pour rejouer !"
+                embed.color       = discord.Color.red()
+                return await msg_state.edit(embed=embed, view=None)
 
             if multiplayer:
                 if len(ready_users) < 2:
-                    cancel_embed = discord.Embed(
-                        title="❌ Pas assez de joueurs",
-                        description="Il faut au moins **2 joueurs** pour lancer la partie.",
-                        color=discord.Color.red()
-                    )
-                    return await msg_start.edit(embed=cancel_embed, view=None)
+                    embed.title       = "❌ Pas assez de joueurs"
+                    embed.description = "Il faut au moins **2 joueurs** pour lancer la partie."
+                    embed.color       = discord.Color.red()
+                    return await msg_state.edit(embed=embed, view=None)
                 view.clicked = True
                 for child in view.children:
                     child.disabled = True
                     child.label    = "✅ Partie en cours"
-                await msg_start.edit(view=view)
+                await msg_state.edit(embed=embed, view=view)
 
             random.shuffle(self.minijeux)
             selected_games = self.minijeux[:5]
             active_players = ready_users if multiplayer else users
 
             for index, (name, game) in enumerate(selected_games, start=1):
-                game_embed = discord.Embed(
-                    title=f"🧩 Mini-jeu {index} — {name}",
-                    description=(
-                        "Le plus rapide à donner la bonne réponse gagne !"
-                        if multiplayer
-                        else f"{users[0].mention}, c'est ton tour !"
-                    ),
-                    color=discord.Color.blurple()
+                embed.clear_fields()
+                embed.title       = f"🧩 Mini-jeu {index}/5 — {name}"
+                embed.description = (
+                    "Le plus rapide à donner la bonne réponse gagne !"
+                    if multiplayer
+                    else f"{users[0].mention}, c'est ton tour !"
                 )
-                msg_game = await send(embed=game_embed)
-                start    = time.time()
+                embed.color = discord.Color.blurple()
+                await msg_state.edit(embed=embed, view=None)
+                start = time.time()
 
                 if multiplayer:
                     def check(m):
-                        return m.author in active_players and m.channel == msg_game.channel
+                        return m.author in active_players and m.channel == msg_state.channel
                     winner = None
                     try:
                         while True:
                             msg     = await self.bot.wait_for("message", check=check, timeout=25)
-                            success = await game(msg_game, game_embed, lambda: msg.author.id, self.bot, msg_override=msg)
+                            success = await game(msg_state, embed, lambda: msg.author.id, self.bot, msg_override=msg)
                             if success:
                                 winner = msg.author
                                 break
@@ -344,52 +339,54 @@ class EntrainementCerebral(commands.Cog):
                         winner = None
 
                     elapsed = round(time.time() - start, 2)
+                    embed.clear_fields()
                     if winner:
                         score = 1000 + max(0, 500 - int(elapsed * 25))
                         total_score[winner.id] = total_score.get(winner.id, 0) + score
                         results.setdefault(winner.id, []).append((index, name, True, elapsed, score))
-                        result_embed = discord.Embed(
-                            title=f"🏆 {winner.name} a trouvé la bonne réponse !",
-                            description=f"⏱️ Temps : `{elapsed}s`\n🏅 Score : `{score}` pts",
-                            color=discord.Color.green()
-                        )
+                        embed.title       = f"🏆 {winner.name} a trouvé la bonne réponse !"
+                        embed.description = f"⏱️ Temps : `{elapsed}s`\n🏅 Score : `{score}` pts"
+                        embed.color       = discord.Color.green()
                     else:
-                        result_embed = discord.Embed(
-                            title="❌ Personne n'a trouvé la bonne réponse",
-                            description="Essayez d'être plus rapides au prochain mini-jeu !",
-                            color=discord.Color.red()
-                        )
-                    await send(embed=result_embed)
+                        embed.title       = "❌ Personne n'a trouvé la bonne réponse"
+                        embed.description = "Essayez d'être plus rapides au prochain mini-jeu !"
+                        embed.color       = discord.Color.red()
+                    await msg_state.edit(embed=embed, view=None)
 
                 else:
                     get_user_id = lambda: users[0].id
-                    success     = await game(msg_game, game_embed, get_user_id, self.bot)
+                    success     = await game(msg_state, embed, get_user_id, self.bot)
                     elapsed     = round(time.time() - start, 2)
                     score       = (1000 + max(0, 500 - int(elapsed * 25))) if success else 0
                     total_score[users[0].id] = total_score.get(users[0].id, 0) + score
                     results.setdefault(users[0].id, []).append((index, name, success, elapsed, score))
-                    result_embed = discord.Embed(
-                        title=f"🎯 Résultat — {name} ({users[0].name})",
-                        description=(
-                            f"{'✅ Réussi' if success else '❌ Raté'}\n"
-                            f"⏱️ Temps : `{elapsed}s`\n"
-                            f"🏅 Score : `{score}` pts"
-                        ),
-                        color=discord.Color.green() if success else discord.Color.red()
+
+                    embed.clear_fields()
+                    embed.title       = f"🎯 Résultat — {name} ({users[0].name})"
+                    embed.description = (
+                        f"{'✅ Réussi' if success else '❌ Raté'}\n"
+                        f"⏱️ Temps : `{elapsed}s`\n"
+                        f"🏅 Score : `{score}` pts"
                     )
-                    await send(embed=result_embed)
+                    embed.color = discord.Color.green() if success else discord.Color.red()
+                    await msg_state.edit(embed=embed, view=None)
 
                 await asyncio.sleep(1.5)
 
-            # === Résultats finaux =============================================
+            # === Résultats finaux — regroupés dans le même embed ==================
+            embed.clear_fields()
+            embed.title       = "🏁 Résultats de l'entraînement"
+            embed.description = None
+            embed.color       = discord.Color.gold()
+
             for player in active_players:
                 if player.id not in total_score:
                     continue
 
                 player_results = results[player.id]
                 results_text   = "\n".join(
-                    f"**Jeu {i}** {'✅' if s else '❌'} {name}{f' — {t}s' if s else ''}"
-                    for i, name, s, t, _ in player_results
+                    f"**Jeu {i}** {'✅' if s else '❌'} {gname}{f' — {t}s' if s else ''}"
+                    for i, gname, s, t, _ in player_results
                 )
                 total = total_score[player.id]
 
@@ -402,28 +399,27 @@ class EntrainementCerebral(commands.Cog):
                 else:
                     rank = "😴 En veille..."
 
-                final_embed = discord.Embed(
-                    title=f"🏁 Résultats — {player.name}",
-                    description=(
-                        f"**Résultats des 5 jeux :**\n{results_text}\n\n"
-                        f"**Score total :** `{total:,}` pts\n"
-                        f"**Niveau cérébral :** {rank}"
-                    ),
-                    color=discord.Color.gold()
+                embed.add_field(
+                    name=f"{player.name} — `{total:,}` pts ({rank})",
+                    value=results_text,
+                    inline=False
                 )
-                await send(embed=final_embed)
 
                 # === Sauvegarde score solo =================================
                 if not multiplayer:
                     db_save_score(player.id, player.name, total)
 
-                # === Validation quête ======================================
-                await self._valider_quete(
-                    player,
-                    total,
-                    channel=getattr(ctx_or_interaction, "channel", None),
-                    ctx_or_inter=ctx_or_interaction
-                )
+            await msg_state.edit(embed=embed, view=None)
+
+            # === Validation quête(s) — annonce séparée (hors embed principal) ====
+            for player in active_players:
+                if player.id in total_score:
+                    await self._valider_quete(
+                        player,
+                        total_score[player.id],
+                        channel=getattr(ctx_or_interaction, "channel", None),
+                        ctx_or_inter=ctx_or_interaction
+                    )
 
         finally:
             if guild_id:
