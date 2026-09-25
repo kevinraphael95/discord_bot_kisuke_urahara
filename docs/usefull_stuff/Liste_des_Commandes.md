@@ -36,12 +36,11 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **sorting :** Trie 12 barres en longueurs différentes selon un algorithme.
 
 ### 📂 Général
-- **code :** Affiche un lien vers le code source du bot.
 - **emoji :** Montre un ou plusieurs emojis du serveur ou de tous les serveurs.
 - **help :** Affiche l’aide du bot.
-- **quoi :** Répond feur.
 - **react :** Réagit à un message avec un ou plusieurs emojis.
 - **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
+- **test :** Affiche le ping, l'heure et le dernier commit du bot.
 
 ### 📂 Jeux
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
