@@ -83,6 +83,7 @@ function showTab(name, btn) {
   if (sideIdx[name] !== undefined) links[sideIdx[name]]?.classList.add('active');
   if (name === 'db') loadTable();
   if (name === 'logs') loadLogs();
+  if (name === 'actions') loadBackupList();
   closeSidebarIfMobile();
 }
 
@@ -426,6 +427,63 @@ async function doAction(action, btn) {
     toast('✕ Erreur réseau', 'err');
   }
   if (btn) btn.disabled = false;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ⛁ BACKUP DATABASE
+// ════════════════════════════════════════════════════════════════════════════
+async function doBackup(btn) {
+  const resBox = document.getElementById('res-backup');
+  resBox.style.display = 'block';
+  resBox.className = 'action-result';
+  resBox.textContent = '⏳ Génération du backup…';
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/backup', { method: 'POST' });
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || 'Erreur inconnue');
+    }
+
+    let msg = `✓ Backup créé : ${data.filename} (${data.size_kb} Ko)`;
+    if (data.discord_sent) {
+      msg += ' — envoyé sur Discord ✓';
+      toast('✓ Backup créé et envoyé sur Discord', 'ok');
+    } else {
+      msg += ` — ⚠ non envoyé sur Discord (${data.discord_error})`;
+      toast('⚠ Backup créé, mais pas envoyé sur Discord', 'warn');
+    }
+    resBox.textContent = msg;
+    loadBackupList();
+  } catch (e) {
+    resBox.textContent = '✕ ' + e.message;
+    resBox.classList.add('err');
+    toast('✕ Erreur backup', 'err');
+  }
+  if (btn) btn.disabled = false;
+}
+
+async function loadBackupList() {
+  const box = document.getElementById('backup-list');
+  if (!box) return;
+  try {
+    const res = await fetch('/api/backup/list');
+    const data = await res.json();
+    if (!data.backups.length) {
+      box.innerHTML = '<div style="color:var(--dim2);font-size:11px">Aucun backup pour le moment.</div>';
+      return;
+    }
+    box.innerHTML = data.backups.map(b => `
+      <div class="backup-row" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:11px">
+        <span>${esc(b.name)} <span style="color:var(--dim2)">(${b.size_kb} Ko)</span></span>
+        <a class="btn btn-ghost" style="padding:2px 10px" href="/api/backup/download/${encodeURIComponent(b.name)}">↓</a>
+      </div>
+    `).join('');
+  } catch (e) {
+    box.innerHTML = '<div style="color:var(--red);font-size:11px">Erreur de chargement</div>';
+  }
 }
 
 // ================================================================================
