@@ -12,6 +12,8 @@
 
 <!-- ─── HEADER ─────────────────────────────────────────────────────────────── -->
 <header>
+  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+
   <div class="logo">Kisuke <span class="logo-tag">Admin</span></div>
 
   <nav>
@@ -30,6 +32,7 @@
   </nav>
 
   <div class="hdr-right">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Changer de thème">☾</button>
     <div class="status-pill">
       <div class="status-dot"></div>
       <span>En ligne</span>
@@ -43,6 +46,9 @@
 
 <!-- ─── BODY ───────────────────────────────────────────────────────────────── -->
 <div class="app-body">
+
+  <!-- Overlay mobile (ferme la sidebar au clic à côté) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
@@ -108,6 +114,7 @@
             <select id="tableSelect" onchange="loadTable()"></select>
             <input type="text" class="input" style="width:200px" id="filterInput" placeholder="Filtrer les lignes…" oninput="filterRows()">
             <button class="btn btn-ghost" onclick="loadTable()">↻</button>
+            <button class="btn btn-red" onclick="confirmDeleteTable()">🗑 Supprimer la table</button>
           </div>
         </div>
         <div class="table-info">
@@ -244,13 +251,13 @@
   </div>
 </div>
 
-<!-- ─── MODAL CONFIRM ──────────────────────────────────────────────────────── -->
+<!-- ─── MODAL CONFIRM (générique : restart bot, suppression de table…) ───────── -->
 <div id="modal-confirm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(2px)">
   <div class="modal" style="border-top-color:var(--red);">
     <div class="modal-title" style="color:var(--red)">Confirmation</div>
-    <div class="modal-meta">Cette action va redémarrer le process du bot. Continuer ?</div>
+    <div class="modal-meta" id="modal-confirm-text">Cette action va redémarrer le process du bot. Continuer ?</div>
     <div class="modal-footer" style="margin-top:20px">
-      <button class="btn btn-red" onclick="doAction('restart_bot',this);document.getElementById('modal-confirm').style.display='none'">Redémarrer</button>
+      <button class="btn btn-red" id="modal-confirm-btn" onclick="doAction('restart_bot',this);document.getElementById('modal-confirm').style.display='none'">Confirmer</button>
       <button class="btn btn-ghost" onclick="document.getElementById('modal-confirm').style.display='none'">Annuler</button>
     </div>
   </div>
