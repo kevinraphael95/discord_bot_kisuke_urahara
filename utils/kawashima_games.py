@@ -1004,7 +1004,8 @@ async def suite_logique(ctx, embed, get_user_id, bot, msg_override=None):
     display_serie[answer_index] = "?"
 
     embed.clear_fields()
-    embed.add_field(name="➗ Suite logique", value=f"{display_serie} ... ?", inline=False)
+    display_text = ", ".join(str(v) for v in display_serie)  # ex: "7, 13, ?, 25, 31" au lieu du repr brut de la liste
+    embed.add_field(name="➗ Suite logique", value=f"{display_text} ...", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
