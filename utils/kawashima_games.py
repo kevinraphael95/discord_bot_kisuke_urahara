@@ -9,12 +9,55 @@
 import random
 import asyncio
 import discord
-from discord.ui import View, Button
+from discord.ui import View, Button, Modal, TextInput
 
 # ================================================================================
 # 📦 Paramètres
 # ================================================================================
 TIMEOUT = 60  # 1 minute pour répondre à chaque mini-jeu
+
+# ================================================================================
+# 🛠️ Helper — Répondre via bouton + fenêtre modale (au lieu d'un message texte)
+# ================================================================================
+async def _ask_text_answer(ctx, embed, get_user_id, bot, button_label="✏️ Répondre", modal_label="Ta réponse", timeout=TIMEOUT):
+    """
+    Affiche un bouton sur le message `ctx`. Au clic, ouvre une fenêtre modale où le
+    joueur tape sa réponse. Retourne le texte saisi (str) ou None si le temps est
+    écoulé / personne n'a répondu.
+    """
+
+    class AnswerModal(Modal, title=modal_label):
+        reponse = TextInput(label=modal_label, placeholder="Tape ta réponse ici", max_length=200)
+
+        def __init__(self, outer_view):
+            super().__init__()
+            self.outer_view = outer_view
+
+        async def on_submit(self, interaction: discord.Interaction):
+            self.outer_view.result = self.reponse.value
+            self.outer_view.stop()
+            await interaction.response.defer()
+
+    class AnswerView(View):
+        def __init__(self):
+            super().__init__(timeout=timeout)
+            self.result = None
+
+        @discord.ui.button(label=button_label, style=discord.ButtonStyle.primary)
+        async def answer_btn(self, interaction: discord.Interaction, button: Button):
+            if interaction.user.id != get_user_id():
+                await interaction.response.send_message("🚫 Ce n'est pas ton tour.", ephemeral=True)
+                return
+            await interaction.response.send_modal(AnswerModal(self))
+
+    view = AnswerView()
+    await ctx.edit(view=view)
+    await view.wait()
+    try:
+        await ctx.edit(view=None)
+    except Exception:
+        pass
+    return view.result
 
 # ================================================================================
 # 🔹 Mini-jeux (chacun avec .emoji et .title)
@@ -23,7 +66,7 @@ TIMEOUT = 60  # 1 minute pour répondre à chaque mini-jeu
 # ================================================================================
 # 🔹 🧮 Addition à la suite
 # ================================================================================
-async def addition_cachee(ctx, embed, get_user_id, bot):
+async def addition_cachee(ctx, embed, get_user_id, bot, msg_override=None):
     additions = [random.randint(-9, 9) for _ in range(6)]
     total = sum(additions)
 
@@ -42,9 +85,15 @@ async def addition_cachee(ctx, embed, get_user_id, bot):
     embed.add_field(name="🧮 Additions à la suite", value="Quel est le total final ?", inline=False)
     await ctx.edit(embed=embed)
 
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Total")
+
+    if text is None:
+        return False
     try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return int(msg.content) == total
+        return int(text.strip()) == total
     except:
         return False
 
@@ -55,7 +104,7 @@ addition_cachee.prep_time = 3 + 1.8 * 6  # temps total avant question
 # ================================================================================
 # 🔹 🧮 Calcul rapide
 # ================================================================================
-async def calcul_rapide(ctx, embed, get_user_id, bot):
+async def calcul_rapide(ctx, embed, get_user_id, bot, msg_override=None):
     op = random.choice(["+", "-", "*", "/"])
     if op == "*":
         a, b = random.randint(1, 10), random.randint(1, 10)
@@ -72,9 +121,15 @@ async def calcul_rapide(ctx, embed, get_user_id, bot):
     embed.add_field(name="🧮 Calcul rapide", value=f"{a} {op} {b} = ?", inline=False)
     await ctx.edit(embed=embed)
 
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Résultat")
+
+    if text is None:
+        return False
     try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return int(msg.content) == answer
+        return int(text.strip()) == answer
     except:
         return False
 
@@ -85,7 +140,7 @@ calcul_rapide.prep_time = 0
 # ================================================================================
 # 🔹 🔢 Carré magique 3x3 fiable emoji (avec boutons)
 # ================================================================================
-async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot):
+async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot, msg_override=None):
     base = [
         [8, 1, 6],
         [3, 5, 7],
@@ -153,7 +208,7 @@ carre_magique_fiable_emoji.prep_time = 0
 # ================================================================================
 # 🔹 👀 Compter les emojis
 # ================================================================================
-async def compter_emojis(ctx, embed, get_user_id, bot):
+async def compter_emojis(ctx, embed, get_user_id, bot, msg_override=None):
     import random
 
     emojis = ["🍎", "🍌", "🍒", "🍇", "🍊"]
@@ -174,15 +229,14 @@ async def compter_emojis(ctx, embed, get_user_id, bot):
     )
     await ctx.edit(embed=embed)
 
-    try:
-        msg = await bot.wait_for(
-            "message",
-            check=lambda m: m.author.id == get_user_id(),
-            timeout=TIMEOUT
-        )
-        return msg.content.isdigit() and int(msg.content) == total
-    except:
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Nombre")
+
+    if text is None:
         return False
+    return text.strip().isdigit() and int(text.strip()) == total
 
 compter_emojis.title = "Compter les emojis"
 compter_emojis.emoji = "👀"
@@ -191,7 +245,7 @@ compter_emojis.prep_time = 1.5
 # ================================================================================
 # 🎨 Couleurs (Stroop complet)
 # ================================================================================
-async def couleurs(ctx, embed, get_user_id, bot):
+async def couleurs(ctx, embed, get_user_id, bot, msg_override=None):
     styles = {
         "bleu": discord.ButtonStyle.primary,
         "vert": discord.ButtonStyle.success,
@@ -250,7 +304,7 @@ couleurs.prep_time = 0.5
 # ================================================================================
 # 🔹 📅 Datation (Version boutons)
 # ================================================================================
-async def datation(msg, embed, get_user_id, bot):
+async def datation(msg, embed, get_user_id, bot, msg_override=None):
     import datetime, random
     user_id = get_user_id()
 
@@ -314,7 +368,7 @@ datation.prep_time = 0
 # ================================================================================
 # 🔹 🧭 Directions opposées
 # ================================================================================
-async def directions_opposees(ctx, embed, get_user_id, bot):
+async def directions_opposees(ctx, embed, get_user_id, bot, msg_override=None):
     import random
     from discord.ui import View, Button
     from discord import ButtonStyle
@@ -367,7 +421,7 @@ directions_opposees.prep_time = 1
 # ================================================================================
 # 🔹 ➗ Équation à trou
 # ================================================================================
-async def equation_trou(ctx, embed, get_user_id, bot):
+async def equation_trou(ctx, embed, get_user_id, bot, msg_override=None):
     op = random.choice(["+", "-", "*"])
     if op == "+":
         a, b = random.randint(1, 20), random.randint(1, 20)
@@ -386,9 +440,15 @@ async def equation_trou(ctx, embed, get_user_id, bot):
     embed.add_field(name="➗ Équation à trou", value=question, inline=False)
     await ctx.edit(embed=embed)
 
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Valeur manquante")
+
+    if text is None:
+        return False
     try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return int(msg.content) == answer
+        return int(text.strip()) == answer
     except:
         return False
 
@@ -399,7 +459,7 @@ equation_trou.prep_time = 0
 # ================================================================================
 # 🔹 🕒 Heures
 # ================================================================================
-async def heures(ctx, embed, get_user_id, bot):
+async def heures(ctx, embed, get_user_id, bot, msg_override=None):
     h1, m1 = random.randint(0, 23), random.randint(0, 59)
     h2, m2 = random.randint(0, 23), random.randint(0, 59)
     diff = abs((h1 * 60 + m1) - (h2 * 60 + m2))
@@ -412,13 +472,15 @@ async def heures(ctx, embed, get_user_id, bot):
     embed.add_field(name="🕒 Heures", value=question_type, inline=False)
     await ctx.edit(embed=embed)
 
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Différence (ex: 1h30)")
+
+    if text is None:
+        return False
     try:
-        msg = await bot.wait_for(
-            "message",
-            check=lambda m: m.author.id == get_user_id(),
-            timeout=TIMEOUT
-        )
-        rep = msg.content.lower().replace("h", " ").replace(":", " ").replace("min", " ").replace("m", " ")
+        rep = text.lower().replace("h", " ").replace(":", " ").replace("min", " ").replace("m", " ")
         nums = [int(x) for x in rep.split() if x.isdigit()]
         if len(nums) == 1:
             user_hours, user_mins = divmod(nums[0], 60)
@@ -439,7 +501,7 @@ heures.prep_time = 0
 # ================================================================================
 # 🔹 🔢 Mémoire numérique
 # ================================================================================
-async def memoire_numerique(ctx, embed, get_user_id, bot):
+async def memoire_numerique(ctx, embed, get_user_id, bot, msg_override=None):
     sequence = [random.randint(0, 9) for _ in range(6)]
     embed.clear_fields()
     embed.add_field(name="🔢 Mémoire numérique", value=str(sequence), inline=False)
@@ -450,11 +512,14 @@ async def memoire_numerique(ctx, embed, get_user_id, bot):
     embed.add_field(name="🔢 Mémoire numérique", value="🕵️‍♂️ Retape la séquence !", inline=False)
     await ctx.edit(embed=embed)
 
-    try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return msg.content == "".join(map(str, sequence))
-    except:
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Séquence (ex: 123456)")
+
+    if text is None:
         return False
+    return text.strip() == "".join(map(str, sequence))
 
 memoire_numerique.title = "Mémoire numérique"
 memoire_numerique.emoji = "🔢"
@@ -463,7 +528,7 @@ memoire_numerique.prep_time = 5
 # ================================================================================
 # 🔹 👁️ Mémoire visuelle (boutons)
 # ================================================================================
-async def memoire_visuelle(ctx, embed, get_user_id, bot):
+async def memoire_visuelle(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 4
     base_emojis = ["🍎", "🚗", "🐶", "🌟", "⚽", "🎲", "💎", "🎵", "🍕", "🐱", "🚀", "🎁"]
     shown_emojis = random.sample(base_emojis, 4)
@@ -523,7 +588,7 @@ memoire_visuelle.prep_time = 4
 # ================================================================================
 # 🔹 💰 Monnaie
 # ================================================================================
-async def monnaie(ctx, embed, get_user_id, bot):
+async def monnaie(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2
     prix = random.randint(1, 20) + random.choice([0, 0.5, 0.2])
     donne = prix + random.choice([0.5, 1, 2])
@@ -538,9 +603,15 @@ async def monnaie(ctx, embed, get_user_id, bot):
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Monnaie rendue (€)")
+
+    if text is None:
+        return False
     try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return abs(float(msg.content.replace(',', '.')) - rendu) < 0.01
+        return abs(float(text.replace(',', '.')) - rendu) < 0.01
     except:
         return False
 
@@ -551,7 +622,7 @@ monnaie.prep_time = 2
 # ================================================================================
 # 🔹 🔁 Mot miroir
 # ================================================================================
-async def mot_miroir(ctx, embed, get_user_id, bot):
+async def mot_miroir(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2
     mots = ["maison", "cerveau", "banane", "ordinateur", "voiture"]
     mot = random.choice(mots)
@@ -566,11 +637,14 @@ async def mot_miroir(ctx, embed, get_user_id, bot):
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
-    try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return msg.content.lower() == mot_inverse
-    except:
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Mot à l'envers")
+
+    if text is None:
         return False
+    return text.strip().lower() == mot_inverse
 
 mot_miroir.title = "Mot miroir"
 mot_miroir.emoji = "🔁"
@@ -579,7 +653,7 @@ mot_miroir.prep_time = 2
 # ================================================================================
 # 🔹 🔤 Pagaille
 # ================================================================================
-async def pagaille(ctx, embed, get_user_id, bot):
+async def pagaille(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2
     mot = random.choice(["amour", "cerveau", "maison", "voiture", "banane"])
     melange = "".join(random.sample(mot, len(mot)))
@@ -589,11 +663,14 @@ async def pagaille(ctx, embed, get_user_id, bot):
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
-    try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return msg.content.lower() == mot
-    except:
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Mot reconstitué")
+
+    if text is None:
         return False
+    return text.strip().lower() == mot
 
 pagaille.title = "Pagaille"
 pagaille.emoji = "🔤"
@@ -602,7 +679,7 @@ pagaille.prep_time = 2
 # ================================================================================
 # 🔹 ⚖️ Pair ou impair
 # ================================================================================
-async def pair_ou_impair(msg, embed, get_user, bot):
+async def pair_ou_impair(msg, embed, get_user, bot, msg_override=None):
     import random
 
     number = random.randint(1, 100)
@@ -646,7 +723,7 @@ pair_ou_impair.prep_time = 1.5
 # ================================================================
 # 🔹 ⚡ Rapidité (version boutons)
 # ================================================================
-async def rapidite(ctx, embed, get_user_id, bot):
+async def rapidite(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2
     nums = random.sample(range(10, 99), 5)
     mode = random.choice(["grand", "petit"])
@@ -704,7 +781,7 @@ rapidite.prep_time = 2
 # ================================================================================
 # 🔹 ⚡ Réflexe couleur
 # ================================================================================
-async def reflexe_couleur(ctx, embed, get_user_id, bot):
+async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2
     embed.clear_fields()
     embed.add_field(
@@ -764,7 +841,7 @@ reflexe_couleur.prep_time = 2
 # ================================================================================
 # 🔹 🧩 Séquence de symboles (version avec boutons)
 # ================================================================================
-async def sequence_symboles(ctx, embed, get_user_id, bot):
+async def sequence_symboles(ctx, embed, get_user_id, bot, msg_override=None):
     import random, asyncio
     from discord.ui import View, Button
     from discord import ButtonStyle
@@ -858,7 +935,7 @@ sequence_symboles.prep_time = 8
 # ================================================================================
 # 🔹 🧩 Suite alphabétique
 # ================================================================================
-async def suite_alpha(ctx, embed, get_user_id, bot):
+async def suite_alpha(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 1
     sens_normal = random.choice([True, False])
 
@@ -882,11 +959,14 @@ async def suite_alpha(ctx, embed, get_user_id, bot):
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
-    try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return msg.content.strip().upper() == answer
-    except:
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Lettre suivante")
+
+    if text is None:
         return False
+    return text.strip().upper() == answer
 
 suite_alpha.title = "Suite alphabétique"
 suite_alpha.emoji = "🧩"
@@ -895,7 +975,7 @@ suite_alpha.prep_time = 1
 # ================================================================================
 # 🔹 ➗ Suite logique
 # ================================================================================
-async def suite_logique(ctx, embed, get_user_id, bot):
+async def suite_logique(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2
     type_suite = random.choice(["arithmétique", "géométrique", "alternée", "carrés", "fibonacci"])
     serie = []
@@ -933,9 +1013,15 @@ async def suite_logique(ctx, embed, get_user_id, bot):
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Valeur manquante")
+
+    if text is None:
+        return False
     try:
-        msg = await bot.wait_for("message", check=lambda m: m.author.id == get_user_id(), timeout=TIMEOUT)
-        return int(msg.content) == answer
+        return int(text.strip()) == answer
     except:
         return False
 
@@ -946,7 +1032,7 @@ suite_logique.prep_time = 2
 # ================================================================================
 # 🔹 🔎 Trouver la différence
 # ================================================================================
-async def trouver_difference(ctx, embed, get_user_id, bot):
+async def trouver_difference(ctx, embed, get_user_id, bot, msg_override=None):
     import random, asyncio
 
     liste1 = [random.randint(1, 9) for _ in range(6)]
@@ -974,17 +1060,16 @@ async def trouver_difference(ctx, embed, get_user_id, bot):
     await ctx.edit(embed=embed)
     await asyncio.sleep(trouver_difference.prep_time)
 
-    try:
-        msg = await bot.wait_for(
-            "message",
-            check=lambda m: m.author.id == get_user_id(),
-            timeout=TIMEOUT
-        )
-        if not msg.content.isdigit():
-            return False
-        return int(msg.content.strip()) == diff_index + 1
-    except:
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Position (1 à 6)")
+
+    if text is None:
         return False
+    if not text.strip().isdigit():
+        return False
+    return int(text.strip()) == diff_index + 1
 
 
 trouver_difference.title = "Trouver la différence"
@@ -994,7 +1079,7 @@ trouver_difference.prep_time = 1
 # ================================================================================
 # 🔹 ✏️ Typographie erreur
 # ================================================================================
-async def typo_trap(ctx, embed, get_user_id, bot):
+async def typo_trap(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2  # Temps pour observer le mot avant de répondre
 
     mot = random.choice(["chien", "maison", "voiture", "ordinateur", "banane", "chocolat"])
@@ -1016,16 +1101,14 @@ async def typo_trap(ctx, embed, get_user_id, bot):
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)  # temps d'observation
 
-    # Attente de la réponse
-    try:
-        msg = await bot.wait_for(
-            "message",
-            check=lambda m: m.author.id == get_user_id(),
-            timeout=TIMEOUT
-        )
-        return msg.content.lower().strip() == nouvelle_lettre
-    except:
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Lettre incorrecte")
+
+    if text is None:
         return False
+    return text.lower().strip() == nouvelle_lettre
 
 typo_trap.title = "Typographie erreur"
 typo_trap.emoji = "✏️"
