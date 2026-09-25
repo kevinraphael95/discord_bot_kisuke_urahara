@@ -40,36 +40,40 @@ class Test(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    def build_message(self) -> str:
+    def build_embed(self) -> discord.Embed:
         ping_ms = round(self.bot.latency * 1000)
         now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         last_commit = get_last_commit_date()
-        return (
-            f"🏓 **Ping** : {ping_ms} ms\n"
-            f"🕒 **Heure actuelle** : {now}\n"
-            f"📦 **Dernier commit** : {last_commit}"
+
+        embed = discord.Embed(
+            title="🔧 Statut du bot",
+            color=discord.Color.blurple()
         )
+        embed.add_field(name="🏓 Ping", value=f"{ping_ms} ms", inline=True)
+        embed.add_field(name="🕒 Heure actuelle", value=now, inline=True)
+        embed.add_field(name="📦 Dernier commit", value=last_commit, inline=False)
+        return embed
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
     @app_commands.command(
         name="test",
-        description="(Admin) Affiche le ping, l'heure et le dernier commit du bot."
+        description="Affiche le ping, l'heure et le dernier commit du bot."
     )
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_test(self, interaction: discord.Interaction):
-        await safe_respond(interaction, self.build_message())
+        await safe_respond(interaction, embed=self.build_embed())
 
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="test", help="(Admin) Affiche le ping, l'heure et le dernier commit du bot.")
+    @commands.command(name="test", help="Affiche le ping, l'heure et le dernier commit du bot.")
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 3.0, commands.BucketType.user)
     async def prefix_test(self, ctx: commands.Context):
-        await safe_send(ctx.channel, self.build_message())
+        await safe_send(ctx.channel, embed=self.build_embed())
 
 # ================================================================================
 # 🔌 Setup du Cog
@@ -78,5 +82,5 @@ async def setup(bot: commands.Bot):
     cog = Test(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Admin"
+            command.category = "Général"
     await bot.add_cog(cog)
