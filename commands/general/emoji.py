@@ -15,7 +15,7 @@ from discord.ext import commands
 from discord.ui import View, Button
 import random
 import re
-from utils.discord_utils import safe_send, safe_respond, safe_delete
+from utils.discord_utils import safe_send, safe_respond
 
 # ================================================================================
 # 🎮 View pour la pagination
@@ -126,7 +126,6 @@ class EmojiCommand(commands.Cog):
     )
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.user)
     async def prefix_emoji(self, ctx: commands.Context, *emoji_names):
-        await safe_delete(ctx.message)
         await self._send_emojis_safe(ctx.channel, ctx.guild, emoji_names)
 
     # ============================================================================
