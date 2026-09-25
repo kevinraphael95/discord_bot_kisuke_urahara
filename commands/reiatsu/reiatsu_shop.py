@@ -264,6 +264,12 @@ class ReiatsuShop(commands.Cog):
         if message.author.bot:
             return
 
+        # Un DM n'a pas de guild (message.guild vaut None) : rien de tout ce
+        # listener ne s'applique en dehors d'un serveur, donc on sort tout
+        # de suite pour éviter le crash sur message.guild.id.
+        if message.guild is None:
+            return
+
         guild_id = message.guild.id
         user_id = message.author.id
 
