@@ -2,7 +2,7 @@
 # 📌 test.py
 # Objectif : Affiche le ping, l'heure actuelle et la date du dernier commit
 # Catégorie : Général
-# Accès : Tous
+# Accès : Admin uniquement
 # Cooldown : 3 secondes
 # ================================================================================
 
@@ -35,7 +35,7 @@ def get_last_commit_date() -> str:
 # ================================================================================
 class Test(commands.Cog):
     """
-    Commande /test et !test — Affiche ping, heure et dernier commit
+    Commande /test et !test — Affiche ping, heure et dernier commit (admin uniquement)
     """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -55,8 +55,9 @@ class Test(commands.Cog):
     # ============================================================================
     @app_commands.command(
         name="test",
-        description="Affiche le ping, l'heure et le dernier commit du bot."
+        description="(Admin) Affiche le ping, l'heure et le dernier commit du bot."
     )
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_test(self, interaction: discord.Interaction):
         await safe_respond(interaction, self.build_message())
@@ -64,7 +65,8 @@ class Test(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="test", help="Affiche le ping, l'heure et le dernier commit du bot.")
+    @commands.command(name="test", help="(Admin) Affiche le ping, l'heure et le dernier commit du bot.")
+    @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 3.0, commands.BucketType.user)
     async def prefix_test(self, ctx: commands.Context):
         await safe_send(ctx.channel, self.build_message())
