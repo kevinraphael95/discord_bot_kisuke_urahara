@@ -163,6 +163,14 @@ class HelpCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def _peut_voir(self, cmd: commands.Command, ctx: commands.Context) -> bool:
+        """Vérifie que l'utilisateur remplit les conditions (permissions, etc.)
+        pour utiliser cette commande, afin de la masquer sinon (ex: commandes admin)."""
+        try:
+            return await cmd.can_run(ctx)
+        except commands.CommandError:
+            return False
+
     @commands.command(name="help", aliases=["h"], help="Affiche l’aide du bot.")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def help_func(self, ctx: commands.Context, commande: str = None):
@@ -171,7 +179,7 @@ class HelpCommand(commands.Cog):
         # 🔍 Aide commande spécifique
         if commande:
             cmd = self.bot.get_command(commande)
-            if not cmd:
+            if not cmd or not await self._peut_voir(cmd, ctx):
                 return await safe_send(ctx.channel, f"❌ Commande `{commande}` inconnue.")
 
             embed = discord.Embed(
@@ -195,6 +203,8 @@ class HelpCommand(commands.Cog):
         categories = {}
         for cmd in self.bot.commands:
             if cmd.hidden:
+                continue
+            if not await self._peut_voir(cmd, ctx):
                 continue
             cat = getattr(cmd, "category", "Autres")
             categories.setdefault(cat, []).append(cmd)
