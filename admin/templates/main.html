@@ -228,6 +228,20 @@
           <div class="action-result" id="res-restart_bot"></div>
         </div>
 
+        <div class="action-card">
+          <div class="action-header">
+            <span class="action-icon">⛁</span>
+            <span class="action-title">Backup Database</span>
+          </div>
+          <div class="action-desc">Crée une copie horodatée de la base, l'envoie automatiquement sur Discord (si configuré) et garde les 10 derniers backups sur le serveur.</div>
+          <button class="btn btn-gold" onclick="doBackup(this)">Créer un backup</button>
+          <div class="action-result" id="res-backup"></div>
+          <div style="margin-top:14px">
+            <div style="font-size:10px;color:var(--dim2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Backups sur le serveur</div>
+            <div id="backup-list"></div>
+          </div>
+        </div>
+
       </div>
     </section>
 
