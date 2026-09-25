@@ -162,7 +162,7 @@ async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot, msg_override=
     answer = base[row][col]
     base[row][col] = "❓"
 
-    num_to_emoji = {i: f"{i}\u20e3" for i in range(1, 10)}
+    num_to_emoji = {i: f"{i}\ufe0f\u20e3" for i in range(1, 10)}  # ex: "3️⃣" (le \ufe0f manquait)
     display = "\n".join("|".join(num_to_emoji.get(x, x) for x in r) for r in base)
 
     embed.clear_fields()
@@ -313,16 +313,11 @@ async def datation(msg, embed, get_user_id, bot, msg_override=None):
     delta_days = random.randint(-7, 7)
     date = today + datetime.timedelta(days=delta_days)
 
-    jours_fr = {
-        "Monday": "lundi",
-        "Tuesday": "mardi",
-        "Wednesday": "mercredi",
-        "Thursday": "jeudi",
-        "Friday": "vendredi",
-        "Saturday": "samedi",
-        "Sunday": "dimanche"
-    }
-    jour_correct = jours_fr[date.strftime("%A")]
+    # ⚠️ On évite strftime("%A") : le nom du jour dépend de la locale du système
+    # (peut planter avec un KeyError si le serveur n'est pas en locale anglaise).
+    # date.weekday() est indépendant de la locale (0 = lundi ... 6 = dimanche).
+    jours_fr_liste = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+    jour_correct = jours_fr_liste[date.weekday()]
 
     # Affichage
     embed.clear_fields()
