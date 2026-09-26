@@ -477,22 +477,6 @@ footer {
 /* ── AFFICHAGE SELON TAILLE ─────────────────────────────── */
 @media (max-width: 900px) {
   .nav-links { display: none; }
-
-  /* ═══ Cache le bouton Discord de la nav sur mobile (renforcé) ═══ */
-  .nav-discord-btn,
-  nav .nav-actions .nav-discord-btn,
-  .nav-inner .nav-actions a.nav-discord-btn {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    pointer-events: none !important;
-  }
-
   .nav-burger { display: flex; }
   .nav-mobile { display: flex; }
   .nav-mobile:not(.open) { pointer-events: none; }
@@ -541,7 +525,7 @@ footer {
   .hero-cta { gap: 8px; }
   .hero-cta .btn { padding: 10px 16px; font-size: 13px; }
 
-  /* ═══ Cartes Discord (hero) : on cache TOUT sur mobile ═══ */
+  /* Cartes Discord (hero) : on cache TOUT sur mobile */
   .hero-visual {
     display: none !important;
   }
