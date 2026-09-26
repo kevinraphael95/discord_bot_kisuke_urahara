@@ -145,6 +145,7 @@ nav {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
+  overflow: hidden;
 }
 
 .nav-inner {
@@ -431,23 +432,23 @@ footer {
   position: fixed;
   top: var(--nav-h);
   left: 0; right: 0;
-  z-index: 999;
+  z-index: 99;                                              /* ← 99 (< nav à 100) */
   background: var(--bg);
   border-bottom: 1px solid var(--line);
   flex-direction: column;
   padding: 16px 20px 24px;
   gap: 4px;
   transform: translateY(-100%);
-  visibility: hidden;                                        /* ← AJOUT */
+  visibility: hidden;
   transition: transform .3s cubic-bezier(.2,.8,.3,1),
-              visibility .3s;                                /* ← AJOUT */
+              visibility .3s;
   max-height: calc(100vh - var(--nav-h));
   overflow-y: auto;
   box-shadow: 0 12px 32px rgba(0,0,0,.4);
 }
 .nav-mobile.open {
   transform: translateY(0);
-  visibility: visible;                                       /* ← AJOUT */
+  visibility: visible;
 }
 .nav-mobile a {
   display: block;
