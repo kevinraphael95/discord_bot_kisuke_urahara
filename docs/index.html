@@ -1,70 +1,47 @@
+<!-- … -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kisuke Urahara Bot — Documentation</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kisuke Urahara — Bot Discord Bleach</title>
+<!-- empecher le flash blanc aux changements de page : -->
+<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
+<!-- no flash -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/index.css">
+<script src="js/nav.js" defer></script>
 </head>
 <body>
-
-<header class="site">
-  <div class="bar">
-    <a class="brand" href="index.html"><span class="hat"></span>Kisuke Urahara Bot</a>
-    <nav class="pages">
-      <a href="index.html" aria-current="page">Accueil</a>
-      <a href="installation.html">Installation</a>
-      <a href="commandes.html">Commandes</a>
-      <a href="character-guesser.html">Character Guesser</a>
-    </nav>
-  </div>
-</header>
-
-<main>
-  <div class="wrap">
-    <section class="hero">
-      <p class="kicker">// bot discord — univers bleach</p>
-      <h1>Le bot du magasin<br>Urahara.</h1>
-      <p class="lead">
-        Un bot Discord complet sur l'univers Bleach : système RPG avec fiches de personnage,
-        économie de Reiatsu, panel d'administration web, et quelques automatismes maison.
-        Cette page regroupe tout ce qu'il faut pour l'installer, l'utiliser, et jouer.
-      </p>
-    </section>
-
-    <div class="diamonds">
-      <span></span><span></span><span></span><span></span><span></span>
+<div class="atmo"></div>
+<div class="top-bar"></div>
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-top">
+      <img class="avatar"
+        src="https://raw.githubusercontent.com/kevinraphael95/discord_bot_kisuke_urahara/main/assets/kisuke.jpg"
+        alt="Kisuke Urahara">
+      <h1 class="hero-title">
+        <span class="l1">Kisuke</span>
+        <span class="l2">Urahara</span>
+      </h1>
     </div>
-
-    <div class="grid">
-      <a class="card" href="installation.html">
-        <span class="mark"></span>
-        <h2>Installation</h2>
-        <p>Prérequis, configuration et lancement du bot — y compris le déploiement sous Termux.</p>
-        <span class="go">lire le tuto →</span>
-      </a>
-      <a class="card" href="commandes.html">
-        <span class="mark"></span>
-        <h2>Commandes</h2>
-        <p>La liste des commandes disponibles, classées par catégorie.</p>
-        <span class="go">voir la liste →</span>
-      </a>
-      <a class="card" href="character-guesser.html">
-        <span class="mark"></span>
-        <h2>Character Guesser</h2>
-        <p>Un mini-jeu pour deviner un personnage de Bleach à partir d'indices.</p>
-        <span class="go">jouer →</span>
-      </a>
+    <p class="hero-desc">Kisuke Urahara est un bot discord inspiré du manga Bleach — il possède des commandes générales, des commandes de divertissement liées à bleach (ou non), des minijeux, et un système de collecte de Reiatsu. Le site possède aussi un Bleach Character Guesser.</p>
+    <div class="hero-cta">
+      <a class="btn btn-gold" href="commandes.html">Voir les commandes</a>
+      <a class="btn btn-gold" href="guesser.html">Bleach Character Guesser</a>
+      <a class="btn btn-ghost" href="https://github.com/kevinraphael95/discord_bot_kisuke_urahara" target="_blank">GitHub ↗</a>
     </div>
   </div>
-</main>
+</section>
 
-<footer class="site">
-  <div class="wrap">
-    <span>Kisuke Urahara Bot — projet perso, non affilié à Bleach / Shueisha</span>
-    <a href="https://github.com/kevinraphael95" target="_blank" rel="noopener">github.com/kevinraphael95</a>
-  </div>
+<!--  
+<footer>
+  <p class="foot-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
 </footer>
-
+-->
+  
 </body>
 </html>
