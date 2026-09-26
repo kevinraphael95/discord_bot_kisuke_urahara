@@ -56,7 +56,7 @@ window.addEventListener('load', () => {
    ─────────────────────────────────────────────────────────────────── */
 
 async function fetchHtml(url) {
-  const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+  const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
 }
