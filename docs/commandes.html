@@ -194,6 +194,389 @@
 </head>
 <body>
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kisuke Urahara — Bot Discord Bleach</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/nav.js" defer></script>
+<script src="js/theme.js" defer></script>
+
+<style>
+  /* ── HERO ─────────────────────────────────────────── */
+  .hero {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 32px 100px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    color: var(--fg);
+    margin: 24px 0 20px;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p {
+    font-size: 17px;
+    color: var(--fg-soft);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 32px;
+  }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ── VISUEL : mockups Discord ──────────────────────── */
+  .hero-visual { display: flex; flex-direction: column; gap: 12px; }
+  .discord-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: transform .3s ease, border-color .3s ease;
+  }
+  .discord-card:hover { transform: translateY(-2px); border-color: var(--line-2); }
+  .dc-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 18px;
+    font-family: var(--font-display);
+  }
+  .dc-body { flex: 1; min-width: 0; }
+  .dc-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .dc-name { font-weight: 600; color: var(--fg); font-size: 15px; }
+  .dc-bot-tag {
+    background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 5px; border-radius: 4px;
+    letter-spacing: .02em; text-transform: uppercase;
+  }
+  .dc-time { font-size: 11px; color: var(--fg-mute); }
+  .dc-msg { color: var(--fg-soft); font-size: 14px; line-height: 1.5; }
+  .dc-msg strong { color: var(--fg); font-weight: 600; }
+  .dc-embed { margin-top: 10px; padding-left: 12px; border-left: 3px solid var(--accent); }
+  .dc-embed-title { font-weight: 600; color: var(--fg); font-size: 14px; margin-bottom: 2px; }
+  .dc-embed-desc { font-size: 13px; color: var(--fg-soft); line-height: 1.5; }
+
+  /* ── FEATURE ALTERNÉE ──────────────────────────────── */
+  .feature {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 72px;
+    align-items: center;
+    padding: 56px 0;
+  }
+  .feature:not(:last-child) { border-bottom: 1px solid var(--line); }
+  .feature.reverse .feature-text { order: 2; }
+  .feature.reverse .feature-visual { order: 1; }
+  .feature-text h3 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--fg);
+    margin-bottom: 14px;
+  }
+  .feature-text h3 em { font-style: normal; color: var(--accent); }
+  .feature-text p {
+    color: var(--fg-soft);
+    font-size: 16px;
+    line-height: 1.75;
+    margin-bottom: 20px;
+    max-width: 480px;
+  }
+  .feature-text ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .feature-text li {
+    display: flex; align-items: flex-start; gap: 10px;
+    color: var(--fg-soft); font-size: 15px;
+  }
+  .feature-text li::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--accent);
+    transform: rotate(45deg);
+    flex-shrink: 0; margin-top: 8px;
+  }
+  .feature-visual {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px;
+    position: relative; overflow: hidden;
+    min-height: 260px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feature-visual::before {
+    content: ''; position: absolute;
+    top: -50%; right: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 40%);
+    opacity: .6; pointer-events: none;
+  }
+  .fv-content { position: relative; z-index: 1; text-align: center; }
+  .fv-icon { font-size: 52px; margin-bottom: 14px; display: block; }
+  .fv-label {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 800;
+    color: var(--fg); margin-bottom: 6px;
+  }
+  .fv-sub {
+    font-size: 13px; color: var(--fg-mute);
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+
+  /* ── CTA FINAL ─────────────────────────────────────── */
+  .cta-final {
+    max-width: 1200px; margin: 0 auto;
+    padding: 100px 32px; text-align: center;
+  }
+  .cta-final h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3vw, 2.2rem);
+    font-weight: 800; color: var(--fg);
+    margin-bottom: 16px; line-height: 1.2;
+  }
+  .cta-final p {
+    color: var(--fg-soft); font-size: 17px;
+    margin-bottom: 32px; max-width: 520px;
+    margin-left: auto; margin-right: auto;
+  }
+  .cta-final .hero-cta { justify-content: center; }
+
+  /* ── RESPONSIVE ────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 48px 20px 64px; gap: 40px; }
+    .hero-visual { order: -1; }
+    .feature { grid-template-columns: 1fr; gap: 32px; padding: 40px 0; }
+    .feature.reverse .feature-text { order: 1; }
+    .feature.reverse .feature-visual { order: 2; }
+    .cta-final { padding: 64px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" data-nav="index">
+      <span class="nav-logo-mark"><span>K</span></span>
+      Kisuke Urahara
+    </a>
+    <ul class="nav-links">
+      <li><a data-nav="install">Installation</a></li>
+      <li><a data-nav="commandes">Commandes</a></li>
+      <li><a data-nav="guesser">Guesser</a></li>
+      <li><a data-nav="minijeux">Mini-jeux</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-btn" id="themeBtn" aria-label="Changer le thème"></button>
+      <a class="btn btn-primary btn-sm nav-discord-btn" data-nav="discord">Ajouter à Discord</a>
+      <button class="nav-burger" id="navBurger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="nav-mobile" id="navMobile">
+  <a data-nav="install">Installation</a>
+  <a data-nav="commandes">Commandes</a>
+  <a data-nav="guesser">Guesser</a>
+  <a data-nav="minijeux">Mini-jeux</a>
+  <a data-nav="discord" class="nav-mobile-cta">Ajouter à Discord</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-text">
+    <div class="badge">Bot Discord · Bleach</div>
+    <h1>KISUKE URAHARA. Un bot Discord inspiré de <em>Bleach</em>.</h1>
+    <p>
+      Commandes générales, mini-jeux, système Reiatsu, Character Guesser
+      quotidien. Tout ce qu'il faut pour transformer ton serveur en Karakura.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="404.html">Ajouter à Discord</a>
+      <a class="btn btn-ghost" href="commandes.html">Voir les commandes</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="discord-card">
+      <div class="dc-avatar">K</div>
+      <div class="dc-body">
+        <div class="dc-head">
+          <span class="dc-name">Kisuke Urahara</span>
+          <span class="dc-bot-tag">Bot</span>
+          <span class="dc-time">Aujourd'hui à 19:03</span>
+        </div>
+        <div class="dc-msg"><strong>!!bmoji</strong></div>
+        <div class="dc-embed">
+          <div class="dc-embed-title">Bmoji</div>
+          <div class="dc-embed-desc">Devine le personnage de Bleach derrière ces emojis !<br>🦷😂❤️<br><strong>A</strong> : Sōsuke Aizen<br><strong>B</strong> : Izuru Kira<br><strong>C</strong> : Yumichika Ayasegawa<br><strong>D</strong> : Kensei Muguruma</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="discord-card">
+      <div class="dc-avatar">K</div>
+      <div class="dc-body">
+        <div class="dc-head">
+          <span class="dc-name">Kisuke Urahara</span>
+          <span class="dc-bot-tag">Bot</span>
+          <span class="dc-time">Aujourd'hui à 19:03</span>
+        </div>
+        <div class="dc-msg"><strong>!!pizza</strong></div>
+        <div class="dc-embed">
+          <div class="dc-embed-title">🍕 Ta pizza aléatoire</div>
+          <div class="dc-embed-desc"><strong>Pâte</strong><br>Fine<br><strong>Base (sauce)</strong><br>Sauce aux champignons<br><strong>Fromage</strong><br>Feta<br><strong>Garnitures</strong><br>Bœuf haché, Jambon</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="section section-soft">
+  <div class="container">
+    <div class="section-head">
+      <h2>Tout ce que fait <em>le bot</em></h2>
+      <p>Des commandes du quotidien aux mécaniques Bleach les plus poussées, en passant par les mini-jeux.</p>
+    </div>
+
+    <!-- 1. COMMANDES GÉNÉRALES (texte gauche) -->
+    <div class="feature">
+      <div class="feature-text">
+        <h3>Commandes <em>générales</em></h3>
+        <p>Utilitaires, fun, jeux, modération. Le kit de survie pour animer un serveur Discord.</p>
+        <ul>
+          <li>Jeux de société (pendu, mastermind, compte est bon)</li>
+          <li>Quiz (capitales, drapeaux, formes, mémoire)</li>
+          <li>Fun &amp; random (ship, gay, pizza, couleur)</li>
+          <li>Solo RPG et commandes interactives</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-content">
+          <span class="fv-icon">⚔️</span>
+          <div class="fv-label">50+ commandes</div>
+          <div class="fv-sub">Générales · Fun · Jeux</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. UNIVERS BLEACH (texte droite) -->
+    <div class="feature reverse">
+      <div class="feature-text">
+        <h3>Univers <em>Bleach</em></h3>
+        <p>Des commandes dans le thème de Bleach.</p>
+        <ul>
+          <li>Répertoire complet des Kidō</li>
+          <li>Test de division du Gotei 13</li>
+          <li>Traduction anglaise du Klub Outside</li>
+          <li>Petits jeux dans le thème de Bleach</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-content">
+          <span class="fv-icon">🩸</span>
+          <div class="fv-label">Univers Bleach</div>
+          <div class="fv-sub">Kidō · Divisions · Klub Outside</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SYSTÈME REIATSU (texte gauche) -->
+    <div class="feature">
+      <div class="feature-text">
+        <h3>Système <em>Reiatsu</em></h3>
+        <p>Collecte, classes, quêtes, shop, vols et classement global. Un vrai mini-RPG qui vit sur ton serveur.</p>
+        <ul>
+          <li>4 classes jouables avec compétences uniques</li>
+          <li>Quêtes, récompenses, boutique d'effets</li>
+          <li>Vol de Reiatsu entre membres</li>
+          <li>Classement global et profils détaillés</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-content">
+          <span class="fv-icon">💠</span>
+          <div class="fv-label">Mini-RPG complet</div>
+          <div class="fv-sub">4 classes · Quêtes · Shop</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CHARACTER GUESSER (texte droite) -->
+    <div class="feature reverse">
+      <div class="feature-text">
+        <h3>Character <em>Guesser</em></h3>
+        <p>Devine un personnage Bleach en 8 essais. Mode quotidien, mode survie, classement mensuel.</p>
+        <ul>
+          <li>Plus de 130 personnages de tous les arcs</li>
+          <li>8 essais, indices chaud/froid</li>
+          <li>Classement mensuel avec connexion Discord</li>
+          <li>Partage de résultat façon Wordle</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-content">
+          <span class="fv-icon">🎯</span>
+          <div class="fv-label">130+ personnages</div>
+          <div class="fv-sub">Quotidien · Survie · Classement</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ CTA FINAL ═══ -->
+<section class="cta-final">
+  <h2>Prêt à rejoindre la Soul Society ?</h2>
+  <p>Ajoute Kisuke Urahara à ton serveur en un clic et commence à collecter ton Reiatsu.</p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="404.html">Ajouter à Discord</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <span>© kevinraphael95 · CC BY-NC-SA 4.0</span>
+    <ul class="footer-links">
+      <li><a href="#">GitHub</a></li>
+      <li><a href="commandes.html">Commandes</a></li>
+      <li><a href="guesser.html">Guesser</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
+
 <!-- PAGE HEAD -->
 <header class="page-head">
   <h1>Toutes les <em>commandes</em></h1>
