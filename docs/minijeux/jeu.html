@@ -3,60 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pixel Guess — Bleach</title>
-<!-- empecher le flash blanc aux changements de page : -->
-<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
-<!-- no flash -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="jeu.css">
+<title>Pixel Guesser — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="../fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="minijeux.css">
 
 <script src="../js/nav.js" defer></script>
+<script src="../js/theme.js" defer></script>
 <script src="../js/data.js"></script>
+<script src="jeu.js" defer></script>
 </head>
 <body>
 
-<div class="atmo"></div>
-<div class="top-bar"></div>
+<header class="page-head">
+  <h1>Pixelated <em>Character Guesser</em></h1>
+  <p>Devine le personnage Bleach qui se cache derrière cette image pixelisée.</p>
+</header>
 
-<div class="phdr">
-  <h1 class="pttl">
-    <span class="t1">Pixelated Character Guesser</span>
-  </h1>
-  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-</div>
+<main class="game-wrap">
 
-<div class="pg-wrap">
-
-  <!-- LOADING -->
-  <div id="loadBox">
+  <div id="loadBox" class="load-box">
     <div class="spinner"></div>
     <div id="loadMsg">Chargement…</div>
   </div>
 
-  <!-- GAME -->
-  <div id="gameBox">
-
-    <div class="game-left">
+  <div id="gameBox" class="pg-layout" style="display:none">
+    <div class="pg-left">
       <div class="canvas-card">
         <canvas id="canvas" width="400" height="400"></canvas>
       </div>
       <div class="stats-row">
-        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">🔥 Série</span></div>
+        <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
         <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
         <div class="sstat"><span class="sv" id="sLevel">—</span><span class="sl">Résolution</span></div>
       </div>
       <div class="hint" id="hintBox"></div>
     </div>
 
-    <div class="game-right">
+    <div class="pg-right">
       <div class="input-row">
         <input id="guessInput" autocomplete="off" placeholder="Nom du personnage…" />
-        <button class="btn-sm" id="submitBtn" onclick="submit()">Valider</button>
+        <button class="btn-choice" id="submitBtn" onclick="submit()">Valider</button>
         <div id="autocompleteBox" class="autocomplete"></div>
       </div>
-      <div class="attempts-bar">Tentatives : <span id="attemptsCount">0</span> / <span id="attemptsMax">12</span></div>
+      <div class="attempts-bar" style="font-size:13px;color:var(--fg-mute);text-align:right">
+        Tentatives : <span id="attemptsCount" style="color:var(--accent);font-weight:600">0</span> / <span id="attemptsMax">12</span>
+      </div>
 
       <div class="guesses-section">
         <div class="guesses-label">Propositions</div>
@@ -65,42 +68,21 @@
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- RESULT -->
-  <div id="resultBox">
-    <div class="result-left">
-      <img id="resultImg" src="" alt="" />
+  <div id="resultBox" class="result-box" style="display:none; flex-direction:row; align-items:stretch; padding:0; overflow:hidden; text-align:left">
+    <div style="flex:0 0 clamp(200px,30vw,360px); max-width:100%">
+      <img id="resultImg" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
     </div>
-    <div class="result-right">
+    <div style="flex:1;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:12px;min-width:0">
       <div class="res-title" id="resTitle"></div>
-      <div class="res-name" id="resName"></div>
-      <div class="res-guesses" id="resGuessesInfo"></div>
-      <button class="btn-sm" onclick="restart()">▶ Rejouer</button>
+      <div style="font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--accent)" id="resName"></div>
+      <div class="res-info" id="resGuessesInfo"></div>
+      <button class="btn-choice" onclick="restart()">▶ Rejouer</button>
     </div>
   </div>
 
-</div>
-
-<!-- Fallback si data.js absent -->
-<script>
-if (typeof CHARS === "undefined") {
-  window.CHARS = [
-    {n:"Ichigo Kurosaki"},{n:"Rukia Kuchiki"},{n:"Orihime Inoue"},{n:"Uryu Ishida"},
-    {n:"Yasutora Sado"},{n:"Byakuya Kuchiki"},{n:"Renji Abarai"},{n:"Toshiro Hitsugaya"},
-    {n:"Sosuke Aizen"},{n:"Kisuke Urahara"},{n:"Yoruichi Shihoin"},{n:"Genryusai Yamamoto"},
-    {n:"Rangiku Matsumoto"},{n:"Gin Ichimaru"},{n:"Kaname Tosen"},{n:"Shunsui Kyoraku"},
-    {n:"Jushiro Ukitake"},{n:"Retsu Unohana"},{n:"Mayuri Kurotsuchi"},{n:"Zaraki Kenpachi"},
-    {n:"Nelliel Tu Odelschwanck"},{n:"Ulquiorra Cifer"},{n:"Grimmjow Jaegerjaquez"},
-    {n:"Tier Harribel"},{n:"Coyote Starrk"},{n:"Baraggan Louisenbairn"},
-    {n:"Yhwach"},{n:"Jugram Haschwalth"},{n:"Bazz-B"},{n:"Gerard Valkyrie"},
-    {n:"Senjumaru Shutara"},{n:"Lille Barro"}
-  ];
-}
-</script>
-
-<script src="jeu.js"></script>
+</main>
 
 </body>
 </html>

@@ -3,68 +3,242 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Commandes — Kisuke Urahara Bot</title>
-<!-- empecher le flash blanc aux changements de page : -->
-<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
-<!-- no flash -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/commandes.css">
+<title>Commandes — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
 <script src="js/nav.js" defer></script>
+<script src="js/theme.js" defer></script>
 <script src="js/commandes.js" defer></script>
+
+<style>
+  /* ── Styles spécifiques à la page Commandes ── */
+
+  /* Barre de recherche */
+  .search-wrap {
+    max-width: 520px;
+    margin: 0 auto 40px;
+    position: relative;
+  }
+  .search-wrap::before {
+    content: '🔍';
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    opacity: .5;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 14px 18px 14px 48px;
+    background: var(--bg-card);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s ease;
+  }
+  .search-input::placeholder { color: var(--fg-mute); }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* Catégorie */
+  .cat {
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .cat:hover { border-color: var(--line-2); }
+
+  .cat-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s;
+    position: relative;
+  }
+  .cat-header::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform .25s;
+    transform-origin: top;
+  }
+  .cat-header:hover::before,
+  .cat-header.open::before { transform: scaleY(1); }
+  .cat-header:hover { background: var(--bg-soft); }
+
+  .cat-icon { font-size: 18px; flex-shrink: 0; }
+
+  .cat-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--fg);
+    flex: 1;
+    letter-spacing: .01em;
+  }
+
+  .cat-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 10px;
+    border-radius: 100px;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .cat-arrow {
+    color: var(--fg-mute);
+    font-size: 14px;
+    transition: transform .25s;
+    flex-shrink: 0;
+  }
+  .cat-header.open .cat-arrow { transform: rotate(90deg); color: var(--accent); }
+
+  /* Liste de commandes */
+  .cmd-list {
+    display: none;
+    padding: 4px 0 12px;
+    border-top: 1px solid var(--line);
+  }
+  .cmd-list.open { display: block; }
+
+  .cmd {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    padding: 14px 22px;
+    transition: background .15s;
+    border-bottom: 1px solid var(--line);
+  }
+  .cmd:last-child { border-bottom: none; }
+  .cmd:hover { background: var(--bg-soft); }
+
+  .cmd-name {
+    font-family: 'SF Mono', 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    word-break: break-word;
+    line-height: 1.5;
+  }
+  .cmd-name::before {
+    content: '';
+    width: 5px; height: 5px;
+    background: var(--accent);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  .cmd-desc {
+    font-size: 14px;
+    color: var(--fg-soft);
+    line-height: 1.6;
+  }
+
+  .cmd-usage {
+    grid-column: 1 / -1;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 6px 12px;
+    border-radius: var(--radius-xs);
+    border-left: 3px solid var(--accent);
+    margin-top: 6px;
+    display: inline-block;
+    width: fit-content;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .cmd {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 14px 18px;
+    }
+    .cmd-usage { width: 100%; box-sizing: border-box; }
+    .cat-header { padding: 16px 18px; }
+    .cat-name { font-size: 15px; }
+  }
+</style>
 </head>
 <body>
 
-<div class="atmo"></div>
-<div class="top-bar"></div>
+<!-- PAGE HEAD -->
+<header class="page-head">
+  <h1>Toutes les <em>commandes</em></h1>
+  <p>Organisées par catégorie. Utilise la recherche pour trouver une commande précise.</p>
+</header>
 
-<div class="phdr">
-  <h1 class="pttl">
-    <span class="t1">Commandes</span>
-  </h1>
-  <p class="psub">Toutes les commandes disponibles, organisées par catégorie.</p>
-  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-</div>
+<!-- CONTENU -->
+<main class="container" style="padding-bottom: 80px;">
 
-<div class="content">
   <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input class="search-inp" id="si" type="text" placeholder="Rechercher une commande…" oninput="filter()"/>
+    <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une commande…" autocomplete="off">
   </div>
 
-  <div id="cats">
+  <div id="categories">
 
-    <!-- ── Admin ── -->
-    <div class="cat" data-id="admin">
-      <div class="cat-hdr open" onclick="toggle(this)">
+    <!-- ═══ ADMIN ═══ -->
+    <div class="cat">
+      <div class="cat-header open">
         <span class="cat-icon">⚙️</span>
         <span class="cat-name">Admin</span>
-        <span class="cat-count" id="c-admin"></span>
+        <span class="cat-count"></span>
         <span class="cat-arrow">›</span>
       </div>
       <div class="cmd-list open">
-        <div class="cmd cmd-admin"><span class="cmd-name">/adminpanel</span><span class="cmd-desc">🔒 Affiche le lien du panneau admin.</span></div>
-        <div class="cmd cmd-admin"><span class="cmd-name">/commandslist</span><span class="cmd-desc">Génère un .md avec toutes les commandes et les envoie en fichier.</span></div>
-        <div class="cmd cmd-admin"><span class="cmd-name">/kisukevol</span><span class="cmd-desc">🌀 Kisuke vole 10 % du Reiatsu d'un membre comme un joueur normal.</span></div>
-        <div class="cmd cmd-admin"><span class="cmd-name">/reiatsuadmin</span><span class="cmd-desc">(Admin) Gère le Reiatsu : set, unset, change, spawn, speed.</span></div>
-        <div class="cmd cmd-admin">
+        <div class="cmd"><span class="cmd-name">/adminpanel</span><span class="cmd-desc">🔒 Affiche le lien du panneau admin.</span></div>
+        <div class="cmd"><span class="cmd-name">/commandslist</span><span class="cmd-desc">Génère un fichier .md avec toutes les commandes.</span></div>
+        <div class="cmd"><span class="cmd-name">/kisukevol</span><span class="cmd-desc">🌀 Kisuke vole 10 % du Reiatsu d'un membre.</span></div>
+        <div class="cmd"><span class="cmd-name">/reiatsuadmin</span><span class="cmd-desc">Gère le Reiatsu : set, unset, change, spawn, speed.</span></div>
+        <div class="cmd">
           <span class="cmd-name">/say_as</span>
-          <span class="cmd-desc">(Admin) Fait répéter un message par le bot comme si c'était un autre membre.</span>
-          <code class="cmd-usage">Usage : !say_as &lt;mention|id|pseudo&gt; &lt;message&gt;</code>
+          <span class="cmd-desc">Fait répéter un message par le bot comme si c'était un autre membre.</span>
+          <code class="cmd-usage">!say_as &lt;mention|id|pseudo&gt; &lt;message&gt;</code>
         </div>
-        <div class="cmd cmd-admin"><span class="cmd-name">/sync</span><span class="cmd-desc">Synchronise les commandes slash (serveur ou global).</span></div>
-        <div class="cmd cmd-admin"><span class="cmd-name">/testgame</span><span class="cmd-desc">Tester un mini-jeu via son numéro ou 'all'.</span></div>
-        <div class="cmd cmd-admin"><span class="cmd-name">/testtache</span><span class="cmd-desc">🕹️ Teste toutes les épreuves pour la commande hollow.</span></div>
+        <div class="cmd"><span class="cmd-name">/sync</span><span class="cmd-desc">Synchronise les commandes slash (serveur ou global).</span></div>
+        <div class="cmd"><span class="cmd-name">/testgame</span><span class="cmd-desc">Tester un mini-jeu via son numéro ou 'all'.</span></div>
+        <div class="cmd"><span class="cmd-name">/testtache</span><span class="cmd-desc">🕹️ Teste toutes les épreuves pour la commande hollow.</span></div>
       </div>
     </div>
 
-    <!-- ── Bleach ── -->
-    <div class="cat" data-id="bleach">
-      <div class="cat-hdr open" onclick="toggle(this)">
+    <!-- ═══ BLEACH ═══ -->
+    <div class="cat">
+      <div class="cat-header open">
         <span class="cat-icon">⚔️</span>
         <span class="cat-name">Bleach</span>
-        <span class="cat-count" id="c-bleach"></span>
+        <span class="cat-count"></span>
         <span class="cat-arrow">›</span>
       </div>
       <div class="cmd-list open">
@@ -81,12 +255,12 @@
       </div>
     </div>
 
-    <!-- ── Fun & Random ── -->
-    <div class="cat" data-id="fun">
-      <div class="cat-hdr open" onclick="toggle(this)">
+    <!-- ═══ FUN & RANDOM ═══ -->
+    <div class="cat">
+      <div class="cat-header open">
         <span class="cat-icon">🎲</span>
         <span class="cat-name">Fun &amp; Random</span>
-        <span class="cat-count" id="c-fun"></span>
+        <span class="cat-count"></span>
         <span class="cat-arrow">›</span>
       </div>
       <div class="cmd-list open">
@@ -97,18 +271,18 @@
         <div class="cmd">
           <span class="cmd-name">/ship</span>
           <span class="cmd-desc">💘 Ship deux membres.</span>
-          <code class="cmd-usage">Usage : !ship @user | !ship @user1 @user2</code>
+          <code class="cmd-usage">!ship @user | !ship @user1 @user2</code>
         </div>
         <div class="cmd"><span class="cmd-name">/sorting</span><span class="cmd-desc">Trie 12 barres en longueurs différentes selon un algorithme.</span></div>
       </div>
     </div>
 
-    <!-- ── Général ── -->
-    <div class="cat" data-id="general">
-      <div class="cat-hdr open" onclick="toggle(this)">
+    <!-- ═══ GÉNÉRAL ═══ -->
+    <div class="cat">
+      <div class="cat-header open">
         <span class="cat-icon">💬</span>
         <span class="cat-name">Général</span>
-        <span class="cat-count" id="c-general"></span>
+        <span class="cat-count"></span>
         <span class="cat-arrow">›</span>
       </div>
       <div class="cmd-list open">
@@ -125,12 +299,12 @@
       </div>
     </div>
 
-    <!-- ── Jeux ── -->
-    <div class="cat" data-id="jeux">
-      <div class="cat-hdr open" onclick="toggle(this)">
+    <!-- ═══ JEUX ═══ -->
+    <div class="cat">
+      <div class="cat-header open">
         <span class="cat-icon">🕹️</span>
         <span class="cat-name">Jeux</span>
-        <span class="cat-count" id="c-jeux"></span>
+        <span class="cat-count"></span>
         <span class="cat-arrow">›</span>
       </div>
       <div class="cmd-list open">
@@ -150,12 +324,12 @@
       </div>
     </div>
 
-    <!-- ── Reiatsu ── -->
-    <div class="cat" data-id="reiatsu">
-      <div class="cat-hdr open" onclick="toggle(this)">
+    <!-- ═══ REIATSU ═══ -->
+    <div class="cat">
+      <div class="cat-header open">
         <span class="cat-icon">💠</span>
         <span class="cat-name">Reiatsu</span>
-        <span class="cat-count" id="c-reiatsu"></span>
+        <span class="cat-count"></span>
         <span class="cat-arrow">›</span>
       </div>
       <div class="cmd-list open">
@@ -163,10 +337,10 @@
         <div class="cmd"><span class="cmd-name">/hollow</span><span class="cmd-desc">👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).</span></div>
         <div class="cmd"><span class="cmd-name">/keylottery</span><span class="cmd-desc">Ticket à gratter : tente ta chance.</span></div>
         <div class="cmd"><span class="cmd-name">/quetes</span><span class="cmd-desc">🎮 Affiche la liste des quêtes et ton niveau actuel.</span></div>
-        <div class="cmd"><span class="cmd-name">/reiatsu</span><span class="cmd-desc">💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.</span></div>
+        <div class="cmd"><span class="cmd-name">/reiatsu</span><span class="cmd-desc">💠 Affiche les informations de spawn Reiatsu et le classement global.</span></div>
         <div class="cmd"><span class="cmd-name">/reiatsuprofil</span><span class="cmd-desc">💠 Affiche ton profil Reiatsu détaillé.</span></div>
         <div class="cmd"><span class="cmd-name">/reiatsushop</span><span class="cmd-desc">Affiche le shop et achète des effets.</span></div>
-        <div class="cmd"><span class="cmd-name">/reiatsutop</span><span class="cmd-desc">📊 Affiche le Top 20 Reiatsu et ta position dans le classement global.</span></div>
+        <div class="cmd"><span class="cmd-name">/reiatsutop</span><span class="cmd-desc">📊 Affiche le Top 20 Reiatsu et ta position.</span></div>
         <div class="cmd"><span class="cmd-name">/reiatsuvol</span><span class="cmd-desc">💠 Vole du Reiatsu à quelqu'un.</span></div>
         <div class="cmd"><span class="cmd-name">/skill</span><span class="cmd-desc">Active la compétence de ta classe Reiatsu.</span></div>
         <div class="cmd"><span class="cmd-name">/tutoreiatsu</span><span class="cmd-desc">Affiche le tutoriel complet pour les nouveaux joueurs.</span></div>
@@ -174,13 +348,18 @@
     </div>
 
   </div>
-</div>
+</main>
 
-<!--
 <footer>
-  <p class="foot-copy">© kevinraphael95 · CC BY-NC-SA 4.0</p>
+  <div class="footer-inner">
+    <span>© kevinraphael95 · CC BY-NC-SA 4.0</span>
+    <ul class="footer-links">
+      <li><a href="#">GitHub</a></li>
+      <li><a href="commandes.html">Commandes</a></li>
+      <li><a href="guesser.html">Guesser</a></li>
+    </ul>
+  </div>
 </footer>
--->
 
 </body>
 </html>

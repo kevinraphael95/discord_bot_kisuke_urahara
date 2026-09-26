@@ -104,7 +104,6 @@ function onAuthReady() {
 
 // ── Render daily : re-render complet depuis dG ────────────────
 function _renderDaily() {
-  // FIX 2 : vider le tableau avant tout pour éviter le flash des rows survie
   clr();
   dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
 
@@ -136,7 +135,6 @@ function _renderDaily() {
 function _renderSurvival() {
   clr();
 
-  // FIX 3 : si game over persisté, afficher directement le banner de fin
   if (sOver) {
     hideGameUI();
     $('sbar').classList.remove('on');
@@ -307,7 +305,6 @@ function saveSurv() {
   } catch(e) {}
 }
 
-// FIX 3 : sauvegarder l'état game over avec le nom du perso
 function saveSurvOver() {
   try {
     localStorage.setItem(LS_SURV_KEY, JSON.stringify({
@@ -325,7 +322,6 @@ function loadSurv() {
     const s = JSON.parse(localStorage.getItem(LS_SURV_KEY));
     if (!s || !s.cur) return false;
 
-    // FIX 3 : si c'était un game over, restaurer l'état over
     if (s.over) {
       sOver = true;
       sStr = s.str || 0; sBst = s.bst || 0; sKil = s.kil || 0;
@@ -356,7 +352,6 @@ function switchMode(m) {
   localStorage.setItem('bleachg_mode', m);
   mode = m;
 
-  // FIX 2 : vider le tableau immédiatement au switch pour éviter le flash
   clr();
 
   $('gi').value = ''; $('acl').innerHTML = '';
@@ -373,11 +368,11 @@ function switchMode(m) {
     if (typeof currentUser !== 'undefined' && currentUser) {
       $('gi').disabled = true; $('gbtn').disabled = true;
       $('gi').placeholder = 'Chargement…';
-    
+
       const timeout = setTimeout(() => {
         $('gi').placeholder = 'Supabase est long à répondre…';
       }, 3000);
-    
+
       loadDailyFromSupabase().then(() => {
         clearTimeout(timeout);
         if (mode !== 'daily') return;
@@ -517,7 +512,7 @@ function showFlash(type, msg) {
 function sGameOver(name) {
   sOver = true;
   if (sStr > sRec) { sRec = sStr; saveRec(); }
-  saveSurvOver(); // FIX 3 : persister le game over
+  saveSurvOver();
   showFlash('ko', '☠ ' + name + ' — Game Over !');
   $('gi').disabled = true; $('gbtn').disabled = true;
   setTimeout(() => {
@@ -549,14 +544,13 @@ function showSEnd() {
   updSUI();
   if (sCur) {
     setImg($('s-img'), sCur); $('s-img').alt = sCur.n;
-    // FIX 3 : afficher le nom du personnage non trouvé
     const seChar = $('se-char');
     if (seChar) seChar.textContent = 'C\'était : ' + sCur.n;
   }
 }
 
 function sRestart() {
-  clearSurv(); // FIX 3 : effacer l'état game over au redémarrage
+  clearSurv();
   $('send').classList.remove('on');
   $('sbar').classList.add('on');
   showGameUI('survival');
@@ -650,8 +644,6 @@ function shake(inp, msg) {
   const BASE = 'https://raw.githubusercontent.com/kevinraphael95/random-useful-stuff/main/bleachmusic/';
   let buf = [], player = null, toast = null, tracks = [], looping = false;
   document.addEventListener('keydown', function (e) {
-    // désactivé le truc qui empêche de faire le konami code si on est en train d'écrire une porposition
-    // if (e.target === $('gi')) return;
     buf.push(e.key); if (buf.length > KONAMI.length) buf.shift();
     if (buf.join(',') === KONAMI.join(',')) { buf = []; triggerKonami(); }
   });
@@ -676,19 +668,19 @@ function shake(inp, msg) {
     const vol = toast ? toast.querySelector('input[type=range]').value : 0.10;
     if (toast) toast.remove();
     toast = document.createElement('div');
-    toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--panel);border:1px solid var(--gold-line);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--gold-glow);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif`;
+    toast.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg-card);border:1px solid var(--accent);padding:.85rem 1.1rem;z-index:9999;box-shadow:0 0 32px var(--accent-soft);animation:rise .4s ease forwards;display:flex;flex-direction:column;gap:.5rem;min-width:220px;max-width:280px;font-family:'Inter',sans-serif;border-radius:12px`;
     toast.innerHTML = `
-      <div style="font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
-      <div style="font-size:.8rem;color:var(--white);line-height:1.3;word-break:break-word">${title}</div>
+      <div style="font-size:.6rem;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;font-weight:600">⚡ Easter Egg</div>
+      <div style="font-size:.8rem;color:var(--fg);line-height:1.3;word-break:break-word">${title}</div>
       <div style="display:flex;gap:4px;align-items:center">
-        <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;min-width:0;accent-color:var(--gold);cursor:pointer">
-        <button class="konami-loop" style="background:${looping?'var(--gold-pale)':'none'};border:1px solid var(--border);color:${looping?'var(--gold-lt)':'var(--muted)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">∞</button>
-        <button class="konami-rnd"  style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">🔀</button>
-        <button class="konami-stop" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">■</button>
+        <input type="range" min="0" max="1" step="0.05" value="${vol}" style="flex:1;min-width:0;accent-color:var(--accent);cursor:pointer">
+        <button class="konami-loop" style="background:${looping?'var(--accent-soft)':'none'};border:1px solid var(--line-2);color:${looping?'var(--accent)':'var(--fg-mute)'};cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">∞</button>
+        <button class="konami-rnd"  style="background:none;border:1px solid var(--line-2);color:var(--fg-mute);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">🔀</button>
+        <button class="konami-stop" style="background:none;border:1px solid var(--line-2);color:var(--fg-mute);cursor:pointer;font-size:.65rem;padding:.2rem .4rem;border-radius:2px;flex-shrink:0">■</button>
       </div>`;
     const cn = () => decodeURIComponent(player?.src?.split('/').pop() || '');
     toast.querySelector('input[type=range]').addEventListener('input', function () { if (player) player.volume = this.value; });
-    toast.querySelector('.konami-loop').addEventListener('click', function () { looping = !looping; this.style.background = looping ? 'var(--gold-pale)' : 'none'; this.style.color = looping ? 'var(--gold-lt)' : 'var(--muted)'; });
+    toast.querySelector('.konami-loop').addEventListener('click', function () { looping = !looping; this.style.background = looping ? 'var(--accent-soft)' : 'none'; this.style.color = looping ? 'var(--accent)' : 'var(--fg-mute)'; });
     toast.querySelector('.konami-rnd').addEventListener('click', () => playTrack(randomOther(cn())));
     toast.querySelector('.konami-stop').addEventListener('click', () => { looping = false; if (player) { player.pause(); player.onended = null; player = null; } toast.remove(); toast = null; });
     document.body.appendChild(toast);

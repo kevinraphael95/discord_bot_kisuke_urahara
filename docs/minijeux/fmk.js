@@ -1,9 +1,36 @@
-/* ══════════════════════════════════════════════════════
-   FMK — GAME LOGIC
-   ══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   FMK — Fuck, Marry, Kill
+   ───────────────────────────────────────────────────────────────────
+   But du jeu :
+     Un trio de personnages Bleach est tiré au hasard.
+     Le joueur doit assigner à chacun : Fuck / Marry / Kill.
 
-let trioActuel = [];
-let choix = { fuck: null, marry: null, kill: null };
+   Dépendances :
+     - ../js/data.js   (variable globale CHARS)
+     - minijeux.css    (styles des cartes et boutons)
+
+   Sections :
+     1. ÉTAT GLOBAL
+     2. EXCLUSIONS
+     3. GÉNÉRATION DU TRIO
+     4. CHOIX DU JOUEUR
+     5. AFFICHAGE DES CARTES
+     6. VALIDATION
+     7. ÉCOUTEURS D'ÉVÉNEMENTS
+     8. INITIALISATION
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────────
+   1. ÉTAT GLOBAL
+   ─────────────────────────────────────────────────────────────────── */
+
+let trioActuel = [];                                       // Les 3 persos affichés
+let choix = { fuck: null, marry: null, kill: null };       // Choix du joueur
+
+/* ───────────────────────────────────────────────────────────────────
+   2. EXCLUSIONS
+   Persos que l'on ne veut jamais voir apparaître dans ce jeu
+   ─────────────────────────────────────────────────────────────────── */
 
 const EXCLUSIONS = [
   "Chizuru Honsho", "Hiyori Sarugaki", "Ichigo Kurosaki", "Jinta Hanakari",
@@ -13,16 +40,23 @@ const EXCLUSIONS = [
   "Yukio Hans Vorarlberna", "Yuzu Kurosaki"
 ];
 
-/* ── GÉNÉRATION DU TRIO ── */
+/* ───────────────────────────────────────────────────────────────────
+   3. GÉNÉRATION DU TRIO
+   Tire 3 persos au hasard, hors exclusions
+   ─────────────────────────────────────────────────────────────────── */
+
 function genererTrio() {
+  // Reset l'état
   choix = { fuck: null, marry: null, kill: null };
   document.getElementById('btn-valider').style.display = 'none';
   document.getElementById('resultBox').style.display   = 'none';
   document.getElementById('gameBox').style.display     = 'block';
   trioActuel = [];
 
+  // Vérifie que data.js est bien chargé
   if (typeof CHARS === 'undefined') return;
 
+  // Filtre les persos exclus puis tire 3 au hasard
   const listeFiltree = CHARS.filter(p => !EXCLUSIONS.includes(p.n));
   for (let i = 0; i < 3; i++) {
     const idx = Math.floor(Math.random() * listeFiltree.length);
@@ -32,33 +66,48 @@ function genererTrio() {
   afficherTrio();
 }
 
-/* ── CHOIX D'UN PERSONNAGE ── */
+/* ───────────────────────────────────────────────────────────────────
+   4. CHOIX DU JOUEUR
+   Assigne une action à un perso (et libère l'ancien emplacement)
+   ─────────────────────────────────────────────────────────────────── */
+
 function faireUnChoix(action, nomPerso) {
-  // Retirer le perso s'il était déjà assigné ailleurs
+  // Si le perso était déjà assigné ailleurs, on le retire
   for (const cle in choix) {
     if (choix[cle] === nomPerso) choix[cle] = null;
   }
-  // Libérer le slot si déjà occupé
-  choix[action] = null;
+  // Assigne le perso à la nouvelle action
   choix[action] = nomPerso;
 
   afficherTrio();
 
+  // Si les 3 choix sont faits, on affiche le bouton Valider
   if (choix.fuck && choix.marry && choix.kill) {
     document.getElementById('btn-valider').style.display = 'inline-block';
   }
 }
 
-/* ── AFFICHAGE DES CARTES ── */
+/* ───────────────────────────────────────────────────────────────────
+   5. AFFICHAGE DES CARTES
+   Génère dynamiquement les 3 cartes avec images + boutons
+   ─────────────────────────────────────────────────────────────────── */
+
 function afficherTrio() {
   const zone = document.getElementById('fmk-zone');
   zone.innerHTML = '';
 
   trioActuel.forEach((perso, index) => {
+    // Chemin image (assets/... ou fallback)
     const image = perso.img
       ? `../${perso.img}`
       : '../assets/personnages/default.png';
 
+    // Vérifie si chaque action est active pour ce perso
+    const isFuck  = choix.fuck  === perso.n;
+    const isMarry = choix.marry === perso.n;
+    const isKill  = choix.kill  === perso.n;
+
+    // Crée la carte
     const carte = document.createElement('div');
     carte.className = 'card';
     carte.innerHTML = `
@@ -66,9 +115,9 @@ function afficherTrio() {
       <div class="card-body">
         <h3>${perso.n}</h3>
         <div class="buttons-list">
-          <button class="btn-choice fuck ${choix.fuck === perso.n ? 'active' : ''}" data-action="fuck" data-index="${index}">💋 Fuck</button>
-          <button class="btn-choice marry ${choix.marry === perso.n ? 'active' : ''}" data-action="marry" data-index="${index}">💍 Marry</button>
-          <button class="btn-choice kill ${choix.kill === perso.n ? 'active' : ''}" data-action="kill" data-index="${index}">💀 Kill</button>
+          <button class="btn-choice fuck ${isFuck ? 'active' : ''}" data-action="fuck" data-index="${index}">💋 Fuck</button>
+          <button class="btn-choice marry ${isMarry ? 'active' : ''}" data-action="marry" data-index="${index}">💍 Marry</button>
+          <button class="btn-choice kill ${isKill ? 'active' : ''}" data-action="kill" data-index="${index}">💀 Kill</button>
         </div>
       </div>
     `;
@@ -76,7 +125,11 @@ function afficherTrio() {
   });
 }
 
-/* ── VALIDATION ── */
+/* ───────────────────────────────────────────────────────────────────
+   6. VALIDATION
+   Affiche le récap des choix
+   ─────────────────────────────────────────────────────────────────── */
+
 function validerChoix() {
   document.getElementById('gameBox').style.display = 'none';
   document.getElementById('fmkSummary').innerHTML = `
@@ -89,7 +142,11 @@ function validerChoix() {
   document.getElementById('resultBox').style.display = 'block';
 }
 
-/* ── LISTENER GLOBAL (remplace les onclick inline) ── */
+/* ───────────────────────────────────────────────────────────────────
+   7. ÉCOUTEURS D'ÉVÉNEMENTS
+   Délégation : un seul listener pour tous les boutons de choix
+   ─────────────────────────────────────────────────────────────────── */
+
 document.addEventListener('click', e => {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
@@ -100,5 +157,8 @@ document.addEventListener('click', e => {
   }
 });
 
-/* ── INIT ── */
+/* ───────────────────────────────────────────────────────────────────
+   8. INITIALISATION
+   ─────────────────────────────────────────────────────────────────── */
+
 window.addEventListener('load', genererTrio);

@@ -3,41 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Installation — Kisuke Urahara Bot</title>
-<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@300;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/installation.css">
+<title>Installation — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
 <script src="js/nav.js" defer></script>
+<script src="js/theme.js" defer></script>
+
 <style>
-.content { position: relative; z-index: 1; max-width: 840px; margin: 0 auto; padding: 0 3rem 6rem; opacity: 0; animation: rise .7s .3s forwards; }
-@media (max-width: 700px)                    { .content { padding: 0 1rem 4rem; } }
-@media (min-width: 701px) and (max-width: 1024px) { .content { padding: 0 1.8rem 5rem; } }
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step { display: grid; grid-template-columns: 56px 1fr; gap: 22px; background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; position: relative; transition: border-color .2s; }
+  .step:hover { border-color: var(--line-2); }
+  .step::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); border-radius: var(--radius) 0 0 var(--radius); transform: scaleY(0); transition: transform .25s; transform-origin: top; }
+  .step:hover::before { transform: scaleY(1); }
+  .step-num { width: 56px; height: 56px; background: var(--accent-soft); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 24px; font-weight: 800; flex-shrink: 0; line-height: 1; }
+  .step-body { min-width: 0; }
+  .step-title { font-family: var(--font-display); font-size: 19px; font-weight: 800; color: var(--fg); margin-bottom: 8px; letter-spacing: .01em; }
+  .step-desc { font-size: 15px; color: var(--fg-soft); line-height: 1.7; margin-bottom: 16px; }
+  .step-desc:last-child { margin-bottom: 0; }
+  .code-block { background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--radius-sm); padding: 14px 18px; font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 13px; color: var(--accent); overflow-x: auto; margin-bottom: 10px; position: relative; line-height: 1.6; white-space: pre; }
+  .code-block:last-child { margin-bottom: 0; }
+  .code-block::before { content: '$'; color: var(--fg-mute); margin-right: 10px; user-select: none; }
+  .code-group { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--line-2); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 10px; }
+  .code-group .code-block { border: none; border-radius: 0; border-bottom: 1px solid var(--line); margin: 0; }
+  .code-group .code-block:last-child { border-bottom: none; }
+  .req-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .req-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--bg-soft); border: 1px solid var(--line-2); color: var(--fg); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 100px; }
+  .req-tag::before { content: '✓'; color: var(--accent); font-weight: 700; font-size: 12px; }
+  .env-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .env-row { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 12px 16px; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); transition: border-color .2s; align-items: center; }
+  .env-row:hover { border-color: var(--accent); }
+  .env-key { font-family: 'SF Mono', 'Consolas', monospace; font-size: 13px; font-weight: 600; color: var(--accent); word-break: break-word; }
+  .env-val { font-size: 14px; color: var(--fg-soft); line-height: 1.5; }
+  .env-val code { font-family: 'SF Mono', 'Consolas', monospace; background: var(--bg-soft); padding: 2px 6px; border-radius: 4px; color: var(--fg); font-size: 12px; }
+  .note { display: flex; gap: 12px; padding: 14px 16px; background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); font-size: 14px; color: var(--fg-soft); line-height: 1.6; margin-top: 12px; }
+  .note-icon { font-size: 16px; flex-shrink: 0; color: var(--accent); }
+  .note strong { color: var(--fg); font-weight: 600; }
+  @media (max-width: 700px) {
+    .step { grid-template-columns: 40px 1fr; gap: 16px; padding: 22px 18px; }
+    .step-num { width: 40px; height: 40px; font-size: 18px; }
+    .step-title { font-size: 17px; }
+    .step-desc { font-size: 14px; }
+    .env-row { grid-template-columns: 1fr; gap: 6px; padding: 12px 14px; }
+    .code-block { font-size: 12px; padding: 12px 14px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="atmo"></div>
-<div class="top-bar"></div>
+<header class="page-head">
+  <h1>Guide d'<em>installation</em></h1>
+  <p>Comment installer et configurer le bot Kisuke Urahara.</p>
+</header>
 
-<div class="phdr">
-  <h1 class="pttl">
-    <span class="t1">Installation</span>
-  </h1>
-  <p class="psub">Comment installer et configurer le bot Kisuke Urahara sur ta machine.</p>
-  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-</div>
+<main class="container-narrow" style="padding-bottom: 80px;">
 
-<div class="content">
   <div class="steps">
 
-    <!-- ── Étape 1 : Prérequis ── -->
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <p class="step-title">Prérequis</p>
-        <p class="step-desc">Assure-toi d'avoir les outils suivants installés sur ta machine avant de commencer.</p>
+        <div class="step-title">Prérequis</div>
+        <p class="step-desc">Assure-toi d'avoir les outils suivants installés avant de commencer.</p>
         <div class="req-list">
           <span class="req-tag">Python 3.10+</span>
           <span class="req-tag">pip</span>
@@ -47,80 +84,79 @@
       </div>
     </div>
 
-    <!-- ── Étape 2 : Cloner le dépôt ── -->
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <p class="step-title">Cloner le dépôt</p>
+        <div class="step-title">Cloner le dépôt</div>
         <p class="step-desc">Clone le projet depuis GitHub dans le répertoire de ton choix, puis place-toi dedans.</p>
-        <div class="code-block">git clone https://github.com/kevinraphael95/discord_bot_kisuke_urahara.git</div>
-        <div class="code-block">cd discord_bot_kisuke_urahara</div>
-      </div>
-    </div>
-
-    <!-- ── Étape 3 : Dépendances ── -->
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <p class="step-title">Installer les dépendances</p>
-        <p class="step-desc">Installe toutes les librairies Python requises listées dans <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">requirements.txt</code>.</p>
-        <div class="code-block">pip install -r requirements.txt</div>
-      </div>
-    </div>
-
-    <!-- ── Étape 4 : Variables d'environnement ── -->
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <p class="step-title">Configurer les variables d'environnement</p>
-        <p class="step-desc">Crée un fichier <code style="font-size:.76rem;color:var(--rei-lt);background:var(--rei-pale);padding:1px 5px">.env</code> à la racine du projet et renseigne les variables suivantes.</p>
-        <div class="env-grid">
-          <div class="env-row">
-            <span class="env-key">COMMAND_PREFIX</span>
-            <span class="env-val">Préfixe des commandes texte (ex : <code>!!</code>)</span>
-          </div>
-          <div class="env-row">
-            <span class="env-key">DISCORD_APP_ID</span>
-            <span class="env-val">ID de l'application Discord (Developer Portal)</span>
-          </div>
-          <div class="env-row">
-            <span class="env-key">DISCORD_TOKEN</span>
-            <span class="env-val">Token secret du bot Discord</span>
-          </div>
-          <div class="env-row">
-            <span class="env-key">GPT_OSS_API_KEY</span>
-            <span class="env-val">Clé API pour le modèle GPT open-source</span>
-          </div>
-          <div class="env-row">
-            <span class="env-key">ADMIN_PASSWORD</span>
-            <span class="env-val">Mot de passe pour accéder au panel admin</span>
-          </div>
-          <div class="env-row">
-            <span class="env-key">ADMIN_PORT</span>
-            <span class="env-val">Port du panel admin Flask (ex : <code>5050</code>)</span>
-          </div>
-          <div class="env-row">
-            <span class="env-key">ADMIN_SECRET</span>
-            <span class="env-val">Clé secrète pour les sessions Flask</span>
-          </div>
+        <div class="code-group">
+          <div class="code-block">git clone https://github.com/kevinraphael95/discord_bot_kisuke_urahara.git</div>
+          <div class="code-block">cd discord_bot_kisuke_urahara</div>
         </div>
       </div>
     </div>
 
-    <!-- ── Étape 5 : Lancer le bot ── -->
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Installer les dépendances</div>
+        <p class="step-desc">
+          Installe toutes les librairies Python requises listées dans <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:13px;color:var(--accent)">requirements.txt</code>.
+        </p>
+        <div class="code-block">pip install -r requirements.txt</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Configurer les variables d'environnement</div>
+        <p class="step-desc">
+          Crée un fichier <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:13px;color:var(--accent)">.env</code> à la racine du projet et renseigne les variables suivantes.
+        </p>
+        <div class="env-list">
+          <div class="env-row"><span class="env-key">COMMAND_PREFIX</span><span class="env-val">Préfixe des commandes texte (ex : <code>!!</code>)</span></div>
+          <div class="env-row"><span class="env-key">DISCORD_APP_ID</span><span class="env-val">ID de l'application Discord (Developer Portal)</span></div>
+          <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token secret du bot Discord</span></div>
+          <div class="env-row"><span class="env-key">GPT_OSS_API_KEY</span><span class="env-val">Clé API pour le modèle GPT open-source</span></div>
+          <div class="env-row"><span class="env-key">ADMIN_PASSWORD</span><span class="env-val">Mot de passe pour accéder au panel admin</span></div>
+          <div class="env-row"><span class="env-key">ADMIN_PORT</span><span class="env-val">Port du panel admin Flask (ex : <code>5050</code>)</span></div>
+          <div class="env-row"><span class="env-key">ADMIN_SECRET</span><span class="env-val">Clé secrète pour les sessions Flask</span></div>
+        </div>
+        <div class="note">
+          <span class="note-icon">💡</span>
+          <span>Le fichier <strong>.env</strong> ne doit <strong>jamais</strong> être commit sur GitHub. Vérifie qu'il est bien présent dans ton <strong>.gitignore</strong>.</span>
+        </div>
+      </div>
+    </div>
+
     <div class="step">
       <div class="step-num">5</div>
       <div class="step-body">
-        <p class="step-title">Lancer le bot</p>
+        <div class="step-title">Lancer le bot</div>
         <p class="step-desc">Lance le bot directement avec Python :</p>
         <div class="code-block">python bot.py</div>
-        <p class="step-desc">Ou via le script de démarrage complet (recommandé), qui initialise aussi le tunnel Cloudflare pour le panel admin :</p>
+        <p class="step-desc" style="margin-top:14px">
+          Ou via le script de démarrage complet (recommandé), qui initialise aussi le tunnel Cloudflare pour le panel admin :
+        </p>
         <div class="code-block">bash start.sh</div>
       </div>
     </div>
 
   </div>
-</div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© kevinraphael95 · CC BY-NC-SA 4.0</span>
+    <ul class="footer-links">
+      <li><a href="#">GitHub</a></li>
+      <li><a href="commandes.html">Commandes</a></li>
+      <li><a href="guesser.html">Guesser</a></li>
+    </ul>
+  </div>
+</footer>
 
 </body>
 </html>

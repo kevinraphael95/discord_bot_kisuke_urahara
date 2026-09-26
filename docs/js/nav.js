@@ -1,137 +1,73 @@
+/* ── nav.js — injecte la nav + menu mobile (compatible sous-dossiers) ── */
 (function () {
-  const pages = [
-    { href: 'install.html', label: 'Installation' },
-    { href: 'commandes.html', label: 'Commandes' },
-    { href: 'guesser.html', label: 'Character Guesser' },
-    { href: 'minijeux.html', label: 'Minijeux' }
-  ];
+  // Détecte si on est dans un sous-dossier (ex: /minijeux/)
+  const isInSubdir = /\/minijeux\//.test(location.pathname) ||
+                     /\/minijeux\//.test(location.href);
+  const prefix = isInSubdir ? '../' : '';
 
-  const themes = [
-    { id: 'shinigami', label: 'Shinigami', icon: '⚔️' },
-    { id: 'quincy', label: 'Quincy', icon: '↗️' }
-  ];
-
-  // ── CALCUL DU PREFIX (GitHub Pages safe) ──
-  const parts = location.pathname.split('/').filter(Boolean);
-
-  const SUB_DIRS = ['minijeux'];
-  const inSub = parts.length >= 2 && SUB_DIRS.includes(parts[parts.length - 2]);
-
-  const prefix = inSub ? '../' : './';
-
-  const current = parts[parts.length - 1] || 'index.html';
-
-  // ── THEME ──
-  const validThemes = ['shinigami', 'quincy'];
-  const saved = localStorage.getItem('shinigami-theme');
-  const savedTheme = validThemes.includes(saved) ? saved : 'shinigami';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-
-  const activeTheme = themes.find(t => t.id === savedTheme) || themes[0];
-
-  // ── ACTIVE PAGE ──
-  function isActive(href) {
-    return current === href;
-  }
-
-  // ── LINKS ──
-  const navLinks = pages.map(p => {
-    const active = isActive(p.href) ? ' class="active"' : '';
-    return `<li><a href="${prefix}${p.href}"${active}>${p.label}</a></li>`;
-  }).join('');
-
-  const drawerLinks = pages.map(p => {
-    const active = isActive(p.href) ? ' class="active"' : '';
-    return `<a href="${prefix}${p.href}"${active} onclick="closeNav()">${p.label}</a>`;
-  }).join('');
-
-  const themeOptions = themes.map(t =>
-    `<button class="theme-opt" data-theme="${t.id}">${t.icon} ${t.label}</button>`
-  ).join('');
-
-  const drawerThemeOptions = themes.map(t =>
-    `<button class="drawer-theme-opt" data-theme="${t.id}">${t.icon} ${t.label}</button>`
-  ).join('');
-
-  // ── INSERT NAV ──
-  document.body.insertAdjacentHTML('afterbegin', `
-<nav>
-  <a class="nav-logo" href="${prefix}index.html">
-    ⚡ Kisuke <span>Bot</span>
-  </a>
-
-  <ul class="nav-links">
-    ${navLinks}
-  </ul>
-
-  <div class="nav-right">
-    <div class="theme-switcher">
-      <button id="themeToggle" class="theme-toggle">
-        ${activeTheme.icon} ${activeTheme.label}
-      </button>
-
-      <div id="themeMenu" class="theme-menu">
-        <div class="theme-menu-title">Thème</div>
-        ${themeOptions}
+  const NAV_HTML = `
+    <div class="nav-inner">
+      <a class="nav-logo" href="${prefix}index.html">
+        <span class="nav-logo-mark"><span>K</span></span>
+        Kisuke Urahara
+      </a>
+      <ul class="nav-links">
+        <li><a href="${prefix}install.html">Installation</a></li>
+        <li><a href="${prefix}commandes.html">Commandes</a></li>
+        <li><a href="${prefix}guesser.html">Guesser</a></li>
+        <li><a href="${prefix}minijeux.html">Mini-jeux</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-btn" id="themeBtn" aria-label="Changer le thème"></button>
+        <a class="btn btn-primary btn-sm nav-discord-btn" href="${prefix}404.html">Ajouter à Discord</a>
+        <button class="nav-burger" id="navBurger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
+  `;
 
-    <button class="ham" id="ham" onclick="toggleNav()"><span></span><span></span><span></span></button>
-  </div>
-</nav>
-
-<div class="drawer" id="drawer">
-  ${drawerLinks}
-  <div class="drawer-theme-section">
-    <div class="drawer-theme-label">Thème visuel</div>
-    <div class="drawer-theme-btns">
-      ${drawerThemeOptions}
+  const MOBILE_HTML = `
+    <div class="nav-mobile" id="navMobile">
+      <a href="${prefix}install.html">Installation</a>
+      <a href="${prefix}commandes.html">Commandes</a>
+      <a href="${prefix}guesser.html">Guesser</a>
+      <a href="${prefix}minijeux.html">Mini-jeux</a>
+      <a href="${prefix}404.html" class="nav-mobile-cta">Ajouter à Discord</a>
     </div>
-  </div>
-</div>
-`);
+  `;
 
-  // ── THEME LOGIC ──
-  const themeToggle = document.getElementById('themeToggle');
-  const themeMenu = document.getElementById('themeMenu');
+  const nav = document.createElement('nav');
+  nav.innerHTML = NAV_HTML;
+  document.body.insertBefore(nav, document.body.firstChild);
 
-  themeToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    themeMenu.classList.toggle('open');
+  // Menu mobile (injecté après la nav)
+  const mobile = document.createElement('div');
+  mobile.innerHTML = MOBILE_HTML;
+  const mobileMenu = mobile.firstElementChild;
+  document.body.insertBefore(mobileMenu, nav.nextSibling);
+
+  // Lien actif
+  const current = location.pathname.split('/').pop() || 'index.html';
+  nav.querySelectorAll('.nav-links a').forEach(a => {
+    if (a.getAttribute('href') === prefix + current) a.classList.add('active');
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    if (a.getAttribute('href') === prefix + current) a.classList.add('active');
   });
 
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-theme]');
-
-    if (btn) {
-      const theme = btn.dataset.theme;
-
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('shinigami-theme', theme);
-
-      const t = themes.find(x => x.id === theme);
-      themeToggle.textContent = `${t.icon} ${t.label}`;
-
-      themeMenu.classList.remove('open');
-    }
-
-    if (!e.target.closest('.theme-switcher')) {
-      themeMenu.classList.remove('open');
-    }
+  // Toggle menu mobile
+  const burger = document.getElementById('navBurger');
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
   });
 
-  // ── DRAWER ──
-  window.toggleNav = function () {
-    document.getElementById('ham').classList.toggle('open');
-    document.getElementById('drawer').classList.toggle('open');
-  };
-
-  window.closeNav = function () {
-    document.getElementById('ham').classList.remove('open');
-    document.getElementById('drawer').classList.remove('open');
-  };
-
-
-  
-
+  // Fermer le menu si on clique sur un lien
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      burger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    });
+  });
 })();

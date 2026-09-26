@@ -3,39 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini-jeux — Bleach Manga Guesser</title>
-<!-- empêcher le flash blanc aux changements de page : -->
-<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
-<!-- no flash -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/minijeux.css">
+<title>Mini-jeux — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
 <script src="js/nav.js" defer></script>
+<script src="js/theme.js" defer></script>
+
+<style>
+  .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+  .game-card { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; gap: 16px; text-decoration: none; color: inherit; position: relative; overflow: hidden; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; min-height: 260px; }
+  .game-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 20px 40px -20px var(--accent-soft); }
+  .game-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .3s ease; }
+  .game-card:hover::before { transform: scaleX(1); }
+  .game-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .game-icon { width: 52px; height: 52px; background: var(--accent-soft); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; transition: transform .3s ease; }
+  .game-card:hover .game-icon { transform: rotate(-8deg) scale(1.05); }
+  .game-badge { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; background: var(--bg-soft); color: var(--fg-soft); border: 1px solid var(--line-2); }
+  .game-name { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--fg); line-height: 1.25; letter-spacing: -.005em; margin: 0; }
+  .game-desc { font-size: 14px; color: var(--fg-soft); line-height: 1.6; margin: 0; flex: 1; }
+  .game-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--line); margin-top: auto; }
+  .game-meta { font-size: 12px; color: var(--fg-mute); font-weight: 500; }
+  .game-arrow { font-size: 13px; font-weight: 600; color: var(--accent); display: inline-flex; align-items: center; gap: 6px; transition: gap .25s ease; }
+  .game-card:hover .game-arrow { gap: 10px; }
+  @media (max-width: 700px) {
+    .games-grid { grid-template-columns: 1fr; gap: 16px; }
+    .game-card { padding: 22px; min-height: auto; }
+    .game-name { font-size: 18px; }
+  }
+</style>
 </head>
 <body>
 
-<div class="atmo"></div>
-<div class="top-bar"></div>
+<header class="page-head">
+  <h1>Les <em>mini-jeux</em></h1>
+  <p>Des jeux Bleach à faire en solo ou entre membres, directement dans Discord ou ici même.</p>
+</header>
 
-<div class="phdr">
-  <h1 class="pttl">
-    <span class="t1">Mini-jeux</span>
-  </h1>
-  <p class="psub">Minijeux Bleach.</p>
-  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-</div>
+<main class="container" style="padding-bottom: 80px;">
 
-<div class="content">
   <div class="games-grid">
 
     <a class="game-card" href="minijeux/scanguess.html">
-      <div class="game-card-header">
-        <span class="game-icon">📖</span>
+      <div class="game-head">
+        <div class="game-icon">📖</div>
         <span class="game-badge">Quiz</span>
       </div>
-      <p class="game-name">Devine le Tome</p>
-      <p class="game-desc">Une page de Bleach s'affiche — de quel tome vient-elle ? Tu as 5 essais pour trouver, avec des indices chaud / froid.</p>
+      <h2 class="game-name">Devine le Tome</h2>
+      <p class="game-desc">
+        Une page de Bleach s'affiche — de quel tome vient-elle ? Tu as 5 essais
+        pour trouver, avec des indices chaud / froid.
+      </p>
       <div class="game-footer">
         <span class="game-meta">5 essais · Tomes 1–74</span>
         <span class="game-arrow">Jouer →</span>
@@ -43,33 +71,51 @@
     </a>
 
     <a class="game-card" href="minijeux/avant-apres.html">
-      <div class="game-card-header">
-        <span class="game-icon">⏳</span>
+      <div class="game-head">
+        <div class="game-icon">⏳</div>
         <span class="game-badge">Versus</span>
       </div>
-      <p class="game-name">Avant ou Après ?</p>
-      <p class="game-desc">Deux pages de Bleach s'affichent — la deuxième est-elle avant ou après la première dans la série ? Enchaîne les bonnes réponses.</p>
+      <h2 class="game-name">Avant ou Après ?</h2>
+      <p class="game-desc">
+        Deux pages de Bleach s'affichent — la deuxième est-elle avant ou après
+        la première dans la série ? Enchaîne les bonnes réponses.
+      </p>
       <div class="game-footer">
         <span class="game-meta">Streak · Sans limite</span>
         <span class="game-arrow">Jouer →</span>
       </div>
     </a>
 
-    <a class="game-card" href="minijeux/jeu.html" style="animation-delay:.6s">
-      <div class="game-card-header">
-        <span class="game-icon">⏳</span>
+    <a class="game-card" href="minijeux/jeu.html">
+      <div class="game-head">
+        <div class="game-icon">🎨</div>
         <span class="game-badge">Pixel</span>
       </div>
-      <p class="game-name">Pixelated Character Guesser</p>
-      <p class="game-desc">Devine le nom du personnage pixelisé.</p>
+      <h2 class="game-name">Pixelated Character Guesser</h2>
+      <p class="game-desc">
+        Devine le nom du personnage pixelisé. Plus tu attends, plus l'image
+        se précise — sauras-tu reconnaître le perso à temps ?
+      </p>
       <div class="game-footer">
-        <span class="game-meta">J'ai oublié le nombre de tentative, entre 8 et 12</span>
+        <span class="game-meta">10 essais</span>
         <span class="game-arrow">Jouer →</span>
       </div>
     </a>
 
   </div>
-</div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© kevinraphael95 · CC BY-NC-SA 4.0</span>
+    <ul class="footer-links">
+      <li><a href="#">GitHub</a></li>
+      <li><a href="commandes.html">Commandes</a></li>
+      <li><a href="guesser.html">Guesser</a></li>
+    </ul>
+  </div>
+</footer>
 
 </body>
 </html>

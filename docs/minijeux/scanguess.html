@@ -3,76 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quel Tome ? — Bleach Manga Guesser</title>
-<!-- empecher le flash blanc aux changements de page : -->
-<script>const t=localStorage.getItem('shinigami-theme');document.documentElement.setAttribute('data-theme',['shinigami','quincy'].includes(t)?t:'shinigami');</script>
-<!-- no flash -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="scanguess.css">
+<title>Quel Tome ? — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="../fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="minijeux.css">
+
 <script src="../js/nav.js" defer></script>
+<script src="../js/theme.js" defer></script>
+<script src="scanguess.js" defer></script>
 </head>
 <body>
 
-<div class="atmo"></div>
-<div class="top-bar"></div>
+<header class="page-head">
+  <h1>De quel <em>tome</em> vient cette page ?</h1>
+  <p>Devine le numéro du tome Bleach en 5 essais.</p>
+</header>
 
-<div class="phdr">
-  <h1 class="pttl">
-    <span class="t1">De quel tome vient cette page ?</span>
-  </h1>
-  <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
-</div>
+<main class="game-wrap">
+  <div class="pg-layout">
 
-<div class="gwrap">
-  <div class="game-layout">
-
-    <div class="col-img">
-      <div id="loadBox">
+    <div class="pg-left">
+      <div id="loadBox" class="load-box">
         <div class="spinner"></div>
         <div id="loadMsg">Chargement…</div>
         <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
       </div>
-      <div id="errorBox">
+      <div id="errorBox" class="error-box" style="display:none">
         <div id="errMsg">Impossible de charger. Vérifie ta connexion.</div>
-        <button class="btn btn-ghost" onclick="newRound()">🔄 Réessayer</button>
+        <button class="btn-choice" onclick="newRound()">🔄 Réessayer</button>
       </div>
-      <div id="imgBox">
-        <img id="mangaImg" alt="Page de Bleach"/>
-        <div class="img-src">📖 SushiScan · Bleach</div>
+      <div id="imgBox" class="img-card" style="display:none">
+        <img id="mangaImg" alt="Page de Bleach" />
       </div>
     </div>
 
-    <div class="col-game">
-      <div class="sstat consigne">
-        <span class="sl">Devine de quel tome vient cette page</span>
-        <span class="sv">5 essais</span>
-      </div>
-      <div class="scorebar">
+    <div class="pg-right">
+      <div class="stats-row">
         <div class="sstat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
         <div class="sstat"><span class="sv" id="sStreak">0</span><span class="sl">Série 🔥</span></div>
         <div class="sstat"><span class="sv" id="sBest">0</span><span class="sl">Record</span></div>
         <div class="sstat"><span class="sv" id="sRound">0</span><span class="sl">Manche</span></div>
       </div>
-      <div class="tries-row" id="triesRow"></div>
-      <div id="inputBox">
+      <div style="display:flex;gap:6px;justify-content:center" id="triesRow"></div>
+      <div id="inputBox" style="display:none">
         <div class="input-row">
-          <input type="number" id="chapInput" placeholder="Tome (1 – 74)" min="1" max="74" onkeydown="if(event.key==='Enter') submit()"/>
-          <button class="btn btn-gold" onclick="submit()">Valider</button>
+          <input type="number" id="chapInput" placeholder="Tome (1 – 74)" min="1" max="74" onkeydown="if(event.key==='Enter') submit()" />
+          <button class="btn-choice" onclick="submit()">Valider</button>
         </div>
       </div>
-      <div id="histBox"></div>
-      <div id="result">
+      <div id="histBox" style="display:flex;flex-direction:column;gap:4px"></div>
+      <div id="result" class="result-box" style="display:none">
         <div class="res-title" id="resTtl"></div>
-        <div class="res-chap" id="resChap"></div>
-        <button class="btn btn-gold" onclick="newRound()">▶ Prochaine page</button>
+        <div class="res-info" id="resChap"></div>
+        <button class="btn-choice" onclick="newRound()">▶ Prochaine page</button>
       </div>
     </div>
 
   </div>
-</div>
+</main>
 
-<script src="scanguess.js"></script>
 </body>
 </html>

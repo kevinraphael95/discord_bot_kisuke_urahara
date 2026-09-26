@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page introuvable — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/nav.js" defer></script>
+<script src="js/theme.js" defer></script>
+
+<style>
+  .error-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 120px 32px 80px;
+    text-align: center;
+  }
+  .error-code {
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 18vw, 12rem);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: -.02em;
+  }
+  .error-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    color: var(--fg);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .error-desc {
+    font-size: 17px;
+    color: var(--fg-soft);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto 32px;
+  }
+  .error-cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+</style>
+</head>
+<body>
+
+<main class="error-page">
+  <div class="error-code">404</div>
+  <h1 class="error-title">Cette page n'existe pas (encore)</h1>
+  <p class="error-desc">
+    Oups — soit elle est en cours de création, soit le lien que tu as suivi est cassé.
+    Reviens à l'accueil ou explore les sections déjà en ligne.
+  </p>
+  <div class="error-cta">
+    <a class="btn btn-primary" href="index.html">Retour à l'accueil</a>
+    <a class="btn btn-ghost" href="commandes.html">Voir les commandes</a>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© kevinraphael95 · CC BY-NC-SA 4.0</span>
+    <ul class="footer-links">
+      <li><a href="#">GitHub</a></li>
+      <li><a href="commandes.html">Commandes</a></li>
+      <li><a href="guesser.html">Guesser</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
