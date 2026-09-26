@@ -477,7 +477,22 @@ footer {
 /* ── AFFICHAGE SELON TAILLE ─────────────────────────────── */
 @media (max-width: 900px) {
   .nav-links { display: none; }
-  .nav-discord-btn { display: none !important; }  /* cache le bouton Discord de la nav */
+
+  /* ═══ Cache le bouton Discord de la nav sur mobile (renforcé) ═══ */
+  .nav-discord-btn,
+  nav .nav-actions .nav-discord-btn,
+  .nav-inner .nav-actions a.nav-discord-btn {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    pointer-events: none !important;
+  }
+
   .nav-burger { display: flex; }
   .nav-mobile { display: flex; }
   .nav-mobile:not(.open) { pointer-events: none; }
