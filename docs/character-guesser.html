@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Character Guesser — Kisuke Urahara Bot</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="bar">
+    <a class="brand" href="index.html"><span class="hat"></span>Kisuke Urahara Bot</a>
+    <nav class="pages">
+      <a href="index.html">Accueil</a>
+      <a href="installation.html">Installation</a>
+      <a href="commandes.html">Commandes</a>
+      <a href="character-guesser.html" aria-current="page">Character Guesser</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <p class="kicker">// mini-jeu</p>
+    <h1>Character Guesser</h1>
+    <p class="sub">Devine le personnage de Bleach mystère. Chaque tentative compare ses attributs à ceux du personnage à trouver.</p>
+
+    <div class="guess-box">
+      <form class="guess-form" id="guess-form" autocomplete="off">
+        <input type="text" id="guess-input" list="char-list" placeholder="Nom d'un personnage…" required>
+        <datalist id="char-list"></datalist>
+        <button type="submit">Deviner</button>
+      </form>
+      <div id="guess-status"></div>
+
+      <table class="history" id="history-table">
+        <thead>
+          <tr>
+            <th>Perso</th>
+            <th>Race</th>
+            <th>Organisation</th>
+            <th>Arme</th>
+            <th>Cheveux</th>
+            <th>Taille</th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      Jeu de démo avec 10 personnages, pour poser la mécanique. Le vrai jeu (base plus large, choix du perso du jour, etc.) reste à brancher — cette page est prête à recevoir une liste plus complète.
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>Kisuke Urahara Bot — projet perso, non affilié à Bleach / Shueisha</span>
+    <a href="https://github.com/kevinraphael95" target="_blank" rel="noopener">github.com/kevinraphael95</a>
+  </div>
+</footer>
+
+<script>
+const CHARACTERS = [
+  { nom: "Ichigo Kurosaki",        race: "Humain/Shinigami", org: "Aucune",    arme: "Zanpakuto",           cheveux: "Orange",    taille: 181 },
+  { nom: "Kisuke Urahara",         race: "Shinigami",        org: "Aucune",    arme: "Zanpakuto",           cheveux: "Blond",     taille: 177 },
+  { nom: "Rukia Kuchiki",          race: "Shinigami",        org: "Gotei 13",  arme: "Zanpakuto",           cheveux: "Noir",      taille: 144 },
+  { nom: "Orihime Inoue",          race: "Humain",           org: "Aucune",    arme: "Shun Shun Rikka",     cheveux: "Roux",      taille: 160 },
+  { nom: "Uryuu Ishida",           race: "Quincy",           org: "Aucune",    arme: "Arc",                 cheveux: "Bleu-noir", taille: 169 },
+  { nom: "Renji Abarai",           race: "Shinigami",        org: "Gotei 13",  arme: "Zanpakuto",           cheveux: "Rouge",     taille: 188 },
+  { nom: "Byakuya Kuchiki",        race: "Shinigami",        org: "Gotei 13",  arme: "Zanpakuto",           cheveux: "Noir",      taille: 175 },
+  { nom: "Grimmjow Jaegerjaquez",  race: "Arrancar",         org: "Espada",    arme: "Zanpakuto",           cheveux: "Bleu",      taille: 187 },
+  { nom: "Yoruichi Shihouin",      race: "Shinigami",        org: "Aucune",    arme: "Corps à corps",       cheveux: "Violet",    taille: 167 },
+  { nom: "Toshiro Hitsugaya",      race: "Shinigami",        org: "Gotei 13",  arme: "Zanpakuto",           cheveux: "Blanc",     taille: 133 },
+];
+
+const target = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+const guessed = new Set();
+
+const list = document.getElementById('char-list');
+CHARACTERS.forEach(c => {
+  const opt = document.createElement('option');
+  opt.value = c.nom;
+  list.appendChild(opt);
+});
+
+const form = document.getElementById('guess-form');
+const input = document.getElementById('guess-input');
+const status = document.getElementById('guess-status');
+const body = document.getElementById('history-body');
+
+function cell(match, extra) {
+  const td = document.createElement('td');
+  td.textContent = extra.label;
+  td.className = match ? 'cell-yes' : 'cell-no';
+  if (extra.arrow) td.classList.add(extra.arrow === 'up' ? 'cell-up' : 'cell-down');
+  return td;
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = input.value.trim();
+  const c = CHARACTERS.find(ch => ch.nom.toLowerCase() === name.toLowerCase());
+  if (!c) {
+    status.textContent = "Personnage inconnu de la liste.";
+    return;
+  }
+  if (guessed.has(c.nom)) {
+    status.textContent = "Déjà tenté.";
+    return;
+  }
+  guessed.add(c.nom);
+
+  const row = document.createElement('tr');
+  const nameTd = document.createElement('td');
+  nameTd.textContent = c.nom;
+  nameTd.className = 'attr-name';
+  row.appendChild(nameTd);
+
+  row.appendChild(cell(c.race === target.race, { label: c.race }));
+  row.appendChild(cell(c.org === target.org, { label: c.org }));
+  row.appendChild(cell(c.arme === target.arme, { label: c.arme }));
+  row.appendChild(cell(c.cheveux === target.cheveux, { label: c.cheveux }));
+
+  let arrow = null;
+  if (c.taille < target.taille) arrow = 'up';
+  else if (c.taille > target.taille) arrow = 'down';
+  row.appendChild(cell(c.taille === target.taille, { label: c.taille + ' cm', arrow }));
+
+  body.prepend(row);
+  input.value = '';
+
+  if (c.nom === target.nom) {
+    status.textContent = `Trouvé — c'était ${target.nom}.`;
+    input.disabled = true;
+    form.querySelector('button').disabled = true;
+  } else {
+    status.textContent = `${guessed.size} tentative(s).`;
+  }
+});
+</script>
+
+</body>
+</html>
