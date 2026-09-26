@@ -473,7 +473,6 @@ footer {
   color: #fff !important;
 }
 
-/* ── AFFICHAGE SELON TAILLE ─────────────────────────────── */
 @media (max-width: 900px) {
   .nav-links { display: none; }
   .nav-discord-btn { display: none; }
@@ -485,4 +484,36 @@ footer {
 @media (min-width: 901px) {
   .nav-mobile { display: none !important; }
   .nav-burger { display: none !important; }
+}
+
+/* ── FIX MOBILE GÉNÉRAL ─────────────────────────────────── */
+@media (max-width: 700px) {
+  body { overflow-x: hidden; }
+  .nav-inner { padding: 12px 16px; gap: 12px; }
+  .nav-logo { font-size: 15px; gap: 8px; }
+  .nav-logo-mark { width: 26px; height: 26px; }
+  .theme-btn { width: 36px; height: 36px; font-size: 14px; }
+  .container, .container-narrow { padding: 0 16px; }
+  .page-head { padding: 40px 16px 24px; }
+  .page-head h1 { font-size: clamp(1.6rem, 8vw, 2.2rem); }
+  .page-head p { font-size: 15px; }
+  .section { padding: 48px 0; }
+  .section-head { margin-bottom: 32px; }
+  .section-head h2 { font-size: clamp(1.4rem, 6vw, 1.8rem); }
+  .section-head p { font-size: 15px; }
+  .feature { gap: 24px; padding: 32px 0; }
+  .feature-text h3 { font-size: 1.3rem; }
+  .feature-text p { font-size: 15px; }
+  .feature-text li { font-size: 14px; }
+  .feature-visual { min-height: 180px; padding: 20px; }
+  .hero { padding: 32px 16px 48px; gap: 32px; }
+  .hero h1 { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+  .hero p { font-size: 15px; }
+  .discord-card { padding: 14px; gap: 12px; }
+  .dc-avatar { width: 36px; height: 36px; font-size: 15px; }
+  .dc-name { font-size: 14px; }
+  .dc-msg, .dc-embed-desc { font-size: 13px; }
+  footer { padding: 20px 16px; }
+  .footer-inner { flex-direction: column; text-align: center; gap: 12px; }
+  .footer-links { justify-content: center; }
 }
