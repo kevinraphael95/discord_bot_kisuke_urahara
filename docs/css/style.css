@@ -477,18 +477,11 @@ footer {
 /* ── AFFICHAGE SELON TAILLE ─────────────────────────────── */
 @media (max-width: 900px) {
   .nav-links { display: none; }
-  .nav-discord-btn { display: none; }
+  .nav-discord-btn { display: none !important; }  /* cache le bouton Discord de la nav */
   .nav-burger { display: flex; }
   .nav-mobile { display: flex; }
   .nav-mobile:not(.open) { pointer-events: none; }
   .nav-mobile.open { pointer-events: auto; }
-
-  /* Hero : cartes Discord compactes */
-  .hero-visual {
-    order: -1;
-    max-height: 340px;
-    overflow: hidden;
-  }
 }
 @media (min-width: 901px) {
   .nav-mobile { display: none !important; }
@@ -533,21 +526,10 @@ footer {
   .hero-cta { gap: 8px; }
   .hero-cta .btn { padding: 10px 16px; font-size: 13px; }
 
-  /* Cartes Discord (hero) : compactes */
+  /* ═══ Cartes Discord (hero) : on cache TOUT sur mobile ═══ */
   .hero-visual {
-    max-height: 260px;
-    overflow: hidden;
+    display: none !important;
   }
-  .hero-visual .discord-card:nth-child(2) {
-    display: none;   /* cache la 2e carte (pizza) sur mobile */
-  }
-  .discord-card { padding: 12px 14px; gap: 10px; }
-  .dc-avatar { width: 32px; height: 32px; font-size: 13px; }
-  .dc-name { font-size: 13px; }
-  .dc-msg { font-size: 12px; }
-  .dc-embed { margin-top: 6px; padding-left: 8px; }
-  .dc-embed-title { font-size: 12px; }
-  .dc-embed-desc { font-size: 11px; line-height: 1.4; }
 
   /* Footer */
   footer { padding: 20px 16px; }
