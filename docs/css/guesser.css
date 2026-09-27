@@ -335,7 +335,7 @@ body.survival-mode .sbar { display: flex; }
 .cgrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
+  gap: 0;
   background: var(--line);
   padding: 0;
   border-radius: 0 0 var(--radius) var(--radius);
@@ -343,13 +343,13 @@ body.survival-mode .sbar { display: flex; }
 }
 .cc {
   background: var(--bg-card);
-  padding: 8px 6px;
+  padding: 10px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  border: none;
-  border-radius: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-xs);
 }
 .cc.correct { background: var(--ok-bg); border-color: var(--ok-bd); }
 .cc.close   { background: var(--yw-bg); border-color: var(--yw-bd); }
