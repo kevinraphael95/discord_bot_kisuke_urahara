@@ -385,6 +385,7 @@ body.survival-mode .sbar { display: flex; }
 }
 
 .card {
+  padding: 0;
   background: var(--bg-card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
