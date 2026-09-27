@@ -86,7 +86,6 @@ function showGameUI(m) {
   if (iz) iz.style.display = 'flex';
   if (tw) tw.style.display = '';
   if (cd) cd.style.display = '';
-  // Le compteur/survie est géré par le CSS via body.survival-mode
   if (m === 'survival') {
     document.body.classList.add('survival-mode');
     const sb = $('sbar'); if (sb) sb.classList.add('on');
@@ -368,11 +367,22 @@ function switchMode(m) {
 
   clr();
 
-  $('gi').value = ''; $('acl').innerHTML = '';
-  $('btnD').classList.toggle('active', m === 'daily');
-  $('btnS').classList.toggle('active', m === 'survival');
+  const gi = $('gi'); if (gi) gi.value = '';
+  const acl = $('acl'); if (acl) acl.innerHTML = '';
+
+  // Mise à jour du menu déroulant (remplace .mode par .menu-item)
+  const btnD = $('btnD'); if (btnD) btnD.classList.toggle('active', m === 'daily');
+  const btnS = $('btnS'); if (btnS) btnS.classList.toggle('active', m === 'survival');
+
+  // Met à jour les check ✓ dans le menu
+  const checkD = $('checkD'); if (checkD) checkD.style.display = m === 'daily' ? '' : 'none';
+  const checkS = $('checkS'); if (checkS) checkS.style.display = m === 'survival' ? '' : 'none';
+
   document.body.classList.toggle('survival-mode', m === 'survival');
   if (_tickID) { clearInterval(_tickID); _tickID = null; }
+
+  // Ferme le menu
+  if (typeof closeMenu === 'function') closeMenu();
 
   if (m === 'daily') {
     const sb = $('sbar'); if (sb) sb.classList.remove('on');
@@ -498,7 +508,7 @@ function sNext() {
   foc(); updSUI();
 }
 
-// ── Mise à jour de l'UI survie (Série / Essais / Record) ──
+// ── Mise à jour UI survie ────────────────────────────────────
 function updSUI() {
   const st = document.getElementById('sstreak');
   const sb = document.getElementById('sbest');
@@ -765,8 +775,10 @@ const _lastMode = localStorage.getItem('bleachg_mode') || 'daily';
 if (_lastMode === 'survival') {
   mode = 'survival';
   document.body.classList.add('survival-mode');
-  $('btnD').classList.remove('active');
-  $('btnS').classList.add('active');
+  const btnD = $('btnD'); if (btnD) btnD.classList.remove('active');
+  const btnS = $('btnS'); if (btnS) btnS.classList.add('active');
+  const checkD = $('checkD'); if (checkD) checkD.style.display = 'none';
+  const checkS = $('checkS'); if (checkS) checkS.style.display = '';
   const sb = $('sbar'); if (sb) sb.classList.add('on');
 
   if (!loadSurv()) {
