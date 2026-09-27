@@ -311,7 +311,6 @@ body.survival-mode .sbar { display: flex; }
   padding: 12px 14px;
   background: var(--bg-soft);
   border-bottom: 1px solid var(--line);
-  margin-bottom: 6px;
 }
 .cimg {
   width: 52px; height: 62px;
@@ -332,23 +331,25 @@ body.survival-mode .sbar { display: flex; }
 .cname.wrong   { color: var(--fg); }
 .cbadge { display: none; }
 
-/* Grille : CELLULES SÉPARÉES comme le mockup */
+/* Grille */
 .cgrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  background: transparent;
-  padding: 0 12px 12px;
+  gap: 1px;
+  background: var(--line);
+  padding: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
 }
 .cc {
   background: var(--bg-card);
-  padding: 10px 6px;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--radius-xs);
+  border: none;
+  border-radius: 0;
 }
 .cc.correct { background: var(--ok-bg); border-color: var(--ok-bd); }
 .cc.close   { background: var(--yw-bg); border-color: var(--yw-bd); }
