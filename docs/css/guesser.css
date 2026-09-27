@@ -1030,52 +1030,44 @@ body.survival-mode .sbar { display: flex; }
 .card.ok::before { background: var(--ok-bd); }
 .card.ko::before { background: var(--ko-bd); }
 
-/* En-tête : image + nom uniquement */
 .ctop {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   background: var(--bg-soft);
   border-bottom: 1px solid var(--line);
 }
 .cimg {
-  width: 52px; height: 62px;
+  width: 48px; height: 58px;
   object-fit: cover;
   object-position: top center;
   border-radius: var(--radius-xs);
   border: 1px solid var(--line-2);
   flex-shrink: 0;
 }
-.cinfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
+.cinfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .cname {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   line-height: 1.15;
 }
 .cname.correct { color: var(--ok-tx); }
 .cname.wrong   { color: var(--fg); }
 
-/* On cache le badge (RACE + ARC sous le nom) sur mobile */
+/* ⚠️ On cache le badge RACE + ARC sous le nom */
 .cbadge { display: none; }
 
-/* Grille d'infos : sans bordures autour de chaque cellule */
+/* Grille d'infos : compacte, sans bordure par cellule */
 .cgrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0;
-  background: transparent;
 }
 .cc {
-  background: transparent;
-  padding: 8px 6px;
+  background: var(--bg-card);
+  padding: 8px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1083,12 +1075,9 @@ body.survival-mode .sbar { display: flex; }
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
-/* Retire la bordure droite de la dernière colonne */
-.cc:nth-child(3n) { border-right: none; }
-/* Retire la bordure basse de la dernière ligne */
+.cc:nth-child(3n)      { border-right: none; }
 .cc:nth-last-child(-n+3) { border-bottom: none; }
 
-/* Couleurs de fond selon le résultat (plus discrètes) */
 .cc.correct { background: var(--ok-bg); }
 .cc.close   { background: var(--yw-bg); }
 .cc.wrong   { background: var(--ko-bg); }
