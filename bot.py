@@ -138,7 +138,7 @@ async def on_message(message):
             style=discord.ButtonStyle.link
         ))
         view.add_item(discord.ui.Button(
-            label="📂 Code source",
+            label="📂 Github",
             url=GITHUB_URL,
             style=discord.ButtonStyle.link
         ))
