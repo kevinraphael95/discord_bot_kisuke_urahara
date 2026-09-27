@@ -27,6 +27,31 @@ let sQ = [], sQi = 0, sCur = null, sG = [], sSel = -1, sOver = false, sRec = 0;
 
 let mode = 'daily';
 
+// ── Menu burger (anciennement dans le HTML) ──────────────────
+function toggleMenu(e) {
+  if (e) e.stopPropagation();
+  const burger = document.getElementById('burger');
+  const panel = document.getElementById('menuPanel');
+  if (!burger || !panel) return;
+  burger.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+
+function closeMenu() {
+  const burger = document.getElementById('burger');
+  const panel = document.getElementById('menuPanel');
+  if (burger) burger.classList.remove('open');
+  if (panel) panel.classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  const burger = document.getElementById('burger');
+  const panel = document.getElementById('menuPanel');
+  if (burger && panel && !burger.contains(e.target) && !panel.contains(e.target)) {
+    closeMenu();
+  }
+});
+
 // ── Images ────────────────────────────────────────────────────
 const WIKI_IMGS   = {};
 const _imgQueue   = [];
@@ -70,22 +95,26 @@ async function setImg(imgEl, char) {
 }
 
 // ── UI helpers ────────────────────────────────────────────────
+// On cache uniquement le tableau + cards. La barre input + burger restent visibles.
 function hideGameUI() {
-  const iz = document.querySelector('.iz');
   const tw = document.querySelector('.tw');
   const cd = document.querySelector('.cards');
-  if (iz) iz.style.display = 'none';
   if (tw) tw.style.display = 'none';
   if (cd) cd.style.display = 'none';
+  // Désactive l'input et le bouton DEVINER
+  const gi = $('gi'); if (gi) gi.disabled = true;
+  const gbtn = $('gbtn'); if (gbtn) gbtn.disabled = true;
 }
 
 function showGameUI(m) {
-  const iz = document.querySelector('.iz');
   const tw = document.querySelector('.tw');
   const cd = document.querySelector('.cards');
-  if (iz) iz.style.display = 'flex';
   if (tw) tw.style.display = '';
   if (cd) cd.style.display = '';
+  // Réactive l'input et le bouton
+  const gi = $('gi'); if (gi) gi.disabled = false;
+  const gbtn = $('gbtn'); if (gbtn) gbtn.disabled = false;
+
   if (m === 'survival') {
     document.body.classList.add('survival-mode');
     const sb = $('sbar'); if (sb) sb.classList.add('on');
@@ -370,11 +399,8 @@ function switchMode(m) {
   const gi = $('gi'); if (gi) gi.value = '';
   const acl = $('acl'); if (acl) acl.innerHTML = '';
 
-  // Mise à jour du menu déroulant (remplace .mode par .menu-item)
   const btnD = $('btnD'); if (btnD) btnD.classList.toggle('active', m === 'daily');
   const btnS = $('btnS'); if (btnS) btnS.classList.toggle('active', m === 'survival');
-
-  // Met à jour les check ✓ dans le menu
   const checkD = $('checkD'); if (checkD) checkD.style.display = m === 'daily' ? '' : 'none';
   const checkS = $('checkS'); if (checkS) checkS.style.display = m === 'survival' ? '' : 'none';
 
@@ -508,7 +534,6 @@ function sNext() {
   foc(); updSUI();
 }
 
-// ── Mise à jour UI survie ────────────────────────────────────
 function updSUI() {
   const st = document.getElementById('sstreak');
   const sb = document.getElementById('sbest');
