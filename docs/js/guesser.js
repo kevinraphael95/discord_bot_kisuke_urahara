@@ -396,16 +396,8 @@ function switchMode(m) {
 
 // ── Daily ─────────────────────────────────────────────────────
 function updDots() {
-  const r = $('dots'); r.innerHTML = '';
-  for (let i = 0; i < MAX; i++) {
-    const d = document.createElement('div'); d.className = 'dot';
-    if (i < dG.length) {
-      const w = dG[i].m.n === tgt.n;
-      d.classList.add(w ? 'win' : (dOver && i === dG.length - 1 ? 'lose' : 'used'));
-    }
-    r.appendChild(d);
-  }
-  $('cnt').innerHTML = '<span>' + dG.length + '/' + MAX + '</span>';
+  const c = document.getElementById('cnt');
+  if (c) c.textContent = dG.length + '/' + MAX;
 }
 
 function showDRes(won) {
