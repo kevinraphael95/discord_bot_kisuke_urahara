@@ -57,8 +57,10 @@
   --line:      rgba(255,255,255,.07);
   --line-2:    rgba(255,255,255,.12);
   --fg:        #f0ede6;
-  --fg-soft:   #a8a39a;
-  --fg-mute:   #6a665e;
+/*  --fg-soft:   #a8a39a;
+  --fg-mute:   #6a665e; */
+  --fg-soft:   #c5c0b8; 
+  --fg-mute:   #8f8a82;  
 
   --accent:      #4ea86b;
   --accent-2:    #2d7a4e;
