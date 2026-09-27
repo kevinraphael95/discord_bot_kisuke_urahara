@@ -123,60 +123,74 @@
 <!-- ═══ CONTENU PRINCIPAL ═══ -->
 <div class="gwrap">
 
-  <!-- ═══ TOOLBAR unique ═══ -->
-  <div class="toolbar">
-
-    <!-- Modes -->
-    <div class="modes">
-      <button class="mode active" id="btnD" onclick="switchMode('daily')">⚔ Quotidien</button>
-      <button class="mode surv"   id="btnS" onclick="switchMode('survival')">💀 Survie</button>
-    </div>
-
-    <!-- Zone du milieu : compteur daily OU barre survie -->
-    <div class="toolbar-middle">
-
-      <!-- Compteur daily (affiché par défaut) -->
-      <div class="counter" id="cnt">0/8</div>
-
-      <!-- Barre survie (cachée par défaut, affichée en mode survie) -->
-      <div class="sbar" id="sbar">
-        <div class="sv">
-          <span class="sv-l">🔥 Série</span>
-          <span class="sv-n" id="sstreak">0</span>
-        </div>
-        <div class="sv">
-          <span class="sv-l">Essais</span>
-          <span class="sv-n" id="sdots">0/8</span>
-        </div>
-        <div class="sv">
-          <span class="sv-l">🏆 Record</span>
-          <span class="sv-n" id="sbest">0</span>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Utilitaires -->
-    <div class="utils">
-      <button class="util" onclick="showRules()" title="Comment jouer">📖</button>
-      <button class="util auth-msw-btn" id="auth-msw-btn" onclick="toggleUserMenu()" title="Se connecter">👤</button>
-      <button class="util" onclick="showLeaderboard()" title="Classement">🏆</button>
-    </div>
-
+  <!-- ═══ TITRE ═══ -->
+  <div class="game-title">
+    <h1>Bleach <em>Character Guesser</em></h1>
+    <p>Devine le personnage caché en 8 essais</p>
   </div>
 
-  <div class="flash" id="flash"></div>
-
-  <!-- Zone de saisie -->
+  <!-- ═══ BARRE INPUT avec burger intégré ═══ -->
   <div class="iz">
     <div class="acw">
       <input class="gi" id="gi" type="text" placeholder="Entrez un personnage Bleach…" autocomplete="off" oninput="onIn()" onkeydown="onKD(event)"/>
       <div class="acl" id="acl"></div>
     </div>
     <button class="gbtn" id="gbtn" onclick="sub()">DEVINER</button>
+
+    <!-- Burger intégré -->
+    <button class="burger" id="burger" onclick="toggleMenu(event)" aria-label="Menu">☰</button>
+
+    <!-- Menu déroulant -->
+    <div class="menu-panel" id="menuPanel">
+
+      <div class="menu-section">Mode de jeu</div>
+      <button class="menu-item active" id="btnD" onclick="switchMode('daily')">
+        <span class="ic">⚔</span>
+        <span>Quotidien</span>
+        <span class="check" id="checkD">✓</span>
+      </button>
+      <button class="menu-item surv" id="btnS" onclick="switchMode('survival')">
+        <span class="ic">💀</span>
+        <span>Survie</span>
+        <span class="check" id="checkS" style="display:none">✓</span>
+      </button>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-section">Compte</div>
+      <button class="menu-item" onclick="showRules(); closeMenu();">
+        <span class="ic">📖</span>
+        <span>Comment jouer</span>
+      </button>
+      <button class="menu-item auth-msw-btn" id="auth-msw-btn" onclick="toggleUserMenu(); closeMenu();">
+        <span class="ic">👤</span>
+        <span>Se connecter</span>
+      </button>
+      <button class="menu-item" onclick="showLeaderboard(); closeMenu();">
+        <span class="ic">🏆</span>
+        <span>Classement</span>
+      </button>
+
+    </div>
   </div>
 
-  <!-- Tableau desktop -->
+  <!-- ═══ Compteur SOUS l'input ═══ -->
+  <div class="counter-row">
+    <!-- Compteur daily -->
+    <div class="counter" id="cnt">0/8</div>
+    <div class="counter-label" id="counterLabel">essais utilisés</div>
+
+    <!-- Barre survie -->
+    <div class="sbar" id="sbar">
+      <span class="sv"><span class="sv-l">🔥 Série</span><span class="sv-n" id="sstreak">0</span></span>
+      <span class="sv"><span class="sv-l">Essais</span><span class="sv-n" id="sdots">0/8</span></span>
+      <span class="sv"><span class="sv-l">🏆 Record</span><span class="sv-n" id="sbest">0</span></span>
+    </div>
+  </div>
+
+  <div class="flash" id="flash"></div>
+
+  <!-- ═══ TABLEAU ═══ -->
   <div class="tw">
     <div class="th">
       <div>PERSONNAGE</div><div>RACE</div><div>GENRE</div><div>ARC</div>
@@ -188,7 +202,7 @@
   <!-- Cards mobile -->
   <div class="cards" id="gc"></div>
 
-  <!-- Hint scroll (mobile) -->
+  <!-- Hint scroll mobile -->
   <div class="board-hint">← Glisse pour voir plus →</div>
 
   <!-- Banner résultat daily -->
@@ -225,6 +239,28 @@
   </div>
 
 </div>
+
+<script>
+  /* ── Menu burger (intégré dans la barre input) ── */
+  function toggleMenu(e) {
+    e.stopPropagation();
+    const burger = document.getElementById('burger');
+    const panel = document.getElementById('menuPanel');
+    burger.classList.toggle('open');
+    panel.classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('burger').classList.remove('open');
+    document.getElementById('menuPanel').classList.remove('open');
+  }
+  document.addEventListener('click', e => {
+    const burger = document.getElementById('burger');
+    const panel = document.getElementById('menuPanel');
+    if (burger && panel && !burger.contains(e.target) && !panel.contains(e.target)) {
+      closeMenu();
+    }
+  });
+</script>
 
 </body>
 </html>
