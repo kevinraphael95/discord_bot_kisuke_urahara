@@ -928,81 +928,166 @@
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE — MOBILE
    ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   NOUVELLE TOOLBAR (modes + compteur + utils)
+   ═══════════════════════════════════════════════════════════ */
+.toolbar {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modes {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-soft);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.mode {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--fg-soft);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all .2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mode:hover { color: var(--fg); }
+.mode.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(78,168,107,.25);
+}
+.mode.surv.active {
+  background: var(--gold);
+  box-shadow: 0 2px 8px rgba(201,169,97,.25);
+}
+
+.toolbar-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.counter {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 0 12px;
+  white-space: nowrap;
+  border-right: 1px solid var(--line);
+}
+
+.utils {
+  display: flex;
+  gap: 4px;
+}
+
+.util {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  color: var(--fg-soft);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.util:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.util.connected { color: var(--accent); border-color: var(--accent); }
+
+/* Hint scroll mobile */
+.board-hint {
+  display: none;
+  text-align: center;
+  font-size: 10px;
+  color: var(--fg-mute);
+  padding: 4px 0 0;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 700px) {
+  .gwrap { padding: 12px 12px 60px; gap: 10px; }
 
-  /* Conteneur principal : marges réduites + moins de gap */
-  .gwrap {
-    padding: 16px 12px 60px;
-    gap: 12px;
+  /* Toolbar en colonne */
+  .toolbar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
   }
-
-  /* Barre de modes : compacte et bien centrée */
-  .msw {
-    padding: 3px;
-    gap: 2px;
-    width: 100%;
-    max-width: 100%;
+  .modes { width: 100%; }
+  .mode {
+    flex: 1;
     justify-content: center;
-  }
-  .mbtn,
-  .rules-btn,
-  .auth-msw-btn,
-  .lb-msw-btn {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
-
-  /* Barre daily */
-  .dbar {
-    padding: 8px 14px;
-    gap: 10px;
+    padding: 10px 8px;
     font-size: 13px;
   }
-  .dbar .cnt { font-size: 15px; }
-  .dots { gap: 4px; }
-  .dot { width: 8px; height: 8px; }
-
-  /* Zone de saisie : input large, bouton compact */
-  .iz { max-width: 100%; }
-  .gi {
-    padding: 13px 14px;
+  .toolbar-bottom {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .counter {
+    border-right: none;
+    padding: 0;
     font-size: 14px;
   }
-  .gbtn {
-    padding: 0 16px;
-    font-size: 12px;
-    letter-spacing: .05em;
-  }
+  .util { width: 36px; height: 36px; font-size: 15px; }
 
-  /* Barre survie */
-  .sv, .sdots-w {
-    padding: 8px 12px;
-    font-size: 12px;
-    gap: 6px;
-  }
+  /* Hint visible sur mobile */
+  .board-hint { display: block; }
+
+  /* Barre survie compacte */
+  .sv, .sdots-w { padding: 8px 12px; font-size: 12px; gap: 6px; }
   .sv-n { font-size: 16px; }
   .sv-l { font-size: 12px; }
+
+  /* Input compact */
+  .iz { max-width: 100%; }
+  .gi { padding: 13px 14px; font-size: 14px; }
+  .gbtn { padding: 0 18px; font-size: 12px; letter-spacing: .05em; }
 
   /* Autocomplete */
   .acl { max-height: 220px; }
   .aci { padding: 8px 12px; font-size: 13px; gap: 10px; }
   .aci-img { width: 34px; height: 42px; }
 
-  /* Tableau desktop caché, cards affichées */
-  .tw { display: none; }
-  .cards { display: flex; }
+  /* Tableau : scroll horizontal + compact */
+  .tw { display: block; padding: 8px; overflow-x: auto; }
+  .cards { display: none; }  /* on garde le tableau qui scrolle */
+  .cell { font-size: 11px; min-height: 38px; padding: 6px 3px; }
+  .th div { font-size: 9px; padding: 5px 2px; }
+  .row-img { width: 24px; height: 30px; }
 
-  /* Cards mobile plus compactes */
-  .ctop { padding: 10px 12px; gap: 10px; }
-  .cimg { width: 42px; height: 50px; }
-  .cinfo { gap: 2px; }
-  .cname { font-size: 15px; }
-  .cbadge { font-size: 10px; }
-  .cc { padding: 8px 4px; gap: 2px; }
-  .cv { font-size: 11px; }
-  .cl { font-size: 8px; }
-
-  /* Bannières daily / survie : image moins haute */
+  /* Bannières résultat */
   .rbanner-inner,
   .send-inner { grid-template-columns: 1fr; }
   .rbanner-left,
@@ -1014,11 +1099,12 @@
   .rdesc, .se-s { font-size: 13px; }
   .ntmr { font-size: 11px; }
 
-  /* Stats game over survie */
+  /* Stats game over */
   .sestats { gap: 6px; }
-  .sestat { padding: 8px 8px; min-width: 70px; }
+  .sestat { padding: 8px; min-width: 70px; }
   .sestat strong { font-size: 18px; }
   .sestat span { font-size: 9px; }
+}
 
   /* Boutons de fin */
   .xbtn, .xbtn2, .r2btn { font-size: 12px; padding: 8px 14px; }
