@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from utils.logger import get_logs, LOG_BUFFER   # 👈 AJOUTÉ ICI
+from utils.logger import get_logs, LOG_BUFFER
 
 import logging
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -139,8 +139,10 @@ def api_table_delete(table_name):
         cur.execute(f"DROP TABLE IF EXISTS {table_name}")
         conn.commit()
         conn.close()
+        print(f"🗑️ Table supprimée : {table_name}")
         return jsonify({"ok": True})
     except Exception as e:
+        print(f"❌ Échec suppression table {table_name} : {e}")
         return jsonify({"ok": False, "error": str(e)})
 
 
@@ -176,8 +178,10 @@ def api_edit():
         conn.close()
         if rows_affected == 0:
             return jsonify({"ok": False, "error": f"0 ligne modifiée — {pk}={pk_val!r} introuvable"})
+        print(f"✏️ Édition : {table}.{col} (ID {pk_val}) = {value!r}")
         return jsonify({"ok": True})
     except Exception as e:
+        print(f"❌ Échec édition {table}.{col} : {e}")
         return jsonify({"ok": False, "error": str(e)})
 
 
@@ -196,12 +200,15 @@ def api_sql():
             columns = [d[0] for d in cur.description]
             rows = cur.fetchall()
             conn.close()
+            print(f"🗄️ SQL SELECT ({len(rows)} lignes) : {query[:80]}")
             return jsonify({"columns": columns, "rows": rows})
         else:
             conn.commit()
             conn.close()
+            print(f"🗄️ SQL WRITE ({cur.rowcount} lignes affectées) : {query[:80]}")
             return jsonify({"ok": True, "message": f"{cur.rowcount} ligne(s) affectée(s)"})
     except Exception as e:
+        print(f"❌ SQL KO : {e}")
         return jsonify({"error": str(e)})
 
 
@@ -216,6 +223,7 @@ def api_logs():
 @login_required
 def api_logs_clear():
     LOG_BUFFER.clear()
+    print("🧹 Logs vidés depuis le panel admin")
     return jsonify({"ok": True})
 
 
@@ -282,9 +290,15 @@ def api_backup():
     try:
         backup_path, backup_filename, size_kb = create_backup_file()
     except Exception as e:
+        print(f"❌ Échec création backup : {e}")
         return jsonify({"ok": False, "error": f"Échec de la création du backup : {e}"}), 500
 
     discord_sent, discord_error = send_backup_to_discord(backup_path, backup_filename)
+
+    if discord_sent:
+        print(f"⛁ Backup créé : {backup_filename} ({size_kb} Ko) — envoyé sur Discord")
+    else:
+        print(f"⛁ Backup créé : {backup_filename} ({size_kb} Ko) — ⚠ non envoyé ({discord_error})")
 
     return jsonify({
         "ok": True,
@@ -351,14 +365,19 @@ def set_bot(bot):
 def api_action(action):
 
     if action == "git_pull":
+        print("🔄 Action : git pull")
         result = subprocess.run(["git", "pull"], capture_output=True, text=True, timeout=30)
         output = result.stdout + result.stderr
+        print(output.strip())
         return jsonify({"ok": result.returncode == 0, "output": output})
 
     elif action == "git_pull_restart":
+        print("🔄 Action : git pull + reload cogs")
         result = subprocess.run(["git", "pull"], capture_output=True, text=True, timeout=30)
         output = result.stdout + result.stderr
+        print(output.strip())
         if _bot_ref is None:
+            print("❌ Bot non disponible pour le reload")
             return jsonify({"ok": False, "output": output + "\n❌ Bot non disponible pour le reload"})
         import asyncio
         output_lines = [output]
@@ -369,15 +388,19 @@ def api_action(action):
                 try:
                     await _bot_ref.reload_extension(ext)
                     output_lines.append(f"✅ {ext}")
+                    print(f"✅ Reload : {ext}")
                 except Exception as e:
                     output_lines.append(f"❌ {ext}: {e}")
+                    print(f"❌ Reload KO : {ext} — {e}")
 
         asyncio.run_coroutine_threadsafe(do_reload(), _bot_ref.loop).result(timeout=15)
         return jsonify({"ok": True, "output": "\n".join(output_lines)})
 
     elif action == "reload_cogs":
         if _bot_ref is None:
+            print("❌ Action reload_cogs : bot non disponible")
             return jsonify({"ok": False, "output": "Bot non disponible"})
+        print("🔄 Action : reload cogs")
         import asyncio
         loop = _bot_ref.loop
         output_lines = []
@@ -388,16 +411,20 @@ def api_action(action):
                 try:
                     await _bot_ref.reload_extension(ext)
                     output_lines.append(f"✅ {ext}")
+                    print(f"✅ Reload : {ext}")
                 except Exception as e:
                     output_lines.append(f"❌ {ext}: {e}")
+                    print(f"❌ Reload KO : {ext} — {e}")
 
         asyncio.run_coroutine_threadsafe(do_reload(), loop).result(timeout=15)
         return jsonify({"ok": True, "output": "\n".join(output_lines)})
 
     elif action == "restart_bot":
+        print("🔄 Action : redémarrage du bot")
         threading.Timer(1.0, restart_bot_process).start()
         return jsonify({"ok": True, "output": "⏳ Redémarrage en cours…"})
 
+    print(f"❌ Action inconnue : {action}")
     return jsonify({"ok": False, "output": "Action inconnue"})
 
 
