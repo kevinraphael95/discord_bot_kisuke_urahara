@@ -21,6 +21,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from utils.logger import get_logs, LOG_BUFFER   # 👈 AJOUTÉ ICI
+
 import logging
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
@@ -207,14 +209,12 @@ def api_sql():
 @app.route("/api/logs")
 @login_required
 def api_logs():
-    from utils.logger import get_logs
     return jsonify({"logs": get_logs()})
 
 
 @app.route("/api/logs/clear", methods=["POST"])
 @login_required
 def api_logs_clear():
-    from utils.logger import LOG_BUFFER
     LOG_BUFFER.clear()
     return jsonify({"ok": True})
 
