@@ -34,11 +34,9 @@ def db_save_score(user_id: int, username: str, score: int):
         conn   = get_conn()
         cursor = conn.cursor()
 
-        # 1. Combien de scores en base ?
         cursor.execute("SELECT COUNT(*) FROM kawashima_scores")
         count = cursor.fetchone()[0]
 
-        # 2. Si on a déjà 10 scores, on regarde le plus bas du top 10
         if count >= 10:
             cursor.execute("""
                 SELECT MIN(score) FROM (
@@ -49,12 +47,10 @@ def db_save_score(user_id: int, username: str, score: int):
             """)
             min_top10 = cursor.fetchone()[0]
 
-            # Si le nouveau score n'est pas meilleur que le 10e, on abandonne
             if score <= min_top10:
                 conn.close()
                 return
 
-            # Sinon, on supprime le plus bas du top 10 pour faire de la place
             cursor.execute("""
                 DELETE FROM kawashima_scores
                 WHERE id = (
@@ -64,7 +60,6 @@ def db_save_score(user_id: int, username: str, score: int):
                 )
             """)
 
-        # 3. On insère le nouveau score
         cursor.execute("""
             INSERT INTO kawashima_scores (user_id, username, score, timestamp)
             VALUES (?, ?, ?, ?)
@@ -191,6 +186,130 @@ class EntrainementCerebral(commands.Cog):
             log.exception("[cerebral] Erreur envoi embed quête : %s", e)
 
     # ============================================================================
+    # 🔹 Wrapper — exécute un mini-jeu en solo avec gestion du timeout
+    # ============================================================================
+    async def _run_game_solo(self, game, msg_state, embed, user, timeout=60):
+        """
+        Exécute un mini-jeu en solo.
+        Retourne True si réussi, False sinon (timeout ou erreur).
+        """
+        def get_user_id():
+            return user.id
+
+        try:
+            return await asyncio.wait_for(
+                game(msg_state, embed, get_user_id, self.bot),
+                timeout=timeout
+            )
+        except asyncio.TimeoutError:
+            log.warning("[cerebral] Mini-jeu solo timeout pour %s", user)
+            return False
+        except Exception as e:
+            log.exception("[cerebral] Erreur mini-jeu solo : %s", e)
+            return False
+
+    # ============================================================================
+    # 🔹 Wrapper — exécute un mini-jeu en multi (boutons OU texte)
+    # ============================================================================
+    async def _run_game_multi(self, game, msg_state, embed, active_players, timeout=25):
+        """
+        Exécute un mini-jeu en multi.
+
+        - Si le jeu utilise des boutons : on attend directement le résultat du jeu,
+          et on accepte TOUS les joueurs actifs (le get_user_id renvoie l'ID du bot
+          ne matchera personne, donc on utilise une lambda spéciale).
+        - Si le jeu utilise du texte : on attend un message d'un joueur actif,
+          puis on passe `msg_override` au jeu.
+
+        Retourne (winner_member_or_None, success_bool).
+        """
+        uses_buttons = getattr(game, "uses_buttons", False)
+
+        if uses_buttons:
+            # ----- Jeu à boutons -----
+            # On doit accepter n'importe quel joueur actif. On stocke l'ID
+            # du cliqueur dans une variable mutable, et get_user_id() renvoie
+            # une valeur sentinelle qui matche tous les joueurs actifs.
+            clicked_holder = {"user_id": None}
+
+            def get_user_id():
+                # Retourne un ID qui n'existe pas → le jeu vérifie
+                # `interaction.user.id != get_user_id()`. Pour accepter tout
+                # le monde en multi, on doit retourner l'ID du cliqueur.
+                # Mais on ne le connaît qu'au moment du clic...
+                # Solution : on patche le check côté jeu via un attribut.
+                return clicked_holder["user_id"]
+
+            # Astuce : on modifie dynamiquement `get_user_id` pour accepter
+            # n'importe qui. On utilise un wrapper qui retourne une valeur
+            # "magique" — mais les jeux comparent avec `!=`. Donc il faut
+            # que get_user_id() retourne l'ID du cliqueur.
+            # → On ne peut pas le savoir à l'avance. On va donc monkey-patch
+            #   la fonction pour qu'elle accepte tout le monde.
+            #
+            # Plus simple : on passe une lambda qui renvoie un objet dont
+            # __eq__ retourne toujours False quand comparé à un int.
+            class _AnyUser:
+                def __eq__(self, other):
+                    return False  # jamais égal → le check `!=` passe toujours
+                def __ne__(self, other):
+                    return False  # `!=` retourne False → accepté
+
+            any_user = _AnyUser()
+            def get_user_id_any():
+                return any_user
+
+            try:
+                # On ne peut pas passer get_user_id_any directement car les
+                # jeux l'appellent comme `get_user_id()`. On l'appelle donc
+                # comme une fonction qui retourne l'objet magique.
+                success = await asyncio.wait_for(
+                    game(msg_state, embed, get_user_id_any, self.bot),
+                    timeout=timeout
+                )
+            except asyncio.TimeoutError:
+                success = False
+            except Exception as e:
+                log.exception("[cerebral] Erreur mini-jeu multi (boutons) : %s", e)
+                success = False
+
+            # On ne connaît pas le cliqueur exact → on ne peut pas attribuer
+            # le point. Solution : on regarde le dernier message du bot ?
+            # → Non. Meilleure solution : demander aux jeux de retourner
+            #   (success, user_id). Mais ça casse l'API actuelle.
+            #
+            # ⚠️ LIMITATION : en multi, les jeux à boutons ne permettent pas
+            # d'identifier le gagnant de manière fiable. On va donc
+            # retourner (None, success) et laisser le mode multi gérer.
+            return None, success
+        else:
+            # ----- Jeu texte -----
+            def check(m):
+                return (
+                    m.author in active_players
+                    and m.channel == msg_state.channel
+                    and not m.author.bot
+                )
+
+            try:
+                msg = await self.bot.wait_for("message", check=check, timeout=timeout)
+            except asyncio.TimeoutError:
+                return None, False
+
+            try:
+                success = await asyncio.wait_for(
+                    game(msg_state, embed, lambda: msg.author.id, self.bot, msg_override=msg),
+                    timeout=15
+                )
+            except asyncio.TimeoutError:
+                success = False
+            except Exception as e:
+                log.exception("[cerebral] Erreur mini-jeu multi (texte) : %s", e)
+                success = False
+
+            return msg.author, success
+
+    # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
     @commands.command(
@@ -273,7 +392,6 @@ class EntrainementCerebral(commands.Cog):
                 "Appuie sur le bouton ci-dessous quand tu es prêt à commencer."
             )
 
-            # ✅ Un seul embed et un seul message, réutilisés et édités pour tout l'entraînement
             embed = discord.Embed(
                 title=f"🧠 Entraînement cérébral — {title_mode}",
                 description=description_text,
@@ -320,7 +438,7 @@ class EntrainementCerebral(commands.Cog):
                         self.ready_event.set()
 
             view      = ReadyButton()
-            msg_state = await send(embed=embed, view=view)  # 🔒 message unique pour tout le déroulé
+            msg_state = await send(embed=embed, view=view)
             await view.ready_event.wait()
 
             if not multiplayer and not view.clicked:
@@ -358,27 +476,24 @@ class EntrainementCerebral(commands.Cog):
                 start = time.time()
 
                 if multiplayer:
-                    def check(m):
-                        return m.author in active_players and m.channel == msg_state.channel
-                    winner = None
-                    try:
-                        while True:
-                            msg     = await self.bot.wait_for("message", check=check, timeout=25)
-                            success = await game(msg_state, embed, lambda: msg.author.id, self.bot, msg_override=msg)
-                            if success:
-                                winner = msg.author
-                                break
-                    except asyncio.TimeoutError:
-                        winner = None
+                    winner, success = await self._run_game_multi(
+                        game, msg_state, embed, active_players, timeout=25
+                    )
 
                     elapsed = round(time.time() - start, 2)
                     embed.clear_fields()
-                    if winner:
+
+                    if winner and success:
                         score = 1000 + max(0, 500 - int(elapsed * 25))
                         total_score[winner.id] = total_score.get(winner.id, 0) + score
                         results.setdefault(winner.id, []).append((index, name, True, elapsed, score))
                         embed.title       = f"🏆 {winner.name} a trouvé la bonne réponse !"
                         embed.description = f"⏱️ Temps : `{elapsed}s`\n🏅 Score : `{score}` pts"
+                        embed.color       = discord.Color.green()
+                    elif success:
+                        # Jeu à boutons réussi mais on ne sait pas qui a cliqué
+                        embed.title       = "✅ Mini-jeu réussi !"
+                        embed.description = "Quelqu'un a trouvé la bonne réponse, mais impossible d'identifier qui (jeu à boutons)."
                         embed.color       = discord.Color.green()
                     else:
                         embed.title       = "❌ Personne n'a trouvé la bonne réponse"
@@ -387,10 +502,11 @@ class EntrainementCerebral(commands.Cog):
                     await msg_state.edit(embed=embed, view=None)
 
                 else:
-                    get_user_id = lambda: users[0].id
-                    success     = await game(msg_state, embed, get_user_id, self.bot)
-                    elapsed     = round(time.time() - start, 2)
-                    score       = (1000 + max(0, 500 - int(elapsed * 25))) if success else 0
+                    success = await self._run_game_solo(
+                        game, msg_state, embed, users[0], timeout=60
+                    )
+                    elapsed = round(time.time() - start, 2)
+                    score   = (1000 + max(0, 500 - int(elapsed * 25))) if success else 0
                     total_score[users[0].id] = total_score.get(users[0].id, 0) + score
                     results.setdefault(users[0].id, []).append((index, name, success, elapsed, score))
 
@@ -406,7 +522,7 @@ class EntrainementCerebral(commands.Cog):
 
                 await asyncio.sleep(1.5)
 
-            # === Résultats finaux — regroupés dans le même embed ==================
+            # === Résultats finaux =================================================
             embed.clear_fields()
             embed.title       = "🏁 Résultats de l'entraînement"
             embed.description = None
@@ -438,13 +554,12 @@ class EntrainementCerebral(commands.Cog):
                     inline=False
                 )
 
-                # === Sauvegarde score solo =================================
                 if not multiplayer:
                     db_save_score(player.id, player.name, total)
 
             await msg_state.edit(embed=embed, view=None)
 
-            # === Validation quête(s) — annonce séparée (hors embed principal) ====
+            # === Validation quête(s) =============================================
             for player in active_players:
                 if player.id in total_score:
                     await self._valider_quete(
