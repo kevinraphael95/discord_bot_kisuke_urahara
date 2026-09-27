@@ -1,30 +1,25 @@
 # ================================================================================
 # 📌 kawashima_games.py — Mini-jeux Professeur Kawashima
-# Objectif : Contient tous les mini-jeux cérébraux détectés automatiquement
+# Version unifiée : TOUS les jeux répondent via un bouton + modale
 # ================================================================================
 
-# ================================================================================
-# 📦 Imports nécessaires
-# ================================================================================
 import random
 import asyncio
-import time
 import discord
 from discord.ui import View, Button, Modal, TextInput
 
 # ================================================================================
 # 📦 Paramètres
 # ================================================================================
-TIMEOUT = 60  # 1 minute pour répondre à chaque mini-jeu
+TIMEOUT = 60  # secondes pour répondre
 
 # ================================================================================
-# 🛠️ Helper — Répondre via bouton + fenêtre modale (au lieu d'un message texte)
+# 🛠️ Helper unique — bouton + modale
 # ================================================================================
-async def _ask_text_answer(ctx, embed, get_user_id, bot, button_label="✏️ Répondre", modal_label="Ta réponse", timeout=TIMEOUT):
+async def _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Ta réponse", timeout=TIMEOUT):
     """
-    Affiche un bouton sur le message `ctx`. Au clic, ouvre une fenêtre modale où le
-    joueur tape sa réponse. Retourne le texte saisi (str) ou None si le temps est
-    écoulé / personne n'a répondu.
+    Affiche un bouton '✏️ Répondre' sur le message. Au clic, ouvre une modale.
+    Retourne le texte saisi (str) ou None si timeout / pas de réponse.
     """
 
     class AnswerModal(Modal):
@@ -51,9 +46,12 @@ async def _ask_text_answer(ctx, embed, get_user_id, bot, button_label="✏️ R�
             super().__init__(timeout=timeout)
             self.result = None
 
-        @discord.ui.button(label=button_label, style=discord.ButtonStyle.primary)
+        @discord.ui.button(label="✏️ Répondre", style=discord.ButtonStyle.primary)
         async def answer_btn(self, interaction: discord.Interaction, button: Button):
-            if interaction.user.id != get_user_id():
+            # En solo : seul le joueur peut cliquer
+            # En multi : n'importe qui (get_user_id renvoie None)
+            expected = get_user_id()
+            if expected is not None and interaction.user.id != expected:
                 await interaction.response.send_message("🚫 Ce n'est pas ton tour.", ephemeral=True)
                 return
             await interaction.response.send_modal(AnswerModal(self))
@@ -70,9 +68,6 @@ async def _ask_text_answer(ctx, embed, get_user_id, bot, button_label="✏️ R�
         pass
     return view.result
 
-# ================================================================================
-# 🔹 Mini-jeux (chacun avec .emoji et .title)
-# ================================================================================
 
 # ================================================================================
 # 🔹 🧮 Addition à la suite
@@ -112,6 +107,7 @@ addition_cachee.title = "Addition à la suite"
 addition_cachee.emoji = "➕"
 addition_cachee.prep_time = 3 + 1.8 * 6
 
+
 # ================================================================================
 # 🔹 🧮 Calcul rapide
 # ================================================================================
@@ -148,8 +144,9 @@ calcul_rapide.title = "Calcul rapide"
 calcul_rapide.emoji = "🧮"
 calcul_rapide.prep_time = 0
 
+
 # ================================================================================
-# 🔹 🔢 Carré magique 3x3 fiable emoji (avec boutons)
+# 🔹 🔢 Carré magique 3x3
 # ================================================================================
 async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot, msg_override=None):
     base = [
@@ -179,43 +176,27 @@ async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot, msg_override=
     embed.clear_fields()
     embed.add_field(
         name="🔢 Carré magique",
-        value=f"Complète le carré magique pour que toutes les lignes, colonnes et diagonales fassent 15 :\n{display}",
+        value=f"Complète le carré magique pour que toutes les lignes, colonnes et diagonales fassent 15 :\n{display}\n\n➡️ Donne le chiffre manquant (1 à 9).",
         inline=False
     )
-    msg = await ctx.edit(embed=embed)
+    await ctx.edit(embed=embed)
 
-    class CarreView(discord.ui.View):
-        def __init__(self):
-            super().__init__(timeout=TIMEOUT)
-            self.selected = None
-            for n in range(1, 10):
-                button = discord.ui.Button(label=str(n), style=discord.ButtonStyle.primary)
-                async def callback(interaction, n=n):
-                    if interaction.user.id != get_user_id():
-                        await interaction.response.send_message("🚫 Pas pour toi.", ephemeral=True)
-                        return
-                    self.selected = n
-                    for child in self.children:
-                        child.disabled = True
-                    await interaction.response.edit_message(view=self)
-                    self.stop()
-                button.callback = callback
-                self.add_item(button)
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Chiffre manquant")
 
-    view = CarreView()
-    await msg.edit(view=view)
-    await view.wait()
-
+    if text is None:
+        return False
     try:
-        await msg.edit(view=None)
+        return int(text.strip()) == answer
     except Exception:
-        pass
-
-    return view.selected == answer if view.selected is not None else None
+        return False
 
 carre_magique_fiable_emoji.title = "Carré magique 3x3"
 carre_magique_fiable_emoji.emoji = "🔢"
 carre_magique_fiable_emoji.prep_time = 0
+
 
 # ================================================================================
 # 🔹 👀 Compter les emojis
@@ -226,7 +207,6 @@ async def compter_emojis(ctx, embed, get_user_id, bot, msg_override=None):
 
     grille = [[random.choice(emojis) for _ in range(4)] for _ in range(4)]
     texte_grille = "\n".join("".join(ligne) for ligne in grille)
-
     total = sum(ligne.count(cible) for ligne in grille)
 
     embed.clear_fields()
@@ -250,77 +230,60 @@ compter_emojis.title = "Compter les emojis"
 compter_emojis.emoji = "👀"
 compter_emojis.prep_time = 1.5
 
+
 # ================================================================================
-# 🎨 Couleurs (Stroop complet)
+# 🔹 🎨 Couleurs (Stroop)
 # ================================================================================
 async def couleurs(ctx, embed, get_user_id, bot, msg_override=None):
-    styles = {
-        "bleu": discord.ButtonStyle.primary,
-        "vert": discord.ButtonStyle.success,
-        "rouge": discord.ButtonStyle.danger,
-        "gris": discord.ButtonStyle.secondary
-    }
-
-    couleurs_list = list(styles.keys())
+    couleurs_list = ["bleu", "vert", "rouge", "gris"]
     mots = couleurs_list.copy()
     random.shuffle(mots)
 
-    buttons = []
-    for couleur, mot in zip(couleurs_list, mots):
-        button = Button(label=mot.upper(), style=styles[couleur])
-        buttons.append(button)
-
     question_type = random.choice(["mot", "couleur"])
+
     if question_type == "mot":
         cible = random.choice(mots)
-        question = f"Appuie sur le bouton où est écrit le **MOT** `{cible.upper()}` !"
-        condition = lambda b: b.label.lower() == cible
+        question = (
+            f"Les mots affichés sont : {', '.join(m.upper() for m in mots)}\n\n"
+            f"➡️ Quel mot est écrit en **{cible.upper()}** dans la liste ?\n"
+            f"(Tape le mot, pas la couleur)"
+        )
+        answer = cible
     else:
         cible = random.choice(couleurs_list)
-        question = f"Appuie sur le bouton de **COULEUR** `{cible.upper()}` !"
-        condition = lambda b: b.style == styles[cible]
-
-    view = View(timeout=TIMEOUT)
-    for button in buttons:
-        async def callback(interaction, b=button):
-            if interaction.user.id != get_user_id():
-                await interaction.response.send_message("🚫 Ce jeu n'est pas pour toi !", ephemeral=True)
-                return
-            view.value = condition(b)
-            view.stop()
-            try:
-                await interaction.response.defer()
-            except Exception:
-                pass
-
-        button.callback = callback
-        view.add_item(button)
+        question = (
+            f"Les couleurs dans l'ordre sont : {', '.join(couleurs_list)}\n\n"
+            f"➡️ Quel est le mot associé à la couleur **{cible.upper()}** ?\n"
+            f"(Tape le mot)"
+        )
+        # Ici on simplifie : on associe chaque couleur à un mot
+        # Pour éviter la confusion Stroop en modale, on demande juste le mot
+        # qui correspond à la couleur cible (toujours le même mot que la couleur)
+        answer = cible
 
     embed.clear_fields()
     embed.add_field(name="🎨 Couleurs (Stroop)", value=question, inline=False)
-    await ctx.edit(embed=embed, view=view)
+    await ctx.edit(embed=embed)
 
-    await asyncio.sleep(0.5)
-    await view.wait()
-    for child in view.children:
-        child.disabled = True
-    try:
-        await ctx.edit(view=view)
-    except Exception:
-        pass
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Mot")
 
-    return getattr(view, "value", False)
+    if text is None:
+        return False
+    return text.strip().lower() == answer.lower()
 
 couleurs.title = "Couleurs"
 couleurs.emoji = "🎨"
 couleurs.prep_time = 0.5
 
+
 # ================================================================================
-# 🔹 📅 Datation (Version boutons)
+# 🔹 📅 Datation
 # ================================================================================
 async def datation(msg, embed, get_user_id, bot, msg_override=None):
     import datetime
-    user_id = get_user_id()
 
     today = datetime.date.today()
     delta_days = random.randint(-7, 7)
@@ -331,103 +294,57 @@ async def datation(msg, embed, get_user_id, bot, msg_override=None):
 
     embed.clear_fields()
     embed.title = "📅 Datation"
-    embed.description = f"Quel jour était le **{date.day}/{date.month}/{date.year}** ?"
+    embed.description = f"Quel jour était le **{date.day}/{date.month}/{date.year}** ?\n(Tape le jour en toutes lettres)"
     await msg.edit(embed=embed)
 
-    class DayView(discord.ui.View):
-        def __init__(self):
-            super().__init__(timeout=15)
-            self.answer = None
-            jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-            for j in jours:
-                self.add_item(self.DayButton(j))
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(msg, embed, get_user_id, bot, modal_label="Jour de la semaine")
 
-        class DayButton(discord.ui.Button):
-            def __init__(self, jour):
-                super().__init__(label=jour.capitalize(), style=discord.ButtonStyle.blurple)
-                self.jour = jour
-
-            async def callback(self, interaction: discord.Interaction):
-                if interaction.user.id != user_id:
-                    return await interaction.response.send_message("❌ Ce n'est pas ta partie.", ephemeral=True)
-
-                self.view.answer = self.jour
-                self.view.stop()
-                try:
-                    await interaction.response.defer()
-                except Exception:
-                    pass
-
-    view = DayView()
-    await msg.edit(view=view)
-
-    timeout = await view.wait()
-    try:
-        await msg.edit(view=None)
-    except Exception:
-        pass
-
-    if timeout:
+    if text is None:
         return False
-
-    return view.answer == jour_correct
+    return text.strip().lower() == jour_correct
 
 datation.title = "Datation"
 datation.emoji = "📅"
 datation.prep_time = 0
 
+
 # ================================================================================
 # 🔹 🧭 Directions opposées
 # ================================================================================
 async def directions_opposees(ctx, embed, get_user_id, bot, msg_override=None):
-    arrows = ["⬆️", "⬇️", "⬅️", "➡️"]
-    opposites = {"⬆️": "⬇️", "⬇️": "⬆️", "⬅️": "➡️", "➡️": "⬅️"}
-
-    arrow = random.choice(arrows)
-    correct = opposites[arrow]
+    arrows_map = {
+        "⬆️": ("haut", "bas"),
+        "⬇️": ("bas", "haut"),
+        "⬅️": ("gauche", "droite"),
+        "➡️": ("droite", "gauche"),
+    }
+    arrow = random.choice(list(arrows_map.keys()))
+    _, correct_word = arrows_map[arrow]
 
     embed.clear_fields()
     embed.add_field(
         name="🧭 Directions opposées",
-        value=f"Flèche affichée : {arrow}\n➡️ Clique sur **la direction opposée** !",
+        value=f"Flèche affichée : {arrow}\n➡️ Quelle est la direction opposée ?\n(Tape : haut, bas, gauche ou droite)",
         inline=False
     )
+    await ctx.edit(embed=embed)
 
-    class ArrowView(View):
-        def __init__(self):
-            super().__init__(timeout=TIMEOUT)
-            self.result = False
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Direction opposée")
 
-    view = ArrowView()
-
-    for symbol in arrows:
-        async def callback(interaction, s=symbol):
-            if interaction.user.id != get_user_id():
-                await interaction.response.send_message("🚫 Pas ton tour !", ephemeral=True)
-                return
-            view.result = (s == correct)
-            view.stop()
-            try:
-                await interaction.response.defer()
-            except Exception:
-                pass
-
-        btn = Button(label=symbol, style=discord.ButtonStyle.primary)
-        btn.callback = callback
-        view.add_item(btn)
-
-    await ctx.edit(embed=embed, view=view)
-
-    await view.wait()
-    try:
-        await ctx.edit(view=None)
-    except Exception:
-        pass
-    return view.result
+    if text is None:
+        return False
+    return text.strip().lower() == correct_word
 
 directions_opposees.title = "Directions opposées"
 directions_opposees.emoji = "🧭"
 directions_opposees.prep_time = 1
+
 
 # ================================================================================
 # 🔹 ➗ Équation à trou
@@ -467,6 +384,7 @@ equation_trou.title = "Equation à trou"
 equation_trou.emoji = "➗"
 equation_trou.prep_time = 0
 
+
 # ================================================================================
 # 🔹 🕒 Heures
 # ================================================================================
@@ -477,7 +395,7 @@ async def heures(ctx, embed, get_user_id, bot, msg_override=None):
     hours, mins = divmod(diff, 60)
 
     heure_1, heure_2 = f"{h1:02d}:{m1:02d}", f"{h2:02d}:{m2:02d}"
-    question_type = f"Quelle est la différence entre {heure_1} et {heure_2} ?"
+    question_type = f"Quelle est la différence entre {heure_1} et {heure_2} ?\n(Ex: 1h30)"
 
     embed.clear_fields()
     embed.add_field(name="🕒 Heures", value=question_type, inline=False)
@@ -486,7 +404,7 @@ async def heures(ctx, embed, get_user_id, bot, msg_override=None):
     if msg_override is not None:
         text = msg_override.content
     else:
-        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Différence (ex: 1h30)")
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Différence")
 
     if text is None:
         return False
@@ -509,6 +427,7 @@ heures.title = "Heures"
 heures.emoji = "🕒"
 heures.prep_time = 0
 
+
 # ================================================================================
 # 🔹 🔢 Mémoire numérique
 # ================================================================================
@@ -526,11 +445,10 @@ async def memoire_numerique(ctx, embed, get_user_id, bot, msg_override=None):
     if msg_override is not None:
         text = msg_override.content
     else:
-        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Séquence (ex: 123456)")
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Séquence")
 
     if text is None:
         return False
-    # Tolérant aux espaces et virgules
     cleaned = text.strip().replace(" ", "").replace(",", "")
     return cleaned == "".join(map(str, sequence))
 
@@ -538,8 +456,9 @@ memoire_numerique.title = "Mémoire numérique"
 memoire_numerique.emoji = "🔢"
 memoire_numerique.prep_time = 5
 
+
 # ================================================================================
-# 🔹 👁️ Mémoire visuelle (boutons)
+# 🔹 👁️ Mémoire visuelle
 # ================================================================================
 async def memoire_visuelle(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 4
@@ -558,52 +477,26 @@ async def memoire_visuelle(ctx, embed, get_user_id, bot, msg_override=None):
     embed.clear_fields()
     embed.add_field(
         name="👁️ Mémoire visuelle",
-        value="🔒 Les emojis ont disparu... retrouve celui qui **n'était PAS dans la liste !**",
+        value="🔒 Les emojis ont disparu... **tape l'emoji qui n'était PAS dans la liste** (ex: 🍎).",
         inline=False
     )
     await ctx.edit(embed=embed)
-    await asyncio.sleep(1)
 
-    all_choices = shown_emojis.copy()
     intrus = random.choice([e for e in base_emojis if e not in shown_emojis])
-    all_choices.append(intrus)
-    random.shuffle(all_choices)
 
-    class EmojiView(discord.ui.View):
-        def __init__(self):
-            super().__init__(timeout=TIMEOUT)
-            self.selected = None
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Emoji intrus")
 
-    view = EmojiView()
-    for e in all_choices:
-        def make_callback(emoji):
-            async def callback(interaction: discord.Interaction):
-                if interaction.user.id != get_user_id():
-                    await interaction.response.send_message("🚫 Pas ton tour.", ephemeral=True)
-                    return
-                view.selected = emoji
-                view.stop()
-                try:
-                    await interaction.response.defer()
-                except Exception:
-                    pass
-            return callback
-
-        button = discord.ui.Button(label=e, style=discord.ButtonStyle.secondary)
-        button.callback = make_callback(e)
-        view.add_item(button)
-
-    await ctx.edit(embed=embed, view=view)
-    await view.wait()
-    try:
-        await ctx.edit(view=None)
-    except Exception:
-        pass
-    return getattr(view, "selected", None) == intrus
+    if text is None:
+        return False
+    return text.strip() == intrus
 
 memoire_visuelle.title = "Mémoire visuelle"
 memoire_visuelle.emoji = "👁️"
 memoire_visuelle.prep_time = 4
+
 
 # ================================================================================
 # 🔹 💰 Monnaie
@@ -617,7 +510,7 @@ async def monnaie(ctx, embed, get_user_id, bot, msg_override=None):
     embed.clear_fields()
     embed.add_field(
         name="💰 Monnaie",
-        value=f"Prix : {prix:.2f} €\nPayé : {donne:.2f} €\n➡️ Quelle monnaie rends-tu ?",
+        value=f"Prix : {prix:.2f} €\nPayé : {donne:.2f} €\n➡️ Quelle monnaie rends-tu ? (en €)",
         inline=False
     )
     await ctx.edit(embed=embed)
@@ -626,7 +519,7 @@ async def monnaie(ctx, embed, get_user_id, bot, msg_override=None):
     if msg_override is not None:
         text = msg_override.content
     else:
-        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Monnaie rendue (€)")
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Monnaie rendue")
 
     if text is None:
         return False
@@ -639,6 +532,7 @@ monnaie.title = "Monnaie"
 monnaie.emoji = "💰"
 monnaie.prep_time = 2
 
+
 # ================================================================================
 # 🔹 🔁 Mot miroir
 # ================================================================================
@@ -649,11 +543,7 @@ async def mot_miroir(ctx, embed, get_user_id, bot, msg_override=None):
     mot_inverse = mot[::-1]
 
     embed.clear_fields()
-    embed.add_field(
-        name="🔁 Mot miroir",
-        value=f"Tape ce mot à l'envers : {mot}",
-        inline=False
-    )
+    embed.add_field(name="🔁 Mot miroir", value=f"Tape ce mot à l'envers : **{mot}**", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
@@ -669,6 +559,7 @@ async def mot_miroir(ctx, embed, get_user_id, bot, msg_override=None):
 mot_miroir.title = "Mot miroir"
 mot_miroir.emoji = "🔁"
 mot_miroir.prep_time = 2
+
 
 # ================================================================================
 # 🔹 🔤 Pagaille
@@ -696,6 +587,7 @@ pagaille.title = "Pagaille"
 pagaille.emoji = "🔤"
 pagaille.prep_time = 2
 
+
 # ================================================================================
 # 🔹 ⚖️ Pair ou impair
 # ================================================================================
@@ -703,59 +595,28 @@ async def pair_ou_impair(msg, embed, get_user, bot, msg_override=None):
     number = random.randint(1, 100)
     correct = "Pair" if number % 2 == 0 else "Impair"
 
-    embed.title = "⚖️ Pair ou impair ?"
-    embed.description = f"Le nombre est : **{number}**"
     embed.clear_fields()
+    embed.title = "⚖️ Pair ou impair ?"
+    embed.description = f"Le nombre est : **{number}**\n➡️ Tape **Pair** ou **Impair**."
     await msg.edit(embed=embed)
 
-    class POIView(discord.ui.View):
-        def __init__(self):
-            super().__init__(timeout=10)
-            self.answer = None
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(msg, embed, get_user, bot, modal_label="Pair ou Impair")
 
-        @discord.ui.button(label="Pair", style=discord.ButtonStyle.blurple)
-        async def pair(self, interaction: discord.Interaction, button):
-            if interaction.user.id != get_user():
-                return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
-            self.answer = "Pair"
-            self.stop()
-            try:
-                await interaction.response.defer()
-            except Exception:
-                pass
-
-        @discord.ui.button(label="Impair", style=discord.ButtonStyle.green)
-        async def impair(self, interaction: discord.Interaction, button):
-            if interaction.user.id != get_user():
-                return await interaction.response.send_message("❌ Pas pour toi.", ephemeral=True)
-            self.answer = "Impair"
-            self.stop()
-            try:
-                await interaction.response.defer()
-            except Exception:
-                pass
-
-    view = POIView()
-    await msg.edit(view=view)
-
-    timeout = await view.wait()
-    try:
-        await msg.edit(view=None)
-    except Exception:
-        pass
-
-    if timeout:
+    if text is None:
         return False
-
-    return view.answer == correct
+    return text.strip().lower() == correct.lower()
 
 pair_ou_impair.title = "Pair ou impair"
 pair_ou_impair.emoji = "⚖️"
 pair_ou_impair.prep_time = 1.5
 
-# ================================================================
-# 🔹 ⚡ Rapidité (version boutons)
-# ================================================================
+
+# ================================================================================
+# 🔹 ⚡ Rapidité
+# ================================================================================
 async def rapidite(ctx, embed, get_user_id, bot, msg_override=None):
     prep_time = 2
     nums = random.sample(range(10, 99), 5)
@@ -772,45 +633,22 @@ async def rapidite(ctx, embed, get_user_id, bot, msg_override=None):
 
     correct = max(nums) if mode == "grand" else min(nums)
 
-    class QuickButton(Button):
-        def __init__(self, value):
-            super().__init__(label=str(value), style=discord.ButtonStyle.primary)
-            self.value = value
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Nombre")
 
-        async def callback(self, inter):
-            if inter.user.id != get_user_id():
-                await inter.response.send_message("🚫 Pas ton tour.", ephemeral=True)
-                return
-            if self.value == correct:
-                self.view.success = True
-                await inter.response.edit_message(
-                    content=f"✅ Correct ! ({self.value})", view=None, embed=None
-                )
-            else:
-                await inter.response.edit_message(
-                    content=f"❌ Mauvaise réponse ({self.value})", view=None, embed=None
-                )
-            self.view.stop()
-
-    class QuickView(View):
-        def __init__(self):
-            super().__init__(timeout=10)
-            self.success = False
-            for n in nums:
-                self.add_item(QuickButton(n))
-
-        async def interaction_check(self, inter):
-            return inter.user.id == get_user_id()
-
-    view = QuickView()
-    await ctx.edit(embed=embed, view=view)
-
-    await view.wait()
-    return view.success
+    if text is None:
+        return False
+    try:
+        return int(text.strip()) == correct
+    except Exception:
+        return False
 
 rapidite.title = "Rapidité"
 rapidite.emoji = "⚡"
 rapidite.prep_time = 2
+
 
 # ================================================================================
 # 🔹 ⚡ Réflexe couleur
@@ -820,153 +658,80 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
     embed.clear_fields()
     embed.add_field(
         name="⚡ Réflexe couleur",
-        value="Appuie sur le bouton **dès qu'il devient vert**.\nMais pas avant 👀",
+        value="Tu vas devoir cliquer le plus vite possible sur le bouton **✏️ Répondre**\nquand le signal **🟢 GO !** apparaît.\n\nPrépare-toi...",
         inline=False
     )
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
-    class ReflexeView(discord.ui.View):
-        def __init__(self):
-            super().__init__(timeout=7)
-            self.clicked = False
-            self.start_time = None
-            self.reaction_time = None
-            self.too_early = False
+    # Affiche "Attends..."
+    embed.clear_fields()
+    embed.add_field(name="⚡ Réflexe couleur", value="🔴 **ATTENDS...**", inline=False)
+    msg = await ctx.edit(embed=embed)
 
-        @discord.ui.button(label="🔴 ATTENDS...", style=discord.ButtonStyle.danger)
-        async def reflexe(self, interaction: discord.Interaction, button: discord.ui.Button):
-            if interaction.user.id != get_user_id():
-                await interaction.response.send_message("🚫 Ce n'est pas ton jeu.", ephemeral=True)
-                return
-            if button.style == discord.ButtonStyle.danger:
-                self.too_early = True
-                self.clicked = True
-                self.stop()
-                await interaction.response.send_message("❌ Trop tôt !", ephemeral=True)
-            elif button.style == discord.ButtonStyle.success:
-                self.reaction_time = round(time.perf_counter() - self.start_time, 3)
-                self.clicked = True
-                self.stop()
-                await interaction.response.send_message(f"✅ Réflexe en {self.reaction_time}s !", ephemeral=True)
-
-    view = ReflexeView()
-    msg = await ctx.edit(view=view)
-
+    # Attend 2-5 secondes
     await asyncio.sleep(random.uniform(2, 5))
-    if view.is_finished():
+
+    # Affiche GO !
+    embed.clear_fields()
+    embed.add_field(name="⚡ Réflexe couleur", value="🟢 **GO ! Clique sur ✏️ Répondre !**", inline=False)
+    await msg.edit(embed=embed)
+
+    start_time = time.perf_counter()
+
+    if msg_override is not None:
+        text = msg_override.content
+    else:
+        text = await _ask_text_answer(msg, embed, get_user_id, bot, modal_label="Vite ! Écris OK", timeout=5)
+
+    elapsed = time.perf_counter() - start_time
+
+    if text is None:
         return False
-
-    button = view.children[0]
-    button.label = "🟢 CLIQUE !"
-    button.style = discord.ButtonStyle.success
-    await msg.edit(view=view)
-    view.start_time = time.perf_counter()
-    await view.wait()
-
-    try:
-        await msg.edit(view=None)
-    except Exception:
-        pass
-
-    if view.too_early or not view.clicked or view.reaction_time is None:
-        return False
-    return view.reaction_time < 1.2
+    return elapsed < 2.0
 
 reflexe_couleur.title = "Réflexe couleur"
 reflexe_couleur.emoji = "🟢"
 reflexe_couleur.prep_time = 2
 
+
 # ================================================================================
-# 🔹 🧩 Séquence de symboles (version avec boutons)
+# 🔹 🧩 Séquence de symboles
 # ================================================================================
 async def sequence_symboles(ctx, embed, get_user_id, bot, msg_override=None):
     symbols = ["⭐", "🍎", "🐍", "⚡", "🎲", "🍀", "🐱", "🔥"]
     seq = random.sample(symbols, 4)
 
     embed.clear_fields()
-    embed.add_field(
-        name="🧩 Séquence de symboles",
-        value="Observe bien la séquence suivante :",
-        inline=False
-    )
+    embed.add_field(name="🧩 Séquence de symboles", value="Observe bien la séquence suivante :", inline=False)
     embed.add_field(name="Séquence :", value=" ".join(seq), inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(sequence_symboles.prep_time)
 
-    question_type = random.choice(["position", "complete"])
+    index = random.randint(0, len(seq) - 1)
     embed.clear_fields()
+    embed.add_field(
+        name="🧩 Séquence de symboles",
+        value=f"Quel était le **{index+1}ᵉ** emoji ?\n(Tape l'emoji, ex: 🍎)",
+        inline=False
+    )
+    await ctx.edit(embed=embed)
 
-    if question_type == "position":
-        index = random.randint(0, len(seq) - 1)
-        embed.add_field(
-            name="🧩 Séquence de symboles",
-            value=f"Quel était le **{index+1}ᵉ** emoji ?",
-            inline=False
-        )
-        correct_answer = seq[index]
-        multiple_clicks = False
+    correct = seq[index]
+
+    if msg_override is not None:
+        text = msg_override.content
     else:
-        embed.add_field(
-            name="🧩 Séquence de symboles",
-            value="Clique sur les 4 emojis dans **le bon ordre** !",
-            inline=False
-        )
-        correct_answer = seq
-        multiple_clicks = True
+        text = await _ask_text_answer(ctx, embed, get_user_id, bot, modal_label="Emoji")
 
-    class SequenceView(View):
-        def __init__(self):
-            super().__init__(timeout=TIMEOUT)
-            self.result = False
-            self.selected = []
-
-    view = SequenceView()
-
-    for symbol in symbols:
-        async def callback(interaction, s=symbol):
-            if interaction.user.id != get_user_id():
-                await interaction.response.send_message("🚫 Pas ton tour !", ephemeral=True)
-                return
-
-            if multiple_clicks:
-                view.selected.append(s)
-                for btn in view.children:
-                    if btn.label == s:
-                        btn.disabled = True
-                        break
-                try:
-                    await interaction.response.edit_message(view=view)
-                except Exception:
-                    pass
-
-                if len(view.selected) == len(correct_answer):
-                    view.result = view.selected == correct_answer
-                    view.stop()
-            else:
-                view.result = (s == correct_answer)
-                view.stop()
-                try:
-                    await interaction.response.defer()
-                except Exception:
-                    pass
-
-        btn = Button(label=symbol, style=discord.ButtonStyle.secondary)
-        btn.callback = callback
-        view.add_item(btn)
-
-    await ctx.edit(embed=embed, view=view)
-    await view.wait()
-
-    try:
-        await ctx.edit(view=None)
-    except Exception:
-        pass
-    return view.result
+    if text is None:
+        return False
+    return text.strip() == correct
 
 sequence_symboles.title = "Séquence de symboles"
 sequence_symboles.emoji = "🧩"
 sequence_symboles.prep_time = 8
+
 
 # ================================================================================
 # 🔹 🧩 Suite alphabétique
@@ -987,11 +752,7 @@ async def suite_alpha(ctx, embed, get_user_id, bot, msg_override=None):
         answer = chr(start - 4 * step)
 
     embed.clear_fields()
-    embed.add_field(
-        name="🧩 Suite alphabétique",
-        value=f"{', '.join(serie)} ... ?",
-        inline=False
-    )
+    embed.add_field(name="🧩 Suite alphabétique", value=f"{', '.join(serie)} ... ?", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(prep_time)
 
@@ -1007,6 +768,7 @@ async def suite_alpha(ctx, embed, get_user_id, bot, msg_override=None):
 suite_alpha.title = "Suite alphabétique"
 suite_alpha.emoji = "🧩"
 suite_alpha.prep_time = 1
+
 
 # ================================================================================
 # 🔹 ➗ Suite logique
@@ -1066,6 +828,7 @@ suite_logique.title = "Suite logique"
 suite_logique.emoji = "➗"
 suite_logique.prep_time = 2
 
+
 # ================================================================================
 # 🔹 🔎 Trouver la différence
 # ================================================================================
@@ -1091,7 +854,6 @@ async def trouver_difference(ctx, embed, get_user_id, bot, msg_override=None):
         ),
         inline=False
     )
-
     await ctx.edit(embed=embed)
     await asyncio.sleep(trouver_difference.prep_time)
 
@@ -1108,9 +870,7 @@ async def trouver_difference(ctx, embed, get_user_id, bot, msg_override=None):
 
 trouver_difference.title = "Trouver la différence"
 trouver_difference.emoji = "🔎"
-trouver_difference.prep_time = 1
-
-# ================================================================================
+trouver_difference.prep_time = 1# ================================================================================
 # 🔹 ✏️ Typographie erreur
 # ================================================================================
 async def typo_trap(ctx, embed, get_user_id, bot, msg_override=None):
@@ -1146,5 +906,21 @@ async def typo_trap(ctx, embed, get_user_id, bot, msg_override=None):
 typo_trap.title = "Typographie erreur"
 typo_trap.emoji = "✏️"
 typo_trap.prep_time = 2
+
+
+# ================================================================================
+# 🔖 Tous les jeux utilisent le bouton + modale
+# ================================================================================
+# Plus besoin de distinguer boutons/texte : tout est uniforme.
+# (On garde l'attribut pour compatibilité avec entrainement_cerebral.py)
+for _f in [
+    addition_cachee, calcul_rapide, carre_magique_fiable_emoji,
+    compter_emojis, couleurs, datation, directions_opposees,
+    equation_trou, heures, memoire_numerique, memoire_visuelle,
+    monnaie, mot_miroir, pagaille, pair_ou_impair, rapidite,
+    reflexe_couleur, sequence_symboles, suite_alpha, suite_logique,
+    trouver_difference, typo_trap,
+]:
+    _f.uses_buttons = False  # tout est géré par modale, plus de "boutons de choix"
 
 # the end
