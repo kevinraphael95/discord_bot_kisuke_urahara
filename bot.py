@@ -30,12 +30,18 @@ from utils.init_db import init_db
 from utils.logger import init_logger
 
 # ================================================================================
+# 📝 Initialisation du logger EN PREMIER
+# ================================================================================
+# Doit être appelé avant tout le reste pour capturer TOUTES les erreurs,
+# y compris celles du démarrage (token manquant, import cassé, etc.).
+init_logger()
+log = logging.getLogger(__name__)
+
+# ================================================================================
 # 🔧 Initialisation de l'environnement
 # ================================================================================
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
-
-log = logging.getLogger(__name__)
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
@@ -97,7 +103,7 @@ async def load_tasks():
 @bot.event
 async def on_ready():
     if bot.aiohttp_session is None:
-        bot.aiohttp_session = aiohttp.ClientSession()
+        bot.aiohttp_session = aiohttp.ClientSession()  # ✅ Créée dans le loop
     print(f"✅ Connecté en tant que {bot.user.name}")
     await bot.change_presence(
         activity=discord.Activity(
@@ -205,7 +211,7 @@ async def cleanup_aiohttp():
 # ================================================================================
 if __name__ == "__main__":
 
-    init_logger()
+    # init_logger() déjà appelé en haut du fichier
 
     from admin.admin_panel import run_admin, set_bot
     admin_thread = threading.Thread(target=run_admin, args=(ADMIN_PORT,), daemon=True)
