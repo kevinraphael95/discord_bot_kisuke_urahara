@@ -141,18 +141,27 @@ async function logout() {
 function renderAuthBtn(user) {
   const btn = document.getElementById('auth-msw-btn');
   if (!btn) return;
+
   if (user) {
     const avatar = user.user_metadata?.avatar_url;
     const name   = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '?';
-    btn.innerHTML = avatar
-      ? `<img src="${avatar}" class="auth-avatar" alt="${name}" title="${name}">`
+    // Garde la structure : <span class="ic">…</span> + <span>Label</span>
+    const iconHTML = avatar
+      ? `<img src="${avatar}" class="auth-avatar" alt="${name}">`
       : `<span class="auth-initials">${name[0].toUpperCase()}</span>`;
+    btn.innerHTML = `
+      <span class="ic">${iconHTML}</span>
+      <span>${name}</span>
+    `;
     btn.classList.add('connected');
-    btn.title = name;
+    btn.removeAttribute('title');
   } else {
-    btn.innerHTML = '👤';
+    btn.innerHTML = `
+      <span class="ic">👤</span>
+      <span>Se connecter</span>
+    `;
     btn.classList.remove('connected');
-    btn.title = 'Se connecter';
+    btn.removeAttribute('title');
   }
 }
 
