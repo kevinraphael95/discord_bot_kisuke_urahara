@@ -61,14 +61,17 @@ async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT
         btn.callback = callback
         view.add_item(btn)
 
-    # Retry anti-rate-limit
-    for tentative in range(4):
+    # ⚠️ Délai AVANT la 1ère tentative pour laisser respirer Discord
+    await asyncio.sleep(0.3)
+
+    # Retry anti-rate-limit (5 tentatives)
+    for tentative in range(5):
         try:
             await ctx.edit(embed=embed, view=view)
             break
         except Exception as e:
             print(f"[kawashima] edit raté (essai {tentative+1}) : {e}")
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(1.5)
     else:
         print("[kawashima] impossible d'afficher les boutons")
         return False, None
