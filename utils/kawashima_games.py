@@ -322,21 +322,58 @@ compter_emojis.prep_time = 1.5
 # 🔹 🎨 Couleurs
 # ================================================================================
 async def couleurs(ctx, embed, get_user_id, bot, msg_override=None):
-    couleurs_list = ["bleu", "vert", "rouge", "gris"]
-    mots = couleurs_list.copy()
-    random.shuffle(mots)
-    cible = random.choice(mots)
+    # Couleurs Discord ANSI
+    ANSI = {
+        "rouge": "\u001b[31m",
+        "vert":  "\u001b[32m",
+        "jaune": "\u001b[33m",
+        "bleu":  "\u001b[34m",
+        "rose":  "\u001b[35m",
+        "cyan":  "\u001b[36m",
+    }
+    RESET = "\u001b[0m"
+
+    noms = ["rouge", "vert", "jaune", "bleu", "rose", "cyan"]
+    random.shuffle(noms)
+    noms = noms[:4]
+
+    # Chaque "mot" est une couleur, mais affiché DANS une AUTRE couleur
+    # → on crée une liste de tuples (mot, couleur_affichage)
+    paires = []
+    for mot in noms:
+        # Choisit une couleur d'affichage différente du mot
+        couleurs_dispo = [c for c in ANSI.keys() if c != mot]
+        couleur_affichage = random.choice(couleurs_dispo)
+        paires.append((mot, couleur_affichage))
+
+    # Cible = la couleur d'affichage qu'on va demander
+    # On demande "Quel mot est écrit en [couleur] ?"
+    cible_couleur = random.choice([c for _, c in paires])
+    # Le bon mot = celui dont la couleur d'affichage est cible_couleur
+    correct = next(m for m, c in paires if c == cible_couleur)
+
+    # Construction de l'affichage ANSI
+    ligne_affichage = "  ".join(
+        f"{ANSI[couleur]}{mot.upper()}{RESET}"
+        for mot, couleur in paires
+    )
+
+    # Choix : les 4 mots (mais on les mélange)
+    choices = [m for m, _ in paires]
+    random.shuffle(choices)
 
     _clean_embed(embed)
     embed.add_field(
         name="🎨 Couleurs",
-        value=f"Mots : **{', '.join(m.upper() for m in mots)}**\n\nQuel mot est écrit en **{cible.upper()}** ?",
+        value=(
+            f"```ansi\n{ligne_affichage}\n```\n"
+            f"➡️ Quel mot est écrit en **{cible_couleur.upper()}** ?"
+        ),
         inline=False
     )
     await ctx.edit(embed=embed)
 
-    choices = couleurs_list.copy()
-    return await _ask_choice(ctx, embed, choices, cible, get_user_id)
+    return await _ask_choice(ctx, embed, choices, correct, get_user_id)
 
 couleurs.title = "Couleurs"
 couleurs.emoji = "🎨"
