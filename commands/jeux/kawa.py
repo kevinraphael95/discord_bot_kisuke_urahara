@@ -401,10 +401,8 @@ class EntrainementCerebral(commands.Cog):
                     return await msg_state.edit(embed=embed, view=None)
 
             # ================================================================
-            # 🔥 FIX CRITIQUE : on retire la view du ReadyButton
-            # (que ce soit solo OU multi) AVANT de lancer les mini-jeux.
-            # Sinon le bouton "C'est parti !" reste collé et les boutons
-            # de choix des mini-jeux ne s'affichent pas.
+            # 🔥 FIX CRITIQUE : on retire la view du ReadyButton AVANT
+            # de lancer les mini-jeux (solo ET multi)
             # ================================================================
             view.clicked = True
             for child in view.children:
