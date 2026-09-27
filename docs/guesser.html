@@ -132,23 +132,37 @@
       <button class="mode surv"   id="btnS" onclick="switchMode('survival')">💀 Survie</button>
     </div>
 
-    <!-- Compteur + utilitaires -->
-    <div class="toolbar-bottom">
+    <!-- Zone du milieu : compteur daily OU barre survie -->
+    <div class="toolbar-middle">
+
+      <!-- Compteur daily (affiché par défaut) -->
       <div class="counter" id="cnt">0/8</div>
-      <div class="utils">
-        <button class="util" onclick="showRules()" title="Comment jouer">📖</button>
-        <button class="util auth-msw-btn" id="auth-msw-btn" onclick="toggleUserMenu()" title="Se connecter">👤</button>
-        <button class="util" onclick="showLeaderboard()" title="Classement">🏆</button>
+
+      <!-- Barre survie (cachée par défaut, affichée en mode survie) -->
+      <div class="sbar" id="sbar">
+        <div class="sv">
+          <span class="sv-l">🔥 Série</span>
+          <span class="sv-n" id="sstreak">0</span>
+        </div>
+        <div class="sv">
+          <span class="sv-l">Essais</span>
+          <span class="sv-n" id="sdots">0/8</span>
+        </div>
+        <div class="sv">
+          <span class="sv-l">🏆 Record</span>
+          <span class="sv-n" id="sbest">0</span>
+        </div>
       </div>
+
     </div>
 
-  </div>
+    <!-- Utilitaires -->
+    <div class="utils">
+      <button class="util" onclick="showRules()" title="Comment jouer">📖</button>
+      <button class="util auth-msw-btn" id="auth-msw-btn" onclick="toggleUserMenu()" title="Se connecter">👤</button>
+      <button class="util" onclick="showLeaderboard()" title="Classement">🏆</button>
+    </div>
 
-  <!-- Barre survie -->
-  <div class="sbar" id="sbar">
-    <div class="sv"><div class="sv-l">🔥 Série :</div><div class="sv-n" id="sstreak">0</div></div>
-    <div class="sdots-w"><div class="sdots" id="sdots"></div><div class="sv-l">Essais</div></div>
-    <div class="sv"><div class="sv-l">🏆 Record :</div><div class="sv-n" id="sbest">0</div></div>
   </div>
 
   <div class="flash" id="flash"></div>
