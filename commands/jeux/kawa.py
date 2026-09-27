@@ -206,7 +206,6 @@ class EntrainementCerebral(commands.Cog):
             log.exception("[cerebral] Erreur mini-jeu solo : %s", e)
             return False, None
 
-        # Les jeux retournent (success, clicker_id) ou juste success
         if isinstance(result, tuple) and len(result) == 2:
             return bool(result[0]), result[1]
         return bool(result), None
@@ -217,7 +216,6 @@ class EntrainementCerebral(commands.Cog):
     # ============================================================================
     async def _run_game_multi(self, game, msg_state, embed, active_players, timeout=25):
         def get_user_id():
-            # None → le helper _ask_choice accepte tous les joueurs
             return None
 
         try:
@@ -231,13 +229,11 @@ class EntrainementCerebral(commands.Cog):
             log.exception("[cerebral] Erreur mini-jeu multi : %s", e)
             return None, False
 
-        # Extraction du résultat
         if isinstance(result, tuple) and len(result) == 2:
             success, clicker_id = bool(result[0]), result[1]
         else:
             success, clicker_id = bool(result), None
 
-        # Retrouve le membre à partir de l'ID
         winner = None
         if clicker_id is not None:
             winner = next((p for p in active_players if p.id == clicker_id), None)
@@ -403,11 +399,22 @@ class EntrainementCerebral(commands.Cog):
                     embed.description = "Il faut au moins **2 joueurs** pour lancer la partie."
                     embed.color       = discord.Color.red()
                     return await msg_state.edit(embed=embed, view=None)
-                view.clicked = True
-                for child in view.children:
-                    child.disabled = True
-                    child.label    = "✅ Partie en cours"
-                await msg_state.edit(embed=embed, view=view)
+
+            # ================================================================
+            # 🔥 FIX CRITIQUE : on retire la view du ReadyButton
+            # (que ce soit solo OU multi) AVANT de lancer les mini-jeux.
+            # Sinon le bouton "C'est parti !" reste collé et les boutons
+            # de choix des mini-jeux ne s'affichent pas.
+            # ================================================================
+            view.clicked = True
+            for child in view.children:
+                child.disabled = True
+                child.label    = "✅ Partie en cours"
+            try:
+                await msg_state.edit(view=None)
+            except Exception as e:
+                log.warning("[cerebral] Impossible de retirer la view Ready : %s", e)
+            await asyncio.sleep(0.5)
 
             # --------------------------------------------------------------------
             # Sélection des 5 mini-jeux
