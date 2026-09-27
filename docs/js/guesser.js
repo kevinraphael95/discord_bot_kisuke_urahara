@@ -95,13 +95,11 @@ async function setImg(imgEl, char) {
 }
 
 // ── UI helpers ────────────────────────────────────────────────
-// On cache uniquement le tableau + cards. La barre input + burger restent visibles.
 function hideGameUI() {
   const tw = document.querySelector('.tw');
   const cd = document.querySelector('.cards');
   if (tw) tw.style.display = 'none';
   if (cd) cd.style.display = 'none';
-  // Désactive l'input et le bouton DEVINER
   const gi = $('gi'); if (gi) gi.disabled = true;
   const gbtn = $('gbtn'); if (gbtn) gbtn.disabled = true;
 }
@@ -111,7 +109,6 @@ function showGameUI(m) {
   const cd = document.querySelector('.cards');
   if (tw) tw.style.display = '';
   if (cd) cd.style.display = '';
-  // Réactive l'input et le bouton
   const gi = $('gi'); if (gi) gi.disabled = false;
   const gbtn = $('gbtn'); if (gbtn) gbtn.disabled = false;
 
@@ -277,16 +274,16 @@ function mkRow(m, f, target) {
   $('gr').prepend(row);
 }
 
+// ── mkCard : nettoyé, plus de .cinfo ni .cbadge ──
 function mkCard(m, f, target) {
   const win  = m.n === target.n;
   const card = document.createElement('div'); card.className = 'card ' + (win ? 'ok' : 'ko');
   const top  = document.createElement('div'); top.className  = 'ctop';
   const ci   = document.createElement('img'); ci.className   = 'cimg'; setImg(ci, m);
-  const info = document.createElement('div'); info.className = 'cinfo';
-  const nm   = document.createElement('div'); nm.className   = 'cname ' + (win ? 'correct' : 'wrong'); nm.textContent = m.n;
-  const badge= document.createElement('div'); badge.className= 'cbadge'; badge.innerHTML = m.r + '<br>' + m.arc;
-  info.appendChild(nm); info.appendChild(badge);
-  top.appendChild(ci); top.appendChild(info); card.appendChild(top);
+  const nm   = document.createElement('div'); nm.className   = 'cname ' + (win ? 'correct' : 'wrong');
+  nm.textContent = m.n;
+  top.appendChild(ci); top.appendChild(nm); card.appendChild(top);
+
   const g = document.createElement('div'); g.className = 'cgrid';
   COLS.forEach((col, i) => {
     const x  = f[i];
@@ -407,7 +404,6 @@ function switchMode(m) {
   document.body.classList.toggle('survival-mode', m === 'survival');
   if (_tickID) { clearInterval(_tickID); _tickID = null; }
 
-  // Ferme le menu
   if (typeof closeMenu === 'function') closeMenu();
 
   if (m === 'daily') {
