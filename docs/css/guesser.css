@@ -1033,12 +1033,10 @@ body.survival-mode .sbar { display: flex; }
   .aci { padding: 8px 12px; font-size: 13px; gap: 10px; }
   .aci-img { width: 34px; height: 42px; }
 
-  /* Tableau : scroll horizontal */
-  .tw { padding: 8px; }
-  .cell { font-size: 11px; min-height: 38px; padding: 6px 3px; }
-  .th div { font-size: 9px; padding: 5px 2px; }
-  .row-img { width: 24px; height: 30px; }
-  .board-hint { display: block; }
+  /* Sur mobile : CARDS affichées, TABLEAU caché */
+  .tw { display: none; }
+  .cards { display: flex; }
+  .board-hint { display: none; }
 
   /* Bannières résultat empilées */
   .rbanner-inner,
