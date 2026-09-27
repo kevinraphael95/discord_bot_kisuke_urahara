@@ -1,32 +1,26 @@
 # ================================================================================
 # 📌 kawashima_games.py — Mini-jeux Kawashima
-# Tous les jeux : 4 boutons avec choix (1 bonne réponse + 3 leurres)
+# 4 boutons de choix (1 bonne réponse + 3 leurres)
 # Retour : (success: bool, clicker_id: int | None)
 # ================================================================================
 
+# ================================================================================
+# 📦 Imports nécessaires
+# ================================================================================
 import random
 import asyncio
 import time
 import discord
 from discord.ui import View, Button
 
-# ================================================================================
-# 📦 Paramètres
-# ================================================================================
 TIMEOUT = 60
 
 
 # ================================================================================
-# 🛠️ Helper — Vue générique à 4 boutons de choix
+# 🛠️ Helper — Vue générique à boutons de choix
 # ================================================================================
 async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT):
-    """
-    Affiche 4 boutons de choix sur le message.
-    `choices` : liste de 4 valeurs (la bonne réponse doit y être)
-    `correct` : la bonne réponse
-    Retourne (success: bool, clicker_id: int | None)
-    """
-    # Mélange des choix
+    """Affiche les boutons de choix. Retourne (success, clicker_id)."""
     shuffled = choices.copy()
     random.shuffle(shuffled)
 
@@ -82,16 +76,11 @@ async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT
     return view.result, view.clicker_id
 
 
-# ================================================================================
-# 🛠️ Helper — génère 3 leurres proches d'un nombre
-# ================================================================================
 def _numeric_distractors(correct: int, n=3, min_val=None, max_val=None):
-    """Génère n leurres numériques proches de `correct`."""
     distractors = set()
     attempts = 0
     while len(distractors) < n and attempts < 100:
         attempts += 1
-        # Écart de 1 à 5 selon la taille du nombre
         if abs(correct) < 20:
             delta = random.choice([-3, -2, -1, 1, 2, 3])
         elif abs(correct) < 100:
@@ -105,7 +94,6 @@ def _numeric_distractors(correct: int, n=3, min_val=None, max_val=None):
             continue
         if candidate != correct:
             distractors.add(candidate)
-    # Complète si nécessaire
     while len(distractors) < n:
         candidate = correct + random.choice([-1, 1, -2, 2, -3, 3, -4, 4, -5, 5])
         if min_val is not None and candidate < min_val:
@@ -118,6 +106,103 @@ def _numeric_distractors(correct: int, n=3, min_val=None, max_val=None):
 
 
 # ================================================================================
+# 🔹 ⚡ Réflexe couleur — LE BOUTON CHANGE DE COULEUR
+# ================================================================================
+async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
+    embed.clear_fields()
+    embed.add_field(
+        name="⚡ Réflexe couleur",
+        value="🔴 **Attends que le bouton devienne vert...**",
+        inline=False
+    )
+
+    class ReflexeView(View):
+        def __init__(self):
+            super().__init__(timeout=15)
+            self.result = False
+            self.clicker_id = None
+            self.too_early = False
+            self.started = False  # True quand le bouton devient vert
+
+        @discord.ui.button(
+            label="🔴 ATTENDS...",
+            style=discord.ButtonStyle.danger
+        )
+        async def reflexe(self, interaction: discord.Interaction, button: discord.ui.Button):
+            expected = get_user_id()
+            if expected is not None and interaction.user.id != expected:
+                await interaction.response.send_message(
+                    "🚫 Ce n'est pas ton tour.", ephemeral=True
+                )
+                return
+
+            if not self.started:
+                # Trop tôt
+                self.too_early = True
+                self.clicker_id = interaction.user.id
+                button.disabled = True
+                button.label = "❌ Trop tôt !"
+                try:
+                    await interaction.response.edit_message(view=self)
+                except Exception:
+                    pass
+                self.stop()
+            else:
+                # Bon clic
+                self.result = True
+                self.clicker_id = interaction.user.id
+                button.disabled = True
+                button.label = "✅ Bien joué !"
+                try:
+                    await interaction.response.edit_message(view=self)
+                except Exception:
+                    pass
+                self.stop()
+
+    view = ReflexeView()
+    await ctx.edit(embed=embed, view=view)
+
+    # Attente aléatoire 2-5 secondes
+    await asyncio.sleep(random.uniform(2, 5))
+
+    # Vérifie que personne n'a cliqué trop tôt
+    if view.is_finished():
+        try:
+            await ctx.edit(view=None)
+        except Exception:
+            pass
+        return False, view.clicker_id
+
+    # Change le bouton en VERT
+    button = view.children[0]
+    button.label = "🟢 CLIQUE !"
+    button.style = discord.ButtonStyle.success
+    view.started = True
+    try:
+        await ctx.edit(view=view)
+    except Exception:
+        pass
+
+    await view.wait()
+
+    try:
+        await ctx.edit(view=None)
+    except Exception:
+        pass
+
+    # Si trop tôt → perdu
+    if view.too_early:
+        return False, view.clicker_id
+
+    # Si cliqué au bon moment → gagné
+    return view.result, view.clicker_id
+
+reflexe_couleur.title = "Réflexe couleur"
+reflexe_couleur.emoji = "🟢"
+reflexe_couleur.prep_time = 2
+
+
+# ================================================================================
 # 🔹 🧮 Addition à la suite
 # ================================================================================
 async def addition_cachee(ctx, embed, get_user_id, bot, msg_override=None):
@@ -125,7 +210,7 @@ async def addition_cachee(ctx, embed, get_user_id, bot, msg_override=None):
     total = sum(additions)
 
     embed.clear_fields()
-    embed.add_field(name="🧮 Addition à la suite", value="Observe bien les additions successives...", inline=False)
+    embed.add_field(name="🧮 Addition à la suite", value="Observe bien...", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(3)
 
@@ -176,7 +261,7 @@ calcul_rapide.prep_time = 0
 
 
 # ================================================================================
-# 🔹 🔢 Carré magique 3x3
+# 🔹 🔢 Carré magique
 # ================================================================================
 async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot, msg_override=None):
     base = [[8, 1, 6], [3, 5, 7], [4, 9, 2]]
@@ -202,12 +287,11 @@ async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot, msg_override=
     embed.clear_fields()
     embed.add_field(
         name="🔢 Carré magique",
-        value=f"Toutes les lignes, colonnes et diagonales font 15 :\n{display}\n\n➡️ Quel chiffre manque ?",
+        value=f"Toutes les lignes/colonnes/diagonales font 15 :\n{display}\n\nQuel chiffre manque ?",
         inline=False
     )
     await ctx.edit(embed=embed)
 
-    # Choix : 1 à 9
     choices = random.sample([n for n in range(1, 10) if n != answer], 3) + [answer]
     return await _ask_choice(ctx, embed, choices, answer, get_user_id)
 
@@ -222,15 +306,14 @@ carre_magique_fiable_emoji.prep_time = 0
 async def compter_emojis(ctx, embed, get_user_id, bot, msg_override=None):
     emojis = ["🍎", "🍌", "🍒", "🍇", "🍊"]
     cible = random.choice(emojis)
-
     grille = [[random.choice(emojis) for _ in range(4)] for _ in range(4)]
-    texte_grille = "\n".join("".join(ligne) for ligne in grille)
-    total = sum(ligne.count(cible) for ligne in grille)
+    texte_grille = "\n".join("".join(l) for l in grille)
+    total = sum(l.count(cible) for l in grille)
 
     embed.clear_fields()
     embed.add_field(
         name="👀 Compter les emojis",
-        value=f"{texte_grille}\n\n➡️ Combien de {cible} dans cette grille ?",
+        value=f"{texte_grille}\n\nCombien de {cible} ?",
         inline=False
     )
     await ctx.edit(embed=embed)
@@ -244,27 +327,23 @@ compter_emojis.prep_time = 1.5
 
 
 # ================================================================================
-# 🔹 🎨 Couleurs (Stroop)
+# 🔹 🎨 Couleurs
 # ================================================================================
 async def couleurs(ctx, embed, get_user_id, bot, msg_override=None):
     couleurs_list = ["bleu", "vert", "rouge", "gris"]
     mots = couleurs_list.copy()
     random.shuffle(mots)
-
     cible = random.choice(mots)
 
     embed.clear_fields()
     embed.add_field(
-        name="🎨 Couleurs (Stroop)",
-        value=(
-            f"Mots affichés : **{', '.join(m.upper() for m in mots)}**\n\n"
-            f"➡️ Quel mot est écrit en **{cible.upper()}** dans la liste ?"
-        ),
+        name="🎨 Couleurs",
+        value=f"Mots : **{', '.join(m.upper() for m in mots)}**\n\nQuel mot est écrit en **{cible.upper()}** ?",
         inline=False
     )
     await ctx.edit(embed=embed)
 
-    choices = couleurs_list.copy()  # 4 mots
+    choices = couleurs_list.copy()
     return await _ask_choice(ctx, embed, choices, cible, get_user_id)
 
 couleurs.title = "Couleurs"
@@ -279,7 +358,6 @@ async def datation(msg, embed, get_user_id, bot, msg_override=None):
     import datetime
     today = datetime.date.today()
     date = today + datetime.timedelta(days=random.randint(-7, 7))
-
     jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
     correct = jours[date.weekday()]
 
@@ -300,21 +378,19 @@ datation.prep_time = 0
 # 🔹 🧭 Directions opposées
 # ================================================================================
 async def directions_opposees(ctx, embed, get_user_id, bot, msg_override=None):
-    arrows_map = {
-        "⬆️": "⬇️", "⬇️": "⬆️", "⬅️": "➡️", "➡️": "⬅️"
-    }
+    arrows_map = {"⬆️": "⬇️", "⬇️": "⬆️", "⬅️": "➡️", "➡️": "⬅️"}
     arrow = random.choice(list(arrows_map.keys()))
     correct = arrows_map[arrow]
 
     embed.clear_fields()
     embed.add_field(
         name="🧭 Directions opposées",
-        value=f"Flèche affichée : **{arrow}**\n➡️ Quelle est la direction opposée ?",
+        value=f"Flèche : **{arrow}**\n\nQuelle est la direction opposée ?",
         inline=False
     )
     await ctx.edit(embed=embed)
 
-    choices = list(arrows_map.keys())  # 4 flèches
+    choices = list(arrows_map.keys())
     return await _ask_choice(ctx, embed, choices, correct, get_user_id)
 
 directions_opposees.title = "Directions opposées"
@@ -358,36 +434,29 @@ equation_trou.prep_time = 0
 async def heures(ctx, embed, get_user_id, bot, msg_override=None):
     h1, m1 = random.randint(0, 23), random.choice([0, 15, 30, 45])
     h2, m2 = random.randint(0, 23), random.choice([0, 15, 30, 45])
-
     if (h1, m1) == (h2, m2):
         h2 = (h2 + 1) % 24
-
-    d1 = h1 * 60 + m1
-    d2 = h2 * 60 + m2
-    diff = abs(d1 - d2)
+    diff = abs((h1 * 60 + m1) - (h2 * 60 + m2))
     hours, mins = divmod(diff, 60)
-
     correct_str = f"{hours}h{mins:02d}" if mins else f"{hours}h"
 
     embed.clear_fields()
     embed.add_field(
         name="🕒 Heures",
-        value=f"Quelle est la différence entre **{h1:02d}:{m1:02d}** et **{h2:02d}:{m2:02d}** ?",
+        value=f"Différence entre **{h1:02d}:{m1:02d}** et **{h2:02d}:{m2:02d}** ?",
         inline=False
     )
     await ctx.edit(embed=embed)
 
-    # Leurres : variations autour de la bonne réponse
     distractors = set()
-    for delta_min in [-60, -45, -30, -15, 15, 30, 45, 60]:
-        total = diff + delta_min
+    for delta in [-60, -45, -30, -15, 15, 30, 45, 60]:
+        total = diff + delta
         if total < 0:
             continue
         h, m = divmod(total, 60)
         s = f"{h}h{m:02d}" if m else f"{h}h"
         if s != correct_str:
             distractors.add(s)
-
     distractors = list(distractors)
     random.shuffle(distractors)
     choices = distractors[:3] + [correct_str]
@@ -404,19 +473,16 @@ heures.prep_time = 0
 # ================================================================================
 async def memoire_numerique(ctx, embed, get_user_id, bot, msg_override=None):
     sequence = [random.randint(0, 9) for _ in range(5)]
-
     embed.clear_fields()
     embed.add_field(name="🔢 Mémoire numérique", value=f"Mémorise : **{''.join(map(str, sequence))}**", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(5)
 
     embed.clear_fields()
-    embed.add_field(name="🔢 Mémoire numérique", value="🕵️‍♂️ Quelle était la séquence ?", inline=False)
+    embed.add_field(name="🔢 Mémoire numérique", value="Quelle était la séquence ?", inline=False)
     await ctx.edit(embed=embed)
 
     seq_str = "".join(map(str, sequence))
-
-    # 3 leurres : même longueur, légèrement modifiés
     distractors = set()
     while len(distractors) < 3:
         mod = list(seq_str)
@@ -438,31 +504,21 @@ memoire_numerique.prep_time = 5
 # 🔹 👁️ Mémoire visuelle
 # ================================================================================
 async def memoire_visuelle(ctx, embed, get_user_id, bot, msg_override=None):
-    prep_time = 4
     base_emojis = ["🍎", "🚗", "🐶", "🌟", "⚽", "🎲", "💎", "🎵", "🍕", "🐱", "🚀", "🎁"]
     shown = random.sample(base_emojis, 4)
 
     embed.clear_fields()
-    embed.add_field(
-        name="👁️ Mémoire visuelle",
-        value=f"Mémorise ces 4 emojis :\n{' '.join(shown)}",
-        inline=False
-    )
+    embed.add_field(name="👁️ Mémoire visuelle", value=f"Mémorise : {' '.join(shown)}", inline=False)
     await ctx.edit(embed=embed)
-    await asyncio.sleep(prep_time)
+    await asyncio.sleep(4)
 
     embed.clear_fields()
-    embed.add_field(
-        name="👁️ Mémoire visuelle",
-        value="🔒 Les emojis ont disparu... **Lequel n'était PAS dans la liste ?**",
-        inline=False
-    )
+    embed.add_field(name="👁️ Mémoire visuelle", value="Lequel n'était **PAS** dans la liste ?", inline=False)
     await ctx.edit(embed=embed)
 
     intrus = random.choice([e for e in base_emojis if e not in shown])
     choices = shown[:] + [intrus]
     random.shuffle(choices)
-
     return await _ask_choice(ctx, embed, choices, intrus, get_user_id)
 
 memoire_visuelle.title = "Mémoire visuelle"
@@ -481,12 +537,11 @@ async def monnaie(ctx, embed, get_user_id, bot, msg_override=None):
     embed.clear_fields()
     embed.add_field(
         name="💰 Monnaie",
-        value=f"Prix : **{prix:.2f} €**\nPayé : **{donne:.2f} €**\n➡️ Quelle monnaie rends-tu ?",
+        value=f"Prix : **{prix:.2f} €**\nPayé : **{donne:.2f} €**\n\nQuelle monnaie rends-tu ?",
         inline=False
     )
     await ctx.edit(embed=embed)
 
-    # Leurres en centimes
     correct_c = round(rendu * 100)
     distractors = set()
     while len(distractors) < 3:
@@ -498,7 +553,6 @@ async def monnaie(ctx, embed, get_user_id, bot, msg_override=None):
     choices = [f"{c/100:.2f} €" for c in distractors]
     correct_str = f"{rendu:.2f} €"
     choices.append(correct_str)
-
     return await _ask_choice(ctx, embed, choices, correct_str, get_user_id)
 
 monnaie.title = "Monnaie"
@@ -515,18 +569,12 @@ async def mot_miroir(ctx, embed, get_user_id, bot, msg_override=None):
     correct = mot[::-1]
 
     embed.clear_fields()
-    embed.add_field(
-        name="🔁 Mot miroir",
-        value=f"Quel est le mot **{mot}** à l'envers ?",
-        inline=False
-    )
+    embed.add_field(name="🔁 Mot miroir", value=f"**{mot}** à l'envers ?", inline=False)
     await ctx.edit(embed=embed)
 
-    # Leurres : autres mots inversés
     autres = [m for m in mots if m != mot]
     distractors = random.sample([m[::-1] for m in autres], 3)
     choices = distractors + [correct]
-
     return await _ask_choice(ctx, embed, choices, correct, get_user_id)
 
 mot_miroir.title = "Mot miroir"
@@ -540,24 +588,17 @@ mot_miroir.prep_time = 2
 async def pagaille(ctx, embed, get_user_id, bot, msg_override=None):
     mots = ["amour", "cerveau", "maison", "voiture", "banane", "jardin"]
     mot = random.choice(mots)
-
-    # Mélange (différent du mot original)
     melange = mot
     while melange == mot:
         melange = "".join(random.sample(mot, len(mot)))
 
     embed.clear_fields()
-    embed.add_field(
-        name="🔤 Pagaille",
-        value=f"**{melange}**\n➡️ Quel mot se cache derrière ces lettres ?",
-        inline=False
-    )
+    embed.add_field(name="🔤 Pagaille", value=f"**{melange}**\n\nQuel mot se cache ici ?", inline=False)
     await ctx.edit(embed=embed)
 
     autres = [m for m in mots if m != mot]
     distractors = random.sample(autres, 3)
     choices = distractors + [mot]
-
     return await _ask_choice(ctx, embed, choices, mot, get_user_id)
 
 pagaille.title = "Pagaille"
@@ -595,83 +636,19 @@ async def rapidite(ctx, embed, get_user_id, bot, msg_override=None):
     embed.clear_fields()
     embed.add_field(
         name="⚡ Rapidité",
-        value=f"Trouve le plus **{mode}** :\n{', '.join(map(str, nums))}",
+        value=f"Le plus **{mode}** :\n{', '.join(map(str, nums))}",
         inline=False
     )
     await ctx.edit(embed=embed)
 
     correct = max(nums) if mode == "grand" else min(nums)
-
-    # 3 autres nombres de la liste
     autres = [n for n in nums if n != correct]
     choices = random.sample(autres, 3) + [correct]
-
     return await _ask_choice(ctx, embed, choices, correct, get_user_id)
 
 rapidite.title = "Rapidité"
 rapidite.emoji = "⚡"
 rapidite.prep_time = 2
-
-
-# ================================================================================
-# 🔹 ⚡ Réflexe couleur
-# ================================================================================
-async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
-    embed.clear_fields()
-    embed.add_field(
-        name="⚡ Réflexe couleur",
-        value="Prépare-toi... Un bouton **🟢 GO** va apparaître.\nClique dessus **le plus vite possible !**",
-        inline=False
-    )
-    await ctx.edit(embed=embed)
-    await asyncio.sleep(2)
-
-    embed.clear_fields()
-    embed.add_field(name="⚡ Réflexe couleur", value="🔴 **Attends...**", inline=False)
-    await ctx.edit(embed=embed)
-    await asyncio.sleep(random.uniform(2, 5))
-
-    embed.clear_fields()
-    embed.add_field(name="⚡ Réflexe couleur", value="🟢 **CLIQUE MAINTENANT !**", inline=False)
-
-    class ReflexeView(View):
-        def __init__(self):
-            super().__init__(timeout=5)
-            self.result = False
-            self.clicker_id = None
-            self.reaction_time = None
-
-        @discord.ui.button(label="🟢 GO !", style=discord.ButtonStyle.success)
-        async def go(self, interaction, button):
-            expected = get_user_id()
-            if expected is not None and interaction.user.id != expected:
-                await interaction.response.send_message("🚫 Pas ton tour.", ephemeral=True)
-                return
-            self.reaction_time = time.perf_counter() - start_time
-            self.result = self.reaction_time < 2.0
-            self.clicker_id = interaction.user.id
-            button.disabled = True
-            try:
-                await interaction.response.edit_message(view=self)
-            except Exception:
-                pass
-            self.stop()
-
-    view = ReflexeView()
-    start_time = time.perf_counter()
-    await ctx.edit(embed=embed, view=view)
-    await view.wait()
-
-    try:
-        await ctx.edit(view=None)
-    except Exception:
-        pass
-
-    return view.result, view.clicker_id
-
-reflexe_couleur.title = "Réflexe couleur"
-reflexe_couleur.emoji = "🟢"
-reflexe_couleur.prep_time = 2
 
 
 # ================================================================================
@@ -682,25 +659,19 @@ async def sequence_symboles(ctx, embed, get_user_id, bot, msg_override=None):
     seq = random.sample(symbols, 4)
 
     embed.clear_fields()
-    embed.add_field(name="🧩 Séquence de symboles", value="Observe bien :", inline=False)
+    embed.add_field(name="🧩 Séquence de symboles", value="Observe :", inline=False)
     embed.add_field(name="Séquence :", value=" ".join(seq), inline=False)
     await ctx.edit(embed=embed)
-    await asyncio.sleep(sequence_symboles.prep_time)
+    await asyncio.sleep(8)
 
     index = random.randint(0, 3)
     embed.clear_fields()
-    embed.add_field(
-        name="🧩 Séquence de symboles",
-        value=f"Quel était le **{index+1}ᵉ** emoji ?",
-        inline=False
-    )
+    embed.add_field(name="🧩 Séquence de symboles", value=f"Le **{index+1}ᵉ** emoji ?", inline=False)
     await ctx.edit(embed=embed)
 
     correct = seq[index]
-    # 3 leurres parmi les autres symboles
     autres = [s for s in symbols if s != correct]
     choices = random.sample(autres, 3) + [correct]
-
     return await _ask_choice(ctx, embed, choices, correct, get_user_id)
 
 sequence_symboles.title = "Séquence de symboles"
@@ -713,7 +684,6 @@ sequence_symboles.prep_time = 8
 # ================================================================================
 async def suite_alpha(ctx, embed, get_user_id, bot, msg_override=None):
     sens_normal = random.choice([True, False])
-
     if sens_normal:
         start = random.randint(65, 70)
         step = random.randint(1, 2)
@@ -729,7 +699,6 @@ async def suite_alpha(ctx, embed, get_user_id, bot, msg_override=None):
     embed.add_field(name="🧩 Suite alphabétique", value=f"{', '.join(serie)} ... ?", inline=False)
     await ctx.edit(embed=embed)
 
-    # Leurres : lettres proches
     idx = ord(correct)
     distractors = set()
     for delta in [-3, -2, -1, 1, 2, 3]:
@@ -755,7 +724,6 @@ suite_alpha.prep_time = 1
 # ================================================================================
 async def suite_logique(ctx, embed, get_user_id, bot, msg_override=None):
     type_suite = random.choice(["arithmétique", "géométrique", "carrés", "fibonacci"])
-
     if type_suite == "arithmétique":
         start = random.randint(1, 10)
         step = random.randint(2, 6)
@@ -767,7 +735,7 @@ async def suite_logique(ctx, embed, get_user_id, bot, msg_override=None):
     elif type_suite == "carrés":
         start = random.randint(1, 5)
         serie = [i ** 2 for i in range(start, start + 5)]
-    else:  # fibonacci
+    else:
         a, b = random.randint(1, 5), random.randint(1, 5)
         serie = [a, b]
         for _ in range(3):
@@ -779,11 +747,7 @@ async def suite_logique(ctx, embed, get_user_id, bot, msg_override=None):
     display[answer_index] = "?"
 
     embed.clear_fields()
-    embed.add_field(
-        name="➗ Suite logique",
-        value=f"{', '.join(str(v) for v in display)} ...\n➡️ Quelle valeur remplace le **?** ?",
-        inline=False
-    )
+    embed.add_field(name="➗ Suite logique", value=f"{', '.join(str(v) for v in display)} ...\n\nQuelle valeur remplace **?** ?", inline=False)
     await ctx.edit(embed=embed)
 
     choices = [answer] + _numeric_distractors(answer, min_val=0)
@@ -801,7 +765,6 @@ async def trouver_difference(ctx, embed, get_user_id, bot, msg_override=None):
     liste1 = [random.randint(1, 9) for _ in range(6)]
     liste2 = liste1.copy()
     diff_index = random.randint(0, 5)
-
     while True:
         new_val = random.randint(1, 9)
         if new_val != liste1[diff_index]:
@@ -811,20 +774,14 @@ async def trouver_difference(ctx, embed, get_user_id, bot, msg_override=None):
     embed.clear_fields()
     embed.add_field(
         name="🔎 Trouver la différence",
-        value=(
-            f"**1️⃣** {', '.join(map(str, liste1))}\n"
-            f"**2️⃣** {', '.join(map(str, liste2))}\n\n"
-            f"➡️ Quelle **position (1 à 6)** diffère ?"
-        ),
+        value=f"**1️⃣** {', '.join(map(str, liste1))}\n**2️⃣** {', '.join(map(str, liste2))}\n\nQuelle **position** diffère ?",
         inline=False
     )
     await ctx.edit(embed=embed)
 
     correct = diff_index + 1
-    # Choix : 4 positions
     autres = [i for i in range(1, 7) if i != correct]
     choices = random.sample(autres, 3) + [correct]
-
     return await _ask_choice(ctx, embed, choices, correct, get_user_id)
 
 trouver_difference.title = "Trouver la différence"
@@ -840,20 +797,14 @@ async def typo_trap(ctx, embed, get_user_id, bot, msg_override=None):
     typo_index = random.randint(0, len(mot) - 1)
     mot_mod = list(mot)
     original = mot_mod[typo_index]
-
     nouvelle = random.choice([chr(i) for i in range(97, 123) if chr(i) != original])
     mot_mod[typo_index] = nouvelle
     mot_mod = "".join(mot_mod)
 
     embed.clear_fields()
-    embed.add_field(
-        name="✏️ Typographie erreur",
-        value=f"**{mot_mod}**\n➡️ Quelle lettre est incorrecte dans ce mot ?",
-        inline=False
-    )
+    embed.add_field(name="✏️ Typographie erreur", value=f"**{mot_mod}**\n\nQuelle lettre est incorrecte ?", inline=False)
     await ctx.edit(embed=embed)
 
-    # Choix : 4 lettres dont la mauvaise
     autres_lettres = list(set(mot) - {nouvelle})
     distractors = random.sample(autres_lettres, min(3, len(autres_lettres)))
     while len(distractors) < 3:
@@ -870,7 +821,7 @@ typo_trap.prep_time = 2
 
 
 # ================================================================================
-# 🔖 Tous les jeux retournent (success, clicker_id)
+# 🔖 Marqueurs (pour éviter les warnings)
 # ================================================================================
 for _f in [
     addition_cachee, calcul_rapide, carre_magique_fiable_emoji,
