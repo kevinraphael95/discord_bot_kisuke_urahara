@@ -162,7 +162,7 @@
         <span class="ic">📖</span>
         <span>Comment jouer</span>
       </button>
-      <button class="menu-item auth-msw-btn" id="auth-msw-btn" onclick="toggleUserMenu(); closeMenu();">
+      <button class="menu-item" id="auth-msw-btn" onclick="toggleUserMenu(); closeMenu();">
         <span class="ic">👤</span>
         <span>Se connecter</span>
       </button>
@@ -239,28 +239,6 @@
   </div>
 
 </div>
-
-<script>
-  /* ── Menu burger (intégré dans la barre input) ── */
-  function toggleMenu(e) {
-    e.stopPropagation();
-    const burger = document.getElementById('burger');
-    const panel = document.getElementById('menuPanel');
-    burger.classList.toggle('open');
-    panel.classList.toggle('open');
-  }
-  function closeMenu() {
-    document.getElementById('burger').classList.remove('open');
-    document.getElementById('menuPanel').classList.remove('open');
-  }
-  document.addEventListener('click', e => {
-    const burger = document.getElementById('burger');
-    const panel = document.getElementById('menuPanel');
-    if (burger && panel && !burger.contains(e.target) && !panel.contains(e.target)) {
-      closeMenu();
-    }
-  });
-</script>
 
 </body>
 </html>
