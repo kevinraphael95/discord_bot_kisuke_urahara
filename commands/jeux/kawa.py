@@ -420,15 +420,6 @@ class EntrainementCerebral(commands.Cog):
             # Boucle des mini-jeux
             # --------------------------------------------------------------------
             for index, (name, game) in enumerate(selected_games, start=1):
-                embed.clear_fields()
-                embed.title       = f"🧩 Mini-jeu {index}/5 — {name}"
-                embed.description = (
-                    "Le plus rapide à donner la bonne réponse gagne !"
-                    if multiplayer
-                    else f"{users[0].mention}, c'est ton tour !"
-                )
-                embed.color = discord.Color.blurple()
-                await msg_state.edit(embed=embed, view=None)
                 start = time.time()
 
                 if multiplayer:
@@ -466,7 +457,7 @@ class EntrainementCerebral(commands.Cog):
                     results.setdefault(users[0].id, []).append((index, name, success, elapsed, score))
 
                     embed.clear_fields()
-                    embed.title       = f"🎯 Résultat — {name} ({users[0].name})"
+                    embed.title       = f"🎯 Résultat — {name}"
                     embed.description = (
                         f"{'✅ Réussi' if success else '❌ Raté'}\n"
                         f"⏱️ Temps : `{elapsed}s`\n"
