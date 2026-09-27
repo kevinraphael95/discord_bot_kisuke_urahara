@@ -17,10 +17,10 @@ TIMEOUT = 60
 
 
 # ================================================================================
-# 🛠️ Helper — Vue générique à boutons de choix (avec retry anti-rate-limit)
+# 🛠️ Helpers
 # ================================================================================
 async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT):
-    """Affiche les boutons de choix. Retourne (success, clicker_id)."""
+    """Affiche les 4 boutons de choix. Retourne (success, clicker_id)."""
     shuffled = choices.copy()
     random.shuffle(shuffled)
 
@@ -61,7 +61,7 @@ async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT
         btn.callback = callback
         view.add_item(btn)
 
-    # ⚠️ Retry 4 fois en cas de rate limit Discord
+    # Retry anti-rate-limit
     for tentative in range(4):
         try:
             await ctx.edit(embed=embed, view=view)
@@ -84,6 +84,7 @@ async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT
 
 
 def _numeric_distractors(correct: int, n=3, min_val=None, max_val=None):
+    """Génère n leurres numériques proches de `correct`."""
     distractors = set()
     attempts = 0
     while len(distractors) < n and attempts < 100:
@@ -112,16 +113,20 @@ def _numeric_distractors(correct: int, n=3, min_val=None, max_val=None):
     return list(distractors)
 
 
+def _clean_embed(embed):
+    """Nettoie complètement un embed avant chaque jeu."""
+    embed.clear_fields()
+    embed.title = None
+    embed.description = None
+    embed.color = discord.Color.blurple()
+
+
 # ================================================================================
-# 🔹 ⚡ Réflexe couleur — LE BOUTON CHANGE DE COULEUR
+# 🔹 ⚡ Réflexe couleur
 # ================================================================================
 async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
-    embed.clear_fields()
-    embed.add_field(
-        name="⚡ Réflexe couleur",
-        value="🔴 **Attends que le bouton devienne vert...**",
-        inline=False
-    )
+    _clean_embed(embed)
+    embed.add_field(name="⚡ Réflexe couleur", value="🔴 **Attends que le bouton devienne vert...**", inline=False)
 
     class ReflexeView(View):
         def __init__(self):
@@ -135,9 +140,7 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
         async def reflexe(self, interaction: discord.Interaction, button: discord.ui.Button):
             expected = get_user_id()
             if expected is not None and interaction.user.id != expected:
-                await interaction.response.send_message(
-                    "🚫 Ce n'est pas ton tour.", ephemeral=True
-                )
+                await interaction.response.send_message("🚫 Ce n'est pas ton tour.", ephemeral=True)
                 return
 
             if not self.started:
@@ -145,32 +148,23 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
                 self.clicker_id = interaction.user.id
                 button.disabled = True
                 button.label = "❌ Trop tôt !"
-                try:
-                    await interaction.response.edit_message(view=self)
-                except Exception:
-                    pass
-                self.stop()
             else:
                 self.result = True
                 self.clicker_id = interaction.user.id
                 button.disabled = True
                 button.label = "✅ Bien joué !"
-                try:
-                    await interaction.response.edit_message(view=self)
-                except Exception:
-                    pass
-                self.stop()
+
+            try:
+                await interaction.response.edit_message(view=self)
+            except Exception:
+                pass
+            self.stop()
 
     view = ReflexeView()
     await ctx.edit(embed=embed, view=view)
 
     await asyncio.sleep(random.uniform(2, 5))
-
     if view.is_finished():
-        try:
-            await ctx.edit(view=None)
-        except Exception:
-            pass
         return False, view.clicker_id
 
     button = view.children[0]
@@ -183,7 +177,6 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
         pass
 
     await view.wait()
-
     try:
         await ctx.edit(view=None)
     except Exception:
@@ -191,7 +184,6 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
 
     if view.too_early:
         return False, view.clicker_id
-
     return view.result, view.clicker_id
 
 reflexe_couleur.title = "Réflexe couleur"
@@ -206,18 +198,18 @@ async def addition_cachee(ctx, embed, get_user_id, bot, msg_override=None):
     additions = [random.randint(-9, 9) for _ in range(6)]
     total = sum(additions)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🧮 Addition à la suite", value="Observe bien...", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(3)
 
     for add in additions:
-        embed.clear_fields()
+        _clean_embed(embed)
         embed.add_field(name="🧮 Addition à la suite", value=f"{add:+d}", inline=False)
         await ctx.edit(embed=embed)
         await asyncio.sleep(1.8)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🧮 Addition à la suite", value="Quel est le total final ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -245,7 +237,7 @@ async def calcul_rapide(ctx, embed, get_user_id, bot, msg_override=None):
         a, b = random.randint(10, 50), random.randint(10, 50)
         answer = a + b if op == "+" else a - b
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🧮 Calcul rapide", value=f"{a} {op} {b} = ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -281,7 +273,7 @@ async def carre_magique_fiable_emoji(ctx, embed, get_user_id, bot, msg_override=
     num_to_emoji = {i: f"{i}\ufe0f\u20e3" for i in range(1, 10)}
     display = "\n".join("|".join(num_to_emoji.get(x, x) for x in r) for r in base)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="🔢 Carré magique",
         value=f"Toutes les lignes/colonnes/diagonales font 15 :\n{display}\n\nQuel chiffre manque ?",
@@ -307,7 +299,7 @@ async def compter_emojis(ctx, embed, get_user_id, bot, msg_override=None):
     texte_grille = "\n".join("".join(l) for l in grille)
     total = sum(l.count(cible) for l in grille)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="👀 Compter les emojis",
         value=f"{texte_grille}\n\nCombien de {cible} ?",
@@ -332,7 +324,7 @@ async def couleurs(ctx, embed, get_user_id, bot, msg_override=None):
     random.shuffle(mots)
     cible = random.choice(mots)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="🎨 Couleurs",
         value=f"Mots : **{', '.join(m.upper() for m in mots)}**\n\nQuel mot est écrit en **{cible.upper()}** ?",
@@ -358,7 +350,7 @@ async def datation(msg, embed, get_user_id, bot, msg_override=None):
     jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
     correct = jours[date.weekday()]
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.title = "📅 Datation"
     embed.description = f"Quel jour était le **{date.day}/{date.month}/{date.year}** ?"
     await msg.edit(embed=embed)
@@ -379,7 +371,7 @@ async def directions_opposees(ctx, embed, get_user_id, bot, msg_override=None):
     arrow = random.choice(list(arrows_map.keys()))
     correct = arrows_map[arrow]
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="🧭 Directions opposées",
         value=f"Flèche : **{arrow}**\n\nQuelle est la direction opposée ?",
@@ -413,7 +405,7 @@ async def equation_trou(ctx, embed, get_user_id, bot, msg_override=None):
         answer = random.choice([a, b])
         question = f"? × {b} = {a * b}" if answer == a else f"{a} × ? = {a * b}"
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="➗ Équation à trou", value=question, inline=False)
     await ctx.edit(embed=embed)
 
@@ -437,7 +429,7 @@ async def heures(ctx, embed, get_user_id, bot, msg_override=None):
     hours, mins = divmod(diff, 60)
     correct_str = f"{hours}h{mins:02d}" if mins else f"{hours}h"
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="🕒 Heures",
         value=f"Différence entre **{h1:02d}:{m1:02d}** et **{h2:02d}:{m2:02d}** ?",
@@ -470,12 +462,13 @@ heures.prep_time = 0
 # ================================================================================
 async def memoire_numerique(ctx, embed, get_user_id, bot, msg_override=None):
     sequence = [random.randint(0, 9) for _ in range(5)]
-    embed.clear_fields()
+
+    _clean_embed(embed)
     embed.add_field(name="🔢 Mémoire numérique", value=f"Mémorise : **{''.join(map(str, sequence))}**", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(5)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🔢 Mémoire numérique", value="Quelle était la séquence ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -504,12 +497,12 @@ async def memoire_visuelle(ctx, embed, get_user_id, bot, msg_override=None):
     base_emojis = ["🍎", "🚗", "🐶", "🌟", "⚽", "🎲", "💎", "🎵", "🍕", "🐱", "🚀", "🎁"]
     shown = random.sample(base_emojis, 4)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="👁️ Mémoire visuelle", value=f"Mémorise : {' '.join(shown)}", inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(4)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="👁️ Mémoire visuelle", value="Lequel n'était **PAS** dans la liste ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -531,7 +524,7 @@ async def monnaie(ctx, embed, get_user_id, bot, msg_override=None):
     donne = round(prix + random.choice([0.5, 1.0, 2.0]), 2)
     rendu = round(donne - prix, 2)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="💰 Monnaie",
         value=f"Prix : **{prix:.2f} €**\nPayé : **{donne:.2f} €**\n\nQuelle monnaie rends-tu ?",
@@ -565,7 +558,7 @@ async def mot_miroir(ctx, embed, get_user_id, bot, msg_override=None):
     mot = random.choice(mots)
     correct = mot[::-1]
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🔁 Mot miroir", value=f"**{mot}** à l'envers ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -589,7 +582,7 @@ async def pagaille(ctx, embed, get_user_id, bot, msg_override=None):
     while melange == mot:
         melange = "".join(random.sample(mot, len(mot)))
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🔤 Pagaille", value=f"**{melange}**\n\nQuel mot se cache ici ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -610,7 +603,7 @@ async def pair_ou_impair(msg, embed, get_user_id, bot, msg_override=None):
     number = random.randint(1, 100)
     correct = "Pair" if number % 2 == 0 else "Impair"
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.title = "⚖️ Pair ou impair ?"
     embed.description = f"Le nombre est : **{number}**"
     await msg.edit(embed=embed)
@@ -630,7 +623,7 @@ async def rapidite(ctx, embed, get_user_id, bot, msg_override=None):
     nums = random.sample(range(10, 99), 5)
     mode = random.choice(["grand", "petit"])
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="⚡ Rapidité",
         value=f"Le plus **{mode}** :\n{', '.join(map(str, nums))}",
@@ -655,14 +648,14 @@ async def sequence_symboles(ctx, embed, get_user_id, bot, msg_override=None):
     symbols = ["⭐", "🍎", "🐍", "⚡", "🎲", "🍀", "🐱", "🔥"]
     seq = random.sample(symbols, 4)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🧩 Séquence de symboles", value="Observe :", inline=False)
     embed.add_field(name="Séquence :", value=" ".join(seq), inline=False)
     await ctx.edit(embed=embed)
     await asyncio.sleep(8)
 
     index = random.randint(0, 3)
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🧩 Séquence de symboles", value=f"Le **{index+1}ᵉ** emoji ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -692,7 +685,7 @@ async def suite_alpha(ctx, embed, get_user_id, bot, msg_override=None):
         serie = [chr(start - i * step) for i in range(4)]
         correct = chr(start - 4 * step)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="🧩 Suite alphabétique", value=f"{', '.join(serie)} ... ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -743,7 +736,7 @@ async def suite_logique(ctx, embed, get_user_id, bot, msg_override=None):
     display = serie.copy()
     display[answer_index] = "?"
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="➗ Suite logique", value=f"{', '.join(str(v) for v in display)} ...\n\nQuelle valeur remplace **?** ?", inline=False)
     await ctx.edit(embed=embed)
 
@@ -768,7 +761,7 @@ async def trouver_difference(ctx, embed, get_user_id, bot, msg_override=None):
             liste2[diff_index] = new_val
             break
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(
         name="🔎 Trouver la différence",
         value=f"**1️⃣** {', '.join(map(str, liste1))}\n**2️⃣** {', '.join(map(str, liste2))}\n\nQuelle **position** diffère ?",
@@ -798,7 +791,7 @@ async def typo_trap(ctx, embed, get_user_id, bot, msg_override=None):
     mot_mod[typo_index] = nouvelle
     mot_mod = "".join(mot_mod)
 
-    embed.clear_fields()
+    _clean_embed(embed)
     embed.add_field(name="✏️ Typographie erreur", value=f"**{mot_mod}**\n\nQuelle lettre est incorrecte ?", inline=False)
     await ctx.edit(embed=embed)
 
