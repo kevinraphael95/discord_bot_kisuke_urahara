@@ -123,19 +123,25 @@
 <!-- ═══ CONTENU PRINCIPAL ═══ -->
 <div class="gwrap">
 
-  <!-- Barre de modes -->
-  <div class="msw">
-    <button class="mbtn rules-btn" onclick="showRules()" title="Comment jouer">📖</button>
-    <button class="mbtn active" id="btnD" onclick="switchMode('daily')">⚔ Quotidien</button>
-    <button class="mbtn surv"   id="btnS" onclick="switchMode('survival')">💀 Survie</button>
-    <button class="auth-msw-btn" id="auth-msw-btn" onclick="toggleUserMenu()" title="Se connecter">👤</button>
-    <button class="lb-msw-btn" onclick="showLeaderboard()" title="Classement mensuel">🏆</button>
-  </div>
+  <!-- ═══ TOOLBAR unique ═══ -->
+  <div class="toolbar">
 
-  <!-- Barre daily -->
-  <div class="dbar" id="dbar">
-    <span class="cnt" id="cnt">0/8</span>
-    <div class="dots" id="dots"></div>
+    <!-- Modes -->
+    <div class="modes">
+      <button class="mode active" id="btnD" onclick="switchMode('daily')">⚔ Quotidien</button>
+      <button class="mode surv"   id="btnS" onclick="switchMode('survival')">💀 Survie</button>
+    </div>
+
+    <!-- Compteur + utilitaires -->
+    <div class="toolbar-bottom">
+      <div class="counter" id="cnt">0/8</div>
+      <div class="utils">
+        <button class="util" onclick="showRules()" title="Comment jouer">📖</button>
+        <button class="util auth-msw-btn" id="auth-msw-btn" onclick="toggleUserMenu()" title="Se connecter">👤</button>
+        <button class="util" onclick="showLeaderboard()" title="Classement">🏆</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- Barre survie -->
@@ -167,6 +173,9 @@
 
   <!-- Cards mobile -->
   <div class="cards" id="gc"></div>
+
+  <!-- Hint scroll (mobile) -->
+  <div class="board-hint">← Glisse pour voir plus →</div>
 
   <!-- Banner résultat daily -->
   <div class="rbanner" id="rb">
