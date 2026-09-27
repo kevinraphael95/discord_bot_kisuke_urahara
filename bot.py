@@ -163,7 +163,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandNotFound):
         return
     else:
-        raise error
+        log.exception("Erreur non gérée dans !%s", ctx.command.name if ctx.command else "?")
 
 # ================================================================================
 # ❗ Gestion des erreurs slash commands
