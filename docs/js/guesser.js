@@ -71,18 +71,29 @@ async function setImg(imgEl, char) {
 
 // ── UI helpers ────────────────────────────────────────────────
 function hideGameUI() {
-  $('dbar').style.display = 'none';
-  document.querySelector('.iz').style.display    = 'none';
-  document.querySelector('.tw').style.display    = 'none';
-  document.querySelector('.cards').style.display = 'none';
+  const iz = document.querySelector('.iz');
+  const tw = document.querySelector('.tw');
+  const cd = document.querySelector('.cards');
+  if (iz) iz.style.display = 'none';
+  if (tw) tw.style.display = 'none';
+  if (cd) cd.style.display = 'none';
 }
 
 function showGameUI(m) {
-  document.querySelector('.iz').style.display    = 'flex';
-  document.querySelector('.tw').style.display    = '';
-  document.querySelector('.cards').style.display = '';
-  $('dbar').style.display = m === 'daily' ? 'flex' : 'none';
-  if (m === 'survival') $('sbar').classList.add('on');
+  const iz = document.querySelector('.iz');
+  const tw = document.querySelector('.tw');
+  const cd = document.querySelector('.cards');
+  if (iz) iz.style.display = 'flex';
+  if (tw) tw.style.display = '';
+  if (cd) cd.style.display = '';
+  // Le compteur/survie est géré par le CSS via body.survival-mode
+  if (m === 'survival') {
+    document.body.classList.add('survival-mode');
+    const sb = $('sbar'); if (sb) sb.classList.add('on');
+  } else {
+    document.body.classList.remove('survival-mode');
+    const sb = $('sbar'); if (sb) sb.classList.remove('on');
+  }
 }
 
 function foc() {
@@ -95,27 +106,27 @@ function foc() {
 function showRules() { const m = $('rules-modal'); if (m) m.classList.add('on'); }
 function hideRules() { const m = $('rules-modal'); if (m) m.classList.remove('on'); }
 
-// ── Auth ready (appelée par auth.js) ─────────────────────────
+// ── Auth ready ────────────────────────────────────────────────
 function onAuthReady() {
   if (mode !== 'daily') return;
   if (!_authResolved) return;
   _renderDaily();
 }
 
-// ── Render daily : re-render complet depuis dG ────────────────
+// ── Render daily ──────────────────────────────────────────────
 function _renderDaily() {
   clr();
   dG.forEach(x => { mkRow(x.m, x.f, tgt); mkCard(x.m, x.f, tgt); });
 
   if (dOver) {
     hideGameUI();
-    $('rb').classList.remove('on');
+    const rb = $('rb'); if (rb) rb.classList.remove('on');
     showDRes(dG.some(x => x.m.n === tgt.n));
     return;
   }
 
-  $('send').classList.remove('on');
-  $('rb').classList.remove('on');
+  const send = $('send'); if (send) send.classList.remove('on');
+  const rb = $('rb'); if (rb) rb.classList.remove('on');
   showGameUI('daily');
   updDots();
 
@@ -131,14 +142,14 @@ function _renderDaily() {
   }
 }
 
-// ── Render survie : re-render complet depuis sG ───────────────
+// ── Render survie ─────────────────────────────────────────────
 function _renderSurvival() {
   clr();
 
   if (sOver) {
     hideGameUI();
-    $('sbar').classList.remove('on');
-    $('rb').classList.remove('on');
+    const sb = $('sbar'); if (sb) sb.classList.remove('on');
+    const rb = $('rb'); if (rb) rb.classList.remove('on');
     showSEnd();
     return;
   }
@@ -149,10 +160,10 @@ function _renderSurvival() {
   }
 
   sG.forEach(x => { mkRow(x.m, x.f, sCur); mkCard(x.m, x.f, sCur); });
-  $('rb').classList.remove('on');
-  $('send').classList.remove('on');
+  const rb = $('rb'); if (rb) rb.classList.remove('on');
+  const send = $('send'); if (send) send.classList.remove('on');
   showGameUI('survival');
-  $('sbar').classList.add('on');
+  const sb = $('sbar'); if (sb) sb.classList.add('on');
   $('gi').disabled    = false;
   $('gbtn').disabled  = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
@@ -260,7 +271,10 @@ function mkCard(m, f, target) {
   card.appendChild(g); $('gc').prepend(card);
 }
 
-function clr() { $('gr').innerHTML = ''; $('gc').innerHTML = ''; }
+function clr() {
+  const gr = $('gr'); if (gr) gr.innerHTML = '';
+  const gc = $('gc'); if (gc) gc.innerHTML = '';
+}
 
 // ── localStorage daily ────────────────────────────────────────
 const LS_KEY      = 'bleachg25v2';
@@ -361,8 +375,8 @@ function switchMode(m) {
   if (_tickID) { clearInterval(_tickID); _tickID = null; }
 
   if (m === 'daily') {
-    $('sbar').classList.remove('on');
-    $('send').classList.remove('on');
+    const sb = $('sbar'); if (sb) sb.classList.remove('on');
+    const send = $('send'); if (send) send.classList.remove('on');
     hideGameUI();
 
     if (typeof currentUser !== 'undefined' && currentUser) {
@@ -384,8 +398,8 @@ function switchMode(m) {
       _renderDaily();
     }
   } else {
-    $('sbar').classList.add('on');
-    $('rb').classList.remove('on');
+    const sb = $('sbar'); if (sb) sb.classList.add('on');
+    const rb = $('rb'); if (rb) rb.classList.remove('on');
 
     if (!loadSurv()) {
       sOver = false; sCur = null; sG = [];
@@ -405,6 +419,7 @@ function showDRes(won) {
   if (_tickID) { clearInterval(_tickID); _tickID = null; }
 
   const b = $('rb');
+  if (!b) return;
   b.classList.remove('win', 'lose');
   b.classList.add('on', won ? 'win' : 'lose');
   $('rttl').textContent  = won ? '⚔ BIEN JOUÉ !' : '💀 ÉCHEC';
@@ -419,10 +434,11 @@ function showDRes(won) {
 }
 
 function tick() {
+  const nt = $('nt'); if (!nt) return;
   const now = new Date(), tom = new Date(now);
   tom.setDate(tom.getDate() + 1); tom.setHours(0, 0, 0, 0);
   const d = tom - now;
-  $('nt').textContent =
+  nt.textContent =
     String(Math.floor(d / 3600000)).padStart(2, '0') + ':' +
     String(Math.floor((d % 3600000) / 60000)).padStart(2, '0') + ':' +
     String(Math.floor((d % 60000) / 1000)).padStart(2, '0');
@@ -433,8 +449,8 @@ function share() {
   dG.forEach(x => { t += x.f.map(f => f.s === 'correct' ? '🟩' : f.s === 'close' ? '🟨' : '🟥').join('') + '\n'; });
   t += '\nJouer sur 🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
   try { navigator.clipboard.writeText(t); } catch(e) {}
-  const b = document.querySelector('.xbtn'); b.textContent = '✓ Copié !';
-  setTimeout(() => b.textContent = '📋 Copier le résultat', 2000);
+  const b = document.querySelector('.xbtn');
+  if (b) { b.textContent = '✓ Copié !'; setTimeout(() => b.textContent = '📋 Copier le résultat', 2000); }
 }
 
 function subD() {
@@ -462,10 +478,10 @@ function rndQ()    { const a = CHARS.slice(); for (let i = a.length - 1; i > 0; 
 function sInit() {
   sStr = 0; sBst = 0; sKil = 0; sQ = rndQ(); sQi = 0; sOver = false; sCur = null; sG = [];
   clearSurv();
-  $('send').classList.remove('on');
-  $('rb').classList.remove('on');
+  const send = $('send'); if (send) send.classList.remove('on');
+  const rb = $('rb'); if (rb) rb.classList.remove('on');
   showGameUI('survival');
-  $('sbar').classList.add('on');
+  const sb = $('sbar'); if (sb) sb.classList.add('on');
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   sNext();
@@ -476,20 +492,20 @@ function sNext() {
   sCur = sQ[sQi++]; sG = []; clr();
   clearSurv();
   const fl = $('flash'); if (fl) fl.classList.remove('on');
-  $('send').classList.remove('on');
+  const send = $('send'); if (send) send.classList.remove('on');
   $('gi').disabled = false; $('gbtn').disabled = false;
   $('gi').placeholder = 'Entrez un personnage Bleach…';
   foc(); updSUI();
 }
 
+// ── Mise à jour de l'UI survie (Série / Essais / Record) ──
 function updSUI() {
-  $('sstreak').textContent = sStr; $('sbest').textContent = sRec;
-  const el = $('sdots'); el.innerHTML = '';
-  for (let i = 0; i < MAX; i++) {
-    const d = document.createElement('div'); d.className = 'sdot';
-    if (i < sG.length) d.classList.add(sG[i] && sG[i].m.n === sCur?.n ? 'win' : 'used');
-    el.appendChild(d);
-  }
+  const st = document.getElementById('sstreak');
+  const sb = document.getElementById('sbest');
+  const sd = document.getElementById('sdots');
+  if (st) st.textContent = sStr;
+  if (sb) sb.textContent = sRec;
+  if (sd) sd.textContent = sG.length + '/' + MAX;
 }
 
 function showFlash(type, msg) {
@@ -510,7 +526,7 @@ function sGameOver(name) {
   setTimeout(() => {
     if (mode !== 'survival') return;
     hideGameUI();
-    $('sbar').classList.remove('on');
+    const sb = $('sbar'); if (sb) sb.classList.remove('on');
     showSEnd();
   }, 1500);
 }
@@ -529,7 +545,7 @@ function sCorrect() {
 }
 
 function showSEnd() {
-  $('send').classList.add('on');
+  const send = $('send'); if (send) send.classList.add('on');
   $('sedesc').innerHTML = 'Série de <em>' + sStr + '</em> — ' + sKil + ' personnage' + (sKil > 1 ? 's' : '') + '.';
   $('sek').textContent = sKil; $('seb').textContent = sBst; $('ser').textContent = sRec;
   $('gi').disabled = true; $('gbtn').disabled = true;
@@ -543,8 +559,8 @@ function showSEnd() {
 
 function sRestart() {
   clearSurv();
-  $('send').classList.remove('on');
-  $('sbar').classList.add('on');
+  const send = $('send'); if (send) send.classList.remove('on');
+  const sb = $('sbar'); if (sb) sb.classList.add('on');
   showGameUI('survival');
   sInit();
 }
@@ -552,8 +568,8 @@ function sRestart() {
 function sShare() {
   const t = 'Bleach Character Guesser — Survie\nSérie : ' + sStr + '\nTrouvés : ' + sKil + '\nRecord : ' + sRec + '\n\nJouer sur 🎮 https://kevinraphael95.github.io/discord_bot_kisuke_urahara/guesser.html';
   try { navigator.clipboard.writeText(t); } catch(e) {}
-  const b = document.querySelector('.xbtn2'); b.textContent = '✓ Copié !';
-  setTimeout(() => b.textContent = '📋 Copier le score', 2000);
+  const b = document.querySelector('.xbtn2');
+  if (b) { b.textContent = '✓ Copié !'; setTimeout(() => b.textContent = '📋 Copier le score', 2000); }
 }
 
 function subS() {
@@ -573,7 +589,7 @@ function subS() {
 
 function sub() { mode === 'daily' ? subD() : subS(); }
 
-// ── Autocomplete avec debounce ─────────────────────────────────
+// ── Autocomplete ──────────────────────────────────────────────
 let _acTimer = null;
 
 function onIn() {
@@ -616,7 +632,10 @@ function onKD(e) {
   if (mode === 'daily') dSel = sel; else sSel = sel;
 }
 
-document.addEventListener('click', e => { if (!e.target.closest('.acw')) $('acl').innerHTML = ''; });
+document.addEventListener('click', e => {
+  const acl = $('acl');
+  if (acl && !e.target.closest('.acw')) acl.innerHTML = '';
+});
 
 function shake(inp, msg) {
   inp.style.borderColor = 'var(--ko-bd)'; inp.placeholder = msg;
@@ -748,8 +767,7 @@ if (_lastMode === 'survival') {
   document.body.classList.add('survival-mode');
   $('btnD').classList.remove('active');
   $('btnS').classList.add('active');
-  $('sbar').classList.add('on');
-  $('dbar').style.display = 'none';
+  const sb = $('sbar'); if (sb) sb.classList.add('on');
 
   if (!loadSurv()) {
     sOver = false; sCur = null; sG = [];
