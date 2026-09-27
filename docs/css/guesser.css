@@ -354,8 +354,13 @@ body.survival-mode .sbar { display: flex; }
   flex-shrink: 0;
 }
 
+/* ── BOARD HINT (caché par défaut et sur mobile) ────────── */
+.board-hint {
+  display: none !important;
+}
+
 /* ═══════════════════════════════════════════════════════════
-   CARDS (style mockup)
+   CARDS (affichées sur mobile)
    ═══════════════════════════════════════════════════════════ */
 .cards {
   display: none;
@@ -395,7 +400,6 @@ body.survival-mode .sbar { display: flex; }
   border-radius: var(--radius-xs);
   border: 1px solid var(--line-2);
   flex-shrink: 0;
-  background: #333;
 }
 .cinfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .cname {
@@ -861,10 +865,9 @@ body.survival-mode .sbar { display: flex; }
   .aci { padding: 8px 12px; font-size: 13px; gap: 10px; }
   .aci-img { width: 34px; height: 42px; }
 
-  /* ✅ MOBILE : cards affichées, tableau caché */
+  /* MOBILE : cards affichées, tableau caché */
   .tw { display: none; }
   .cards { display: flex; }
-  .board-hint { display: none; }
 
   .rbanner-inner, .send-inner { grid-template-columns: 1fr; }
   .rbanner-left, .send-left { height: 180px; }
