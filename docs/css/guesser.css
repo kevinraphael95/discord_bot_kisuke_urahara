@@ -418,21 +418,18 @@ body.survival-mode .sbar { display: flex; }
   border: 1px solid var(--line-2);
   flex-shrink: 0;
 }
-.cinfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .cname {
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 800;
   line-height: 1.15;
+  flex: 1;
+  min-width: 0;
 }
 .cname.correct { color: var(--ok-tx); }
 .cname.wrong   { color: var(--fg); }
-.cbadge { display: none; }
 
-/* ─── GRILLE STYLE MOCKUP ─────────────────────────────────
-   Cellules collées (gap:0), séparateurs fins via le fond,
-   chaque cellule a sa bordure + son fond coloré.
-   ─────────────────────────────────────────────────────── */
+/* Grille style mockup */
 .cgrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
