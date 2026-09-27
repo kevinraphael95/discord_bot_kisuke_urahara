@@ -25,7 +25,7 @@ import aiohttp
 # ================================================================================
 # 📦 Modules internes
 # ================================================================================
-from utils.discord_utils import safe_send, safe_respond
+from utils.discord_utils import safe_send, safe_respond, safe_interact
 from utils.init_db import init_db
 from utils.logger import init_logger
 
@@ -35,7 +35,7 @@ from utils.logger import init_logger
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
 
-log = logging.getLogger(__name__)  # ✅ Ajout manquant
+log = logging.getLogger(__name__)
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
@@ -97,7 +97,7 @@ async def load_tasks():
 @bot.event
 async def on_ready():
     if bot.aiohttp_session is None:
-        bot.aiohttp_session = aiohttp.ClientSession()  # ✅ Créée dans le loop
+        bot.aiohttp_session = aiohttp.ClientSession()
     print(f"✅ Connecté en tant que {bot.user.name}")
     await bot.change_presence(
         activity=discord.Activity(
@@ -171,12 +171,27 @@ async def on_command_error(ctx, error):
 @bot.tree.error
 async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.CommandOnCooldown):
-        await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
+        await safe_interact(
+            interaction,
+            f"⏳ Attends encore {error.retry_after:.1f}s.",
+            edit=True,
+            ephemeral=True,
+        )
     elif isinstance(error, app_commands.MissingPermissions):
-        await safe_respond(interaction, "❌ Tu n'as pas les permissions pour cette commande.", ephemeral=True)
+        await safe_interact(
+            interaction,
+            "❌ Tu n'as pas les permissions pour cette commande.",
+            edit=True,
+            ephemeral=True,
+        )
     else:
         log.exception("[slash] Erreur non gérée : %s", error)
-        await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+        await safe_interact(
+            interaction,
+            "❌ Une erreur est survenue.",
+            edit=True,
+            ephemeral=True,
+        )
 
 # ================================================================================
 # 🔒 Nettoyage aiohttp
