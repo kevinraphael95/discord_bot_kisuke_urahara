@@ -8,191 +8,39 @@
 .gwrap {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 32px 80px;
+  padding: 24px 32px 80px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TOOLBAR UNIQUE : modes + compteur/survie + utils
-   ═══════════════════════════════════════════════════════════ */
-.toolbar {
-  width: 100%;
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* ── Modes (2 boutons) ── */
-.modes {
-  display: flex;
-  gap: 2px;
-  background: var(--bg-soft);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-}
-
-.mode {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border: none;
-  background: transparent;
-  color: var(--fg-soft);
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all .2s;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.mode:hover { color: var(--fg); }
-.mode.active {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(78,168,107,.25);
-}
-.mode.surv.active {
-  background: var(--gold);
-  box-shadow: 0 2px 8px rgba(201,169,97,.25);
-}
-
-/* ── Zone du milieu : compteur daily OU survie ── */
-.toolbar-middle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Compteur daily (0/8) */
-.counter {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--accent);
-  padding: 0 12px;
-  white-space: nowrap;
-}
-
-/* Barre survie (dans la toolbar) */
-.sbar {
-  display: none;
-  gap: 14px;
-  align-items: center;
-}
-.sbar.on { display: flex; }
-
-.sbar .sv {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-.sbar .sv-l {
-  font-weight: 600;
-  color: var(--fg-soft);
-  font-size: 12px;
-}
-.sbar .sv-n {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--gold);
-  line-height: 1;
-}
-
-/* En mode survie : cache le compteur, affiche la barre survie */
-body.survival-mode .counter { display: none; }
-body.survival-mode .sbar { display: flex; }
-
-/* ── Utilitaires (📖 👤 🏆) ── */
-.utils {
-  display: flex;
-  gap: 4px;
-}
-
-.util {
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--line-2);
-  border-radius: var(--radius-sm);
-  color: var(--fg-soft);
-  font-size: 16px;
-  cursor: pointer;
-  transition: all .15s;
-}
-.util:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-soft);
-}
-.util.connected {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.auth-avatar {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  object-fit: cover;
-}
-.auth-initials {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   FLASH MESSAGE
+   TITRE "BLEACH CHARACTER GUESSER"
    ═══════════════════════════════════════════════════════════ */
-.flash {
-  display: none;
-  width: 100%;
-  padding: 12px 20px;
+.game-title {
   text-align: center;
-  font-size: 15px;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
+  padding: 8px 0 4px;
 }
-.flash.on { display: block; animation: flashIn .25s ease; }
-.flash.ok {
-  background: var(--ok-bg);
-  border: 1px solid var(--ok-bd);
-  color: var(--ok-tx);
+.game-title h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--fg);
+  letter-spacing: -.01em;
+  line-height: 1.2;
 }
-.flash.ko {
-  background: var(--ko-bg);
-  border: 1px solid var(--ko-bd);
-  color: var(--ko-tx);
+.game-title h1 em {
+  font-style: normal;
+  color: var(--accent);
 }
-@keyframes flashIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+.game-title p {
+  font-size: 13px;
+  color: var(--fg-mute);
+  margin-top: 4px;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ZONE DE SAISIE
+   BARRE INPUT avec burger intégré
    ═══════════════════════════════════════════════════════════ */
 .iz {
   width: 100%;
@@ -224,6 +72,7 @@ body.survival-mode .sbar { display: flex; }
   font-weight: 500;
   padding: 16px 20px;
   outline: none;
+  border-radius: var(--radius) 0 0 var(--radius);
 }
 .gi::placeholder { color: var(--fg-mute); }
 
@@ -234,18 +83,199 @@ body.survival-mode .sbar { display: flex; }
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
-  padding: 0 32px;
+  padding: 0 28px;
   cursor: pointer;
   letter-spacing: .08em;
   text-transform: uppercase;
   transition: background .2s;
-  border-radius: 0 var(--radius) var(--radius) 0;
   white-space: nowrap;
 }
 .gbtn:hover:not(:disabled) { background: var(--accent-2); }
 .gbtn:disabled { opacity: .4; cursor: not-allowed; }
 .survival-mode .gbtn { background: var(--gold); }
 .survival-mode .gbtn:hover:not(:disabled) { background: #b8955a; }
+
+/* ── Burger intégré DANS la barre input ── */
+.iz .burger {
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--line-2);
+  color: var(--fg-soft);
+  font-size: 18px;
+  width: 52px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  flex-shrink: 0;
+}
+.iz .burger:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.iz .burger.open {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ── Menu déroulant aligné sur la barre input ── */
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 240px;
+  background: var(--bg-card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding: 8px;
+  z-index: 200;
+  box-shadow: 0 20px 40px -20px rgba(0,0,0,.6);
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+.menu-panel.open { display: flex; }
+
+.menu-section {
+  padding: 6px 10px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--fg-mute);
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--fg-soft);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all .15s;
+  width: 100%;
+}
+.menu-item:hover {
+  color: var(--fg);
+  background: var(--bg-soft);
+}
+.menu-item.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.menu-item.active.surv {
+  color: var(--gold);
+  background: var(--gold-soft);
+}
+.menu-item .ic {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+.menu-item .check {
+  margin-left: auto;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 14px;
+}
+.menu-item.active.surv .check { color: var(--gold); }
+.menu-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 6px 4px;
+}
+
+/* ── Compteur SOUS l'input ── */
+.counter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  min-height: 22px;
+  font-size: 13px;
+  color: var(--fg-soft);
+}
+.counter {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.counter-label {
+  font-size: 12px;
+  color: var(--fg-mute);
+}
+
+/* ── Barre survie (dans counter-row) ── */
+.sbar {
+  display: none;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.sbar.on { display: flex; }
+
+.sbar .sv {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.sbar .sv-l {
+  font-weight: 600;
+  color: var(--fg-soft);
+  font-size: 12px;
+}
+.sbar .sv-n {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+
+/* En mode survie : cache le compteur daily, affiche la barre survie */
+body.survival-mode .counter,
+body.survival-mode .counter-label { display: none; }
+body.survival-mode .sbar { display: flex; }
+
+/* ═══════════════════════════════════════════════════════════
+   FLASH MESSAGE
+   ═══════════════════════════════════════════════════════════ */
+.flash {
+  display: none;
+  width: 100%;
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+.flash.on { display: block; animation: flashIn .25s ease; }
+.flash.ok {
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-bd);
+  color: var(--ok-tx);
+}
+.flash.ko {
+  background: var(--ko-bg);
+  border: 1px solid var(--ko-bd);
+  color: var(--ko-tx);
+}
+@keyframes flashIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* ═══════════════════════════════════════════════════════════
    AUTOCOMPLETE
@@ -311,7 +341,6 @@ body.survival-mode .sbar { display: flex; }
   gap: 4px;
   min-width: 860px;
 }
-
 .th {
   margin-bottom: 6px;
   padding: 0 4px;
@@ -389,7 +418,7 @@ body.survival-mode .sbar { display: flex; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CARDS MOBILE (fallback, caché par défaut)
+   CARDS MOBILE (fallback)
    ═══════════════════════════════════════════════════════════ */
 .cards {
   display: none;
@@ -943,47 +972,24 @@ body.survival-mode .sbar { display: flex; }
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 700px) {
   .gwrap {
-    padding: 12px 12px 60px;
+    padding: 16px 12px 60px;
     gap: 10px;
   }
 
-  /* Toolbar en colonne */
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    padding: 8px;
-  }
-  .modes { width: 100%; }
-  .mode {
-    flex: 1;
-    justify-content: center;
-    padding: 10px 8px;
-    font-size: 13px;
-  }
-  .toolbar-middle {
-    width: 100%;
-    justify-content: center;
-    min-height: 32px;
-  }
-  .counter {
-    text-align: center;
-    font-size: 14px;
-    padding: 0;
-  }
-  .sbar {
-    justify-content: space-around;
-    gap: 8px;
-    width: 100%;
-  }
-  .sbar .sv { font-size: 12px; }
-  .sbar .sv-n { font-size: 14px; }
-  .utils { justify-content: center; }
-  .util { width: 36px; height: 36px; font-size: 15px; }
+  .game-title h1 { font-size: 1.4rem; }
+  .game-title p { font-size: 12px; }
 
   /* Input compact */
   .gi { padding: 13px 14px; font-size: 14px; }
   .gbtn { padding: 0 18px; font-size: 12px; letter-spacing: .05em; }
+  .iz .burger { width: 44px; font-size: 16px; }
+
+  /* Menu en pleine largeur */
+  .menu-panel {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
 
   /* Autocomplete */
   .acl { max-height: 220px; }
