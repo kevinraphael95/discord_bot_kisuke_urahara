@@ -29,14 +29,47 @@ log = logging.getLogger(__name__)
 # ================================================================================
 
 def db_save_score(user_id: int, username: str, score: int):
-    """Enregistre un score Kawashima dans la table kawashima_scores."""
+    """Enregistre un score Kawashima SEULEMENT s'il entre dans le top 10."""
     try:
         conn   = get_conn()
         cursor = conn.cursor()
+
+        # 1. Combien de scores en base ?
+        cursor.execute("SELECT COUNT(*) FROM kawashima_scores")
+        count = cursor.fetchone()[0]
+
+        # 2. Si on a déjà 10 scores, on regarde le plus bas du top 10
+        if count >= 10:
+            cursor.execute("""
+                SELECT MIN(score) FROM (
+                    SELECT score FROM kawashima_scores
+                    ORDER BY score DESC
+                    LIMIT 10
+                )
+            """)
+            min_top10 = cursor.fetchone()[0]
+
+            # Si le nouveau score n'est pas meilleur que le 10e, on abandonne
+            if score <= min_top10:
+                conn.close()
+                return
+
+            # Sinon, on supprime le plus bas du top 10 pour faire de la place
+            cursor.execute("""
+                DELETE FROM kawashima_scores
+                WHERE id = (
+                    SELECT id FROM kawashima_scores
+                    ORDER BY score ASC
+                    LIMIT 1
+                )
+            """)
+
+        # 3. On insère le nouveau score
         cursor.execute("""
             INSERT INTO kawashima_scores (user_id, username, score, timestamp)
             VALUES (?, ?, ?, ?)
         """, (user_id, username, score, int(time.time())))
+
         conn.commit()
         conn.close()
     except Exception as e:
