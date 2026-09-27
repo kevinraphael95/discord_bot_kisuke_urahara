@@ -267,13 +267,15 @@ body.survival-mode .sbar { display: flex; }
   position: absolute;
   top: calc(100% + 6px);
   left: 0; right: 0;
-  background: var(--bg-card);
+  background: var(--bg);
   border: 1px solid var(--line-2);
   border-radius: var(--radius);
   max-height: 320px;
   overflow-y: auto;
-  z-index: 100;
-  box-shadow: 0 20px 40px -20px rgba(0,0,0,.5);
+  z-index: 300;
+  box-shadow:
+    0 24px 48px -12px rgba(0,0,0,.85),
+    0 0 0 1px rgba(0,0,0,.5);
 }
 .acl:empty { display: none; }
 .aci {
