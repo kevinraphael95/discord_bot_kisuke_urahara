@@ -1,7 +1,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ═══ Couleurs du site Bleach ═══ */
   --void:      #14181a;
   --surface:   #222829;
   --raised:    #1c2124;
@@ -11,10 +10,9 @@
   --gold-dim:  rgba(201,169,97,.12);
   --red:       #d93025;
   --cyan:      #4ea86b;
-  --text:      #f0ede6;
-  --dim:       #8f8a82;
+  --text:      #ffffff;
+  --dim:       #d0ccc0;
 
-  /* Fonts site */
   --font-sans:    'Inter', system-ui, sans-serif;
   --font-display: 'Shippori Mincho', Georgia, serif;
 }
@@ -30,7 +28,6 @@ body {
   position: relative;
 }
 
-/* Grid de fond */
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -41,7 +38,6 @@ body::before {
   pointer-events: none;
 }
 
-/* Vignette */
 body::after {
   content: '';
   position: fixed; inset: 0;
@@ -64,7 +60,6 @@ body::after {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Glyphe décoratif */
 .glyph {
   font-family: var(--font-display);
   font-weight: 800;
@@ -92,7 +87,6 @@ body::after {
   position: relative;
 }
 
-/* Coin décoratif */
 .box::after {
   content: '';
   position: absolute;
