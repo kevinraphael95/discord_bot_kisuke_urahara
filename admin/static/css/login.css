@@ -1,185 +1,190 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --void: #05050a;
-    --surface: #0c0c14;
-    --raised: #12121f;
-    --line: #1e1e30;
-    --line2: #2a2a42;
-    --gold: #d4a843;
-    --gold-dim: rgba(212,168,67,.12);
-    --red: #e05555;
-    --cyan: #4db8c8;
-    --text: #b8b8d0;
-    --dim: #484860;
-  }
+:root {
+  /* ═══ Couleurs du site Bleach ═══ */
+  --void:      #14181a;
+  --surface:   #222829;
+  --raised:    #1c2124;
+  --line:      rgba(255,255,255,.07);
+  --line2:     rgba(255,255,255,.14);
+  --gold:      #c9a961;
+  --gold-dim:  rgba(201,169,97,.12);
+  --red:       #d93025;
+  --cyan:      #4ea86b;
+  --text:      #f0ede6;
+  --dim:       #8f8a82;
 
-  body {
-    background: var(--void);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'DM Mono', monospace;
-    overflow: hidden;
-    position: relative;
-  }
+  /* Fonts site */
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-display: 'Shippori Mincho', Georgia, serif;
+}
 
-  /* Grid de fond */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(212,168,67,.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(212,168,67,.03) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-  }
+body {
+  background: var(--void);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  overflow: hidden;
+  position: relative;
+}
 
-  /* Vignette */
-  body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background: radial-gradient(ellipse 60% 60% at 50% 50%, transparent 40%, var(--void) 100%);
-    pointer-events: none;
-  }
+/* Grid de fond */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(201,169,97,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,169,97,.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
 
-  .wrap {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    animation: fadeUp .5s ease both;
-  }
+/* Vignette */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, transparent 40%, var(--void) 100%);
+  pointer-events: none;
+}
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+.wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  animation: fadeUp .5s ease both;
+}
 
-  /* Glyphe décoratif */
-  .glyph {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 8px;
-    color: var(--dim);
-    text-transform: uppercase;
-    margin-bottom: 32px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .glyph::before, .glyph::after {
-    content: '';
-    width: 40px; height: 1px;
-    background: var(--line2);
-  }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  .box {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-top: 2px solid var(--gold);
-    width: 380px;
-    padding: 40px;
-    position: relative;
-  }
+/* Glyphe décoratif */
+.glyph {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 8px;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.glyph::before, .glyph::after {
+  content: '';
+  width: 40px; height: 1px;
+  background: var(--line2);
+}
 
-  /* Coin décoratif */
-  .box::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; right: -1px;
-    width: 20px; height: 20px;
-    border-bottom: 2px solid var(--gold);
-    border-right: 2px solid var(--gold);
-  }
+.box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--gold);
+  width: 380px;
+  padding: 40px;
+  position: relative;
+}
 
-  .box-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 26px;
-    letter-spacing: 4px;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
+/* Coin décoratif */
+.box::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 20px; height: 20px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
 
-  .box-sub {
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--dim);
-    text-transform: uppercase;
-    margin-bottom: 36px;
-    font-family: 'Syne Mono', monospace;
-  }
+.box-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
 
-  .field-label {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--dim);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    display: block;
-  }
+.box-sub {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 36px;
+  font-family: var(--font-sans);
+}
 
-  input[type=password] {
-    width: 100%;
-    background: var(--void);
-    border: 1px solid var(--line2);
-    color: var(--text);
-    font-family: 'Syne Mono', monospace;
-    font-size: 14px;
-    padding: 12px 16px;
-    outline: none;
-    letter-spacing: 3px;
-    transition: border-color .2s, box-shadow .2s;
-    margin-bottom: 20px;
-    border-radius: 0;
-    -webkit-appearance: none;
-  }
+.field-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
 
-  input[type=password]:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px var(--gold-dim);
-  }
+input[type=password] {
+  width: 100%;
+  background: var(--void);
+  border: 1px solid var(--line2);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 12px 16px;
+  outline: none;
+  letter-spacing: 3px;
+  transition: border-color .2s, box-shadow .2s;
+  margin-bottom: 20px;
+  border-radius: 0;
+  -webkit-appearance: none;
+}
 
-  .btn-submit {
-    width: 100%;
-    background: var(--gold);
-    color: var(--void);
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 13px;
-    letter-spacing: 5px;
-    text-transform: uppercase;
-    padding: 14px;
-    cursor: pointer;
-    transition: opacity .2s, transform .1s;
-    border-radius: 0;
-  }
+input[type=password]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
 
-  .btn-submit:hover { opacity: .88; }
-  .btn-submit:active { transform: scale(.99); }
+.btn-submit {
+  width: 100%;
+  background: var(--gold);
+  color: var(--void);
+  border: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  padding: 14px;
+  cursor: pointer;
+  transition: opacity .2s, transform .1s;
+  border-radius: 0;
+}
 
-  .error {
-    background: rgba(224,85,85,.08);
-    border: 1px solid rgba(224,85,85,.3);
-    border-left: 3px solid var(--red);
-    color: var(--red);
-    font-size: 11px;
-    padding: 10px 14px;
-    margin-bottom: 20px;
-    letter-spacing: .5px;
-  }
+.btn-submit:hover { opacity: .88; }
+.btn-submit:active { transform: scale(.99); }
 
-  .footer-line {
-    margin-top: 28px;
-    font-size: 10px;
-    color: var(--dim);
-    letter-spacing: 2px;
-    font-family: 'Syne Mono', monospace;
-  }
+.error {
+  background: rgba(217,48,37,.08);
+  border: 1px solid rgba(217,48,37,.3);
+  border-left: 3px solid var(--red);
+  color: var(--red);
+  font-size: 11px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  letter-spacing: .5px;
+}
+
+.footer-line {
+  margin-top: 28px;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  font-family: var(--font-sans);
+}
