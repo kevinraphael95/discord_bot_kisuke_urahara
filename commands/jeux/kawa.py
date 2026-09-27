@@ -146,16 +146,16 @@ class EntrainementCerebral(commands.Cog):
                 self.minijeux.append((f"{emoji} {titre}", func))
 
     # ============================================================================
-    # 🔹 Fonction interne — validation de la quête
+    # 🔹 Validation de la quête
     # ============================================================================
     async def _valider_quete(
         self,
-        user:            discord.User | discord.Member,
-        total_score:     int,
-        channel:         discord.abc.Messageable | None  = None,
-        ctx_or_inter:    discord.Interaction | commands.Context | None = None
+        user:         discord.User | discord.Member,
+        total_score:  int,
+        channel:      discord.abc.Messageable | None = None,
+        ctx_or_inter: discord.Interaction | commands.Context | None = None
     ):
-        """Valide la quête 'entrainement' si score >= 5000 et envoie un embed de félicitations."""
+        """Valide la quête 'entrainement' si score >= 5000 et envoie un embed."""
         if total_score < 5000:
             return
 
@@ -166,7 +166,8 @@ class EntrainementCerebral(commands.Cog):
         embed = discord.Embed(
             title="🎉 Quête accomplie !",
             description=(
-                f"Bravo **{user.display_name}** ! Tu as terminé la quête **Entraînement cérébral** 🏆\n\n"
+                f"Bravo **{user.display_name}** ! Tu as terminé la quête "
+                f"**Entraînement cérébral** 🏆\n\n"
                 f"⭐ **Niveau +1 !** (Niveau {new_lvl})"
             ),
             color=0xFFD700
@@ -186,13 +187,10 @@ class EntrainementCerebral(commands.Cog):
             log.exception("[cerebral] Erreur envoi embed quête : %s", e)
 
     # ============================================================================
-    # 🔹 Wrapper — exécute un mini-jeu en solo avec gestion du timeout
+    # 🔹 Wrapper — exécute un mini-jeu en solo
     # ============================================================================
     async def _run_game_solo(self, game, msg_state, embed, user, timeout=60):
-        """
-        Exécute un mini-jeu en solo.
-        Retourne True si réussi, False sinon (timeout ou erreur).
-        """
+        """Exécute un mini-jeu en solo. Retourne True si réussi, False sinon."""
         def get_user_id():
             return user.id
 
@@ -209,105 +207,32 @@ class EntrainementCerebral(commands.Cog):
             return False
 
     # ============================================================================
-    # 🔹 Wrapper — exécute un mini-jeu en multi (boutons OU texte)
+    # 🔹 Wrapper — exécute un mini-jeu en multi
     # ============================================================================
     async def _run_game_multi(self, game, msg_state, embed, active_players, timeout=25):
         """
         Exécute un mini-jeu en multi.
 
-        - Si le jeu utilise des boutons : on attend directement le résultat du jeu,
-          et on accepte TOUS les joueurs actifs (le get_user_id renvoie l'ID du bot
-          ne matchera personne, donc on utilise une lambda spéciale).
-        - Si le jeu utilise du texte : on attend un message d'un joueur actif,
-          puis on passe `msg_override` au jeu.
-
-        Retourne (winner_member_or_None, success_bool).
+        Tous les jeux utilisent maintenant le bouton + modale.
+        On ne peut pas identifier le cliqueur avec cette architecture,
+        donc on retourne (None, success).
         """
-        uses_buttons = getattr(game, "uses_buttons", False)
+        def get_user_id():
+            # None → le helper _ask_text_answer accepte tout le monde
+            return None
 
-        if uses_buttons:
-            # ----- Jeu à boutons -----
-            # On doit accepter n'importe quel joueur actif. On stocke l'ID
-            # du cliqueur dans une variable mutable, et get_user_id() renvoie
-            # une valeur sentinelle qui matche tous les joueurs actifs.
-            clicked_holder = {"user_id": None}
+        try:
+            success = await asyncio.wait_for(
+                game(msg_state, embed, get_user_id, self.bot),
+                timeout=timeout
+            )
+        except asyncio.TimeoutError:
+            return None, False
+        except Exception as e:
+            log.exception("[cerebral] Erreur mini-jeu multi : %s", e)
+            return None, False
 
-            def get_user_id():
-                # Retourne un ID qui n'existe pas → le jeu vérifie
-                # `interaction.user.id != get_user_id()`. Pour accepter tout
-                # le monde en multi, on doit retourner l'ID du cliqueur.
-                # Mais on ne le connaît qu'au moment du clic...
-                # Solution : on patche le check côté jeu via un attribut.
-                return clicked_holder["user_id"]
-
-            # Astuce : on modifie dynamiquement `get_user_id` pour accepter
-            # n'importe qui. On utilise un wrapper qui retourne une valeur
-            # "magique" — mais les jeux comparent avec `!=`. Donc il faut
-            # que get_user_id() retourne l'ID du cliqueur.
-            # → On ne peut pas le savoir à l'avance. On va donc monkey-patch
-            #   la fonction pour qu'elle accepte tout le monde.
-            #
-            # Plus simple : on passe une lambda qui renvoie un objet dont
-            # __eq__ retourne toujours False quand comparé à un int.
-            class _AnyUser:
-                def __eq__(self, other):
-                    return False  # jamais égal → le check `!=` passe toujours
-                def __ne__(self, other):
-                    return False  # `!=` retourne False → accepté
-
-            any_user = _AnyUser()
-            def get_user_id_any():
-                return any_user
-
-            try:
-                # On ne peut pas passer get_user_id_any directement car les
-                # jeux l'appellent comme `get_user_id()`. On l'appelle donc
-                # comme une fonction qui retourne l'objet magique.
-                success = await asyncio.wait_for(
-                    game(msg_state, embed, get_user_id_any, self.bot),
-                    timeout=timeout
-                )
-            except asyncio.TimeoutError:
-                success = False
-            except Exception as e:
-                log.exception("[cerebral] Erreur mini-jeu multi (boutons) : %s", e)
-                success = False
-
-            # On ne connaît pas le cliqueur exact → on ne peut pas attribuer
-            # le point. Solution : on regarde le dernier message du bot ?
-            # → Non. Meilleure solution : demander aux jeux de retourner
-            #   (success, user_id). Mais ça casse l'API actuelle.
-            #
-            # ⚠️ LIMITATION : en multi, les jeux à boutons ne permettent pas
-            # d'identifier le gagnant de manière fiable. On va donc
-            # retourner (None, success) et laisser le mode multi gérer.
-            return None, success
-        else:
-            # ----- Jeu texte -----
-            def check(m):
-                return (
-                    m.author in active_players
-                    and m.channel == msg_state.channel
-                    and not m.author.bot
-                )
-
-            try:
-                msg = await self.bot.wait_for("message", check=check, timeout=timeout)
-            except asyncio.TimeoutError:
-                return None, False
-
-            try:
-                success = await asyncio.wait_for(
-                    game(msg_state, embed, lambda: msg.author.id, self.bot, msg_override=msg),
-                    timeout=15
-                )
-            except asyncio.TimeoutError:
-                success = False
-            except Exception as e:
-                log.exception("[cerebral] Erreur mini-jeu multi (texte) : %s", e)
-                success = False
-
-            return msg.author, success
+        return None, bool(success)
 
     # ============================================================================
     # 🔹 Commande PREFIX
@@ -381,10 +306,10 @@ class EntrainementCerebral(commands.Cog):
                 send  = ctx_or_interaction.send
                 users = [ctx_or_interaction.author]
 
-            total_score  = {}
-            results      = {}
-            title_mode   = "Mode Multijoueur" if multiplayer else "Mode Arcade"
-            ready_users  = []
+            total_score = {}
+            results     = {}
+            title_mode  = "Mode Multijoueur" if multiplayer else "Mode Arcade"
+            ready_users = []
 
             description_text = (
                 f"{'🔹 Mode Multijoueur : entre 2 et 10 joueurs.' if multiplayer else ''}\n"
@@ -398,6 +323,9 @@ class EntrainementCerebral(commands.Cog):
                 color=discord.Color.blurple()
             )
 
+            # --------------------------------------------------------------------
+            # Vue "Je suis prêt"
+            # --------------------------------------------------------------------
             class ReadyButton(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=30)
@@ -408,11 +336,15 @@ class EntrainementCerebral(commands.Cog):
                 async def ready(self, interaction: discord.Interaction, button: discord.ui.Button):
                     if multiplayer:
                         if interaction.user in ready_users:
-                            return await interaction.response.send_message("✅ Tu es déjà prêt !", ephemeral=True)
+                            return await interaction.response.send_message(
+                                "✅ Tu es déjà prêt !", ephemeral=True
+                            )
                         if len(ready_users) >= 10:
-                            return await interaction.response.send_message("🚫 Maximum 10 joueurs atteint.", ephemeral=True)
+                            return await interaction.response.send_message(
+                                "🚫 Maximum 10 joueurs atteint.", ephemeral=True
+                            )
                         ready_users.append(interaction.user)
-                        participants = ", ".join([u.name for u in ready_users])
+                        participants = ", ".join(u.name for u in ready_users)
                         embed.description = (
                             f"Participants prêts : {participants}\n\n"
                             "Appuyez sur le bouton pour rejoindre (30s restantes)..."
@@ -420,13 +352,18 @@ class EntrainementCerebral(commands.Cog):
                         await interaction.response.edit_message(embed=embed, view=self)
                     else:
                         if interaction.user != users[0]:
-                            return await interaction.response.send_message("🚫 Ce n'est pas ton entraînement.", ephemeral=True)
+                            return await interaction.response.send_message(
+                                "🚫 Ce n'est pas ton entraînement.", ephemeral=True
+                            )
                         button.disabled = True
                         button.label    = "✅ C'est parti !"
                         try:
                             await interaction.response.edit_message(embed=embed, view=self)
-                        except discord.InteractionResponded:
-                            await interaction.message.edit(embed=embed, view=self)
+                        except Exception:
+                            try:
+                                await interaction.message.edit(embed=embed, view=self)
+                            except Exception:
+                                pass
                         self.clicked = True
                         self.ready_event.set()
 
@@ -441,6 +378,9 @@ class EntrainementCerebral(commands.Cog):
             msg_state = await send(embed=embed, view=view)
             await view.ready_event.wait()
 
+            # --------------------------------------------------------------------
+            # Vérifications post-ready
+            # --------------------------------------------------------------------
             if not multiplayer and not view.clicked:
                 embed.title       = "⏰ Temps écoulé"
                 embed.description = "Personne n'a cliqué à temps. Relance la commande pour rejouer !"
@@ -459,10 +399,16 @@ class EntrainementCerebral(commands.Cog):
                     child.label    = "✅ Partie en cours"
                 await msg_state.edit(embed=embed, view=view)
 
+            # --------------------------------------------------------------------
+            # Sélection des 5 mini-jeux
+            # --------------------------------------------------------------------
             random.shuffle(self.minijeux)
             selected_games = self.minijeux[:5]
             active_players = ready_users if multiplayer else users
 
+            # --------------------------------------------------------------------
+            # Boucle des mini-jeux
+            # --------------------------------------------------------------------
             for index, (name, game) in enumerate(selected_games, start=1):
                 embed.clear_fields()
                 embed.title       = f"🧩 Mini-jeu {index}/5 — {name}"
@@ -483,18 +429,13 @@ class EntrainementCerebral(commands.Cog):
                     elapsed = round(time.time() - start, 2)
                     embed.clear_fields()
 
-                    if winner and success:
-                        score = 1000 + max(0, 500 - int(elapsed * 25))
-                        total_score[winner.id] = total_score.get(winner.id, 0) + score
-                        results.setdefault(winner.id, []).append((index, name, True, elapsed, score))
-                        embed.title       = f"🏆 {winner.name} a trouvé la bonne réponse !"
-                        embed.description = f"⏱️ Temps : `{elapsed}s`\n🏅 Score : `{score}` pts"
-                        embed.color       = discord.Color.green()
-                    elif success:
-                        # Jeu à boutons réussi mais on ne sait pas qui a cliqué
+                    if success:
                         embed.title       = "✅ Mini-jeu réussi !"
-                        embed.description = "Quelqu'un a trouvé la bonne réponse, mais impossible d'identifier qui (jeu à boutons)."
-                        embed.color       = discord.Color.green()
+                        embed.description = (
+                            f"Quelqu'un a trouvé la bonne réponse en `{elapsed}s`.\n"
+                            "*(Mode multi : le nom du gagnant n'est pas identifié pour ce jeu.)*"
+                        )
+                        embed.color = discord.Color.green()
                     else:
                         embed.title       = "❌ Personne n'a trouvé la bonne réponse"
                         embed.description = "Essayez d'être plus rapides au prochain mini-jeu !"
@@ -522,7 +463,9 @@ class EntrainementCerebral(commands.Cog):
 
                 await asyncio.sleep(1.5)
 
-            # === Résultats finaux =================================================
+            # --------------------------------------------------------------------
+            # Résultats finaux
+            # --------------------------------------------------------------------
             embed.clear_fields()
             embed.title       = "🏁 Résultats de l'entraînement"
             embed.description = None
@@ -559,7 +502,9 @@ class EntrainementCerebral(commands.Cog):
 
             await msg_state.edit(embed=embed, view=None)
 
-            # === Validation quête(s) =============================================
+            # --------------------------------------------------------------------
+            # Validation des quêtes
+            # --------------------------------------------------------------------
             for player in active_players:
                 if player.id in total_score:
                     await self._valider_quete(
@@ -577,7 +522,7 @@ class EntrainementCerebral(commands.Cog):
     # 🔹 Classement global
     # ============================================================================
     async def show_leaderboard(self, ctx_or_interaction):
-        embed   = discord.Embed(
+        embed = discord.Embed(
             title="🏆 Entraînement cérébral — Top 10",
             description="Voici le classement global des meilleurs scores !",
             color=discord.Color.gold()
@@ -594,6 +539,7 @@ class EntrainementCerebral(commands.Cog):
             await ctx_or_interaction.followup.send(embed=embed)
         else:
             await ctx_or_interaction.send(embed=embed)
+
 
 # ================================================================================
 # 🔌 Setup du Cog
