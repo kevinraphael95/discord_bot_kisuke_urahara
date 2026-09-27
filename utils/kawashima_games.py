@@ -4,9 +4,6 @@
 # Retour : (success: bool, clicker_id: int | None)
 # ================================================================================
 
-# ================================================================================
-# 📦 Imports nécessaires
-# ================================================================================
 import random
 import asyncio
 import time
@@ -17,7 +14,7 @@ TIMEOUT = 60
 
 
 # ================================================================================
-# 🛠️ Helper — Vue générique à boutons de choix
+# 🛠️ Helper — Vue générique à boutons de choix (avec retry anti-rate-limit)
 # ================================================================================
 async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT):
     """Affiche les boutons de choix. Retourne (success, clicker_id)."""
@@ -61,9 +58,16 @@ async def _ask_choice(ctx, embed, choices, correct, get_user_id, timeout=TIMEOUT
         btn.callback = callback
         view.add_item(btn)
 
-    try:
-        await ctx.edit(embed=embed, view=view)
-    except Exception:
+    # ⚠️ Retry 4 fois en cas de rate limit Discord
+    for tentative in range(4):
+        try:
+            await ctx.edit(embed=embed, view=view)
+            break
+        except Exception as e:
+            print(f"[kawashima] edit raté (essai {tentative+1}) : {e}")
+            await asyncio.sleep(1.0)
+    else:
+        print("[kawashima] impossible d'afficher les boutons")
         return False, None
 
     await view.wait()
@@ -122,12 +126,9 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
             self.result = False
             self.clicker_id = None
             self.too_early = False
-            self.started = False  # True quand le bouton devient vert
+            self.started = False
 
-        @discord.ui.button(
-            label="🔴 ATTENDS...",
-            style=discord.ButtonStyle.danger
-        )
+        @discord.ui.button(label="🔴 ATTENDS...", style=discord.ButtonStyle.danger)
         async def reflexe(self, interaction: discord.Interaction, button: discord.ui.Button):
             expected = get_user_id()
             if expected is not None and interaction.user.id != expected:
@@ -137,7 +138,6 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
                 return
 
             if not self.started:
-                # Trop tôt
                 self.too_early = True
                 self.clicker_id = interaction.user.id
                 button.disabled = True
@@ -148,7 +148,6 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
                     pass
                 self.stop()
             else:
-                # Bon clic
                 self.result = True
                 self.clicker_id = interaction.user.id
                 button.disabled = True
@@ -162,10 +161,8 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
     view = ReflexeView()
     await ctx.edit(embed=embed, view=view)
 
-    # Attente aléatoire 2-5 secondes
     await asyncio.sleep(random.uniform(2, 5))
 
-    # Vérifie que personne n'a cliqué trop tôt
     if view.is_finished():
         try:
             await ctx.edit(view=None)
@@ -173,7 +170,6 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
             pass
         return False, view.clicker_id
 
-    # Change le bouton en VERT
     button = view.children[0]
     button.label = "🟢 CLIQUE !"
     button.style = discord.ButtonStyle.success
@@ -190,11 +186,9 @@ async def reflexe_couleur(ctx, embed, get_user_id, bot, msg_override=None):
     except Exception:
         pass
 
-    # Si trop tôt → perdu
     if view.too_early:
         return False, view.clicker_id
 
-    # Si cliqué au bon moment → gagné
     return view.result, view.clicker_id
 
 reflexe_couleur.title = "Réflexe couleur"
@@ -821,7 +815,7 @@ typo_trap.prep_time = 2
 
 
 # ================================================================================
-# 🔖 Marqueurs (pour éviter les warnings)
+# 🔖 Marqueurs
 # ================================================================================
 for _f in [
     addition_cachee, calcul_rapide, carre_magique_fiable_emoji,
