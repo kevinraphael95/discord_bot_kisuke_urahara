@@ -344,9 +344,7 @@ body.survival-mode .sbar { display: flex; }
 
 .cell {
   background: var(--bg-soft);
-  border: none;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: 0;
   padding: 8px 4px;
   text-align: center;
@@ -358,7 +356,6 @@ body.survival-mode .sbar { display: flex; }
   justify-content: center;
   color: var(--fg-soft);
 }
-.cell:last-child { border-right: none; }
 .cell:first-child {
   text-align: left;
   justify-content: flex-start;
