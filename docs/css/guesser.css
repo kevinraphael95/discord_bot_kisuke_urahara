@@ -12,9 +12,7 @@
   gap: 12px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TITRE "BLEACH CHARACTER GUESSER"
-   ═══════════════════════════════════════════════════════════ */
+/* ── TITRE ──────────────────────────────────────────────── */
 .game-title {
   text-align: center;
   padding: 8px 0 4px;
@@ -37,9 +35,7 @@
   margin-top: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BARRE INPUT avec burger intégré
-   ═══════════════════════════════════════════════════════════ */
+/* ── BARRE INPUT + BURGER ───────────────────────────────── */
 .iz {
   width: 100%;
   display: flex;
@@ -58,7 +54,6 @@
   border-color: var(--gold);
   box-shadow: 0 0 0 3px var(--gold-soft);
 }
-
 .acw { position: relative; flex: 1; }
 .gi {
   width: 100%;
@@ -73,7 +68,6 @@
   border-radius: var(--radius) 0 0 var(--radius);
 }
 .gi::placeholder { color: var(--fg-mute); }
-
 .gbtn {
   background: var(--accent);
   border: none;
@@ -92,8 +86,6 @@
 .gbtn:disabled { opacity: .4; cursor: not-allowed; }
 .survival-mode .gbtn { background: var(--gold); }
 .survival-mode .gbtn:hover:not(:disabled) { background: #b8955a; }
-
-/* ── Burger intégré DANS la barre input ── */
 .iz .burger {
   background: transparent;
   border: none;
@@ -109,16 +101,13 @@
   border-radius: 0 var(--radius) var(--radius) 0;
   flex-shrink: 0;
 }
-.iz .burger:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
-}
+.iz .burger:hover,
 .iz .burger.open {
   color: var(--accent);
   background: var(--accent-soft);
 }
 
-/* ── Menu déroulant ── */
+/* ── MENU DÉROULANT ─────────────────────────────────────── */
 .menu-panel {
   position: absolute;
   top: calc(100% + 6px);
@@ -135,7 +124,6 @@
   gap: 2px;
 }
 .menu-panel.open { display: flex; }
-
 .menu-section {
   padding: 6px 10px 4px;
   font-size: 10px;
@@ -164,7 +152,6 @@
 .menu-item:hover { color: var(--fg); background: var(--bg-soft); }
 .menu-item.active { color: var(--accent); background: var(--accent-soft); }
 .menu-item.active.surv { color: var(--gold); background: var(--gold-soft); }
-
 .menu-item span:not(.ic):not(.check) {
   color: var(--fg-soft);
   flex: 1;
@@ -173,7 +160,6 @@
 .menu-item:hover span:not(.ic):not(.check) { color: var(--fg); }
 .menu-item.active span:not(.ic):not(.check) { color: var(--accent); }
 .menu-item.active.surv span:not(.ic):not(.check) { color: var(--gold); }
-
 .menu-item .ic { font-size: 16px; width: 20px; text-align: center; }
 .menu-item .check {
   margin-left: auto;
@@ -184,7 +170,6 @@
 .menu-item.active.surv .check { color: var(--gold); }
 .menu-divider { height: 1px; background: var(--line); margin: 6px 4px; }
 
-/* ── Avatar dans le menu ── */
 #auth-msw-btn .auth-avatar {
   width: 20px; height: 20px;
   border-radius: 50%;
@@ -204,7 +189,7 @@
   color: var(--accent);
 }
 
-/* ── Compteur SOUS l'input ── */
+/* ── COMPTEUR SOUS INPUT ────────────────────────────────── */
 .counter-row {
   display: flex;
   align-items: center;
@@ -221,12 +206,7 @@
   color: var(--accent);
   white-space: nowrap;
 }
-.counter-label {
-  font-size: 12px;
-  color: var(--fg-mute);
-}
-
-/* ── Barre survie ── */
+.counter-label { font-size: 12px; color: var(--fg-mute); }
 .sbar { display: none; gap: 14px; align-items: center; flex-wrap: wrap; }
 .sbar.on { display: flex; }
 .sbar .sv {
@@ -248,9 +228,7 @@ body.survival-mode .counter,
 body.survival-mode .counter-label { display: none; }
 body.survival-mode .sbar { display: flex; }
 
-/* ═══════════════════════════════════════════════════════════
-   FLASH MESSAGE
-   ═══════════════════════════════════════════════════════════ */
+/* ── FLASH ──────────────────────────────────────────────── */
 .flash {
   display: none;
   width: 100%;
@@ -268,9 +246,7 @@ body.survival-mode .sbar { display: flex; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   AUTOCOMPLETE
-   ═══════════════════════════════════════════════════════════ */
+/* ── AUTOCOMPLETE ───────────────────────────────────────── */
 .acl {
   position: absolute;
   top: calc(100% + 6px);
@@ -308,9 +284,7 @@ body.survival-mode .sbar { display: flex; }
   flex-shrink: 0;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TABLEAU (desktop)
-   ═══════════════════════════════════════════════════════════ */
+/* ── TABLEAU DESKTOP ────────────────────────────────────── */
 .tw {
   width: 100%;
   background: var(--bg-card);
@@ -381,7 +355,7 @@ body.survival-mode .sbar { display: flex; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CARDS (mobiles uniquement, affichées par @media)
+   CARDS (style mockup)
    ═══════════════════════════════════════════════════════════ */
 .cards {
   display: none;
@@ -409,8 +383,8 @@ body.survival-mode .sbar { display: flex; }
 .ctop {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 10px 12px;
   background: var(--bg-soft);
   border-bottom: 1px solid var(--line);
 }
@@ -421,6 +395,7 @@ body.survival-mode .sbar { display: flex; }
   border-radius: var(--radius-xs);
   border: 1px solid var(--line-2);
   flex-shrink: 0;
+  background: #333;
 }
 .cinfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .cname {
@@ -431,8 +406,6 @@ body.survival-mode .sbar { display: flex; }
 }
 .cname.correct { color: var(--ok-tx); }
 .cname.wrong   { color: var(--fg); }
-
-/* On cache le badge RACE + ARC sous le nom sur mobile */
 .cbadge { display: none; }
 
 .cgrid {
@@ -443,7 +416,7 @@ body.survival-mode .sbar { display: flex; }
 }
 .cc {
   background: transparent;
-  padding: 8px 6px;
+  padding: 7px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -480,9 +453,7 @@ body.survival-mode .sbar { display: flex; }
 .cc.close   .cv { color: var(--yw-tx); }
 .cc.wrong   .cv { color: var(--ko-tx); }
 
-/* ═══════════════════════════════════════════════════════════
-   BANNIÈRE RÉSULTAT DAILY
-   ═══════════════════════════════════════════════════════════ */
+/* ── BANNIÈRE RÉSULTAT DAILY ────────────────────────────── */
 .rbanner {
   display: none;
   width: 100%;
@@ -545,9 +516,7 @@ body.survival-mode .sbar { display: flex; }
 }
 .xbtn:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ═══════════════════════════════════════════════════════════
-   BANNIÈRE GAME OVER SURVIE
-   ═══════════════════════════════════════════════════════════ */
+/* ── BANNIÈRE GAME OVER SURVIE ──────────────────────────── */
 .send {
   display: none;
   width: 100%;
@@ -646,9 +615,7 @@ body.survival-mode .sbar { display: flex; }
 }
 .xbtn2:hover { background: var(--gold-soft); }
 
-/* ═══════════════════════════════════════════════════════════
-   MODAL AUTH
-   ═══════════════════════════════════════════════════════════ */
+/* ── MODAL AUTH ─────────────────────────────────────────── */
 .auth-modal {
   display: none;
   position: fixed;
@@ -736,9 +703,7 @@ body.survival-mode .sbar { display: flex; }
 }
 .am-skip:hover { color: var(--accent); }
 
-/* ═══════════════════════════════════════════════════════════
-   MODAL LEADERBOARD
-   ═══════════════════════════════════════════════════════════ */
+/* ── MODAL LEADERBOARD ──────────────────────────────────── */
 .lb-modal {
   display: none;
   position: fixed;
@@ -848,9 +813,7 @@ body.survival-mode .sbar { display: flex; }
   color: var(--accent);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MENU UTILISATEUR (dropdown)
-   ═══════════════════════════════════════════════════════════ */
+/* ── MENU UTILISATEUR ───────────────────────────────────── */
 .user-menu {
   background: var(--bg-card);
   border: 1px solid var(--line-2);
