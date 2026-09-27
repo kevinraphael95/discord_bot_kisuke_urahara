@@ -332,7 +332,6 @@ body.survival-mode .sbar { display: flex; }
 
 .row {
   margin-bottom: 6px;
-  border-radius: var(--radius-xs);
   overflow: hidden;
   animation: rowIn .35s cubic-bezier(.2,.8,.3,1) both;
 }
