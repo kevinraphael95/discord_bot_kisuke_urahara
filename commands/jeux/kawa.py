@@ -188,41 +188,40 @@ class EntrainementCerebral(commands.Cog):
 
     # ============================================================================
     # 🔹 Wrapper — exécute un mini-jeu en solo
+    # Retourne (success: bool, clicker_id: int | None)
     # ============================================================================
     async def _run_game_solo(self, game, msg_state, embed, user, timeout=60):
-        """Exécute un mini-jeu en solo. Retourne True si réussi, False sinon."""
         def get_user_id():
             return user.id
 
         try:
-            return await asyncio.wait_for(
+            result = await asyncio.wait_for(
                 game(msg_state, embed, get_user_id, self.bot),
                 timeout=timeout
             )
         except asyncio.TimeoutError:
             log.warning("[cerebral] Mini-jeu solo timeout pour %s", user)
-            return False
+            return False, None
         except Exception as e:
             log.exception("[cerebral] Erreur mini-jeu solo : %s", e)
-            return False
+            return False, None
+
+        # Les jeux retournent (success, clicker_id) ou juste success
+        if isinstance(result, tuple) and len(result) == 2:
+            return bool(result[0]), result[1]
+        return bool(result), None
 
     # ============================================================================
     # 🔹 Wrapper — exécute un mini-jeu en multi
+    # Retourne (winner_member_or_None, success_bool)
     # ============================================================================
     async def _run_game_multi(self, game, msg_state, embed, active_players, timeout=25):
-        """
-        Exécute un mini-jeu en multi.
-
-        Tous les jeux utilisent maintenant le bouton + modale.
-        On ne peut pas identifier le cliqueur avec cette architecture,
-        donc on retourne (None, success).
-        """
         def get_user_id():
-            # None → le helper _ask_text_answer accepte tout le monde
+            # None → le helper _ask_choice accepte tous les joueurs
             return None
 
         try:
-            success = await asyncio.wait_for(
+            result = await asyncio.wait_for(
                 game(msg_state, embed, get_user_id, self.bot),
                 timeout=timeout
             )
@@ -232,7 +231,18 @@ class EntrainementCerebral(commands.Cog):
             log.exception("[cerebral] Erreur mini-jeu multi : %s", e)
             return None, False
 
-        return None, bool(success)
+        # Extraction du résultat
+        if isinstance(result, tuple) and len(result) == 2:
+            success, clicker_id = bool(result[0]), result[1]
+        else:
+            success, clicker_id = bool(result), None
+
+        # Retrouve le membre à partir de l'ID
+        winner = None
+        if clicker_id is not None:
+            winner = next((p for p in active_players if p.id == clicker_id), None)
+
+        return winner, success
 
     # ============================================================================
     # 🔹 Commande PREFIX
@@ -429,21 +439,25 @@ class EntrainementCerebral(commands.Cog):
                     elapsed = round(time.time() - start, 2)
                     embed.clear_fields()
 
-                    if success:
-                        embed.title       = "✅ Mini-jeu réussi !"
-                        embed.description = (
-                            f"Quelqu'un a trouvé la bonne réponse en `{elapsed}s`.\n"
-                            "*(Mode multi : le nom du gagnant n'est pas identifié pour ce jeu.)*"
-                        )
-                        embed.color = discord.Color.green()
+                    if winner and success:
+                        score = 1000 + max(0, 500 - int(elapsed * 25))
+                        total_score[winner.id] = total_score.get(winner.id, 0) + score
+                        results.setdefault(winner.id, []).append((index, name, True, elapsed, score))
+                        embed.title       = f"🏆 {winner.name} a trouvé !"
+                        embed.description = f"⏱️ `{elapsed}s` • 🏅 `{score}` pts"
+                        embed.color       = discord.Color.green()
+                    elif success:
+                        embed.title       = "✅ Quelqu'un a trouvé !"
+                        embed.description = f"⏱️ `{elapsed}s`"
+                        embed.color       = discord.Color.green()
                     else:
-                        embed.title       = "❌ Personne n'a trouvé la bonne réponse"
-                        embed.description = "Essayez d'être plus rapides au prochain mini-jeu !"
+                        embed.title       = "❌ Personne n'a trouvé"
+                        embed.description = "Plus rapides au prochain !"
                         embed.color       = discord.Color.red()
                     await msg_state.edit(embed=embed, view=None)
 
                 else:
-                    success = await self._run_game_solo(
+                    success, _ = await self._run_game_solo(
                         game, msg_state, embed, users[0], timeout=60
                     )
                     elapsed = round(time.time() - start, 2)
