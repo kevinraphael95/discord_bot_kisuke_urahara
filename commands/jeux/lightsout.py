@@ -1,6 +1,6 @@
 # ================================================================================
 # 💡 lightsout.py — Commande interactive !lightsout et /lightsout
-# Objectif : Jeu "Lights Out" avec grille de boutons et affichage de solution en emojis
+# Objectif : Jeu "Lights Out" avec grille de boutons et solution affichée dans un embed
 # Catégorie : Jeux
 # Accès : Public
 # ================================================================================
@@ -74,7 +74,7 @@ class LightsOutGame:
                     if 0 <= nx < n and 0 <= ny < n:
                         A[ny * n + nx, idx] = 1
 
-        b = np.array([1 if self.grid[y][x0] else 0 for y in range(n) for x0 in range(n)], dtype=int)
+        b = np.array([1 if self.grid[y][x0] else 0 for y in range(n) for x0 in range(N//n)], dtype=int)
 
         # Résolution Gauss-Jordan (mod 2)
         M = np.hstack([A, b.reshape(N, 1)]).astype(int) % 2
@@ -202,7 +202,7 @@ class LightsOut(commands.Cog):
         await self.start_game(interaction.channel, interaction.user.id, mode, interaction)
 
     # ============================================================================
-    # 🔹 Méthode pour afficher la solution en emojis
+    # 🔹 Méthode pour afficher la solution dans un Embed
     # ============================================================================
     async def show_solution(self, channel, ctx_or_interaction, is_slash: bool = False):
         session = self.sessions.get(channel.id)
@@ -223,12 +223,19 @@ class LightsOut(commands.Cog):
             emoji_lines.append(line)
         
         visual_grid = "\n".join(emoji_lines)
-        text = f"💡 **Solution (Grille à cliquer) :**\n{visual_grid}\n\n*(🟢 = À cliquer | ⬛ = Ne rien faire)*"
+
+        # Création de l'embed de solution
+        embed = discord.Embed(
+            title="🔍 Solution du Lights Out",
+            description=f"{visual_grid}",
+            color=discord.Color.blue()
+        )
+        embed.add_field(name="Légende", value="🟢 = Cases sur lesquelles cliquer\n⬛ = Ne rien faire", inline=False)
 
         if is_slash:
-            await ctx_or_interaction.response.send_message(text, ephemeral=True)
+            await ctx_or_interaction.response.send_message(embed=embed, ephemeral=True)
         else:
-            await safe_send(channel, text)
+            await safe_send(channel, embed=embed)
 
     # ============================================================================
     # 🔹 Méthode commune pour lancer une partie
