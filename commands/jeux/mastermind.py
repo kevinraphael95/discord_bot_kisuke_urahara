@@ -144,9 +144,8 @@ class MastermindView(View):
 
     async def show_result(self, interaction: discord.Interaction, win: bool):
         self.stop()
-
-        self.clear_items()
-        self.add_item(ReplayButton(self.author, self.code_length, self.corruption))
+        for item in self.children:
+            item.disabled = True
 
         embed = self.build_embed()
         embed.add_field(
@@ -218,29 +217,6 @@ class ValidateButton(Button):
         await self.view_ref.make_attempt(interaction)
 
 # ================================================================================
-# 🔁 Bouton Rejouer
-# ================================================================================
-class ReplayButton(Button):
-    def __init__(self, author: discord.User | None, code_length: int, corruption: bool):
-        super().__init__(label="Rejouer", emoji="🔁", style=discord.ButtonStyle.primary)
-        self.author = author
-        self.code_length = code_length
-        self.corruption = corruption
-
-    async def callback(self, interaction: discord.Interaction):
-        if self.author and interaction.user != self.author:
-            return await safe_respond(interaction, "⛔ Ce jeu ne t'appartient pas.", ephemeral=True)
-
-        # 👇 DEFER immédiat pour éviter le timeout (3 s)
-        await interaction.response.defer()
-
-        new_view = MastermindView(self.author, self.code_length, self.corruption)
-        new_view.message = interaction.message
-        embed = new_view.build_embed()
-
-        await interaction.edit_original_response(embed=embed, view=new_view)
-
-# ================================================================================
 # 🎛️ Menu de sélection de difficulté
 # ================================================================================
 class DifficultyView(View):
@@ -259,7 +235,6 @@ class DifficultyButton(Button):
         self.author = author
 
     async def callback(self, interaction: discord.Interaction):
-        # 👇 DEFER immédiat
         await interaction.response.defer()
 
         length = self.code_length if self.code_length is not None else random.randint(8, 10)
