@@ -87,17 +87,15 @@ def init_logger():
         return
     _initialized = True
 
-    # ============================================================================
-    # 🔍 DEBUG : qui appelle init_logger() ?
-    # ============================================================================
+    # 1️⃣ Remplacement EN PREMIER (sinon le print va dans le terminal, pas dans les logs)
+    sys.stdout = LogCapture(sys.stdout)
+    sys.stderr = LogCapture(sys.stderr)
+
+    # 2️⃣ DEBUG APRÈS (maintenant visible dans les logs du panel)
     import traceback
     print("=== init_logger APPELÉ ===")
     traceback.print_stack()
     print("==========================")
-    # ============================================================================
-
-    sys.stdout = LogCapture(sys.stdout)
-    sys.stderr = LogCapture(sys.stderr)
 
     handler = BufferLogHandler()
     handler.setFormatter(logging.Formatter("%(levelname)s [%(name)s] %(message)s"))
