@@ -14,7 +14,8 @@ from discord import app_commands
 from discord.ext import commands
 import random
 import asyncio
-from utils.discord_utils import safe_send
+
+from utils.discord_utils import safe_send, safe_edit
 
 # ================================================================================
 # 🧠 Cog principal
@@ -23,11 +24,7 @@ class MemoryFormes(commands.Cog):
     """
     Commande /formes et !formes — Jouez au mini-jeu mémoire
     """
-    FORMS = [
-        ("❤️", "rouge"), ("💙", "bleu"), ("🤍", "blanc"),
-        ("🟥", "rouge"), ("🟦", "bleu"), ("⬜", "blanc"),
-        ("🔴", "rouge"), ("🔵", "bleu"), ("⚪", "blanc")
-    ]
+    FORMS = ["❤️", "💙", "🤍", "🟥", "🟦", "⬜", "🔴", "🔵", "⚪"]
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -56,49 +53,47 @@ class MemoryFormes(commands.Cog):
     # ============================================================================
     async def start_game(self, ctx_or_interaction):
         is_interaction = isinstance(ctx_or_interaction, discord.Interaction)
-        user = ctx_or_interaction.user if is_interaction else ctx_or_interaction.author
+        user    = ctx_or_interaction.user if is_interaction else ctx_or_interaction.author
         channel = ctx_or_interaction.channel
 
         # Choix aléatoire de 4 à 6 formes
         sequence = random.sample(self.FORMS, random.randint(4, 6))
-        sequence_str = " ".join([s[0] for s in sequence])
+        sequence_str = " ".join(sequence)
 
-        # == Compte à rebours + affichage de la séquence
-        countdown_text = f"👁️ **Retenez cette suite !**\n\n{sequence_str}\n\n"
+        # == Embed de départ
+        embed = discord.Embed(
+            title="🧠 Test de mémoire",
+            description=f"Retenez bien cette suite !\n\n# {sequence_str}\n\nDisparition dans **5**s...",
+            color=discord.Color.blurple()
+        )
+        embed.set_footer(text=f"Joueur : {user.display_name}")
 
         if is_interaction:
-            await ctx_or_interaction.response.send_message(countdown_text + "⏳ Disparition dans **5**s...")
+            await ctx_or_interaction.response.send_message(embed=embed)
             msg = await ctx_or_interaction.original_response()
         else:
-            msg = await channel.send(countdown_text + "⏳ Disparition dans **5**s...")
+            msg = await channel.send(embed=embed)
 
         # Décompte visuel
         for i in range(4, 0, -1):
             await asyncio.sleep(1)
+            embed.description = f"Retenez bien cette suite !\n\n# {sequence_str}\n\nDisparition dans **{i}**s..."
             try:
-                await msg.edit(content=countdown_text + f"⏳ Disparition dans **{i}**s...")
+                await safe_edit(msg, embed=embed)
             except discord.NotFound:
                 return
 
         await asyncio.sleep(1)
 
-        # Suppression du message ou remplacement par le jeu
-        view = MemoryView(self.FORMS, sequence, user.id)
-        progress_bar = "⬜" * len(sequence)
+        # == Embed de jeu
+        view       = MemoryView(sequence, user.id)
+        game_embed = view.build_embed()
 
         try:
-            await msg.edit(
-                content=f"🧠 **Reproduisez la suite dans le bon ordre !**\n\n"
-                        f"**Progression :** {progress_bar} (0/{len(sequence)})",
-                view=view
-            )
+            await safe_edit(msg, embed=game_embed, view=view)
             view.game_message = msg
         except discord.NotFound:
-            msg = await channel.send(
-                content=f"🧠 **Reproduisez la suite dans le bon ordre !**\n\n"
-                        f"**Progression :** {progress_bar} (0/{len(sequence)})",
-                view=view
-            )
+            msg = await safe_send(channel, embed=game_embed, view=view)
             view.game_message = msg
 
 
@@ -106,73 +101,97 @@ class MemoryFormes(commands.Cog):
 # 🔹 View personnalisée
 # ================================================================
 class MemoryView(discord.ui.View):
-    def __init__(self, forms, sequence, user_id):
+    def __init__(self, sequence, user_id):
         super().__init__(timeout=45)
-        self.sequence = sequence
-        self.user_id = user_id
+        self.sequence      = sequence
+        self.user_id       = user_id
         self.user_sequence = []
         self.game_message: discord.Message | None = None
 
-        # Mélange des formes pour les boutons
-        shuffled = random.sample(forms, len(forms))
-        for symbol, color in shuffled:
-            self.add_item(MemoryButton(symbol, color))
+        # Boutons des formes (mélangés) — 3 lignes de 3 max
+        for symbol in self.sequence:
+            self.add_item(MemoryButton(symbol))
 
+        # Bouton "Supprimer"
         self.add_item(DeleteLastButton())
 
-    def build_progress(self) -> str:
-        """Construit l'affichage de progression avec les formes choisies."""
-        filled = [s[0] for s in self.user_sequence]
-        empty = ["⬛"] * (len(self.sequence) - len(filled))
-        bar = " ".join(filled + empty)
-        return f"**Progression :** {bar} ({len(self.user_sequence)}/{len(self.sequence)})"
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message("❌ Ce n'est pas votre partie !", ephemeral=True)
+            return False
+        return True
 
-    async def refresh_message(self, interaction: discord.Interaction):
-        """Met à jour le message avec la progression actuelle."""
-        progress = self.build_progress()
-        await interaction.message.edit(
-            content=f"🧠 **Reproduisez la suite dans le bon ordre !**\n\n{progress}",
-            view=self
+    def build_embed(self) -> discord.Embed:
+        """Construit l'embed principal du jeu avec la progression."""
+        progress_bar = self._build_progress_bar()
+
+        embed = discord.Embed(
+            title="🧠 Reproduisez la suite !",
+            description=(
+                f"Clique sur les formes **dans le bon ordre**.\n\n"
+                f"**Progression :**\n{progress_bar}\n\n"
+                f"**{len(self.user_sequence)} / {len(self.sequence)}**"
+            ),
+            color=discord.Color.orange()
         )
+        return embed
 
-    async def check_win(self, interaction: discord.Interaction):
-        """Vérifie si la séquence est complète et détermine victoire/défaite."""
-        if len(self.user_sequence) < len(self.sequence):
-            return
+    def _build_progress_bar(self) -> str:
+        """Construit la barre de progression avec les formes choisies + les cases vides."""
+        filled = [s for s in self.user_sequence]
+        empty  = ["⬛"] * (len(self.sequence) - len(filled))
+        return " ".join(filled + empty)
 
-        correct = self.user_sequence == self.sequence
-        good = " ".join([s[0] for s in self.sequence])
-        given = " ".join([s[0] for s in self.user_sequence])
+    async def refresh(self, interaction: discord.Interaction):
+        """Met à jour l'embed + désactive les boutons si terminé."""
+        finished = len(self.user_sequence) >= len(self.sequence)
 
-        if correct:
-            msg = (
-                f"✅ **Bravo !** Vous avez reproduit la bonne suite !\n\n"
-                f"**Suite :** {good}"
-            )
+        if finished:
+            for item in self.children:
+                item.disabled = True
+
+            correct = self.user_sequence == self.sequence
+            given   = " ".join(self.user_sequence)
+            good    = " ".join(self.sequence)
+
+            if correct:
+                embed = discord.Embed(
+                    title="✅ Bravo !",
+                    description=f"Tu as reproduit la bonne suite !\n\n**Suite :** {good}",
+                    color=discord.Color.green()
+                )
+            else:
+                embed = discord.Embed(
+                    title="❌ Raté !",
+                    description=(
+                        f"**Ta réponse :** {given}\n"
+                        f"**Bonne suite :** {good}"
+                    ),
+                    color=discord.Color.red()
+                )
+            embed.set_footer(text=f"Joueur : {interaction.user.display_name}")
+            self.stop()
         else:
-            msg = (
-                f"❌ **Raté !** Ce n'était pas la bonne suite.\n\n"
-                f"**Votre réponse :** {given}\n"
-                f"**Bonne suite :** {good}"
-            )
+            embed = self.build_embed()
 
-        for item in self.children:
-            item.disabled = True
-
-        await interaction.message.edit(content=msg, view=self)
-        self.stop()
+        try:
+            await safe_edit(interaction.message, embed=embed, view=self)
+        except discord.NotFound:
+            pass
 
     async def on_timeout(self):
         """Désactive les boutons si le temps est écoulé."""
         if self.game_message:
             for item in self.children:
                 item.disabled = True
-            good = " ".join([s[0] for s in self.sequence])
+            good = " ".join(self.sequence)
+            embed = discord.Embed(
+                title="⏰ Temps écoulé !",
+                description=f"**La bonne suite était :** {good}",
+                color=discord.Color.dark_gray()
+            )
             try:
-                await self.game_message.edit(
-                    content=f"⏰ **Temps écoulé !**\n\n**La bonne suite était :** {good}",
-                    view=self
-                )
+                await safe_edit(self.game_message, embed=embed, view=self)
             except discord.NotFound:
                 pass
 
@@ -181,26 +200,20 @@ class MemoryView(discord.ui.View):
 # 🔹 Bouton mémoire — ajouter une forme
 # ================================================================
 class MemoryButton(discord.ui.Button):
-    def __init__(self, symbol, color):
+    def __init__(self, symbol: str):
         super().__init__(label=symbol, style=discord.ButtonStyle.secondary)
         self.symbol = symbol
-        self.color = color
 
     async def callback(self, interaction: discord.Interaction):
         view: MemoryView = self.view
 
-        if interaction.user.id != view.user_id:
-            return await interaction.response.send_message("❌ Ce n'est pas votre partie !", ephemeral=True)
-
-        # Empêche de dépasser la longueur attendue
         if len(view.user_sequence) >= len(view.sequence):
-            return await interaction.response.send_message("⚠️ Vous avez déjà rempli toute la suite !", ephemeral=True)
+            return
 
-        view.user_sequence.append((self.symbol, self.color))
+        view.user_sequence.append(self.symbol)
 
         await interaction.response.defer()
-        await view.refresh_message(interaction)
-        await view.check_win(interaction)
+        await view.refresh(interaction)
 
 
 # ================================================================
@@ -208,19 +221,16 @@ class MemoryButton(discord.ui.Button):
 # ================================================================
 class DeleteLastButton(discord.ui.Button):
     def __init__(self):
-        super().__init__(label="⬅️ Supprimer", style=discord.ButtonStyle.danger, row=4)
+        super().__init__(label="⬅️ Supprimer", style=discord.ButtonStyle.danger)
 
     async def callback(self, interaction: discord.Interaction):
         view: MemoryView = self.view
-
-        if interaction.user.id != view.user_id:
-            return await interaction.response.send_message("❌ Ce n'est pas votre partie !", ephemeral=True)
 
         if view.user_sequence:
             view.user_sequence.pop()
 
         await interaction.response.defer()
-        await view.refresh_message(interaction)
+        await view.refresh(interaction)
 
 
 # ================================================================
