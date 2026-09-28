@@ -63,10 +63,49 @@ class LightsOutGame:
     def check_win(self) -> bool:
         return all(not cell for row in self.grid for cell in row)
 
+    def get_solution(self) -> list[tuple[int, int]]:
+        """Calcule la liste des coordonnées (x, y) où cliquer pour résoudre la grille actuelle."""
+        n = self.size
+        N = n * n
+        A = np.zeros((N, N), dtype=int)
+        for y in range(n):
+            for x0 in range(n):
+                idx = y * n + x0
+                for dx, dy in [(0,0),(1,0),(-1,0),(0,1),(0,-1)]:
+                    nx, ny = x0 + dx, y + dy
+                    if 0 <= nx < n and 0 <= ny < n:
+                        A[ny * n + nx, idx] = 1
+
+        b = np.array([1 if self.grid[y][x0] else 0 for y in range(n) for x0 in range(n)], dtype=int)
+
+        # Résolution du système A * x = b (mod 2) par élimination de Gauss-Jordan
+        M = np.hstack([A, b.reshape(N, 1)]).astype(int) % 2
+        for i in range(N):
+            pivot = -1
+            for r in range(i, N):
+                if M[r, i] == 1:
+                    pivot = r
+                    break
+            if pivot == -1:
+                continue
+            if pivot != i:
+                M[[i, pivot]] = M[[pivot, i]]
+            for r in range(N):
+                if r != i and M[r, i] == 1:
+                    M[r] = (M[r] ^ M[i]) % 2
+
+        x_sol = M[:, N]
+        solution_coords = []
+        for y in range(n):
+            for x0 in range(n):
+                if x_sol[y * n + x0] == 1:
+                    solution_coords.append((x0 + 1, y + 1))  # Affichage 1-indexé pour l'humain
+        return solution_coords
+
     def get_embed(self) -> discord.Embed:
         embed = discord.Embed(
             title=f"💡 Jeu Lights Out — mode {self.mode.capitalize()}",
-            description="Clique sur les boutons pour éteindre toutes les lumières !",
+            description="Clique sur les boutons pour éteindre toutes les lumières !\n*(Tape `!lightsout solution` si tu es bloqué)*",
             color=discord.Color.gold(),
         )
         status = "✅ Toutes les lumières sont éteintes ! Bravo !" if self.terminee else "🕹️ Clique sur les cases pour jouer."
@@ -151,20 +190,53 @@ class LightsOut(commands.Cog):
     # ============================================================================
     @commands.command(name="lightsout", aliases=["lo"])
     async def lightsout_cmd(self, ctx: commands.Context, mode: str = ""):
+        mode = mode.lower()
+        if mode in ("solution", "soluce", "solve"):
+            await self.show_solution(ctx.channel, ctx)
+            return
         await self.start_game(ctx.channel, ctx.author.id, mode, ctx)
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="lightsout", description="Lancer une partie de Lights Out")
+    @app_commands.command(name="lightsout", description="Lancer une partie de Lights Out ou voir la solution")
+    @app_commands.describe(mode="Choisis 'multi', 'solution' ou laisse vide pour solo")
     async def slash_lightsout(self, interaction: discord.Interaction, mode: str = ""):
+        mode = mode.lower()
+        if mode in ("solution", "soluce", "solve"):
+            await self.show_solution(interaction.channel, interaction, is_slash=True)
+            return
         await self.start_game(interaction.channel, interaction.user.id, mode, interaction)
+
+    # ============================================================================
+    # 🔹 Méthode pour afficher la solution
+    # ============================================================================
+    async def show_solution(self, channel, ctx_or_interaction, is_slash: bool = False):
+        session = self.sessions.get(channel.id)
+        if not session:
+            msg = "❌ Aucune partie de Lights Out n'est en cours dans ce salon."
+            if is_slash:
+                await ctx_or_interaction.response.send_message(msg, ephemeral=True)
+            else:
+                await safe_send(channel, msg)
+            return
+
+        solution = session.game.get_solution()
+        if not solution:
+            text = "🎉 La grille est déjà résolue !"
+        else:
+            coords_str = ", ".join([f"(Ligne {y}, Col {x})" for x, y in solution])
+            text = f"💡 **Solution pour éteindre les lumières restantes :**\n Clique sur les cases : {coords_str}"
+
+        if is_slash:
+            await ctx_or_interaction.response.send_message(text, ephemeral=True)
+        else:
+            await safe_send(channel, text)
 
     # ============================================================================
     # 🔹 Méthode commune pour lancer une partie
     # ============================================================================
     async def start_game(self, channel, author_id: int, mode: str, ctx_or_interaction):
-        mode = mode.lower()
         if mode not in ("multi", "m"):
             mode = "solo"
         channel_id = channel.id
@@ -173,16 +245,19 @@ class LightsOut(commands.Cog):
             if isinstance(ctx_or_interaction, commands.Context):
                 await safe_send(channel, msg)
             else:
-                await safe_respond(ctx_or_interaction, msg)
+                await ctx_or_interaction.response.send_message(msg, ephemeral=True)
             return
+
         game = LightsOutGame(mode=mode)
         embed = game.get_embed()
         view = LightsOutView(game, self, channel_id, player_id=author_id if mode=="solo" else None)
+        
         if isinstance(ctx_or_interaction, commands.Context):
             message = await safe_send(channel, embed=embed, view=view)
         else:
-            message = await ctx_or_interaction.channel.send(embed=embed, view=view)
-            await ctx_or_interaction.response.send_message("✅ Partie lancée !", ephemeral=True)
+            await ctx_or_interaction.response.send_message(embed=embed, view=view)
+            message = await ctx_or_interaction.original_response()
+
         session = LightsOutSession(game, message, mode=mode, author_id=author_id)
         self.sessions[channel_id] = session
 
