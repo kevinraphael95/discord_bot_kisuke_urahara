@@ -193,9 +193,14 @@ class Division(commands.Cog):
             description=f"Tu serais dans la **{best_division}** !\n\n{div_info['description']}",
             color=discord.Color.green()
         )
-        embed_result.set_image(url=f"attachment://{os.path.basename(div_info['image'])}")
 
-        await safe_edit(message, embed=embed_result, view=None)
+        # === Pièce jointe de l'image ===
+        image_path = div_info["image"]
+        filename   = os.path.basename(image_path)
+        file       = discord.File(image_path, filename=filename)
+        embed_result.set_image(url=f"attachment://{filename}")
+
+        await safe_edit(message, embed=embed_result, view=None, file=file)
         await self._valider_quete(author, channel=channel)
 
     # ============================================================================
