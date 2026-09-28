@@ -24,11 +24,16 @@ class MemoryFormes(commands.Cog):
     """
     Commande /formes et !formes — Jouez au mini-jeu mémoire
     """
-    # Ordre rangé : cœurs, puis carrés, puis ronds — chacun rouge, bleu, blanc
-    FORMS = [
-        "❤️", "💙", "🤍",   # cœurs : rouge, bleu, blanc
-        "🟥", "🟦", "⬜",   # carrés : rouge, bleu, blanc
-        "🔴", "🔵", "⚪",   # ronds  : rouge, bleu, blanc
+    FORMS = ["❤️", "💙", "🤍", "🟥", "🟦", "⬜", "🔴", "🔵", "⚪"]
+
+    # Disposition : 3 boutons par ligne
+    # Ligne 1 : cœurs (rouge, bleu, blanc)
+    # Ligne 2 : carrés (rouge, bleu, blanc)
+    # Ligne 3 : ronds  (rouge, bleu, blanc)
+    LAYOUT = [
+        ["❤️", "💙", "🤍"],
+        ["🟥", "🟦", "⬜"],
+        ["🔴", "🔵", "⚪"],
     ]
 
     def __init__(self, bot: commands.Bot):
@@ -87,7 +92,7 @@ class MemoryFormes(commands.Cog):
 
         await asyncio.sleep(1)
 
-        view       = MemoryView(sequence, self.FORMS, user.id)
+        view       = MemoryView(sequence, self.LAYOUT, user.id)
         game_embed = view.build_embed()
 
         try:
@@ -102,18 +107,20 @@ class MemoryFormes(commands.Cog):
 # 🔹 View personnalisée
 # ================================================================
 class MemoryView(discord.ui.View):
-    def __init__(self, sequence, all_forms, user_id):
+    def __init__(self, sequence, layout, user_id):
         super().__init__(timeout=45)
         self.sequence      = sequence
         self.user_id       = user_id
         self.user_sequence = []
         self.game_message: discord.Message | None = None
 
-        # 👇 Boutons = TOUTES les formes, DANS L'ORDRE de la liste FORMS
-        for symbol in all_forms:
-            self.add_item(MemoryButton(symbol))
+        # 👇 3 boutons par ligne, selon le layout
+        for row_idx, row_symbols in enumerate(layout):
+            for symbol in row_symbols:
+                self.add_item(MemoryButton(symbol, row=row_idx))
 
-        self.add_item(DeleteLastButton())
+        # Bouton "Supprimer" sur la ligne suivante
+        self.add_item(DeleteLastButton(row=len(layout)))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.user_id:
@@ -200,8 +207,8 @@ class MemoryView(discord.ui.View):
 # 🔹 Bouton mémoire — ajouter une forme
 # ================================================================
 class MemoryButton(discord.ui.Button):
-    def __init__(self, symbol: str):
-        super().__init__(label=symbol, style=discord.ButtonStyle.secondary)
+    def __init__(self, symbol: str, row: int = 0):
+        super().__init__(label=symbol, style=discord.ButtonStyle.secondary, row=row)
         self.symbol = symbol
 
     async def callback(self, interaction: discord.Interaction):
@@ -220,8 +227,8 @@ class MemoryButton(discord.ui.Button):
 # 🔹 Bouton supprimer la dernière forme
 # ================================================================
 class DeleteLastButton(discord.ui.Button):
-    def __init__(self):
-        super().__init__(label="⬅️ Supprimer", style=discord.ButtonStyle.danger)
+    def __init__(self, row: int = 4):
+        super().__init__(label="⬅️ Supprimer", style=discord.ButtonStyle.danger, row=row)
 
     async def callback(self, interaction: discord.Interaction):
         view: MemoryView = self.view
