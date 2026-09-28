@@ -141,14 +141,14 @@ class MastermindView(View):
 
         await self.update_message()
         try:
-            await interaction.response.defer()
+            if not interaction.response.is_done():
+                await interaction.response.defer()
         except discord.InteractionResponded:
             pass
 
     async def show_result(self, interaction: discord.Interaction, win: bool):
         self.stop()
         
-        # On nettoie les boutons de jeu et on ajoute le bouton Rejouer
         self.clear_items()
         self.add_item(ReplayButton(self.author, self.code_length, self.corruption))
 
@@ -161,7 +161,10 @@ class MastermindView(View):
         )
         embed.color = discord.Color.green() if win else discord.Color.red()
         try:
-            await interaction.response.edit_message(embed=embed, view=self)
+            if not interaction.response.is_done():
+                await interaction.response.edit_message(embed=embed, view=self)
+            else:
+                await interaction.edit_original_response(embed=embed, view=self)
         except discord.InteractionResponded:
             await interaction.edit_original_response(embed=embed, view=self)
 
@@ -182,7 +185,8 @@ class ColorButton(Button):
         self.view_ref.current_guess.append(self.color)
         await self.view_ref.update_message()
         try:
-            await interaction.response.defer()
+            if not interaction.response.is_done():
+                await interaction.response.defer()
         except discord.InteractionResponded:
             pass
 
@@ -197,7 +201,8 @@ class ClearButton(Button):
         self.view_ref.current_guess.clear()
         await self.view_ref.update_message()
         try:
-            await interaction.response.defer()
+            if not interaction.response.is_done():
+                await interaction.response.defer()
         except discord.InteractionResponded:
             pass
 
@@ -230,7 +235,14 @@ class ReplayButton(Button):
         new_view = MastermindView(self.author, self.code_length, self.corruption)
         new_view.message = interaction.message
         embed = new_view.build_embed()
-        await interaction.response.edit_message(embed=embed, view=new_view)
+        
+        try:
+            if not interaction.response.is_done():
+                await interaction.response.edit_message(embed=embed, view=new_view)
+            else:
+                await interaction.edit_original_response(embed=embed, view=new_view)
+        except discord.InteractionResponded:
+            await interaction.edit_original_response(embed=embed, view=new_view)
 
 # ================================================================================
 # 🎛️ Menu de sélection de difficulté
@@ -257,7 +269,15 @@ class DifficultyButton(Button):
         length = self.code_length if self.code_length is not None else random.randint(8, 10)
         view = MastermindView(self.author, length, self.corruption)
         embed = view.build_embed()
-        await interaction.response.edit_message(embed=embed, view=view)
+        
+        try:
+            if not interaction.response.is_done():
+                await interaction.response.edit_message(embed=embed, view=view)
+            else:
+                await interaction.edit_original_response(embed=embed, view=view)
+        except discord.InteractionResponded:
+            await interaction.edit_original_response(embed=embed, view=view)
+            
         view.message = interaction.message
 
 # ================================================================================
