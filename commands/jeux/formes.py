@@ -55,26 +55,23 @@ class MemoryFormes(commands.Cog):
         is_interaction = isinstance(ctx_or_interaction, discord.Interaction)
         user    = ctx_or_interaction.user if is_interaction else ctx_or_interaction.author
         channel = ctx_or_interaction.channel
-
-        # Choix aléatoire de 4 à 6 formes
+    
         sequence = random.sample(self.FORMS, random.randint(4, 6))
         sequence_str = " ".join(sequence)
-
-        # == Embed de départ
+    
         embed = discord.Embed(
             title="🧠 Test de mémoire",
             description=f"Retenez bien cette suite !\n\n# {sequence_str}\n\nDisparition dans **5**s...",
             color=discord.Color.blurple()
         )
         embed.set_footer(text=f"Joueur : {user.display_name}")
-
+    
         if is_interaction:
             await ctx_or_interaction.response.send_message(embed=embed)
             msg = await ctx_or_interaction.original_response()
         else:
             msg = await channel.send(embed=embed)
-
-        # Décompte visuel
+    
         for i in range(4, 0, -1):
             await asyncio.sleep(1)
             embed.description = f"Retenez bien cette suite !\n\n# {sequence_str}\n\nDisparition dans **{i}**s..."
@@ -82,13 +79,13 @@ class MemoryFormes(commands.Cog):
                 await safe_edit(msg, embed=embed)
             except discord.NotFound:
                 return
-
+    
         await asyncio.sleep(1)
-
-        # == Embed de jeu
-        view       = MemoryView(sequence, user.id)
+    
+        # 👇 Passe TOUTES les formes à la View
+        view       = MemoryView(sequence, self.FORMS, user.id)
         game_embed = view.build_embed()
-
+    
         try:
             await safe_edit(msg, embed=game_embed, view=view)
             view.game_message = msg
@@ -101,18 +98,18 @@ class MemoryFormes(commands.Cog):
 # 🔹 View personnalisée
 # ================================================================
 class MemoryView(discord.ui.View):
-    def __init__(self, sequence, user_id):
+    def __init__(self, sequence, all_forms, user_id):
         super().__init__(timeout=45)
         self.sequence      = sequence
         self.user_id       = user_id
         self.user_sequence = []
         self.game_message: discord.Message | None = None
 
-        # Boutons des formes (mélangés) — 3 lignes de 3 max
-        for symbol in self.sequence:
+        # 👇 Boutons = TOUTES les formes, mélangées
+        shuffled = random.sample(all_forms, len(all_forms))
+        for symbol in shuffled:
             self.add_item(MemoryButton(symbol))
 
-        # Bouton "Supprimer"
         self.add_item(DeleteLastButton())
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
