@@ -200,7 +200,8 @@ class Division(commands.Cog):
         file       = discord.File(image_path, filename=filename)
         embed_result.set_image(url=f"attachment://{filename}")
 
-        await safe_edit(message, embed=embed_result, view=None, file=file)
+        # 👇 CORRIGÉ : attachments=[file] au lieu de file=file
+        await safe_edit(message, embed=embed_result, view=None, attachments=[file])
         await self._valider_quete(author, channel=channel)
 
     # ============================================================================
