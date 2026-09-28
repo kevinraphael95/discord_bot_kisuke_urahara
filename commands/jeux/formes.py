@@ -24,7 +24,12 @@ class MemoryFormes(commands.Cog):
     """
     Commande /formes et !formes — Jouez au mini-jeu mémoire
     """
-    FORMS = ["❤️", "💙", "🤍", "🟥", "🟦", "⬜", "🔴", "🔵", "⚪"]
+    # Ordre rangé : cœurs, puis carrés, puis ronds — chacun rouge, bleu, blanc
+    FORMS = [
+        "❤️", "💙", "🤍",   # cœurs : rouge, bleu, blanc
+        "🟥", "🟦", "⬜",   # carrés : rouge, bleu, blanc
+        "🔴", "🔵", "⚪",   # ronds  : rouge, bleu, blanc
+    ]
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -55,23 +60,23 @@ class MemoryFormes(commands.Cog):
         is_interaction = isinstance(ctx_or_interaction, discord.Interaction)
         user    = ctx_or_interaction.user if is_interaction else ctx_or_interaction.author
         channel = ctx_or_interaction.channel
-    
-        sequence = random.sample(self.FORMS, random.randint(4, 6))
+
+        sequence     = random.sample(self.FORMS, random.randint(4, 6))
         sequence_str = " ".join(sequence)
-    
+
         embed = discord.Embed(
             title="🧠 Test de mémoire",
             description=f"Retenez bien cette suite !\n\n# {sequence_str}\n\nDisparition dans **5**s...",
             color=discord.Color.blurple()
         )
         embed.set_footer(text=f"Joueur : {user.display_name}")
-    
+
         if is_interaction:
             await ctx_or_interaction.response.send_message(embed=embed)
             msg = await ctx_or_interaction.original_response()
         else:
             msg = await channel.send(embed=embed)
-    
+
         for i in range(4, 0, -1):
             await asyncio.sleep(1)
             embed.description = f"Retenez bien cette suite !\n\n# {sequence_str}\n\nDisparition dans **{i}**s..."
@@ -79,13 +84,12 @@ class MemoryFormes(commands.Cog):
                 await safe_edit(msg, embed=embed)
             except discord.NotFound:
                 return
-    
+
         await asyncio.sleep(1)
-    
-        # 👇 Passe TOUTES les formes à la View
+
         view       = MemoryView(sequence, self.FORMS, user.id)
         game_embed = view.build_embed()
-    
+
         try:
             await safe_edit(msg, embed=game_embed, view=view)
             view.game_message = msg
@@ -105,9 +109,8 @@ class MemoryView(discord.ui.View):
         self.user_sequence = []
         self.game_message: discord.Message | None = None
 
-        # 👇 Boutons = TOUTES les formes, mélangées
-        shuffled = random.sample(all_forms, len(all_forms))
-        for symbol in shuffled:
+        # 👇 Boutons = TOUTES les formes, DANS L'ORDRE de la liste FORMS
+        for symbol in all_forms:
             self.add_item(MemoryButton(symbol))
 
         self.add_item(DeleteLastButton())
