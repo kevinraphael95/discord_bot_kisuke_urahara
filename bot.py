@@ -169,7 +169,16 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandNotFound):
         return
     else:
-        log.exception("Erreur non gérée dans !%s", ctx.command.name if ctx.command else "?")
+        # 👇 Affiche la VRAIE erreur dans le terminal (avec traceback)
+        import traceback
+        traceback.print_exception(type(error), error, error.__traceback__)
+
+        # 👇 Et l'écrit aussi dans les logs du panel
+        log.error(
+            "Erreur non gérée dans !%s : %s",
+            ctx.command.name if ctx.command else "?",
+            error
+        )
 
 # ================================================================================
 # ❗ Gestion des erreurs slash commands
