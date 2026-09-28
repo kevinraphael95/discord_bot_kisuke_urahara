@@ -2,67 +2,67 @@
   "divisions": {
     "1ère Division": {
       "traits": ["discipline", "leadership", "sagesse"],
-      "image": "data/images/divisions/division01.png",
+      "image": "assets/divisions/division01.png",
       "description": "La 1ère Division est le cœur du Gotei 13, symbole de l’autorité et de la sagesse. Dirigée par le Capitaine-Commandant, elle incarne la discipline absolue et la responsabilité de guider toutes les autres divisions. Ses membres sont choisis pour leur loyauté inébranlable et leur sens du devoir, prêts à porter le poids de décisions qui peuvent changer le destin de la Soul Society."
     },
     "2ème Division": {
       "traits": ["discrétion", "efficacité", "loyauté"],
-      "image": "data/images/divisions/division02.png",
+      "image": "assets/divisions/division02.png",
       "description": "La 2ème Division opère dans l’ombre : maîtres de l’espionnage, de l’assassinat et des opérations secrètes. Étroitement liée à l’Onmitsukidō (la Force Spéciale), elle incarne la précision et l’efficacité. Ses membres privilégient la rapidité et la discrétion, acceptant de tout sacrifier pour accomplir leurs missions, même au prix de leur propre vie."
     },
     "3ème Division": {
       "traits": ["fidélité", "obéissance", "manipulation"],
-      "image": "data/images/divisions/division03.png",
+      "image": "assets/divisions/division03.png",
       "description": "La 3ème Division est marquée par l’ambiguïté et la complexité. Elle représente à la fois la loyauté envers ses supérieurs et l’ombre de la manipulation. Ses membres excellent dans l’obéissance et l’adaptabilité, souvent dévoués, parfois troublés par le poids de la tromperie. Elle est le reflet des conflits intérieurs entre fidélité et ambition."
     },
     "4ème Division": {
       "traits": ["empathie", "altruisme", "pacifisme"],
-      "image": "data/images/divisions/division04.png",
+      "image": "assets/divisions/division04.png",
       "description": "La 4ème Division est celle des soigneurs, des protecteurs et des altruistes. Maîtres du Kidō de guérison, ses membres placent la vie au-dessus du combat. Ils incarnent la compassion et le pacifisme, mais leur rôle est vital : sans eux, aucune guerre ne pourrait être gagnée. Leur calme et leur humanité contrastent avec la brutalité des champs de bataille."
     },
     "5ème Division": {
       "traits": ["intelligence", "calme", "analyse"],
-      "image": "data/images/divisions/division05.png",
+      "image": "assets/divisions/division05.png",
       "description": "La 5ème Division se distingue par son sens du devoir, sa loyauté et sa recherche de l’équilibre. Ses membres sont calmes, réfléchis et intelligents, capables d’analyser les situations avec lucidité. Elle incarne la fiabilité et la stabilité au sein du Gotei 13, mais cache aussi une part de mystère qui a marqué son histoire."
     },
     "6ème Division": {
       "traits": ["fierté", "honneur", "rigueur"],
-      "image": "data/images/divisions/division06.png",
+      "image": "assets/divisions/division06.png",
       "description": "La 6ème Division incarne la noblesse, l’honneur et la stricte discipline. Fidèles au règlement et aux traditions de la Soul Society, ses membres considèrent l’obéissance aux lois comme une vertu suprême. Leur fierté et leur rigueur en font un modèle de droiture, mais aussi une division inflexible face à la moindre transgression."
     },
     "7ème Division": {
       "traits": ["honnêteté", "justice", "force morale"],
-      "image": "data/images/divisions/division07.png",
+      "image": "assets/divisions/division07.png",
       "description": "La 7ème Division est le visage de l’honnêteté et de la justice. Guidée par un profond sens moral, elle valorise la sincérité et la loyauté avant tout. Ses membres cherchent à protéger la Soul Society par des actions justes et honorables, préférant la droiture à la ruse. Ils incarnent la force tranquille et l’intégrité absolue."
     },
     "8ème Division": {
       "traits": ["détente", "humour", "improvisation"],
-      "image": "data/images/divisions/division08.png",
+      "image": "assets/divisions/division08.png",
       "description": "La 8ème Division est connue pour sa convivialité, son humour et son approche détendue de la vie. Ses membres privilégient la créativité et l’improvisation, trouvant toujours une manière originale de surmonter les obstacles. Derrière leur apparente insouciance, ils cachent une redoutable intelligence et une capacité à surprendre leurs adversaires."
     },
     "9ème Division": {
       "traits": ["courage", "endurance", "résilience"],
-      "image": "data/images/divisions/division09.png",
+      "image": "assets/divisions/division09.png",
       "description": "La 9ème Division incarne la détermination, la persévérance et la vigilance. Elle est historiquement liée à la protection de l’ordre et à la préservation de la mémoire de la Soul Society. Ses membres sont endurants et résilients, refusant de plier face à l’adversité. Leur rôle est de veiller et d’assurer que l’histoire ne soit jamais oubliée."
     },
     "10ème Division": {
       "traits": ["équilibre", "adaptabilité", "prudence"],
-      "image": "data/images/divisions/division10.png",
+      "image": "assets/divisions/division10.png",
       "description": "La 10ème Division symbolise l’équilibre et l’adaptabilité. Ses membres savent garder leur sang-froid même dans les situations critiques, privilégiant la prudence à l’impulsivité. Ils incarnent la modération et la rationalité, alliant intelligence et souplesse pour s’ajuster à chaque défi sans jamais perdre de vue leurs objectifs."
     },
     "11ème Division": {
       "traits": ["combat", "bravoure", "détermination"],
-      "image": "data/images/divisions/division11.png",
+      "image": "assets/divisions/division11.png",
       "description": "La 11ème Division est l’essence même du combat. Ses membres vivent pour le duel, cherchant la gloire dans l’affrontement direct. Le courage, la force brute et la détermination sont leurs valeurs suprêmes. Ils méprisent les subtilités du Kidō et ne jurent que par la puissance des lames, incarnant l’esprit guerrier pur du Gotei 13."
     },
     "12ème Division": {
       "traits": ["curiosité", "invention", "folie"],
-      "image": "data/images/divisions/division12.png",
+      "image": "assets/divisions/division12.png",
       "description": "La 12ème Division est celle des chercheurs, des inventeurs et des esprits visionnaires. Étroitement liée au Bureau de Développement Technologique, elle repousse sans cesse les limites de la science et de l’expérimentation. Ses membres incarnent la curiosité et l’innovation, mais flirtent souvent avec la folie et les dangers de leurs propres créations."
     },
     "13ème Division": {
       "traits": ["compassion", "détermination", "dévouement"],
-      "image": "data/images/divisions/division13.png",
+      "image": "assets/divisions/division13.png",
       "description": "La 13ème Division est un symbole de compassion, de fidélité et de détermination. Ses membres se distinguent par leur altruisme et leur sens du sacrifice, mettant toujours la protection des autres avant leur propre intérêt. Elle incarne l’espoir et la résilience, même dans les périodes les plus sombres de la Soul Society."
     }
   },
