@@ -28,7 +28,7 @@ DIFFICULTIES = [
     {"label": "Facile", "code_length": 3, "corruption": False},
     {"label": "Normal", "code_length": 4, "corruption": False},
     {"label": "Difficile", "code_length": 5, "corruption": False},
-    {"label": "Cauchemar", "code_length": random.randint(8, 10), "corruption": True},
+    {"label": "Cauchemar", "code_length": None, "corruption": True},
 ]
 
 # ================================================================================
@@ -51,6 +51,10 @@ class MastermindView(View):
         self.message = None
         self.result_shown = False
 
+        self.setup_game_buttons()
+
+    def setup_game_buttons(self):
+        self.clear_items()
         for color in COLORS:
             self.add_item(ColorButton(color, self))
         self.add_item(ValidateButton(self))
@@ -64,6 +68,7 @@ class MastermindView(View):
                 "🔴 : bonne couleur et bonne position\n"
                 "⚪ : bonne couleur mais mauvaise position\n"
                 "❌ : couleur absente"
+                + ("\n💀 : feedback corrompu !" if self.corruption else "")
             ),
             color=discord.Color.blue()
         )
@@ -142,8 +147,11 @@ class MastermindView(View):
 
     async def show_result(self, interaction: discord.Interaction, win: bool):
         self.stop()
-        for item in self.children:
-            item.disabled = True
+        
+        # On nettoie les boutons de jeu et on ajoute le bouton Rejouer
+        self.clear_items()
+        self.add_item(ReplayButton(self.author, self.code_length, self.corruption))
+
         embed = self.build_embed()
         embed.add_field(
             name="🏁 Résultat",
@@ -206,6 +214,25 @@ class ValidateButton(Button):
         await self.view_ref.make_attempt(interaction)
 
 # ================================================================================
+# 🔁 Bouton Rejouer de fin de partie
+# ================================================================================
+class ReplayButton(Button):
+    def __init__(self, author: discord.User | None, code_length: int, corruption: bool):
+        super().__init__(label="Rejouer", emoji="🔁", style=discord.ButtonStyle.primary)
+        self.author = author
+        self.code_length = code_length
+        self.corruption = corruption
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.author and interaction.user != self.author:
+            return await safe_respond(interaction, "⛔ Ce jeu ne t'appartient pas.", ephemeral=True)
+        
+        new_view = MastermindView(self.author, self.code_length, self.corruption)
+        new_view.message = interaction.message
+        embed = new_view.build_embed()
+        await interaction.response.edit_message(embed=embed, view=new_view)
+
+# ================================================================================
 # 🎛️ Menu de sélection de difficulté
 # ================================================================================
 class DifficultyView(View):
@@ -227,7 +254,8 @@ class DifficultyButton(Button):
         self.author = author
 
     async def callback(self, interaction: discord.Interaction):
-        view = MastermindView(self.author, self.code_length, self.corruption)
+        length = self.code_length if self.code_length is not None else random.randint(8, 10)
+        view = MastermindView(self.author, length, self.corruption)
         embed = view.build_embed()
         await interaction.response.edit_message(embed=embed, view=view)
         view.message = interaction.message
@@ -262,7 +290,7 @@ class Mastermind(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="mastermind",description="Jouer au Mastermind interactif.")
+    @app_commands.command(name="mastermind", description="Jouer au Mastermind interactif.")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_mastermind(self, interaction: discord.Interaction, mode: str = "solo"):
