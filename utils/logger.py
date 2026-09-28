@@ -21,6 +21,9 @@ from datetime import datetime
 # Garde les 500 dernières lignes en mémoire
 LOG_BUFFER = deque(maxlen=500)
 
+# Empêche les doubles initialisations (logs en double)
+_initialized = False   # 👈 AJOUTÉ
+
 
 def _add_entry(message: str):
     """Ajoute une entrée horodatée au buffer si le message n'est pas vide."""
@@ -76,7 +79,15 @@ def init_logger():
     - Attache un handler au root logger pour capturer tout ce qui passe par
       le module `logging` (log.exception, log.error, log.warning, ...),
       utilisé par exemple dans bot.py (on_app_command_error).
+
+    Ne s'exécute qu'UNE SEULE FOIS, même si appelé plusieurs fois
+    (sinon chaque print est enregistré en double dans LOG_BUFFER).
     """
+    global _initialized          # 👈 AJOUTÉ
+    if _initialized:             # 👈 AJOUTÉ
+        return                   # 👈 AJOUTÉ
+    _initialized = True          # 👈 AJOUTÉ
+
     sys.stdout = LogCapture(sys.stdout)
     sys.stderr = LogCapture(sys.stderr)
 
