@@ -1,6 +1,6 @@
 # ================================================================================
 # 💡 lightsout.py — Commande interactive !lightsout et /lightsout
-# Objectif : Jeu "Lights Out" avec grille de boutons interactifs (toujours résoluble)
+# Objectif : Jeu "Lights Out" avec grille de boutons et affichage de solution en emojis
 # Catégorie : Jeux
 # Accès : Public
 # ================================================================================
@@ -20,8 +20,6 @@ from utils.discord_utils import safe_send, safe_respond
 # ================================================================================
 TAILLE_GRILLE = 5
 INACTIVITE_MAX = 180
-COULEUR_ACTIVE = 0xFFD700
-COULEUR_INACTIVE = 0x2F3136
 
 # ================================================================================
 # 🧩 Classe LightsOutGame
@@ -63,8 +61,8 @@ class LightsOutGame:
     def check_win(self) -> bool:
         return all(not cell for row in self.grid for cell in row)
 
-    def get_solution(self) -> list[tuple[int, int]]:
-        """Calcule la liste des coordonnées (x, y) où cliquer pour résoudre la grille actuelle."""
+    def get_solution_matrix(self) -> list[list[bool]]:
+        """Calcule la matrice des coups à jouer (True = cliquer, False = ne rien faire)."""
         n = self.size
         N = n * n
         A = np.zeros((N, N), dtype=int)
@@ -78,7 +76,7 @@ class LightsOutGame:
 
         b = np.array([1 if self.grid[y][x0] else 0 for y in range(n) for x0 in range(n)], dtype=int)
 
-        # Résolution du système A * x = b (mod 2) par élimination de Gauss-Jordan
+        # Résolution Gauss-Jordan (mod 2)
         M = np.hstack([A, b.reshape(N, 1)]).astype(int) % 2
         for i in range(N):
             pivot = -1
@@ -95,12 +93,7 @@ class LightsOutGame:
                     M[r] = (M[r] ^ M[i]) % 2
 
         x_sol = M[:, N]
-        solution_coords = []
-        for y in range(n):
-            for x0 in range(n):
-                if x_sol[y * n + x0] == 1:
-                    solution_coords.append((x0 + 1, y + 1))  # Affichage 1-indexé pour l'humain
-        return solution_coords
+        return [[bool(x_sol[y * n + x0]) for x0 in range(n)] for y in range(n)]
 
     def get_embed(self) -> discord.Embed:
         embed = discord.Embed(
@@ -209,7 +202,7 @@ class LightsOut(commands.Cog):
         await self.start_game(interaction.channel, interaction.user.id, mode, interaction)
 
     # ============================================================================
-    # 🔹 Méthode pour afficher la solution
+    # 🔹 Méthode pour afficher la solution en emojis
     # ============================================================================
     async def show_solution(self, channel, ctx_or_interaction, is_slash: bool = False):
         session = self.sessions.get(channel.id)
@@ -221,12 +214,16 @@ class LightsOut(commands.Cog):
                 await safe_send(channel, msg)
             return
 
-        solution = session.game.get_solution()
-        if not solution:
-            text = "🎉 La grille est déjà résolue !"
-        else:
-            coords_str = ", ".join([f"(Ligne {y}, Col {x})" for x, y in solution])
-            text = f"💡 **Solution pour éteindre les lumières restantes :**\n Clique sur les cases : {coords_str}"
+        sol_matrix = session.game.get_solution_matrix()
+        
+        # Construction de la grille d'emojis
+        emoji_lines = []
+        for row in sol_matrix:
+            line = "".join(["🟢" if cell else "⬛" for cell in row])
+            emoji_lines.append(line)
+        
+        visual_grid = "\n".join(emoji_lines)
+        text = f"💡 **Solution (Grille à cliquer) :**\n{visual_grid}\n\n*(🟢 = À cliquer | ⬛ = Ne rien faire)*"
 
         if is_slash:
             await ctx_or_interaction.response.send_message(text, ephemeral=True)
