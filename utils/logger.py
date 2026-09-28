@@ -22,7 +22,7 @@ from datetime import datetime
 LOG_BUFFER = deque(maxlen=500)
 
 # Empêche les doubles initialisations (logs en double)
-_initialized = False   # 👈 AJOUTÉ
+_initialized = False
 
 
 def _add_entry(message: str):
@@ -80,13 +80,21 @@ def init_logger():
       le module `logging` (log.exception, log.error, log.warning, ...),
       utilisé par exemple dans bot.py (on_app_command_error).
 
-    Ne s'exécute qu'UNE SEULE FOIS, même si appelé plusieurs fois
-    (sinon chaque print est enregistré en double dans LOG_BUFFER).
+    Ne s'exécute qu'UNE SEULE FOIS, même si appelé plusieurs fois.
     """
-    global _initialized          # 👈 AJOUTÉ
-    if _initialized:             # 👈 AJOUTÉ
-        return                   # 👈 AJOUTÉ
-    _initialized = True          # 👈 AJOUTÉ
+    global _initialized
+    if _initialized:
+        return
+    _initialized = True
+
+    # ============================================================================
+    # 🔍 DEBUG : qui appelle init_logger() ?
+    # ============================================================================
+    import traceback
+    print("=== init_logger APPELÉ ===")
+    traceback.print_stack()
+    print("==========================")
+    # ============================================================================
 
     sys.stdout = LogCapture(sys.stdout)
     sys.stderr = LogCapture(sys.stderr)
