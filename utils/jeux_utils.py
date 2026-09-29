@@ -1,6 +1,6 @@
 # ================================================================================
 # 📌 jeux_utils.py — Fonctions utilitaires communes aux jeux
-# Objectif : Standardiser le comportement des jeux (modes, embeds, fin de partie)
+# Objectif : Standardiser le comportement des jeux (modes, embeds, réponses, fin)
 # Catégorie : Utils
 # Accès : Interne
 # ================================================================================
@@ -78,3 +78,77 @@ async def finish_game(message, embed, view=None):
         for child in view.children:
             child.disabled = True
     return await safe_edit(message, embed=embed, view=view)
+
+
+# ================================================================================
+# 🔹 Modal standardisée pour les jeux
+# ================================================================================
+class ReplyModal(discord.ui.Modal):
+    """Modal standard : un seul champ de saisie pour répondre à un jeu."""
+
+    def __init__(
+        self,
+        title: str,
+        label: str,
+        placeholder: str,
+        max_length: int,
+        on_submit_callback,
+    ):
+        super().__init__(title=title)
+        self.on_submit_callback = on_submit_callback
+
+        self.answer = discord.ui.TextInput(
+            label=label,
+            placeholder=placeholder,
+            required=True,
+            max_length=max_length,
+        )
+        self.add_item(self.answer)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await self.on_submit_callback(interaction, self.answer.value)
+
+
+# ================================================================================
+# 🔹 View standardisée : bouton "✍️ Répondre"
+# ================================================================================
+class ReplyView(discord.ui.View):
+    """View standard avec un bouton '✍️ Répondre' qui ouvre une modal."""
+
+    def __init__(
+        self,
+        user_id: int,
+        modal_title: str,
+        modal_label: str,
+        modal_placeholder: str = "...",
+        modal_max_length: int = 50,
+        on_submit=None,
+        timeout: int = 180,
+    ):
+        super().__init__(timeout=timeout)
+        self.user_id           = user_id
+        self.modal_title       = modal_title
+        self.modal_label       = modal_label
+        self.modal_placeholder = modal_placeholder
+        self.modal_max_length  = modal_max_length
+        self.on_submit         = on_submit
+        self.message           = None
+
+    @discord.ui.button(label="✍️ Répondre", style=discord.ButtonStyle.primary)
+    async def reply(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.user_id:
+            await safe_respond(interaction, "❌ Ce n'est pas ton jeu.", ephemeral=True)
+            return
+
+        if self.on_submit is None:
+            await safe_respond(interaction, "❌ Ce jeu est mal configuré.", ephemeral=True)
+            return
+
+        modal = ReplyModal(
+            title=self.modal_title,
+            label=self.modal_label,
+            placeholder=self.modal_placeholder,
+            max_length=self.modal_max_length,
+            on_submit_callback=self.on_submit,
+        )
+        await interaction.response.send_modal(modal)
