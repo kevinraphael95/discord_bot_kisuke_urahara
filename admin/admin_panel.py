@@ -57,11 +57,16 @@ app.config.update(
 
 csrf = CSRFProtect(app)
 
+# ✅ Exemption du rate-limit pour localhost (le panel se poll lui-même)
+def _is_local_request():
+    return request.remote_addr in ("127.0.0.1", "::1", "localhost")
+
 limiter = Limiter(
     get_remote_address,
     app=app,
     default_limits=["500 per day", "100 per hour"],
     storage_uri="memory://",
+    default_limits_exempt_when=_is_local_request,  # ✅ localhost exempté
 )
 
 # === Auth ======================================================================
