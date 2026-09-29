@@ -71,7 +71,6 @@ class AnagrammeView:
         self.message           = None
         self.finished          = False
         self.start_time        = asyncio.get_event_loop().time()
-        self.current_turn_user = None
 
     def build_embed(self) -> discord.Embed:
         mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
@@ -80,13 +79,6 @@ class AnagrammeView:
             description=f"Mot mélangé : **{' '.join(self.display_word)}**",
             color=discord.Color.orange()
         )
-
-        if self.multi and self.current_turn_user is not None:
-            embed.add_field(
-                name="🎯 Au tour de",
-                value=self.current_turn_user.mention,
-                inline=False,
-            )
 
         if self.multi:
             instructions = (
@@ -130,53 +122,6 @@ class AnagrammeView:
 
         return embed
 
-    async def process_guess(self, channel, guess: str, author_name: str, author_id: int, silent: bool = False):
-        if self.finished:
-            if not silent:
-                await safe_send(channel, "⚠️ La partie est terminée.")
-            return False, "La partie est terminée."
-
-        if not self.multi and author_id != self.author_id:
-            return False, "Ce n'est pas ton tour."
-
-        filtered_guess = guess.strip(".* ").upper()
-
-        if len(filtered_guess) != self.display_length:
-            raison = f"Le mot doit faire {self.display_length} lettres."
-            if not silent:
-                await safe_send(channel, f"⚠️ {raison}")
-            return False, raison
-
-        if not is_valid_word(filtered_guess):
-            raison = f"`{filtered_guess}` n'est pas reconnu comme un mot valide."
-            if not silent:
-                await safe_send(channel, f"❌ {raison}")
-            return False, raison
-
-        self.attempts.append({'word': filtered_guess, 'author': author_name})
-
-        if normalize_text(filtered_guess) == normalize_text(self.target_word):
-            self.finished = True
-        elif not self.multi and len(self.attempts) >= self.max_attempts:
-            self.finished = True
-
-        if self.message:
-            await safe_edit(self.message, embed=self.build_embed())
-
-        return True, ""
-
-    async def check_timeout(self, game_view=None):
-        while not self.finished:
-            await asyncio.sleep(5)
-            elapsed = asyncio.get_event_loop().time() - self.start_time
-            if elapsed >= 180:
-                self.finished = True
-                if self.message:
-                    await safe_edit(self.message, embed=self.build_embed())
-                if game_view is not None and hasattr(game_view, "mark_finished"):
-                    await game_view.mark_finished()
-                break
-
 # ================================================================================
 # 🧠 Cog principal
 # ================================================================================
@@ -189,113 +134,117 @@ class Anagramme(commands.Cog):
         length      = random.choice(range(5, 9))
         target_word = await get_random_french_word(length=length)
         multi       = parse_mode(mode)
-        author_filter = None if multi else author_id
 
-        view  = AnagrammeView(target_word, author_id=author_filter, multi=multi)
-        embed = view.build_embed()
+        game  = AnagrammeView(target_word, author_id=author_id, multi=multi)
+        state = {"finished": False}
 
-        # ── Mode Solo : bouton "✍️ Répondre" ──
-        if not multi:
-            async def on_submit(interaction, answer):
-                # ✅ Defer IMMÉDIATEMENT pour éviter l'expiration de l'interaction
-                try:
-                    await interaction.response.defer(ephemeral=True)
-                except discord.NotFound:
-                    return
+        embed = game.build_embed()
 
-                ok, raison = await view.process_guess(
+        # ── Callback de validation (comme capitales) ──
+        async def on_submit(interaction, answer):
+            # ✅ Defer immédiat
+            try:
+                await interaction.response.defer(ephemeral=True)
+            except discord.NotFound:
+                return
+
+            # Vérifications
+            if state["finished"]:
+                await interaction.followup.send("❌ La partie est terminée.", ephemeral=True)
+                return
+
+            if not game.multi and interaction.user.id != game.author_id:
+                await interaction.followup.send("❌ Ce n'est pas ton jeu.", ephemeral=True)
+                return
+
+            guess = answer.strip().upper()
+
+            if len(guess) != game.display_length:
+                await interaction.followup.send(
+                    f"❌ Le mot doit faire {game.display_length} lettres.", ephemeral=True
+                )
+                return
+
+            if not is_valid_word(guess):
+                await interaction.followup.send(
+                    f"❌ `{guess}` n'est pas un mot valide.", ephemeral=True
+                )
+                return
+
+            # ✅ Enregistre l'essai
+            game.attempts.append({'word': guess, 'author': interaction.user.display_name})
+
+            # ✅ Bonne réponse ?
+            if normalize_text(guess) == normalize_text(game.target_word):
+                state["finished"] = True
+                game.finished = True
+
+                # Message public
+                await safe_send(
                     interaction.channel,
-                    answer,
-                    interaction.user.display_name,
-                    interaction.user.id,
-                    silent=True,
+                    f"🎉 {interaction.user.mention} a trouvé ! C'était bien **{game.target_word}**."
                 )
 
-                if not ok:
-                    await interaction.followup.send(f"❌ {raison}", ephemeral=True)
-                    return
+                final_embed = game.build_embed()
+                await view.mark_finished(embed=final_embed)
+                await interaction.followup.send("🎉 Bien joué !", ephemeral=True)
 
-                if view.finished:
-                    await reply_view.mark_finished()
-                    await interaction.followup.send("🎉 Bien joué !", ephemeral=True)
-                else:
-                    await interaction.followup.send("✅ Proposition envoyée !", ephemeral=True)
+            # ❌ Mauvaise réponse
+            else:
+                # Met à jour l'embed avec l'essai
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
+                await interaction.followup.send("✅ Proposition envoyée !", ephemeral=True)
 
-            reply_view = ReplyView(
+        # ── Création de la view (comme capitales) ──
+        if multi:
+            async def on_buzz(user):
+                await safe_send(
+                    channel,
+                    f"🎯 {user.mention} a buzzé ! À toi de proposer."
+                )
+
+            view = BuzzerView(
+                modal_title="✍️ Propose ton mot",
+                modal_label="Mot",
+                modal_placeholder=f"Mot de {game.display_length} lettres",
+                modal_max_length=game.display_length,
+                on_submit=on_submit,
+                on_buzz=on_buzz,
+                buzz_timeout=30,
+                view_timeout=300,
+            )
+        else:
+            view = ReplyView(
                 user_id=author_id,
                 modal_title="✍️ Propose ton mot",
                 modal_label="Mot",
-                modal_placeholder=f"Mot de {view.display_length} lettres",
-                modal_max_length=view.display_length,
+                modal_placeholder=f"Mot de {game.display_length} lettres",
+                modal_max_length=game.display_length,
                 on_submit=on_submit,
-                timeout=180,
+                timeout=300,
             )
-            msg = await safe_send(channel, embed=embed, view=reply_view)
-            if msg is not None:
-                reply_view.message = msg
-                view.message       = msg
 
-        # ── Mode Multi : buzzer ──
-        else:
-            async def update_embed_turn(user: discord.Member):
-                view.current_turn_user = user
-                if view.message:
-                    await safe_edit(view.message, embed=view.build_embed())
-
-            async def clear_embed_turn():
-                view.current_turn_user = None
-                if view.message:
-                    await safe_edit(view.message, embed=view.build_embed())
-
-            async def on_submit(interaction, answer):
-                # ✅ Defer IMMÉDIATEMENT
-                try:
-                    await interaction.response.defer(ephemeral=True)
-                except discord.NotFound:
-                    return
-
-                await clear_embed_turn()
-
-                ok, raison = await view.process_guess(
-                    interaction.channel,
-                    answer,
-                    interaction.user.display_name,
-                    interaction.user.id,
-                    silent=True,
-                )
-
-                if not ok:
-                    await interaction.followup.send(f"❌ {raison}", ephemeral=True)
-                    return
-
-                if view.finished:
-                    await buzz_view.mark_finished()
-                    await interaction.followup.send("🎉 Bien joué !", ephemeral=True)
-                else:
-                    await interaction.followup.send("✅ Proposition envoyée !", ephemeral=True)
-
-            buzz_view = BuzzerView(
-                modal_title="✍️ Propose ton mot",
-                modal_label="Mot",
-                modal_placeholder=f"Mot de {view.display_length} lettres",
-                modal_max_length=view.display_length,
-                on_submit=on_submit,
-                on_buzz=update_embed_turn,
-                on_buzz_timeout=clear_embed_turn,
-                buzz_timeout=10,
-                view_timeout=180,
-            )
-            msg = await safe_send(channel, embed=embed, view=buzz_view)
-            if msg is not None:
-                buzz_view.message = msg
-                view.message      = msg
-
+        view.message = await safe_send(channel, embed=embed, view=view)
         if view.message is None:
             return
+        game.message = view.message
 
-        self.active_games[channel.id] = view
-        game_view = buzz_view if multi else reply_view
-        asyncio.create_task(view.check_timeout(game_view))
+        self.active_games[channel.id] = game
+
+        # ── Attente (3 minutes) ──
+        try:
+            await asyncio.sleep(180)
+        except asyncio.CancelledError:
+            return
+
+        if state["finished"]:
+            return
+
+        # ── Fin du temps ──
+        game.finished = True
+        final_embed = game.build_embed()
+        await view.mark_finished(embed=final_embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
