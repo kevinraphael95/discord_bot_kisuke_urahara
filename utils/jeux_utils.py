@@ -167,6 +167,17 @@ class ReplyView(discord.ui.View):
         except discord.NotFound:
             pass
 
+    async def mark_finished(self):
+        """Marque la partie comme terminée et désactive les boutons (édition immédiate)."""
+        self.finished = True
+        for child in self.children:
+            child.disabled = True
+        if self.message:
+            try:
+                await safe_edit(self.message, view=self)
+            except Exception:
+                pass
+
 
 # ================================================================================
 # 🔹 View avec BUZZER + Modal (1 seul joueur à la fois)
@@ -223,7 +234,7 @@ class BuzzerView(discord.ui.View):
         self.buzzer_id  = interaction.user.id
         button.disabled = True
 
-        # ✅ 1. ENVOIE LA MODAL EN PREMIER (répond à l'interaction, évite le 404)
+        # ✅ 1. ENVOIE LA MODAL EN PREMIER
         modal = ReplyModal(
             title=self.modal_title,
             label=self.modal_label,
@@ -239,14 +250,14 @@ class BuzzerView(discord.ui.View):
             button.disabled = False
             return
 
-        # ✅ 2. Callback externe (mention dans le salon)
+        # ✅ 2. Callback externe
         if self.on_buzz:
             try:
                 await self.on_buzz(interaction)
             except Exception as e:
                 log.exception("[BuzzerView] on_buzz a échoué : %s", e)
 
-        # ✅ 3. Édition du message pour montrer qui a buzzé
+        # ✅ 3. Édition du message
         if self.message:
             try:
                 await safe_edit(self.message, view=self)
@@ -289,8 +300,7 @@ class BuzzerView(discord.ui.View):
         return _callback
 
     def unlock(self, force: bool = False):
-        """Déverrouille le buzzer pour le tour suivant.
-        - Si `finished=True` → ne réactive PAS les boutons (sauf si force=True)."""
+        """Déverrouille le buzzer pour le tour suivant."""
         self.buzzer_id = None
         if self.buzz_task and not self.buzz_task.done():
             self.buzz_task.cancel()
@@ -307,14 +317,14 @@ class BuzzerView(discord.ui.View):
             except Exception:
                 pass
 
-    def mark_finished(self):
-        """Marque la partie comme terminée et désactive les boutons."""
+    async def mark_finished(self):
+        """Marque la partie comme terminée et désactive les boutons (édition immédiate)."""
         self.finished = True
         for child in self.children:
             child.disabled = True
         if self.message:
             try:
-                asyncio.create_task(safe_edit(self.message, view=self))
+                await safe_edit(self.message, view=self)
             except Exception:
                 pass
 
