@@ -46,7 +46,7 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!!")
 ADMIN_PORT = int(os.getenv("ADMIN_PORT", "5050"))
-GITHUB_URL = "https://github.com/kevinraphael95/kisuke"
+GITHUB_URL = "https://github.com/kevinraphael95/discord_bot_kisuke_urahara"
 
 def get_prefix(bot, message):
     return COMMAND_PREFIX
