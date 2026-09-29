@@ -9,10 +9,13 @@
 # 📦 Imports nécessaires
 # ================================================================================
 import asyncio
+import logging
 import unicodedata
 import discord
 
 from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followup
+
+log = logging.getLogger(__name__)
 
 
 # ================================================================================
@@ -152,7 +155,11 @@ class ReplyView(discord.ui.View):
             max_length=self.modal_max_length,
             on_submit_callback=self.on_submit,
         )
-        await interaction.response.send_modal(modal)
+        try:
+            await interaction.response.send_modal(modal)
+        except discord.NotFound:
+            # L'interaction a expiré, on abandonne proprement
+            pass
 
 
 # ================================================================================
@@ -203,21 +210,7 @@ class BuzzerView(discord.ui.View):
         self.buzzer_id  = interaction.user.id
         button.disabled = True
 
-        # Met à jour le message pour montrer qui a buzzé
-        if self.message:
-            try:
-                await safe_edit(self.message, view=self)
-            except Exception:
-                pass
-
-        # Callback externe (mention dans le salon, etc.)
-        if self.on_buzz:
-            await self.on_buzz(interaction)
-
-        # 🔓 Timer de sécurité
-        self.buzz_task = asyncio.create_task(self._unlock_after_timeout())
-
-        # Ouvre la modal
+        # ✅ 1. ENVOIE LA MODAL EN PREMIER (répond à l'interaction, évite le 404)
         modal = ReplyModal(
             title=self.modal_title,
             label=self.modal_label,
@@ -225,7 +218,31 @@ class BuzzerView(discord.ui.View):
             max_length=self.modal_max_length,
             on_submit_callback=self._wrap_submit(),
         )
-        await interaction.response.send_modal(modal)
+        try:
+            await interaction.response.send_modal(modal)
+        except discord.NotFound:
+            # L'interaction a expiré, on abandonne proprement
+            log.warning("[BuzzerView] Interaction expirée avant send_modal")
+            self.buzzer_id  = None
+            button.disabled = False
+            return
+
+        # ✅ 2. Callback externe (mention dans le salon) — indépendant de l'interaction
+        if self.on_buzz:
+            try:
+                await self.on_buzz(interaction)
+            except Exception as e:
+                log.exception("[BuzzerView] on_buzz a échoué : %s", e)
+
+        # ✅ 3. Édition du message pour montrer qui a buzzé (indépendant)
+        if self.message:
+            try:
+                await safe_edit(self.message, view=self)
+            except Exception:
+                pass
+
+        # ✅ 4. Timer de sécurité
+        self.buzz_task = asyncio.create_task(self._unlock_after_timeout())
 
     async def _unlock_after_timeout(self):
         """Déverrouille automatiquement après un délai."""
