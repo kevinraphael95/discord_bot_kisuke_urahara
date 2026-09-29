@@ -62,7 +62,7 @@ class StartGameView(View):
     @discord.ui.button(label="🎮 Lancer la partie", style=discord.ButtonStyle.success)
     async def start_button(self, interaction: discord.Interaction, button: Button):
         if interaction.user.id != self.author_id:
-            return await safe_respond(interaction, "❌ Tu ne peux pas démarrer la partie d'un autre joueur.", ephemeral=False)
+            return await safe_respond(interaction, "❌ Tu ne peux pas démarrer la partie d'un autre joueur.", ephemeral=True)
 
         start, end = get_random_letter_pair()
         game_view = MotContraintView(start, end, self.author_id)
@@ -102,19 +102,31 @@ class MotContraintView(View):
 
     async def check_word(self, interaction: discord.Interaction, word: str):
         if interaction.user.id != self.author_id:
-            return await safe_respond(interaction, "❌ Tu ne participes pas à cette partie.", ephemeral=False)
+            return await safe_respond(interaction, "❌ Tu ne participes pas à cette partie.", ephemeral=True)
+
+        # ✅ On acquitte l'interaction immédiatement pour éviter le spam de messages
+        # L'embed sera mis à jour via safe_edit ensuite.
+        await interaction.response.defer()
 
         word_clean = word.lower()
         if not word_clean.startswith(self.start_letter.lower()):
-            return await safe_respond(interaction, f"❌ Le mot ne commence pas par `{self.start_letter}`.", ephemeral=False)
-        if not word_clean.endswith(self.end_letter.lower()):
-            return await safe_respond(interaction, f"❌ Le mot ne se termine pas par `{self.end_letter}`.", ephemeral=False)
-        if not is_valid_word(word_clean):
-            return await safe_respond(interaction, f"❌ `{word}` n’est pas reconnu comme un mot français valide.", ephemeral=False)
+            # Comme on a defer(), on doit utiliser followup ou safe_send si on veut alerter l'utilisateur,
+            # mais ici on va simplement safe_edit l'embed pour remettre l'ancien tour si échec,
+            # OU mieux, on ne fait rien et on attend la prochaine modal pour ne pas casser le flow.
+            # Pour simplifier et éviter le spam de DM/Messages, on va safe_edit le même embed pour "refresh"
+            return await safe_edit(self.message, embed=self.build_embed(), view=self)
 
+        if not word_clean.endswith(self.end_letter.lower()):
+            return await safe_edit(self.message, embed=self.build_embed(), view=self)
+
+        if not is_valid_word(word_clean):
+            return await safe_edit(self.message, embed=self.build_embed(), view=self)
+
+        # 🔥 Le mot est valide : On incrémente
         self.score += 1
         self.rounds += 1
 
+        # Vérification fin de partie
         if self.rounds > self.max_rounds:
             for child in self.children:
                 child.disabled = True
@@ -125,12 +137,15 @@ class MotContraintView(View):
             )
             return await safe_edit(self.message, embed=embed, view=self)
 
-        # Nouveau tour
+        # Nouveau tour : On met à jour l'embed existant SANS message de confirmation
         self.start_letter, self.end_letter = get_random_letter_pair()
         await safe_edit(self.message, embed=self.build_embed(), view=self)
-        await safe_respond(interaction, "✅ Bien joué ! Nouvelle manche 🔄", ephemeral=False)
 
     async def on_timeout(self):
+        # En cas de timeout, Discord n'envoie pas d'interaction, on doit safe_edit le message stocké
+        if not self.message:
+            return
+
         for child in self.children:
             child.disabled = True
         embed = discord.Embed(
@@ -150,7 +165,8 @@ class ProposerButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.parent_view.author_id:
-            return await safe_respond(interaction, "❌ Tu ne participes pas à cette partie.", ephemeral=False)
+            return await safe_respond(interaction, "❌ Tu ne participes pas à cette partie.", ephemeral=True)
+        # Discord gère l'acquittement de la modal automatiquement
         await interaction.response.send_modal(MotModal(self.parent_view))
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -170,6 +186,7 @@ class MotContraint(commands.Cog):
             color=discord.Color.blurple()
         )
         view = StartGameView(author_id)
+        # safe_send retourne le message envoyé, utile pour le timeout plus tard
         await safe_send(channel, embed=embed, view=view)
 
     # ────────────────────────────────────────────────────────────────────────────
@@ -178,8 +195,10 @@ class MotContraint(commands.Cog):
     @app_commands.command(name="mot_contraint", description="Jeu : trouve un mot qui commence et finit par les lettres données.")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_mot_contraint(self, interaction: discord.Interaction):
+        # On defer pour avoir le temps de safe_send
         await interaction.response.defer()
         await self._start_game(interaction.channel, interaction.user.id)
+        # safe_send a déjà envoyé le message de Start, on supprime le "Le bot réfléchit"
         await interaction.delete_original_response()
 
     # ────────────────────────────────────────────────────────────────────────────
