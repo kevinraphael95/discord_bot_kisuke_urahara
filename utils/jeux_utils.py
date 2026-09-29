@@ -81,6 +81,8 @@ async def finish_game(message, embed, view=None):
     if view:
         for child in view.children:
             child.disabled = True
+        if hasattr(view, "finished"):
+            view.finished = True
     return await safe_edit(message, embed=embed, view=view)
 
 
@@ -137,11 +139,16 @@ class ReplyView(discord.ui.View):
         self.modal_max_length  = modal_max_length
         self.on_submit         = on_submit
         self.message           = None
+        self.finished          = False   # ✅ flag de fin
 
     @discord.ui.button(label="✍️ Répondre", style=discord.ButtonStyle.primary)
     async def reply(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.user_id:
             await safe_respond(interaction, "❌ Ce n'est pas ton jeu.", ephemeral=True)
+            return
+
+        if self.finished:
+            await safe_respond(interaction, "❌ La partie est terminée.", ephemeral=True)
             return
 
         if self.on_submit is None:
@@ -158,7 +165,6 @@ class ReplyView(discord.ui.View):
         try:
             await interaction.response.send_modal(modal)
         except discord.NotFound:
-            # L'interaction a expiré, on abandonne proprement
             pass
 
 
@@ -171,6 +177,7 @@ class BuzzerView(discord.ui.View):
     - Un bouton '🔔 Buzzer' visible par tous
     - Le 1er qui clique prend la main et ouvre une modal
     - Un timeout de sécurité déverrouille si le joueur ferme la modal sans valider
+    - Un flag `finished` empêche toute nouvelle interaction après la fin
     """
 
     def __init__(
@@ -195,9 +202,15 @@ class BuzzerView(discord.ui.View):
         self.buzzer_id         = None
         self.buzz_task         = None
         self.message           = None
+        self.finished          = False   # ✅ flag de fin
 
     @discord.ui.button(label="🔔 Buzzer", style=discord.ButtonStyle.primary)
     async def buzz(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # 🔒 Partie terminée ?
+        if self.finished:
+            await safe_respond(interaction, "❌ La partie est terminée.", ephemeral=True)
+            return
+
         # 🔒 Quelqu'un a déjà buzzé ?
         if self.buzzer_id is not None:
             await safe_respond(
@@ -221,20 +234,19 @@ class BuzzerView(discord.ui.View):
         try:
             await interaction.response.send_modal(modal)
         except discord.NotFound:
-            # L'interaction a expiré, on abandonne proprement
             log.warning("[BuzzerView] Interaction expirée avant send_modal")
             self.buzzer_id  = None
             button.disabled = False
             return
 
-        # ✅ 2. Callback externe (mention dans le salon) — indépendant de l'interaction
+        # ✅ 2. Callback externe (mention dans le salon)
         if self.on_buzz:
             try:
                 await self.on_buzz(interaction)
             except Exception as e:
                 log.exception("[BuzzerView] on_buzz a échoué : %s", e)
 
-        # ✅ 3. Édition du message pour montrer qui a buzzé (indépendant)
+        # ✅ 3. Édition du message pour montrer qui a buzzé
         if self.message:
             try:
                 await safe_edit(self.message, view=self)
@@ -271,15 +283,22 @@ class BuzzerView(discord.ui.View):
                 if self.on_submit:
                     await self.on_submit(interaction, answer)
             finally:
+                # ✅ On ne réactive PAS si la partie est finie
                 self.unlock()
 
         return _callback
 
-    def unlock(self):
-        """Déverrouille le buzzer pour le tour suivant."""
+    def unlock(self, force: bool = False):
+        """Déverrouille le buzzer pour le tour suivant.
+        - Si `finished=True` → ne réactive PAS les boutons (sauf si force=True)."""
         self.buzzer_id = None
         if self.buzz_task and not self.buzz_task.done():
             self.buzz_task.cancel()
+
+        # ✅ Ne réactive pas si la partie est finie
+        if self.finished and not force:
+            return
+
         for child in self.children:
             child.disabled = False
         if self.message:
@@ -288,8 +307,20 @@ class BuzzerView(discord.ui.View):
             except Exception:
                 pass
 
+    def mark_finished(self):
+        """Marque la partie comme terminée et désactive les boutons."""
+        self.finished = True
+        for child in self.children:
+            child.disabled = True
+        if self.message:
+            try:
+                asyncio.create_task(safe_edit(self.message, view=self))
+            except Exception:
+                pass
+
     async def on_timeout(self):
         """Ferme les boutons quand la view expire."""
+        self.finished = True
         for child in self.children:
             child.disabled = True
         if self.message:
