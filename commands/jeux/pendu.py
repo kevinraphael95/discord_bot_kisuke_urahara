@@ -117,15 +117,26 @@ class PenduView:
         embed.add_field(name="Erreurs", value=f"`{len(self.rate)} / {self.max_erreurs}`", inline=True)
         embed.add_field(name="Lettres tentées", value=f"`{self.get_lettres_tentees()}`", inline=True)
 
-        if self.attempts:
-            lines = []
-            for entry in self.attempts[-5:]:
-                status = "✅" if entry.get('correct') else "❌"
-                lines.append(f"{entry['author']}: **{entry['word']}** {status}")
-            tries_text = "\n".join(lines)
-            embed.add_field(name="Essais", value=tries_text, inline=False)
-        else:
-            embed.add_field(name="Essais", value="*(Aucun essai pour l'instant)*", inline=False)
+        # Affichage des participants/essais uniquement en mode Multi
+        if self.multi:
+            if self.attempts:
+                player_stats: dict[str, dict[str, int]] = {}
+                for entry in self.attempts:
+                    author = entry['author']
+                    if author not in player_stats:
+                        player_stats[author] = {'correct': 0, 'wrong': 0}
+                    if entry.get('correct'):
+                        player_stats[author]['correct'] += 1
+                    else:
+                        player_stats[author]['wrong'] += 1
+
+                lines = [
+                    f"• **{author}** : {stats['correct']} ✅ / {stats['wrong']} ❌"
+                    for author, stats in player_stats.items()
+                ]
+                embed.add_field(name="👥 Participants", value="\n".join(lines), inline=False)
+            else:
+                embed.add_field(name="👥 Participants", value="*(Aucune participation pour l'instant)*", inline=False)
 
         if self.last_error and not self.finished:
             embed.add_field(name="⚠️ Remarque", value=self.last_error, inline=False)
