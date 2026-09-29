@@ -12,11 +12,12 @@
 import random
 import json
 import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_interact
+from utils.discord_utils import safe_send, safe_edit, safe_interact
 from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
@@ -31,32 +32,29 @@ def db_valider_quete(user_id: int) -> int | None:
     Retourne le nouveau niveau si la quête vient d'être validée, sinon None.
     """
     try:
-        conn   = get_conn()
-        cursor = conn.cursor()
+        with get_conn() as conn:
+            cursor = conn.cursor()
 
-        cursor.execute("SELECT quetes, niveau FROM reiatsu WHERE user_id = ?", (user_id,))
-        row = cursor.fetchone()
+            cursor.execute("SELECT quetes, niveau FROM reiatsu WHERE user_id = ?", (user_id,))
+            row = cursor.fetchone()
 
-        if not row:
-            conn.close()
-            return None
+            if not row:
+                return None
 
-        quetes = json.loads(row[0] or "[]")
-        niveau = row[1] or 1
+            quetes = json.loads(row[0] or "[]")
+            niveau = row[1] or 1
 
-        if "couleur" in quetes:
-            conn.close()
-            return None
+            if "couleur" in quetes:
+                return None
 
-        quetes.append("couleur")
-        new_lvl = niveau + 1
-        cursor.execute(
-            "UPDATE reiatsu SET quetes = ?, niveau = ? WHERE user_id = ?",
-            (json.dumps(quetes), new_lvl, user_id)
-        )
-        conn.commit()
-        conn.close()
-        return new_lvl
+            quetes.append("couleur")
+            new_lvl = niveau + 1
+            cursor.execute(
+                "UPDATE reiatsu SET quetes = ?, niveau = ? WHERE user_id = ?",
+                (json.dumps(quetes), new_lvl, user_id)
+            )
+            conn.commit()
+            return new_lvl
 
     except Exception as e:
         log.exception("[couleur] Erreur validation quête SQLite : %s", e)
@@ -111,12 +109,7 @@ class CouleurCommand(commands.Cog):
     # ============================================================================
     # 🔹 Fonction interne — validation de la quête
     # ============================================================================
-    async def _valider_quete(
-        self,
-        user:        discord.User | discord.Member,
-        channel:     discord.abc.Messageable | None = None,
-        interaction: discord.Interaction | None     = None
-    ):
+    async def _valider_quete(self, user, channel: discord.abc.Messageable):
         """Valide la quête 'couleur' et envoie un embed de félicitations si nécessaire."""
         new_lvl = db_valider_quete(user.id)
         if new_lvl is None:
@@ -130,16 +123,7 @@ class CouleurCommand(commands.Cog):
             ),
             color=0x00FF7F
         )
-
-        if channel:
-            await safe_send(channel, embed=embed)
-        elif interaction:
-            if not interaction.response.is_done():
-                await interaction.response.send_message(embed=embed)
-            else:
-                await interaction.followup.send(embed=embed)
-        else:
-            await safe_send(user, embed=embed)
+        await safe_send(channel, embed=embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
@@ -156,7 +140,7 @@ class CouleurCommand(commands.Cog):
         await safe_interact(interaction, embed=embed, view=view)
         view.message = await interaction.original_response()
 
-        await self._valider_quete(interaction.user, channel=interaction.channel, interaction=interaction)
+        await self._valider_quete(interaction.user, channel=interaction.channel)
 
     # ============================================================================
     # 🔹 Commande PREFIX
