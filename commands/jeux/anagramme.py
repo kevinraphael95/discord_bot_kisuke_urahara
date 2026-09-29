@@ -125,9 +125,7 @@ class AnagrammeView:
     async def process_guess(self, channel, guess: str, author_name: str, author_id: int, silent: bool = False):
         """
         Vérifie la proposition.
-        Retourne un tuple (ok: bool, raison: str) :
-        - ok=True → proposition valide
-        - ok=False + raison → message d'erreur à afficher
+        Retourne (ok: bool, raison: str).
         """
         if self.finished:
             if not silent:
@@ -163,7 +161,7 @@ class AnagrammeView:
 
         return True, ""
 
-    async def check_timeout(self):
+    async def check_timeout(self, game_view=None):
         """Arrête la partie après 3 minutes"""
         while not self.finished:
             await asyncio.sleep(5)
@@ -172,6 +170,14 @@ class AnagrammeView:
                 self.finished = True
                 if self.message:
                     await safe_edit(self.message, embed=self.build_embed())
+                # ✅ Désactive les boutons à la fin du timer
+                if game_view is not None:
+                    for child in game_view.children:
+                        child.disabled = True
+                    try:
+                        await safe_edit(game_view.message, view=game_view)
+                    except Exception:
+                        pass
                 break
 
 # ================================================================================
@@ -203,7 +209,16 @@ class Anagramme(commands.Cog):
                 )
                 if not ok:
                     await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
-                elif view.finished:
+                    return
+
+                # ✅ Si la partie est finie, on désactive les boutons
+                if view.finished:
+                    for child in reply_view.children:
+                        child.disabled = True
+                    try:
+                        await safe_edit(reply_view.message, view=reply_view)
+                    except Exception:
+                        pass
                     await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
                 else:
                     await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
@@ -240,7 +255,15 @@ class Anagramme(commands.Cog):
                 )
                 if not ok:
                     await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
-                elif view.finished:
+                    return
+
+                if view.finished:
+                    for child in buzz_view.children:
+                        child.disabled = True
+                    try:
+                        await safe_edit(buzz_view.message, view=buzz_view)
+                    except Exception:
+                        pass
                     await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
                 else:
                     await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
@@ -264,7 +287,9 @@ class Anagramme(commands.Cog):
             return
 
         self.active_games[channel.id] = view
-        asyncio.create_task(view.check_timeout())
+        # ✅ On passe la view au timer pour désactiver les boutons à la fin
+        game_view = buzz_view if multi else reply_view
+        asyncio.create_task(view.check_timeout(game_view))
 
     # ============================================================================
     # 🔹 Commande SLASH
