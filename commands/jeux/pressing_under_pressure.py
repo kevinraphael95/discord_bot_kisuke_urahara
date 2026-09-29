@@ -1,6 +1,6 @@
 # ================================================================================
 # 📌 pressing_under_pressure.py
-# Objectif : Mini-jeu troll style "The Impossible Quiz" - Rendu ultra-épuré
+# Objectif : Mini-jeu troll style "The Impossible Quiz" - Rendu épuré + Start View
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
@@ -108,7 +108,7 @@ def load_puzzles() -> List[Dict[str, Any]]:
 
 
 # ================================================================================
-# 🧩 State & View
+# 🧩 State & Views
 # ================================================================================
 class PuzzleState:
     def __init__(self, puzzle: Dict[str, Any], total_time: int):
@@ -139,7 +139,37 @@ class PuzzleState:
             self.double_penalty = True
 
 
+class StartView(discord.ui.View):
+    """Vue initiale avec le bouton de lancement."""
+
+    def __init__(self, user: discord.User | discord.Member):
+        super().__init__(timeout=30.0)
+        self.user = user
+        self.started = False
+
+    @discord.ui.button(
+        label="🎮 Lancer la partie", style=discord.ButtonStyle.green
+    )
+    async def start_button(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        if interaction.user.id != self.user.id:
+            await interaction.response.send_message(
+                "❌ Seul l'auteur de la commande peut lancer !", ephemeral=True
+            )
+            return
+
+        self.started = True
+        button.disabled = True
+        button.label = "Partie lancée !"
+        button.style = discord.ButtonStyle.secondary
+        await interaction.response.edit_message(view=self)
+        self.stop()
+
+
 class PressView(discord.ui.View):
+    """Vue en cours de jeu."""
+
     def __init__(self, user: discord.User | discord.Member):
         super().__init__(timeout=None)
         self.user = user
@@ -281,6 +311,7 @@ class PressingUnderPressure(commands.Cog):
             desc = result_msg
 
         return discord.Embed(
+            title="🧠 Pressing Under Pressure",
             description=desc,
             color=PHASE_COLORS.get(phase, discord.Color.blurple()),
         )
@@ -362,29 +393,51 @@ class PressingUnderPressure(commands.Cog):
             combo = 0
             total_puzzles = len(puzzles)
 
-            view = PressView(user)
-            view.lock()
+            start_view = StartView(user)
 
             intro_embed = discord.Embed(
+                title="🧠 Pressing Under Pressure",
                 description=(
-                    f"🎮 **Pressing Under Pressure**\n\n"
-                    f"Joueur: **{user.display_name}**\n"
-                    f"Objectif: **{total_puzzles} énigmes**\n\n"
-                    f"⏱️ Lancement dans **3 secondes**..."
+                    f"Joueur : **{user.display_name}**\n"
+                    f"Objectif : **{total_puzzles} énigmes**\n\n"
+                    f"Clique sur le bouton ci-dessous pour démarrer !"
                 ),
                 color=PHASE_COLORS["intro"],
             )
 
-            msg = await safe_send(channel, embed=intro_embed, view=view)
+            msg = await safe_send(channel, embed=intro_embed, view=start_view)
             if msg is None:
                 return
 
-            await asyncio.sleep(3)
+            await start_view.wait()
+
+            # Si le bouton n'a pas été cliqué (timeout)
+            if not start_view.started:
+                timeout_embed = discord.Embed(
+                    title="🧠 Pressing Under Pressure",
+                    description="⌛ Temps écoulé. Partie annulée.",
+                    color=discord.Color.red(),
+                )
+                start_view.children[0].disabled = True  # type: ignore
+                await safe_edit(msg, embed=timeout_embed, view=start_view)
+                return
+
+            # Décompte
+            for count in range(3, 0, -1):
+                countdown_embed = discord.Embed(
+                    title="🧠 Pressing Under Pressure",
+                    description=f"⏱️ Lancement dans **{count}**...",
+                    color=PHASE_COLORS["intro"],
+                )
+                await safe_edit(msg, embed=countdown_embed, view=start_view)
+                await asyncio.sleep(1)
 
             puzzles_done = 0
+            game_view = PressView(user)
+
             for i, puzzle in enumerate(puzzles, start=1):
                 lives, combo = await self._run_puzzle(
-                    msg, view, puzzle, lives, combo, i, total_puzzles
+                    msg, game_view, puzzle, lives, combo, i, total_puzzles
                 )
                 puzzles_done += 1
                 if lives <= 0:
@@ -392,7 +445,7 @@ class PressingUnderPressure(commands.Cog):
 
             won = lives > 0 and puzzles_done == total_puzzles
             update_score(user.id, user.display_name, puzzles_done, won)
-            view.lock()
+            game_view.lock()
 
             if won:
                 end_desc = (
@@ -419,7 +472,7 @@ class PressingUnderPressure(commands.Cog):
                 phase=phase,
                 result_msg=end_desc,
             )
-            await safe_edit(msg, embed=end_embed, view=view)
+            await safe_edit(msg, embed=end_embed, view=game_view)
 
         except Exception as e:
             log.error("[PUP] Erreur : %s", e, exc_info=True)
@@ -449,7 +502,7 @@ class PressingUnderPressure(commands.Cog):
         ]
 
         embed = discord.Embed(
-            title="🏆 Classement",
+            title="🧠 Pressing Under Pressure — Classement",
             description="\n".join(lines),
             color=discord.Color.gold(),
         )
