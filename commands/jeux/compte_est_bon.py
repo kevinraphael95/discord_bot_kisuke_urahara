@@ -60,6 +60,7 @@ class CompteEstBon(commands.Cog):
     # ============================================================================
     async def _start_game(self, channel: discord.abc.Messageable, author: discord.User = None, multi: bool = False):
         numbers, target = generate_numbers()
+        footer_text = "⏱️ Temps : 90 secondes"
 
         embed = discord.Embed(
             title="🧮 Le Compte est Bon",
@@ -67,20 +68,27 @@ class CompteEstBon(commands.Cog):
                 f"**But :** Atteindre `{target}` avec les nombres suivants :\n"
                 f"`{'  '.join(map(str, numbers))}`\n\n"
                 "Utilise les opérations `+ - * /` pour t'en approcher le plus possible !\n\n"
-                f"Mode : **{'Multijoueur' if multi else 'Solo'}**"
+                f"Mode : **{'Multijoueur 🌍' if multi else 'Solo 🧍‍♂️'}**\n"
+                + ("Clique sur **🔔 Buzzer** pour prendre la main." if multi else "Clique sur **✍️ Répondre** pour proposer ton calcul.")
             ),
             color=discord.Color.gold()
         )
-        embed.set_footer(
-            text=("Clique sur 🔔 Buzzer pour prendre la main (90 secondes)."
-                  if multi else
-                  "Clique sur ✍️ Répondre pour proposer ton calcul (90 secondes).")
-        )
+        embed.set_footer(text=footer_text)
 
+        best_attempt = {
+            "user": None,
+            "expr": None,
+            "result": None,
+            "diff": float("inf")
+        }
         found_exact = {"value": False}
 
         # ── Callback de validation (commun solo + multi) ──
         async def on_submit(interaction, answer):
+            if found_exact["value"]:
+                await safe_respond(interaction, "❌ La partie est terminée.", ephemeral=True)
+                return
+
             expr_raw = answer.strip()
 
             if not expr_raw:
@@ -111,50 +119,54 @@ class CompteEstBon(commands.Cog):
                 return
 
             diff = abs(target - result)
-            short_msg = f"🧠 **{interaction.user.display_name}** → `{expr_raw}` = **{result}** (écart : {diff})"
 
-            # ── Cible trouvée : fin de partie ──
+            # Mettre à jour la meilleure tentative
+            if diff < best_attempt["diff"]:
+                best_attempt["user"] = interaction.user
+                best_attempt["expr"] = expr_raw
+                best_attempt["result"] = result
+                best_attempt["diff"] = diff
+
+            # ── Cible exacte trouvée (écart 0) ──
             if diff == 0:
                 found_exact["value"] = True
 
+                await safe_respond(interaction, "🎉 Le compte est bon !", ephemeral=True)
+
                 winner_embed = discord.Embed(
-                    title="🎉 Le compte est bon !",
+                    title="🧮 Le Compte est Bon — Gagné !",
                     description=(
-                        f"🏆 {interaction.user.mention} a trouvé la cible **{target}**\n\n"
-                        f"**Proposition :** `{expr_raw}` = **{result}**"
+                        f"**Cible :** `{target}` | **Nombres :** `{'  '.join(map(str, numbers))}`\n\n"
+                        f"🏆 **{interaction.user.mention}** a trouvé le compte exact !\n"
+                        f"✅ **Calcul :** `{expr_raw}` = **{result}**"
                     ),
                     color=discord.Color.green()
                 )
-                winner_embed.add_field(name="Nombres", value="  ".join(map(str, numbers)), inline=False)
-
-                await safe_send(interaction.channel, short_msg + "\n🎉 **Le compte est bon !**")
-                if view.message:
-                    try:
-                        await safe_edit(view.message, embed=winner_embed, view=None)
-                    except Exception:
-                        pass
-
-                await safe_respond(
-                    interaction,
-                    "✅ Proposition enregistrée — tu as trouvé la cible !",
-                    ephemeral=True,
-                )
+                winner_embed.set_footer(text="Partie terminée")
+                await view.mark_finished(embed=winner_embed)
                 return
 
-            # ── Sinon : on relaie la proposition ──
-            await safe_send(interaction.channel, short_msg)
+            # ── Calcul valide mais pas exact ──
             await safe_respond(
                 interaction,
-                f"✅ Proposition enregistrée — écart {diff}.",
+                f"✅ Calcul enregistré : `{expr_raw}` = **{result}** (Écart : {diff})",
                 ephemeral=True,
             )
 
         # ── Callback quand quelqu'un buzze (multi seulement) ──
-        async def on_buzz(interaction):
-            await safe_send(
-                interaction.channel,
-                f"🎯 {interaction.user.mention} a buzzé ! À toi de proposer un calcul.",
-            )
+        async def on_buzz(user: discord.User | discord.Member):
+            if view.message and view.message.embeds:
+                # 1. Griser les boutons de la view
+                for child in view.children:
+                    if isinstance(child, discord.ui.Button):
+                        child.disabled = True
+
+                # 2. Indiquer le joueur qui a pris la main dans le footer
+                current_embed = view.message.embeds[0]
+                current_embed.set_footer(text=f"🎯 Main prise par {user.display_name} | {footer_text}")
+
+                # 3. Transmettre view=view pour enregistrer l'état grisé
+                await safe_edit(view.message, embed=current_embed, view=view)
 
         # ── Vue selon le mode ──
         if multi:
@@ -183,20 +195,35 @@ class CompteEstBon(commands.Cog):
         if view.message is None:
             return
 
-        # ── Attente (90 secondes ou fin de partie) ──
+        # ── Attente (90 secondes) ──
         await view.wait()
 
         if found_exact["value"]:
             return
 
         # ── Fin par timeout ──
-        for c in view.children:
-            c.disabled = True
-        try:
-            await safe_edit(view.message, view=view)
-        except Exception:
-            pass
-        await safe_send(channel, "⏱️ Temps écoulé ! Personne n'a trouvé la solution exacte.")
+        if best_attempt["user"] is not None:
+            final_embed = discord.Embed(
+                title="🧮 Le Compte est Bon — Terminé",
+                description=(
+                    f"**Cible :** `{target}` | **Nombres :** `{'  '.join(map(str, numbers))}`\n\n"
+                    f"🥇 Meilleure approche par **{best_attempt['user'].mention}** !\n"
+                    f"🎯 **Calcul :** `{best_attempt['expr']}` = **{best_attempt['result']}** (écart de {best_attempt['diff']})"
+                ),
+                color=discord.Color.gold()
+            )
+        else:
+            final_embed = discord.Embed(
+                title="⏱️ Temps écoulé !",
+                description=(
+                    f"**Cible :** `{target}` | **Nombres :** `{'  '.join(map(str, numbers))}`\n\n"
+                    "❌ Personne n'a proposé de calcul valide."
+                ),
+                color=discord.Color.red()
+            )
+
+        final_embed.set_footer(text="Partie terminée")
+        await view.mark_finished(embed=final_embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
@@ -205,9 +232,10 @@ class CompteEstBon(commands.Cog):
     @app_commands.describe(mode="Écris 'multi' pour activer le mode multijoueur.")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_compte(self, interaction: discord.Interaction, mode: str = None):
+        await interaction.response.defer()
         multi = bool(mode and mode.lower() in ("multi", "m"))
-        await safe_respond(interaction, "🎮 Jeu lancé ! Regarde le canal pour participer.", ephemeral=True)
         await self._start_game(interaction.channel, author=interaction.user, multi=multi)
+        await interaction.delete_original_response()
 
     # ============================================================================
     # 🔹 Commande PREFIX
