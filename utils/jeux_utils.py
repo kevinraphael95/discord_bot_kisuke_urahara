@@ -23,16 +23,13 @@ log = logging.getLogger(__name__)
 # ================================================================================
 def normalize_text(text: str) -> str:
     """
-    Retire les accents, les tirets, les espaces et les apostrophes,
-    puis met en minuscules.
+    Retire les accents, tirets, espaces et apostrophes, puis met en minuscules.
     Ex : "Arc-en-Ciel" → "arcenciel"
     """
-    # 1. Minuscules + suppression accents (NFD + drop Mn)
     text = ''.join(
         c for c in unicodedata.normalize('NFD', text.lower())
         if unicodedata.category(c) != 'Mn'
     )
-    # 2. Suppression tirets, espaces, apostrophes
     for ch in ("-", " ", "'", "’", "_"):
         text = text.replace(ch, "")
     return text.strip()
@@ -210,7 +207,8 @@ class BuzzerView(discord.ui.View):
         modal_placeholder: str = "...",
         modal_max_length: int = 50,
         on_submit=None,
-        on_buzz=None,
+        on_buzz=None,          # ✅ reçoit maintenant un discord.User
+        on_buzz_timeout=None,  # ✅ appelé quand le timer de buzz expire
         buzz_timeout: int = 10,
         view_timeout: int = 300,
     ):
@@ -221,6 +219,7 @@ class BuzzerView(discord.ui.View):
         self.modal_max_length  = modal_max_length
         self.on_submit         = on_submit
         self.on_buzz           = on_buzz
+        self.on_buzz_timeout   = on_buzz_timeout
         self.buzz_timeout      = buzz_timeout
         self.buzzer_id         = None
         self.buzz_task         = None
@@ -259,9 +258,10 @@ class BuzzerView(discord.ui.View):
             button.disabled = False
             return
 
+        # ✅ Passe l'utilisateur, pas l'interaction
         if self.on_buzz:
             try:
-                await self.on_buzz(interaction)
+                await self.on_buzz(interaction.user)
             except Exception as e:
                 log.exception("[BuzzerView] on_buzz a échoué : %s", e)
 
@@ -278,15 +278,12 @@ class BuzzerView(discord.ui.View):
         try:
             await asyncio.sleep(self.buzz_timeout)
             if self.buzzer_id is not None:
-                if self.message:
+                # ✅ Callback optionnel pour reset l'embed
+                if self.on_buzz_timeout:
                     try:
-                        await safe_send(
-                            self.message.channel,
-                            f"⏰ <@{self.buzzer_id}> n'a pas répondu à temps, le buzzer se libère.",
-                            delete_after=8,
-                        )
-                    except Exception:
-                        pass
+                        await self.on_buzz_timeout()
+                    except Exception as e:
+                        log.exception("[BuzzerView] on_buzz_timeout a échoué : %s", e)
                 self.unlock()
         except asyncio.CancelledError:
             pass
