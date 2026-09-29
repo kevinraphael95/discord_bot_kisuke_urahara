@@ -19,14 +19,23 @@ log = logging.getLogger(__name__)
 
 
 # ================================================================================
-# 🔹 Normalisation de texte
+# 🔹 Normalisation de texte (accents + tirets + espaces)
 # ================================================================================
 def normalize_text(text: str) -> str:
-    """Retire les accents et met en minuscules."""
-    return ''.join(
+    """
+    Retire les accents, les tirets, les espaces et les apostrophes,
+    puis met en minuscules.
+    Ex : "Arc-en-Ciel" → "arcenciel"
+    """
+    # 1. Minuscules + suppression accents (NFD + drop Mn)
+    text = ''.join(
         c for c in unicodedata.normalize('NFD', text.lower())
         if unicodedata.category(c) != 'Mn'
-    ).strip()
+    )
+    # 2. Suppression tirets, espaces, apostrophes
+    for ch in ("-", " ", "'", "’", "_"):
+        text = text.replace(ch, "")
+    return text.strip()
 
 
 # ================================================================================
@@ -202,7 +211,7 @@ class BuzzerView(discord.ui.View):
         modal_max_length: int = 50,
         on_submit=None,
         on_buzz=None,
-        buzz_timeout: int = 30,
+        buzz_timeout: int = 10,
         view_timeout: int = 300,
     ):
         super().__init__(timeout=view_timeout)
@@ -274,6 +283,7 @@ class BuzzerView(discord.ui.View):
                         await safe_send(
                             self.message.channel,
                             f"⏰ <@{self.buzzer_id}> n'a pas répondu à temps, le buzzer se libère.",
+                            delete_after=8,
                         )
                     except Exception:
                         pass
