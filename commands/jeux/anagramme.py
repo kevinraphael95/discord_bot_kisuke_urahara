@@ -79,14 +79,14 @@ class AnagrammeView:
         mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
         embed = discord.Embed(
             title=f"🔀 Anagramme - {mode_text}",
-            description=f"Mot mélangé : **{' '.join(self.display_word)}**",
+            description=f"# 🔀 `{' '.join(self.display_word)}`",
             color=discord.Color.orange()
         )
 
         if self.multi:
             instructions = (
                 "💡 **Comment jouer en mode Multi :**\n"
-                "1️⃣ Clique sur **🔔 Buzzer** pour prendre la hand.\n"
+                "1️⃣ Clique sur **🔔 Buzzer** pour prendre la main.\n"
                 "2️⃣ Le plus rapide ouvre une fenêtre pour proposer un mot.\n"
                 f"3️⃣ Le mot doit faire {self.display_length} lettres.\n"
                 "4️⃣ Il n'y a **aucune limite d'essais**.\n"
@@ -121,12 +121,12 @@ class AnagrammeView:
             if self.winner:
                 embed.title = "🔀 Anagramme - Gagné !"
                 embed.color = discord.Color.green()
-                embed.description = f"Mot mélangé : **{' '.join(self.display_word)}**\n\n🏆 **{self.winner}** a trouvé ! C'était bien **{self.target_word}**."
+                embed.description = f"# 🔀 `{' '.join(self.display_word)}`\n\n🏆 **{self.winner}** a trouvé ! C'était bien **{self.target_word}**."
                 embed.set_footer(text="Partie terminée")
             else:
                 embed.title = "🔀 Anagramme - Terminé"
                 embed.color = discord.Color.red()
-                embed.description = f"Mot mélangé : **{' '.join(self.display_word)}**\n\n❌ Personne n'a trouvé. Le mot était **{self.target_word}**."
+                embed.description = f"# 🔀 `{' '.join(self.display_word)}`\n\n❌ Personne n'a trouvé. Le mot était **{self.target_word}**."
                 embed.set_footer(text="Partie terminée")
         else:
             elapsed   = int(asyncio.get_event_loop().time() - self.start_time)
