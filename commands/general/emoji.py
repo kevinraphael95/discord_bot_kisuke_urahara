@@ -15,7 +15,8 @@ from discord.ext import commands
 from discord.ui import View, Button
 import random
 import re
-from utils.discord_utils import safe_send, safe_respond
+
+from utils.discord_utils import safe_send, safe_interact
 
 # ================================================================================
 # 🎮 View pour la pagination
@@ -29,7 +30,8 @@ class EmojiPaginator(View):
         self.index = 0
 
     async def update(self, interaction: discord.Interaction):
-        await interaction.response.edit_message(embed=self.pages[self.index], view=self)
+        # ✅ safe_interact (retry + rate-limit)
+        await safe_interact(interaction, edit=True, embed=self.pages[self.index], view=self)
 
     @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
     async def previous(self, interaction: discord.Interaction, button: Button):
@@ -40,6 +42,11 @@ class EmojiPaginator(View):
     async def next(self, interaction: discord.Interaction, button: Button):
         self.index = (self.index + 1) % len(self.pages)
         await self.update(interaction)
+
+    async def on_timeout(self):
+        # ✅ désactive les boutons après expiration
+        for child in self.children:
+            child.disabled = True
 
 # ================================================================================
 # 🧠 Cog principal
@@ -61,32 +68,45 @@ class EmojiCommand(commands.Cog):
         found, not_found = [], []
         for name in emoji_inputs:
             name_lower = name.lower()
-            match = discord.utils.find(lambda e: e.name.lower() == name_lower and e.available, current_guild.emojis)
+
+            # ✅ Cherche d'abord dans le serveur actuel
+            match = discord.utils.find(
+                lambda e: e.name.lower() == name_lower and e.available,
+                current_guild.emojis,
+            )
+
+            # ✅ Sinon, cherche dans les autres serveurs (ordre mélangé)
             if not match:
                 other_guilds = [g for g in self.bot.guilds if g.id != current_guild.id]
-                for g in random.sample(other_guilds, len(other_guilds)):
-                    match = discord.utils.find(lambda e: e.name.lower() == name_lower and e.available, g.emojis)
+                random.shuffle(other_guilds)   # ✅ mélange en place
+                for g in other_guilds:
+                    match = discord.utils.find(
+                        lambda e: e.name.lower() == name_lower and e.available,
+                        g.emojis,
+                    )
                     if match:
                         break
+
             if match:
                 found.append(str(match))
             else:
                 not_found.append(f":{name}:")
+
         return found, not_found
 
     def _build_pages(self, guilds: list[discord.Guild]) -> list[discord.Embed]:
         pages = []
         for g in guilds:
             animated = [str(e) for e in g.emojis if e.animated and e.available]
-            static = [str(e) for e in g.emojis if not e.animated and e.available]
+            static   = [str(e) for e in g.emojis if not e.animated and e.available]
 
             def create_pages(emojis_list, title_suffix, color):
-                chunks = [emojis_list[i:i+40] for i in range(0, len(emojis_list), 40)]
+                chunks = [emojis_list[i:i + 40] for i in range(0, len(emojis_list), 40)]
                 for i, chunk in enumerate(chunks, start=1):
                     embed = discord.Embed(
                         title=f"🎭 Emojis {title_suffix} — {g.name}",
                         description=" ".join(chunk),
-                        color=color
+                        color=color,
                     )
                     if len(chunks) > 1:
                         embed.set_footer(text=f"Page {i}/{len(chunks)} pour {g.name}")
@@ -100,7 +120,11 @@ class EmojiCommand(commands.Cog):
 
     async def _send_emojis_safe(self, channel, guild, emoji_names):
         if emoji_names:
-            emoji_inputs = self._parse_emoji_input(emoji_names) if isinstance(emoji_names, tuple) else emoji_names
+            emoji_inputs = (
+                self._parse_emoji_input(emoji_names)
+                if isinstance(emoji_names, tuple)
+                else emoji_names
+            )
             found, not_found = self._find_emojis(emoji_inputs, guild)
             if found:
                 await safe_send(channel, " ".join(found))
@@ -108,7 +132,7 @@ class EmojiCommand(commands.Cog):
                 await safe_send(channel, f"❌ Emojis introuvables : {', '.join(not_found)}")
         else:
             guilds = [guild] + [g for g in self.bot.guilds if g.id != guild.id]
-            pages = self._build_pages(guilds)
+            pages  = self._build_pages(guilds)
             if not pages:
                 await safe_send(channel, "❌ Aucun emoji trouvé sur les serveurs.")
                 return
@@ -122,7 +146,7 @@ class EmojiCommand(commands.Cog):
         name="emoji",
         aliases=["e"],
         help="Montre un ou plusieurs emojis du serveur ou de tous les serveurs.",
-        description="Affiche les emojis demandés ou tous les emojis du serveur (animés puis non animés) si aucun argument."
+        description="Affiche les emojis demandés ou tous les emojis du serveur (animés puis non animés) si aucun argument.",
     )
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.user)
     async def prefix_emoji(self, ctx: commands.Context, *emoji_names):
@@ -133,7 +157,7 @@ class EmojiCommand(commands.Cog):
     # ============================================================================
     @app_commands.command(
         name="emoji",
-        description="Montre un ou plusieurs emojis du serveur ou de tous les serveurs."
+        description="Montre un ou plusieurs emojis du serveur ou de tous les serveurs.",
     )
     @app_commands.describe(emojis="Noms des emojis à afficher, séparés par des espaces ou répétés (ex: :woah::woah:)")
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: i.user.id)
@@ -141,12 +165,21 @@ class EmojiCommand(commands.Cog):
         await interaction.response.defer()
         emoji_inputs = self._parse_emoji_input((emojis,))
         await self._send_emojis_safe(interaction.channel, interaction.guild, emoji_inputs)
-        await interaction.delete_original_response()
+        # ✅ supprime le placeholder du defer (l'utilisateur ne voit que le résultat final)
+        try:
+            await interaction.delete_original_response()
+        except Exception:
+            pass
 
     @slash_emoji.autocomplete("emojis")
     async def autocomplete_emojis(self, interaction: discord.Interaction, current: str):
         suggestions = [e.name for e in interaction.guild.emojis if e.available]
-        return [app_commands.Choice(name=s, value=s) for s in suggestions if current.lower() in s.lower()][:25]
+        return [
+            app_commands.Choice(name=s, value=s)
+            for s in suggestions
+            if current.lower() in s.lower()
+        ][:25]
+
 
 # ================================================================================
 # 🔌 Setup du Cog
