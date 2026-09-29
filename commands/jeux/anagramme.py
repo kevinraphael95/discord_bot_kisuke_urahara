@@ -167,7 +167,6 @@ class AnagrammeView:
         return True, ""
 
     async def check_timeout(self, game_view=None):
-        """Arrête la partie après 3 minutes"""
         while not self.finished:
             await asyncio.sleep(5)
             elapsed = asyncio.get_event_loop().time() - self.start_time
@@ -232,20 +231,20 @@ class Anagramme(commands.Cog):
 
         # ── Mode Multi : buzzer ──
         else:
+            # ✅ Callback quand quelqu'un buzze : affiche "Au tour de X" dans l'embed
             async def update_embed_turn(user: discord.Member):
-                """Met à jour l'embed pour afficher "Au tour de X"."""
                 view.current_turn_user = user
                 if view.message:
                     await safe_edit(view.message, embed=view.build_embed())
 
+            # ✅ Callback quand le timer expire : retire le tour de l'embed
             async def clear_embed_turn():
-                """Retire la zone "Au tour de X" de l'embed."""
                 view.current_turn_user = None
                 if view.message:
                     await safe_edit(view.message, embed=view.build_embed())
 
             async def on_submit(interaction, answer):
-                # ✅ Retire le tour de l'embed AVANT de traiter
+                # ✅ Retire le tour de l'embed avant de traiter
                 await clear_embed_turn()
 
                 ok, raison = await view.process_guess(
@@ -271,7 +270,8 @@ class Anagramme(commands.Cog):
                 modal_placeholder=f"Mot de {view.display_length} lettres",
                 modal_max_length=view.display_length,
                 on_submit=on_submit,
-                on_buzz=update_embed_turn,   # ✅ Met à jour l'embed au lieu d'envoyer un message
+                on_buzz=update_embed_turn,       # ✅ met à jour l'embed
+                on_buzz_timeout=clear_embed_turn, # ✅ reset l'embed si timeout
                 buzz_timeout=10,
                 view_timeout=180,
             )
