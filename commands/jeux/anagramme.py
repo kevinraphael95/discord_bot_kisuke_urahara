@@ -206,7 +206,6 @@ class Anagramme(commands.Cog):
                     await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
                     return
 
-                # ✅ Si la partie est finie, on marque la view comme terminée
                 if view.finished:
                     await reply_view.mark_finished()
                     await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
@@ -247,7 +246,6 @@ class Anagramme(commands.Cog):
                     await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
                     return
 
-                # ✅ Si la partie est finie, on marque la view comme terminée
                 if view.finished:
                     await buzz_view.mark_finished()
                     await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
@@ -261,7 +259,7 @@ class Anagramme(commands.Cog):
                 modal_max_length=view.display_length,
                 on_submit=on_submit,
                 on_buzz=on_buzz,
-                buzz_timeout=30,
+                buzz_timeout=10,   # ✅ Réduit à 10 secondes
                 view_timeout=180,
             )
             msg = await safe_send(channel, embed=embed, view=buzz_view)
