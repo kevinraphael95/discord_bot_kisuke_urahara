@@ -12,13 +12,14 @@
 import json
 import os
 import random
+import re
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, button
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followup, safe_interact
+from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_interact
 
 # ================================================================================
 # 📂 Gestion des personnages
@@ -26,6 +27,11 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followu
 CHAR_DIR = os.path.join("data", "personnages")
 
 def load_character(name: str):
+    # ✅ Sécurité : refuse tout nom qui contient autre chose que
+    #    des lettres, chiffres, tirets et underscores.
+    if not name or not re.match(r"^[a-zA-Z0-9_\-]+$", name):
+        return None
+
     path = os.path.join(CHAR_DIR, f"{name.lower()}.json")
     if not os.path.isfile(path):
         return None
@@ -37,6 +43,10 @@ def load_character(name: str):
 def list_characters():
     files = os.listdir(CHAR_DIR)
     return [f.replace(".json", "") for f in files if f.endswith(".json")]
+
+def load_all_characters():
+    """Charge TOUS les personnages disponibles (utilisé pour le bouton Nouveau ship)."""
+    return [p for p in (load_character(n) for n in list_characters()) if p is not None]
 
 # ================================================================================
 # 🧮 Calcul du score de compatibilité
@@ -103,9 +113,8 @@ def generate_ship_embed(p1, p2):
 # ================================================================================
 
 class BleachShipView(View):
-    def __init__(self, persos: list, author: discord.User | discord.Member):
+    def __init__(self, author: discord.User | discord.Member):
         super().__init__(timeout=60)
-        self.persos  = persos
         self.author  = author
         self.message: discord.Message | None = None
 
@@ -122,7 +131,13 @@ class BleachShipView(View):
     async def nouveau_ship(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user != self.author:
             return await safe_interact(interaction, content="❌ Ce n'est pas ton ship !", ephemeral=True)
-        p1, p2    = random.sample(self.persos, 2)
+
+        # ✅ Recharge la liste à chaque clic (au lieu de la figer au démarrage)
+        persos = load_all_characters()
+        if len(persos) < 2:
+            return await safe_interact(interaction, content="❌ Pas assez de personnages.", ephemeral=True)
+
+        p1, p2    = random.sample(persos, 2)
         new_embed = generate_ship_embed(p1, p2)
         await safe_interact(interaction, edit=True, embed=new_embed, view=self)
 
@@ -144,49 +159,49 @@ class BleachShipCommand(commands.Cog):
         Charge les personnages, calcule le ship et retourne un dict :
         {
             "embed": discord.Embed | None,
-            "persos": list,               # tous les persos chargés (pour le bouton "Nouveau ship")
-            "error": str | None,          # message d'erreur bloquant (pas assez de persos)
+            "error": str | None,          # message d'erreur bloquant
         }
         """
-        persos = [p for p in (load_character(n) for n in list_characters()) if p is not None]
+        persos = load_all_characters()
         if len(persos) < 2:
-            return {"embed": None, "persos": persos, "error": "❌ Il faut au moins deux personnages pour créer un ship."}
+            return {"embed": None, "error": "❌ Il faut au moins deux personnages pour créer un ship."}
 
         p1 = (load_character(p1_name) if p1_name else None) or random.choice(persos)
-        # p2 est tiré parmi les persos différents de p1 pour éviter un ship avec soi-même
+
         p2 = load_character(p2_name) if p2_name else None
         if p2 is None or p2["nom"] == p1["nom"]:
             autres = [p for p in persos if p["nom"] != p1["nom"]]
             p2 = random.choice(autres) if autres else p1
 
         embed = generate_ship_embed(p1, p2)
-        return {"embed": embed, "persos": persos, "error": None}
+        return {"embed": embed, "error": None}
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="bleachship",description="💘 Teste la compatibilité entre deux personnages de Bleach.")
+    @app_commands.command(name="bleachship", description="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @app_commands.describe(p1="Nom du premier personnage", p2="Nom du second personnage")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_bleachship(self, interaction: discord.Interaction, p1: str = None, p2: str = None):
         result = self._build_ship(p1, p2)
         if result["error"]:
             return await safe_respond(interaction, result["error"], ephemeral=True)
-        view = BleachShipView(result["persos"], interaction.user)
+        view = BleachShipView(interaction.user)
         await safe_respond(interaction, embed=result["embed"], view=view)
         view.message = await interaction.original_response()
 
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="bleachship",aliases=["bship"],help="💘 Teste la compatibilité entre deux personnages de Bleach.")
+    @commands.command(name="bleachship", aliases=["bship"], help="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_bleachship(self, ctx: commands.Context, p1: str = None, p2: str = None):
         result = self._build_ship(p1, p2)
         if result["error"]:
             return await safe_send(ctx.channel, result["error"])
-        view = BleachShipView(result["persos"], ctx.author)
+        view = BleachShipView(ctx.author)
         view.message = await safe_send(ctx.channel, embed=result["embed"], view=view)
+
 
 # ================================================================================
 # 🔌 Setup du Cog
