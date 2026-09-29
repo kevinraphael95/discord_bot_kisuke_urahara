@@ -240,7 +240,7 @@ class CapitalesGame:
         title = f"🌍 Devine la Capitale - Mode {mode_text}"
 
         action_text = "Clique sur **🔔 Buzzer** pour prendre la main." if self.multi else "Clique sur **✍️ Répondre** pour proposer ta réponse."
-        description = f"Quelle est la capitale de **{self.country}** ?\n{action_text}"
+        description = f"# ➡️ `{self.country}`\n{action_text}"
 
         embed = discord.Embed(
             title=title,
@@ -263,11 +263,11 @@ class CapitalesGame:
             if self.winner:
                 embed.title = f"{title} — Gagné !"
                 embed.color = discord.Color.green()
-                embed.description = f"Quelle est la capitale de **{self.country}** ?\n\n🏆 **{self.winner}** a trouvé !\n✅ Réponse : **{self.capital}**"
+                embed.description = f"# ➡️ `{self.country}`\n\n🏆 **{self.winner}** a trouvé !\n✅ Réponse : **{self.capital}**"
             else:
                 embed.title = "⏰ Temps écoulé !"
                 embed.color = discord.Color.red()
-                embed.description = f"Quelle est la capitale de **{self.country}** ?\n\n❌ Personne n'a trouvé. C'était **{self.capital}**."
+                embed.description = f"# ➡️ `{self.country}`\n\n❌ Personne n'a trouvé. C'était **{self.capital}**."
             embed.set_footer(text="Partie terminée")
         else:
             elapsed = int(asyncio.get_event_loop().time() - self.start_time)
