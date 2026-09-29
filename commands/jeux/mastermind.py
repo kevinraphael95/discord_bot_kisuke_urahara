@@ -9,12 +9,15 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
+import random
+from typing import Optional
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ui import View, Button
-import random
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from discord.ui import Button, View
+
+from utils.discord_utils import safe_edit, safe_respond, safe_send
 
 # ================================================================================
 # 🎨 Liste des couleurs utilisables
@@ -35,7 +38,7 @@ DIFFICULTIES = [
 # 🧩 Vue principale du jeu Mastermind
 # ================================================================================
 class MastermindView(View):
-    def __init__(self, author: discord.User | None, code_length: int, corruption: bool):
+    def __init__(self, author: Optional[discord.User], code_length: int, corruption: bool):
         super().__init__(timeout=180)
         self.author = author
         self.code_length = code_length
@@ -44,7 +47,7 @@ class MastermindView(View):
         self.code = [random.choice(COLORS) for _ in range(code_length)]
         self.attempts = []
         self.current_guess = []
-        self.message = None
+        self.message: Optional[discord.Message] = None
         self.result_shown = False
 
         self.setup_game_buttons()
@@ -161,8 +164,9 @@ class MastermindView(View):
                 await interaction.response.edit_message(embed=embed, view=self)
             else:
                 await interaction.edit_original_response(embed=embed, view=self)
-        except discord.InteractionResponded:
-            await interaction.edit_original_response(embed=embed, view=self)
+        except (discord.InteractionResponded, discord.NotFound):
+            if self.message:
+                await safe_edit(self.message, embed=embed, view=self)
 
 # ================================================================================
 # 🔵 Boutons interactifs
@@ -220,7 +224,7 @@ class ValidateButton(Button):
 # 🎛️ Menu de sélection de difficulté
 # ================================================================================
 class DifficultyView(View):
-    def __init__(self, author: discord.User | None, mode: str = "solo"):
+    def __init__(self, author: Optional[discord.User], mode: str = "solo"):
         super().__init__(timeout=60)
         self.author = author if mode.lower() == "solo" else None
         for diff in DIFFICULTIES:
@@ -228,14 +232,21 @@ class DifficultyView(View):
 
 
 class DifficultyButton(Button):
-    def __init__(self, label, code_length, corruption, author):
+    def __init__(self, label: str, code_length: Optional[int], corruption: bool, author: Optional[discord.User]):
         super().__init__(label=label, style=discord.ButtonStyle.primary)
         self.code_length = code_length
         self.corruption = corruption
         self.author = author
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer()
+        if self.author and interaction.user != self.author:
+            return await safe_respond(interaction, "⛔ Tu ne peux pas choisir la difficulté pour cette partie.", ephemeral=True)
+
+        try:
+            if not interaction.response.is_done():
+                await interaction.response.defer()
+        except discord.InteractionResponded:
+            pass
 
         length = self.code_length if self.code_length is not None else random.randint(8, 10)
         view = MastermindView(self.author, length, self.corruption)
@@ -265,7 +276,9 @@ class Mastermind(commands.Cog):
             description="Clique sur un bouton ci-dessous :",
             color=discord.Color.orange()
         )
-        await safe_send(ctx.channel, embed=embed, view=view)
+        msg = await safe_send(ctx.channel, embed=embed, view=view)
+        if msg is None:
+            await ctx.send("❌ Impossible d'envoyer le message.")
 
     # ============================================================================
     # 🔹 Commande SLASH
