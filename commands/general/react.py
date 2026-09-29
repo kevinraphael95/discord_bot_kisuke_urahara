@@ -9,11 +9,13 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
+import random
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_delete
-import random
+
+from utils.discord_utils import safe_send, safe_delete, safe_followup
 
 # ================================================================================
 # 🧠 Cog principal
@@ -37,27 +39,41 @@ class ReactCommand(commands.Cog):
     ):
         target_message = None
 
+        # ✅ récupération sécurisée du message cible
         if reference_message_id:
-            target_message = await channel.fetch_message(reference_message_id)
-        else:
+            try:
+                target_message = await channel.fetch_message(reference_message_id)
+            except Exception:
+                target_message = None
+
+        if not target_message:
             async for msg in channel.history(limit=20, before=before_time):
                 target_message = msg
                 break
 
         if not target_message:
-            await safe_send(channel, "❌ Aucun message valide à réagir.", delete_after=5)
+            await safe_send(channel, "❌ Aucun message valide à réagir.")
             return
 
         for emoji_name in emoji_names:
             emoji_name_cleaned = emoji_name.strip()
-            emoji_lookup = emoji_name_cleaned.strip(":").lower()
+            emoji_lookup       = emoji_name_cleaned.strip(":").lower()
 
-            emoji = next((e for e in guild.emojis if e.name.lower() == emoji_lookup), None)
+            # ✅ cherche d'abord dans le serveur actuel
+            emoji = next(
+                (e for e in guild.emojis if e.name.lower() == emoji_lookup),
+                None,
+            )
 
+            # ✅ sinon dans les autres serveurs (mélangés)
             if not emoji:
                 other_guilds = [g for g in self.bot.guilds if g.id != guild.id]
-                for g in random.sample(other_guilds, len(other_guilds)):
-                    emoji = next((e for e in g.emojis if e.name.lower() == emoji_lookup and e.available), None)
+                random.shuffle(other_guilds)
+                for g in other_guilds:
+                    emoji = next(
+                        (e for e in g.emojis if e.name.lower() == emoji_lookup and e.available),
+                        None,
+                    )
                     if emoji:
                         break
 
@@ -67,7 +83,7 @@ class ReactCommand(commands.Cog):
                 else:
                     await target_message.add_reaction(emoji_name_cleaned)
             except discord.HTTPException:
-                await safe_send(channel, f"❌ Impossible d'ajouter `{emoji_name_cleaned}`.", delete_after=5)
+                await safe_send(channel, f"❌ Impossible d'ajouter `{emoji_name_cleaned}`.")
 
     # ============================================================================
     # 🔹 Commande SLASH
@@ -81,18 +97,15 @@ class ReactCommand(commands.Cog):
     async def slash_react(self, interaction: discord.Interaction, emojis: str):
         await interaction.response.defer(ephemeral=True)
 
+        # ✅ on cherche le dernier message non-bot du salon
         message = None
-        if interaction.message and interaction.message.reference:
-            message = await interaction.channel.fetch_message(interaction.message.reference.message_id)
+        async for msg in interaction.channel.history(limit=5):
+            if msg.author != self.bot.user:
+                message = msg
+                break
 
         if not message:
-            async for msg in interaction.channel.history(limit=5):
-                if msg.author != self.bot.user:
-                    message = msg
-                    break
-
-        if not message:
-            await interaction.followup.send("❌ Aucun message trouvé.", ephemeral=True)
+            await safe_followup(interaction, "❌ Aucun message trouvé.", ephemeral=True)
             return
 
         await self._react_to_message(
@@ -102,7 +115,10 @@ class ReactCommand(commands.Cog):
             reference_message_id=message.id,
         )
 
-        await interaction.delete_original_response()
+        try:
+            await interaction.delete_original_response()
+        except Exception:
+            pass
 
     # ============================================================================
     # 🔹 Commande PREFIX
@@ -114,14 +130,19 @@ class ReactCommand(commands.Cog):
     )
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.user)
     async def prefix_react(self, ctx: commands.Context, *emoji_names: str):
+        # ✅ on garde la référence du message avant de le supprimer
+        reference_id = ctx.message.reference.message_id if ctx.message.reference else None
+        before_time  = ctx.message.created_at
+
         await safe_delete(ctx.message)
         await self._react_to_message(
             channel=ctx.channel,
             guild=ctx.guild,
             emoji_names=list(emoji_names),
-            reference_message_id=ctx.message.reference.message_id if ctx.message.reference else None,
-            before_time=ctx.message.created_at,
+            reference_message_id=reference_id,
+            before_time=before_time,
         )
+
 
 # ================================================================================
 # 🔌 Setup du Cog
