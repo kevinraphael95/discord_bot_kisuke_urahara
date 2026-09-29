@@ -28,11 +28,195 @@ log = logging.getLogger(__name__)
 # 📂 Liste des pays et leurs capitales
 # ================================================================================
 CAPITALS = {
-    # ⚠️ GARDE ton dictionnaire complet ici (je ne le recopie pas pour ne pas surcharger)
-    # Copie-colle ton dictionnaire actuel à cette place
-    "France": "Paris",
+    "Afghanistan": "Kaboul",
+    "Afrique du Sud": "Pretoria",
+    "Albanie": "Tirana",
+    "Algérie": "Alger",
     "Allemagne": "Berlin",
-    # ... (tout ton dictionnaire)
+    "Andorre": "Andorre-la-Vieille",
+    "Angola": "Luanda",
+    "Antigua-et-Barbuda": "Saint-Jean",
+    "Arabie saoudite": "Riyad",
+    "Argentine": "Buenos Aires",
+    "Arménie": "Erevan",
+    "Australie": "Canberra",
+    "Autriche": "Vienne",
+    "Azerbaïdjan": "Bakou",
+    "Bahamas": "Nassau",
+    "Bahreïn": "Manama",
+    "Bangladesh": "Dacca",
+    "Barbade": "Bridgetown",
+    "Belgique": "Bruxelles",
+    "Belize": "Belmopan",
+    "Bénin": "Porto-Novo",
+    "Bhoutan": "Thimphou",
+    "Biélorussie": "Minsk",
+    "Birmanie": "Naypyidaw",
+    "Bolivie": "Sucre",
+    "Bosnie-Herzégovine": "Sarajevo",
+    "Botswana": "Gaborone",
+    "Brésil": "Brasília",
+    "Brunei": "Bandar Seri Begawan",
+    "Bulgarie": "Sofia",
+    "Burkina Faso": "Ouagadougou",
+    "Burundi": "Gitega",
+    "Cambodge": "Phnom Penh",
+    "Cameroun": "Yaoundé",
+    "Canada": "Ottawa",
+    "Cap-Vert": "Praia",
+    "Chili": "Santiago",
+    "Chine": "Pékin",
+    "Chypre": "Nicosie",
+    "Colombie": "Bogotá",
+    "Comores": "Moroni",
+    "Congo": "Brazzaville",
+    "Corée du Nord": "Pyongyang",
+    "Corée du Sud": "Séoul",
+    "Costa Rica": "San José",
+    "Croatie": "Zagreb",
+    "Cuba": "La Havane",
+    "Danemark": "Copenhague",
+    "Djibouti": "Djibouti",
+    "Dominique": "Roseau",
+    "Égypte": "Le Caire",
+    "Émirats arabes unis": "Abou Dabi",
+    "Équateur": "Quito",
+    "Érythrée": "Asmara",
+    "Espagne": "Madrid",
+    "Estonie": "Tallinn",
+    "Eswatini": "Mbabane",
+    "États-Unis": "Washington, D.C.",
+    "Éthiopie": "Addis-Abeba",
+    "Fidji": "Suva",
+    "Finlande": "Helsinki",
+    "France": "Paris",
+    "Gabon": "Libreville",
+    "Gambie": "Banjul",
+    "Géorgie": "Tbilissi",
+    "Ghana": "Accra",
+    "Grèce": "Athènes",
+    "Grenade": "Saint-Georges",
+    "Guatemala": "Guatemala",
+    "Guinée": "Conakry",
+    "Guinée-Bissau": "Bissau",
+    "Guinée équatoriale": "Malabo",
+    "Guyana": "Georgetown",
+    "Haïti": "Port-au-Prince",
+    "Honduras": "Tegucigalpa",
+    "Hongrie": "Budapest",
+    "Îles Marshall": "Majuro",
+    "Îles Salomon": "Honiara",
+    "Inde": "New Delhi",
+    "Indonésie": "Jakarta",
+    "Iran": "Téhéran",
+    "Irak": "Bagdad",
+    "Irlande": "Dublin",
+    "Islande": "Reykjavik",
+    "Israël": "Jérusalem",
+    "Italie": "Rome",
+    "Jamaïque": "Kingston",
+    "Japon": "Tokyo",
+    "Jordanie": "Amman",
+    "Kazakhstan": "Noursoultan",
+    "Kenya": "Nairobi",
+    "Kirghizistan": "Bichkek",
+    "Kiribati": "Tarawa",
+    "Koweït": "Koweït",
+    "Laos": "Vientiane",
+    "Lesotho": "Maseru",
+    "Lettonie": "Riga",
+    "Liban": "Beyrouth",
+    "Liberia": "Monrovia",
+    "Libye": "Tripoli",
+    "Liechtenstein": "Vaduz",
+    "Lituanie": "Vilnius",
+    "Luxembourg": "Luxembourg",
+    "Madagascar": "Antananarivo",
+    "Malaisie": "Kuala Lumpur",
+    "Malawi": "Lilongwe",
+    "Maldives": "Malé",
+    "Mali": "Bamako",
+    "Malte": "La Valette",
+    "Maroc": "Rabat",
+    "Maurice": "Port-Louis",
+    "Mauritanie": "Nouakchott",
+    "Mexique": "Mexico",
+    "Micronésie": "Palikir",
+    "Moldavie": "Chișinău",
+    "Monaco": "Monaco",
+    "Mongolie": "Oulan-Bator",
+    "Monténégro": "Podgorica",
+    "Mozambique": "Maputo",
+    "Namibie": "Windhoek",
+    "Nauru": "Yaren",
+    "Népal": "Katmandou",
+    "Nicaragua": "Managua",
+    "Niger": "Niamey",
+    "Nigéria": "Abuja",
+    "Norvège": "Oslo",
+    "Nouvelle-Zélande": "Wellington",
+    "Oman": "Mascate",
+    "Ouganda": "Kampala",
+    "Ouzbékistan": "Tachkent",
+    "Pakistan": "Islamabad",
+    "Palaos": "Ngerulmud",
+    "Panama": "Panama",
+    "Papouasie-Nouvelle-Guinée": "Port-Moresby",
+    "Paraguay": "Asuncion",
+    "Pays-Bas": "Amsterdam",
+    "Pérou": "Lima",
+    "Philippines": "Manille",
+    "Pologne": "Varsovie",
+    "Portugal": "Lisbonne",
+    "Qatar": "Doha",
+    "République centrafricaine": "Bangui",
+    "République dominicaine": "Saint-Domingue",
+    "République tchèque": "Prague",
+    "Roumanie": "Bucarest",
+    "Royaume-Uni": "Londres",
+    "Russie": "Moscou",
+    "Rwanda": "Kigali",
+    "Saint-Christophe-et-Niévès": "Basseterre",
+    "Saint-Marin": "Saint-Marin",
+    "Saint-Vincent-et-les-Grenadines": "Kingstown",
+    "Salvador": "San Salvador",
+    "Samoa": "Apia",
+    "Sao Tomé-et-Principe": "São Tomé",
+    "Sénégal": "Dakar",
+    "Serbie": "Belgrade",
+    "Seychelles": "Victoria",
+    "Sierra Leone": "Freetown",
+    "Singapour": "Singapour",
+    "Slovaquie": "Bratislava",
+    "Slovénie": "Ljubljana",
+    "Somalie": "Mogadiscio",
+    "Soudan": "Khartoum",
+    "Soudan du Sud": "Djouba",
+    "Sri Lanka": "Sri Jayawardenepura Kotte",
+    "Suède": "Stockholm",
+    "Suisse": "Berne",
+    "Syrie": "Damas",
+    "Taïwan": "Taipei",
+    "Tadjikistan": "Douchanbé",
+    "Tanzanie": "Dodoma",
+    "Thaïlande": "Bangkok",
+    "Timor oriental": "Dili",
+    "Togo": "Lomé",
+    "Tonga": "Nukuʻalofa",
+    "Trinité-et-Tobago": "Port-d'Espagne",
+    "Tunisie": "Tunis",
+    "Turkménistan": "Achgabat",
+    "Turquie": "Ankara",
+    "Tuvalu": "Funafuti",
+    "Ukraine": "Kiev",
+    "Uruguay": "Montevideo",
+    "Vanuatu": "Port-Vila",
+    "Vatican": "Cité du Vatican",
+    "Venezuela": "Caracas",
+    "Viêt Nam": "Hanoï",
+    "Yémen": "Sanaa",
+    "Zambie": "Lusaka",
+    "Zimbabwe": "Harare"
 }
 
 # ================================================================================
@@ -52,7 +236,7 @@ class Capitales(commands.Cog):
     async def _send_quiz(self, channel, author_id: int, multi: bool = False):
         country = random.choice(list(CAPITALS.keys()))
         capital = CAPITALS[country]
-        winners = []
+        state   = {"finished": False}
 
         title       = "Devine la Capitale - Mode Multijoueur 🌍" if multi else "Devine la Capitale - Mode Solo 🧍‍♂️"
         footer_text = f"⏱️ Temps : {self.MULTI_TIME if multi else self.SOLO_TIME} secondes"
@@ -68,29 +252,36 @@ class Capitales(commands.Cog):
         # ── Callback de validation (partagé) ──
         async def on_submit(interaction, answer):
             user_answer = normalize_text(answer)
+
+            # ✅ Bonne réponse
             if user_answer == normalize_text(capital):
-                if interaction.user not in winners:
-                    winners.append(interaction.user)
                 await safe_respond(interaction, "✅ Bonne réponse !", ephemeral=True)
 
-                # En solo, on termine immédiatement
-                if not multi and not getattr(view, "finished", False):
-                    view.finished = True
+                # ✅ Annonce publique de la victoire
+                await safe_send(
+                    interaction.channel,
+                    f"🎉 {interaction.user.mention} a trouvé ! C'était bien **{capital}**."
+                )
+
+                # ✅ Fin de partie immédiate (solo ET multi)
+                if not state["finished"]:
+                    state["finished"] = True
                     for child in view.children:
                         child.disabled = True
 
                     final_embed = discord.Embed(
-                        title="🎉 Le compte est bon !",
+                        title="🎉 Bonne réponse !",
                         description=f"🏆 **{interaction.user.display_name}** a trouvé !\n\n✅ Réponse : **{capital}**",
                         color=discord.Color.green()
                     )
                     await safe_edit(view.message, embed=final_embed, view=view)
+
+            # ❌ Mauvaise réponse
             else:
                 await safe_respond(interaction, "❌ Mauvaise réponse !", ephemeral=True)
 
         # ── Création de la view selon le mode ──
         if multi:
-            # ── MULTI : BuzzerView (1 seul joueur à la fois) ──
             async def on_buzz(interaction):
                 await safe_send(
                     interaction.channel,
@@ -108,7 +299,6 @@ class Capitales(commands.Cog):
                 view_timeout=300,
             )
         else:
-            # ── SOLO : ReplyView (bouton "✍️ Répondre") ──
             view = ReplyView(
                 user_id=author_id,
                 modal_title="🖊️ Devine la capitale",
@@ -119,33 +309,24 @@ class Capitales(commands.Cog):
                 timeout=300,
             )
 
-        view.message  = None
-        view.finished = False
-
-        msg = await safe_send(channel, embed=embed, view=view)
-        if msg is None:
+        view.message = await safe_send(channel, embed=embed, view=view)
+        if view.message is None:
             return
-        view.message = msg
 
-        # ── Attente (le temps du quiz) ──
+        # ── Attente ──
         try:
             await asyncio.sleep(self.MULTI_TIME if multi else self.SOLO_TIME)
         except asyncio.CancelledError:
             return
 
-        if view.finished:
+        if state["finished"]:
             return
 
         # ── Fin du temps ──
         final_embed = discord.Embed(
-            title="🎉 Résultat",
-            description=(
-                f"✅ Réponse : **{capital}**\n"
-                f"🏆 Gagnants : {', '.join(w.mention for w in dict.fromkeys(winners))}"
-                if winners else
-                f"❌ Personne n'a trouvé. C'était **{capital}**."
-            ),
-            color=discord.Color.red() if not winners else discord.Color.green(),
+            title="⏰ Temps écoulé !",
+            description=f"❌ Personne n'a trouvé. C'était **{capital}**.",
+            color=discord.Color.red(),
         )
         for child in view.children:
             child.disabled = True
