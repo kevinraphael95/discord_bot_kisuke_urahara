@@ -281,10 +281,10 @@ class Capitales(commands.Cog):
         # ── Création de la view selon le mode ──
         if multi:
             async def on_buzz(user: discord.User | discord.Member):
-                await safe_send(
-                    channel,
-                    f"🎯 {user.mention} a buzzé ! À toi de proposer."
-                )
+                if view.message and view.message.embeds:
+                    current_embed = view.message.embeds[0]
+                    current_embed.set_footer(text=f"🎯 Main prise par {user.display_name} | {footer_text}")
+                    await safe_edit(view.message, embed=current_embed)
 
             view = BuzzerView(
                 modal_title="🖊️ Devine la capitale",
