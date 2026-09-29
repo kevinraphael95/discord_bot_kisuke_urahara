@@ -68,8 +68,8 @@ class CompteEstBonGame:
 
         action_text = "Clique sur **🔔 Buzzer** pour prendre la main." if self.multi else "Clique sur **✍️ Répondre** pour proposer ton calcul."
         description = (
-            f"**But :** Atteindre `{self.target}` avec les nombres suivants :\n"
-            f"`{'  '.join(map(str, self.numbers))}`\n\n"
+            f"# 🎯 `{self.target}`\n"
+            f"# 🎲 `{'  '.join(map(str, self.numbers))}`\n\n"
             "Utilise uniquement les opérations `+ - * /` pour t'en approcher le plus possible !\n"
             f"{action_text}"
         )
@@ -97,7 +97,8 @@ class CompteEstBonGame:
                 embed.color = discord.Color.green()
                 best = self.best_attempt
                 embed.description = (
-                    f"**Cible :** `{self.target}` | **Nombres :** `{'  '.join(map(str, self.numbers))}`\n\n"
+                    f"# 🎯 `{self.target}`\n"
+                    f"# 🎲 `{'  '.join(map(str, self.numbers))}`\n\n"
                     f"🏆 **{self.winner}** a trouvé le compte exact !\n"
                     f"✅ **Calcul :** `{best['expr']}` = **{best['result']}**"
                 )
@@ -105,7 +106,8 @@ class CompteEstBonGame:
                 embed.title = f"{title} — Terminé"
                 best = self.best_attempt
                 embed.description = (
-                    f"**Cible :** `{self.target}` | **Nombres :** `{'  '.join(map(str, self.numbers))}`\n\n"
+                    f"# 🎯 `{self.target}`\n"
+                    f"# 🎲 `{'  '.join(map(str, self.numbers))}`\n\n"
                     f"🥇 Meilleure approche par **{best['user_mention']}** !\n"
                     f"🎯 **Calcul :** `{best['expr']}` = **{best['result']}** (écart de {best['diff']})"
                 )
@@ -113,7 +115,8 @@ class CompteEstBonGame:
                 embed.title = "⏰ Temps écoulé !"
                 embed.color = discord.Color.red()
                 embed.description = (
-                    f"**Cible :** `{self.target}` | **Nombres :** `{'  '.join(map(str, self.numbers))}`\n\n"
+                    f"# 🎯 `{self.target}`\n"
+                    f"# 🎲 `{'  '.join(map(str, self.numbers))}`\n\n"
                     "❌ Personne n'a proposé de calcul valide."
                 )
             embed.set_footer(text="Partie terminée")
