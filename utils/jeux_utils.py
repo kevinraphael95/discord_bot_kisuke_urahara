@@ -207,7 +207,7 @@ class BuzzerView(discord.ui.View):
         modal_placeholder: str = "...",
         modal_max_length: int = 50,
         on_submit=None,
-        on_buzz=None,          # ✅ reçoit maintenant un discord.User
+        on_buzz=None,          # ✅ reçoit un discord.User
         on_buzz_timeout=None,  # ✅ appelé quand le timer de buzz expire
         buzz_timeout: int = 10,
         view_timeout: int = 300,
@@ -240,9 +240,11 @@ class BuzzerView(discord.ui.View):
             )
             return
 
+        # 1. Marque le buzzer AVANT tout
         self.buzzer_id  = interaction.user.id
         button.disabled = True
 
+        # 2. Ouvre la modal le plus vite possible
         modal = ReplyModal(
             title=self.modal_title,
             label=self.modal_label,
@@ -258,19 +260,21 @@ class BuzzerView(discord.ui.View):
             button.disabled = False
             return
 
-        # ✅ Passe l'utilisateur, pas l'interaction
+        # 3. Désactive VISUELLEMENT le bouton pour tout le monde (AVANT on_buzz)
+        if self.message:
+            try:
+                await safe_edit(self.message, view=self)
+            except Exception as e:
+                log.exception("[BuzzerView] safe_edit a échoué : %s", e)
+
+        # 4. Callback externe (embed "Au tour de X")
         if self.on_buzz:
             try:
                 await self.on_buzz(interaction.user)
             except Exception as e:
                 log.exception("[BuzzerView] on_buzz a échoué : %s", e)
 
-        if self.message:
-            try:
-                await safe_edit(self.message, view=self)
-            except Exception:
-                pass
-
+        # 5. Timer de sécurité
         self.buzz_task = asyncio.create_task(self._unlock_after_timeout())
 
     async def _unlock_after_timeout(self):
@@ -278,13 +282,12 @@ class BuzzerView(discord.ui.View):
         try:
             await asyncio.sleep(self.buzz_timeout)
             if self.buzzer_id is not None:
-                # ✅ Callback optionnel pour reset l'embed
                 if self.on_buzz_timeout:
                     try:
                         await self.on_buzz_timeout()
                     except Exception as e:
                         log.exception("[BuzzerView] on_buzz_timeout a échoué : %s", e)
-                self.unlock()
+                await self.unlock()
         except asyncio.CancelledError:
             pass
 
@@ -298,11 +301,11 @@ class BuzzerView(discord.ui.View):
                 if self.on_submit:
                     await self.on_submit(interaction, answer)
             finally:
-                self.unlock()
+                await self.unlock()
 
         return _callback
 
-    def unlock(self, force: bool = False):
+    async def unlock(self, force: bool = False):
         """Déverrouille le buzzer pour le tour suivant."""
         self.buzzer_id = None
         if self.buzz_task and not self.buzz_task.done():
@@ -313,11 +316,12 @@ class BuzzerView(discord.ui.View):
 
         for child in self.children:
             child.disabled = False
+
         if self.message:
             try:
-                asyncio.create_task(safe_edit(self.message, view=self))
-            except Exception:
-                pass
+                await safe_edit(self.message, view=self)
+            except Exception as e:
+                log.exception("[BuzzerView] unlock safe_edit a échoué : %s", e)
 
     async def mark_finished(self, embed=None):
         """Marque la partie comme terminée et désactive les boutons."""
