@@ -14,8 +14,9 @@ import random
 import asyncio
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond
-from utils.algorithms import algorithms as all_algos  # ✅ Import des algorithmes
+from utils.discord_utils import safe_send, safe_respond, safe_edit  # ✅ ajout safe_edit
+from utils.algorithms import algorithms as all_algos
+
 
 # ================================================================================
 # Visualisation des barres
@@ -25,17 +26,18 @@ def render_bars(data, highlight_indices=None, max_length=None):
     Génère une représentation visuelle des barres pour Discord.
     highlight_indices : liste des indices des colonnes en cours de déplacement (orange)
     """
+    if not data:                    # ✅ sécurité si data vide
+        return ""
     if highlight_indices is None:
         highlight_indices = []
     if max_length is None:
-        max_length = len(data)  # 12 pour ton cas, au moins autant que de barres
+        max_length = len(data)
     max_val = max(data)
     lines = []
     for i, n in enumerate(data):
-        # utilisation de round pour éviter les doublons visuels
         height = round((n / max_val) * max_length)
         if height < 1:
-            height = 1  # au moins 1 bloc pour les petites valeurs
+            height = 1
         if i in highlight_indices:
             bar = "🟥" * height
         else:
@@ -43,14 +45,15 @@ def render_bars(data, highlight_indices=None, max_length=None):
         lines.append(bar)
     return "\n".join(lines)
 
+
 # ================================================================================
 # Cog principal
 # ================================================================================
 class Sorting(commands.Cog):
     """Commande /sorting et !sorting — Visualise un algorithme de tri en temps réel"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # On récupère la description depuis algo.desc si elle existe
         self.algorithms = {
             name: {"func": func, "desc": getattr(func, "desc", "Description à compléter")}
             for name, func in all_algos.items()
@@ -67,18 +70,23 @@ class Sorting(commands.Cog):
 
         async def send(embed):
             nonlocal msg
+            # ✅ on utilise safe_edit / safe_respond / safe_send partout
             if isinstance(channel_or_interaction, discord.Interaction):
                 if msg:
-                    await msg.edit(embed=embed)
+                    await safe_edit(msg, embed=embed)
                 else:
                     msg = await safe_respond(channel_or_interaction, embed=embed)
+                    if msg is None:      # ✅ si le 1er envoi a raté, on abandonne
+                        return
             else:
                 if msg:
-                    await msg.edit(embed=embed)
+                    await safe_edit(msg, embed=embed)
                 else:
                     msg = await safe_send(channel_or_interaction, embed=embed)
+                    if msg is None:      # ✅ idem
+                        return
 
-        # première étape
+        # Première étape
         embed = discord.Embed(
             title=f"🔄 {algorithm_name} — En cours...",
             description=f"{algo_info['desc']}\n```\n{render_bars(data)}\n```",
@@ -86,8 +94,10 @@ class Sorting(commands.Cog):
         )
         await send(embed)
 
-        # visualisation dynamique
-        async for step, highlight in algo(data.copy()):
+        # ✅ on travaille sur une copie qu'on garde en mémoire
+        work = data.copy()
+
+        async for step, highlight in algo(work):
             iteration += 1
             await asyncio.sleep(delay)
             embed = discord.Embed(
@@ -97,8 +107,9 @@ class Sorting(commands.Cog):
             )
             await send(embed)
 
-        # résultat final
-        sorted_data = sorted(data)
+        # ✅ résultat final = celui produit par l'algo (cohérent avec ce qu'on a affiché)
+        sorted_data = work
+
         embed = discord.Embed(
             title=f"✅ {algorithm_name} terminé !",
             description=f"{algo_info['desc']}\n```\n{render_bars(sorted_data)}\n```",
@@ -110,7 +121,7 @@ class Sorting(commands.Cog):
     # ============================================================================
     # Commande SLASH
     # ============================================================================
-    @app_commands.command(name="sorting",description="Visualise un algorithme de tri en temps réel.")
+    @app_commands.command(name="sorting", description="Visualise un algorithme de tri en temps réel.")
     @app_commands.describe(algorithme="Trie 12 barres en longueurs différentes selon un algorithme.")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_sorting(self, interaction: discord.Interaction, algorithme: str = None):
@@ -171,6 +182,7 @@ class Sorting(commands.Cog):
             algo_name = matched
 
         await self.visualize_sorting(channel_or_interaction, algo_name)
+
 
 # ================================================================================
 # Setup du Cog
