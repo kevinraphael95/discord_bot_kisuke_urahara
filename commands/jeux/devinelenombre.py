@@ -49,7 +49,7 @@ class Devinelenombre(commands.Cog):
     ) -> discord.Embed:
         mode_text = "Multi 🌍" if multi else "Solo 🧍‍♂️"
         embed = discord.Embed(
-            title=f"🎯 Devinelenombre - Mode {mode_text}",
+            title=f"# 🎯 Devinelenombre - Mode {mode_text}",
             description=(
                 "Devine le nombre entre 0 et 100.\n" +
                 ("Clique sur **🔔 Buzzer** pour prendre la main." if multi
@@ -64,7 +64,7 @@ class Devinelenombre(commands.Cog):
                 val = entry['value']
                 author_name = entry['author']
                 if val < target:
-                    symbol = "⬆️ Trop bas"
+                    symbol = "⬆️️ Trop bas"
                 elif val > target:
                     symbol = "⬇️ Trop haut"
                 else:
@@ -83,17 +83,17 @@ class Devinelenombre(commands.Cog):
 
         if finished:
             if winner:
-                embed.title = "🎯 Devinelenombre - Gagné !"
+                embed.title = "# 🎯 Devinelenombre - Gagné !"
                 embed.color = discord.Color.green()
                 embed.description = f"🏆 **{winner.mention}** a trouvé le bon nombre ! C'était bien **{target}**."
                 embed.set_footer(text="Partie terminée")
             elif attempts and attempts[-1]['value'] == target:
-                embed.title = "🎯 Devinelenombre - Gagné !"
+                embed.title = "# 🎯 Devinelenombre - Gagné !"
                 embed.color = discord.Color.green()
                 embed.description = f"🎉 Le nombre exact **{target}** a été trouvé !"
                 embed.set_footer(text="Partie terminée")
             else:
-                embed.title = "🎯 Devinelenombre - Terminé"
+                embed.title = "# 🎯 Devinelenombre - Terminé"
                 embed.color = discord.Color.red()
                 embed.description = f"❌ Partie terminée ! Le nombre était **{target}**."
                 embed.set_footer(text="Partie terminée")
@@ -114,7 +114,6 @@ class Devinelenombre(commands.Cog):
 
         # ── Callback de validation ──
         async def on_submit(interaction, answer):
-            # Acquittement silencieux de l'interaction (aucun message éphémère)
             if not interaction.response.is_done():
                 await interaction.response.defer()
 
