@@ -18,7 +18,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_respond, safe_followup
+from utils.discord_utils import safe_edit, safe_followup, safe_respond, safe_send
 from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 # 📂 Chargement des données JSON
 # ================================================================================
 DATA_JSON_PATH = os.path.join("data", "bleach_emojis.json")
+
 
 def load_characters() -> list:
     """Charge les personnages et leurs emojis depuis le fichier JSON."""
@@ -37,9 +38,11 @@ def load_characters() -> list:
         log.exception("[bmoji] Impossible de charger %s : %s", DATA_JSON_PATH, e)
         return []
 
+
 # ================================================================================
 # 🗄️ Accès base de données locale
 # ================================================================================
+
 
 def db_valider_quete(user_id: int) -> int | None:
     """
@@ -48,7 +51,7 @@ def db_valider_quete(user_id: int) -> int | None:
     Retourne le nouveau niveau si la quête vient d'être validée, sinon None.
     """
     try:
-        conn   = get_conn()
+        conn = get_conn()
         cursor = conn.cursor()
 
         cursor.execute("SELECT quetes, niveau FROM reiatsu WHERE user_id = ?", (user_id,))
@@ -69,7 +72,7 @@ def db_valider_quete(user_id: int) -> int | None:
         new_lvl = niveau + 1
         cursor.execute(
             "UPDATE reiatsu SET quetes = ?, niveau = ? WHERE user_id = ?",
-            (json.dumps(quetes), new_lvl, user_id)
+            (json.dumps(quetes), new_lvl, user_id),
         )
         conn.commit()
         conn.close()
@@ -79,9 +82,11 @@ def db_valider_quete(user_id: int) -> int | None:
         log.exception("[bmoji] Erreur validation quête SQLite : %s", e)
         return None
 
+
 # ================================================================================
 # 🧠 Cog principal
 # ================================================================================
+
 
 class BMojiCommand(commands.Cog):
     """Commandes /bmoji et !bmoji — Devine le personnage Bleach caché derrière des emojis."""
@@ -100,7 +105,7 @@ class BMojiCommand(commands.Cog):
         embed = discord.Embed(
             title="🎉 Quête accomplie !",
             description="Tu as réussi ton premier **Bmoji** !\nTu gagnes **+1 niveau** 🆙",
-            color=discord.Color.green()
+            color=discord.Color.green(),
         )
         embed.set_footer(text=f"Niveau actuel : {new_lvl}")
         await safe_send(channel, embed=embed)
@@ -114,25 +119,29 @@ class BMojiCommand(commands.Cog):
                 return await safe_respond(target, msg, ephemeral=True)
             return await safe_send(target.channel, msg)
 
-        perso        = random.choice(characters)
-        nom          = perso["nom"]
-        emojis       = random.sample(perso["emojis"], k=min(3, len(perso["emojis"])))
+        perso = random.choice(characters)
+        nom = perso["nom"]
+        emojis = random.sample(perso["emojis"], k=min(3, len(perso["emojis"])))
         distracteurs = random.sample([c["nom"] for c in characters if c["nom"] != nom], 3)
-        options      = distracteurs + [nom]
+        options = distracteurs + [nom]
         random.shuffle(options)
 
         lettres = ["🇦", "🇧", "🇨", "🇩"]
-        bonne   = lettres[options.index(nom)]
+        bonne = lettres[options.index(nom)]
+
+        # Mise en forme des emojis en grand via le titre H1 (#) dans la description/field
+        emoji_display = f"# {' '.join(emojis)}"
+        options_display = "\n".join(f"{lettres[i]} : {options[i]}" for i in range(4))
 
         embed = discord.Embed(
             title="Bmoji",
-            description="Devine le personnage de Bleach derrière ces emojis !",
-            color=discord.Color.purple()
+            description=f"Devine le personnage de Bleach derrière ces emojis !\n\n{emoji_display}",
+            color=discord.Color.purple(),
         )
         embed.add_field(
-            name=" ".join(emojis),
-            value="\n".join(f"{lettres[i]} : {options[i]}" for i in range(4)),
-            inline=False
+            name="Propositions",
+            value=options_display,
+            inline=False,
         )
 
         class PersoButton(discord.ui.Button):
@@ -149,11 +158,11 @@ class BMojiCommand(commands.Cog):
                 if not user_ok:
                     return await safe_respond(inter_button, "❌ Ce défi ne t'est pas destiné.", ephemeral=True)
 
-                view.success = (lettres[self.idx] == bonne)
+                view.success = lettres[self.idx] == bonne
                 view.stop()
                 await inter_button.response.defer()
 
-        view         = discord.ui.View(timeout=30)
+        view = discord.ui.View(timeout=30)
         view.success = False
         for i in range(4):
             view.add_item(PersoButton(lettres[i], i))
@@ -167,24 +176,27 @@ class BMojiCommand(commands.Cog):
         view.message = msg
         await view.wait()
 
+        # Désactivation de tous les boutons à la fin
+        for child in view.children:
+            child.disabled = True
+
         if view.success:
-            if isinstance(target, discord.Interaction):
-                await safe_followup(target, "✅ Bonne réponse !")
-                await self._valider_quete_bmoji(target.user, target.channel)
-            else:
-                await safe_send(target.channel, "✅ Bonne réponse !")
-                await self._valider_quete_bmoji(target.author, target.channel)
+            embed.color = discord.Color.green()
+            embed.set_footer(text=f"🎉 Bravo ! C'était bien {nom}.")
+            await safe_edit(msg, embed=embed, view=view)
+
+            user = target.user if isinstance(target, discord.Interaction) else target.author
+            channel = target.channel
+            await self._valider_quete_bmoji(user, channel)
         else:
-            result_msg = f"❌ Mauvaise réponse (c'était **{nom}**)"
-            if isinstance(target, discord.Interaction):
-                await safe_followup(target, result_msg)
-            else:
-                await safe_send(target.channel, result_msg)
+            embed.color = discord.Color.red()
+            embed.set_footer(text=f"💀 Perdu ! C'était {nom}.")
+            await safe_edit(msg, embed=embed, view=view)
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="bmoji",description="Devine quel personnage Bleach se cache derrière ces emojis.")
+    @app_commands.command(name="bmoji", description="Devine quel personnage Bleach se cache derrière ces emojis.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def bmoji_slash(self, interaction: discord.Interaction):
         await self._run_bmoji(interaction)
@@ -192,10 +204,11 @@ class BMojiCommand(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="bmoji",help="Devine quel personnage Bleach se cache derrière ces emojis.")
+    @commands.command(name="bmoji", help="Devine quel personnage Bleach se cache derrière ces emojis.")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def bmoji_prefix(self, ctx: commands.Context):
         await self._run_bmoji(ctx)
+
 
 # ================================================================================
 # 🔌 Setup du Cog
