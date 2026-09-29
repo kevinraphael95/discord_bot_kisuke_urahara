@@ -18,8 +18,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_edit
-from utils.jeux_utils import parse_mode, ReplyView, BuzzerView
+from utils.discord_utils import safe_edit, safe_send
+from utils.jeux_utils import BuzzerView, ReplyView, parse_mode
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +44,8 @@ class Devinelenombre(commands.Cog):
         attempts: list[dict],
         multi: bool,
         finished: bool,
-        winner: discord.User | discord.Member | None = None
+        winner: discord.User | discord.Member | None = None,
+        last_error: str | None = None
     ) -> discord.Embed:
         mode_text = "Multi 🌍" if multi else "Solo 🧍‍♂️"
         embed = discord.Embed(
@@ -77,6 +78,9 @@ class Devinelenombre(commands.Cog):
         else:
             embed.add_field(name="Essais", value="*(Aucun essai pour l'instant)*", inline=False)
 
+        if last_error and not finished:
+            embed.add_field(name="⚠️ Remarque", value=last_error, inline=False)
+
         if finished:
             if winner:
                 embed.title = "🎯 Devinelenombre - Gagné !"
@@ -104,7 +108,7 @@ class Devinelenombre(commands.Cog):
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, multi: bool = False):
         target   = random.randint(0, 100)
         attempts: list[dict] = []
-        state    = {"finished": False, "winner": None}
+        state    = {"finished": False, "winner": None, "last_error": None}
 
         embed = self._build_embed(target, attempts, multi, state["finished"])
 
@@ -123,6 +127,17 @@ class Devinelenombre(commands.Cog):
                 return
 
             if not (0 <= guess <= 100):
+                return
+
+            state["last_error"] = None
+
+            # Vérification anti-doublon
+            if any(entry['value'] == guess for entry in attempts):
+                state["last_error"] = f"Le nombre `{guess}` a déjà été proposé !"
+                new_embed = self._build_embed(
+                    target, attempts, multi, state["finished"], last_error=state["last_error"]
+                )
+                await safe_edit(view.message, embed=new_embed)
                 return
 
             attempts.append({'value': guess, 'author': interaction.user.display_name})
