@@ -236,6 +236,10 @@ class Puissance4(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+
+    # ============================================================================
+    # 🔹 Commande PREFIX
+    # ============================================================================
     @commands.command(name="puissance4", aliases=["p4"])
     async def p4(self, ctx, mode: str = "solo"):
         mode = mode.lower()
@@ -248,6 +252,9 @@ class Puissance4(commands.Cog):
             msg = await safe_send(ctx.channel, embed=view.embed(), view=view)
             view.message = msg
 
+    # ============================================================================
+    # 🔹 Commande SLASH
+    # ============================================================================
     @app_commands.command(name="puissance4")
     async def slash(self, interaction, mode: str = "solo"):
         mode = mode.lower()
