@@ -20,15 +20,15 @@ from discord import app_commands
 from discord.ext import commands
 from spellchecker import SpellChecker
 
-from utils.discord_utils import safe_send, safe_edit
-from utils.jeux_utils import normalize_text, parse_mode, ReplyView, BuzzerView
+from utils.discord_utils import safe_edit, safe_send
+from utils.jeux_utils import BuzzerView, ReplyView, normalize_text, parse_mode
 
 log = logging.getLogger(__name__)
 
 # ================================================================================
 # 🌐 Initialisation du spellchecker français
 # ================================================================================
-spell = SpellChecker(language='fr')
+spell = SpellChecker(language="fr")
 
 # ================================================================================
 # 🌐 Récupération d'un mot français aléatoire
@@ -86,7 +86,7 @@ class AnagrammeView:
         if self.multi:
             instructions = (
                 "💡 **Comment jouer en mode Multi :**\n"
-                "1️⃣ Clique sur **🔔 Buzzer** pour prendre la main.\n"
+                "1️⃣ Clique sur **🔔 Buzzer** pour prendre la hand.\n"
                 "2️⃣ Le plus rapide ouvre une fenêtre pour proposer un mot.\n"
                 f"3️⃣ Le mot doit faire {self.display_length} lettres.\n"
                 "4️⃣ Il n'y a **aucune limite d'essais**.\n"
@@ -166,6 +166,13 @@ class Anagramme(commands.Cog):
 
             guess = answer.strip().upper()
             game.last_error = None
+
+            # Vérification si le mot a déjà été proposé
+            if any(entry['word'] == guess for entry in game.attempts):
+                game.last_error = f"Le mot `{guess}` a déjà été proposé !"
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
+                return
 
             if len(guess) != game.display_length:
                 game.last_error = f"Le mot doit faire exactement {game.display_length} lettres."
