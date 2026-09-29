@@ -280,10 +280,10 @@ class Capitales(commands.Cog):
 
         # ── Création de la view selon le mode ──
         if multi:
-            async def on_buzz(interaction):
+            async def on_buzz(user: discord.User | discord.Member):
                 await safe_send(
-                    interaction.channel,
-                    f"🎯 {interaction.user.mention} a buzzé ! À toi de proposer."
+                    channel,
+                    f"🎯 {user.mention} a buzzé ! À toi de proposer."
                 )
 
             view = BuzzerView(
