@@ -72,6 +72,7 @@ class ReiatsuSpawner(commands.Cog):
     async def _check_on_startup(self):
         await self.bot.wait_until_ready()
 
+        # === 1. Nettoyage des VRAIS spawns fantômes ===
         self.cursor.execute("SELECT * FROM reiatsu_config")
         configs = self.cursor.fetchall()
 
@@ -89,6 +90,44 @@ class ReiatsuSpawner(commands.Cog):
             except Exception:
                 self._reset_spawn_config(conf["guild_id"], new_delay=True)
                 print(f"[STARTUP] Spawn fantôme nettoyé — guild {conf['guild_id']}")
+
+        # === 2. Nettoyage des FAUX spawns orphelins (Illusionniste) ===
+        self.cursor.execute("""
+            SELECT user_id, fake_spawn_id, fake_spawn_guild_id
+            FROM reiatsu
+            WHERE fake_spawn_id IS NOT NULL
+        """)
+        fake_spawns = self.cursor.fetchall()
+
+        for row in fake_spawns:
+            user_id    = row["user_id"]
+            message_id = row["fake_spawn_id"]
+            guild_id   = row["fake_spawn_guild_id"]
+
+            guild = self.bot.get_guild(guild_id) if guild_id else None
+            if guild:
+                self.cursor.execute(
+                    "SELECT channel_id FROM reiatsu_config WHERE guild_id = ?",
+                    (guild_id,)
+                )
+                conf = self.cursor.fetchone()
+                if conf and conf["channel_id"]:
+                    channel = guild.get_channel(conf["channel_id"])
+                    if channel:
+                        try:
+                            old_msg = await channel.fetch_message(message_id)
+                            await safe_delete(old_msg)
+                            print(f"[STARTUP] Faux Reiatsu orphelin supprimé — user {user_id}")
+                        except Exception:
+                            pass
+
+            # Reset DB dans tous les cas
+            self.cursor.execute("""
+                UPDATE reiatsu
+                SET fake_spawn_id = NULL, fake_spawn_guild_id = NULL, active_skill = 0
+                WHERE user_id = ?
+            """, (user_id,))
+            self.conn.commit()
 
     # ==============================================================
     # 🔹 Boucle principale de spawn
@@ -372,7 +411,6 @@ class ReiatsuSpawner(commands.Cog):
 
         async with self.locks[lock_key]:
             try:
-                # Re-vérifie disponibilité
                 if conf:
                     self.cursor.execute("""
                         SELECT is_spawn FROM reiatsu_config
@@ -401,11 +439,9 @@ class ReiatsuSpawner(commands.Cog):
 
                 gain, is_super, classe = 0, False, None
                 if conf:
-                    # ✅ Appel direct (self) au lieu de bot.get_cog()
                     gain, is_super, classe = self._calculate_gain(user_id)
                 elif fake_row:
                     owner_id = fake_row["owner_id"]
-                    # ✅ Appel direct (self) au lieu de bot.get_cog()
                     self.cursor.execute(
                         "UPDATE reiatsu SET points = points + 50, active_skill = 0 WHERE user_id = ?",
                         (owner_id,)
@@ -438,7 +474,6 @@ class ReiatsuSpawner(commands.Cog):
                         f"🎭 {user.mention} a absorbé un faux Reiatsu ! **{owner.display_name}** gagne **+50 Reiatsu** !"
                     )
             finally:
-                # ✅ Garanti même si erreur/return
                 self.locks.pop(lock_key, None)
 
 
