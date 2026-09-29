@@ -266,15 +266,13 @@ class Capitales(commands.Cog):
                 # ✅ Fin de partie immédiate (solo ET multi)
                 if not state["finished"]:
                     state["finished"] = True
-                    for child in view.children:
-                        child.disabled = True
 
                     final_embed = discord.Embed(
                         title="🎉 Bonne réponse !",
                         description=f"🏆 **{interaction.user.display_name}** a trouvé !\n\n✅ Réponse : **{capital}**",
                         color=discord.Color.green()
                     )
-                    await safe_edit(view.message, embed=final_embed, view=view)
+                    await view.mark_finished(embed=final_embed)
 
             # ❌ Mauvaise réponse
             else:
@@ -328,9 +326,7 @@ class Capitales(commands.Cog):
             description=f"❌ Personne n'a trouvé. C'était **{capital}**.",
             color=discord.Color.red(),
         )
-        for child in view.children:
-            child.disabled = True
-        await safe_edit(view.message, embed=final_embed, view=view)
+        await view.mark_finished(embed=final_embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
