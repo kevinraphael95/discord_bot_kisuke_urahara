@@ -464,7 +464,7 @@ class ReiatsuSpawner(commands.Cog):
                     """, (message_id,))
                     self.conn.commit()
 
-                if conf and gain > 0:
+                if conf:
                     await self._send_feedback(channel, user, gain, is_super, classe)
                 elif fake_row:
                     owner_id = fake_row["owner_id"]
