@@ -18,7 +18,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_interact, safe_edit
+from utils.discord_utils import safe_send, safe_interact, safe_edit, safe_respond
 
 # ================================================================================
 # 📂 Gestion des personnages
@@ -125,12 +125,14 @@ class VersusCommand(commands.Cog):
                     view.narratif.append(f"🏆 **{p1['nom']}** remporte le combat !")
                     for child in view.children:
                         child.disabled = True
+                    # ✅ safe_interact gère le rate-limit
                     await safe_interact(interaction, embed=create_embed(view.narratif), view=view, edit=True)
                     view.stop()
                     return
 
                 view.turn = "bot"
                 view._update_buttons()
+                # ✅ safe_interact au lieu de interaction.response.edit_message
                 await safe_interact(interaction, embed=create_embed(view.narratif), view=view, edit=True)
                 await view.bot_turn()
 
@@ -168,13 +170,24 @@ class VersusCommand(commands.Cog):
                     self.narratif.append(f"🏆 **{p2['nom']}** remporte le combat !")
                     for child in self.children:
                         child.disabled = True
+                    # ✅ safe_edit partout
                     await safe_edit(self.message, embed=create_embed(self.narratif), view=self)
                     self.stop()
                     return
 
                 self.turn = "player"
                 self._update_buttons()
+                # ✅ safe_edit partout
                 await safe_edit(self.message, embed=create_embed(self.narratif), view=self)
+
+            async def on_timeout(self):
+                for child in self.children:
+                    child.disabled = True
+                if self.message:
+                    try:
+                        await safe_edit(self.message, view=self)
+                    except Exception:
+                        pass
 
         view         = AttackView()
         view.message = await safe_send(channel, embed=create_embed(view.narratif), view=view)
@@ -182,7 +195,7 @@ class VersusCommand(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="versus",description="⚔️ Lance un combat interactif contre le bot.")
+    @app_commands.command(name="versus", description="⚔️ Lance un combat interactif contre le bot.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_versus(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -192,10 +205,11 @@ class VersusCommand(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="versus",help="⚔️ Lance un combat interactif contre le bot.")
+    @commands.command(name="versus", help="⚔️ Lance un combat interactif contre le bot.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_versus(self, ctx: commands.Context):
         await self._run_combat(ctx.channel)
+
 
 # ================================================================================
 # 🔌 Setup du Cog
