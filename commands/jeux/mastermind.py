@@ -62,7 +62,7 @@ class MastermindView(View):
     def build_embed(self) -> discord.Embed:
         mode_text = "Multi" if self.author is None else "Solo"
         embed = discord.Embed(
-            title=f"🎯 Mastermind - mode {mode_text}",
+            title=f"# 🎯 Mastermind - mode {mode_text}",
             description=(
                 "🔴 : bonne couleur et bonne position\n"
                 "⚪ : bonne couleur mais mauvaise position\n"
@@ -272,7 +272,7 @@ class Mastermind(commands.Cog):
     async def prefix_mastermind(self, ctx: commands.Context, mode: str = "solo"):
         view = DifficultyView(ctx.author, mode)
         embed = discord.Embed(
-            title=f"🎮 Choisis la difficulté — mode {'Multi' if mode.lower() != 'solo' else 'Solo'}",
+            title=f"# 🎮 Choisis la difficulté — mode {'Multi' if mode.lower() != 'solo' else 'Solo'}",
             description="Clique sur un bouton ci-dessous :",
             color=discord.Color.orange()
         )
@@ -289,7 +289,7 @@ class Mastermind(commands.Cog):
     async def slash_mastermind(self, interaction: discord.Interaction, mode: str = "solo"):
         view = DifficultyView(interaction.user, mode)
         embed = discord.Embed(
-            title=f"🎮 Choisis la difficulté — mode {'Multi' if mode.lower() != 'solo' else 'Solo'}",
+            title=f"# 🎮 Choisis la difficulté — mode {'Multi' if mode.lower() != 'solo' else 'Solo'}",
             description="Clique sur un bouton ci-dessous :",
             color=discord.Color.orange()
         )
