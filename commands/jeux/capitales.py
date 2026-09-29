@@ -243,8 +243,7 @@ class Capitales(commands.Cog):
 
         embed = discord.Embed(
             title=title,
-            description=f"Quelle est la capitale de **{country}** ?" +
-                        ("\nClique sur **🔔 Buzzer** pour prendre la main." if multi else "\nClique sur **✍️ Répondre** pour proposer ta réponse."),
+            description=f"Quelle est la capitale de **{country}** ?",
             color=discord.Color.blurple()
         )
         embed.set_footer(text=footer_text)
@@ -257,21 +256,16 @@ class Capitales(commands.Cog):
             if user_answer == normalize_text(capital):
                 await safe_respond(interaction, "✅ Bonne réponse !", ephemeral=True)
 
-                # ✅ Annonce publique de la victoire
-                await safe_send(
-                    interaction.channel,
-                    f"🎉 {interaction.user.mention} a trouvé ! C'était bien **{capital}**."
-                )
-
-                # ✅ Fin de partie immédiate (solo ET multi)
                 if not state["finished"]:
                     state["finished"] = True
 
+                    # Reprise du message d'origine et ajout des infos de victoire
                     final_embed = discord.Embed(
-                        title="🎉 Bonne réponse !",
-                        description=f"🏆 **{interaction.user.display_name}** a trouvé !\n\n✅ Réponse : **{capital}**",
+                        title=f"{title} — Gagné !",
+                        description=f"Quelle est la capitale de **{country}** ?\n\n🏆 **{interaction.user.mention}** a trouvé !\n✅ Réponse : **{capital}**",
                         color=discord.Color.green()
                     )
+                    final_embed.set_footer(text="Partie terminée")
                     await view.mark_finished(embed=final_embed)
 
             # ❌ Mauvaise réponse
@@ -287,7 +281,7 @@ class Capitales(commands.Cog):
                     await safe_edit(view.message, embed=current_embed)
 
             view = BuzzerView(
-                modal_title="🖊️ Devine la capitale",
+                modal_title="🖊️️ Devine la capitale",
                 modal_label="Entre la capitale",
                 modal_placeholder="Exemple : Paris",
                 modal_max_length=50,
@@ -323,9 +317,10 @@ class Capitales(commands.Cog):
         # ── Fin du temps ──
         final_embed = discord.Embed(
             title="⏰ Temps écoulé !",
-            description=f"❌ Personne n'a trouvé. C'était **{capital}**.",
+            description=f"Quelle est la capitale de **{country}** ?\n\n❌ Personne n'a trouvé. C'était **{capital}**.",
             color=discord.Color.red(),
         )
+        final_embed.set_footer(text="Partie terminée")
         await view.mark_finished(embed=final_embed)
 
     # ============================================================================
