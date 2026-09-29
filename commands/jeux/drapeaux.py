@@ -19,7 +19,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_respond, safe_edit
+from utils.discord_utils import safe_send, safe_edit
 from utils.jeux_utils import normalize_text, parse_mode, ReplyView, BuzzerView
 
 log = logging.getLogger(__name__)
@@ -38,6 +38,61 @@ def get_flag_url(iso_code: str) -> str:
     return f"https://flagcdn.com/w320/{iso_code}.png"
 
 # ================================================================================
+# 🎮 Classe de gestion du jeu
+# ================================================================================
+class DrapeauxGame:
+    def __init__(self, country: str, iso_code: str, author_id: int, multi: bool = False, duration: int = 120):
+        self.country = country
+        self.flag_url = get_flag_url(iso_code)
+        self.author_id = author_id
+        self.multi = multi
+        self.duration = duration
+        self.finished = False
+        self.winner: str | None = None
+        self.attempts: list[dict] = []
+        self.message = None
+        self.start_time = asyncio.get_event_loop().time()
+
+    def build_embed(self) -> discord.Embed:
+        mode_text = "Multijoueur 🌍" if self.multi else "Solo 🧍‍♂️"
+        title = f"🚩 Devine le Drapeau - Mode {mode_text}"
+
+        action_text = "Clique sur **🔔 Buzzer** pour prendre la main." if self.multi else "Clique sur **✍️ Répondre** pour proposer ta réponse."
+        description = f"Quel est ce pays ?\n{action_text}"
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.blurple()
+        )
+        embed.set_image(url=self.flag_url)
+
+        if self.attempts:
+            lines = []
+            for entry in self.attempts:
+                status = "✅" if entry.get('correct') else "❌"
+                lines.append(f"{entry['author']}: **{entry['word']}** {status}")
+            tries_text = "\n".join(lines)
+            embed.add_field(name=f"Essais ({len(self.attempts)})", value=tries_text, inline=False)
+
+        if self.finished:
+            if self.winner:
+                embed.title = f"{title} — Gagné !"
+                embed.color = discord.Color.green()
+                embed.description = f"Quel est ce pays ?\n\n🏆 **{self.winner}** a trouvé !\n✅ Réponse : **{self.country}**"
+            else:
+                embed.title = "⏰ Temps écoulé !"
+                embed.color = discord.Color.red()
+                embed.description = f"Quel est ce pays ?\n\n❌ Personne n'a trouvé. C'était **{self.country}**."
+            embed.set_footer(text="Partie terminée")
+        else:
+            elapsed = int(asyncio.get_event_loop().time() - self.start_time)
+            remaining = max(0, self.duration - elapsed)
+            embed.set_footer(text=f"⏱️ Temps restant : {remaining} secondes")
+
+        return embed
+
+# ================================================================================
 # 🧠 Cog principal
 # ================================================================================
 class Drapeaux(commands.Cog):
@@ -54,50 +109,62 @@ class Drapeaux(commands.Cog):
     # ============================================================================
     async def _send_quiz(self, channel, author_id: int, multi: bool = False):
         country, iso_code = random.choice(list(COUNTRIES.items()))
-        flag_url = get_flag_url(iso_code)
-        winners  = []
-
-        embed = discord.Embed(
-            title="🌍 Devine le pays !",
-            description=("Clique sur **🔔 Buzzer** pour prendre la main." if multi
-                         else "Clique sur **✍️ Répondre** pour proposer ta réponse."),
-            color=discord.Color.blurple()
-        )
-        embed.set_image(url=flag_url)
-        embed.set_footer(text=f"⏱️ Temps : {self.MULTI_TIME if multi else self.SOLO_TIME} secondes")
-
-        # ── Callback de validation ──
-        async def on_submit(interaction, answer):
-            user_answer = normalize_text(answer)
-            if user_answer == normalize_text(country):
-                if interaction.user not in winners:
-                    winners.append(interaction.user)
-                await safe_respond(interaction, "✅ Bonne réponse !", ephemeral=True)
-
-                # En solo, on termine immédiatement
-                if not multi and not state["finished"]:
-                    state["finished"] = True
-                    for child in view.children:
-                        child.disabled = True
-
-                    final_embed = discord.Embed(
-                        title="🎉 Bravo !",
-                        description=f"🏆 **{interaction.user.display_name}** a trouvé !\n\n✅ Réponse : **{country}**",
-                        color=discord.Color.green()
-                    )
-                    final_embed.set_image(url=flag_url)
-                    await safe_edit(view.message, embed=final_embed, view=view)
-            else:
-                await safe_respond(interaction, "❌ Mauvaise réponse !", ephemeral=True)
-
-        # ── Callback quand quelqu'un buzze (multi seulement) ──
-        async def on_buzz(interaction):
-            await safe_send(
-                interaction.channel,
-                f"🎯 {interaction.user.mention} a buzzé ! À toi de proposer.",
-            )
+        duration = self.MULTI_TIME if multi else self.SOLO_TIME
+        game = DrapeauxGame(country, iso_code, author_id, multi, duration)
 
         state = {"finished": False}
+        embed = game.build_embed()
+
+        # ── Callback de validation ──
+        async def on_submit(interaction: discord.Interaction, answer: str):
+            if not interaction.response.is_done():
+                await interaction.response.defer()
+
+            if state["finished"]:
+                return
+
+            if not game.multi and interaction.user.id != game.author_id:
+                return
+
+            user_answer = answer.strip()
+            if not user_answer:
+                return
+
+            is_correct = (normalize_text(user_answer) == normalize_text(country))
+
+            game.attempts.append({
+                'word': user_answer,
+                'author': interaction.user.display_name,
+                'correct': is_correct
+            })
+
+            # ✅ Bonne réponse
+            if is_correct:
+                state["finished"] = True
+                game.finished = True
+                game.winner = interaction.user.mention
+
+                final_embed = game.build_embed()
+                await view.mark_finished(embed=final_embed)
+
+            # ❌ Mauvaise réponse
+            else:
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
+
+        # ── Callback quand quelqu'un buzze (multi seulement) ──
+        async def on_buzz(user: discord.User | discord.Member):
+            if view.message:
+                for child in view.children:
+                    if isinstance(child, discord.ui.Button):
+                        child.disabled = True
+
+                current_embed = game.build_embed()
+                elapsed = int(asyncio.get_event_loop().time() - game.start_time)
+                remaining = max(0, game.duration - elapsed)
+                current_embed.set_footer(text=f"🎯 Main prise par {user.display_name} | ⏱️ Temps restant : {remaining}s")
+
+                await safe_edit(view.message, embed=current_embed, view=view)
 
         # ── Vue selon le mode ──
         if multi:
@@ -125,10 +192,11 @@ class Drapeaux(commands.Cog):
         view.message = await safe_send(channel, embed=embed, view=view)
         if view.message is None:
             return
+        game.message = view.message
 
         # ── Attente ──
         try:
-            await asyncio.sleep(self.MULTI_TIME if multi else self.SOLO_TIME)
+            await asyncio.sleep(duration)
         except asyncio.CancelledError:
             return
 
@@ -136,20 +204,9 @@ class Drapeaux(commands.Cog):
             return
 
         # ── Fin du temps ──
-        final_embed = discord.Embed(
-            title="🎉 Résultat",
-            description=(
-                f"✅ Réponse : **{country}**\n"
-                f"🏆 Gagnants : {', '.join(w.mention for w in dict.fromkeys(winners))}"
-                if winners else
-                f"❌ Personne n'a trouvé. C'était **{country}**."
-            ),
-            color=discord.Color.red() if not winners else discord.Color.green(),
-        )
-        final_embed.set_image(url=flag_url)
-        for child in view.children:
-            child.disabled = True
-        await safe_edit(view.message, embed=final_embed, view=view)
+        game.finished = True
+        final_embed = game.build_embed()
+        await view.mark_finished(embed=final_embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
