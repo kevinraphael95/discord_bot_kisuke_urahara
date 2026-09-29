@@ -1,6 +1,6 @@
 # ================================================================================
 # 📌 mot_contraint.py — Commande interactive /mot_contraint et !mot_contraint
-# Objectif : Jeu de mot contraint avec embed, manches et feedback
+# Objectif : Jeu du mot contraint avec embed, tentatives limitées et feedback
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
@@ -68,7 +68,6 @@ class MotContraintView:
         embed = discord.Embed(
             title=f"🎯 Mots Contraints - {mode_text}",
             description=(
-                f"```ansi\n\x1b[1;37;44m                  Manche {self.rounds} / {self.max_rounds}                  \x1b[0m\n```\n"
                 f"# ➡️ `{self.start_letter}` _ _ _ `{self.end_letter}`\n\n"
                 f"Trouvez un mot commençant par **`{self.start_letter}`** et se terminant par **`{self.end_letter}`** !"
             ),
@@ -96,16 +95,16 @@ class MotContraintView:
 
         if self.attempts:
             lines = []
-            for entry in self.attempts[-4:]:
+            for entry in self.attempts[-5:]:
                 status = "✅" if entry.get("correct") else "❌"
-                reason = f" ({entry['reason']})" if entry.get("reason") else ""
-                lines.append(f"• **{entry['author']}**: `{entry['word']}` {status}{reason}")
+                lines.append(f"{entry['author']}: **{entry['word']}** {status}")
             tries_text = "\n".join(lines)
-            embed.add_field(name=f"Essais Récents (Manche {self.rounds})", value=tries_text, inline=False)
+            field_name = f"Essais ({len(self.attempts)})"
+            embed.add_field(name=field_name, value=tries_text, inline=False)
         else:
-            embed.add_field(name=f"Essais (Manche {self.rounds})", value="*(Aucun essai pour l'instant)*", inline=False)
+            embed.add_field(name="Essais", value="*(Aucun essai pour l'instant)*", inline=False)
 
-        if self.scores:
+        if self.scores and self.multi:
             sorted_scores = sorted(self.scores.items(), key=lambda x: x[1], reverse=True)
             leaderboard = "\n".join([f"- **{name}**: {pts}" for name, pts in sorted_scores])
             embed.add_field(name="🏆 Classement Actuel (Points)", value=leaderboard, inline=False)
@@ -176,47 +175,36 @@ class MotContraint(commands.Cog):
                 return
 
             # Vérification des règles
-            reason = None
             if not word_clean.startswith(game.start_letter.lower()):
-                reason = f"ne commence pas par {game.start_letter}"
+                game.last_error = f"Le mot doit commencer par `{game.start_letter}`."
+                game.attempts.append({'word': guess, 'author': author_name, 'correct': False})
             elif not word_clean.endswith(game.end_letter.lower()):
-                reason = f"se termine par {word_clean[-1].upper()}"
+                game.last_error = f"Le mot doit se terminer par `{game.end_letter}`."
+                game.attempts.append({'word': guess, 'author': author_name, 'correct': False})
             elif not is_valid_word(word_clean):
-                reason = "mot inconnu du dictionnaire"
-
-            if reason:
-                game.attempts.append({
-                    'word': guess,
-                    'author': author_name,
-                    'correct': False,
-                    'reason': reason
-                })
-                if game.message:
-                    await safe_edit(game.message, embed=game.build_embed())
-                return
-
-            # ✅ Mot valide !
-            game.attempts.append({
-                'word': guess,
-                'author': author_name,
-                'correct': True
-            })
-            game.scores[author_name] = game.scores.get(author_name, 0) + 1
-
-            game.rounds += 1
-            if game.rounds > game.max_rounds:
-                state["finished"] = True
-                game.finished = True
-                self.active_games.pop(channel.id, None)
-
-                final_embed = game.build_embed()
-                await view.mark_finished(embed=final_embed)
+                game.last_error = f"`{guess}` n'est pas un mot reconnu du dictionnaire."
+                game.attempts.append({'word': guess, 'author': author_name, 'correct': False})
             else:
-                # Passage à la manche suivante
-                game.start_letter, game.end_letter = get_random_letter_pair()
-                game.attempts.clear()
-                if game.message:
-                    await safe_edit(game.message, embed=game.build_embed())
+                # ✅ Mot valide !
+                game.attempts.append({'word': guess, 'author': author_name, 'correct': True})
+                game.scores[author_name] = game.scores.get(author_name, 0) + 1
+
+                game.rounds += 1
+                if game.rounds > game.max_rounds:
+                    state["finished"] = True
+                    game.finished = True
+                    self.active_games.pop(channel.id, None)
+
+                    final_embed = game.build_embed()
+                    await view.mark_finished(embed=final_embed)
+                    return
+                else:
+                    # Manche suivante
+                    game.start_letter, game.end_letter = get_random_letter_pair()
+                    game.attempts.clear()
+
+            if game.message:
+                await safe_edit(game.message, embed=game.build_embed())
 
         # ── Création de la view ──
         if multi:
