@@ -9,15 +9,16 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
-import discord
-from discord import app_commands
-from discord.ext import commands
-from discord.ui import View, Modal, TextInput, Button
 import random
-import aiohttp
 import unicodedata
+import aiohttp
+import discord
+from discord import ButtonStyle, TextInput, app_commands
+from discord.ext import commands
+from discord.ui import Button, Modal, View
 from spellchecker import SpellChecker
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+
+from utils.discord_utils import safe_edit, safe_respond, safe_send
 
 # ================================================================================
 # 🌐 Initialisation du spellchecker français
@@ -164,7 +165,7 @@ class MotusView(View):
     def build_embed(self) -> discord.Embed:
         mode_text = "Multi" if self.author_id is None else "Solo"
         embed = discord.Embed(
-            title=f"🎯 M🟡TUS - mode {mode_text}",
+            title=f"# 🎯 M🟡TUS - mode {mode_text}",
             description=f"Mot de **{self.display_length}** lettres",
             color=discord.Color.orange()
         )
@@ -225,7 +226,7 @@ class MotusView(View):
 # ================================================================================
 class MotusButton(Button):
     def __init__(self, parent_view: MotusView):
-        super().__init__(label="Proposer un mot", style=discord.ButtonStyle.primary)
+        super().__init__(label="Proposer un mot", style=ButtonStyle.primary)
         self.parent_view = parent_view
 
     async def callback(self, interaction: discord.Interaction):
@@ -238,7 +239,7 @@ class MotusButton(Button):
 # ================================================================================
 class HintButton(Button):
     def __init__(self, parent_view: MotusView):
-        super().__init__(label="Indice", style=discord.ButtonStyle.secondary)
+        super().__init__(label="Indice", style=ButtonStyle.secondary)
         self.parent_view = parent_view
 
     async def callback(self, interaction: discord.Interaction):
