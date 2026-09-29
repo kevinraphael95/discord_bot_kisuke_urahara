@@ -28,8 +28,8 @@ log = logging.getLogger(__name__)
 # ================================================================================
 class Devinelenombre(commands.Cog):
     """Commande /devinelenombre et !devinelenombre — Deviner un nombre entre 0 et 100"""
-    SOLO_TIME  = 120
-    MULTI_TIME = 120
+    SOLO_TIME   = 120
+    MULTI_TIME  = 120
     MAX_ATTEMPTS = 10
 
     def __init__(self, bot: commands.Bot):
@@ -38,28 +38,30 @@ class Devinelenombre(commands.Cog):
     # ============================================================================
     # 🔹 Construction de l'embed
     # ============================================================================
-    def _build_embed(self, target: int, attempts: list, multi: bool, finished: bool) -> discord.Embed:
-        mode_text = "Multi" if multi else "Solo"
+    def _build_embed(self, target: int, attempts: list[dict], multi: bool, finished: bool, winner: discord.User | discord.Member | None = None) -> discord.Embed:
+        mode_text = "Multi 🌍" if multi else "Solo 🧍‍♂️"
         embed = discord.Embed(
             title=f"🎯 Devinelenombre - Mode {mode_text}",
             description=(
                 "Devine le nombre entre 0 et 100.\n" +
                 ("Clique sur **🔔 Buzzer** pour prendre la main." if multi
-                 else "Clique sur **✍️ Répondre** pour proposer.")
+                 else "Clique sur **✍️ Répondre** pour proposer un nombre.")
             ),
             color=discord.Color.orange()
         )
 
         if attempts:
             lines = []
-            for idx, val in enumerate(attempts, 1):
+            for idx, entry in enumerate(attempts, 1):
+                val = entry['value']
+                author_name = entry['author']
                 if val < target:
                     symbol = "⬆️ Trop bas"
                 elif val > target:
                     symbol = "⬇️ Trop haut"
                 else:
                     symbol = "✅ Exact !"
-                lines.append(f"{idx}. {val} → {symbol}")
+                lines.append(f"{idx}. {author_name}: **{val}** → {symbol}")
             embed.add_field(
                 name=f"Essais ({len(attempts)}/{self.MAX_ATTEMPTS})",
                 value="\n".join(lines),
@@ -69,12 +71,21 @@ class Devinelenombre(commands.Cog):
             embed.add_field(name="Essais", value="*(Aucun essai pour l'instant)*", inline=False)
 
         if finished:
-            if attempts and attempts[-1] == target:
+            if winner:
+                embed.title = "🎯 Devinelenombre - Gagné !"
                 embed.color = discord.Color.green()
-                embed.set_footer(text="🎉 Bravo ! Le nombre a été trouvé.")
+                embed.description = f"🏆 **{winner.mention}** a trouvé le bon nombre ! C'était bien **{target}**."
+                embed.set_footer(text="Partie terminée")
+            elif attempts and attempts[-1]['value'] == target:
+                embed.title = "🎯 Devinelenombre - Gagné !"
+                embed.color = discord.Color.green()
+                embed.description = f"🎉 Le nombre exact **{target}** a été trouvé !"
+                embed.set_footer(text="Partie terminée")
             else:
+                embed.title = "🎯 Devinelenombre - Terminé"
                 embed.color = discord.Color.red()
-                embed.set_footer(text=f"💀 Partie terminée. Le nombre était {target}.")
+                embed.description = f"❌ Partie terminée ! Le nombre était **{target}**."
+                embed.set_footer(text="Partie terminée")
         else:
             embed.set_footer(text=f"⏳ Temps restant : {self.MULTI_TIME if multi else self.SOLO_TIME} secondes")
 
@@ -85,8 +96,8 @@ class Devinelenombre(commands.Cog):
     # ============================================================================
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, multi: bool = False):
         target   = random.randint(0, 100)
-        attempts = []
-        state    = {"finished": False}
+        attempts: list[dict] = []
+        state    = {"finished": False, "winner": None}
 
         embed = self._build_embed(target, attempts, multi, state["finished"])
 
@@ -106,33 +117,47 @@ class Devinelenombre(commands.Cog):
                 await safe_respond(interaction, "⚠️ Le nombre doit être entre 0 et 100.", ephemeral=True)
                 return
 
-            attempts.append(guess)
+            attempts.append({'value': guess, 'author': interaction.user.display_name})
 
+            # ✅ Gagné ou max d'essais atteint
             if guess == target or len(attempts) >= self.MAX_ATTEMPTS:
                 state["finished"] = True
-                for child in view.children:
-                    child.disabled = True
+                if guess == target:
+                    state["winner"] = interaction.user
 
-            # Met à jour l'embed
-            new_embed = self._build_embed(target, attempts, multi, state["finished"])
-            await safe_edit(view.message, embed=new_embed, view=view)
+                new_embed = self._build_embed(
+                    target, attempts, multi, state["finished"], winner=state["winner"]
+                )
+                await view.mark_finished(embed=new_embed)
 
-            # Réponse éphémère au joueur
-            if guess == target:
-                await safe_respond(interaction, f"🎉 Bravo ! C'était bien **{target}**.", ephemeral=True)
-            elif len(attempts) >= self.MAX_ATTEMPTS:
-                await safe_respond(interaction, f"💀 Perdu ! Le nombre était **{target}**.", ephemeral=True)
-            elif guess < target:
-                await safe_respond(interaction, "⬆️ Trop bas !", ephemeral=True)
+                if guess == target:
+                    await safe_respond(interaction, f"🎉 Bravo ! C'était bien **{target}**.", ephemeral=True)
+                else:
+                    await safe_respond(interaction, f"💀 Perdu ! Le nombre était **{target}**.", ephemeral=True)
+
+            # ❌ Encore des essais disponibles
             else:
-                await safe_respond(interaction, "⬇️ Trop haut !", ephemeral=True)
+                new_embed = self._build_embed(target, attempts, multi, state["finished"])
+                await safe_edit(view.message, embed=new_embed)
+
+                if guess < target:
+                    await safe_respond(interaction, "⬆️ Trop bas !", ephemeral=True)
+                else:
+                    await safe_respond(interaction, "⬇️ Trop haut !", ephemeral=True)
 
         # ── Callback quand quelqu'un buzze (multi seulement) ──
-        async def on_buzz(interaction):
-            await safe_send(
-                interaction.channel,
-                f"🎯 {interaction.user.mention} a buzzé ! À toi de proposer un nombre.",
-            )
+        async def on_buzz(user: discord.User | discord.Member):
+            if view.message:
+                # 1. Griser les boutons de la view
+                for child in view.children:
+                    if isinstance(child, discord.ui.Button):
+                        child.disabled = True
+
+                # 2. Indiquer la prise de main dans le footer
+                current_embed = self._build_embed(target, attempts, multi, state["finished"])
+                current_embed.set_footer(text=f"🎯 Main prise par {user.display_name}")
+
+                await safe_edit(view.message, embed=current_embed, view=view)
 
         # ── Vue selon le mode ──
         if multi:
@@ -172,11 +197,8 @@ class Devinelenombre(commands.Cog):
 
         # ── Fin par timeout ──
         state["finished"] = True
-        for child in view.children:
-            child.disabled = True
-        final_embed = self._build_embed(target, attempts, multi, True)
-        await safe_edit(view.message, embed=final_embed, view=view)
-        await safe_send(channel, f"⏳ Temps écoulé ! Le nombre était **{target}**.")
+        final_embed = self._build_embed(target, attempts, multi, True, winner=state["winner"])
+        await view.mark_finished(embed=final_embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
