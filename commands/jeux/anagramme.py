@@ -123,25 +123,33 @@ class AnagrammeView:
         return embed
 
     async def process_guess(self, channel, guess: str, author_name: str, author_id: int, silent: bool = False):
-        """Vérifie la proposition."""
+        """
+        Vérifie la proposition.
+        Retourne un tuple (ok: bool, raison: str) :
+        - ok=True → proposition valide
+        - ok=False + raison → message d'erreur à afficher
+        """
         if self.finished:
             if not silent:
                 await safe_send(channel, "⚠️ La partie est terminée.")
-            return False
+            return False, "La partie est terminée."
 
         if not self.multi and author_id != self.author_id:
-            return False
+            return False, "Ce n'est pas ton tour."
 
         filtered_guess = guess.strip(".* ").upper()
 
         if len(filtered_guess) != self.display_length:
+            raison = f"Le mot doit faire {self.display_length} lettres."
             if not silent:
-                await safe_send(channel, f"⚠️ Le mot doit faire {self.display_length} lettres.")
-            return False
+                await safe_send(channel, f"⚠️ {raison}")
+            return False, raison
+
         if not is_valid_word(filtered_guess):
+            raison = f"`{filtered_guess}` n'est pas reconnu comme un mot valide."
             if not silent:
-                await safe_send(channel, f"❌ `{filtered_guess}` n'est pas reconnu comme un mot valide.")
-            return False
+                await safe_send(channel, f"❌ {raison}")
+            return False, raison
 
         self.attempts.append({'word': filtered_guess, 'author': author_name})
 
@@ -153,7 +161,7 @@ class AnagrammeView:
         if self.message:
             await safe_edit(self.message, embed=self.build_embed())
 
-        return True
+        return True, ""
 
     async def check_timeout(self):
         """Arrête la partie après 3 minutes"""
@@ -186,17 +194,19 @@ class Anagramme(commands.Cog):
         # ── Mode Solo : bouton "✍️ Répondre" ──
         if not multi:
             async def on_submit(interaction, answer):
-                await view.process_guess(
+                ok, raison = await view.process_guess(
                     interaction.channel,
                     answer,
                     interaction.user.display_name,
                     interaction.user.id,
                     silent=True,
                 )
-                if not view.finished:
-                    await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
-                else:
+                if not ok:
+                    await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
+                elif view.finished:
                     await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
+                else:
+                    await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
 
             reply_view = ReplyView(
                 user_id=author_id,
@@ -214,27 +224,26 @@ class Anagramme(commands.Cog):
 
         # ── Mode Multi : buzzer ──
         else:
-            buzz_ref = {"view": None}  # référence circulaire
-
             async def on_buzz(interaction):
-                # Mention dans le salon
                 await safe_send(
                     interaction.channel,
                     f"🎯 {interaction.user.mention} a buzzé ! À toi de proposer.",
                 )
 
             async def on_submit(interaction, answer):
-                ok = await view.process_guess(
+                ok, raison = await view.process_guess(
                     interaction.channel,
                     answer,
                     interaction.user.display_name,
                     interaction.user.id,
                     silent=True,
                 )
-                if ok:
-                    await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
+                if not ok:
+                    await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
+                elif view.finished:
+                    await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
                 else:
-                    await safe_respond(interaction, "❌ Proposition invalide.", ephemeral=True)
+                    await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
 
             buzz_view = BuzzerView(
                 modal_title="✍️ Propose ton mot",
