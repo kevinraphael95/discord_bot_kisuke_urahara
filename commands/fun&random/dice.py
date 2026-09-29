@@ -23,13 +23,9 @@ MAX_DES   = 20
 MAX_FACES = 1000
 
 # ================================================================================
-# 🧠 Fonction utilitaire : parse la formule et génère l'embed
+# 🧠 Fonction utilitaire
 # ================================================================================
-def lancer_des(formule: str, author: discord.Member | discord.User) -> tuple[discord.Embed | None, str | None]:
-    """
-    Parse une formule NdX et retourne un embed de résultat.
-    Retourne (embed, None) si OK, (None, message_erreur) si invalide.
-    """
+def lancer_des(formule: str, author):
     match = re.fullmatch(r'(\d+)[dD](\d+)', formule.strip())
     if not match:
         return None, "❌ Format invalide. Utilise `NdX` — ex: `2d6`, `1d20`, `4d100`."
@@ -53,14 +49,8 @@ def lancer_des(formule: str, author: discord.Member | discord.User) -> tuple[dis
 
     detail = " + ".join(fmt(r) for r in resultats)
 
-    embed = discord.Embed(
-        description=f"{detail}\n# = {total}",
-        color=color
-    )
-    embed.set_author(
-        name=f"{emoji} {author.display_name} a lancé {formule.upper()}",
-        icon_url=author.display_avatar.url
-    )
+    embed = discord.Embed(description=f"{detail}\n# = {total}", color=color)
+    embed.set_author(name=f"{emoji} {author.display_name} a lancé {formule.upper()}", icon_url=author.display_avatar.url)
 
     if total == n * x: embed.set_footer(text="🎯 Score parfait !")
     elif total == n:   embed.set_footer(text="💀 Score catastrophique.")
@@ -91,11 +81,6 @@ class DiceCommand(commands.Cog):
         embed.timestamp = interaction.created_at
         await safe_respond(interaction, embed=embed)
 
-    @slash_dice.error
-    async def slash_dice_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await safe_respond(interaction, f"⏳ Attends encore {error.retry_after:.1f}s.", ephemeral=True)
-
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
@@ -111,11 +96,6 @@ class DiceCommand(commands.Cog):
             return
         embed.timestamp = ctx.message.created_at
         await safe_send(ctx, embed=embed)
-
-    @prefix_dice.error
-    async def prefix_dice_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx, f"⏳ Attends encore {error.retry_after:.1f}s.")
 
 
 # ================================================================================
