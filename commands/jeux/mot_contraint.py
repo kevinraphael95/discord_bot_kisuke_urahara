@@ -22,7 +22,7 @@ from utils.discord_utils import safe_send, safe_respond, safe_edit
 # ────────────────────────────────────────────────────────────────────────────────
 spell = SpellChecker(language='fr')
 
-# On extrait les mots du dictionnaire ayant au moins 2 lettres
+# Extraction des mots du dictionnaire ayant au moins 2 lettres
 DICTIONARY_WORDS = [w for w in spell.word_frequency.dictionary.keys() if len(w) >= 2 and w.isalpha()]
 
 def get_random_letter_pair() -> tuple[str, str]:
@@ -52,7 +52,28 @@ class MotModal(Modal):
         await self.parent_view.check_word(interaction, self.word_input.value.strip())
 
 # ────────────────────────────────────────────────────────────────────────────────
-# 🎮 Vue principale du jeu
+# 🔘 Vue initiale avec le bouton de lancement
+# ────────────────────────────────────────────────────────────────────────────────
+class StartGameView(View):
+    def __init__(self, author_id: int):
+        super().__init__(timeout=60)
+        self.author_id = author_id
+
+    @discord.ui.button(label="🎮 Lancer la partie", style=discord.ButtonStyle.success)
+    async def start_button(self, interaction: discord.Interaction, button: Button):
+        if interaction.user.id != self.author_id:
+            return await safe_respond(interaction, "❌ Tu ne peux pas démarrer la partie d'un autre joueur.", ephemeral=False)
+
+        start, end = get_random_letter_pair()
+        game_view = MotContraintView(start, end, self.author_id)
+        embed = game_view.build_embed()
+
+        # Remplacement du message initial par le jeu actif
+        await interaction.response.edit_message(embed=embed, view=game_view)
+        game_view.message = interaction.message
+
+# ────────────────────────────────────────────────────────────────────────────────
+# 🎮 Vue principale du jeu actif
 # ────────────────────────────────────────────────────────────────────────────────
 class MotContraintView(View):
     def __init__(self, start_letter: str, end_letter: str, author_id: int):
@@ -71,7 +92,7 @@ class MotContraintView(View):
         embed = discord.Embed(
             title=f"🎯 Mot Contraint — Manche {self.rounds}/{self.max_rounds}",
             description=(
-                f"➡️️ Donne un mot qui **commence par** `{self.start_letter}` "
+                f"➡️ Donne un mot qui **commence par** `{self.start_letter}` "
                 f"et **se termine par** `{self.end_letter}`."
             ),
             color=discord.Color.orange()
@@ -81,15 +102,15 @@ class MotContraintView(View):
 
     async def check_word(self, interaction: discord.Interaction, word: str):
         if interaction.user.id != self.author_id:
-            return await interaction.response.send_message("❌ Tu ne participes pas à cette partie.", ephemeral=True)
+            return await safe_respond(interaction, "❌ Tu ne participes pas à cette partie.", ephemeral=False)
 
         word_clean = word.lower()
         if not word_clean.startswith(self.start_letter.lower()):
-            return await safe_respond(interaction, f"❌ Le mot ne commence pas par `{self.start_letter}`.", ephemeral=True)
+            return await safe_respond(interaction, f"❌ Le mot ne commence pas par `{self.start_letter}`.", ephemeral=False)
         if not word_clean.endswith(self.end_letter.lower()):
-            return await safe_respond(interaction, f"❌ Le mot ne se termine pas par `{self.end_letter}`.", ephemeral=True)
+            return await safe_respond(interaction, f"❌ Le mot ne se termine pas par `{self.end_letter}`.", ephemeral=False)
         if not is_valid_word(word_clean):
-            return await safe_respond(interaction, f"❌ `{word}` n’est pas reconnu comme un mot français valide.", ephemeral=True)
+            return await safe_respond(interaction, f"❌ `{word}` n’est pas reconnu comme un mot français valide.", ephemeral=False)
 
         self.score += 1
         self.rounds += 1
@@ -104,10 +125,10 @@ class MotContraintView(View):
             )
             return await safe_edit(self.message, embed=embed, view=self)
 
-        # Nouveau tour via mot aléatoire
+        # Nouveau tour
         self.start_letter, self.end_letter = get_random_letter_pair()
         await safe_edit(self.message, embed=self.build_embed(), view=self)
-        await safe_respond(interaction, "✅ Bien joué ! Nouvelle manche 🔄", ephemeral=True)
+        await safe_respond(interaction, "✅ Bien joué ! Nouvelle manche 🔄", ephemeral=False)
 
     async def on_timeout(self):
         for child in self.children:
@@ -129,7 +150,7 @@ class ProposerButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.parent_view.author_id:
-            return await interaction.response.send_message("❌ Tu ne participes pas à cette partie.", ephemeral=True)
+            return await safe_respond(interaction, "❌ Tu ne participes pas à cette partie.", ephemeral=False)
         await interaction.response.send_modal(MotModal(self.parent_view))
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -143,10 +164,13 @@ class MotContraint(commands.Cog):
         self.bot = bot
 
     async def _start_game(self, channel, author_id):
-        start, end = get_random_letter_pair()
-        view = MotContraintView(start, end, author_id)
-        embed = view.build_embed()
-        view.message = await safe_send(channel, embed=embed, view=view)
+        embed = discord.Embed(
+            title="🎯 Mot Contraint",
+            description="Appuie sur le bouton ci-dessous pour démarrer la partie (5 manches).",
+            color=discord.Color.blurple()
+        )
+        view = StartGameView(author_id)
+        await safe_send(channel, embed=embed, view=view)
 
     # ────────────────────────────────────────────────────────────────────────────
     # 🔹 Commande SLASH
