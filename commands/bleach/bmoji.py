@@ -1,6 +1,6 @@
 # ================================================================================
 # 📌 bmoji.py — Commande interactive !bmoji + /bmoji
-# Objectif : Deviner quel personnage Bleach se cache derrière un emoji
+# Objectif : Deviner quel personnage Bleach se cache derrière un emoji (Solo / Multi)
 # Catégorie : Bleach
 # Accès : Public
 # Cooldown : 1 utilisation / 5s / utilisateur
@@ -18,7 +18,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_edit, safe_followup, safe_respond, safe_send
+from utils.discord_utils import safe_edit, safe_respond, safe_send
 from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)
@@ -104,20 +104,23 @@ class BMojiCommand(commands.Cog):
             return
         embed = discord.Embed(
             title="🎉 Quête accomplie !",
-            description="Tu as réussi ton premier **Bmoji** !\nTu gagnes **+1 niveau** 🆙",
+            description=f"{user.mention} a réussi son premier **Bmoji** !\n**+1 niveau** 🆙",
             color=discord.Color.green(),
         )
         embed.set_footer(text=f"Niveau actuel : {new_lvl}")
         await safe_send(channel, embed=embed)
 
-    async def _run_bmoji(self, target: discord.Interaction | commands.Context):
-        """Lance une partie de Bmoji pour l'utilisateur donné."""
+    async def _run_bmoji(self, target: discord.Interaction | commands.Context, mode: str = "solo"):
+        """Lance une partie de Bmoji pour l'utilisateur donné ou le salon (multi)."""
         characters = load_characters()
         if not characters:
             msg = "⚠️ Le fichier d'emojis est vide ou introuvable."
             if isinstance(target, discord.Interaction):
                 return await safe_respond(target, msg, ephemeral=True)
             return await safe_send(target.channel, msg)
+
+        is_multi = mode.lower() in ("multi", "m")
+        author_id = None if is_multi else (target.user.id if isinstance(target, discord.Interaction) else target.author.id)
 
         perso = random.choice(characters)
         nom = perso["nom"]
@@ -129,12 +132,13 @@ class BMojiCommand(commands.Cog):
         lettres = ["🇦", "🇧", "🇨", "🇩"]
         bonne = lettres[options.index(nom)]
 
-        # Mise en forme des emojis en grand via le titre H1 (#) dans la description/field
+        # Mise en forme grand format des emojis
         emoji_display = f"# {' '.join(emojis)}"
         options_display = "\n".join(f"{lettres[i]} : {options[i]}" for i in range(4))
 
+        mode_label = "Multi" if is_multi else "Solo"
         embed = discord.Embed(
-            title="Bmoji",
+            title=f"Bmoji — Mode {mode_label}",
             description=f"Devine le personnage de Bleach derrière ces emojis !\n\n{emoji_display}",
             color=discord.Color.purple(),
         )
@@ -150,20 +154,17 @@ class BMojiCommand(commands.Cog):
                 self.idx = idx
 
             async def callback(self, inter_button: discord.Interaction):
-                if isinstance(target, discord.Interaction):
-                    user_ok = inter_button.user == target.user
-                else:
-                    user_ok = inter_button.user == target.author
+                if author_id is not None and inter_button.user.id != author_id:
+                    return await safe_respond(inter_button, "❌ Ce défi ne t'est pas destiné. Lance `/bmoji multi` pour jouer en groupe !", ephemeral=True)
 
-                if not user_ok:
-                    return await safe_respond(inter_button, "❌ Ce défi ne t'est pas destiné.", ephemeral=True)
-
+                view.winner = inter_button.user
                 view.success = lettres[self.idx] == bonne
                 view.stop()
                 await inter_button.response.defer()
 
         view = discord.ui.View(timeout=30)
         view.success = False
+        view.winner = None
         for i in range(4):
             view.add_item(PersoButton(lettres[i], i))
 
@@ -180,34 +181,37 @@ class BMojiCommand(commands.Cog):
         for child in view.children:
             child.disabled = True
 
-        if view.success:
+        if view.success and view.winner:
             embed.color = discord.Color.green()
-            embed.set_footer(text=f"🎉 Bravo ! C'était bien {nom}.")
+            embed.set_footer(text=f"🎉 Bravo {view.winner.display_name} ! C'était bien {nom}.")
             await safe_edit(msg, embed=embed, view=view)
 
-            user = target.user if isinstance(target, discord.Interaction) else target.author
             channel = target.channel
-            await self._valider_quete_bmoji(user, channel)
+            await self._valider_quete_bmoji(view.winner, channel)
         else:
             embed.color = discord.Color.red()
-            embed.set_footer(text=f"💀 Perdu ! C'était {nom}.")
+            footer_text = f"💀 Perdu ! C'était {nom}."
+            if view.winner and is_multi:
+                footer_text = f"💀 Mauvaise réponse de {view.winner.display_name} ! C'était {nom}."
+            embed.set_footer(text=footer_text)
             await safe_edit(msg, embed=embed, view=view)
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
     @app_commands.command(name="bmoji", description="Devine quel personnage Bleach se cache derrière ces emojis.")
+    @app_commands.describe(mode="Mode de jeu : solo ou multi")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
-    async def bmoji_slash(self, interaction: discord.Interaction):
-        await self._run_bmoji(interaction)
+    async def bmoji_slash(self, interaction: discord.Interaction, mode: str = "solo"):
+        await self._run_bmoji(interaction, mode=mode)
 
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="bmoji", help="Devine quel personnage Bleach se cache derrière ces emojis.")
+    @commands.command(name="bmoji", help="Devine quel personnage Bleach se cache derrière ces emojis. (Ex: !bmoji multi)")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def bmoji_prefix(self, ctx: commands.Context):
-        await self._run_bmoji(ctx)
+    async def bmoji_prefix(self, ctx: commands.Context, mode: str = "solo"):
+        await self._run_bmoji(ctx, mode=mode)
 
 
 # ================================================================================
