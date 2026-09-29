@@ -13,9 +13,9 @@ import random
 import unicodedata
 import aiohttp
 import discord
-from discord import ButtonStyle, TextInput, app_commands
+from discord import app_commands
 from discord.ext import commands
-from discord.ui import Button, Modal, View
+from discord.ui import Button, Modal, TextInput, View
 from spellchecker import SpellChecker
 
 from utils.discord_utils import safe_edit, safe_respond, safe_send
@@ -93,6 +93,7 @@ class MotusView(View):
         self.finished = False
         self.author_id = author_id
         self.hinted_indices: set[int] = set()
+        self.last_error: str | None = None
 
         # Boutons
         self.add_item(MotusButton(self))
@@ -165,7 +166,7 @@ class MotusView(View):
     def build_embed(self) -> discord.Embed:
         mode_text = "Multi" if self.author_id is None else "Solo"
         embed = discord.Embed(
-            title=f"# 🎯 M🟡TUS - mode {mode_text}",
+            title=f"🎯 M🟡TUS - mode {mode_text}",
             description=f"Mot de **{self.display_length}** lettres",
             color=discord.Color.orange()
         )
@@ -174,6 +175,9 @@ class MotusView(View):
             embed.add_field(name=f"Essais ({len(self.attempts)}/{self.max_attempts})", value=tries_text, inline=False)
         else:
             embed.add_field(name="Essais", value="*(Aucun essai pour l’instant)*", inline=False)
+
+        if self.last_error and not self.finished:
+            embed.add_field(name="⚠️ Remarque", value=self.last_error, inline=False)
 
         if self.finished:
             last_word = self.attempts[-1]['word'] if self.attempts else ""
@@ -187,16 +191,25 @@ class MotusView(View):
         return embed
 
     async def process_guess(self, interaction: discord.Interaction, guess: str):
+        if not interaction.response.is_done():
+            await interaction.response.defer()
+
         if self.finished:
-            return await safe_respond(interaction, "⚠️ La partie est terminée.", ephemeral=True)
+            return
+
+        self.last_error = None
 
         # Vérifie la longueur hors tirets
         filtered_guess = guess.replace("-", "")
         if len(filtered_guess) != self.display_length:
-            return await safe_respond(interaction, f"⚠️ Le mot doit faire {self.display_length} lettres.", ephemeral=True)
+            self.last_error = f"Le mot doit faire exactement **{self.display_length}** lettres."
+            await safe_edit(self.message, embed=self.build_embed(), view=self)
+            return
 
         if not is_valid_word(filtered_guess):
-            return await safe_respond(interaction, f"❌ `{guess}` n’est pas reconnu comme un mot valide.", ephemeral=True)
+            self.last_error = f"Le mot `{guess}` n’est pas reconnu dans le dictionnaire."
+            await safe_edit(self.message, embed=self.build_embed(), view=self)
+            return
 
         self.attempts.append({'word': guess.upper(), 'hint': False})
 
@@ -207,8 +220,6 @@ class MotusView(View):
                 child.disabled = True
 
         await safe_edit(self.message, embed=self.build_embed(), view=self)
-        if not interaction.response.is_done():
-            await interaction.response.defer(ephemeral=True)
 
     async def on_timeout(self):
         if self.finished:
@@ -226,12 +237,14 @@ class MotusView(View):
 # ================================================================================
 class MotusButton(Button):
     def __init__(self, parent_view: MotusView):
-        super().__init__(label="Proposer un mot", style=ButtonStyle.primary)
+        super().__init__(label="Proposer un mot", style=discord.ButtonStyle.primary)
         self.parent_view = parent_view
 
     async def callback(self, interaction: discord.Interaction):
         if self.parent_view.author_id and interaction.user.id != self.parent_view.author_id:
-            return await interaction.response.send_message("❌ Seul le lanceur peut proposer un mot.", ephemeral=True)
+            if not interaction.response.is_done():
+                await interaction.response.defer()
+            return
         await interaction.response.send_modal(MotusModal(self.parent_view))
 
 # ================================================================================
@@ -239,19 +252,26 @@ class MotusButton(Button):
 # ================================================================================
 class HintButton(Button):
     def __init__(self, parent_view: MotusView):
-        super().__init__(label="Indice", style=ButtonStyle.secondary)
+        super().__init__(label="Indice", style=discord.ButtonStyle.secondary)
         self.parent_view = parent_view
 
     async def callback(self, interaction: discord.Interaction):
         pv = self.parent_view
+        if not interaction.response.is_done():
+            await interaction.response.defer()
+
         if pv.author_id and interaction.user.id != pv.author_id:
-            return await interaction.response.send_message("❌ Seul le lanceur peut utiliser l'indice.", ephemeral=True)
+            return
         if pv.finished:
-            return await interaction.response.send_message("⚠️ La partie est déjà terminée.", ephemeral=True)
+            return
+
+        pv.last_error = None
 
         available_indices = [i for i in range(len(pv.target_word)) if i not in pv.hinted_indices and pv.target_word[i] != "-"]
         if not available_indices:
-            return await interaction.response.send_message("ℹ️ Aucune lettre restante à révéler.", ephemeral=True)
+            pv.last_error = "Aucune autre lettre ne peut être révélée."
+            await safe_edit(pv.message, embed=pv.build_embed(), view=pv)
+            return
 
         idx = random.choice(available_indices)
         hint_word = ["_" for _ in range(len(pv.target_word))]
@@ -267,7 +287,6 @@ class HintButton(Button):
                 child.disabled = True
 
         await safe_edit(pv.message, embed=pv.build_embed(), view=pv)
-        await interaction.response.send_message(f"🔎 Indice utilisé — lettre **{pv.target_word[idx]}** révélée.", ephemeral=True)
 
 # ================================================================================
 # 🧠 Cog principal
@@ -294,10 +313,10 @@ class Motus(commands.Cog):
             await self._start_game(interaction.channel, author_id=interaction.user.id, mode=mode)
             await interaction.delete_original_response()
         except app_commands.CommandOnCooldown as e:
-            await safe_respond(interaction, f"⏳ Attends encore {e.retry_after:.1f}s.", ephemeral=True)
+            await safe_respond(interaction, f"⏳ Attends encore {e.retry_after:.1f}s.")
         except Exception as e:
             print(f"[ERREUR /motus] {e}")
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+            await safe_respond(interaction, "❌ Une erreur est survenue.")
 
     @commands.command(name="motus", help="Lance une partie de Motus. motus multi ou m pour jouer en multi.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
