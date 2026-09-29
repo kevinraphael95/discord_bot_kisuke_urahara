@@ -170,14 +170,9 @@ class AnagrammeView:
                 self.finished = True
                 if self.message:
                     await safe_edit(self.message, embed=self.build_embed())
-                # ✅ Désactive les boutons à la fin du timer
-                if game_view is not None:
-                    for child in game_view.children:
-                        child.disabled = True
-                    try:
-                        await safe_edit(game_view.message, view=game_view)
-                    except Exception:
-                        pass
+                # ✅ Marque la view comme terminée (désactive les boutons définitivement)
+                if game_view is not None and hasattr(game_view, "mark_finished"):
+                    await game_view.mark_finished()
                 break
 
 # ================================================================================
@@ -211,14 +206,9 @@ class Anagramme(commands.Cog):
                     await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
                     return
 
-                # ✅ Si la partie est finie, on désactive les boutons
+                # ✅ Si la partie est finie, on marque la view comme terminée
                 if view.finished:
-                    for child in reply_view.children:
-                        child.disabled = True
-                    try:
-                        await safe_edit(reply_view.message, view=reply_view)
-                    except Exception:
-                        pass
+                    await reply_view.mark_finished()
                     await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
                 else:
                     await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
@@ -257,13 +247,9 @@ class Anagramme(commands.Cog):
                     await safe_respond(interaction, f"❌ {raison}", ephemeral=True)
                     return
 
+                # ✅ Si la partie est finie, on marque la view comme terminée
                 if view.finished:
-                    for child in buzz_view.children:
-                        child.disabled = True
-                    try:
-                        await safe_edit(buzz_view.message, view=buzz_view)
-                    except Exception:
-                        pass
+                    await buzz_view.mark_finished()
                     await safe_respond(interaction, "🎉 Bien joué !", ephemeral=True)
                 else:
                     await safe_respond(interaction, "✅ Proposition envoyée !", ephemeral=True)
@@ -287,7 +273,7 @@ class Anagramme(commands.Cog):
             return
 
         self.active_games[channel.id] = view
-        # ✅ On passe la view au timer pour désactiver les boutons à la fin
+        # ✅ On passe la view au timer pour la marquer comme finie
         game_view = buzz_view if multi else reply_view
         asyncio.create_task(view.check_timeout(game_view))
 
