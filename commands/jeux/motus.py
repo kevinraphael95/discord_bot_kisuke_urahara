@@ -11,7 +11,6 @@
 # ================================================================================
 import random
 import unicodedata
-import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -26,15 +25,16 @@ from utils.discord_utils import safe_edit, safe_respond, safe_send
 spell = SpellChecker(language='fr')
 
 # ================================================================================
-# 🌐 Fonction pour récupérer un mot français aléatoire
+# 🌐 Fonction pour récupérer un mot français aléatoire (via session globale)
 # ================================================================================
-async def get_random_french_word(length: int | None = None) -> str:
+async def get_random_french_word(bot, length: int | None = None) -> str:
     """Récupère un mot français aléatoire depuis l'API trouve-mot.fr"""
     url = "https://trouve-mot.fr/api/random"
     if length:
         url += f"?size={length}"
     try:
-        async with aiohttp.ClientSession() as session:
+        session = getattr(bot, "aiohttp_session", None)
+        if session and not session.closed:
             async with session.get(url, timeout=5) as resp:
                 if resp.status == 200:
                     data = await resp.json()
@@ -68,6 +68,8 @@ class MotusModal(Modal):
         self.add_item(self.word_input)
 
     async def on_submit(self, interaction: discord.Interaction):
+        if not interaction.response.is_done():
+            await interaction.response.defer()
         guess = self.word_input.value.strip().upper()
         await self.parent_view.process_guess(interaction, guess)
 
@@ -191,9 +193,6 @@ class MotusView(View):
         return embed
 
     async def process_guess(self, interaction: discord.Interaction, guess: str):
-        if not interaction.response.is_done():
-            await interaction.response.defer()
-
         if self.finished:
             return
 
@@ -298,12 +297,15 @@ class Motus(commands.Cog):
 
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, mode: str = "solo"):
         length = random.choice(range(5, 9))
-        target_word = await get_random_french_word(length=length)
+        target_word = await get_random_french_word(self.bot, length=length)
         author_filter = None if mode.lower() in ("multi", "m") else author_id
         view = MotusView(target_word, max_attempts=None, author_id=author_filter)
         embed = view.build_embed()
         view.message = await safe_send(channel, embed=embed, view=view)
 
+    # ============================================================================
+    # 🔹 Commande SLASH
+    # ============================================================================
     @app_commands.command(name="motus", description="Lance une partie de Motus (multi = tout le monde peut jouer)")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.user.id))
@@ -318,6 +320,9 @@ class Motus(commands.Cog):
             print(f"[ERREUR /motus] {e}")
             await safe_respond(interaction, "❌ Une erreur est survenue.")
 
+    # ============================================================================
+    # 🔹 Commande PREFIX
+    # ============================================================================
     @commands.command(name="motus", help="Lance une partie de Motus. motus multi ou m pour jouer en multi.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_motus(self, ctx: commands.Context, mode: str = "solo"):
