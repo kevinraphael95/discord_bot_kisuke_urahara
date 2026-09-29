@@ -222,6 +222,7 @@ class ScratchKey(commands.Cog):
             await self._update_reiatsu(user_id, reiatsu_points + SCRATCH_COST * 2)
 
         elif result_type == "key":
+            # ✅ On rend d'abord la mise en Reiatsu
             await self._update_reiatsu(user_id, reiatsu_points + SCRATCH_COST)
 
             keys_dispo = await self._get_all_steam_keys()
@@ -229,14 +230,25 @@ class ScratchKey(commands.Cog):
                 return await safe_send(interaction.channel, "⛔ Aucune clé Steam disponible.")
 
             chosen = random.choice(keys_dispo)
-            await self._mark_steam_key_won(chosen["id"], interaction.user.name)
 
+            # ✅ On essaie d'envoyer le DM AVANT de marquer la clé comme gagnée
+            dm_sent = False
             try:
                 await interaction.user.send(
                     f"🎁 **Clé Steam pour {chosen['game_name']}**\n`{chosen['steam_key']}`"
                 )
+                dm_sent = True
             except discord.Forbidden:
-                await safe_send(interaction.channel, "⚠️ Impossible d'envoyer un DM.")
+                # L'utilisateur a les DM fermés → on ne consomme PAS la clé
+                await safe_send(
+                    interaction.channel,
+                    f"⚠️ {interaction.user.mention} je n'ai pas pu t'envoyer la clé Steam en DM.\n"
+                    f"👉 **Active tes DM** puis retente ta chance (ta mise a été remboursée)."
+                )
+
+            # ✅ On ne marque la clé "gagnée" que si le DM est parti
+            if dm_sent:
+                await self._mark_steam_key_won(chosen["id"], interaction.user.name)
 
     # ============================================================================
     # 🔹 Commande SLASH
