@@ -9,12 +9,17 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 import qrcode
 import io
-from utils.discord_utils import safe_send, safe_respond
+
+from utils.discord_utils import safe_send, safe_respond, safe_followup
+
+log = logging.getLogger(__name__)
 
 # ================================================================================
 # 🧠 Fonction utilitaire pour générer le QR code et l'embed
@@ -64,28 +69,39 @@ class QRCodeCommand(commands.Cog):
     # 🔹 Commande SLASH
     # ============================================================================
     @app_commands.command(name="qrcode", description="📷 Génère un QR code depuis un texte ou une URL.")
-    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)  # Cooldown 5s par utilisateur
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     @app_commands.describe(texte="Le texte ou l'URL à encoder dans le QR code")
     async def slash_qrcode(self, interaction: discord.Interaction, texte: str):
         try:
             if len(texte) > 1000:
+                # ✅ répond AVANT defer → pas de double réponse
                 await safe_respond(interaction, "❌ Le texte est trop long (max 1000 caractères).", ephemeral=True)
                 return
+
             await interaction.response.defer()
+
             embed, file = generer_qrcode_embed(texte, interaction.user)
             embed.timestamp = interaction.created_at
-            await interaction.followup.send(embed=embed, file=file)
-        except app_commands.CommandOnCooldown as e:
-            await safe_respond(interaction, f"⏳ Attends encore {e.retry_after:.1f}s.", ephemeral=True)
+
+            # ✅ safe_followup au lieu de interaction.followup.send (retry 429)
+            await safe_followup(interaction, embed=embed, file=file)
+
         except Exception as e:
-            print(f"[ERREUR /qrcode] {e}")
-            await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+            log.exception("[qrcode] Erreur /qrcode : %s", e)
+            # ✅ on envoie une erreur seulement si l'interaction n'a pas déjà été répondue
+            try:
+                if not interaction.response.is_done():
+                    await safe_respond(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+                else:
+                    await safe_followup(interaction, "❌ Une erreur est survenue.", ephemeral=True)
+            except Exception:
+                pass
 
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
     @commands.command(name="qrcode", help="📷 Génère un QR code depuis un texte ou une URL.")
-    @commands.cooldown(1, 5, commands.BucketType.user)  # Cooldown 5s par utilisateur
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def prefix_qrcode(self, ctx: commands.Context, *, texte: str = None):
         try:
             if not texte:
@@ -94,13 +110,13 @@ class QRCodeCommand(commands.Cog):
             if len(texte) > 1000:
                 await safe_send(ctx, "❌ Le texte est trop long (max 1000 caractères).")
                 return
+
             embed, file = generer_qrcode_embed(texte, ctx.author)
             embed.timestamp = ctx.message.created_at
             await safe_send(ctx, embed=embed, file=file)
-        except commands.CommandOnCooldown as e:
-            await safe_send(ctx, f"⏳ Attends encore {e.retry_after:.1f}s.")
+
         except Exception as e:
-            print(f"[ERREUR !qrcode] {e}")
+            log.exception("[qrcode] Erreur !qrcode : %s", e)
             await safe_send(ctx, "❌ Une erreur est survenue.")
 
 # ================================================================================
