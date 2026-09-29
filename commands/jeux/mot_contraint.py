@@ -1,14 +1,14 @@
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📌 mot_contraint.py — Commande interactive /mot_contraint et !mot_contraint
 # Objectif : Trouver un mot qui commence et se termine par les lettres données
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 📦 Imports nécessaires
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 import random
 import discord
 from discord import app_commands
@@ -18,9 +18,9 @@ from spellchecker import SpellChecker
 from utils.discord_utils import safe_send, safe_respond, safe_edit
 from utils.jeux_utils import normalize_text, parse_mode, ReplyView, BuzzerView
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🌐 Initialisation du SpellChecker français
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 spell = SpellChecker(language='fr')
 
 # On extrait les mots du dictionnaire ayant au moins 2 lettres pour garantir la faisabilité
@@ -36,9 +36,9 @@ def is_valid_word(word: str) -> bool:
     """Vérifie si le mot existe en français"""
     return word.lower() in spell.word_frequency
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🎮 Classe de gestion de la partie (Affichage & Logique)
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class MotContraintGame:
     def __init__(self, start_letter: str, end_letter: str, author_id: int, multi: bool = False, duration: int = 180):
         self.start_letter = start_letter
@@ -115,9 +115,9 @@ class MotContraintGame:
 
         return embed
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🧠 Cog principal
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 class MotContraint(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -138,7 +138,7 @@ class MotContraint(commands.Cog):
 
         embed = game.build_embed()
 
-        # ── Callback de validation (partagé par Solo et Multi) ──
+        # == Callback de validation (partagé par Solo et Multi) ==
         async def on_submit(interaction: discord.Interaction, answer: str):
             # defer() immédiat pour éviter le spam et acquitter la modal
             if not interaction.response.is_done():
@@ -205,7 +205,7 @@ class MotContraint(commands.Cog):
             # mark_finished gère la désactivation des boutons
             await view.mark_finished(embed=final_embed)
 
-        # ── Création de la view selon le mode ──
+        # == Création de la view selon le mode ==
         if multi:
             # En Multi, on utilise BuzzerView de jeux_utils
             async def on_buzz(user: discord.User | discord.Member):
@@ -250,7 +250,7 @@ class MotContraint(commands.Cog):
             return
         game.message = view.message
 
-        # ── Gestion du Timeout (Temps écoulé) ──
+        # == Gestion du Timeout (Temps écoulé) ==
         # Les ReplyView/BuzzerView gèrent leur propre timeout interne, 
         # mais on ajoute une sécurité ici pour safe_edit l'embed si personne n'a répondu
         try:
@@ -290,9 +290,9 @@ class MotContraint(commands.Cog):
         # Lancement immédiat
         await self._start_game(ctx.channel, author_id=ctx.author.id, mode=mode)
 
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 # 🔌 Setup du Cog
-# ────────────────────────────────────────────────────────────────────────────────
+# ================================================================================
 async def setup(bot: commands.Bot):
     cog = MotContraint(bot)
     # Ajout de la catégorie pour l'aide
