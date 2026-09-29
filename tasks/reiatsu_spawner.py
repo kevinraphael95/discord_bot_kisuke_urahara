@@ -64,7 +64,7 @@ class ReiatsuSpawner(commands.Cog):
 
     def cog_unload(self):
         self.spawn_loop.cancel()
-        self.conn.close()
+        # self.conn.close()
 
     # ==============================================================
     # 🔹 Nettoyage au démarrage
