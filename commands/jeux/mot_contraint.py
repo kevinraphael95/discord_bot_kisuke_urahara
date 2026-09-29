@@ -1,6 +1,6 @@
 # ================================================================================
 # 📌 mot_contraint.py — Commande interactive /mot_contraint et !mot_contraint
-# Objectif : Trouver un mot qui commence et se termine par les lettres données
+# Objectif : Jeu de mot contraint avec embed, manches et feedback
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
@@ -9,20 +9,29 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
+import asyncio
+import logging
 import random
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 from spellchecker import SpellChecker
-from utils.discord_utils import safe_send, safe_respond, safe_edit
-from utils.jeux_utils import normalize_text, parse_mode, ReplyView, BuzzerView
+
+from utils.discord_utils import safe_edit, safe_send
+from utils.jeux_utils import BuzzerView, ReplyView, normalize_text, parse_mode
+
+log = logging.getLogger(__name__)
 
 # ================================================================================
-# 🌐 Initialisation du SpellChecker français
+# 🌐 Initialisation du spellchecker français
 # ================================================================================
-spell = SpellChecker(language='fr')
+spell = SpellChecker(language="fr")
 
-DICTIONARY_WORDS = [w for w in spell.word_frequency.dictionary.keys() if len(w) >= 2 and w.isalpha()]
+DICTIONARY_WORDS = [
+    w for w in spell.word_frequency.dictionary.keys()
+    if len(w) >= 2 and w.isalpha()
+]
 
 def get_random_letter_pair() -> tuple[str, str]:
     """Tire un mot aléatoire existant et extrait sa première et dernière lettre."""
@@ -30,60 +39,76 @@ def get_random_letter_pair() -> tuple[str, str]:
     return word[0].upper(), word[-1].upper()
 
 def is_valid_word(word: str) -> bool:
-    """Vérifie si le mot existe en français"""
+    """Vérifie si le mot existe dans le dictionnaire français"""
     return word.lower() in spell.word_frequency
 
 # ================================================================================
-# 🎮 Classe de gestion de la partie (Affichage & Logique)
+# 🎮 Vue principale du jeu
 # ================================================================================
-class MotContraintGame:
-    def __init__(self, start_letter: str, end_letter: str, author_id: int, multi: bool = False, duration: int = 180):
-        self.start_letter = start_letter
-        self.end_letter = end_letter
-        self.author_id = author_id
-        self.multi = multi
-        self.duration = duration
-        self.finished = False
+class MotContraintView:
+    """Classe représentant une partie de Mot Contraint"""
+
+    def __init__(self, start_letter: str, end_letter: str, author_id: int | None = None, multi: bool = False):
+        self.start_letter      = start_letter
+        self.end_letter        = end_letter
+        self.author_id         = author_id
+        self.multi             = multi
+        self.rounds            = 1
+        self.max_rounds        = 10 if multi else 1
+        self.attempts: list[dict] = []
+        self.scores: dict[str, int] = {}
+        self.message           = None
+        self.finished          = False
         self.winner: str | None = None
         self.last_error: str | None = None
-        self.attempts: list[str] = []
-        self.scores: dict[str, int] = {}  # {display_name: points}
-        self.rounds = 1
-        self.max_rounds = 10 if multi else 1
-        self.message = None
-        self.start_time = discord.utils.utcnow()
+        self.start_time        = asyncio.get_event_loop().time()
 
     def build_embed(self) -> discord.Embed:
-        mode_text = "Mode Multijoueur" if self.multi else "Mode Solo"
-        title = f"🎯 Mots Contraints - {mode_text}"
-
-        # Visuel exact : bannière bleu foncé ANSI + Gros titre de tirage
-        description = (
-            f"```ansi\n\x1b[1;37;44m                  **Manche {self.rounds} / {self.max_rounds}**                  \x1b[0m\n```"
-            f"# ➡️ `{self.start_letter}` _ _ _ `{self.end_letter}`\n\n"
-            f"Trouvez un mot commençant par **`{self.start_letter}`** et se terminant par **`{self.end_letter}`** !"
-        )
-
+        mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
         embed = discord.Embed(
-            title=title,
-            description=description,
-            color=discord.Color.from_rgb(230, 100, 40)
+            title=f"🎯 Mots Contraints - {mode_text}",
+            description=(
+                f"```ansi\n\x1b[1;37;44m                  Manche {self.rounds} / {self.max_rounds}                  \x1b[0m\n```\n"
+                f"# ➡️ `{self.start_letter}` _ _ _ `{self.end_letter}`\n\n"
+                f"Trouvez un mot commençant par **`{self.start_letter}`** et se terminant par **`{self.end_letter}`** !"
+            ),
+            color=discord.Color.orange()
         )
 
-        # Champ : Essais Récents (Manche X)
-        if self.attempts:
-            tries_text = "\n".join(self.attempts[-4:])
-            embed.add_field(name=f"Essais Récents (Manche {self.rounds}) :", value=tries_text, inline=False)
+        if self.multi:
+            instructions = (
+                "💡 **Comment jouer en mode Multi :**\n"
+                "1️⃣ Clique sur **🔔 Buzzer** pour prendre la main.\n"
+                "2️⃣ Le plus rapide ouvre une fenêtre pour proposer un mot.\n"
+                f"3️⃣ Le mot doit commencer par `{self.start_letter}` et finir par `{self.end_letter}`.\n"
+                f"4️⃣ Partie en **{self.max_rounds} manches**.\n"
+                "5️⃣ La partie se termine après 3 minutes ou à la fin des manches."
+            )
         else:
-            embed.add_field(name=f"Essais Récents (Manche {self.rounds}) :", value="_Aucun essai pour l'instant_", inline=False)
+            instructions = (
+                "💡 **Comment jouer en mode Solo :**\n"
+                "1️⃣ Clique sur **✍️ Répondre** pour proposer ta réponse.\n"
+                f"2️⃣ Le mot doit commencer par `{self.start_letter}` et finir par `{self.end_letter}`.\n"
+                "3️⃣ La partie se termine dès que tu trouves un mot valide ou après 3 minutes."
+            )
 
-        # Champ : Classement Actuel (Points) avec tirets
+        embed.add_field(name="📝 Instructions", value=instructions, inline=False)
+
+        if self.attempts:
+            lines = []
+            for entry in self.attempts[-4:]:
+                status = "✅" if entry.get("correct") else "❌"
+                reason = f" ({entry['reason']})" if entry.get("reason") else ""
+                lines.append(f"• **{entry['author']}**: `{entry['word']}` {status}{reason}")
+            tries_text = "\n".join(lines)
+            embed.add_field(name=f"Essais Récents (Manche {self.rounds})", value=tries_text, inline=False)
+        else:
+            embed.add_field(name=f"Essais (Manche {self.rounds})", value="*(Aucun essai pour l'instant)*", inline=False)
+
         if self.scores:
             sorted_scores = sorted(self.scores.items(), key=lambda x: x[1], reverse=True)
             leaderboard = "\n".join([f"- **{name}**: {pts}" for name, pts in sorted_scores])
-            embed.add_field(name="🏆 Classement Actuel (Points) :", value=leaderboard, inline=False)
-        else:
-            embed.add_field(name="🏆 Classement Actuel (Points) :", value="_Aucun point marqué_", inline=False)
+            embed.add_field(name="🏆 Classement Actuel (Points)", value=leaderboard, inline=False)
 
         if self.last_error and not self.finished:
             embed.add_field(name="⚠️ Remarque", value=self.last_error, inline=False)
@@ -92,18 +117,18 @@ class MotContraintGame:
             if self.scores:
                 sorted_scores = sorted(self.scores.items(), key=lambda x: x[1], reverse=True)
                 top_name, top_score = sorted_scores[0]
-                embed.title = f"{title} - Terminé !"
-                embed.color = discord.Color.gold()
+                embed.title = "🎯 Mots Contraints - Gagné !"
+                embed.color = discord.Color.green()
                 embed.description = f"🎉 Victoire de **{top_name}** avec **{top_score} point(s)** !"
             else:
-                embed.title = f"{title} - Terminé"
+                embed.title = "🎯 Mots Contraints - Terminé"
                 embed.color = discord.Color.red()
-                embed.description = "❌ Temps écoulé, la partie s'est terminée sans aucun point."
+                embed.description = "❌ Fin de la partie, aucun point n'a été marqué."
             embed.set_footer(text="Partie terminée")
         else:
-            elapsed = (discord.utils.utcnow() - self.start_time).total_seconds()
-            remaining = max(0, self.duration - elapsed)
-            embed.set_footer(text=f"⏳ Temps restant : {int(remaining)} secondes")
+            elapsed   = int(asyncio.get_event_loop().time() - self.start_time)
+            remaining = max(0, 180 - elapsed)
+            embed.set_footer(text=f"⏳ Temps restant : {remaining} secondes")
 
         return embed
 
@@ -112,24 +137,19 @@ class MotContraintGame:
 # ================================================================================
 class MotContraint(commands.Cog):
     def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.SOLO_TIME = 120
-        self.MULTI_TIME = 180
+        self.bot          = bot
+        self.active_games: dict[int, MotContraintView] = {}
 
-    # ============================================================================
-    # 🔹 Fonction interne commune de lancement
-    # ============================================================================
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, mode: str = "solo"):
         start, end = get_random_letter_pair()
-        multi = parse_mode(mode)
-        duration = self.MULTI_TIME if multi else self.SOLO_TIME
+        multi      = parse_mode(mode)
 
-        game = MotContraintGame(start, end, author_id, multi, duration)
+        game  = MotContraintView(start, end, author_id=author_id, multi=multi)
         state = {"finished": False}
 
         embed = game.build_embed()
 
-        # == Callback de validation (partagé par Solo et Multi) ==
+        # ── Callback de validation ──
         async def on_submit(interaction: discord.Interaction, answer: str):
             if not interaction.response.is_done():
                 await interaction.response.defer()
@@ -140,108 +160,126 @@ class MotContraint(commands.Cog):
             if not game.multi and interaction.user.id != game.author_id:
                 return
 
-            guess = answer.strip()
+            guess = answer.strip().upper()
             word_clean = guess.lower()
             author_name = interaction.user.display_name
             game.last_error = None
 
-            if not word_clean:
+            if not guess:
                 return
 
-            # Vérification du mot selon les critères exacts de l'image
+            # Vérification si le mot a déjà été proposé
+            if any(normalize_text(entry['word']) == normalize_text(guess) for entry in game.attempts):
+                game.last_error = f"Le mot `{guess}` a déjà été proposé !"
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
+                return
+
+            # Vérification des règles
+            reason = None
             if not word_clean.startswith(game.start_letter.lower()):
-                reason = f"❌ Incorrect: ne commence pas par {game.start_letter}"
-                game.attempts.append(f"• **{author_name}** proposed '{guess.upper()}' ({reason})")
+                reason = f"ne commence pas par {game.start_letter}"
             elif not word_clean.endswith(game.end_letter.lower()):
-                reason = f"❌ Incorrect: se termine par {word_clean[-1].upper()}"
-                game.attempts.append(f"• **{author_name}** proposed '{guess.upper()}' ({reason})")
+                reason = f"se termine par {word_clean[-1].upper()}"
             elif not is_valid_word(word_clean):
-                game.attempts.append(f"• **{author_name}** proposed '{guess.upper()}' (❌ Incorrect: mot inconnu)")
+                reason = "mot inconnu du dictionnaire"
+
+            if reason:
+                game.attempts.append({
+                    'word': guess,
+                    'author': author_name,
+                    'correct': False,
+                    'reason': reason
+                })
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
+                return
+
+            # ✅ Mot valide !
+            game.attempts.append({
+                'word': guess,
+                'author': author_name,
+                'correct': True
+            })
+            game.scores[author_name] = game.scores.get(author_name, 0) + 1
+
+            game.rounds += 1
+            if game.rounds > game.max_rounds:
+                state["finished"] = True
+                game.finished = True
+                self.active_games.pop(channel.id, None)
+
+                final_embed = game.build_embed()
+                await view.mark_finished(embed=final_embed)
             else:
-                # Mot valide !
-                game.scores[author_name] = game.scores.get(author_name, 0) + 1
-                game.attempts.append(f"• **{author_name}** proposed '{guess.upper()}' (✅ Correct !)")
-
-                game.rounds += 1
-                if game.rounds > game.max_rounds:
-                    state["finished"] = True
-                    game.finished = True
-                    final_embed = game.build_embed()
-                    return await view.mark_finished(embed=final_embed)
-
-                # Manche suivante
+                # Passage à la manche suivante
                 game.start_letter, game.end_letter = get_random_letter_pair()
                 game.attempts.clear()
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
 
-            if game.message:
-                await safe_edit(game.message, embed=game.build_embed())
-
-        # == Création de la view selon le mode ==
+        # ── Création de la view ──
         if multi:
             async def on_buzz(user: discord.User | discord.Member):
-                game.attempts.append(f"• **{user.display_name}** buzzed!")
                 if view.message:
+                    for child in view.children:
+                        if isinstance(child, discord.ui.Button):
+                            child.disabled = True
+
                     current_embed = game.build_embed()
+                    current_embed.set_footer(text=f"🎯 Main prise par {user.display_name}")
+
                     await safe_edit(view.message, embed=current_embed, view=view)
 
             view = BuzzerView(
-                modal_title="🔔 BUZZER — Proposer un mot",
+                modal_title="✍️ Propose ton mot",
                 modal_label="Mot",
                 modal_placeholder=f"Mot commençant par {game.start_letter} et finissant par {game.end_letter}",
                 modal_max_length=30,
                 on_submit=on_submit,
                 on_buzz=on_buzz,
                 buzz_timeout=30,
-                view_timeout=duration,
+                view_timeout=300,
             )
         else:
             view = ReplyView(
                 user_id=author_id,
-                modal_title="✍️ Proposer un mot",
+                modal_title="✍️ Propose ton mot",
                 modal_label="Mot",
                 modal_placeholder=f"Mot commençant par {game.start_letter} et finissant par {game.end_letter}",
                 modal_max_length=30,
                 on_submit=on_submit,
-                timeout=duration,
+                timeout=300,
             )
-
-        # Ajout du bouton règles à côté du bouton principal
-        rules_btn = discord.ui.Button(label="❓ Règles", style=discord.ButtonStyle.secondary)
-        async def rules_callback(interaction: discord.Interaction):
-            await safe_respond(
-                interaction,
-                "**Règles du jeu :**\n"
-                "1. Propose un mot valide de la langue française.\n"
-                f"2. Il doit impérativement commencer par la première lettre demandée et finir par la seconde.\n"
-                "3. En mode multijoueur, buzze pour prendre la main !",
-                ephemeral=True
-            )
-        rules_btn.callback = rules_callback
-        view.add_item(rules_btn)
 
         view.message = await safe_send(channel, embed=embed, view=view)
         if view.message is None:
             return
         game.message = view.message
 
-        # == Gestion du Timeout ==
+        self.active_games[channel.id] = game
+
+        # ── Attente (3 minutes) ──
         try:
-            await self.bot.wait_for("interaction", timeout=duration + 2)
-        except discord.utils.wait_for.TimeoutError:
-            pass
+            await asyncio.sleep(180)
+        except asyncio.CancelledError:
+            self.active_games.pop(channel.id, None)
+            return
 
         if state["finished"]:
             return
 
+        # ── Fin du temps ──
         game.finished = True
+        self.active_games.pop(channel.id, None)
         final_embed = game.build_embed()
         await view.mark_finished(embed=final_embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="mot_contraint", description="Devine un mot commençant et finissant par les lettres données.")
-    @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur (buzzer)")
+    @app_commands.command(name="mot_contraint", description="Trouve un mot commençant et finissant par les lettres données.")
+    @app_commands.describe(mode="Mode de jeu : solo ou multi")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_mot_contraint(self, interaction: discord.Interaction, mode: str = "solo"):
         await interaction.response.defer()
@@ -251,7 +289,7 @@ class MotContraint(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="mot_contraint", aliases=["mc"], help="Devine un mot commençant et finissant par des lettres données. !mc multi pour le buzzer.")
+    @commands.command(name="mot_contraint", aliases=["mc"], help="Jeu du mot contraint. mot_contraint multi ou m pour jouer en multi.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_mot_contraint(self, ctx: commands.Context, mode: str = "solo"):
         await self._start_game(ctx.channel, author_id=ctx.author.id, mode=mode)
