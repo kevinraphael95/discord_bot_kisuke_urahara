@@ -6,9 +6,21 @@
 // ================================================================================
 
 // ================================================================================
+// 🔒 CSRF TOKEN — ajoute automatiquement le token sur toutes les requêtes POST
+// ================================================================================
+const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const _originalFetch = window.fetch;
+window.fetch = function(url, options = {}) {
+  if (options.method && options.method.toUpperCase() === 'POST') {
+    options.headers = options.headers || {};
+    options.headers['X-CSRFToken'] = CSRF_TOKEN;
+  }
+  return _originalFetch(url, options);
+};
+
+// ================================================================================
 // 🛠️ UTILS
 // ================================================================================
-
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
