@@ -18,7 +18,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_utils import safe_send, safe_edit
 from utils.jeux_utils import parse_mode, ReplyView, BuzzerView
 
 log = logging.getLogger(__name__)
@@ -38,7 +38,14 @@ class Devinelenombre(commands.Cog):
     # ============================================================================
     # 🔹 Construction de l'embed
     # ============================================================================
-    def _build_embed(self, target: int, attempts: list[dict], multi: bool, finished: bool, winner: discord.User | discord.Member | None = None) -> discord.Embed:
+    def _build_embed(
+        self,
+        target: int,
+        attempts: list[dict],
+        multi: bool,
+        finished: bool,
+        winner: discord.User | discord.Member | None = None
+    ) -> discord.Embed:
         mode_text = "Multi 🌍" if multi else "Solo 🧍‍♂️"
         embed = discord.Embed(
             title=f"🎯 Devinelenombre - Mode {mode_text}",
@@ -103,23 +110,24 @@ class Devinelenombre(commands.Cog):
 
         # ── Callback de validation ──
         async def on_submit(interaction, answer):
+            # Acquittement silencieux de l'interaction (aucun message éphémère)
+            if not interaction.response.is_done():
+                await interaction.response.defer()
+
             if state["finished"]:
-                await safe_respond(interaction, "⚠️ La partie est terminée.", ephemeral=True)
                 return
 
             try:
                 guess = int(answer.strip())
             except ValueError:
-                await safe_respond(interaction, "❌ Ce n'est pas un nombre valide.", ephemeral=True)
                 return
 
             if not (0 <= guess <= 100):
-                await safe_respond(interaction, "⚠️ Le nombre doit être entre 0 et 100.", ephemeral=True)
                 return
 
             attempts.append({'value': guess, 'author': interaction.user.display_name})
 
-            # ✅ Gagné ou max d'essais atteint
+            # ✅ Gagné ou limite atteinte
             if guess == target or len(attempts) >= self.MAX_ATTEMPTS:
                 state["finished"] = True
                 if guess == target:
@@ -130,30 +138,18 @@ class Devinelenombre(commands.Cog):
                 )
                 await view.mark_finished(embed=new_embed)
 
-                if guess == target:
-                    await safe_respond(interaction, f"🎉 Bravo ! C'était bien **{target}**.", ephemeral=True)
-                else:
-                    await safe_respond(interaction, f"💀 Perdu ! Le nombre était **{target}**.", ephemeral=True)
-
-            # ❌ Encore des essais disponibles
+            # ❌ Partie toujours en cours
             else:
                 new_embed = self._build_embed(target, attempts, multi, state["finished"])
                 await safe_edit(view.message, embed=new_embed)
 
-                if guess < target:
-                    await safe_respond(interaction, "⬆️ Trop bas !", ephemeral=True)
-                else:
-                    await safe_respond(interaction, "⬇️ Trop haut !", ephemeral=True)
-
         # ── Callback quand quelqu'un buzze (multi seulement) ──
         async def on_buzz(user: discord.User | discord.Member):
             if view.message:
-                # 1. Griser les boutons de la view
                 for child in view.children:
                     if isinstance(child, discord.ui.Button):
                         child.disabled = True
 
-                # 2. Indiquer la prise de main dans le footer
                 current_embed = self._build_embed(target, attempts, multi, state["finished"])
                 current_embed.set_footer(text=f"🎯 Main prise par {user.display_name}")
 
