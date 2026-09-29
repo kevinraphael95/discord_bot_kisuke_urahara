@@ -61,16 +61,17 @@ class AnagrammeView:
 
     def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False):
         normalized = target_word.replace("Œ", "OE").replace("œ", "oe")
-        self.target_word    = normalized.upper()
-        self.display_word   = ''.join(random.sample(self.target_word, len(self.target_word)))
-        self.display_length = len([c for c in self.target_word if c.isalpha()])
-        self.author_id      = author_id
-        self.multi          = multi
-        self.max_attempts   = None if multi else max(self.display_length, 5)
+        self.target_word       = normalized.upper()
+        self.display_word      = ''.join(random.sample(self.target_word, len(self.target_word)))
+        self.display_length    = len([c for c in self.target_word if c.isalpha()])
+        self.author_id         = author_id
+        self.multi             = multi
+        self.max_attempts      = None if multi else max(self.display_length, 5)
         self.attempts: list[dict] = []
-        self.message        = None
-        self.finished       = False
-        self.start_time     = asyncio.get_event_loop().time()
+        self.message           = None
+        self.finished          = False
+        self.start_time        = asyncio.get_event_loop().time()
+        self.current_turn_user = None   # ✅ joueur qui a la main (multi)
 
     def build_embed(self) -> discord.Embed:
         mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
@@ -79,6 +80,14 @@ class AnagrammeView:
             description=f"Mot mélangé : **{' '.join(self.display_word)}**",
             color=discord.Color.orange()
         )
+
+        # ✅ Zone "Au tour de X" (uniquement en multi, si quelqu'un a la main)
+        if self.multi and self.current_turn_user is not None:
+            embed.add_field(
+                name="🎯 Au tour de",
+                value=self.current_turn_user.mention,
+                inline=False,
+            )
 
         if self.multi:
             instructions = (
@@ -123,10 +132,6 @@ class AnagrammeView:
         return embed
 
     async def process_guess(self, channel, guess: str, author_name: str, author_id: int, silent: bool = False):
-        """
-        Vérifie la proposition.
-        Retourne (ok: bool, raison: str).
-        """
         if self.finished:
             if not silent:
                 await safe_send(channel, "⚠️ La partie est terminée.")
@@ -170,7 +175,6 @@ class AnagrammeView:
                 self.finished = True
                 if self.message:
                     await safe_edit(self.message, embed=self.build_embed())
-                # ✅ Marque la view comme terminée (désactive les boutons définitivement)
                 if game_view is not None and hasattr(game_view, "mark_finished"):
                     await game_view.mark_finished()
                 break
@@ -228,13 +232,22 @@ class Anagramme(commands.Cog):
 
         # ── Mode Multi : buzzer ──
         else:
-            async def on_buzz(interaction):
-                await safe_send(
-                    interaction.channel,
-                    f"🎯 {interaction.user.mention} a buzzé ! À toi de proposer.",
-                )
+            async def update_embed_turn(user: discord.Member):
+                """Met à jour l'embed pour afficher "Au tour de X"."""
+                view.current_turn_user = user
+                if view.message:
+                    await safe_edit(view.message, embed=view.build_embed())
+
+            async def clear_embed_turn():
+                """Retire la zone "Au tour de X" de l'embed."""
+                view.current_turn_user = None
+                if view.message:
+                    await safe_edit(view.message, embed=view.build_embed())
 
             async def on_submit(interaction, answer):
+                # ✅ Retire le tour de l'embed AVANT de traiter
+                await clear_embed_turn()
+
                 ok, raison = await view.process_guess(
                     interaction.channel,
                     answer,
@@ -258,8 +271,8 @@ class Anagramme(commands.Cog):
                 modal_placeholder=f"Mot de {view.display_length} lettres",
                 modal_max_length=view.display_length,
                 on_submit=on_submit,
-                on_buzz=on_buzz,
-                buzz_timeout=10,   # ✅ Réduit à 10 secondes
+                on_buzz=update_embed_turn,   # ✅ Met à jour l'embed au lieu d'envoyer un message
+                buzz_timeout=10,
                 view_timeout=180,
             )
             msg = await safe_send(channel, embed=embed, view=buzz_view)
@@ -271,7 +284,6 @@ class Anagramme(commands.Cog):
             return
 
         self.active_games[channel.id] = view
-        # ✅ On passe la view au timer pour la marquer comme finie
         game_view = buzz_view if multi else reply_view
         asyncio.create_task(view.check_timeout(game_view))
 
