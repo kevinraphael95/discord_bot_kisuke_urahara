@@ -19,8 +19,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_edit
-from utils.jeux_utils import normalize_text, parse_mode, ReplyView, BuzzerView
+from utils.discord_utils import safe_edit, safe_send
+from utils.jeux_utils import BuzzerView, ReplyView, normalize_text, parse_mode
 
 log = logging.getLogger(__name__)
 
@@ -94,6 +94,7 @@ class DrapeauxGame:
         self.duration = duration
         self.finished = False
         self.winner: str | None = None
+        self.last_error: str | None = None
         self.attempts: list[dict] = []
         self.message = None
         self.start_time = asyncio.get_event_loop().time()
@@ -119,6 +120,9 @@ class DrapeauxGame:
                 lines.append(f"{entry['author']}: **{entry['word']}** {status}")
             tries_text = "\n".join(lines)
             embed.add_field(name=f"Essais ({len(self.attempts)})", value=tries_text, inline=False)
+
+        if self.last_error and not self.finished:
+            embed.add_field(name="⚠️ Remarque", value=self.last_error, inline=False)
 
         if self.finished:
             if self.winner:
@@ -173,6 +177,15 @@ class Drapeaux(commands.Cog):
 
             user_answer = answer.strip()
             if not user_answer:
+                return
+
+            game.last_error = None
+
+            # Vérification anti-doublon (avec normalisation)
+            if any(normalize_text(entry['word']) == normalize_text(user_answer) for entry in game.attempts):
+                game.last_error = f"Le pays `{user_answer}` a déjà été proposé !"
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
                 return
 
             is_correct = (normalize_text(user_answer) == normalize_text(country))
