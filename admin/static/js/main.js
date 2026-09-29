@@ -353,7 +353,7 @@ async function runSQL() {
 // ================================================================================
 // ▤ LOGS
 // ================================================================================
-const LOG_REFRESH_INTERVAL_MS = 6000; // 6s : compromis entre réactivité et charge/bruit
+const LOG_REFRESH_INTERVAL_MS = 60000; // ✅ 60s au lieu de 6s → 60 req/h < 100 ✅
 let autoRefreshTimer = null;
 
 async function loadLogs() {
@@ -503,3 +503,11 @@ async function loadBackupList() {
 // ================================================================================
 loadTableList();
 autoRefreshTimer = setInterval(loadLogs, LOG_REFRESH_INTERVAL_MS);
+
+// ✅ AJOUT : Stoppe le poll quand l'onglet est caché
+document.addEventListener('visibilitychange', () => {
+    clearInterval(autoRefreshTimer);
+    if (!document.hidden) {
+        autoRefreshTimer = setInterval(loadLogs, LOG_REFRESH_INTERVAL_MS);
+    }
+});
