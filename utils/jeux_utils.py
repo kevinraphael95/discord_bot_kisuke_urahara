@@ -139,7 +139,7 @@ class ReplyView(discord.ui.View):
         self.modal_max_length  = modal_max_length
         self.on_submit         = on_submit
         self.message           = None
-        self.finished          = False   # ✅ flag de fin
+        self.finished          = False
 
     @discord.ui.button(label="✍️ Répondre", style=discord.ButtonStyle.primary)
     async def reply(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -167,14 +167,17 @@ class ReplyView(discord.ui.View):
         except discord.NotFound:
             pass
 
-    async def mark_finished(self):
-        """Marque la partie comme terminée et désactive les boutons (édition immédiate)."""
+    async def mark_finished(self, embed=None):
+        """Marque la partie comme terminée et désactive les boutons."""
         self.finished = True
         for child in self.children:
             child.disabled = True
         if self.message:
             try:
-                await safe_edit(self.message, view=self)
+                if embed is not None:
+                    await safe_edit(self.message, embed=embed, view=self)
+                else:
+                    await safe_edit(self.message, view=self)
             except Exception:
                 pass
 
@@ -213,16 +216,14 @@ class BuzzerView(discord.ui.View):
         self.buzzer_id         = None
         self.buzz_task         = None
         self.message           = None
-        self.finished          = False   # ✅ flag de fin
+        self.finished          = False
 
     @discord.ui.button(label="🔔 Buzzer", style=discord.ButtonStyle.primary)
     async def buzz(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # 🔒 Partie terminée ?
         if self.finished:
             await safe_respond(interaction, "❌ La partie est terminée.", ephemeral=True)
             return
 
-        # 🔒 Quelqu'un a déjà buzzé ?
         if self.buzzer_id is not None:
             await safe_respond(
                 interaction,
@@ -234,7 +235,6 @@ class BuzzerView(discord.ui.View):
         self.buzzer_id  = interaction.user.id
         button.disabled = True
 
-        # ✅ 1. ENVOIE LA MODAL EN PREMIER
         modal = ReplyModal(
             title=self.modal_title,
             label=self.modal_label,
@@ -250,21 +250,18 @@ class BuzzerView(discord.ui.View):
             button.disabled = False
             return
 
-        # ✅ 2. Callback externe
         if self.on_buzz:
             try:
                 await self.on_buzz(interaction)
             except Exception as e:
                 log.exception("[BuzzerView] on_buzz a échoué : %s", e)
 
-        # ✅ 3. Édition du message
         if self.message:
             try:
                 await safe_edit(self.message, view=self)
             except Exception:
                 pass
 
-        # ✅ 4. Timer de sécurité
         self.buzz_task = asyncio.create_task(self._unlock_after_timeout())
 
     async def _unlock_after_timeout(self):
@@ -294,7 +291,6 @@ class BuzzerView(discord.ui.View):
                 if self.on_submit:
                     await self.on_submit(interaction, answer)
             finally:
-                # ✅ On ne réactive PAS si la partie est finie
                 self.unlock()
 
         return _callback
@@ -305,7 +301,6 @@ class BuzzerView(discord.ui.View):
         if self.buzz_task and not self.buzz_task.done():
             self.buzz_task.cancel()
 
-        # ✅ Ne réactive pas si la partie est finie
         if self.finished and not force:
             return
 
@@ -317,14 +312,17 @@ class BuzzerView(discord.ui.View):
             except Exception:
                 pass
 
-    async def mark_finished(self):
-        """Marque la partie comme terminée et désactive les boutons (édition immédiate)."""
+    async def mark_finished(self, embed=None):
+        """Marque la partie comme terminée et désactive les boutons."""
         self.finished = True
         for child in self.children:
             child.disabled = True
         if self.message:
             try:
-                await safe_edit(self.message, view=self)
+                if embed is not None:
+                    await safe_edit(self.message, embed=embed, view=self)
+                else:
+                    await safe_edit(self.message, view=self)
             except Exception:
                 pass
 
