@@ -12,12 +12,15 @@ import sqlite3
 import subprocess
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 
 import requests
 from flask import Flask, render_template, request, redirect, session, jsonify, url_for, send_file, abort
 from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect, CSRFError
 
 load_dotenv()
 
@@ -43,6 +46,24 @@ BACKUP_AUTO_HOURS = float(os.getenv("BACKUP_AUTO_HOURS", "0"))  # 0 = désactiv�
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = SECRET_KEY
 
+# ─── 🔒 Sécurité : cookies + CSRF + rate limiting ──────────────────────────────
+app.config.update(
+    SESSION_COOKIE_SECURE=True,       # cookie uniquement en HTTPS
+    SESSION_COOKIE_HTTPONLY=True,     # JS ne peut pas lire le cookie
+    SESSION_COOKIE_SAMESITE='Lax',    # bloque les requêtes cross-site
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+    WTF_CSRF_TIME_LIMIT=None,         # le token CSRF ne périme pas
+)
+
+csrf = CSRFProtect(app)
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["500 per day", "100 per hour"],
+    storage_uri="memory://",
+)
+
 # === Auth ======================================================================
 def login_required(f):
     @wraps(f)
@@ -61,11 +82,13 @@ def index():
 
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute")   # ← max 5 tentatives par minute par IP
 def login():
     error = None
     if request.method == "POST":
         if request.form.get("password") == ADMIN_PASSWORD:
             session["logged_in"] = True
+            session.permanent = True
             return redirect(url_for("index"))
         error = "Mot de passe incorrect."
     return render_template("login.html", error=error)
@@ -85,6 +108,16 @@ def get_all_tables():
     tables = [row[0] for row in cur.fetchall()]
     conn.close()
     return tables
+
+
+def get_columns_for_table(table):
+    """Retourne la liste des colonnes d'une table (whitelist pour /api/edit)."""
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute(f"PRAGMA table_info({table})")
+    cols = [row[1] for row in cur.fetchall()]
+    conn.close()
+    return cols
 
 
 def get_pk_for_table(table):
@@ -164,6 +197,11 @@ def api_edit():
         return jsonify({"ok": False, "error": "Table non autorisée"})
     if col == pk:
         return jsonify({"ok": False, "error": "Impossible de modifier la clé primaire"})
+
+    # 🔒 Validation : la colonne doit exister réellement dans la table
+    valid_cols = get_columns_for_table(table)
+    if col not in valid_cols:
+        return jsonify({"ok": False, "error": f"Colonne invalide : {col}"})
 
     try:
         try:
@@ -337,6 +375,8 @@ def api_backup_list():
 @login_required
 def api_backup_download(filename):
     """Télécharge un backup précis (whitelist stricte pour éviter le path traversal)."""
+    if not os.path.isdir(BACKUP_DIR):
+        abort(404)
     if filename not in os.listdir(BACKUP_DIR) or not filename.endswith(".db"):
         abort(404)
     return send_file(os.path.join(BACKUP_DIR, filename), as_attachment=True, download_name=filename)
@@ -442,8 +482,25 @@ def restart_bot_process():
         close_fds=True,
         start_new_session=True
     )
-    time.sleep(1)
+    time.sleep(2)
     os.kill(os.getpid(), 9)
+
+
+# === Gestion des erreurs (rate limit + CSRF) ==================================
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({
+        "ok": False,
+        "error": "Trop de tentatives. Réessaie dans une minute."
+    }), 429
+
+
+@app.errorhandler(CSRFError)
+def csrf_error_handler(e):
+    return jsonify({
+        "ok": False,
+        "error": "Session expirée ou invalide. Recharge la page."
+    }), 400
 
 
 # === Lancement Flask (dans un thread) =========================================
