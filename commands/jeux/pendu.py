@@ -28,32 +28,45 @@ log = logging.getLogger(__name__)
 # ================================================================================
 PENDU_ASCII = [
     "`      \n      \n      \n      \n      \n=========`",
-    "`      +---+\n     |   |\n          |\n          |\n          |\n=========`",
-    "`      +---+\n     |   |\n     O   |\n          |\n          |\n=========`",
-    "`      +---+\n     |   |\n     O   |\n     |   |\n          |\n=========`",
-    "`      +---+\n     |   |\n     O   |\n    /|   |\n          |\n=========`",
-    "`      +---+\n     |   |\n     O   |\n    /|\\  |\n          |\n=========`",
-    "`      +---+\n     |   |\n     O   |\n    /    |\n=========`",
-    "`      +---+\n     |   |\n     O   |\n    /|\\  |\n    / \\  |\n=========`",
+    "`      +---+\n      |   |\n          |\n          |\n          |\n=========`",
+    "`      +---+\n      |   |\n      O   |\n          |\n          |\n=========`",
+    "`      +---+\n      |   |\n      O   |\n      |   |\n          |\n=========`",
+    "`      +---+\n      |   |\n      O   |\n     /|   |\n          |\n=========`",
+    "`      +---+\n      |   |\n      O   |\n     /|\\  |\n          |\n=========`",
+    "`      +---+\n      |   |\n      O   |\n     /    |\n=========`",
+    "`      +---+\n      |   |\n      O   |\n     /|\\  |\n     / \\  |\n=========`",
 ]
 MAX_ERREURS = 7
 
 # ================================================================================
-# 🌐 Récupération d'un mot français aléatoire
+# 🌐 Récupération d'un mot français aléatoire via la session partagée du bot
 # ================================================================================
-async def get_random_french_word(length: int | None = None) -> str:
+async def get_random_french_word(bot: commands.Bot, length: int | None = None) -> str:
     url = "https://trouve-mot.fr/api/random"
     if length:
         url += f"?size={length}"
     try:
-        async with aiohttp.ClientSession() as session:
+        # Récupération de la session globale initialisée dans bot.py
+        session = getattr(bot, "aiohttp_session", None)
+        
+        if session is None:
+            # Fallback temporaire si la session globale n'est pas encore prête
+            async with aiohttp.ClientSession() as temp_session:
+                async with temp_session.get(url, timeout=5) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        if isinstance(data, list) and len(data) > 0:
+                            return data[0]["name"].upper()
+        else:
             async with session.get(url, timeout=5) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     if isinstance(data, list) and len(data) > 0:
                         return data[0]["name"].upper()
+                        
     except Exception as e:
-        log.exception("[pendu] Erreur API : %s", e)
+        log.exception("[pendu] Erreur API ou Timeout : %s", e)
+        
     return "PYTHON"
 
 # ================================================================================
@@ -64,18 +77,18 @@ class PenduView:
 
     def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False):
         normalized = target_word.replace("Œ", "OE").replace("œ", "oe")
-        self.target_word       = normalized.upper()
-        self.trouve            = set()
-        self.rate              = set()
-        self.author_id         = author_id
-        self.multi             = multi
-        self.max_erreurs       = MAX_ERREURS
+        self.target_word        = normalized.upper()
+        self.trouve             = set()
+        self.rate               = set()
+        self.author_id          = author_id
+        self.multi              = multi
+        self.max_erreurs        = MAX_ERREURS
         self.attempts: list[dict] = []
-        self.message           = None
-        self.finished          = False
+        self.message            = None
+        self.finished           = False
         self.winner: str | None = None
         self.last_error: str | None = None
-        self.start_time        = asyncio.get_event_loop().time()
+        self.start_time         = asyncio.get_event_loop().time()
 
     def get_display_word(self) -> str:
         return " ".join([l if l in self.trouve else "_" for l in self.target_word])
@@ -168,7 +181,7 @@ class Pendu(commands.Cog):
 
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, mode: str = "solo"):
         length      = random.choice(range(5, 9))
-        target_word = await get_random_french_word(length=length)
+        target_word = await get_random_french_word(self.bot, length=length)
         multi       = parse_mode(mode)
 
         game  = PenduView(target_word, author_id=author_id, multi=multi)
