@@ -333,9 +333,9 @@ class Skill(commands.Cog):
     @app_commands.command(name="skill", description="Active la compétence de ta classe Reiatsu.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_skill(self, interaction: discord.Interaction):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)   # ✅ ephemeral ici
         await self._activate_skill(interaction.user, interaction.channel, interaction)
-        await interaction.delete_original_response()
+        # ❌ NE PAS appeler delete_original_response()
 
     # ========================================================================
     # 🔹 Commande PREFIX
