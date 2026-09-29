@@ -12,6 +12,7 @@
 import json
 import os
 import random
+import re
 
 import discord
 from discord import app_commands
@@ -26,6 +27,12 @@ CHAR_DIR = os.path.join("data", "personnages")
 
 def load_character(name: str):
     """Charge la fiche JSON d'un personnage par nom."""
+    # ✅ Sécurité : refuse tout nom qui contient autre chose que
+    #    des lettres, chiffres, tirets et underscores.
+    #    Empêche les attaques du type "../../etc/passwd".
+    if not name or not re.match(r"^[a-zA-Z0-9_\-]+$", name):
+        return None
+
     path = os.path.join(CHAR_DIR, f"{name.lower()}.json")
     if not os.path.isfile(path):
         return None
@@ -127,7 +134,7 @@ class Perso(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="perso",description="Affiche la fiche d'un personnage Bleach.")
+    @app_commands.command(name="perso", description="Affiche la fiche d'un personnage Bleach.")
     @app_commands.describe(name="Nom du personnage (laisser vide pour aléatoire)")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_perso(self, interaction: discord.Interaction, name: str = None):
@@ -138,10 +145,11 @@ class Perso(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="perso",help="Affiche la fiche d'un personnage Bleach.")
+    @commands.command(name="perso", help="Affiche la fiche d'un personnage Bleach.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_perso(self, ctx: commands.Context, *, name: str = None):
         await self._send_character(ctx.channel, name)
+
 
 # ================================================================================
 # 🔌 Setup du Cog
