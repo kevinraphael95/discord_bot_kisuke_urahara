@@ -71,6 +71,7 @@ class AnagrammeView:
         self.attempts: list[dict] = []
         self.message           = None
         self.finished          = False
+        self.winner: str | None = None
         self.start_time        = asyncio.get_event_loop().time()
 
     def build_embed(self) -> discord.Embed:
@@ -109,13 +110,16 @@ class AnagrammeView:
             embed.add_field(name="Essais", value="*(Aucun essai pour l'instant)*", inline=False)
 
         if self.finished:
-            last_word = self.attempts[-1]['word'] if self.attempts else ""
-            if normalize_text(last_word) == normalize_text(self.target_word):
+            if self.winner:
+                embed.title = f"🔀 Anagramme - Gagné !"
                 embed.color = discord.Color.green()
-                embed.set_footer(text="🎉 Bravo ! Le mot a été trouvé.")
+                embed.description = f"Mot mélangé : **{' '.join(self.display_word)}**\n\n🏆 **{self.winner}** a trouvé ! C'était bien **{self.target_word}**."
+                embed.set_footer(text="Partie terminée")
             else:
+                embed.title = f"🔀 Anagramme - Terminé"
                 embed.color = discord.Color.red()
-                embed.set_footer(text=f"💀 Partie terminée. Le mot était {self.target_word}.")
+                embed.description = f"Mot mélangé : **{' '.join(self.display_word)}**\n\n❌ Personne n'a trouvé. Le mot était **{self.target_word}**."
+                embed.set_footer(text="Partie terminée")
         else:
             elapsed   = int(asyncio.get_event_loop().time() - self.start_time)
             remaining = max(0, 180 - elapsed)
@@ -143,36 +147,37 @@ class Anagramme(commands.Cog):
 
         # ── Callback de validation ──
         async def on_submit(interaction, answer):
-            try:
-                await interaction.response.defer(ephemeral=True)
-            except discord.NotFound:
-                return
-
             if state["finished"]:
-                await interaction.followup.send("❌ La partie est terminée.", ephemeral=True)
+                await safe_respond(interaction, "❌ La partie est terminée.", ephemeral=True)
                 return
 
             if not game.multi and interaction.user.id != game.author_id:
-                await interaction.followup.send("❌ Ce n'est pas ton jeu.", ephemeral=True)
+                await safe_respond(interaction, "❌ Ce n'est pas ton jeu.", ephemeral=True)
                 return
 
             guess = answer.strip().upper()
 
             if len(guess) != game.display_length:
-                await interaction.followup.send(
-                    f"❌ Le mot doit faire {game.display_length} lettres.", ephemeral=True
+                await safe_respond(
+                    interaction,
+                    f"❌ Le mot doit faire {game.display_length} lettres.",
+                    ephemeral=True
                 )
                 return
 
             if Counter(guess) != Counter(game.target_word):
-                await interaction.followup.send(
-                    "❌ Ce mot n'utilise pas exactement les lettres proposées.", ephemeral=True
+                await safe_respond(
+                    interaction,
+                    "❌ Ce mot n'utilise pas exactement les lettres proposées.",
+                    ephemeral=True
                 )
                 return
 
             if not is_valid_word(guess):
-                await interaction.followup.send(
-                    f"❌ `{guess}` n'est pas un mot valide.", ephemeral=True
+                await safe_respond(
+                    interaction,
+                    f"❌ `{guess}` n'est pas un mot valide.",
+                    ephemeral=True
                 )
                 return
 
@@ -182,19 +187,18 @@ class Anagramme(commands.Cog):
             if normalize_text(guess) == normalize_text(game.target_word):
                 state["finished"] = True
                 game.finished = True
+                game.winner = interaction.user.mention
                 self.active_games.pop(channel.id, None)
 
-                await safe_send(
-                    interaction.channel,
-                    f"🎉 {interaction.user.mention} a trouvé ! C'était bien **{game.target_word}**."
-                )
+                await safe_respond(interaction, "✅ Bonne réponse !", ephemeral=True)
 
                 final_embed = game.build_embed()
                 await view.mark_finished(embed=final_embed)
-                await interaction.followup.send("🎉 Bien joué !", ephemeral=True)
 
             # ❌ Mauvaise réponse
             else:
+                await safe_respond(interaction, "❌ Ce n'est pas le bon mot !", ephemeral=True)
+
                 # Vérification de la limite d'essais en Solo
                 if not game.multi and len(game.attempts) >= game.max_attempts:
                     state["finished"] = True
@@ -203,19 +207,24 @@ class Anagramme(commands.Cog):
 
                     final_embed = game.build_embed()
                     await view.mark_finished(embed=final_embed)
-                    await interaction.followup.send("❌ Dommage, tu as épuisé tous tes essais.", ephemeral=True)
                 else:
                     if game.message:
                         await safe_edit(game.message, embed=game.build_embed())
-                    await interaction.followup.send("❌ Ce n'est pas le bon mot !", ephemeral=True)
 
         # ── Création de la view ──
         if multi:
-            async def on_buzz(user):
-                await safe_send(
-                    channel,
-                    f"🎯 {user.mention} a buzzé ! À toi de proposer."
-                )
+            async def on_buzz(user: discord.User | discord.Member):
+                if view.message:
+                    # 1. Griser les boutons de la view lors du buzz
+                    for child in view.children:
+                        if isinstance(child, discord.ui.Button):
+                            child.disabled = True
+
+                    # 2. Mise à jour du message avec la main prise dans le footer
+                    current_embed = game.build_embed()
+                    current_embed.set_footer(text=f"🎯 Main prise par {user.display_name}")
+
+                    await safe_edit(view.message, embed=current_embed, view=view)
 
             view = BuzzerView(
                 modal_title="✍️ Propose ton mot",
@@ -266,6 +275,7 @@ class Anagramme(commands.Cog):
     # ============================================================================
     @app_commands.command(name="anagramme", description="Lance une partie d'Anagramme (multi = tout le monde peut jouer)")
     @app_commands.describe(mode="Mode de jeu : solo ou multi")
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
     async def slash_anagramme(self, interaction: discord.Interaction, mode: str = "solo"):
         await interaction.response.defer()
         await self._start_game(interaction.channel, author_id=interaction.user.id, mode=mode)
@@ -275,6 +285,7 @@ class Anagramme(commands.Cog):
     # 🔹 Commande PREFIX
     # ============================================================================
     @commands.command(name="anagramme", help="Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.")
+    @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_anagramme(self, ctx: commands.Context, mode: str = "solo"):
         await self._start_game(ctx.channel, author_id=ctx.author.id, mode=mode)
 
