@@ -49,104 +49,110 @@ class ReiatsuVol(commands.Cog):
         conn = self._get_db()
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT points, classe, steal_cd, last_steal_attempt, active_skill
-            FROM reiatsu WHERE user_id = ?
-        """, (voleur_id,))
-        voleur_data = cursor.fetchone()
+        try:
+            cursor.execute("""
+                SELECT points, classe, steal_cd, last_steal_attempt, active_skill
+                FROM reiatsu WHERE user_id = ?
+            """, (voleur_id,))
+            voleur_data = cursor.fetchone()
 
-        cursor.execute("""
-            SELECT points, classe
-            FROM reiatsu WHERE user_id = ?
-        """, (cible_id,))
-        cible_data = cursor.fetchone()
+            cursor.execute("""
+                SELECT points, classe
+                FROM reiatsu WHERE user_id = ?
+            """, (cible_id,))
+            cible_data = cursor.fetchone()
 
-        voleur_points, voleur_classe, voleur_cd, last_attempt, active_skill = voleur_data
-        cible_points, cible_classe = cible_data
-
-        now = datetime.now(timezone.utc)
-
-        # 🔹 Cooldown
-        if last_attempt:
-            last_dt = datetime.fromisoformat(last_attempt)
-            next_attempt = last_dt + timedelta(hours=voleur_cd)
-
-            if now < next_attempt:
-                restant = next_attempt - now
-                total_sec = int(restant.total_seconds())
-                h, rem = divmod(total_sec, 3600)
-                m, _ = divmod(rem, 60)
-
-                await safe_send(
-                    channel,
-                    f"⏳ Tu dois encore attendre **{h}h {m}m** avant de retenter."
-                )
-                conn.close()
+            if not voleur_data or not cible_data:
+                await safe_send(channel, "❌ Profil introuvable.")
                 return
 
-        # 🔹 Vérifications
-        if cible_points <= 0:
-            await safe_send(channel, f"⚠️ {cible.mention} n’a pas de Reiatsu à voler.")
-            conn.close()
-            return
+            voleur_points, voleur_classe, voleur_cd, last_attempt, active_skill = voleur_data
+            cible_points, cible_classe = cible_data
 
-        if voleur_points <= 0:
-            await safe_send(channel, "⚠️ Tu dois avoir au moins 1 point de Reiatsu pour voler.")
-            conn.close()
-            return
+            now = datetime.now(timezone.utc)
 
-        montant = max(1, cible_points // 10)
+            # 🔹 Cooldown
+            if last_attempt:
+                # ✅ Sécurité : fromisoformat peut planter sur des vieilles données
+                try:
+                    last_dt = datetime.fromisoformat(last_attempt)
+                except (ValueError, TypeError):
+                    last_dt = None
 
-        # 🔹 Skill actif
-        if voleur_classe == "Voleur" and active_skill:
-            succes = True
-            montant *= 2
-            cursor.execute(
-                "UPDATE reiatsu SET active_skill = 0 WHERE user_id = ?",
-                (voleur_id,)
-            )
-        else:
-            succes = random.random() < (0.67 if voleur_classe == "Voleur" else 0.25)
+                if last_dt is not None:
+                    next_attempt = last_dt + timedelta(hours=voleur_cd)
 
-        # 🔹 Enregistrement tentative
-        cursor.execute(
-            "UPDATE reiatsu SET last_steal_attempt = ? WHERE user_id = ?",
-            (now.isoformat(), voleur_id)
-        )
+                    if now < next_attempt:
+                        restant = next_attempt - now
+                        total_sec = int(restant.total_seconds())
+                        h, rem = divmod(total_sec, 3600)
+                        m, _ = divmod(rem, 60)
 
-        # 🔹 Résultat
-        if succes:
+                        await safe_send(
+                            channel,
+                            f"⏳ Tu dois encore attendre **{h}h {m}m** avant de retenter."
+                        )
+                        return
 
-            # Ajout au voleur
-            cursor.execute(
-                "UPDATE reiatsu SET points = points + ? WHERE user_id = ?",
-                (montant, voleur_id)
-            )
+            # 🔹 Vérifications
+            if cible_points <= 0:
+                await safe_send(channel, f"⚠️ {cible.mention} n'a pas de Reiatsu à voler.")
+                return
 
-            # Illusionniste
-            if cible_classe == "Illusionniste" and random.random() < 0.5:
-                await safe_send(
-                    channel,
-                    f"🩸 {voleur.mention} a volé **{montant}**... mais c’était une illusion !"
+            if voleur_points <= 0:
+                await safe_send(channel, "⚠️ Tu dois avoir au moins 1 point de Reiatsu pour voler.")
+                return
+
+            montant = max(1, cible_points // 10)
+
+            # 🔹 Skill actif
+            if voleur_classe == "Voleur" and active_skill:
+                succes = True
+                montant *= 2
+                cursor.execute(
+                    "UPDATE reiatsu SET active_skill = 0 WHERE user_id = ?",
+                    (voleur_id,)
                 )
             else:
-                cursor.execute(
-                    "UPDATE reiatsu SET points = MAX(points - ?, 0) WHERE user_id = ?",
-                    (montant, cible_id)
-                )
-                await safe_send(
-                    channel,
-                    f"🩸 {voleur.mention} a volé **{montant}** points à {cible.mention} !"
-                )
+                succes = random.random() < (0.67 if voleur_classe == "Voleur" else 0.25)
 
-        else:
-            await safe_send(
-                channel,
-                f"😵 {voleur.mention} a échoué à voler {cible.mention}."
+            # 🔹 Enregistrement tentative
+            cursor.execute(
+                "UPDATE reiatsu SET last_steal_attempt = ? WHERE user_id = ?",
+                (now.isoformat(), voleur_id)
             )
 
-        conn.commit()
-        conn.close()
+            # 🔹 Résultat
+            if succes:
+                cursor.execute(
+                    "UPDATE reiatsu SET points = points + ? WHERE user_id = ?",
+                    (montant, voleur_id)
+                )
+
+                if cible_classe == "Illusionniste" and random.random() < 0.5:
+                    await safe_send(
+                        channel,
+                        f"🩸 {voleur.mention} a volé **{montant}**... mais c'était une illusion !"
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE reiatsu SET points = MAX(points - ?, 0) WHERE user_id = ?",
+                        (montant, cible_id)
+                    )
+                    await safe_send(
+                        channel,
+                        f"🩸 {voleur.mention} a volé **{montant}** points à {cible.mention} !"
+                    )
+            else:
+                await safe_send(
+                    channel,
+                    f"😵 {voleur.mention} a échoué à voler {cible.mention}."
+                )
+
+            conn.commit()
+        finally:
+            # ✅ Fermé quoi qu'il arrive
+            conn.close()
 
     # ============================================================================
     # 🔹 Slash
