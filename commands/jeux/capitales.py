@@ -243,7 +243,8 @@ class Capitales(commands.Cog):
 
         embed = discord.Embed(
             title=title,
-            description=f"Quelle est la capitale de **{country}** ?",
+            description=f"Quelle est la capitale de **{country}** ?" +
+                        ("\nClique sur **🔔 Buzzer** pour prendre la main." if multi else "\nClique sur **✍️ Répondre** pour proposer ta réponse."),
             color=discord.Color.blurple()
         )
         embed.set_footer(text=footer_text)
@@ -259,7 +260,6 @@ class Capitales(commands.Cog):
                 if not state["finished"]:
                     state["finished"] = True
 
-                    # Reprise du message d'origine et ajout des infos de victoire
                     final_embed = discord.Embed(
                         title=f"{title} — Gagné !",
                         description=f"Quelle est la capitale de **{country}** ?\n\n🏆 **{interaction.user.mention}** a trouvé !\n✅ Réponse : **{capital}**",
@@ -276,12 +276,20 @@ class Capitales(commands.Cog):
         if multi:
             async def on_buzz(user: discord.User | discord.Member):
                 if view.message and view.message.embeds:
+                    # 1. Griser tous les boutons de la view
+                    for child in view.children:
+                        if isinstance(child, discord.ui.Button):
+                            child.disabled = True
+
+                    # 2. Mettre à jour l'embed avec le joueur qui a pris la main
                     current_embed = view.message.embeds[0]
                     current_embed.set_footer(text=f"🎯 Main prise par {user.display_name} | {footer_text}")
-                    await safe_edit(view.message, embed=current_embed)
+
+                    # 3. Transmettre view=view à safe_edit pour enregistrer l'état grisé
+                    await safe_edit(view.message, embed=current_embed, view=view)
 
             view = BuzzerView(
-                modal_title="🖊️️ Devine la capitale",
+                modal_title="🖊️ Devine la capitale",
                 modal_label="Entre la capitale",
                 modal_placeholder="Exemple : Paris",
                 modal_max_length=50,
