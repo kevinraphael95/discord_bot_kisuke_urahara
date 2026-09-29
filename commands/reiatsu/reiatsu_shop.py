@@ -16,7 +16,7 @@ import os
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
-from utils.discord_utils import safe_send, safe_respond
+from utils.discord_utils import safe_send, safe_respond, safe_create_webhook
 from utils.reiatsu_utils import ensure_profile
 import datetime
 import random
@@ -302,15 +302,33 @@ class ReiatsuShop(commands.Cog):
                     self.active_effects["rename"][after.id]["use_webhook"] = True
 
     async def _send_webhook(self, message: discord.Message, content: str, username: str = None):
-        webhook = await message.channel.create_webhook(name=username or f"tmp-{message.author.name}")
+        # ✅ Appel API sécurisé (retry + backoff 429)
+        webhook = await safe_create_webhook(
+            message.channel,
+            name=username or f"tmp-{message.author.name}"
+        )
+        if webhook is None:
+            # Rate-limit ou permission manquante → on abandonne sans supprimer le message original
+            return
+
+        # ✅ Sécurité : avatar_url peut être None si l'auteur a quitté le serveur
+        avatar_url = None
+        if message.author.display_avatar:
+            avatar_url = message.author.display_avatar.url
+
         try:
             await webhook.send(
                 username=username or message.author.display_name,
-                avatar_url=message.author.display_avatar.url,
+                avatar_url=avatar_url,
                 content=content
             )
+        except Exception as e:
+            print(f"[ERREUR webhook] {e}")
         finally:
-            await webhook.delete()
+            try:
+                await webhook.delete()
+            except Exception:
+                pass
 
     # ============================================================================
     # 🔹 Nettoyage périodique
