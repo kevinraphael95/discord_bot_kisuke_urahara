@@ -9,11 +9,13 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
-import discord
 import re
+
+import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_delete, safe_respond, safe_create_webhook
+
+from utils.discord_utils import safe_send, safe_delete, safe_followup, safe_create_webhook
 
 # ==============================================================
 # 🔹 Vue pour les messages secrets
@@ -21,7 +23,7 @@ from utils.discord_utils import safe_send, safe_delete, safe_respond, safe_creat
 class SecretMessageView(discord.ui.View):
     def __init__(self, target_user: discord.User, secret_message: str):
         super().__init__(timeout=1920)  # 32 minutes
-        self.target_user = target_user
+        self.target_user    = target_user
         self.secret_message = secret_message
 
     @discord.ui.button(label="🔒 Voir le message", style=discord.ButtonStyle.blurple)
@@ -89,7 +91,7 @@ class Say(commands.Cog):
             message = message[:1997] + "..."
         webhook = await safe_create_webhook(channel, name=f"tmp-{user.name}")
         if webhook is None:
-            return await safe_send(channel, "❌ Impossible de créer le webhook pour ce message (rate-limit ou permissions).")
+            return await safe_send(channel, "❌ Impossible de créer le webhook (rate-limit ou permissions).")
 
         try:
             if embed:
@@ -101,7 +103,7 @@ class Say(commands.Cog):
             await webhook.delete()
 
     # ==============================================================
-    # 🔹 Remplacement emojis custom (avec affichage correct)
+    # 🔹 Remplacement emojis custom
     # ==============================================================
     def _replace_custom_emojis(self, channel, message: str) -> str:
         message = re.sub(r"<:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
@@ -135,22 +137,40 @@ class Say(commands.Cog):
         user="Destinataire du message secret (requis avec *chuchotte)"
     )
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_say(self, interaction: discord.Interaction, message: str, embed: bool = False, as_user: bool = False, user: discord.Member = None):
+    async def slash_say(
+        self,
+        interaction: discord.Interaction,
+        message: str,
+        embed: bool = False,
+        as_user: bool = False,
+        user: discord.Member = None,
+    ):
         await interaction.response.defer()
         options, clean_message = self.parse_options(message)
+
         if options["chuchotte"]:
             if user is None:
-                await safe_respond(interaction, "❌ Tu dois choisir un utilisateur (paramètre `user`) pour *chuchotte.", ephemeral=True)
+                # ✅ safe_followup au lieu de safe_respond (déjà répondue par defer)
+                await safe_followup(
+                    interaction,
+                    "❌ Tu dois choisir un utilisateur (paramètre `user`) pour *chuchotte.",
+                    ephemeral=True,
+                )
                 return
             view = SecretMessageView(user, clean_message)
-            await interaction.channel.send(f"🔒 Message secret pour {user.mention}", view=view)
+            await safe_send(interaction.channel, f"🔒 Message secret pour {user.mention}", view=view)
             await interaction.delete_original_response()
             return
+
         if as_user:
             await self._say_as_user(interaction.channel, interaction.user, clean_message, embed)
         else:
             await self._say_message(interaction.channel, clean_message, embed)
-        await interaction.delete_original_response()
+
+        try:
+            await interaction.delete_original_response()
+        except Exception:
+            pass
 
     # ================================================================================
     # 🔹 Commande PREFIX
@@ -162,6 +182,7 @@ class Say(commands.Cog):
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_say(self, ctx: commands.Context, *, message: str):
         options, clean_message = self.parse_options(message)
+
         if options["chuchotte"]:
             mention = next((m for m in ctx.message.mentions), None)
             if not mention:
@@ -169,12 +190,14 @@ class Say(commands.Cog):
                 return
             secret_text = clean_message.replace(mention.mention, "").strip()
             view = SecretMessageView(mention, secret_text)
-            await ctx.channel.send(f"🔒 Message secret pour {mention.mention}", view=view)
+            await safe_send(ctx.channel, f"🔒 Message secret pour {mention.mention}", view=view)
         elif options["as_user"]:
             await self._say_as_user(ctx.channel, ctx.author, clean_message, options["embed"])
         else:
             await self._say_message(ctx.channel, clean_message, options["embed"])
+
         await safe_delete(ctx.message)
+
 
 # ================================================================================
 # 🔌 Setup du Cog
