@@ -12,6 +12,7 @@
 import asyncio
 import logging
 import random
+from collections import Counter
 
 import aiohttp
 import discord
@@ -140,15 +141,13 @@ class Anagramme(commands.Cog):
 
         embed = game.build_embed()
 
-        # ── Callback de validation (comme capitales) ──
+        # ── Callback de validation ──
         async def on_submit(interaction, answer):
-            # ✅ Defer immédiat
             try:
                 await interaction.response.defer(ephemeral=True)
             except discord.NotFound:
                 return
 
-            # Vérifications
             if state["finished"]:
                 await interaction.followup.send("❌ La partie est terminée.", ephemeral=True)
                 return
@@ -165,21 +164,26 @@ class Anagramme(commands.Cog):
                 )
                 return
 
+            if Counter(guess) != Counter(game.target_word):
+                await interaction.followup.send(
+                    "❌ Ce mot n'utilise pas exactement les lettres proposées.", ephemeral=True
+                )
+                return
+
             if not is_valid_word(guess):
                 await interaction.followup.send(
                     f"❌ `{guess}` n'est pas un mot valide.", ephemeral=True
                 )
                 return
 
-            # ✅ Enregistre l'essai
             game.attempts.append({'word': guess, 'author': interaction.user.display_name})
 
-            # ✅ Bonne réponse ?
+            # ✅ Bonne réponse
             if normalize_text(guess) == normalize_text(game.target_word):
                 state["finished"] = True
                 game.finished = True
+                self.active_games.pop(channel.id, None)
 
-                # Message public
                 await safe_send(
                     interaction.channel,
                     f"🎉 {interaction.user.mention} a trouvé ! C'était bien **{game.target_word}**."
@@ -191,12 +195,21 @@ class Anagramme(commands.Cog):
 
             # ❌ Mauvaise réponse
             else:
-                # Met à jour l'embed avec l'essai
-                if game.message:
-                    await safe_edit(game.message, embed=game.build_embed())
-                await interaction.followup.send("✅ Proposition envoyée !", ephemeral=True)
+                # Vérification de la limite d'essais en Solo
+                if not game.multi and len(game.attempts) >= game.max_attempts:
+                    state["finished"] = True
+                    game.finished = True
+                    self.active_games.pop(channel.id, None)
 
-        # ── Création de la view (comme capitales) ──
+                    final_embed = game.build_embed()
+                    await view.mark_finished(embed=final_embed)
+                    await interaction.followup.send("❌ Dommage, tu as épuisé tous tes essais.", ephemeral=True)
+                else:
+                    if game.message:
+                        await safe_edit(game.message, embed=game.build_embed())
+                    await interaction.followup.send("❌ Ce n'est pas le bon mot !", ephemeral=True)
+
+        # ── Création de la view ──
         if multi:
             async def on_buzz(user):
                 await safe_send(
@@ -236,6 +249,7 @@ class Anagramme(commands.Cog):
         try:
             await asyncio.sleep(180)
         except asyncio.CancelledError:
+            self.active_games.pop(channel.id, None)
             return
 
         if state["finished"]:
@@ -243,6 +257,7 @@ class Anagramme(commands.Cog):
 
         # ── Fin du temps ──
         game.finished = True
+        self.active_games.pop(channel.id, None)
         final_embed = game.build_embed()
         await view.mark_finished(embed=final_embed)
 
