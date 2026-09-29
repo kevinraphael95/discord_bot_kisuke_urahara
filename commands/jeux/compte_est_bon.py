@@ -9,6 +9,7 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
+import asyncio
 import logging
 import random
 import re
@@ -17,8 +18,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond
-from utils.jeux_utils import ReplyView, BuzzerView
+from utils.discord_utils import safe_send, safe_edit
+from utils.jeux_utils import parse_mode, ReplyView, BuzzerView
 
 log = logging.getLogger(__name__)
 
@@ -45,12 +46,89 @@ def safe_eval(expr: str):
         return None
 
 # ================================================================================
+# 🎮 Classe de gestion du jeu
+# ================================================================================
+class CompteEstBonGame:
+    def __init__(self, numbers: list[int], target: int, author_id: int, multi: bool = False, duration: int = 90):
+        self.numbers = numbers
+        self.target = target
+        self.author_id = author_id
+        self.multi = multi
+        self.duration = duration
+        self.finished = False
+        self.winner: str | None = None
+        self.attempts: list[dict] = []
+        self.best_attempt: dict | None = None
+        self.message = None
+        self.start_time = asyncio.get_event_loop().time()
+
+    def build_embed(self) -> discord.Embed:
+        mode_text = "Multijoueur 🌍" if self.multi else "Solo 🧍‍♂️"
+        title = f"🧮 Le Compte est Bon - Mode {mode_text}"
+
+        action_text = "Clique sur **🔔 Buzzer** pour prendre la main." if self.multi else "Clique sur **✍️ Répondre** pour proposer ton calcul."
+        description = (
+            f"**But :** Atteindre `{self.target}` avec les nombres suivants :\n"
+            f"`{'  '.join(map(str, self.numbers))}`\n\n"
+            "Utilise uniquement les opérations `+ - * /` pour t'en approcher le plus possible !\n"
+            f"{action_text}"
+        )
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.gold()
+        )
+
+        if self.attempts:
+            lines = []
+            for entry in self.attempts:
+                if entry.get('error'):
+                    lines.append(f"{entry['author']}: `{entry['expr']}` ❌ ({entry['error']})")
+                else:
+                    status = "✅ (Compte Bon !)" if entry['diff'] == 0 else f" (Écart: {entry['diff']})"
+                    lines.append(f"{entry['author']}: `{entry['expr']}` = **{entry['result']}**{status}")
+            tries_text = "\n".join(lines[-5:])  # Affiche les 5 derniers essais
+            embed.add_field(name=f"Essais ({len(self.attempts)})", value=tries_text, inline=False)
+
+        if self.finished:
+            if self.winner:
+                embed.title = f"{title} — Gagné !"
+                embed.color = discord.Color.green()
+                best = self.best_attempt
+                embed.description = (
+                    f"**Cible :** `{self.target}` | **Nombres :** `{'  '.join(map(str, self.numbers))}`\n\n"
+                    f"🏆 **{self.winner}** a trouvé le compte exact !\n"
+                    f"✅ **Calcul :** `{best['expr']}` = **{best['result']}**"
+                )
+            elif self.best_attempt:
+                embed.title = f"{title} — Terminé"
+                best = self.best_attempt
+                embed.description = (
+                    f"**Cible :** `{self.target}` | **Nombres :** `{'  '.join(map(str, self.numbers))}`\n\n"
+                    f"🥇 Meilleure approche par **{best['user_mention']}** !\n"
+                    f"🎯 **Calcul :** `{best['expr']}` = **{best['result']}** (écart de {best['diff']})"
+                )
+            else:
+                embed.title = "⏰ Temps écoulé !"
+                embed.color = discord.Color.red()
+                embed.description = (
+                    f"**Cible :** `{self.target}` | **Nombres :** `{'  '.join(map(str, self.numbers))}`\n\n"
+                    "❌ Personne n'a proposé de calcul valide."
+                )
+            embed.set_footer(text="Partie terminée")
+        else:
+            elapsed = int(asyncio.get_event_loop().time() - self.start_time)
+            remaining = max(0, self.duration - elapsed)
+            embed.set_footer(text=f"⏱️ Temps restant : {remaining} secondes")
+
+        return embed
+
+# ================================================================================
 # 🧠 Cog principal
 # ================================================================================
 class CompteEstBon(commands.Cog):
-    """
-    Commande /compte_est_bon et !compte_est_bon — Reproduit le jeu "Le Compte est Bon"
-    """
+    """Commande /compte_est_bon et !compte_est_bon — Reproduit le jeu "Le Compte est Bon" """
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -58,114 +136,100 @@ class CompteEstBon(commands.Cog):
     # ============================================================================
     # 🔹 Lancement du jeu
     # ============================================================================
-    async def _start_game(self, channel: discord.abc.Messageable, author: discord.User = None, multi: bool = False):
+    async def _start_game(self, channel: discord.abc.Messageable, author_id: int, multi: bool = False):
         numbers, target = generate_numbers()
-        footer_text = "⏱️ Temps : 90 secondes"
+        game = CompteEstBonGame(numbers, target, author_id, multi, duration=90)
 
-        embed = discord.Embed(
-            title="🧮 Le Compte est Bon",
-            description=(
-                f"**But :** Atteindre `{target}` avec les nombres suivants :\n"
-                f"`{'  '.join(map(str, numbers))}`\n\n"
-                "Utilise les opérations `+ - * /` pour t'en approcher le plus possible !\n\n"
-                f"Mode : **{'Multijoueur 🌍' if multi else 'Solo 🧍‍♂️'}**\n"
-                + ("Clique sur **🔔 Buzzer** pour prendre la main." if multi else "Clique sur **✍️ Répondre** pour proposer ton calcul.")
-            ),
-            color=discord.Color.gold()
-        )
-        embed.set_footer(text=footer_text)
+        state = {"finished": False}
+        embed = game.build_embed()
 
-        best_attempt = {
-            "user": None,
-            "expr": None,
-            "result": None,
-            "diff": float("inf")
-        }
-        found_exact = {"value": False}
+        # ── Callback de validation ──
+        async def on_submit(interaction: discord.Interaction, answer: str):
+            if not interaction.response.is_done():
+                await interaction.response.defer()
 
-        # ── Callback de validation (commun solo + multi) ──
-        async def on_submit(interaction, answer):
-            if found_exact["value"]:
-                await safe_respond(interaction, "❌ La partie est terminée.", ephemeral=True)
+            if state["finished"]:
+                return
+
+            if not game.multi and interaction.user.id != game.author_id:
                 return
 
             expr_raw = answer.strip()
-
             if not expr_raw:
-                await safe_respond(interaction, "❌ Expression vide.", ephemeral=True)
                 return
 
+            # Vérification de l'utilisation des nombres
             found_numbers = [int(x) for x in re.findall(r"\d+", expr_raw)]
-            pool = numbers.copy()
+            pool = game.numbers.copy()
+            invalid_num = False
 
             for n in found_numbers:
                 if n in pool:
                     pool.remove(n)
                 else:
-                    await safe_respond(
-                        interaction,
-                        "❌ Tu as utilisé un nombre non disponible ou trop de fois.",
-                        ephemeral=True,
-                    )
-                    return
+                    invalid_num = True
+                    break
+
+            if invalid_num:
+                game.attempts.append({
+                    'author': interaction.user.display_name,
+                    'expr': expr_raw,
+                    'error': "Nombre non disponible"
+                })
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
+                return
 
             result = safe_eval(expr_raw)
             if result is None:
-                await safe_respond(
-                    interaction,
-                    "❌ Calcul invalide ou caractères interdits.",
-                    ephemeral=True,
-                )
+                game.attempts.append({
+                    'author': interaction.user.display_name,
+                    'expr': expr_raw,
+                    'error': "Calcul invalide"
+                })
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
                 return
 
             diff = abs(target - result)
+            attempt_data = {
+                'author': interaction.user.display_name,
+                'user_mention': interaction.user.mention,
+                'expr': expr_raw,
+                'result': result,
+                'diff': diff,
+                'error': None
+            }
+            game.attempts.append(attempt_data)
 
-            # Mettre à jour la meilleure tentative
-            if diff < best_attempt["diff"]:
-                best_attempt["user"] = interaction.user
-                best_attempt["expr"] = expr_raw
-                best_attempt["result"] = result
-                best_attempt["diff"] = diff
+            # Mise à jour de la meilleure tentative
+            if game.best_attempt is None or diff < game.best_attempt['diff']:
+                game.best_attempt = attempt_data
 
-            # ── Cible exacte trouvée (écart 0) ──
+            # ── Cible exacte trouvée ──
             if diff == 0:
-                found_exact["value"] = True
+                state["finished"] = True
+                game.finished = True
+                game.winner = interaction.user.mention
 
-                await safe_respond(interaction, "🎉 Le compte est bon !", ephemeral=True)
-
-                winner_embed = discord.Embed(
-                    title="🧮 Le Compte est Bon — Gagné !",
-                    description=(
-                        f"**Cible :** `{target}` | **Nombres :** `{'  '.join(map(str, numbers))}`\n\n"
-                        f"🏆 **{interaction.user.mention}** a trouvé le compte exact !\n"
-                        f"✅ **Calcul :** `{expr_raw}` = **{result}**"
-                    ),
-                    color=discord.Color.green()
-                )
-                winner_embed.set_footer(text="Partie terminée")
-                await view.mark_finished(embed=winner_embed)
-                return
-
-            # ── Calcul valide mais pas exact ──
-            await safe_respond(
-                interaction,
-                f"✅ Calcul enregistré : `{expr_raw}` = **{result}** (Écart : {diff})",
-                ephemeral=True,
-            )
+                final_embed = game.build_embed()
+                await view.mark_finished(embed=final_embed)
+            else:
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
 
         # ── Callback quand quelqu'un buzze (multi seulement) ──
         async def on_buzz(user: discord.User | discord.Member):
-            if view.message and view.message.embeds:
-                # 1. Griser les boutons de la view
+            if view.message:
                 for child in view.children:
                     if isinstance(child, discord.ui.Button):
                         child.disabled = True
 
-                # 2. Indiquer le joueur qui a pris la main dans le footer
-                current_embed = view.message.embeds[0]
-                current_embed.set_footer(text=f"🎯 Main prise par {user.display_name} | {footer_text}")
+                current_embed = game.build_embed()
+                elapsed = int(asyncio.get_event_loop().time() - game.start_time)
+                remaining = max(0, game.duration - elapsed)
+                current_embed.set_footer(text=f"🎯 Main prise par {user.display_name} | ⏱️ Temps restant : {remaining}s")
 
-                # 3. Transmettre view=view pour enregistrer l'état grisé
                 await safe_edit(view.message, embed=current_embed, view=view)
 
         # ── Vue selon le mode ──
@@ -182,7 +246,7 @@ class CompteEstBon(commands.Cog):
             )
         else:
             view = ReplyView(
-                user_id=author.id if author else None,
+                user_id=author_id,
                 modal_title="🧮 Proposer un calcul",
                 modal_label="Ton calcul (ex: (100-25)*3)",
                 modal_placeholder="Utilise uniquement les nombres affichés et + - * /",
@@ -194,57 +258,42 @@ class CompteEstBon(commands.Cog):
         view.message = await safe_send(channel, embed=embed, view=view)
         if view.message is None:
             return
+        game.message = view.message
 
         # ── Attente (90 secondes) ──
-        await view.wait()
+        try:
+            await asyncio.sleep(game.duration)
+        except asyncio.CancelledError:
+            return
 
-        if found_exact["value"]:
+        if state["finished"]:
             return
 
         # ── Fin par timeout ──
-        if best_attempt["user"] is not None:
-            final_embed = discord.Embed(
-                title="🧮 Le Compte est Bon — Terminé",
-                description=(
-                    f"**Cible :** `{target}` | **Nombres :** `{'  '.join(map(str, numbers))}`\n\n"
-                    f"🥇 Meilleure approche par **{best_attempt['user'].mention}** !\n"
-                    f"🎯 **Calcul :** `{best_attempt['expr']}` = **{best_attempt['result']}** (écart de {best_attempt['diff']})"
-                ),
-                color=discord.Color.gold()
-            )
-        else:
-            final_embed = discord.Embed(
-                title="⏱️ Temps écoulé !",
-                description=(
-                    f"**Cible :** `{target}` | **Nombres :** `{'  '.join(map(str, numbers))}`\n\n"
-                    "❌ Personne n'a proposé de calcul valide."
-                ),
-                color=discord.Color.red()
-            )
-
-        final_embed.set_footer(text="Partie terminée")
+        game.finished = True
+        final_embed = game.build_embed()
         await view.mark_finished(embed=final_embed)
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="compte_est_bon", description="Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)")
-    @app_commands.describe(mode="Écris 'multi' pour activer le mode multijoueur.")
+    @app_commands.command(name="compte_est_bon", description="Lance le jeu du Compte est Bon")
+    @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_compte(self, interaction: discord.Interaction, mode: str = None):
         await interaction.response.defer()
-        multi = bool(mode and mode.lower() in ("multi", "m"))
-        await self._start_game(interaction.channel, author=interaction.user, multi=multi)
+        multi = parse_mode(mode)
+        await self._start_game(interaction.channel, author_id=interaction.user.id, multi=multi)
         await interaction.delete_original_response()
 
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="compte_est_bon", aliases=["lceb", "lecompteestbon"], help="Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)")
+    @commands.command(name="compte_est_bon", aliases=["lceb", "lecompteestbon"], help="Lance le jeu du Compte est Bon")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
-    async def prefix_compte(self, ctx: commands.Context, mode: str = None):
-        multi = bool(mode and mode.lower() in ("multi", "m"))
-        await self._start_game(ctx.channel, author=ctx.author, multi=multi)
+    async def prefix_compte(self, ctx: commands.Context, *, arg: str = None):
+        multi = parse_mode(arg)
+        await self._start_game(ctx.channel, author_id=ctx.author.id, multi=multi)
 
 
 # ================================================================================
