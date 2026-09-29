@@ -8,6 +8,7 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
+import asyncio
 import unicodedata
 import discord
 
@@ -152,3 +153,130 @@ class ReplyView(discord.ui.View):
             on_submit_callback=self.on_submit,
         )
         await interaction.response.send_modal(modal)
+
+
+# ================================================================================
+# 🔹 View avec BUZZER + Modal (1 seul joueur à la fois)
+# ================================================================================
+class BuzzerView(discord.ui.View):
+    """
+    View standard :
+    - Un bouton '🔔 Buzzer' visible par tous
+    - Le 1er qui clique prend la main et ouvre une modal
+    - Un timeout de sécurité déverrouille si le joueur ferme la modal sans valider
+    """
+
+    def __init__(
+        self,
+        modal_title: str,
+        modal_label: str,
+        modal_placeholder: str = "...",
+        modal_max_length: int = 50,
+        on_submit=None,
+        on_buzz=None,
+        buzz_timeout: int = 30,
+        view_timeout: int = 300,
+    ):
+        super().__init__(timeout=view_timeout)
+        self.modal_title       = modal_title
+        self.modal_label       = modal_label
+        self.modal_placeholder = modal_placeholder
+        self.modal_max_length  = modal_max_length
+        self.on_submit         = on_submit
+        self.on_buzz           = on_buzz
+        self.buzz_timeout      = buzz_timeout
+        self.buzzer_id         = None
+        self.buzz_task         = None
+        self.message           = None
+
+    @discord.ui.button(label="🔔 Buzzer", style=discord.ButtonStyle.primary)
+    async def buzz(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # 🔒 Quelqu'un a déjà buzzé ?
+        if self.buzzer_id is not None:
+            await safe_respond(
+                interaction,
+                f"❌ Trop tard ! C'est <@{self.buzzer_id}> qui a la main.",
+                ephemeral=True,
+            )
+            return
+
+        self.buzzer_id  = interaction.user.id
+        button.disabled = True
+
+        # Met à jour le message pour montrer qui a buzzé
+        if self.message:
+            try:
+                await safe_edit(self.message, view=self)
+            except Exception:
+                pass
+
+        # Callback externe (mention dans le salon, etc.)
+        if self.on_buzz:
+            await self.on_buzz(interaction)
+
+        # 🔓 Timer de sécurité
+        self.buzz_task = asyncio.create_task(self._unlock_after_timeout())
+
+        # Ouvre la modal
+        modal = ReplyModal(
+            title=self.modal_title,
+            label=self.modal_label,
+            placeholder=self.modal_placeholder,
+            max_length=self.modal_max_length,
+            on_submit_callback=self._wrap_submit(),
+        )
+        await interaction.response.send_modal(modal)
+
+    async def _unlock_after_timeout(self):
+        """Déverrouille automatiquement après un délai."""
+        try:
+            await asyncio.sleep(self.buzz_timeout)
+            if self.buzzer_id is not None:
+                if self.message:
+                    try:
+                        await safe_send(
+                            self.message.channel,
+                            f"⏰ <@{self.buzzer_id}> n'a pas répondu à temps, le buzzer se libère.",
+                        )
+                    except Exception:
+                        pass
+                self.unlock()
+        except asyncio.CancelledError:
+            pass
+
+    def _wrap_submit(self):
+        """Wrapper : annule le timer + déverrouille après validation."""
+        async def _callback(interaction, answer):
+            if self.buzz_task and not self.buzz_task.done():
+                self.buzz_task.cancel()
+
+            try:
+                if self.on_submit:
+                    await self.on_submit(interaction, answer)
+            finally:
+                self.unlock()
+
+        return _callback
+
+    def unlock(self):
+        """Déverrouille le buzzer pour le tour suivant."""
+        self.buzzer_id = None
+        if self.buzz_task and not self.buzz_task.done():
+            self.buzz_task.cancel()
+        for child in self.children:
+            child.disabled = False
+        if self.message:
+            try:
+                asyncio.create_task(safe_edit(self.message, view=self))
+            except Exception:
+                pass
+
+    async def on_timeout(self):
+        """Ferme les boutons quand la view expire."""
+        for child in self.children:
+            child.disabled = True
+        if self.message:
+            try:
+                await safe_edit(self.message, view=self)
+            except Exception:
+                pass
