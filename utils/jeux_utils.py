@@ -240,11 +240,15 @@ class BuzzerView(discord.ui.View):
             )
             return
 
-        # 1. Marque le buzzer AVANT tout
-        self.buzzer_id  = interaction.user.id
-        button.disabled = True
+        # 1. Marque le buzzer
+        self.buzzer_id = interaction.user.id
 
-        # 2. Ouvre la modal le plus vite possible
+        # 2. Désactive le VRAI bouton dans self.children (pas la copie locale)
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True
+
+        # 3. Ouvre la modal
         modal = ReplyModal(
             title=self.modal_title,
             label=self.modal_label,
@@ -256,25 +260,28 @@ class BuzzerView(discord.ui.View):
             await interaction.response.send_modal(modal)
         except discord.NotFound:
             log.warning("[BuzzerView] Interaction expirée avant send_modal")
-            self.buzzer_id  = None
-            button.disabled = False
+            self.buzzer_id = None
+            for child in self.children:
+                if isinstance(child, discord.ui.Button):
+                    child.disabled = False
             return
 
-        # 3. Désactive VISUELLEMENT le bouton pour tout le monde (AVANT on_buzz)
-        if self.message:
-            try:
-                await safe_edit(self.message, view=self)
-            except Exception as e:
-                log.exception("[BuzzerView] safe_edit a échoué : %s", e)
-
-        # 4. Callback externe (embed "Au tour de X")
+        # 4. Callback externe (met à jour l'embed "Au tour de X")
         if self.on_buzz:
             try:
                 await self.on_buzz(interaction.user)
             except Exception as e:
                 log.exception("[BuzzerView] on_buzz a échoué : %s", e)
 
-        # 5. Timer de sécurité
+        # 5. Envoie la view AVEC le bouton grisé
+        #    (l'embed a changé, donc Discord applique la mise à jour)
+        if self.message:
+            try:
+                await self.message.edit(view=self)
+            except Exception as e:
+                log.exception("[BuzzerView] edit view a échoué : %s", e)
+
+        # 6. Timer de sécurité
         self.buzz_task = asyncio.create_task(self._unlock_after_timeout())
 
     async def _unlock_after_timeout(self):
@@ -319,9 +326,9 @@ class BuzzerView(discord.ui.View):
 
         if self.message:
             try:
-                await safe_edit(self.message, view=self)
+                await self.message.edit(view=self)
             except Exception as e:
-                log.exception("[BuzzerView] unlock safe_edit a échoué : %s", e)
+                log.exception("[BuzzerView] unlock edit a échoué : %s", e)
 
     async def mark_finished(self, embed=None):
         """Marque la partie comme terminée et désactive les boutons."""
