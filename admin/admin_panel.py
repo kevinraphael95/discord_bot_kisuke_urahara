@@ -27,8 +27,12 @@ import logging
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
 # === Config ====================================================================
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin1234")
-SECRET_KEY     = os.getenv("FLASK_SECRET", "bleach_urahara_secret")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+SECRET_KEY     = os.getenv("FLASK_SECRET")
+if not ADMIN_PASSWORD:
+    raise RuntimeError("❌ ADMIN_PASSWORD manquant dans .env — arrêt du panel")
+if not SECRET_KEY:
+    raise RuntimeError("❌ FLASK_SECRET manquant dans .env — arrêt du panel")
 DB_PATH        = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database", "reiatsu.db")
 BACKUP_DIR     = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database", "backups")
 MAX_BACKUPS    = 10
