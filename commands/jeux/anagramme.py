@@ -20,7 +20,7 @@ from discord import app_commands
 from discord.ext import commands
 from spellchecker import SpellChecker
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_utils import safe_send, safe_edit
 from utils.jeux_utils import normalize_text, parse_mode, ReplyView, BuzzerView
 
 log = logging.getLogger(__name__)
@@ -72,6 +72,7 @@ class AnagrammeView:
         self.message           = None
         self.finished          = False
         self.winner: str | None = None
+        self.last_error: str | None = None
         self.start_time        = asyncio.get_event_loop().time()
 
     def build_embed(self) -> discord.Embed:
@@ -103,20 +104,27 @@ class AnagrammeView:
         embed.add_field(name="📝 Instructions", value=instructions, inline=False)
 
         if self.attempts:
-            tries_text = "\n".join(f"{entry['author']}: {entry['word']}" for entry in self.attempts)
+            lines = []
+            for entry in self.attempts:
+                status = "✅" if entry.get('correct') else "❌"
+                lines.append(f"{entry['author']}: **{entry['word']}** {status}")
+            tries_text = "\n".join(lines)
             field_name = f"Essais ({len(self.attempts)})" if self.multi else f"Essais ({len(self.attempts)}/{self.max_attempts})"
             embed.add_field(name=field_name, value=tries_text, inline=False)
         else:
             embed.add_field(name="Essais", value="*(Aucun essai pour l'instant)*", inline=False)
 
+        if self.last_error and not self.finished:
+            embed.add_field(name="⚠️ Remarque", value=self.last_error, inline=False)
+
         if self.finished:
             if self.winner:
-                embed.title = f"🔀 Anagramme - Gagné !"
+                embed.title = "🔀 Anagramme - Gagné !"
                 embed.color = discord.Color.green()
                 embed.description = f"Mot mélangé : **{' '.join(self.display_word)}**\n\n🏆 **{self.winner}** a trouvé ! C'était bien **{self.target_word}**."
                 embed.set_footer(text="Partie terminée")
             else:
-                embed.title = f"🔀 Anagramme - Terminé"
+                embed.title = "🔀 Anagramme - Terminé"
                 embed.color = discord.Color.red()
                 embed.description = f"Mot mélangé : **{' '.join(self.display_word)}**\n\n❌ Personne n'a trouvé. Le mot était **{self.target_word}**."
                 embed.set_footer(text="Partie terminée")
@@ -146,59 +154,56 @@ class Anagramme(commands.Cog):
         embed = game.build_embed()
 
         # ── Callback de validation ──
-        async def on_submit(interaction, answer):
+        async def on_submit(interaction: discord.Interaction, answer: str):
+            if not interaction.response.is_done():
+                await interaction.response.defer()
+
             if state["finished"]:
-                await safe_respond(interaction, "❌ La partie est terminée.", ephemeral=True)
                 return
 
             if not game.multi and interaction.user.id != game.author_id:
-                await safe_respond(interaction, "❌ Ce n'est pas ton jeu.", ephemeral=True)
                 return
 
             guess = answer.strip().upper()
+            game.last_error = None
 
             if len(guess) != game.display_length:
-                await safe_respond(
-                    interaction,
-                    f"❌ Le mot doit faire {game.display_length} lettres.",
-                    ephemeral=True
-                )
+                game.last_error = f"Le mot doit faire exactement {game.display_length} lettres."
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
                 return
 
             if Counter(guess) != Counter(game.target_word):
-                await safe_respond(
-                    interaction,
-                    "❌ Ce mot n'utilise pas exactement les lettres proposées.",
-                    ephemeral=True
-                )
+                game.last_error = "Ce mot n'utilise pas exactement les lettres proposées."
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
                 return
 
             if not is_valid_word(guess):
-                await safe_respond(
-                    interaction,
-                    f"❌ `{guess}` n'est pas un mot valide.",
-                    ephemeral=True
-                )
+                game.last_error = f"`{guess}` n'est pas un mot reconnu du dictionnaire."
+                if game.message:
+                    await safe_edit(game.message, embed=game.build_embed())
                 return
 
-            game.attempts.append({'word': guess, 'author': interaction.user.display_name})
+            is_correct = (normalize_text(guess) == normalize_text(game.target_word))
+            game.attempts.append({
+                'word': guess,
+                'author': interaction.user.display_name,
+                'correct': is_correct
+            })
 
             # ✅ Bonne réponse
-            if normalize_text(guess) == normalize_text(game.target_word):
+            if is_correct:
                 state["finished"] = True
                 game.finished = True
                 game.winner = interaction.user.mention
                 self.active_games.pop(channel.id, None)
-
-                await safe_respond(interaction, "✅ Bonne réponse !", ephemeral=True)
 
                 final_embed = game.build_embed()
                 await view.mark_finished(embed=final_embed)
 
             # ❌ Mauvaise réponse
             else:
-                await safe_respond(interaction, "❌ Ce n'est pas le bon mot !", ephemeral=True)
-
                 # Vérification de la limite d'essais en Solo
                 if not game.multi and len(game.attempts) >= game.max_attempts:
                     state["finished"] = True
@@ -215,12 +220,10 @@ class Anagramme(commands.Cog):
         if multi:
             async def on_buzz(user: discord.User | discord.Member):
                 if view.message:
-                    # 1. Griser les boutons de la view lors du buzz
                     for child in view.children:
                         if isinstance(child, discord.ui.Button):
                             child.disabled = True
 
-                    # 2. Mise à jour du message avec la main prise dans le footer
                     current_embed = game.build_embed()
                     current_embed.set_footer(text=f"🎯 Main prise par {user.display_name}")
 
