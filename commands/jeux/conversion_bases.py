@@ -4,6 +4,7 @@
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
+# Modes : Facile (→ base 10) / Hard (base 2-10 vers base 2-10)
 # ================================================================================
 
 # ================================================================================
@@ -39,13 +40,19 @@ def to_base(n: int, base: int) -> str:
     return "".join(reversed(out))
 
 
-def pick_question(min_base: int = 2, max_base: int = 10) -> tuple[int, int, int, str, str]:
+def pick_question(difficulty: str = "hard") -> tuple[int, int, int, str, str]:
     """
-    Tire un nombre et 2 bases différentes.
+    Tire un nombre et 2 bases.
+    - difficulté "easy" : source ∈ 2-9, cible = 10 (toujours)
+    - difficulté "hard" : source ∈ 2-10, cible ∈ 2-10, différentes
     Retourne (n, src_base, dst_base, src_str, dst_str).
     """
-    src_base = random.randint(min_base, max_base)
-    dst_base = random.choice([b for b in range(min_base, max_base + 1) if b != src_base])
+    if difficulty == "easy":
+        src_base = random.randint(2, 9)
+        dst_base = 10
+    else:  # hard
+        src_base = random.randint(2, 10)
+        dst_base = random.choice([b for b in range(2, 11) if b != src_base])
 
     length = random.randint(3, 5) if src_base <= 4 else random.randint(2, 4)
     max_val = src_base ** length - 1
@@ -53,6 +60,43 @@ def pick_question(min_base: int = 2, max_base: int = 10) -> tuple[int, int, int,
     n = random.randint(min_val, max_val)
 
     return n, src_base, dst_base, to_base(n, src_base), to_base(n, dst_base)
+
+
+# ================================================================================
+# 🎛️ Menu de choix de difficulté
+# ================================================================================
+class DifficultyButton(discord.ui.Button):
+    def __init__(self, label: str, difficulty: str, cog, author_id: int, multi: bool):
+        super().__init__(label=label, style=discord.ButtonStyle.primary)
+        self.difficulty = difficulty
+        self.cog = cog
+        self.author_id = author_id
+        self.multi = multi
+
+    async def callback(self, interaction: discord.Interaction):
+        if not self.multi and interaction.user.id != self.author_id:
+            await safe_respond(interaction, "❌ Ce n'est pas ta partie.", ephemeral=True)
+            return
+        try:
+            await interaction.response.defer()
+        except Exception:
+            pass
+        # Désactive le menu
+        self.disabled = True
+        try:
+            await safe_edit(interaction.message, view=self.view)
+        except Exception:
+            pass
+        await self.cog._start_game(
+            interaction.channel, self.author_id, self.multi, difficulty=self.difficulty
+        )
+
+
+class DifficultyView(discord.ui.View):
+    def __init__(self, cog, author_id: int, multi: bool, timeout: int = 60):
+        super().__init__(timeout=timeout)
+        self.add_item(DifficultyButton("🟢 Facile (→ base 10)", "easy", cog, author_id, multi))
+        self.add_item(DifficultyButton("🔴 Hard (base → base)", "hard", cog, author_id, multi))
 
 
 # ================================================================================
@@ -68,14 +112,38 @@ class ConversionBases(commands.Cog):
         self.bot = bot
 
     # ============================================================================
+    # 🎯 Menu de difficulté
+    # ============================================================================
+    async def _show_difficulty_menu(self, channel, author_id: int, multi: bool):
+        embed = discord.Embed(
+            title="🔢 Conversion de bases",
+            description=(
+                "Choisis ton mode de jeu :\n\n"
+                "🟢 **Facile** — convertis un nombre (base 2-9) en **base 10**\n"
+                "🔴 **Hard** — convertis un nombre entre **deux bases** (2-10)"
+            ),
+            color=discord.Color.orange(),
+        )
+        view = DifficultyView(self, author_id, multi)
+        await safe_send(channel, embed=embed, view=view)
+
+    # ============================================================================
     # 🎮 Logique de jeu
     # ============================================================================
-    async def _start_game(self, channel: discord.abc.Messageable, author_id: int, multi: bool = False):
-        n, src_base, dst_base, src_str, dst_str = pick_question()
+    async def _start_game(
+        self,
+        channel: discord.abc.Messageable,
+        author_id: int,
+        multi: bool = False,
+        difficulty: str = "hard",
+    ):
+        n, src_base, dst_base, src_str, dst_str = pick_question(difficulty)
 
         attempts: list[dict] = []
         state = {"finished": False}
         start_time = asyncio.get_event_loop().time()
+
+        diff_txt = "🟢 Facile" if difficulty == "easy" else "🔴 Hard"
 
         def build_embed(
             winner: str | None = None,
@@ -83,14 +151,13 @@ class ConversionBases(commands.Cog):
             timed_out: bool = False,
         ) -> discord.Embed:
             mode_txt = "Multi 🌍" if multi else "Solo 🧍"
-            title = f"🔢 Conversion de bases — {mode_txt}"
+            title = f"🔢 Conversion de bases — {diff_txt} — {mode_txt}"
 
             if finished:
                 color = discord.Color.green() if winner else discord.Color.red()
             else:
                 color = discord.Color.blurple()
 
-            # ✅ L'ÉNONCÉ TOUJOURS VISIBLE EN DESCRIPTION (en gros)
             embed = discord.Embed(
                 title=title,
                 description=(
@@ -100,7 +167,6 @@ class ConversionBases(commands.Cog):
                 color=color,
             )
 
-            # Essais (solo / multi)
             if not multi:
                 embed.add_field(
                     name=f"Essais ({len(attempts)}/{self.MAX_ATTEMPTS_SOLO})",
@@ -120,21 +186,23 @@ class ConversionBases(commands.Cog):
                     inline=False,
                 )
 
-            # ✅ RÉSULTAT AJOUTÉ (pas à la place de l'énoncé)
             if finished:
                 if winner:
                     result_txt = (
                         f"🏆 **{winner}** a trouvé !\n"
-                        f"✅ Réponse : **`{dst_str}`** (base {dst_base})\n"
-                        f"🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
+                        f"✅ Réponse : **`{dst_str}`** (base {dst_base})"
                     )
+                    # En mode hard, on rappelle la valeur décimale intermédiaire
+                    if difficulty == "hard":
+                        result_txt += f"\n🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
                 else:
                     prefix = "⏰ Temps écoulé !" if timed_out else "❌ Personne n'a trouvé."
                     result_txt = (
                         f"{prefix}\n"
-                        f"✅ Réponse : **`{dst_str}`** (base {dst_base})\n"
-                        f"🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
+                        f"✅ Réponse : **`{dst_str}`** (base {dst_base})"
                     )
+                    if difficulty == "hard":
+                        result_txt += f"\n🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
                 embed.add_field(name="🏁 Résultat", value=result_txt, inline=False)
                 embed.set_footer(text="Partie terminée")
             else:
@@ -231,7 +299,7 @@ class ConversionBases(commands.Cog):
     # ============================================================================
     @app_commands.command(
         name="conversion_bases",
-        description="Convertis un nombre d'une base (2-10) vers une autre (2-10).",
+        description="Convertis un nombre entre bases 2 et 10.",
     )
     @app_commands.describe(mode="solo ou multi (tout le monde peut jouer)")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
@@ -241,7 +309,9 @@ class ConversionBases(commands.Cog):
         mode: Literal["solo", "multi"] = "solo",
     ):
         await interaction.response.defer()
-        await self._start_game(interaction.channel, author_id=interaction.user.id, multi=parse_mode(mode))
+        await self._show_difficulty_menu(
+            interaction.channel, author_id=interaction.user.id, multi=parse_mode(mode)
+        )
         await interaction.delete_original_response()
 
     # ============================================================================
@@ -256,7 +326,7 @@ class ConversionBases(commands.Cog):
     async def prefix_conversion(self, ctx: commands.Context, *, arg: str = None):
         tokens = (arg or "").lower().split()
         multi = any(parse_mode(t) for t in tokens)
-        await self._start_game(ctx.channel, author_id=ctx.author.id, multi=multi)
+        await self._show_difficulty_menu(ctx.channel, author_id=ctx.author.id, multi=multi)
 
 
 # ================================================================================
