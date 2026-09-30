@@ -39,6 +39,60 @@ def load_data() -> dict:
         return {}
 
 # ================================================================================
+# 🎲 Tirage pondéré
+# ================================================================================
+def random_weighted(options: list, default: str = "Classique") -> str:
+    """
+    Choisit un élément au hasard en fonction de son poids.
+    Supporte les formats :
+    - {"nom": "...", "poids": N}
+    - "..." (str → poids 1)
+    """
+    if not options:
+        return default
+
+    # Normalise : si l'élément est une simple str, on lui donne un poids de 1
+    noms, poids = [], []
+    for opt in options:
+        if isinstance(opt, dict):
+            noms.append(opt.get("nom", default))
+            poids.append(opt.get("poids", 1))
+        else:
+            noms.append(opt)
+            poids.append(1)
+
+    return random.choices(noms, weights=poids, k=1)[0]
+
+
+def random_weighted_multiple(options: list, k: int, default: str = "Classique") -> list:
+    """Choisit k éléments distincts au hasard en fonction de leur poids."""
+    if not options or k <= 0:
+        return []
+
+    noms, poids = [], []
+    for opt in options:
+        if isinstance(opt, dict):
+            noms.append(opt.get("nom", default))
+            poids.append(opt.get("poids", 1))
+        else:
+            noms.append(opt)
+            poids.append(1)
+
+    # Si on demande plus d'éléments que dispo, on limite
+    k = min(k, len(noms))
+
+    # Tirage pondéré SANS remise (pour éviter les doublons)
+    selected = []
+    indices  = list(range(len(noms)))
+    for _ in range(k):
+        weights_subset = [poids[i] for i in indices]
+        chosen_idx     = random.choices(indices, weights=weights_subset, k=1)[0]
+        selected.append(noms[chosen_idx])
+        indices.remove(chosen_idx)
+
+    return selected
+
+# ================================================================================
 # 🗄️ Accès base de données locale
 # ================================================================================
 
@@ -85,12 +139,12 @@ def db_valider_quete(user_id: int) -> int | None:
 # ================================================================================
 
 def generate_pizza_embed(data: dict) -> discord.Embed:
-    """Génère un embed représentant une pizza aléatoire."""
-    pate       = random.choice(data.get("pates",             ["Classique"]))
-    base       = random.choice(data.get("bases",             ["Tomate"]))
-    fromage    = random.choice(data.get("fromages",          ["Mozzarella"]))
-    garnitures = random.sample(data.get("garnitures",        ["Champignons", "Jambon"]), k=min(2, len(data.get("garnitures", []))))
-    toppings   = random.sample(data.get("toppings_speciaux", ["Olives"]),                k=min(1, len(data.get("toppings_speciaux", []))))
+    """Génère un embed représentant une pizza aléatoire avec tirage pondéré."""
+    pate       = random_weighted(data.get("pates",             []), default="Classique")
+    base       = random_weighted(data.get("bases",             []), default="Tomate")
+    fromage    = random_weighted(data.get("fromages",          []), default="Mozzarella")
+    garnitures = random_weighted_multiple(data.get("garnitures", []), k=2, default="Champignons")
+    toppings   = random_weighted_multiple(data.get("toppings_speciaux", []), k=1, default="Olives")
 
     embed = discord.Embed(title="🍕 Ta pizza aléatoire", color=discord.Color.orange())
     embed.add_field(name="Pâte",              value=pate,                  inline=False)
@@ -158,7 +212,7 @@ class PizzaAleatoire(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="pizza",description="🍕 Génère une pizza aléatoire.")
+    @app_commands.command(name="pizza", description="🍕 Génère une pizza aléatoire.")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_pizza(self, interaction: discord.Interaction):
         data = load_data()
@@ -174,7 +228,7 @@ class PizzaAleatoire(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="pizza",help="🍕 Génère une pizza aléatoire.")
+    @commands.command(name="pizza", help="🍕 Génère une pizza aléatoire.")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_pizza(self, ctx: commands.Context):
         data = load_data()
