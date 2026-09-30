@@ -12,7 +12,7 @@
 import asyncio
 import logging
 import random
-from typing import Literal, NamedTuple
+from typing import Literal
 
 import discord
 from discord import app_commands
@@ -39,20 +39,6 @@ def to_base(n: int, base: int) -> str:
     return "".join(reversed(out))
 
 
-def from_base(s: str, base: int) -> int | None:
-    """Convertit une chaîne (base 2-10) en entier. None si invalide."""
-    s = s.strip().lower()
-    if not s:
-        return None
-    for ch in s:
-        if ch not in DIGITS[:base]:
-            return None
-    try:
-        return int(s, base)
-    except ValueError:
-        return None
-
-
 def pick_question(min_base: int = 2, max_base: int = 10) -> tuple[int, int, int, str, str]:
     """
     Tire un nombre et 2 bases différentes.
@@ -61,7 +47,6 @@ def pick_question(min_base: int = 2, max_base: int = 10) -> tuple[int, int, int,
     src_base = random.randint(min_base, max_base)
     dst_base = random.choice([b for b in range(min_base, max_base + 1) if b != src_base])
 
-    # Taille du nombre adaptée : plus la base est petite, plus on prend de chiffres
     length = random.randint(3, 5) if src_base <= 4 else random.randint(2, 4)
     max_val = src_base ** length - 1
     min_val = src_base ** (length - 1) if length > 1 else 0
@@ -76,7 +61,7 @@ def pick_question(min_base: int = 2, max_base: int = 10) -> tuple[int, int, int,
 class ConversionBases(commands.Cog):
     """Commande /conversion_bases et !conversion_bases — Convertir entre bases 2 à 10."""
 
-    DURATION = 120  # secondes par question
+    DURATION = 120
     MAX_ATTEMPTS_SOLO = 3
 
     def __init__(self, bot: commands.Bot):
@@ -92,43 +77,30 @@ class ConversionBases(commands.Cog):
         state = {"finished": False}
         start_time = asyncio.get_event_loop().time()
 
-        def build_embed(winner: str | None = None, finished: bool = False) -> discord.Embed:
+        def build_embed(
+            winner: str | None = None,
+            finished: bool = False,
+            timed_out: bool = False,
+        ) -> discord.Embed:
             mode_txt = "Multi 🌍" if multi else "Solo 🧍"
             title = f"🔢 Conversion de bases — {mode_txt}"
 
             if finished:
-                if winner:
-                    embed = discord.Embed(
-                        title=f"{title} — Gagné !",
-                        description=(
-                            f"🏆 **{winner}** a trouvé !\n"
-                            f"✅ Réponse : **`{dst_str}`** (base {dst_base})\n"
-                            f"🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
-                        ),
-                        color=discord.Color.green(),
-                    )
-                else:
-                    embed = discord.Embed(
-                        title=f"{title} — Perdu",
-                        description=(
-                            f"❌ Personne n'a trouvé.\n"
-                            f"✅ Réponse : **`{dst_str}`** (base {dst_base})\n"
-                            f"🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
-                        ),
-                        color=discord.Color.red(),
-                    )
-                embed.set_footer(text="Partie terminée")
-                return embed
+                color = discord.Color.green() if winner else discord.Color.red()
+            else:
+                color = discord.Color.blurple()
 
+            # ✅ L'ÉNONCÉ TOUJOURS VISIBLE EN DESCRIPTION (en gros)
             embed = discord.Embed(
                 title=title,
                 description=(
-                    f"Convertis le nombre suivant :\n\n"
-                    f"**`{src_str}`** (base **{src_base}**)  →  base **{dst_base}**"
+                    f"# `{src_str}` (base {src_base})  →  base {dst_base}\n"
+                    f"**Convertis ce nombre dans la base demandée.**"
                 ),
-                color=discord.Color.blurple(),
+                color=color,
             )
 
+            # Essais (solo / multi)
             if not multi:
                 embed.add_field(
                     name=f"Essais ({len(attempts)}/{self.MAX_ATTEMPTS_SOLO})",
@@ -138,27 +110,46 @@ class ConversionBases(commands.Cog):
                     ) or "_Aucun essai pour l'instant._",
                     inline=False,
                 )
-            else:
-                if attempts:
-                    embed.add_field(
-                        name="Essais",
-                        value="\n".join(
-                            f"{a['author']}: **{a['word']}** {'✅' if a['correct'] else '❌'}"
-                            for a in attempts
-                        ),
-                        inline=False,
-                    )
+            elif attempts:
+                embed.add_field(
+                    name="Essais",
+                    value="\n".join(
+                        f"{a['author']}: **{a['word']}** {'✅' if a['correct'] else '❌'}"
+                        for a in attempts
+                    ),
+                    inline=False,
+                )
 
-            elapsed = int(asyncio.get_event_loop().time() - start_time)
-            remaining = max(0, self.DURATION - elapsed)
-            embed.set_footer(text=f"⏱️ Temps restant : {remaining}s")
+            # ✅ RÉSULTAT AJOUTÉ (pas à la place de l'énoncé)
+            if finished:
+                if winner:
+                    result_txt = (
+                        f"🏆 **{winner}** a trouvé !\n"
+                        f"✅ Réponse : **`{dst_str}`** (base {dst_base})\n"
+                        f"🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
+                    )
+                else:
+                    prefix = "⏰ Temps écoulé !" if timed_out else "❌ Personne n'a trouvé."
+                    result_txt = (
+                        f"{prefix}\n"
+                        f"✅ Réponse : **`{dst_str}`** (base {dst_base})\n"
+                        f"🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
+                    )
+                embed.add_field(name="🏁 Résultat", value=result_txt, inline=False)
+                embed.set_footer(text="Partie terminée")
+            else:
+                elapsed = int(asyncio.get_event_loop().time() - start_time)
+                remaining = max(0, self.DURATION - elapsed)
+                embed.set_footer(text=f"⏱️ Temps restant : {remaining}s")
+
             return embed
 
-        async def finish(winner: str | None):
+        async def finish(winner: str | None, timed_out: bool = False):
             state["finished"] = True
-            await view.mark_finished(embed=build_embed(winner=winner, finished=True))
+            final_embed = build_embed(winner=winner, finished=True, timed_out=timed_out)
+            await view.mark_finished(embed=final_embed)
 
-        # ── Soumission de réponse (mode texte / modal) ──
+        # ── Soumission de réponse ──
         async def on_submit(interaction: discord.Interaction, answer: str):
             if not interaction.response.is_done():
                 await interaction.response.defer()
@@ -171,7 +162,6 @@ class ConversionBases(commands.Cog):
             if not guess:
                 return
 
-            # Anti-doublon
             if any(a["word"] == guess for a in attempts):
                 if view.message:
                     await safe_edit(view.message, embed=build_embed())
@@ -204,7 +194,7 @@ class ConversionBases(commands.Cog):
             view = BuzzerView(
                 modal_title="🔢 Ta réponse",
                 modal_label=f"En base {dst_base}",
-                modal_placeholder=f"Ex : 1010",
+                modal_placeholder="Ex : 1010",
                 modal_max_length=20,
                 on_submit=on_submit,
                 on_buzz=on_buzz,
@@ -216,7 +206,7 @@ class ConversionBases(commands.Cog):
                 user_id=author_id,
                 modal_title="🔢 Ta réponse",
                 modal_label=f"En base {dst_base}",
-                modal_placeholder=f"Ex : 1010",
+                modal_placeholder="Ex : 1010",
                 modal_max_length=20,
                 on_submit=on_submit,
                 timeout=300,
@@ -226,7 +216,6 @@ class ConversionBases(commands.Cog):
         if view.message is None:
             return
 
-        # ── Attente / timeout ──
         try:
             await asyncio.sleep(self.DURATION)
         except asyncio.CancelledError:
@@ -235,10 +224,7 @@ class ConversionBases(commands.Cog):
         if state["finished"]:
             return
 
-        # Temps écoulé
-        final = build_embed(winner=None, finished=True)
-        final.title = "⏰ Temps écoulé !"
-        await view.mark_finished(embed=final)
+        await finish(None, timed_out=True)
 
     # ============================================================================
     # 🔹 Commande SLASH
