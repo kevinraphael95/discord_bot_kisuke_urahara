@@ -63,7 +63,7 @@ def pick_question(difficulty: str = "hard") -> tuple[int, int, int, str, str]:
 
 
 # ================================================================================
-# 🎛️ Menu de choix de difficulté
+# 🎛️ Menu de choix de difficulté (dans le même message)
 # ================================================================================
 class DifficultyButton(discord.ui.Button):
     def __init__(self, label: str, difficulty: str, cog, author_id: int, multi: bool):
@@ -81,14 +81,13 @@ class DifficultyButton(discord.ui.Button):
             await interaction.response.defer()
         except Exception:
             pass
-        # Désactive le menu
-        self.disabled = True
-        try:
-            await safe_edit(interaction.message, view=self.view)
-        except Exception:
-            pass
+        # ✅ On lance la partie DANS LE MÊME message (pas de nouveau message)
         await self.cog._start_game(
-            interaction.channel, self.author_id, self.multi, difficulty=self.difficulty
+            interaction.channel,
+            self.author_id,
+            self.multi,
+            difficulty=self.difficulty,
+            edit_message=interaction.message,
         )
 
 
@@ -112,7 +111,7 @@ class ConversionBases(commands.Cog):
         self.bot = bot
 
     # ============================================================================
-    # 🎯 Menu de difficulté
+    # 🎯 Menu de difficulté (envoie UN SEUL message)
     # ============================================================================
     async def _show_difficulty_menu(self, channel, author_id: int, multi: bool):
         embed = discord.Embed(
@@ -136,6 +135,7 @@ class ConversionBases(commands.Cog):
         author_id: int,
         multi: bool = False,
         difficulty: str = "hard",
+        edit_message: discord.Message | None = None,
     ):
         n, src_base, dst_base, src_str, dst_str = pick_question(difficulty)
 
@@ -192,7 +192,6 @@ class ConversionBases(commands.Cog):
                         f"🏆 **{winner}** a trouvé !\n"
                         f"✅ Réponse : **`{dst_str}`** (base {dst_base})"
                     )
-                    # En mode hard, on rappelle la valeur décimale intermédiaire
                     if difficulty == "hard":
                         result_txt += f"\n🔎 `{src_str}` (base {src_base}) = `{n}` en décimal"
                 else:
@@ -280,9 +279,15 @@ class ConversionBases(commands.Cog):
                 timeout=300,
             )
 
-        view.message = await safe_send(channel, embed=build_embed(), view=view)
-        if view.message is None:
-            return
+        # ✅ Si edit_message fourni : on édite le message existant (menu)
+        # Sinon : on envoie un nouveau message
+        if edit_message is not None:
+            view.message = edit_message
+            await safe_edit(edit_message, embed=build_embed(), view=view)
+        else:
+            view.message = await safe_send(channel, embed=build_embed(), view=view)
+            if view.message is None:
+                return
 
         try:
             await asyncio.sleep(self.DURATION)
