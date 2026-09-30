@@ -49,6 +49,15 @@ def load_all_characters():
     return [p for p in (load_character(n) for n in list_characters()) if p is not None]
 
 # ================================================================================
+# 🧮 Détection de même famille
+# ================================================================================
+def a_meme_famille(p1, p2):
+    """Retourne True si les deux persos ont au moins un mot en commun dans leur nom."""
+    mots1 = set(p1["nom"].lower().split())
+    mots2 = set(p2["nom"].lower().split())
+    return bool(mots1 & mots2)
+
+# ================================================================================
 # 🧮 Calcul du score de compatibilité
 # ================================================================================
 def compatibilite_amoureuse(p1, p2):
@@ -70,6 +79,10 @@ def compatibilite_amoureuse(p1, p2):
     return 0.5
 
 def calculer_score(p1, p2):
+    # 🚫 Même famille → score 0
+    if a_meme_famille(p1, p2):
+        return 0
+
     score = 50
     score *= compatibilite_amoureuse(p1, p2)
     commun_races = set(p1.get("race", [])) & set(p2.get("race", []))
@@ -88,6 +101,32 @@ def calculer_score(p1, p2):
     return max(0, min(int(score), 100))
 
 def generate_ship_embed(p1, p2):
+    # 🚫 Cas spécial : même famille → 0%
+    if a_meme_famille(p1, p2):
+        embed = discord.Embed(
+            title="💘 Test de compatibilité Bleach 💘",
+            color=discord.Color.dark_gray()
+        )
+        embed.add_field(
+            name="👩‍❤️‍👨 Couple",
+            value=f"**{p1['nom']}** ❤️ **{p2['nom']}**",
+            inline=False
+        )
+        embed.add_field(
+            name="🔢 Taux d'affinité",
+            value="`0%`",
+            inline=True
+        )
+        embed.add_field(
+            name="💬 Verdict",
+            value="*Non, parce que dans la même famille. 🚫*",
+            inline=False
+        )
+        embed.set_thumbnail(url=p1["image"])
+        embed.set_image(url=p2["image"])
+        return embed
+
+    # ✅ Cas normal
     score = calculer_score(p1, p2)
     if score >= 90:
         reaction, color = "âmes sœurs 💞", discord.Color.magenta()
