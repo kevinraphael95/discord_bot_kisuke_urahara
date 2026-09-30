@@ -277,18 +277,38 @@ class TramProbleme(commands.Cog):
 
         embed.add_field(name="🧭 Profil moral", value=profil, inline=False)
 
-        saved = (
-            f"🕊️ **Tu as sauvé :** {total_saved['humain']} adultes, "
-            f"{total_saved['enfant']} enfants, {total_saved['pa']} personnes âgées, "
-            f"{total_saved['animal']} animaux et {total_saved['robot']} robots."
-        )
-        killed = (
-            f"💀 **Tu as tué :** {total_killed['humain']} adultes, "
-            f"{total_killed['enfant']} enfants, {total_killed['pa']} personnes âgées, "
-            f"{total_killed['animal']} animaux et {total_killed['robot']} robots."
-        )
+        # ----------------------------------------------------------
+        # Bilan moral : on n'affiche que les catégories non nulles
+        # ----------------------------------------------------------
+        LABELS = {
+            "humain": ("adulte", "adultes"),
+            "enfant": ("enfant", "enfants"),
+            "pa":     ("personne âgée", "personnes âgées"),
+            "animal": ("animal", "animaux"),
+            "robot":  ("robot", "robots"),
+        }
 
-        embed.add_field(name="📊 Bilan moral", value=f"{saved}\n{killed}", inline=False)
+        def format_counts(counts: dict) -> str:
+            """Construit '2 adultes, 1 enfant, 3 robots' en ignorant les zéros."""
+            parts = []
+            for key, (sing, plur) in LABELS.items():
+                n = counts.get(key, 0)
+                if n <= 0:
+                    continue
+                parts.append(f"{n} {sing if n == 1 else plur}")
+            return ", ".join(parts) if parts else "rien"
+
+        saved_txt = format_counts(total_saved)
+        killed_txt = format_counts(total_killed)
+
+        embed.add_field(
+            name="📊 Bilan moral",
+            value=(
+                f"🕊️ **Tu as sauvé :** {saved_txt}.\n"
+                f"💀 **Tu as tué :** {killed_txt}."
+            ),
+            inline=False
+        )
         embed.set_footer(text="Fin du test moral 🛤️")
 
         await edit(msg, embed=embed, view=None)
