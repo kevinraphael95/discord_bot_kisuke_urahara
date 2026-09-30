@@ -8,12 +8,13 @@ Liste des Commandes
 - **say_as :** (Admin) Fait répéter un message par le bot comme si c'était un autre membre.
 Usage: !say_as <mention|id|pseudo> <message>
 - **sync :** Synchronise les commandes slash (serveur ou global).
+- **test :** Affiche le ping, l'heure et le dernier commit du bot.
 - **testgame :** Tester un mini-jeu via son numéro ou 'all'.
 - **testtache :** 🕹️ Teste toutes les épreuves pour la commande hollow.
 
 ### 📂 Bleach
 - **bleachship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
-- **bmoji :** Devine quel personnage Bleach se cache derrière ces emojis.
+- **bmoji :** Devine quel personnage Bleach se cache derrière ces emojis. (Ex: !bmoji multi)
 - **combat :** ⚔️ Combat style Pokémon entre 2 persos.
 - **division :** Détermine ta division dans le Gotei 13.
 - **kido :** Affiche un Kido précis, aléatoire ou la liste paginée.
@@ -28,7 +29,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
 - **dice :** 🎲 Lance des dés. Ex: !dice 2d6, !dice 1d20
 - **fortune :** Ouvre un biscuit chinois et découvre ta prédiction.
-- **gay :** 🌈 Calcule ton taux de gaytitude.
+- **gay :** 🌈 Calcule ton taux de gaytitude du jour.
 - **inspire :** Reçois une citation inspirante... très inspirante.
 - **pizza :** 🍕 Génère une pizza aléatoire.
 - **qrcode :** 📷 Génère un QR code depuis un texte ou une URL.
@@ -40,24 +41,23 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **help :** Affiche l’aide du bot.
 - **react :** Réagit à un message avec un ou plusieurs emojis.
 - **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
-- **test :** Affiche le ping, l'heure et le dernier commit du bot.
 
 ### 📂 Jeux
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
 - **capitales :** Devine la capitale d'un pays
-- **compte_est_bon :** Lance le jeu du Compte est Bon (ajoute 'multi' pour jouer à plusieurs)
+- **compte_est_bon :** Lance le jeu du Compte est Bon
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
 - **drapeaux :** Devine le pays à partir d'un drapeau
 - **entrainementcerebral :** Entraînement cérébral composé de 5 mini-jeux.
 - **formes :** Jouez au mini-jeu mémoire avec des formes et couleurs.
 - **lightsout :** Pas de description.
 - **mastermind :** Jouer au Mastermind interactif.
-- **mot_contraint :** Jeu : trouve un mot qui commence et finit par des lettres données.
+- **mot_contraint :** Jeu du mot contraint. mot_contraint multi ou m pour jouer en multi.
 - **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
 - **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
-- **pendu :** Démarre une partie du jeu du pendu.
-- **pressing :** Lance le jeu Pressing Under Pressure !
-- **pressingtop :** Voir le classement
+- **pendu :** Lance une partie du Pendu. pendu multi ou m pour jouer en multi.
+- **pressing :** Pas de description.
+- **pressingtop :** Pas de description.
 - **puissance4 :** Pas de description.
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
 - **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
