@@ -1,7 +1,7 @@
 # ================================================================================
 # 📌 compte_a_rebours.py — Commande /compte_a_rebours et !compte_a_rebours
 # Objectif : Compter à rebours de 20 à 0 dans une base choisie (2-10)
-# Catégorie : Fun
+# Catégorie : Fun&Random
 # Accès : Tous
 # Cooldown : 1 utilisation / 15 secondes / utilisateur
 # ================================================================================
@@ -267,5 +267,5 @@ async def setup(bot: commands.Bot):
     cog = CompteARebours(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun"
+            command.category = "Fun&Random"
     await bot.add_cog(cog)
