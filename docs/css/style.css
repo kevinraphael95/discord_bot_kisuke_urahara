@@ -57,10 +57,8 @@
   --line:      rgba(255,255,255,.07);
   --line-2:    rgba(255,255,255,.12);
   --fg:        #f0ede6;
-/*  --fg-soft:   #a8a39a;
-  --fg-mute:   #6a665e; */
-  --fg-soft:   #c5c0b8; 
-  --fg-mute:   #8f8a82;  
+  --fg-soft:   #c5c0b8;
+  --fg-mute:   #8f8a82;
 
   --accent:      #4ea86b;
   --accent-2:    #2d7a4e;
@@ -107,7 +105,11 @@
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  overflow-y: scroll;   /* ← Scrollbar toujours visible = largeur stable */
+  overflow-x: hidden;
+}
 
 body {
   background: var(--bg);
@@ -120,6 +122,13 @@ body {
   transition: background .3s ease, color .3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;   /* ← FIX PRINCIPAL : les enfants directs prennent 100% */
+}
+
+body > * {
+  width: 100%;            /* ← Sécurité : tous les enfants directs prennent 100% */
 }
 
 a { color: inherit; }
@@ -275,11 +284,15 @@ nav {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 32px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .container-narrow {
   max-width: 840px;
   margin: 0 auto;
   padding: 0 32px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── PAGE HEADER ────────────────────────────────────────── */
@@ -288,6 +301,8 @@ nav {
   margin: 0 auto;
   padding: 72px 32px 40px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 .page-head h1 {
   font-family: var(--font-display);
@@ -367,6 +382,7 @@ nav {
 footer {
   border-top: 1px solid var(--line);
   padding: 32px;
+  margin-top: auto;
 }
 .footer-inner {
   max-width: 1200px;
@@ -431,7 +447,7 @@ footer {
   position: fixed;
   top: var(--nav-h);
   left: 0; right: 0;
-  z-index: 99;                                              /* ← 99 (< nav à 100) */
+  z-index: 99;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
   flex-direction: column;
@@ -483,63 +499,37 @@ footer {
 @media (max-width: 700px) {
   body { overflow-x: hidden; }
 
-  /* Nav */
   .nav-inner { padding: 12px 16px; gap: 12px; }
   .nav-logo { font-size: 15px; gap: 8px; }
   .nav-logo-mark { width: 26px; height: 26px; }
   .theme-btn { width: 36px; height: 36px; font-size: 14px; }
 
-  /* Layout */
   .container, .container-narrow { padding: 0 16px; }
 
-  /* Page head */
   .page-head { padding: 40px 16px 24px; }
   .page-head h1 { font-size: clamp(1.6rem, 8vw, 2.2rem); }
   .page-head p { font-size: 15px; }
 
-  /* Sections */
   .section { padding: 48px 0; }
   .section-head { margin-bottom: 32px; }
   .section-head h2 { font-size: clamp(1.4rem, 6vw, 1.8rem); }
   .section-head p { font-size: 15px; }
 
-  /* Features (page d'accueil) */
   .feature { gap: 24px; padding: 32px 0; }
   .feature-text h3 { font-size: 1.3rem; }
   .feature-text p { font-size: 15px; }
   .feature-text li { font-size: 14px; }
   .feature-visual { min-height: 180px; padding: 20px; }
 
-  /* Hero (page d'accueil) */
   .hero { padding: 32px 16px 48px; gap: 32px; }
   .hero h1 { font-size: clamp(1.8rem, 8vw, 2.4rem); }
   .hero p { font-size: 15px; }
   .hero-cta { gap: 8px; }
   .hero-cta .btn { padding: 10px 16px; font-size: 13px; }
 
-  /* Cartes Discord (hero) : on cache TOUT sur mobile */
-  .hero-visual {
-    display: none !important;
-  }
+  .hero-visual { display: none !important; }
 
-  /* Footer */
   footer { padding: 20px 16px; }
   .footer-inner { flex-direction: column; text-align: center; gap: 12px; }
   .footer-links { justify-content: center; }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   FIX : FOOTER TOUJOURS EN BAS DE LA PAGE
-   ═══════════════════════════════════════════════════════════ */
-html, body {
-  min-height: 100vh;
-}
-
-body {
-  display: flex;
-  flex-direction: column;
-}
-
-body > footer {
-  margin-top: auto;
 }
