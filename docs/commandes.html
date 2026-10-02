@@ -126,7 +126,9 @@
 
   .cmd {
     display: grid;
-    grid-template-columns: 200px 1fr;
+    /* minmax(0, 1fr) au lieu de 1fr → la colonne ne s'élargit plus
+       quand un enfant contient un long exemple de commande */
+    grid-template-columns: 200px minmax(0, 1fr);
     gap: 20px;
     padding: 14px 22px;
     transition: background .15s;
@@ -173,6 +175,8 @@
     margin-top: 6px;
     display: inline-block;
     width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   @media (max-width: 700px) {
