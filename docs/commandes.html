@@ -126,7 +126,7 @@
 
   .cmd {
     display: grid;
-    /* minmax(0, 1fr) au lieu de 1fr → la colonne ne s'élargit plus
+    /* minmax(0, 1fr) au lieu de 1fr → empêche la colonne de s'élargir
        quand un enfant contient un long exemple de commande */
     grid-template-columns: 200px minmax(0, 1fr);
     gap: 20px;
