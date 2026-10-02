@@ -53,23 +53,29 @@
   .search-input::placeholder { color: var(--fg-mute); }
   .search-input:focus { border-color: var(--accent); }
 
-  /* Conteneur des catégories : force une largeur uniforme */
+  /* Conteneur des catégories : largeur imposée à tous les enfants */
   #categories {
+    display: block;
     width: 100%;
     max-width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
-  /* Chaque catégorie : largeur identique ouverte ET fermée */
+  /* Chaque catégorie : strictement la même largeur (ouverte ou fermée) */
   .cat {
-    width: 100%;
-    max-width: 100%;
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box;
-    margin-bottom: 12px;
+    margin: 0 0 12px 0 !important;
+    padding: 0;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--bg-card);
     overflow: hidden;
     transition: border-color .2s;
+    text-align: left;
   }
   .cat:hover { border-color: var(--line-2); }
 
@@ -82,6 +88,8 @@
     user-select: none;
     transition: background .2s;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
   }
   .cat-header::before {
     content: '';
@@ -131,6 +139,8 @@
     display: none;
     padding: 4px 0 12px;
     border-top: 1px solid var(--line);
+    width: 100%;
+    box-sizing: border-box;
   }
   .cmd-list.open { display: block; }
 
@@ -141,6 +151,8 @@
     padding: 14px 22px;
     transition: background .15s;
     border-bottom: 1px solid var(--line);
+    width: 100%;
+    box-sizing: border-box;
   }
   .cmd:last-child { border-bottom: none; }
   .cmd:hover { background: var(--bg-soft); }
