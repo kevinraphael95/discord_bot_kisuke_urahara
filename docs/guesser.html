@@ -25,6 +25,14 @@
 <script src="js/data.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/guesser.js" defer></script>
+
+<style>
+  /* Fix : empêche les colonnes du tableau de s'élargir quand un
+     contenu est très long (nom de personnage, arc, etc.) */
+  .th, .row {
+    grid-template-columns: 160px repeat(9, minmax(0, 1fr));
+  }
+</style>
 </head>
 <body>
 
