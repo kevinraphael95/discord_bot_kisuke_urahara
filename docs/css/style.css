@@ -527,3 +527,19 @@ footer {
   .footer-inner { flex-direction: column; text-align: center; gap: 12px; }
   .footer-links { justify-content: center; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   FIX : FOOTER TOUJOURS EN BAS DE LA PAGE
+   ═══════════════════════════════════════════════════════════ */
+html, body {
+  min-height: 100vh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+body > footer {
+  margin-top: auto;
+}
