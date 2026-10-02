@@ -54,24 +54,25 @@
   .search-input:focus { border-color: var(--accent); }
 
   /* ═══════════════════════════════════════════════════════════
-     FIX : LES BLOCS GARDENT LA MÊME LARGEUR QU'ILS SOIENT
-     OUVERTS OU FERMÉS
+     FIX DÉFINITIF
+     Toutes les catégories ont EXACTEMENT la même largeur (640px)
+     qu'elles soient ouvertes ou fermées.
      ═══════════════════════════════════════════════════════════ */
 
-  /* Conteneur : largeur fixe, centré */
   #categories {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    max-width: 720px;        /* ← largeur MAX, modifiable */
-    margin: 0 auto;          /* ← centré horizontalement */
+    margin: 0 auto;
     padding: 0;
   }
 
-  /* Chaque bloc catégorie : largeur imposée */
-  .cat {
-    display: block;
-    width: 100%;
+  /* Largeur FIXE = la même pour tous les blocs, ouverts ou fermés */
+  #categories > .cat {
+    width: 640px;
     max-width: 100%;
-    box-sizing: border-box;  /* ← bordures/paddings inclus dans la largeur */
+    box-sizing: border-box;
     margin: 0 0 12px 0;
     padding: 0;
     border: 1px solid var(--line);
@@ -80,9 +81,8 @@
     overflow: hidden;
     transition: border-color .2s;
   }
-  .cat:hover { border-color: var(--line-2); }
+  #categories > .cat:hover { border-color: var(--line-2); }
 
-  /* En-tête : largeur 100% du bloc parent */
   .cat-header {
     display: flex;
     align-items: center;
@@ -139,7 +139,6 @@
   }
   .cat-header.open .cat-arrow { transform: rotate(90deg); color: var(--accent); }
 
-  /* Liste des commandes : largeur 100% du bloc parent */
   .cmd-list {
     display: none;
     padding: 4px 0 12px;
@@ -149,10 +148,9 @@
   }
   .cmd-list.open { display: block; }
 
-  /* Commande : grid avec colonnes fixes, largeur 100% */
   .cmd {
     display: grid;
-    grid-template-columns: 200px minmax(0, 1fr); /* ← minmax(0, 1fr) empêche l'élargissement */
+    grid-template-columns: 200px minmax(0, 1fr);
     gap: 20px;
     padding: 14px 22px;
     transition: background .15s;
@@ -189,7 +187,6 @@
     line-height: 1.6;
   }
 
-  /* ⚠️ L'exemple de commande est LA cause du bug de largeur */
   .cmd-usage {
     grid-column: 1 / -1;
     font-family: 'SF Mono', 'Consolas', monospace;
@@ -201,14 +198,15 @@
     border-left: 3px solid var(--accent);
     margin-top: 6px;
     display: block;
-    width: auto;              /* ← était fit-content : CHANGE */
-    max-width: 100%;          /* ← empêche de dépasser */
+    width: auto;
+    max-width: 100%;
     box-sizing: border-box;
-    overflow-wrap: break-word; /* ← casse les longues lignes */
+    overflow-wrap: break-word;
     word-break: break-word;
   }
 
   @media (max-width: 700px) {
+    #categories > .cat { width: 100%; }
     .cmd {
       grid-template-columns: 1fr;
       gap: 6px;
