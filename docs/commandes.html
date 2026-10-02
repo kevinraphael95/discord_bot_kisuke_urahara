@@ -54,23 +54,21 @@
   .search-input:focus { border-color: var(--accent); }
 
   /* ═══════════════════════════════════════════════════════════
-     FIX DÉFINITIF
-     Toutes les catégories ont EXACTEMENT la même largeur (640px)
-     qu'elles soient ouvertes ou fermées.
+     LARGEUR IDENTIQUE AU GUESSER (1100px max)
      ═══════════════════════════════════════════════════════════ */
 
   #categories {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;      /* blocs prennent toute la largeur */
     width: 100%;
+    max-width: 1100px;         /* ← même largeur que .gwrap du guesser */
     margin: 0 auto;
     padding: 0;
   }
 
-  /* Largeur FIXE = la même pour tous les blocs, ouverts ou fermés */
   #categories > .cat {
-    width: 700px;
+    width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     margin: 0 0 12px 0;
