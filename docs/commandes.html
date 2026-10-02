@@ -22,6 +22,15 @@
 <script src="js/commandes.js" defer></script>
 
 <style>
+  /* ═══════════════════════════════════════════════════════════
+     FIX : barre de défilement toujours visible
+     → la largeur ne change jamais quand on ouvre/ferme
+     ═══════════════════════════════════════════════════════════ */
+  html {
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+
   /* Barre de recherche */
   .search-wrap {
     max-width: 520px;
