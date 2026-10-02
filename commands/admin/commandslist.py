@@ -43,7 +43,7 @@ class CommandsList(commands.Cog):
             categories.setdefault(cat, []).append((cmd.name, desc))
 
         for cat in sorted(categories.keys(), key=lambda c: c.lower()):
-            content += f"### 📂 {cat}\n"
+            content += f"### {cat}\n"
             for name, desc in sorted(categories[cat], key=lambda x: x[0].lower()):
                 content += f"- **{name} :** {desc}\n"
             content += "\n"
