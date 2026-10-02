@@ -46,6 +46,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
 - **capitales :** Devine la capitale d'un pays
 - **compte_est_bon :** Lance le jeu du Compte est Bon
+- **conversion_bases :** Convertis un nombre entre bases 2 et 10. Ajoute 'm' ou 'multi' pour jouer en multi.
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
 - **drapeaux :** Devine le pays à partir d'un drapeau
 - **entrainementcerebral :** Entraînement cérébral composé de 5 mini-jeux.
