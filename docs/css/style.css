@@ -1,7 +1,26 @@
-/* ═══════════════════════════════════════════════════════════
-   POLICES HÉBERGÉES EN LOCAL
-   font-display: optional = zéro saut, jamais
-   ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   KISUKE URAHARA — style.css
+   ─────────────────────────────────────────────────────────────────────
+   SOMMAIRE :
+   A. Polices hébergées en local
+   B. Variables de thème (couleurs, tailles)
+   C. Reset + base du body
+   D. Navigation (barre du haut + menu mobile)
+   E. Boutons
+   F. Layouts et conteneurs
+   G. Cartes, sections, badges
+   H. Footer
+   I. Media queries (responsive)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   A. POLICES HÉBERGÉES EN LOCAL
+   ─────────────────────────────────────────────────────────────────────
+   On charge les .woff2 depuis le dossier /fonts du projet.
+   font-display: optional → évite le "flash" de police (FOUC) :
+   soit la police est prête, soit on utilise la police système.
+   ═══════════════════════════════════════════════════════════════════════ */
 
 @font-face {
   font-family: 'Inter';
@@ -46,43 +65,58 @@
   src: url('../fonts/shippori-mincho-800.woff2') format('woff2');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   KISUKE URAHARA — style.css v2
-   ═══════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════════
+   B. VARIABLES DE THÈME
+   ─────────────────────────────────────────────────────────────────────
+   On centralise toutes les couleurs ici. Modifier une seule variable
+   met à jour tout le site. Deux thèmes : sombre (défaut) + clair.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Thème sombre (défaut) ─────────────────────────────────────────── */
 :root {
-  --bg:        #14181a;
-  --bg-soft:   #1c2124;
-  --bg-card:   #222829;
+  /* Fonds */
+  --bg:        #14181a;   /* fond principal */
+  --bg-soft:   #1c2124;   /* fond secondaire (sections alternées) */
+  --bg-card:   #222829;   /* fond des cartes/blocs */
+
+  /* Bordures */
   --line:      rgba(255,255,255,.07);
   --line-2:    rgba(255,255,255,.12);
-  --fg:        #f0ede6;
-/*  --fg-soft:   #a8a39a;
-  --fg-mute:   #6a665e; */
-  --fg-soft:   #c5c0b8; 
-  --fg-mute:   #8f8a82;  
 
+  /* Textes */
+  --fg:        #f0ede6;   /* texte principal */
+  --fg-soft:   #c5c0b8;   /* texte secondaire */
+  --fg-mute:   #8f8a82;   /* texte discret (labels, hints) */
+
+  /* Couleur d'accent (vert Urahara) */
   --accent:      #4ea86b;
-  --accent-2:    #2d7a4e;
+  --accent-2:    #2d7a4e;   /* version plus foncée au survol */
   --accent-soft: rgba(78,168,107,.12);
 
+  /* Couleur dorée (mode survie) */
   --gold:      #c9a961;
   --gold-soft: rgba(201,169,97,.14);
 
-  --ok-bg:  #122b1c; --ok-bd:  #15803d; --ok-tx:  #4ade80;
-  --ko-bg:  #2a0d0d; --ko-bd:  #991b1b; --ko-tx:  #f87171;
-  --yw-bg:  #3d2b00; --yw-bd:  #a67c1a; --yw-tx:  #fbbf24;
+  /* Codes de couleur des cellules (jeu) */
+  --ok-bg: #122b1c; --ok-bd: #15803d; --ok-tx: #4ade80;  /* vert  = correct */
+  --ko-bg: #2a0d0d; --ko-bd: #991b1b; --ko-tx: #f87171;  /* rouge = faux */
+  --yw-bg: #3d2b00; --yw-bd: #a67c1a; --yw-tx: #fbbf24;  /* jaune = proche */
 
-  --font-sans:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-display: 'Shippori Mincho', 'Yu Mincho', 'Hiragino Mincho ProN', Georgia, 'Times New Roman', serif;
+  /* Polices */
+  --font-sans:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Shippori Mincho', Georgia, serif;
 
+  /* Arrondis */
   --radius:    14px;
   --radius-sm: 8px;
   --radius-xs: 6px;
 
+  /* Hauteur de la barre de navigation */
   --nav-h: 64px;
 }
 
+/* ── Thème clair (activé via [data-theme="light"] sur <html>) ──────── */
 [data-theme="light"] {
   --bg:        #fbfaf7;
   --bg-soft:   #f4f2ec;
@@ -105,31 +139,56 @@
   --yw-bg: #fffbeb; --yw-bd: #d97706; --yw-tx: #78350f;
 }
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   C. RESET + BASE DU BODY
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Reset universel : supprime marges/paddings par défaut + box-sizing */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 html { scroll-behavior: smooth; }
 
 body {
+  /* Couleurs + typo */
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.65;
+
+  /* Hauteur minimale : la page prend au moins tout l'écran */
   min-height: 100vh;
+
+  /* Empêche le scroll horizontal parasite sur mobile */
   overflow-x: hidden;
+
+  /* Transition douce quand on change de thème */
   transition: background .3s ease, color .3s ease;
+
+  /* Rendu de police plus net */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* ⚑ FLEX COLUMN — indispensable pour pousser le footer en bas */
+  display: flex;
+  flex-direction: column;
 }
 
 a { color: inherit; }
 
+/* Contour de focus visible pour l'accessibilité clavier */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
+/* Respecte la préférence "réduire les animations" du système */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -138,11 +197,16 @@ a { color: inherit; }
   }
 }
 
-/* ── NAV ────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   D. NAVIGATION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Barre de navigation principale ────────────────────────────────── */
 nav {
-  position: sticky;
+  position: sticky;              /* reste collée en haut au scroll */
   top: 0;
-  z-index: 100;
+  z-index: 100;                  /* au-dessus du contenu */
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -161,6 +225,7 @@ nav {
   min-height: var(--nav-h);
 }
 
+/* Logo à gauche */
 .nav-logo {
   display: flex;
   align-items: center;
@@ -187,6 +252,7 @@ nav {
   object-position: center 25%;
 }
 
+/* Liens au centre (desktop) */
 .nav-links {
   display: flex;
   gap: 4px;
@@ -202,17 +268,26 @@ nav {
   font-weight: 500;
   transition: all .2s ease;
 }
-.nav-links a:hover { color: var(--fg); background: var(--bg-soft); }
-.nav-links a.active { color: var(--accent); background: var(--accent-soft); }
+.nav-links a:hover {
+  color: var(--fg);
+  background: var(--bg-soft);
+}
+.nav-links a.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
 
+/* Actions à droite (thème + burger) */
 .nav-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+/* Bouton de changement de thème */
 .theme-btn {
-  width: 38px; height: 38px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line-2);
   background: transparent;
@@ -230,180 +305,19 @@ nav {
   color: var(--accent);
 }
 
-/* ── BOUTONS ───────────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 22px;
-  font-family: var(--font-sans);
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  transition: all .2s ease;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-.btn-primary:hover {
-  background: var(--accent-2);
-  border-color: var(--accent-2);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px -8px var(--accent);
-}
-.btn-ghost {
-  background: transparent;
-  color: var(--fg);
-  border-color: var(--line-2);
-}
-.btn-ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: translateY(-1px);
-}
-.btn-sm { padding: 8px 16px; font-size: 14px; }
-.btn-lg { padding: 14px 28px; font-size: 16px; }
-
-/* ── LAYOUT ─────────────────────────────────────────────── */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 32px;
-}
-.container-narrow {
-  max-width: 840px;
-  margin: 0 auto;
-  padding: 0 32px;
-}
-
-/* ── PAGE HEADER ────────────────────────────────────────── */
-.page-head {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 72px 32px 40px;
-  text-align: center;
-}
-.page-head h1 {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 800;
-  line-height: 1.15;
-  color: var(--fg);
-  margin-bottom: 12px;
-  letter-spacing: -.01em;
-}
-.page-head h1 em { font-style: normal; color: var(--accent); }
-.page-head p {
-  color: var(--fg-soft);
-  font-size: 17px;
-  max-width: 560px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
-
-/* ── BADGES ─────────────────────────────────────────────── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 500;
-}
-.badge::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-}
-
-/* ── CARDS ──────────────────────────────────────────────── */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 24px;
-}
-
-/* ── SECTIONS ───────────────────────────────────────────── */
-.section { padding: 80px 0; }
-.section-soft {
-  background: var(--bg-soft);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.section-head {
-  text-align: center;
-  margin-bottom: 56px;
-}
-.section-head h2 {
-  font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  font-weight: 800;
-  line-height: 1.2;
-  color: var(--fg);
-  margin-bottom: 12px;
-  letter-spacing: -.01em;
-}
-.section-head h2 em { font-style: normal; color: var(--accent); }
-.section-head p {
-  color: var(--fg-soft);
-  font-size: 17px;
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-/* ── FOOTER ─────────────────────────────────────────────── */
-footer {
-  border-top: 1px solid var(--line);
-  padding: 32px;
-}
-.footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  font-size: 14px;
-  color: var(--fg-mute);
-}
-.footer-links {
-  display: flex;
-  gap: 20px;
-  list-style: none;
-}
-.footer-links a {
-  color: var(--fg-mute);
-  text-decoration: none;
-  transition: color .2s;
-}
-.footer-links a:hover { color: var(--accent); }
-
-/* ── THEME BUTTON ICON ──────────────────────────────────── */
+/* Icône du bouton selon le thème actif (◐ = sombre, ◑ = clair) */
 .theme-btn[data-theme-state="dark"]::before  { content: '◐'; }
 .theme-btn[data-theme-state="light"]::before { content: '◑'; }
 .theme-btn::before { display: inline-block; line-height: 1; }
 
-
-/* ── NAV MOBILE ─────────────────────────────────────────── */
+/* ── Bouton burger + menu mobile ───────────────────────────────────── */
 .nav-burger {
-  display: none;
+  display: none;                /* caché sur desktop, visible sur mobile */
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  width: 40px; height: 40px;
+  width: 40px;
+  height: 40px;
   padding: 10px;
   background: transparent;
   border: 1px solid var(--line-2);
@@ -414,6 +328,8 @@ footer {
   -webkit-tap-highlight-color: transparent;
 }
 .nav-burger:hover { border-color: var(--accent); }
+
+/* Les 3 barres du burger */
 .nav-burger span {
   display: block;
   width: 100%;
@@ -422,25 +338,28 @@ footer {
   border-radius: 2px;
   transition: all .25s ease;
 }
+
+/* Animation burger → croix quand ouvert */
 .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .nav-burger.open span:nth-child(2) { opacity: 0; }
 .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+/* Menu mobile (caché par défaut, glisse depuis le haut) */
 .nav-mobile {
   display: none;
   position: fixed;
   top: var(--nav-h);
-  left: 0; right: 0;
-  z-index: 99;                                              /* ← 99 (< nav à 100) */
+  left: 0;
+  right: 0;
+  z-index: 99;                   /* sous la nav (100) mais au-dessus du contenu */
   background: var(--bg);
   border-bottom: 1px solid var(--line);
   flex-direction: column;
   padding: 16px 20px 24px;
   gap: 4px;
-  transform: translateY(-100%);
+  transform: translateY(-100%);  /* caché au-dessus de l'écran */
   visibility: hidden;
-  transition: transform .3s cubic-bezier(.2,.8,.3,1),
-              visibility .3s;
+  transition: transform .3s cubic-bezier(.2,.8,.3,1), visibility .3s;
   max-height: calc(100vh - var(--nav-h));
   overflow-y: auto;
   box-shadow: 0 12px 32px rgba(0,0,0,.4);
@@ -466,20 +385,229 @@ footer {
   background: var(--accent-soft);
 }
 
-/* ── AFFICHAGE SELON TAILLE ─────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   E. BOUTONS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all .2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Bouton principal (vert) */
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-primary:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -8px var(--accent);
+}
+
+/* Bouton secondaire (transparent, contour) */
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--line-2);
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* Tailles */
+.btn-sm { padding: 8px 16px; font-size: 14px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   F. LAYOUTS ET CONTENEURS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+.container-narrow {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   G. CARTES, SECTIONS, BADGES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── En-tête de page (titre + sous-titre centrés) ──────────────────── */
+.page-head {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 72px 32px 40px;
+  text-align: center;
+}
+.page-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--fg);
+  margin-bottom: 12px;
+  letter-spacing: -.01em;
+}
+.page-head h1 em {
+  font-style: normal;
+  color: var(--accent);            /* mise en avant du mot-clé */
+}
+.page-head p {
+  color: var(--fg-soft);
+  font-size: 17px;
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Badge (petit label avec point lumineux) ──────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* ── Bloc générique (.card) ───────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+/* ── Sections (blocs verticaux avec alternance de fond) ────────────── */
+.section { padding: 80px 0; }
+.section-soft {
+  background: var(--bg-soft);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.section-head {
+  text-align: center;
+  margin-bottom: 56px;
+}
+.section-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--fg);
+  margin-bottom: 12px;
+  letter-spacing: -.01em;
+}
+.section-head h2 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.section-head p {
+  color: var(--fg-soft);
+  font-size: 17px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   H. FOOTER
+   ─────────────────────────────────────────────────────────────────────
+   Grâce au `body { display: flex; flex-direction: column }` (section C)
+   et au `margin-top: auto` ci-dessous, le footer est TOUJOURS poussé
+   en bas de la page, même si le contenu est court.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 32px;
+
+  /* ⚑ Ces 2 lignes poussent le footer tout en bas : */
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--fg-mute);
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+}
+.footer-links a {
+  color: var(--fg-mute);
+  text-decoration: none;
+  transition: color .2s;
+}
+.footer-links a:hover { color: var(--accent); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   I. MEDIA QUERIES (RESPONSIVE)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablette / petit desktop (≤ 900px) ────────────────────────────── */
 @media (max-width: 900px) {
+  /* Cache les liens horizontaux, affiche le burger et le menu mobile */
   .nav-links { display: none; }
   .nav-burger { display: flex; }
   .nav-mobile { display: flex; }
   .nav-mobile:not(.open) { pointer-events: none; }
   .nav-mobile.open { pointer-events: auto; }
 }
+
+/* ── Desktop large (> 900px) : on s'assure que le menu mobile est off ─ */
 @media (min-width: 901px) {
   .nav-mobile { display: none !important; }
   .nav-burger { display: none !important; }
 }
 
-/* ── FIX MOBILE GÉNÉRAL ─────────────────────────────────── */
+/* ── Mobile (≤ 700px) ─────────────────────────────────────────────── */
 @media (max-width: 700px) {
   body { overflow-x: hidden; }
 
@@ -489,10 +617,11 @@ footer {
   .nav-logo-mark { width: 26px; height: 26px; }
   .theme-btn { width: 36px; height: 36px; font-size: 14px; }
 
-  /* Layout */
-  .container, .container-narrow { padding: 0 16px; }
+  /* Layouts : padding réduit */
+  .container,
+  .container-narrow { padding: 0 16px; }
 
-  /* Page head */
+  /* En-tête de page */
   .page-head { padding: 40px 16px 24px; }
   .page-head h1 { font-size: clamp(1.6rem, 8vw, 2.2rem); }
   .page-head p { font-size: 15px; }
@@ -517,13 +646,15 @@ footer {
   .hero-cta { gap: 8px; }
   .hero-cta .btn { padding: 10px 16px; font-size: 13px; }
 
-  /* Cartes Discord (hero) : on cache TOUT sur mobile */
-  .hero-visual {
-    display: none !important;
-  }
+  /* Hero-visual caché sur mobile (trop lourd visuellement) */
+  .hero-visual { display: none !important; }
 
   /* Footer */
   footer { padding: 20px 16px; }
-  .footer-inner { flex-direction: column; text-align: center; gap: 12px; }
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
   .footer-links { justify-content: center; }
 }
