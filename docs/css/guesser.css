@@ -24,6 +24,7 @@
    ═══════════════════════════════════════════════════════════ */
 .gwrap {
   max-width: 1100px;
+  width: 100%;              /* ← FIX : garde la même largeur même quand contenu petit */
   margin: 0 auto;
   padding: 24px 32px 80px;
   display: flex;
