@@ -25,14 +25,6 @@
 <script src="js/data.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/guesser.js" defer></script>
-
-<style>
-  /* Fix : empêche les colonnes du tableau de s'élargir quand
-     un contenu est très long (nom de personnage, arc, etc.) */
-  .th, .row {
-    grid-template-columns: 160px repeat(9, minmax(0, 1fr));
-  }
-</style>
 </head>
 <body>
 
@@ -131,13 +123,11 @@
 <!-- ═══ CONTENU PRINCIPAL ═══ -->
 <div class="gwrap">
 
-  <!-- ═══ TITRE ═══ -->
   <div class="game-title">
     <h1>Bleach <em>Character Guesser</em></h1>
     <p>Devine le personnage caché en 8 essais</p>
   </div>
 
-  <!-- ═══ BARRE INPUT avec burger intégré ═══ -->
   <div class="iz">
     <div class="acw">
       <input class="gi" id="gi" type="text" placeholder="Entrez un personnage Bleach…" autocomplete="off" oninput="onIn()" onkeydown="onKD(event)"/>
@@ -178,7 +168,6 @@
     </div>
   </div>
 
-  <!-- ═══ Compteur SOUS l'input ═══ -->
   <div class="counter-row">
     <div class="counter" id="cnt">0/8</div>
     <div class="counter-label" id="counterLabel">essais utilisés</div>
@@ -192,7 +181,6 @@
 
   <div class="flash" id="flash"></div>
 
-  <!-- ═══ TABLEAU ═══ -->
   <div class="tw">
     <div class="th">
       <div>PERSONNAGE</div><div>RACE</div><div>GENRE</div><div>ARC</div>
