@@ -1,6 +1,6 @@
 Liste des Commandes
 
-### 📂 Admin
+### Admin
 - **adminpanel :** 🔒 Affiche le lien du panneau admin.
 - **commandslist :** Génère un .md avec toutes les commandes et les envoie en fichier.
 - **kisukevol :** 🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal.
@@ -12,7 +12,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **testgame :** Tester un mini-jeu via son numéro ou 'all'.
 - **testtache :** 🕹️ Teste toutes les épreuves pour la commande hollow.
 
-### 📂 Bleach
+### Bleach
 - **bleachship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
 - **bmoji :** Devine quel personnage Bleach se cache derrière ces emojis. (Ex: !bmoji multi)
 - **combat :** ⚔️ Combat style Pokémon entre 2 persos.
@@ -24,7 +24,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **shifumi :** Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.
 - **versus :** ⚔️ Lance un combat interactif contre le bot.
 
-### 📂 Fun&Random
+### Fun&Random
 - **calc :** Calculatrice scientifique interactive.
 - **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
 - **dice :** 🎲 Lance des dés. Ex: !dice 2d6, !dice 1d20
@@ -36,13 +36,13 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **ship :** 💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2
 - **sorting :** Trie 12 barres en longueurs différentes selon un algorithme.
 
-### 📂 Général
+### Général
 - **emoji :** Montre un ou plusieurs emojis du serveur ou de tous les serveurs.
 - **help :** Affiche l’aide du bot.
 - **react :** Réagit à un message avec un ou plusieurs emojis.
 - **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
 
-### 📂 Jeux
+### Jeux
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
 - **capitales :** Devine la capitale d'un pays
 - **compte_est_bon :** Lance le jeu du Compte est Bon
@@ -63,7 +63,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **solorpg :** Commande préfixe identique à la slash, avec menu déroulant
 - **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
 
-### 📂 Reiatsu
+### Reiatsu
 - **classe :** Choisir sa classe Reiatsu
 - **hollow :** 👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).
 - **keylottery :** Ticket à gratter : tente ta chance
