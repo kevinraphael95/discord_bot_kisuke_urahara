@@ -27,8 +27,8 @@
 <script src="js/guesser.js" defer></script>
 
 <style>
-  /* Fix : empêche les colonnes du tableau de s'élargir quand un
-     contenu est très long (nom de personnage, arc, etc.) */
+  /* Fix : empêche les colonnes du tableau de s'élargir quand
+     un contenu est très long (nom de personnage, arc, etc.) */
   .th, .row {
     grid-template-columns: 160px repeat(9, minmax(0, 1fr));
   }
@@ -180,11 +180,9 @@
 
   <!-- ═══ Compteur SOUS l'input ═══ -->
   <div class="counter-row">
-    <!-- Compteur daily -->
     <div class="counter" id="cnt">0/8</div>
     <div class="counter-label" id="counterLabel">essais utilisés</div>
 
-    <!-- Barre survie -->
     <div class="sbar" id="sbar">
       <span class="sv"><span class="sv-l">🔥 Série</span><span class="sv-n" id="sstreak">0</span></span>
       <span class="sv"><span class="sv-l">Essais</span><span class="sv-n" id="sdots">0/8</span></span>
@@ -203,13 +201,10 @@
     <div id="gr"></div>
   </div>
 
-  <!-- Cards mobile -->
   <div class="cards" id="gc"></div>
 
-  <!-- Hint scroll mobile -->
   <div class="board-hint">← Glisse pour voir plus →</div>
 
-  <!-- Banner résultat daily -->
   <div class="rbanner" id="rb">
     <div class="rbanner-inner">
       <div class="rbanner-left"><img id="r-img" src="" alt="" /></div>
@@ -223,7 +218,6 @@
     </div>
   </div>
 
-  <!-- Banner game over survie -->
   <div class="send" id="send">
     <div class="send-inner">
       <div class="send-left"><img id="s-img" src="" alt="" /></div>
