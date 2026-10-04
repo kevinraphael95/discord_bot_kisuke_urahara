@@ -1,18 +1,17 @@
 # ================================================================================
 # 📌 departements.py — Commande interactive /departement et !departement
-# Objectif : Jeu sur les départements français, avec 3 infos liées :
-#            le NUMÉRO, le NOM du département et sa PRÉFECTURE (chef-lieu).
+# Objectif : Jeu sur les départements français.
 #
 #   🟢 MODE FACILE : on te donne le NOM du département, tu trouves le NUMÉRO.
-#   🔴 MODE HARD   : on te donne une info au hasard, tu en trouves une autre
-#                    (numero / nom / prefecture, selon l'option "trouve").
+#   🔴 MODE HARD   : on te donne une info au hasard, tu en trouves une autre.
 #
+# Un MENU s'affiche d'abord pour choisir Facile ou Hard, puis la partie démarre.
 # Modes : Solo (1 joueur, 2 minutes) et Multi (plusieurs joueurs, 2 minutes)
 # Réponses : via bouton (solo = ✍️ Répondre, multi = 🔔 Buzzer)
 # Catégorie : Jeux
 # Accès : Tous
 # Cooldown : 1 utilisation / 10 secondes / utilisateur
-# Usage prefix : !departement [facile|hard] [numero|nom|prefecture|mix] [m|multi]
+# Usage prefix : !departement [numero|nom|prefecture|mix] [m|multi]
 # ================================================================================
 
 # ================================================================================
@@ -197,11 +196,6 @@ KIND_ALIASES = {
 # 🟢 En mode facile on impose : donné = nom, demandé = numéro
 FACILE_GIVEN, FACILE_ASKED = "nom", "code"
 
-DIFFICULTE_ALIASES = {
-    "facile": "facile", "easy": "facile", "simple": "facile", "f": "facile", "fac": "facile",
-    "hard": "hard", "difficile": "hard", "dur": "hard", "h": "hard", "d": "hard",
-}
-
 
 def canon_code(text: str) -> str:
     """'01' == '1', '2a' == '2A'."""
@@ -234,12 +228,7 @@ def accepted_answers(dept: Dept, field: str) -> set[str]:
 
 
 def pick_round(kind: str, difficulte: str = "hard") -> tuple[Dept, str, str]:
-    """Retourne (département, champ donné, champ demandé).
-
-    🟢 facile : on donne toujours le nom, on demande toujours le numéro.
-    🔴 hard   : on donne une info au hasard, on demande celle dictée par `kind`
-                (ou une autre au hasard si `kind == "mix"`).
-    """
+    """Retourne (département, champ donné, champ demandé)."""
     dept = random.choice(DEPARTEMENTS)
 
     if difficulte == "facile":
@@ -326,6 +315,58 @@ class DepartementsGame:
 
         return embed
 
+
+# ================================================================================
+# 🎛️ Menu de choix de difficulté
+# ================================================================================
+class DifficulteView(discord.ui.View):
+    """Affiche deux boutons : 🟢 Facile et 🔴 Hard. Renvoie le choix via callback."""
+
+    def __init__(self, author_id: int, on_choice, timeout: float = 30.0):
+        super().__init__(timeout=timeout)
+        self.author_id = author_id
+        self.on_choice = on_choice
+        self.message: discord.Message | None = None
+        self.choice: str | None = None
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.author_id:
+            await interaction.response.send_message(
+                "❌ Seul l'auteur de la commande peut choisir la difficulté.",
+                ephemeral=True,
+            )
+            return False
+        return True
+
+    async def _choose(self, interaction: discord.Interaction, difficulte: str):
+        self.choice = difficulte
+        # Désactive les boutons
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True
+        await interaction.response.edit_message(view=self)
+        self.stop()
+        await self.on_choice(interaction, difficulte)
+
+    @discord.ui.button(label="Facile", emoji="🟢", style=discord.ButtonStyle.success)
+    async def btn_facile(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._choose(interaction, "facile")
+
+    @discord.ui.button(label="Hard", emoji="🔴", style=discord.ButtonStyle.danger)
+    async def btn_hard(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._choose(interaction, "hard")
+
+    async def on_timeout(self):
+        if self.message:
+            try:
+                for child in self.children:
+                    if isinstance(child, discord.ui.Button):
+                        child.disabled = True
+                await self.message.edit(view=self)
+            except Exception:
+                pass
+
+
 # ================================================================================
 # 🧠 Cog principal
 # ================================================================================
@@ -333,12 +374,55 @@ class Departements(commands.Cog):
     """Commande /departement et !departement — Numéro, département et préfecture"""
     SOLO_TIME  = 120
     MULTI_TIME = 120
+    MENU_TIME  = 30
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     # ============================================================================
-    # 🔹 Fonction interne commune
+    # 🔹 Étape 1 : menu de choix de la difficulté
+    # ============================================================================
+    async def _ask_difficulte(self, channel, author_id: int, kind: str, multi: bool):
+        """Affiche le menu Facile/Hard et lance la partie avec le choix effectué."""
+
+        async def on_choice(interaction: discord.Interaction, difficulte: str):
+            # On supprime le menu, puis on lance la partie
+            if interaction.message:
+                try:
+                    await interaction.message.delete()
+                except Exception:
+                    pass
+            await self._send_quiz(channel, author_id=author_id, kind=kind,
+                                  multi=multi, difficulte=difficulte)
+
+        view = DifficulteView(author_id=author_id, on_choice=on_choice, timeout=self.MENU_TIME)
+
+        embed = discord.Embed(
+            title="🇫🇷 Départements — Choisis ta difficulté",
+            description=(
+                "🟢 **Facile** — On te donne le **nom** du département, tu trouves le **numéro**.\n"
+                "🔴 **Hard** — On te donne une info au hasard (numéro, nom ou préfecture), "
+                "tu dois trouver une autre info.\n\n"
+                f"*Le menu expire dans {self.MENU_TIME} secondes.*"
+            ),
+            color=discord.Color.gold(),
+        )
+        embed.set_footer(text=f"Mode : {'Multi 🌍' if multi else 'Solo 🧍‍♂️'}")
+
+        view.message = await safe_send(channel, embed=embed, view=view)
+        if view.message is None:
+            return
+
+        # Si le menu expire sans choix, on nettoie
+        await view.wait()
+        if view.choice is None and view.message:
+            try:
+                await view.message.delete()
+            except Exception:
+                pass
+
+    # ============================================================================
+    # 🔹 Étape 2 : la partie elle-même
     # ============================================================================
     async def _send_quiz(self, channel, author_id: int, kind: str = "mix",
                          multi: bool = False, difficulte: str = "hard"):
@@ -457,7 +541,6 @@ class Departements(commands.Cog):
     # ============================================================================
     @app_commands.command(name="departement", description="Numéro, département, préfecture : trouve l'info manquante")
     @app_commands.describe(
-        difficulte="facile = on te donne le département, tu trouves le numéro. hard = variantes aléatoires.",
         trouve="(hard uniquement) Ce que tu dois trouver : numero, nom, prefecture ou mix",
         mode="solo ou multi (tout le monde peut jouer)",
     )
@@ -465,17 +548,15 @@ class Departements(commands.Cog):
     async def slash_departements(
         self,
         interaction: discord.Interaction,
-        difficulte: Literal["facile", "hard"] = "hard",
         trouve: Literal["mix", "numero", "nom", "prefecture"] = "mix",
         mode: Literal["solo", "multi"] = "solo",
     ):
         await interaction.response.defer()
-        await self._send_quiz(
+        await self._ask_difficulte(
             interaction.channel,
             author_id=interaction.user.id,
             kind=trouve,
             multi=parse_mode(mode),
-            difficulte=difficulte,
         )
         await interaction.delete_original_response()
 
@@ -485,19 +566,14 @@ class Departements(commands.Cog):
     @commands.command(
         name="departement",
         aliases=["departements", "dep"],
-        help=(
-            "Trouve le numéro, le nom ou la préfecture d'un département.\n"
-            "Options : facile|hard, numero|nom|prefecture|mix, m|multi\n"
-            "Ex : !departement facile  |  !departement hard prefecture multi"
-        ),
+        help="Trouve le numéro, le nom ou la préfecture d'un département. Options : numero|nom|prefecture|mix, m|multi.",
     )
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_departements(self, ctx: commands.Context, *, arg: str = None):
         tokens = (arg or "").lower().split()
         multi = any(parse_mode(t) for t in tokens)
-        difficulte = next((DIFFICULTE_ALIASES[t] for t in tokens if t in DIFFICULTE_ALIASES), "hard")
         kind = next((KIND_ALIASES[t] for t in tokens if t in KIND_ALIASES), "mix")
-        await self._send_quiz(ctx.channel, author_id=ctx.author.id, kind=kind, multi=multi, difficulte=difficulte)
+        await self._ask_difficulte(ctx.channel, author_id=ctx.author.id, kind=kind, multi=multi)
 
 
 # ================================================================================
