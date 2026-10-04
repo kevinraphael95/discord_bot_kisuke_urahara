@@ -1,5 +1,5 @@
 # ================================================================================
-# 📌 capitales.py — Commande interactive /capitales et !capitales
+# 📌 capitale.py — Commande interactive /capitales et !capitales
 # Objectif : Deviner la capitale d'un pays
 # Modes : Solo (1 joueur, 2 minutes) et Multi (plusieurs joueurs, 2 minutes)
 # Réponses : via bouton (solo = ✍️ Répondre, multi = 🔔 Buzzer)
@@ -400,7 +400,7 @@ class Capitales(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="capitales", description="Devine la capitale d'un pays")
+    @app_commands.command(name="capitale", description="Devine la capitale d'un pays")
     @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_capitales(self, interaction: discord.Interaction, mode: str = None):
@@ -412,7 +412,7 @@ class Capitales(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="capitales", help="Devine la capitale d'un pays")
+    @commands.command(name="capitale", help="Devine la capitale d'un pays")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_capitales(self, ctx: commands.Context, *, arg: str = None):
         multi = parse_mode(arg)
