@@ -22,4 +22,4 @@ pyspellchecker[fr]
 
 # ─── Génération d'images ───────────────────────────────────────────────────────
 qrcode[pil]
-Pillow
+Pillow>=10.0.0
