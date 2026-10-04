@@ -26,7 +26,34 @@ TITRES = [
     "Président", "Empereur suprême", "Grand Chancelier", "Maréchal-Président",
     "Premier Ministre perpétuel", "Sultan", "Généralissime", "Roi",
 ]
-SYLLABES = ["bor", "kal", "zu", "mir", "vlad", "tek", "no", "ras", "gul", "pi", "dan", "ox", "fre", "lum", "wak"]
+NOMS = [
+    "Donald Trump (États-Unis)",
+    "Vladimir Poutine (Russie)",
+    "Benjamin Netanyahou (Israël)",
+    "Viktor Orbán (Hongrie)",
+    "Nicolás Maduro (Venezuela)",
+    "Xi Jinping (Chine)",
+    "Recep Tayyip Erdoğan (Turquie)",
+    "Narendra Modi (Inde)",
+    "Javier Milei (Argentine)",
+    "Emmanuel Macron (France)",
+    "Rodrigo Duterte (Philippines, ex)",
+    "Jair Bolsonaro (Brésil, ex)",
+    "Kim Jong-un (Corée du Nord)",
+    "Ali Khamenei (Iran)",
+    "Mohammed ben Salmane (Arabie saoudite)",
+    "Abdel Fattah al-Sissi (Égypte)",
+    "Nayib Bukele (Salvador)",
+    "Daniel Ortega (Nicaragua)",
+    "Alexandre Loukachenko (Biélorussie)",
+    "Min Aung Hlaing (Birmanie)",
+    "Paul Kagame (Rwanda)",
+    "Yoweri Museveni (Ouganda)",
+    "Kaïs Saïed (Tunisie)",
+    "Ferdinand Marcos Jr. (Philippines)",
+    "Boris Johnson (Royaume-Uni, ex)",
+    "Liz Truss (Royaume-Uni, ex)",
+]
 PAYS = [
     "la République démocratique de Bananie", "le Royaume uni de Patatistan",
     "l'Empire de Moldavie-du-Sud", "la Principauté de Trucbidule",
@@ -95,8 +122,7 @@ BLEACH = {
 # 🔧 Génération
 # ================================================================================
 def fictional_leader() -> str:
-    nom = "".join(random.choices(SYLLABES, k=random.randint(2, 3))).capitalize()
-    nom = f"{random.choice(TITRES)} {nom}"
+    nom = f"{random.choice(TITRES)} {random.choice(NOMS)}"
     pays = random.choice(PAYS)
     return random.choice(INSULTES_FICTIF).format(nom=nom, pays=pays)
 
@@ -149,5 +175,5 @@ async def setup(bot: commands.Bot):
     cog = Dirigeant(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = "Fun&Random"
+            command.category = CATEGORY
     await bot.add_cog(cog)
