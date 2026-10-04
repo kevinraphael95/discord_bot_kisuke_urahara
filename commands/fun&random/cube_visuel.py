@@ -588,7 +588,6 @@ class CubeVisuel(commands.Cog):
 
         await self._launch(send, ctx.channel, ctx.author.id, state)
 
-
 # ================================================================================
 # 🔌 Setup du Cog
 # ================================================================================
@@ -596,5 +595,5 @@ async def setup(bot: commands.Bot):
     cog = CubeVisuel(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
-            command.category = CATEGORY
+            command.category = "Fun&Random"
     await bot.add_cog(cog)
