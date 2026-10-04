@@ -344,7 +344,6 @@ class PaletteView(discord.ui.View):
             color=accent,
         )
         embed.set_image(url="attachment://palette.png")
-        embed.set_footer(text="🔁 Nouvelle palette")
 
         file = discord.File(png, filename="palette.png")
         return embed, file
