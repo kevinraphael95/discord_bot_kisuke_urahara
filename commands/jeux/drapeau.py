@@ -1,5 +1,5 @@
 # ================================================================================
-# 📌 drapeaux.py — Commande interactive /drapeaux et !drapeaux
+# 📌 drapeau.py — Commande interactive /drapeaux et !drapeaux
 # Objectif : Deviner le pays à partir d'un drapeau aléatoire (tous les pays)
 # Modes : Solo (1 joueur, 2 minutes) et Multi (plusieurs joueurs, 2 minutes)
 # Réponses : via bouton (solo = ✍️ Répondre, multi = 🔔 Buzzer)
@@ -269,7 +269,7 @@ class Drapeaux(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="drapeaux", description="Devine le pays à partir d'un drapeau")
+    @app_commands.command(name="drapeau", description="Devine le pays à partir d'un drapeau")
     @app_commands.describe(mode="Tapez 'm' ou 'multi' pour le mode multijoueur")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.user.id)
     async def slash_drapeaux(self, interaction: discord.Interaction, mode: str = None):
@@ -281,7 +281,7 @@ class Drapeaux(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="drapeaux", help="Devine le pays à partir d'un drapeau")
+    @commands.command(name="drapeau", help="Devine le pays à partir d'un drapeau")
     @commands.cooldown(1, 10.0, commands.BucketType.user)
     async def prefix_drapeaux(self, ctx: commands.Context, *, arg: str = None):
         multi = parse_mode(arg)
