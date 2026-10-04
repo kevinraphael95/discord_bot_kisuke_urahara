@@ -1,6 +1,6 @@
 # ================================================================================
-# 📌 palette.py — Nuancier d'artiste généré avec Pillow
-# Objectif : Construire un VRAI nuancier structuré (grille / ramp), pas du random
+# 📌 palette.py — Palette de 6 couleurs pour dessiner
+# Objectif : Générer une palette (libre ou thématique), rendu nuancier 2x3
 # Catégorie : Fun&Random
 # Accès : Public
 # Cooldown : 1 utilisation / 5 sec / utilisateur
@@ -14,7 +14,6 @@ import random
 import json
 import logging
 import colorsys
-import math
 from pathlib import Path
 
 import discord
@@ -28,34 +27,106 @@ from utils.init_db import get_conn
 log = logging.getLogger(__name__)
 
 # ================================================================================
-# 🎨 Modes de nuancier disponibles
+# 🎨 Thèmes de palettes (chacun = 6 couleurs de base)
 # ================================================================================
-MODES = {
-    "peintre":    "Grille de familles de teintes (style nuancier Pantone)",
-    "analogue":   "Grille de teintes voisines sur la roue chromatique",
-    "complement": "Teinte + sa complémentaire, déclinées en luminosité",
-    "triade":     "3 teintes en triangle, déclinées en luminosité",
-    "ramp":       "Dégradé continu traversant le spectre",
-    "terre":      "Palette de pigments naturels (ocres, terres, verts)",
-    "pastel":     "Teintes douces et désaturées (style aquarelle)",
-    "nuit":       "Palette sombre et saturée (style nocturne)",
+THEMES = {
+    "paysage": [
+        (210, 0.55, 0.75),  # ciel
+        (200, 0.40, 0.55),  # horizon
+        (110, 0.45, 0.40),  # herbe
+        (95,  0.40, 0.25),  # feuillage sombre
+        (35,  0.35, 0.45),  # terre
+        (25,  0.30, 0.65),  # roche
+    ],
+    "personnage": [
+        (25,  0.45, 0.75),  # carnation claire
+        (20,  0.55, 0.60),  # carnation
+        (15,  0.50, 0.45),  # ombre peau
+        (30,  0.35, 0.30),  # cheveux
+        (220, 0.40, 0.40),  # vêtement bleu
+        (350, 0.35, 0.55),  # accent
+    ],
+    "urbain": [
+        (210, 0.05, 0.55),  # béton
+        (200, 0.03, 0.35),  # asphalte
+        (220, 0.10, 0.75),  # métal clair
+        (0,   0.00, 0.20),  # métal sombre
+        (320, 0.70, 0.55),  # néon rose
+        (180, 0.70, 0.55),  # néon cyan
+    ],
+    "pastel": [
+        (350, 0.35, 0.85),  # rose poudré
+        (30,  0.40, 0.85),  # pêche
+        (55,  0.35, 0.85),  # jaune pâle
+        (140, 0.30, 0.82),  # menthe
+        (200, 0.35, 0.82),  # bleu layette
+        (280, 0.30, 0.82),  # lavande
+    ],
+    "automne": [
+        (10,  0.55, 0.35),  # rouille
+        (25,  0.65, 0.50),  # orange
+        (42,  0.70, 0.55),  # doré
+        (70,  0.40, 0.35),  # olive
+        (18,  0.50, 0.45),  # sienne
+        (15,  0.40, 0.20),  # brun foncé
+    ],
+    "hiver": [
+        (210, 0.15, 0.92),  # blanc cassé
+        (205, 0.20, 0.75),  # bleu pâle
+        (215, 0.35, 0.55),  # bleu froid
+        (230, 0.40, 0.35),  # bleu nuit
+        (260, 0.25, 0.60),  # violet givré
+        (200, 0.10, 0.45),  # gris glacier
+    ],
+    "nuit": [
+        (240, 0.55, 0.10),  # bleu nuit profond
+        (260, 0.50, 0.20),  # violet sombre
+        (280, 0.45, 0.35),  # pourpre
+        (200, 0.60, 0.30),  # bleu électrique
+        (330, 0.55, 0.45),  # rose néon
+        (60,  0.70, 0.60),  # lune
+    ],
+    "pixel_art": [
+        (0,   0.90, 0.55),  # rouge vif
+        (55,  0.95, 0.55),  # jaune vif
+        (130, 0.75, 0.50),  # vert vif
+        (210, 0.85, 0.55),  # bleu vif
+        (290, 0.75, 0.55),  # violet vif
+        (0,   0.00, 0.15),  # noir profond
+    ],
+    "ocean": [
+        (200, 0.65, 0.75),  # écume
+        (195, 0.55, 0.60),  # turquoise
+        (205, 0.65, 0.45),  # bleu océan
+        (215, 0.70, 0.30),  # bleu profond
+        (185, 0.40, 0.70),  # sable mouillé
+        (40,  0.30, 0.75),  # sable
+    ],
+    "feu": [
+        (0,   0.85, 0.25),  # braise sombre
+        (10,  0.85, 0.45),  # rouge feu
+        (25,  0.90, 0.55),  # orange
+        (42,  0.95, 0.60),  # jaune
+        (55,  0.85, 0.75),  # jaune clair
+        (0,   0.00, 0.15),  # fumée
+    ],
 }
 
 # ================================================================================
 # 🔤 Polices
 # ================================================================================
-# palette.py est dans commands/fun&random/ → racine bot = parents[2]
 RACINE_BOT = Path(__file__).resolve().parents[2]
 FONT_DIR = RACINE_BOT / "assets" / "fonts"
+
 
 def _load_font(size: int, bold: bool = False):
     nom = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
     candidates = [
         FONT_DIR / nom,
         FONT_DIR / ("Inter-Bold.ttf" if bold else "Inter-Regular.ttf"),
-        Path("/data/data/com.termux/files/usr/share/fonts/TTF") / nom,   # Termux
-        Path("/usr/share/fonts/truetype/dejavu") / nom,                  # Linux
-        Path("/system/fonts") / nom,                                     # Android
+        Path("/data/data/com.termux/files/usr/share/fonts/TTF") / nom,
+        Path("/usr/share/fonts/truetype/dejavu") / nom,
+        Path("/system/fonts") / nom,
     ]
     for path in candidates:
         if path.exists():
@@ -63,8 +134,9 @@ def _load_font(size: int, bold: bool = False):
                 return ImageFont.truetype(str(path), size)
             except Exception as e:
                 log.warning("[palette] Échec chargement %s : %s", path, e)
-    log.warning("[palette] Aucune police TTF trouvée → fallback (emojis interdits)")
+    log.warning("[palette] Aucune police TTF → fallback")
     return ImageFont.load_default()
+
 
 # ================================================================================
 # 🧮 Utilitaires couleur
@@ -73,183 +145,139 @@ def _hsl_to_rgb(h: float, s: float, l: float) -> tuple[int, int, int]:
     r, g, b = colorsys.hls_to_rgb(h / 360.0, l, s)
     return int(r * 255), int(g * 255), int(b * 255)
 
+
 def _hsl_to_hex(h: float, s: float, l: float) -> str:
     r, g, b = _hsl_to_rgb(h, s, l)
     return f"#{r:02X}{g:02X}{b:02X}"
 
-def _luminance(rgb: tuple[int, int, int]) -> float:
+
+def _luminance(rgb):
     r, g, b = [c / 255 for c in rgb]
     return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
-def _texte_sur(rgb: tuple[int, int, int]) -> tuple[int, int, int]:
+
+def _texte_sur(rgb):
     return (0, 0, 0) if _luminance(rgb) > 0.55 else (255, 255, 255)
+
 
 def _clamp(v, lo=0.0, hi=1.0):
     return max(lo, min(hi, v))
 
+
 # ================================================================================
-# 🧱 Construction des nuanciers (STRUCTURÉS, pas random)
+# 🎨 Générateurs de palettes
 # ================================================================================
-def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
-    h_seed = random.uniform(0, 360)
-    grille = []
+def palette_libre() -> list[dict]:
+    """6 couleurs cohérentes générées par harmonie aléatoire."""
+    harmonies = ["analogue", "triadique", "complementaire", "split", "tetradique", "mono"]
+    harmonie = random.choice(harmonies)
+    h_base = random.uniform(0, 360)
+    s_base = random.uniform(0.55, 0.85)
+    l_base = random.uniform(0.45, 0.65)
 
-    if mode == "peintre":
-        for r in range(n_rows):
-            h = (h_seed + r * 15) % 360
-            ligne = []
-            for c in range(n_cols):
-                l = 0.15 + (c / (n_cols - 1)) * 0.75
-                s = 0.85
-                rgb = _hsl_to_rgb(h, s, l)
-                ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-            grille.append(ligne)
+    couleurs = []
+    for i in range(6):
+        if harmonie == "mono":
+            h = h_base
+            l = 0.20 + (i / 5) * 0.65
+            s = s_base
+        else:
+            offsets = {
+                "analogue":       [-50, -25, 0, 25, 50, 75],
+                "triadique":      [0, 120, 240, 60, 180, 300],
+                "complementaire": [0, 180, 30, 210, 90, 270],
+                "split":          [0, 150, 210, 30, 180, 330],
+                "tetradique":     [0, 90, 180, 270, 45, 135],
+            }[harmonie]
+            h = (h_base + offsets[i]) % 360
+            l = _clamp(l_base + random.uniform(-0.18, 0.18), 0.20, 0.88)
+            s = _clamp(s_base + random.uniform(-0.15, 0.15), 0.40, 1.0)
 
-    elif mode == "analogue":
-        for r in range(n_rows):
-            h = (h_seed + (r - n_rows//2) * 20) % 360
-            ligne = []
-            for c in range(n_cols):
-                l = 0.20 + (c / (n_cols - 1)) * 0.65
-                s = 0.75
-                rgb = _hsl_to_rgb(h, s, l)
-                ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-            grille.append(ligne)
+        rgb = _hsl_to_rgb(h, s, l)
+        couleurs.append({
+            "hex": _hsl_to_hex(h, s, l),
+            "rgb": rgb,
+            "hsl": (round(h), round(s * 100), round(l * 100)),
+        })
+    return couleurs, harmonie
 
-    elif mode == "complement":
-        for r in range(n_rows):
-            h = h_seed if r < n_rows // 2 else (h_seed + 180) % 360
-            ligne = []
-            for c in range(n_cols):
-                l = 0.20 + (c / (n_cols - 1)) * 0.65
-                s = 0.80
-                rgb = _hsl_to_rgb(h, s, l)
-                ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-            grille.append(ligne)
 
-    elif mode == "triade":
-        for r in range(n_rows):
-            h = (h_seed + (r % 3) * 120) % 360
-            ligne = []
-            for c in range(n_cols):
-                l = 0.20 + (c / (n_cols - 1)) * 0.65
-                s = 0.80
-                rgb = _hsl_to_rgb(h, s, l)
-                ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-            grille.append(ligne)
+def palette_theme(nom_theme: str) -> list[dict]:
+    """6 couleurs d'un thème, avec de légères variations autour de chaque base."""
+    base = THEMES[nom_theme]
+    couleurs = []
+    for (h, s, l) in base:
+        # Petite variation pour éviter d'avoir exactement les mêmes à chaque fois
+        h2 = (h + random.uniform(-6, 6)) % 360
+        s2 = _clamp(s + random.uniform(-0.06, 0.06), 0.15, 1.0)
+        l2 = _clamp(l + random.uniform(-0.06, 0.06), 0.10, 0.92)
+        rgb = _hsl_to_rgb(h2, s2, l2)
+        couleurs.append({
+            "hex": _hsl_to_hex(h2, s2, l2),
+            "rgb": rgb,
+            "hsl": (round(h2), round(s2 * 100), round(l2 * 100)),
+        })
+    return couleurs
 
-    elif mode == "ramp":
-        ligne = []
-        for c in range(n_cols * n_rows):
-            t = c / (n_cols * n_rows - 1)
-            h = t * 360
-            s = 0.35 + 0.55 * math.sin(math.pi * t)
-            l = 0.35 + 0.35 * math.sin(math.pi * t + 0.3)
-            rgb = _hsl_to_rgb(h, s, l)
-            ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-        grille = [ligne]
 
-    elif mode == "terre":
-        h_base = 20 + random.uniform(0, 40)
-        for r in range(n_rows):
-            h = (h_base + r * 25) % 360
-            ligne = []
-            for c in range(n_cols):
-                l = 0.18 + (c / (n_cols - 1)) * 0.60
-                s = 0.45 + 0.25 * math.sin(math.pi * c / (n_cols - 1))
-                rgb = _hsl_to_rgb(h, s, l)
-                ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-            grille.append(ligne)
-
-    elif mode == "pastel":
-        for r in range(n_rows):
-            h = (h_seed + r * 30) % 360
-            ligne = []
-            for c in range(n_cols):
-                l = 0.65 + (c / (n_cols - 1)) * 0.25
-                s = 0.20 + (c / (n_cols - 1)) * 0.25
-                rgb = _hsl_to_rgb(h, s, l)
-                ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-            grille.append(ligne)
-
-    elif mode == "nuit":
-        for r in range(n_rows):
-            h = (h_seed + r * 40) % 360
-            ligne = []
-            for c in range(n_cols):
-                l = 0.10 + (c / (n_cols - 1)) * 0.35
-                s = 0.55 + (c / (n_cols - 1)) * 0.35
-                rgb = _hsl_to_rgb(h, s, l)
-                ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
-            grille.append(ligne)
-
+def generer_palette() -> tuple[list[dict], str, str | None]:
+    """
+    Retourne (couleurs, mode, nom_theme).
+    mode = 'libre' ou 'thematique'. nom_theme = clé du thème ou None.
+    """
+    mode = random.choice(["libre", "thematique"])
+    if mode == "libre":
+        couleurs, _ = palette_libre()
+        return couleurs, "libre", None
     else:
-        grille = build_nuancier("peintre", n_cols, n_rows)["grille"]
-
-    return {
-        "mode": mode,
-        "titre": MODES.get(mode, mode).split("(")[0].strip(),
-        "grille": grille,
-        "type": "ramp" if mode == "ramp" else "grille",
-    }
+        nom_theme = random.choice(list(THEMES.keys()))
+        couleurs = palette_theme(nom_theme)
+        return couleurs, "thematique", nom_theme
 
 
 # ================================================================================
-# 🖼️ Rendu PNG du nuancier  ← AUCUN EMOJI DANS LES draw.text() !
+# 🖼️ Rendu PNG — grille 2x3
 # ================================================================================
-def render_nuancier_png(nuancier: dict,
-                        largeur: int = 1100,
-                        hauteur_case: int = 90) -> io.BytesIO:
-    grille = nuancier["grille"]
-    n_rows = len(grille)
-    n_cols = len(grille[0])
+def render_palette_png(couleurs: list[dict],
+                       largeur: int = 1200,
+                       hauteur: int = 800) -> io.BytesIO:
+    """
+    Grille 2 lignes x 3 colonnes. Chaque case : couleur de fond + HEX centré.
+    """
+    n_cols = 3
+    n_rows = 2
 
-    marge = 40
-    header_h = 100
-    footer_h = 50
-    gap = 4
-
+    marge = 30
+    gap = 8
     largeur_case = (largeur - marge * 2 - gap * (n_cols - 1)) // n_cols
-    hauteur = header_h + n_rows * hauteur_case + (n_rows - 1) * gap + footer_h + marge * 2
+    hauteur_case = (hauteur - marge * 2 - gap * (n_rows - 1)) // n_rows
 
-    img = Image.new("RGB", (largeur, hauteur), (18, 18, 22))
+    img = Image.new("RGB", (largeur, hauteur), (20, 20, 24))
     draw = ImageDraw.Draw(img)
 
-    font_title = _load_font(30, bold=True)
-    font_sub   = _load_font(16)
-    font_hex   = _load_font(13, bold=True)
-    font_foot  = _load_font(13)
+    font_hex = _load_font(38, bold=True)
 
-    # --- Header (SANS EMOJI)
-    draw.text((marge, marge), "Nuancier", font=font_title, fill=(255, 255, 255))
-    draw.text((marge, marge + 42), nuancier["titre"], font=font_sub, fill=(180, 180, 190))
+    for i, c in enumerate(couleurs):
+        row = i // n_cols
+        col = i % n_cols
+        x0 = marge + col * (largeur_case + gap)
+        y0 = marge + row * (hauteur_case + gap)
+        x1 = x0 + largeur_case
+        y1 = y0 + hauteur_case
 
-    # --- Grille
-    y = marge + header_h
-    for row in grille:
-        x = marge
-        for (hex_str, rgb, hsl) in row:
-            draw.rectangle([x, y, x + largeur_case, y + hauteur_case], fill=rgb)
-            draw.rectangle([x, y, x + largeur_case, y + hauteur_case],
-                           outline=(0, 0, 0), width=1)
+        # Case colorée
+        draw.rectangle([x0, y0, x1, y1], fill=c["rgb"])
 
-            txt = _texte_sur(rgb)
-            if largeur_case >= 80:
-                bbox = draw.textbbox((0, 0), hex_str, font=font_hex)
-                tw = bbox[2] - bbox[0]
-                th = bbox[3] - bbox[1]
-                draw.text(
-                    (x + (largeur_case - tw) // 2, y + hauteur_case - th - 10),
-                    hex_str, font=font_hex, fill=txt
-                )
-
-            x += largeur_case + gap
-        y += hauteur_case + gap
-
-    # --- Footer (SANS EMOJI)
-    draw.text((marge, hauteur - marge - 18),
-              "Nuancier structure - Reiatsu Bot",
-              font=font_foot, fill=(140, 140, 150))
+        # Code HEX centré
+        txt = c["hex"]
+        txt_color = _texte_sur(c["rgb"])
+        bbox = draw.textbbox((0, 0), txt, font=font_hex)
+        tw = bbox[2] - bbox[0]
+        th = bbox[3] - bbox[1]
+        draw.text(
+            (x0 + (largeur_case - tw) // 2, y0 + (hauteur_case - th) // 2),
+            txt, font=font_hex, fill=txt_color
+        )
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)
@@ -289,59 +317,42 @@ def db_valider_quete(user_id: int) -> int | None:
 # 🎛️ Vue interactive
 # ================================================================================
 class PaletteView(discord.ui.View):
-    def __init__(self, author: discord.User | discord.Member, mode: str | None = None):
+    def __init__(self, author: discord.User | discord.Member):
         super().__init__(timeout=120)
         self.author = author
-        self.mode = mode
         self.message: discord.Message | None = None
 
     def build_payload(self) -> tuple[discord.Embed, discord.File]:
-        mode = self.mode or random.choice(list(MODES.keys()))
-        self.mode = mode
+        couleurs, mode, theme = generer_palette()
+        png = render_palette_png(couleurs)
 
-        if mode == "ramp":
-            n_cols, n_rows = 10, 4
-        elif mode in ("terre", "pastel", "nuit"):
-            n_cols, n_rows = 8, 4
+        # Couleur d'accent = 4e couleur
+        accent = int(couleurs[3]["hex"][1:], 16)
+
+        if mode == "libre":
+            titre = "🎨 Palette libre"
+            desc = "6 couleurs harmonieuses pour dessiner"
         else:
-            n_cols, n_rows = 8, 5
+            titre = f"🎨 Palette — {theme.replace('_', ' ').capitalize()}"
+            desc = f"6 couleurs du thème **{theme.replace('_', ' ')}**"
 
-        nuancier = build_nuancier(mode, n_cols=n_cols, n_rows=n_rows)
-        png = render_nuancier_png(nuancier)
+        codes = " • ".join(f"`{c['hex']}`" for c in couleurs)
 
-        mid_row = nuancier["grille"][len(nuancier["grille"]) // 2]
-        accent_hex = mid_row[len(mid_row) // 2][0]
-        accent = int(accent_hex[1:], 16)
-
-        # EMOJIS OK ICI → c'est Discord qui les rend, pas Pillow
         embed = discord.Embed(
-            title=f"🎨 Nuancier — {nuancier['titre']}",
-            description=(
-                f"*{MODES.get(mode, '')}*\n\n"
-                f"Structure : `{n_rows} lignes × {n_cols} colonnes`"
-                + (" (dégradé continu)" if mode == "ramp" else "")
-            ),
+            title=titre,
+            description=f"{desc}\n\n{codes}",
             color=accent,
         )
-        embed.set_image(url="attachment://nuancier.png")
-        embed.set_footer(text="🔁 régénérer • 🎲 autre mode")
+        embed.set_image(url="attachment://palette.png")
+        embed.set_footer(text="🔁 Nouvelle palette")
 
-        file = discord.File(png, filename="nuancier.png")
+        file = discord.File(png, filename="palette.png")
         return embed, file
 
-    @discord.ui.button(label="🔁 Nouveau nuancier", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="🔁 Nouvelle palette", style=discord.ButtonStyle.primary)
     async def regenerate(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user != self.author:
             return await safe_interact(interaction, content="❌ Bouton réservé.", ephemeral=True)
-        embed, file = self.build_payload()
-        await safe_interact(interaction, edit=True, embed=embed, attachments=[file], view=self)
-
-    @discord.ui.button(label="🎲 Autre mode", style=discord.ButtonStyle.secondary)
-    async def change_mode(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user != self.author:
-            return await safe_interact(interaction, content="❌ Bouton réservé.", ephemeral=True)
-        autres = [m for m in MODES if m != self.mode]
-        self.mode = random.choice(autres)
         embed, file = self.build_payload()
         await safe_interact(interaction, edit=True, embed=embed, attachments=[file], view=self)
 
@@ -356,7 +367,7 @@ class PaletteView(discord.ui.View):
 # 🧠 Cog principal
 # ================================================================================
 class PaletteCommand(commands.Cog):
-    """Commandes /palette et !palette — Nuancier d'artiste structuré."""
+    """Commandes /palette et !palette — Palette de 6 couleurs pour dessiner."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -377,16 +388,11 @@ class PaletteCommand(commands.Cog):
 
     @app_commands.command(
         name="palette",
-        description="Génère un nuancier d'artiste structuré (grille ou dégradé)."
+        description="Génère une palette de 6 couleurs pour dessiner."
     )
-    @app_commands.describe(mode="Type de nuancier (aléatoire si vide)")
-    @app_commands.choices(mode=[
-        app_commands.Choice(name=label, value=key)
-        for key, label in MODES.items()
-    ])
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.user.id)
-    async def slash_palette(self, interaction: discord.Interaction, mode: str | None = None):
-        view = PaletteView(interaction.user, mode=mode)
+    async def slash_palette(self, interaction: discord.Interaction):
+        view = PaletteView(interaction.user)
         embed, file = view.build_payload()
         await safe_interact(interaction, embed=embed, file=file, view=view)
         view.message = await interaction.original_response()
@@ -394,16 +400,11 @@ class PaletteCommand(commands.Cog):
 
     @commands.command(
         name="palette",
-        help="🎨 Nuancier d'artiste. Usage : !palette [peintre|analogue|complement|triade|ramp|terre|pastel|nuit]"
+        help="🎨 Génère une palette de 6 couleurs pour dessiner."
     )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def prefix_palette(self, ctx: commands.Context, mode: str | None = None):
-        if mode and mode.lower() not in MODES:
-            return await safe_send(
-                ctx,
-                content=f"❌ Mode inconnu. Choix : `{'`, `'.join(MODES)}`"
-            )
-        view = PaletteView(ctx.author, mode=mode.lower() if mode else None)
+    async def prefix_palette(self, ctx: commands.Context):
+        view = PaletteView(ctx.author)
         embed, file = view.build_payload()
         view.message = await safe_send(ctx, embed=embed, file=file, view=view)
         await self._valider_quete(ctx.author, channel=ctx.channel)
