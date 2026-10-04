@@ -23,3 +23,6 @@ pyspellchecker[fr]
 # ─── Génération d'images ───────────────────────────────────────────────────────
 qrcode[pil]
 Pillow>=10.0.0
+
+# ─── Jeux ──────────────────────────────────────────────────────────────────────
+kociemba   # /cube et /cubevisuel (nécessite clang sous Termux : pkg install clang make)
