@@ -44,21 +44,26 @@ MODES = {
 # ================================================================================
 # 🔤 Polices
 # ================================================================================
-FONT_DIR = Path("assets/fonts")
+# palette.py est dans commands/fun&random/ → racine bot = parents[2]
+RACINE_BOT = Path(__file__).resolve().parents[2]
+FONT_DIR = RACINE_BOT / "assets" / "fonts"
 
 def _load_font(size: int, bold: bool = False):
+    nom = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
     candidates = [
+        FONT_DIR / nom,
         FONT_DIR / ("Inter-Bold.ttf" if bold else "Inter-Regular.ttf"),
-        FONT_DIR / ("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"),
-        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else
-             "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+        Path("/data/data/com.termux/files/usr/share/fonts/TTF") / nom,   # Termux
+        Path("/usr/share/fonts/truetype/dejavu") / nom,                  # Linux
+        Path("/system/fonts") / nom,                                     # Android
     ]
     for path in candidates:
         if path.exists():
             try:
                 return ImageFont.truetype(str(path), size)
-            except Exception:
-                continue
+            except Exception as e:
+                log.warning("[palette] Échec chargement %s : %s", path, e)
+    log.warning("[palette] Aucune police TTF trouvée → fallback (emojis interdits)")
     return ImageFont.load_default()
 
 # ================================================================================
@@ -86,38 +91,21 @@ def _clamp(v, lo=0.0, hi=1.0):
 # 🧱 Construction des nuanciers (STRUCTURÉS, pas random)
 # ================================================================================
 def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
-    """
-    Retourne un dict :
-    {
-      "mode": str,
-      "titre": str,
-      "grille": [[(hex, rgb, (h,s,l)), ...], ...],   # n_rows x n_cols
-      "type": "grille" | "ramp"
-    }
-    Toutes les couleurs sont calculées par pas réguliers — AUCUN random sur H/S/L.
-    """
-    # --- On tire UNE graine de teinte (le reste est déterministe)
     h_seed = random.uniform(0, 360)
-
     grille = []
 
     if mode == "peintre":
-        # Chaque ligne = une famille de teinte, on décline L de sombre à clair
-        # Les lignes voisines sont des teintes proches (analogues ±15°)
         for r in range(n_rows):
             h = (h_seed + r * 15) % 360
             ligne = []
             for c in range(n_cols):
-                # L varie de 15% (très sombre) à 90% (très clair)
                 l = 0.15 + (c / (n_cols - 1)) * 0.75
-                # S reste haute pour un nuancier "peinture"
                 s = 0.85
                 rgb = _hsl_to_rgb(h, s, l)
                 ligne.append((_hsl_to_hex(h, s, l), rgb, (round(h), round(s*100), round(l*100))))
             grille.append(ligne)
 
     elif mode == "analogue":
-        # Teintes analogues réparties sur ±60°, chaque ligne = une teinte
         for r in range(n_rows):
             h = (h_seed + (r - n_rows//2) * 20) % 360
             ligne = []
@@ -129,7 +117,6 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
             grille.append(ligne)
 
     elif mode == "complement":
-        # Moitié des lignes = teinte de base, moitié = complémentaire
         for r in range(n_rows):
             h = h_seed if r < n_rows // 2 else (h_seed + 180) % 360
             ligne = []
@@ -141,7 +128,6 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
             grille.append(ligne)
 
     elif mode == "triade":
-        # 3 teintes en triangle (0°, 120°, 240°) réparties sur les lignes
         for r in range(n_rows):
             h = (h_seed + (r % 3) * 120) % 360
             ligne = []
@@ -153,13 +139,10 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
             grille.append(ligne)
 
     elif mode == "ramp":
-        # Une seule ligne, dégradé continu sur tout le spectre
-        # On fait varier H sur 360°, S en cloche, L en cloche → dégradé naturel
         ligne = []
         for c in range(n_cols * n_rows):
             t = c / (n_cols * n_rows - 1)
             h = t * 360
-            # S et L suivent une courbe douce
             s = 0.35 + 0.55 * math.sin(math.pi * t)
             l = 0.35 + 0.35 * math.sin(math.pi * t + 0.3)
             rgb = _hsl_to_rgb(h, s, l)
@@ -167,8 +150,6 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
         grille = [ligne]
 
     elif mode == "terre":
-        # Palette de pigments naturels : ocres, terres de Sienne, verts olive, bruns
-        # On part d'une teinte de base dans les oranges/bruns (20-60°)
         h_base = 20 + random.uniform(0, 40)
         for r in range(n_rows):
             h = (h_base + r * 25) % 360
@@ -181,7 +162,6 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
             grille.append(ligne)
 
     elif mode == "pastel":
-        # Teintes douces : saturation basse (20-45%), luminosité haute (65-90%)
         for r in range(n_rows):
             h = (h_seed + r * 30) % 360
             ligne = []
@@ -193,7 +173,6 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
             grille.append(ligne)
 
     elif mode == "nuit":
-        # Palette sombre : L bas (10-45%), S élevée
         for r in range(n_rows):
             h = (h_seed + r * 40) % 360
             ligne = []
@@ -205,7 +184,6 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
             grille.append(ligne)
 
     else:
-        # fallback
         grille = build_nuancier("peintre", n_cols, n_rows)["grille"]
 
     return {
@@ -217,16 +195,11 @@ def build_nuancier(mode: str, n_cols: int = 8, n_rows: int = 5) -> dict:
 
 
 # ================================================================================
-# 🖼️ Rendu PNG du nuancier
+# 🖼️ Rendu PNG du nuancier  ← AUCUN EMOJI DANS LES draw.text() !
 # ================================================================================
 def render_nuancier_png(nuancier: dict,
                         largeur: int = 1100,
                         hauteur_case: int = 90) -> io.BytesIO:
-    """
-    Dessine le nuancier. Pour une grille : chaque ligne = une famille de teinte.
-    Pour une ramp : une seule ligne longue.
-    Chaque case affiche son HEX (si assez large) et sa position.
-    """
     grille = nuancier["grille"]
     n_rows = len(grille)
     n_cols = len(grille[0])
@@ -234,7 +207,7 @@ def render_nuancier_png(nuancier: dict,
     marge = 40
     header_h = 100
     footer_h = 50
-    gap = 4  # espace entre les cases
+    gap = 4
 
     largeur_case = (largeur - marge * 2 - gap * (n_cols - 1)) // n_cols
     hauteur = header_h + n_rows * hauteur_case + (n_rows - 1) * gap + footer_h + marge * 2
@@ -247,8 +220,8 @@ def render_nuancier_png(nuancier: dict,
     font_hex   = _load_font(13, bold=True)
     font_foot  = _load_font(13)
 
-    # --- Header
-    draw.text((marge, marge), "🎨 Nuancier", font=font_title, fill=(255, 255, 255))
+    # --- Header (SANS EMOJI)
+    draw.text((marge, marge), "Nuancier", font=font_title, fill=(255, 255, 255))
     draw.text((marge, marge + 42), nuancier["titre"], font=font_sub, fill=(180, 180, 190))
 
     # --- Grille
@@ -256,14 +229,10 @@ def render_nuancier_png(nuancier: dict,
     for row in grille:
         x = marge
         for (hex_str, rgb, hsl) in row:
-            # Case colorée
             draw.rectangle([x, y, x + largeur_case, y + hauteur_case], fill=rgb)
-
-            # Bordure légère
             draw.rectangle([x, y, x + largeur_case, y + hauteur_case],
                            outline=(0, 0, 0), width=1)
 
-            # Texte : HEX si la case est assez large
             txt = _texte_sur(rgb)
             if largeur_case >= 80:
                 bbox = draw.textbbox((0, 0), hex_str, font=font_hex)
@@ -277,9 +246,9 @@ def render_nuancier_png(nuancier: dict,
             x += largeur_case + gap
         y += hauteur_case + gap
 
-    # --- Footer
+    # --- Footer (SANS EMOJI)
     draw.text((marge, hauteur - marge - 18),
-              "Nuancier structuré • Reiatsu Bot",
+              "Nuancier structure - Reiatsu Bot",
               font=font_foot, fill=(140, 140, 150))
 
     buf = io.BytesIO()
@@ -330,9 +299,8 @@ class PaletteView(discord.ui.View):
         mode = self.mode or random.choice(list(MODES.keys()))
         self.mode = mode
 
-        # Nombre de colonnes/lignes selon le mode
         if mode == "ramp":
-            n_cols, n_rows = 10, 4   # 40 cases sur une ligne
+            n_cols, n_rows = 10, 4
         elif mode in ("terre", "pastel", "nuit"):
             n_cols, n_rows = 8, 4
         else:
@@ -341,11 +309,11 @@ class PaletteView(discord.ui.View):
         nuancier = build_nuancier(mode, n_cols=n_cols, n_rows=n_rows)
         png = render_nuancier_png(nuancier)
 
-        # Couleur d'accent = teinte du milieu
         mid_row = nuancier["grille"][len(nuancier["grille"]) // 2]
         accent_hex = mid_row[len(mid_row) // 2][0]
         accent = int(accent_hex[1:], 16)
 
+        # EMOJIS OK ICI → c'est Discord qui les rend, pas Pillow
         embed = discord.Embed(
             title=f"🎨 Nuancier — {nuancier['titre']}",
             description=(
@@ -407,7 +375,6 @@ class PaletteCommand(commands.Cog):
         )
         await safe_send(channel, embed=embed)
 
-    # ------------------------------------------------------------------ SLASH
     @app_commands.command(
         name="palette",
         description="Génère un nuancier d'artiste structuré (grille ou dégradé)."
@@ -425,7 +392,6 @@ class PaletteCommand(commands.Cog):
         view.message = await interaction.original_response()
         await self._valider_quete(interaction.user, channel=interaction.channel)
 
-    # ----------------------------------------------------------------- PREFIX
     @commands.command(
         name="palette",
         help="🎨 Nuancier d'artiste. Usage : !palette [peintre|analogue|complement|triade|ramp|terre|pastel|nuit]"
