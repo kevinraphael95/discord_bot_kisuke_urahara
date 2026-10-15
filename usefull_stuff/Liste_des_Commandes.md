@@ -31,6 +31,7 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **fortune :** Ouvre un biscuit chinois et découvre ta prédiction.
 - **gay :** 🌈 Calcule ton taux de gaytitude du jour.
 - **inspire :** Reçois une citation inspirante... très inspirante.
+- **palette :** 🎨 Génère une palette de 6 couleurs pour dessiner.
 - **pizza :** 🍕 Génère une pizza aléatoire.
 - **qrcode :** 📷 Génère un QR code depuis un texte ou une URL.
 - **ship :** 💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2
@@ -44,11 +45,12 @@ Usage: !say_as <mention|id|pseudo> <message>
 
 ### Jeux
 - **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
-- **capitales :** Devine la capitale d'un pays
+- **capitale :** Devine la capitale d'un pays
 - **compte_est_bon :** Lance le jeu du Compte est Bon
 - **conversion_bases :** Convertis un nombre entre bases 2 et 10. Ajoute 'm' ou 'multi' pour jouer en multi.
+- **departement :** Trouve le numéro, le nom ou la préfecture d'un département. Options : numero|nom|prefecture|mix, m|multi.
 - **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
-- **drapeaux :** Devine le pays à partir d'un drapeau
+- **drapeau :** Devine le pays à partir d'un drapeau
 - **entrainementcerebral :** Entraînement cérébral composé de 5 mini-jeux.
 - **formes :** Jouez au mini-jeu mémoire avec des formes et couleurs.
 - **lightsout :** Pas de description.
