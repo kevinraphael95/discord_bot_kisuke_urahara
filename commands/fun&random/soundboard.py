@@ -28,7 +28,7 @@ COOLDOWN_CLEANUP = 300.0  # purge les entrées > 5 min
 # ================================================================================
 # 📂 Scan automatique du dossier sounds/
 # ================================================================================
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SOUNDS_DIR = os.path.join(BASE_DIR, "sounds")
 AUDIO_EXTENSIONS = (".mp3", ".ogg", ".wav", ".m4a", ".flac", ".opus")
 
