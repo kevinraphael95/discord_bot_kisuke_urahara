@@ -18,7 +18,7 @@ import time
 import asyncio
 from collections import deque
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followup
+from utils.discord_utils import safe_edit, safe_followup
 
 # ================================================================================
 # ⚙️ Configuration
@@ -155,8 +155,7 @@ class CategorySelect(Select):
         category = self.values[0]
         new_view = SoundSelectView(self.parent_view.bot, self.parent_view.data, category)
         new_view.message = interaction.message
-        await safe_edit(
-            interaction.message,
+        await interaction.response.edit_message(
             content=f"📁 Catégorie : **{category}**\nChoisis un son à jouer :",
             embed=None,
             view=new_view
@@ -205,31 +204,10 @@ class SoundSelect(Select):
             await safe_followup(interaction, "❌ Erreur interne (cog introuvable).", ephemeral=True)
             return
 
-        # ⏱️ Cooldown anti-spam
-        remaining = cog.play_cooldowns.check(interaction.user.id)
-        if remaining > 0:
-            await safe_followup(
-                interaction,
-                f"⏱️ Doucement ! Attends encore **{int(remaining) + 1}s**.",
-                ephemeral=True
-            )
-            return
-
-        # 🔍 Vérifications
         sound_name = self.values[0]
         sound_path = self.parent_view.data[self.parent_view.category][sound_name]
 
-        if not os.path.isfile(sound_path):
-            await safe_followup(interaction, f"❌ Fichier introuvable : `{sound_path}`", ephemeral=True)
-            return
-
-        member = interaction.user
-        if not isinstance(member, discord.Member) or not member.voice or not member.voice.channel:
-            await safe_followup(interaction, "❌ Tu dois être dans un salon vocal.", ephemeral=True)
-            return
-
-        cog.play_cooldowns.update(interaction.user.id)
-        result = await cog.enqueue_and_play(interaction.guild, member, sound_path, sound_name)
+        result = await cog.play_checked(interaction.guild, interaction.user, sound_path, sound_name)
         await safe_followup(interaction, result, ephemeral=True)
 
 class StopButton(Button):
@@ -239,14 +217,10 @@ class StopButton(Button):
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         cog: Soundboard = interaction.client.get_cog("Soundboard")
-        vc = interaction.guild.voice_client
-        if cog:
-            cog.queues[interaction.guild.id] = GuildQueue()
-        if vc and (vc.is_playing() or vc.is_paused()):
-            vc.stop()
-            await safe_followup(interaction, "⏹️ Stop + queue vidée.", ephemeral=True)
-        else:
-            await safe_followup(interaction, "❌ Rien en cours.", ephemeral=True)
+        if cog is None:
+            await safe_followup(interaction, "❌ Erreur interne (cog introuvable).", ephemeral=True)
+            return
+        await safe_followup(interaction, cog.do_stop(interaction.guild), ephemeral=True)
 
 class BackButton(Button):
     def __init__(self, parent_view: SoundSelectView):
@@ -256,8 +230,7 @@ class BackButton(Button):
     async def callback(self, interaction: discord.Interaction):
         new_view = CategorySelectView(self.parent_view.bot, self.parent_view.data)
         new_view.message = interaction.message
-        await safe_edit(
-            interaction.message,
+        await interaction.response.edit_message(
             content="🎵 **Soundboard** — Choisis une catégorie :",
             embed=None,
             view=new_view
@@ -268,7 +241,7 @@ class BackButton(Button):
 # ================================================================================
 class Soundboard(commands.Cog):
     """
-    Commandes /play, /soundboard, /queue, /skip, /stop, /leave — Soundboard moderne.
+    Commandes /play, /soundboard, /queue, /skip, /stop, /leave (+ versions !préfixe).
     """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -283,7 +256,7 @@ class Soundboard(commands.Cog):
             self.queues[guild_id] = GuildQueue()
         return self.queues[guild_id]
 
-    async def ensure_voice(self, guild: discord.Guild, member: discord.Member) -> discord.VoiceClient | None:
+    async def ensure_voice(self, guild: discord.Guild, member: discord.Member):
         vc = guild.voice_client
         try:
             if vc is None:
@@ -313,19 +286,12 @@ class Soundboard(commands.Cog):
     def _after_play(self, guild: discord.Guild, err):
         if err:
             print(f"[SOUNDBOARD] Erreur audio : {err}")
-        # ✅ Relance proprement la boucle async
         asyncio.run_coroutine_threadsafe(self._play_next_async(guild), self.bot.loop)
 
     async def _play_next_async(self, guild: discord.Guild):
         self.play_next(guild)
 
-    async def enqueue_and_play(
-        self,
-        guild: discord.Guild,
-        member: discord.Member,
-        sound_path: str,
-        sound_name: str
-    ) -> str:
+    async def enqueue_and_play(self, guild, member, sound_path: str, sound_name: str) -> str:
         vc = await self.ensure_voice(guild, member)
         if vc is None:
             return "❌ Impossible de rejoindre le vocal."
@@ -340,73 +306,54 @@ class Soundboard(commands.Cog):
         self.play_next(guild)
         return f"🎵 **{sound_name}** en cours de lecture"
 
-    # ============================================================================
-    # 🔹 Commande SLASH — /play <nom> (autocomplete)
-    # ============================================================================
-    @app_commands.command(name="play", description="Joue un son par son nom.")
-    @app_commands.describe(nom="Nom du son à jouer")
-    async def slash_play(self, interaction: discord.Interaction, nom: str):
-        await interaction.response.defer(ephemeral=True)
+    async def play_checked(self, guild, user, sound_path: str, sound_name: str) -> str:
+        """Vérifs (vocal, fichier, cooldown) puis lecture. Retourne le message à afficher."""
+        if guild is None:
+            return "❌ Commande utilisable uniquement sur un serveur."
+        if not isinstance(user, discord.Member) or not user.voice or not user.voice.channel:
+            return "❌ Rejoins un salon vocal d'abord."
+        if not os.path.isfile(sound_path):
+            return f"❌ Fichier introuvable : `{sound_path}`"
 
-        member = interaction.user
-        if not isinstance(member, discord.Member) or not member.voice or not member.voice.channel:
-            await safe_followup(interaction, "❌ Rejoins un salon vocal d'abord.", ephemeral=True)
-            return
+        remaining = self.play_cooldowns.check(user.id)
+        if remaining > 0:
+            return f"⏱️ Doucement ! Attends encore **{int(remaining) + 1}s**."
+        self.play_cooldowns.update(user.id)
 
+        return await self.enqueue_and_play(guild, user, sound_path, sound_name)
+
+    async def play_by_name(self, guild, user, nom: str) -> str:
         found = find_sound(nom)
         if not found:
-            await safe_followup(interaction, f"❌ Son `{nom}` introuvable.", ephemeral=True)
-            return
+            return f"❌ Son `{nom}` introuvable."
+        _, name, path = found
+        return await self.play_checked(guild, user, path, name)
 
-        cat, name, path = found
+    def do_stop(self, guild: discord.Guild) -> str:
+        self.queues[guild.id] = GuildQueue()
+        vc = guild.voice_client
+        if vc and (vc.is_playing() or vc.is_paused()):
+            vc.stop()
+            return "⏹️ Stop + file vidée."
+        return "❌ Rien en cours."
 
-        remaining = self.play_cooldowns.check(member.id)
-        if remaining > 0:
-            await safe_followup(
-                interaction,
-                f"⏱️ Doucement ! Attends encore **{int(remaining) + 1}s**.",
-                ephemeral=True
-            )
-            return
-        self.play_cooldowns.update(member.id)
+    def do_skip(self, guild: discord.Guild) -> str:
+        vc = guild.voice_client
+        if not vc or not vc.is_playing():
+            return "❌ Rien en cours."
+        vc.stop()
+        return "⏭️ Son passé."
 
-        result = await self.enqueue_and_play(interaction.guild, member, path, name)
-        await safe_followup(interaction, result, ephemeral=True)
+    async def do_leave(self, guild: discord.Guild) -> str:
+        self.queues[guild.id] = GuildQueue()
+        vc = guild.voice_client
+        if vc:
+            await vc.disconnect()
+            return "👋 Déconnecté."
+        return "❌ Pas dans un vocal."
 
-    @slash_play.autocomplete("nom")
-    async def play_autocomplete(self, interaction: discord.Interaction, current: str):
-        names = all_sound_names()
-        current_low = current.lower()
-        matches = [n for n in names if current_low in n.lower()][:25]
-        return [app_commands.Choice(name=n, value=n) for n in matches]
-
-    # ============================================================================
-    # 🔹 Commande SLASH — /soundboard (menu catégories)
-    # ============================================================================
-    @app_commands.command(name="soundboard", description="Ouvre le menu des sons.")
-    async def slash_soundboard(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        data = scan_sounds()
-        if not data:
-            await safe_followup(
-                interaction,
-                f"❌ Aucun son trouvé.\nDépose des fichiers dans `{SOUNDS_DIR}/<catégorie>/`.",
-                ephemeral=True
-            )
-            return
-        view = CategorySelectView(self.bot, data)
-        msg = await interaction.channel.send("🎵 **Soundboard** — Choisis une catégorie :", view=view)
-        view.message = msg
-        await interaction.delete_original_response()
-
-    # ============================================================================
-    # 🔹 Commande SLASH — /queue (voir la file)
-    # ============================================================================
-    @app_commands.command(name="queue", description="Affiche la file d'attente.")
-    async def slash_queue(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        queue = self.get_queue(interaction.guild.id)
-
+    def build_queue_embed(self, guild: discord.Guild) -> discord.Embed:
+        queue = self.get_queue(guild.id)
         embed = discord.Embed(title="🎵 File d'attente", color=discord.Color.blue())
         if queue.current:
             _, name, uid = queue.current
@@ -421,53 +368,64 @@ class Soundboard(commands.Cog):
             if len(queue) > 10:
                 lines.append(f"*… et {len(queue) - 10} autres*")
             embed.add_field(name=f"⏳ À venir ({len(queue)})", value="\n".join(lines), inline=False)
-
-        await safe_followup(interaction, embed=embed, ephemeral=True)
+        return embed
 
     # ============================================================================
-    # 🔹 Commande SLASH — /skip (passe au suivant)
+    # 🔹 SLASH — /play <nom> (autocomplete)
     # ============================================================================
+    @app_commands.command(name="play", description="Joue un son par son nom.")
+    @app_commands.describe(nom="Nom du son à jouer")
+    async def slash_play(self, interaction: discord.Interaction, nom: str):
+        await interaction.response.defer(ephemeral=True)
+        result = await self.play_by_name(interaction.guild, interaction.user, nom)
+        await safe_followup(interaction, result, ephemeral=True)
+
+    @slash_play.autocomplete("nom")
+    async def play_autocomplete(self, interaction: discord.Interaction, current: str):
+        names = all_sound_names()
+        current_low = current.lower()
+        matches = [n for n in names if current_low in n.lower()][:25]
+        return [app_commands.Choice(name=n, value=n) for n in matches]
+
+    # ============================================================================
+    # 🔹 SLASH — /soundboard (menu catégories)
+    # ============================================================================
+    @app_commands.command(name="soundboard", description="Ouvre le menu des sons.")
+    async def slash_soundboard(self, interaction: discord.Interaction):
+        data = scan_sounds()
+        if not data:
+            await interaction.response.send_message(
+                f"❌ Aucun son trouvé.\nDépose des fichiers dans `{SOUNDS_DIR}/<catégorie>/`.",
+                ephemeral=True
+            )
+            return
+        view = CategorySelectView(self.bot, data)
+        await interaction.response.send_message("🎵 **Soundboard** — Choisis une catégorie :", view=view)
+        view.message = await interaction.original_response()
+
+    # ============================================================================
+    # 🔹 SLASH — /queue /skip /stop /leave /reload_sounds
+    # ============================================================================
+    @app_commands.command(name="queue", description="Affiche la file d'attente.")
+    async def slash_queue(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        await safe_followup(interaction, embed=self.build_queue_embed(interaction.guild), ephemeral=True)
+
     @app_commands.command(name="skip", description="Passe au son suivant.")
     async def slash_skip(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        vc = interaction.guild.voice_client
-        if not vc or not vc.is_playing():
-            await safe_followup(interaction, "❌ Rien en cours.", ephemeral=True)
-            return
-        vc.stop()
-        await safe_followup(interaction, "⏭️ Son passé.", ephemeral=True)
+        await safe_followup(interaction, self.do_skip(interaction.guild), ephemeral=True)
 
-    # ============================================================================
-    # 🔹 Commande SLASH — /stop (stop + vide queue)
-    # ============================================================================
     @app_commands.command(name="stop", description="Arrête la lecture et vide la file.")
     async def slash_stop(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        self.queues[interaction.guild.id] = GuildQueue()
-        vc = interaction.guild.voice_client
-        if vc and (vc.is_playing() or vc.is_paused()):
-            vc.stop()
-            await safe_followup(interaction, "⏹️ Stop + file vidée.", ephemeral=True)
-        else:
-            await safe_followup(interaction, "❌ Rien en cours.", ephemeral=True)
+        await safe_followup(interaction, self.do_stop(interaction.guild), ephemeral=True)
 
-    # ============================================================================
-    # 🔹 Commande SLASH — /leave (quitter vocal)
-    # ============================================================================
     @app_commands.command(name="leave", description="Quitte le salon vocal.")
     async def slash_leave(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        self.queues[interaction.guild.id] = GuildQueue()
-        vc = interaction.guild.voice_client
-        if vc:
-            await vc.disconnect()
-            await safe_followup(interaction, "👋 Déconnecté.", ephemeral=True)
-        else:
-            await safe_followup(interaction, "❌ Pas dans un vocal.", ephemeral=True)
+        await safe_followup(interaction, await self.do_leave(interaction.guild), ephemeral=True)
 
-    # ============================================================================
-    # 🔹 Commande SLASH — /reload_sounds (admin)
-    # ============================================================================
     @app_commands.command(name="reload_sounds", description="Rescanne le dossier sounds/ (admin).")
     @app_commands.default_permissions(manage_guild=True)
     async def slash_reload(self, interaction: discord.Interaction):
@@ -479,6 +437,60 @@ class Soundboard(commands.Cog):
             f"✅ Rescan terminé : **{len(data)}** catégorie(s), **{total}** son(s).",
             ephemeral=True
         )
+
+    # ============================================================================
+    # 🔹 PREFIX — !play !soundboard !queue !skip !stop !leave
+    # ============================================================================
+    @commands.command(name="play", help="Joue un son par son nom.")
+    @commands.guild_only()
+    async def prefix_play(self, ctx: commands.Context, *, nom: str = None):
+        if not nom:
+            names = all_sound_names()
+            if not names:
+                await ctx.send("❌ Aucun son trouvé.")
+                return
+            await ctx.send("Usage : `!play <nom>`\nSons : " + ", ".join(f"`{n}`" for n in names[:40]))
+            return
+        await ctx.send(await self.play_by_name(ctx.guild, ctx.author, nom))
+
+    @commands.command(name="soundboard", aliases=["sb"], help="Ouvre le menu des sons.")
+    @commands.guild_only()
+    async def prefix_soundboard(self, ctx: commands.Context):
+        data = scan_sounds()
+        if not data:
+            await ctx.send(f"❌ Aucun son trouvé.\nDépose des fichiers dans `{SOUNDS_DIR}/<catégorie>/`.")
+            return
+        view = CategorySelectView(self.bot, data)
+        view.message = await ctx.send("🎵 **Soundboard** — Choisis une catégorie :", view=view)
+
+    @commands.command(name="queue", help="Affiche la file d'attente.")
+    @commands.guild_only()
+    async def prefix_queue(self, ctx: commands.Context):
+        await ctx.send(embed=self.build_queue_embed(ctx.guild))
+
+    @commands.command(name="skip", help="Passe au son suivant.")
+    @commands.guild_only()
+    async def prefix_skip(self, ctx: commands.Context):
+        await ctx.send(self.do_skip(ctx.guild))
+
+    @commands.command(name="stop", help="Arrête la lecture et vide la file.")
+    @commands.guild_only()
+    async def prefix_stop(self, ctx: commands.Context):
+        await ctx.send(self.do_stop(ctx.guild))
+
+    @commands.command(name="leave", help="Quitte le salon vocal.")
+    @commands.guild_only()
+    async def prefix_leave(self, ctx: commands.Context):
+        await ctx.send(await self.do_leave(ctx.guild))
+
+    # ============================================================================
+    # 🔹 PREFIX — !!syncslash (owner) : enregistre les slash auprès de Discord
+    # ============================================================================
+    @commands.command(name="syncslash", help="Synchronise les commandes slash (owner).")
+    @commands.is_owner()
+    async def prefix_syncslash(self, ctx: commands.Context):
+        synced = await self.bot.tree.sync()
+        await ctx.send(f"✅ {len(synced)} commande(s) slash synchronisée(s).")
 
     # ============================================================================
     # 🎧 Event — Déconnexion auto si plus personne dans le vocal
