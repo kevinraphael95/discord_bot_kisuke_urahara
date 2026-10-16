@@ -482,10 +482,12 @@ def restart_bot_process():
     start_sh = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "start.sh")
     subprocess.Popen(
         ["bash", start_sh],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        # ✅ On garde les logs visibles dans le terminal qui a lancé le panel
+        stdout=1,       # = sys.stdout (le vrai file descriptor)
+        stderr=2,       # = sys.stderr
+        stdin=subprocess.DEVNULL,
         close_fds=True,
-        start_new_session=True
+        # ❌ On ENLÈVE start_new_session=True
     )
     time.sleep(2)
     os.kill(os.getpid(), 9)
