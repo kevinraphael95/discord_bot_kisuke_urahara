@@ -23,8 +23,8 @@ from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followu
 # ================================================================================
 # ⚙️ Configuration
 # ================================================================================
-PLAY_COOLDOWN = 5.0       # anti-spam clic (secondes)
-COOLDOWN_CLEANUP = 300.0  # purge auto du cache cooldowns
+PLAY_COOLDOWN = 5.0        # anti-spam clic (secondes)
+COOLDOWN_CLEANUP = 300.0   # purge auto du cache cooldowns
 
 # ================================================================================
 # 📂 Scan automatique du dossier sounds/
@@ -364,7 +364,7 @@ class Soundboard(commands.Cog):
         if remaining > 0:
             await safe_followup(
                 interaction,
-                f"⏱️ Doucement ! Attends **{int(remaining) + 1}s**.",
+                f"⏱️ Doucement ! Attends encore **{int(remaining) + 1}s**.",
                 ephemeral=True
             )
             return
