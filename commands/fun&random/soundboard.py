@@ -1,13 +1,13 @@
 # ================================================================================
-# 📌 soundboard.py — Soundboard façon "vrai bot Discord"
-# Objectif : File d'attente, /play avec autocomplete, menus, event-driven
+# 📌 soundboard.py — Soundboard moderne (queue, autocomplete, event-driven)
+# Objectif : Jouer des sons dans un salon vocal via menus interactifs
 # Catégorie : Audio
 # Accès : Tous
-# Cooldown : géré globalement par bot.py (pas ici)
+# Cooldown : géré globalement par bot.py
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports
+# 📦 Imports nécessaires
 # ================================================================================
 import discord
 from discord import app_commands
@@ -18,23 +18,23 @@ import time
 import asyncio
 from collections import deque
 
-from utils.discord_utils import safe_send, safe_edit, safe_followup
+from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followup
 
 # ================================================================================
-# ⚙️ Config
+# ⚙️ Configuration
 # ================================================================================
-COMMAND_COOLDOWN = 60.0
-PLAY_COOLDOWN = 5.0       # anti-spam clic (plus court car la queue gère le reste)
-COOLDOWN_CLEANUP = 300.0
+PLAY_COOLDOWN = 5.0       # anti-spam clic (secondes)
+COOLDOWN_CLEANUP = 300.0  # purge auto du cache cooldowns
 
 # ================================================================================
-# 📂 Scan des sons (catégorie → {nom: chemin})
+# 📂 Scan automatique du dossier sounds/
 # ================================================================================
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SOUNDS_DIR = os.path.join(BASE_DIR, "sounds")
 AUDIO_EXTENSIONS = (".mp3", ".ogg", ".wav", ".m4a", ".flac", ".opus")
 
 def scan_sounds() -> dict:
+    """Scanne le dossier sounds/ et retourne {catégorie: {nom: chemin}}."""
     data = {}
     if not os.path.isdir(SOUNDS_DIR):
         print(f"[SOUNDBOARD] Dossier introuvable : {SOUNDS_DIR}")
@@ -55,7 +55,7 @@ def scan_sounds() -> dict:
     return data
 
 def find_sound(sound_name: str):
-    """Retourne (categorie, nom, chemin) ou None."""
+    """Retourne (catégorie, nom, chemin) ou None."""
     data = scan_sounds()
     for cat, sounds in data.items():
         for name, path in sounds.items():
@@ -72,15 +72,17 @@ def all_sound_names() -> list[str]:
     return sorted(names)
 
 # ================================================================================
-# ⏱️ Cooldown anti-spam (par user)
+# ⏱️ Gestionnaire de cooldowns par utilisateur
 # ================================================================================
 class CooldownManager:
+    """Gère des cooldowns simples par user_id avec purge automatique."""
     def __init__(self, delay: float):
         self.delay = delay
         self._last: dict[int, float] = {}
         self._last_cleanup = time.time()
 
     def check(self, user_id: int) -> float:
+        """Retourne le temps restant (0 si OK)."""
         now = time.time()
         if now - self._last_cleanup > COOLDOWN_CLEANUP:
             cutoff = now - self.delay
@@ -119,7 +121,7 @@ class GuildQueue:
         return len(self.queue)
 
 # ================================================================================
-# 🎛️ UI — Menu catégories
+# 🎛️ UI — Premier menu (catégories)
 # ================================================================================
 class CategorySelectView(View):
     def __init__(self, bot, data):
@@ -140,7 +142,9 @@ class CategorySelect(Select):
         self.parent_view = parent_view
         options = [
             discord.SelectOption(
-                label=cat[:100], value=cat, emoji="📁",
+                label=cat[:100],
+                value=cat,
+                emoji="📁",
                 description=f"{len(sounds)} son(s)"
             )
             for cat, sounds in list(parent_view.data.items())[:25]
@@ -153,13 +157,13 @@ class CategorySelect(Select):
         new_view.message = interaction.message
         await safe_edit(
             interaction.message,
-            content=f"📁 Catégorie : **{category}**\nChoisis un son :",
+            content=f"📁 Catégorie : **{category}**\nChoisis un son à jouer :",
             embed=None,
             view=new_view
         )
 
 # ================================================================================
-# 🎛️ UI — Menu sons + Stop/Retour
+# 🎛️ UI — Deuxième menu (sons) + boutons Stop / Retour
 # ================================================================================
 class SoundSelectView(View):
     def __init__(self, bot, data, category):
@@ -183,39 +187,45 @@ class SoundSelect(Select):
         self.parent_view = parent_view
         sounds = parent_view.data[parent_view.category]
         options = [
-            discord.SelectOption(label=name[:100], value=name, emoji="🎵")
+            discord.SelectOption(
+                label=name[:100],
+                value=name,
+                emoji="🎵"
+            )
             for name in list(sounds.keys())[:25]
         ]
         super().__init__(placeholder="Choisis un son", options=options)
 
     async def callback(self, interaction: discord.Interaction):
+        # ⚡ Defer en premier (anti-timeout Discord)
         await interaction.response.defer(ephemeral=True)
 
         cog: Soundboard = interaction.client.get_cog("Soundboard")
         if cog is None:
-            await safe_followup(interaction, "❌ Erreur interne.", ephemeral=True)
+            await safe_followup(interaction, "❌ Erreur interne (cog introuvable).", ephemeral=True)
             return
 
-        # Anti-spam clic
+        # ⏱️ Cooldown anti-spam
         remaining = cog.play_cooldowns.check(interaction.user.id)
         if remaining > 0:
             await safe_followup(
                 interaction,
-                f"⏱️ Doucement ! Attends **{int(remaining) + 1}s**.",
+                f"⏱️ Doucement ! Attends encore **{int(remaining) + 1}s**.",
                 ephemeral=True
             )
             return
 
+        # 🔍 Vérifications
         sound_name = self.values[0]
         sound_path = self.parent_view.data[self.parent_view.category][sound_name]
 
         if not os.path.isfile(sound_path):
-            await safe_followup(interaction, f"❌ Fichier introuvable.", ephemeral=True)
+            await safe_followup(interaction, f"❌ Fichier introuvable : `{sound_path}`", ephemeral=True)
             return
 
         member = interaction.user
         if not isinstance(member, discord.Member) or not member.voice or not member.voice.channel:
-            await safe_followup(interaction, "❌ Rejoins un salon vocal d'abord.", ephemeral=True)
+            await safe_followup(interaction, "❌ Tu dois être dans un salon vocal.", ephemeral=True)
             return
 
         cog.play_cooldowns.update(interaction.user.id)
@@ -257,24 +267,22 @@ class BackButton(Button):
 # 🧠 Cog principal
 # ================================================================================
 class Soundboard(commands.Cog):
-    """Soundboard moderne : queue, autocomplete, event-driven."""
-
+    """
+    Commandes /play, /soundboard, /queue, /skip, /stop, /leave — Soundboard moderne.
+    """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.play_cooldowns = CooldownManager(PLAY_COOLDOWN)
-        self.queues: dict[int, GuildQueue] = {}  # guild_id → GuildQueue
+        self.queues: dict[int, GuildQueue] = {}
 
-    # ---------------------------------------------------------------------------
-    # Helper : récupère/crée la queue
-    # ---------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
+    # 🔹 Helpers internes
+    # ----------------------------------------------------------------------------
     def get_queue(self, guild_id: int) -> GuildQueue:
         if guild_id not in self.queues:
             self.queues[guild_id] = GuildQueue()
         return self.queues[guild_id]
 
-    # ---------------------------------------------------------------------------
-    # Helper : connexion au vocal + lancement lecture
-    # ---------------------------------------------------------------------------
     async def ensure_voice(self, guild: discord.Guild, member: discord.Member) -> discord.VoiceClient | None:
         vc = guild.voice_client
         try:
@@ -287,9 +295,6 @@ class Soundboard(commands.Cog):
             return None
         return vc
 
-    # ---------------------------------------------------------------------------
-    # Helper : joue le prochain son de la queue
-    # ---------------------------------------------------------------------------
     def play_next(self, guild: discord.Guild):
         vc = guild.voice_client
         if vc is None:
@@ -301,23 +306,19 @@ class Soundboard(commands.Cog):
         path, name, _ = nxt
         try:
             source = discord.FFmpegPCMAudio(path)
-            vc.play(
-                source,
-                after=lambda err: self.bot.loop.call_soon_threadsafe(
-                    self._after_play, guild, err
-                )
-            )
+            vc.play(source, after=lambda err: self._after_play(guild, err))
         except Exception as e:
             print(f"[SOUNDBOARD] Erreur lecture {name} : {e}")
 
     def _after_play(self, guild: discord.Guild, err):
         if err:
             print(f"[SOUNDBOARD] Erreur audio : {err}")
+        # ✅ Relance proprement la boucle async
+        asyncio.run_coroutine_threadsafe(self._play_next_async(guild), self.bot.loop)
+
+    async def _play_next_async(self, guild: discord.Guild):
         self.play_next(guild)
 
-    # ---------------------------------------------------------------------------
-    # Helper central : ajoute à la queue et lance si rien en cours
-    # ---------------------------------------------------------------------------
     async def enqueue_and_play(
         self,
         guild: discord.Guild,
@@ -335,13 +336,12 @@ class Soundboard(commands.Cog):
             queue.add(sound_path, sound_name, member.id)
             return f"➕ **{sound_name}** ajouté à la queue (position {len(queue)})"
 
-        # Rien en cours → on joue direct
         queue.add(sound_path, sound_name, member.id)
         self.play_next(guild)
         return f"🎵 **{sound_name}** en cours de lecture"
 
     # ============================================================================
-    # /play <nom>  — avec autocomplete
+    # 🔹 Commande SLASH — /play <nom> (autocomplete)
     # ============================================================================
     @app_commands.command(name="play", description="Joue un son par son nom.")
     @app_commands.describe(nom="Nom du son à jouer")
@@ -360,7 +360,6 @@ class Soundboard(commands.Cog):
 
         cat, name, path = found
 
-        # Anti-spam
         remaining = self.play_cooldowns.check(member.id)
         if remaining > 0:
             await safe_followup(
@@ -382,7 +381,7 @@ class Soundboard(commands.Cog):
         return [app_commands.Choice(name=n, value=n) for n in matches]
 
     # ============================================================================
-    # /soundboard — menu catégories
+    # 🔹 Commande SLASH — /soundboard (menu catégories)
     # ============================================================================
     @app_commands.command(name="soundboard", description="Ouvre le menu des sons.")
     async def slash_soundboard(self, interaction: discord.Interaction):
@@ -401,7 +400,7 @@ class Soundboard(commands.Cog):
         await interaction.delete_original_response()
 
     # ============================================================================
-    # /queue — voir la file
+    # 🔹 Commande SLASH — /queue (voir la file)
     # ============================================================================
     @app_commands.command(name="queue", description="Affiche la file d'attente.")
     async def slash_queue(self, interaction: discord.Interaction):
@@ -426,7 +425,7 @@ class Soundboard(commands.Cog):
         await safe_followup(interaction, embed=embed, ephemeral=True)
 
     # ============================================================================
-    # /skip — passe au suivant
+    # 🔹 Commande SLASH — /skip (passe au suivant)
     # ============================================================================
     @app_commands.command(name="skip", description="Passe au son suivant.")
     async def slash_skip(self, interaction: discord.Interaction):
@@ -435,11 +434,11 @@ class Soundboard(commands.Cog):
         if not vc or not vc.is_playing():
             await safe_followup(interaction, "❌ Rien en cours.", ephemeral=True)
             return
-        vc.stop()  # déclenche play_next automatiquement
+        vc.stop()
         await safe_followup(interaction, "⏭️ Son passé.", ephemeral=True)
 
     # ============================================================================
-    # /stop — stop + vide la queue
+    # 🔹 Commande SLASH — /stop (stop + vide queue)
     # ============================================================================
     @app_commands.command(name="stop", description="Arrête la lecture et vide la file.")
     async def slash_stop(self, interaction: discord.Interaction):
@@ -453,7 +452,7 @@ class Soundboard(commands.Cog):
             await safe_followup(interaction, "❌ Rien en cours.", ephemeral=True)
 
     # ============================================================================
-    # /leave — quitte le vocal
+    # 🔹 Commande SLASH — /leave (quitter vocal)
     # ============================================================================
     @app_commands.command(name="leave", description="Quitte le salon vocal.")
     async def slash_leave(self, interaction: discord.Interaction):
@@ -467,9 +466,9 @@ class Soundboard(commands.Cog):
             await safe_followup(interaction, "❌ Pas dans un vocal.", ephemeral=True)
 
     # ============================================================================
-    # /reload_sounds — admin
+    # 🔹 Commande SLASH — /reload_sounds (admin)
     # ============================================================================
-    @app_commands.command(name="reload_sounds", description="Rescanne le dossier sounds/.")
+    @app_commands.command(name="reload_sounds", description="Rescanne le dossier sounds/ (admin).")
     @app_commands.default_permissions(manage_guild=True)
     async def slash_reload(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -477,12 +476,12 @@ class Soundboard(commands.Cog):
         total = sum(len(s) for s in data.values())
         await safe_followup(
             interaction,
-            f"✅ Rescan : **{len(data)}** catégorie(s), **{total}** son(s).",
+            f"✅ Rescan terminé : **{len(data)}** catégorie(s), **{total}** son(s).",
             ephemeral=True
         )
 
     # ============================================================================
-    # 🎧 Event : déconnexion auto si plus personne
+    # 🎧 Event — Déconnexion auto si plus personne dans le vocal
     # ============================================================================
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -498,19 +497,18 @@ class Soundboard(commands.Cog):
         if not vc or not vc.channel:
             return
 
-        # Si le membre part d'un canal où le bot est
         if before.channel and before.channel == vc.channel and after.channel != vc.channel:
             humans = [m for m in vc.channel.members if not m.bot]
             if not humans:
                 self.queues[guild.id] = GuildQueue()
-                await asyncio.sleep(2)  # petit délai anti-flap
+                await asyncio.sleep(2)
                 vc = guild.voice_client
                 if vc and not [m for m in vc.channel.members if not m.bot]:
                     await vc.disconnect()
                     print(f"[SOUNDBOARD] Déconnexion auto (vide) — {guild.name}")
 
 # ================================================================================
-# Setup
+# 🔌 Setup du Cog
 # ================================================================================
 async def setup(bot: commands.Bot):
     cog = Soundboard(bot)
