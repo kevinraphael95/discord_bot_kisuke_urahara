@@ -52,13 +52,31 @@ window.addEventListener('load', () => {
 
 /* ───────────────────────────────────────────────────────────────────
    3. FETCH HTML (proxy)
-   On passe par corsproxy.io pour éviter le blocage CORS de sushiscan.fr
    ─────────────────────────────────────────────────────────────────── */
 
+const PROXIES = [
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+];
+let proxyIdx = 0;
+
 async function fetchHtml(url) {
-  const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
+  for (let i = 0; i < PROXIES.length; i++) {
+    const k = (proxyIdx + i) % PROXIES.length;
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(PROXIES[k](url), { signal: ctrl.signal });
+      clearTimeout(t);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const txt = await res.text();
+      if (!txt.includes('ts_reader')) throw new Error('Réponse invalide');
+      proxyIdx = k;   // garde celui qui a marché
+      return txt;
+    } catch (e) { /* essaie le proxy suivant */ }
+  }
+  throw new Error('Tous les proxies ont échoué');
 }
 
 // Met à jour le message de chargement + la barre de progression
