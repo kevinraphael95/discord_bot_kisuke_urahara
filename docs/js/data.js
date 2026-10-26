@@ -10,13 +10,15 @@
 // ???
 // "Arrancar : Invasion du Hueco Mundo (3.2)"        — ch. 230–315
 // Infiltration du Hueco Mundo jusqu'au départ d'Aizen vers Karakura
-// "Arrancar : Bataille de Karakura (3.3)"           — ch. 316–423
+// "Turn Back The Pendulum (3.3)"                    — ch. -108 à -100
+// Le Passé
+// "Arrancar : Bataille de Karakura (3.4)"           — ch. 316–423
 // Fake Karakura Town, combat final contre Aizen
 // "Arc Fullbringers (4)"                            — ch. 424–479
 // Les fullbringers
 // "Guerre Sanglante de Mille Ans (5)"               — ch. 480–686
 // La guerre sanglante c'est sanglant
-// NO BREATHES FROM HELL (6)                         — ch. xxx
+// NO BREATHES FROM HELL (6)                         — ch. 687+
 // ouai ouai
 
 const CHARS = [
@@ -75,13 +77,13 @@ const CHARS = [
   // ============================================================
   {n:"Shunsui Kyoraku",       r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Brun",   bday:"11/07", w:6,  l:1,  draw:1, img:"assets/personnages/shunsui-kyoraku.png"},
   {n:"Soi Fon",               r:"Shinigami",sx:"F", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"11/02", w:5,  l:2,  draw:1, img:"assets/personnages/sui-feng.png"},
-  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.3)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"17/03", w:2,  l:2,  draw:0, img:"assets/personnages/rojuro-otoribashi.png"},
+  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"17/03", w:2,  l:2,  draw:0, img:"assets/personnages/rojuro-otoribashi.png"},
   {n:"Isane Kotetsu",         r:"Shinigami",sx:"F", chapter:"109", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"02/08", w:1,  l:1,  draw:0, img:"assets/personnages/isane-kotetsu.png"},
   {n:"Shinji Hirako",         r:"Vizard",   sx:"M", chapter:"183", arc:"Arrancar : Invasion du monde des humains (3.1)",  af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"10/05", w:3,  l:2,  draw:0, img:"assets/personnages/shinji-hirako.png"},
   {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", chapter:"51", arc:"Le Shinigami Remplaçant (1)",                     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0, img:"assets/personnages/byakuya-kuchiki.png"},
   {n:"Tetsuzaemon Iba",       r:"Shinigami",sx:"M", chapter:"80", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"18/07", w:0,  l:0,  draw:1, img:"assets/personnages/tetsuzaemon-iba.png"},
-  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.3)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"03/02", w:2,  l:2,  draw:0, img:"assets/personnages/lisa-yadomaru.png"},
-  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.3)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0, img:"assets/personnages/kensei-muguruma.png"},
+  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"03/02", w:2,  l:2,  draw:0, img:"assets/personnages/lisa-yadomaru.png"},
+  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0, img:"assets/personnages/kensei-muguruma.png"},
   {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0, img:"assets/personnages/toshiro-hitsugaya.png"},
   {n:"Kenpachi Zaraki",       r:"Shinigami",sx:"M", chapter:"65", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"19/11", w:9,  l:2,  draw:1, img:"assets/personnages/kenpachi-zaraki.png"},
   {n:"Mayuri Kurotsuchi",     r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"30/03", w:6,  l:1,  draw:0, img:"assets/personnages/mayuri-kurotsuchi.png"},
@@ -111,7 +113,7 @@ const CHARS = [
   {n:"Atau Rindo",            r:"Shinigami", sx:"M", chapter:"687", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/atau-rindo.png"},
   {n:"Yuyu Yayahara",         r:"Shinigami", sx:"F", chapter:"687", arc:"NO BREATHES FROM HELL (6)",             af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"??/??", w:0,  l:0,  draw:0, img:"assets/personnages/yuyu-yayahara.png"},
   {n:"Shuhei Hisagi",         r:"Shinigami", sx:"M", chapter:"72", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0, img:"assets/personnages/shuhei-hisagi.png"},
-  {n:"Mashiro Kuna",          r:"Vizard",    sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.3)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0, img:"assets/personnages/mashiro-kuna.png"},
+  {n:"Mashiro Kuna",          r:"Vizard",    sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0, img:"assets/personnages/mashiro-kuna.png"},
   {n:"Rangiku Matsumoto",     r:"Shinigami", sx:"F", chapter:"80", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"25/05", w:3,  l:3,  draw:0, img:"assets/personnages/rangiku-matsumoto.png"},
   {n:"Ikkaku Madarame",       r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0, img:"assets/personnages/ikkaku-madarame.png"},
   {n:"Akon",                  r:"Shinigami", sx:"M", chapter:"69", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/akon.png"},
@@ -134,16 +136,16 @@ const CHARS = [
   // VIZARDS (non promus à la fin)
   // ============================================================
   {n:"Hiyori Sarugaki",       r:"Vizard",    sx:"F", chapter:"189", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Indépendant", d:3, st:"Vivant",    hc:"Blond",  bday:"01/08", w:2,  l:2,  draw:0, img:"assets/personnages/hiyori-sarugaki.png"},
-  {n:"Love Aikawa",           r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0, img:"assets/personnages/love-aikawa.png"},
-  {n:"Hachigen Ushoda",       r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Rose",   bday:"08/09", w:2,  l:1,  draw:0, img:"assets/personnages/hachigen-ushoda.png"},
+  {n:"Love Aikawa",           r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0, img:"assets/personnages/love-aikawa.png"},
+  {n:"Hachigen Ushoda",       r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Rose",   bday:"08/09", w:2,  l:1,  draw:0, img:"assets/personnages/hachigen-ushoda.png"},
  
   // ============================================================
   // ESPADA (par numéro tatoué : 1 → 10)
   // ============================================================
   {n:"Coyote Starrk",         r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"19/01", w:4,  l:1,  draw:0, img:"assets/personnages/coyote-starrk.png"},
   {n:"Lilynette Gingerbuck",  r:"Arrancar",  sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Vert",   bday:"19/01", w:2,  l:1,  draw:0, img:"assets/personnages/lilynette-gingerbuck.png"},
-  {n:"Baraggan Louisenbairn", r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:5, st:"Mort",      hc:"Blanc",  bday:"09/02", w:3,  l:1,  draw:0, img:"assets/personnages/baraggan-louisenbairn.png"},
-  {n:"Tier Harribel",         r:"Arrancar",  sx:"F", chapter:"198", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:5, st:"Vivant",    hc:"Blond",  bday:"25/07", w:3,  l:1,  draw:0, img:"assets/personnages/tier-harribel.png"},
+  {n:"Baraggan Louisenbairn", r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Espada",      d:5, st:"Mort",      hc:"Blanc",  bday:"09/02", w:3,  l:1,  draw:0, img:"assets/personnages/baraggan-louisenbairn.png"},
+  {n:"Tier Harribel",         r:"Arrancar",  sx:"F", chapter:"198", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Espada",      d:5, st:"Vivant",    hc:"Blond",  bday:"25/07", w:3,  l:1,  draw:0, img:"assets/personnages/tier-harribel.png"},
   {n:"Ulquiorra Cifer",       r:"Arrancar",  sx:"M", chapter:"190", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"01/12", w:5,  l:1,  draw:0, img:"assets/personnages/ulquiorra-cifer.png"},
   {n:"Nnoitra Gilga",         r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"11/11", w:4,  l:1,  draw:0, img:"assets/personnages/nnoitra-gilga.png"},
   {n:"Grimmjow Jaegerjaquez", r:"Arrancar",  sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Vivant",    hc:"Bleu",   bday:"31/07", w:4,  l:2,  draw:0, img:"assets/personnages/grimmjow-jaegerjaquez.png"},
@@ -158,7 +160,7 @@ const CHARS = [
   {n:"Kukkapuro",                r:"Arrancar", sx:"M", chapter:"342", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Chauve", bday:"04/04", w:0,  l:0,  draw:0, img:"assets/personnages/kukkapuro.png"},
   {n:"Nelliel Tu Odelschwanck",  r:"Arrancar", sx:"F", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",   bday:"24/04", w:4,  l:1,  draw:0, img:"assets/personnages/nelliel-tu-odelschwanck.png"},
   {n:"Luppi Antenor",            r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada", d:3, st:"Mort",      hc:"Noir",   bday:"05/06", w:1,  l:1,  draw:0, img:"assets/personnages/luppi-antenor.png"},
-  {n:"Wonderweiss Margela",      r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Bataille de Karakura (3.3)",    af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"06/07", w:2,  l:1,  draw:0, img:"assets/personnages/wonderweiss-margela.png"},
+  {n:"Wonderweiss Margela",      r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Bataille de Karakura (3.4)",    af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"06/07", w:2,  l:1,  draw:0, img:"assets/personnages/wonderweiss-margela.png"},
  
   // ============================================================
   // FRACCIÓN DE HARRIBEL (Espada 3)
@@ -173,8 +175,8 @@ const CHARS = [
   {n:"Loly Aivirrne",         r:"Arrancar",  sx:"F", chapter:"249", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:2, st:"Vivant",    hc:"Noir",   bday:"27/01", w:0,  l:2,  draw:0, img:"assets/personnages/loly-aivirrne.png"},
   {n:"Menoly Mallia",         r:"Arrancar",  sx:"F", chapter:"249", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:2, st:"Incertain", hc:"Blond",  bday:"07/12", w:0,  l:2,  draw:0, img:"assets/personnages/menoly-mallia.png"},
   {n:"Shawlong Koufang",      r:"Arrancar",  sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"04/11", w:1,  l:1,  draw:0, img:"assets/personnages/shawlong-koufang.png"},
-  {n:"Findorr Calius",        r:"Arrancar",  sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:3, st:"Mort",      hc:"Blond",  bday:"27/06", w:1,  l:1,  draw:0, img:"assets/personnages/findorr-calius.png"},
-  {n:"Charlotte Chuhlhourne", r:"Arrancar",  sx:"M", chapter:"319", arc:"Arrancar : Bataille de Karakura (3.3)",          af:"Espada",      d:3, st:"Mort",      hc:"Violet", bday:"08/08", w:1,  l:1,  draw:0, img:"assets/personnages/charlotte-chuhlhourne.png"},
+  {n:"Findorr Calius",        r:"Arrancar",  sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Espada",      d:3, st:"Mort",      hc:"Blond",  bday:"27/06", w:1,  l:1,  draw:0, img:"assets/personnages/findorr-calius.png"},
+  {n:"Charlotte Chuhlhourne", r:"Arrancar",  sx:"M", chapter:"319", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Espada",      d:3, st:"Mort",      hc:"Violet", bday:"08/08", w:1,  l:1,  draw:0, img:"assets/personnages/charlotte-chuhlhourne.png"},
   {n:"Dordoni Alessandro",    r:"Arrancar",  sx:"M", chapter:"250", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Noir",   bday:"28/08", w:2,  l:2,  draw:0, img:"assets/personnages/dordoni-alessandro-del-socaccio.png"},
   {n:"Cirucci Sanderwicci",   r:"Arrancar",  sx:"F", chapter:"251", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Violet", bday:"27/02", w:1,  l:1,  draw:0, img:"assets/personnages/cirucci-sanderwicci.png"},
   {n:"Gantenbainne Mosqueda", r:"Arrancar",  sx:"M", chapter:"251", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Hueco Mundo", d:3, st:"Mort",      hc:"Roux",   bday:"21/09", w:1,  l:1,  draw:0, img:"assets/personnages/gantenbainne-mosqueda.png"},
