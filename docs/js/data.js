@@ -130,7 +130,7 @@ const CHARS = [
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
   // ============================================================
   {n:"Yumichika Ayasegawa",   r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"19/09", w:3,  l:1,  draw:0, img:"assets/personnages/yumichika-ayasegawa.png"},
-  {n:"Hanataro Yamada",       r:"Shinigami", sx:"M", chapter:"92", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:1, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0, img:"assets/personnages/hanataro-yamada.png"},
+  {n:"Hanataro Yamada",       r:"Shinigami", sx:"M", chapter:"92", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13",    d:1, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0, img:"assets/personnages/hanataro-yamada.png"},
  
   // ============================================================
   // VIZARDS (non promus à la fin)
