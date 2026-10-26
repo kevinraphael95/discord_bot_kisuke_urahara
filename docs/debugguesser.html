@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Debug Guesser — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+
+<script src="js/nav.js" defer></script>
+<script src="js/theme.js" defer></script>
+<script src="js/data.js"></script>
+
+<style>
+  .dbg { max-width: 1400px; margin: 0 auto; padding: 84px 20px 48px; }
+  .dbg h1 { margin: 0 0 4px; font-size: 28px; font-weight: 800; }
+  .dbg .sub { margin: 0 0 18px; opacity: .7; font-size: 14px; }
+  .dbg .sub a { color: var(--accent, inherit); }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .stat { padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(128,128,128,.3); background: rgba(128,128,128,.08); font-size: 13px; }
+  .stat strong { display: block; font-size: 20px; line-height: 1.1; }
+  .stat.err  { background: var(--ko-bg, rgba(220,60,60,.18)); border-color: var(--ko-bd, rgba(220,60,60,.5)); }
+  .stat.warn { background: var(--yw-bg, rgba(230,180,40,.18)); border-color: var(--yw-bd, rgba(230,180,40,.5)); }
+  .stat.ok   { background: var(--ok-bg, rgba(60,180,90,.18)); border-color: var(--ok-bd, rgba(60,180,90,.5)); }
+
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 10px; }
+  .bar label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; opacity: .85; }
+  .bar input, .bar select {
+    font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; color: inherit;
+    border: 1px solid rgba(128,128,128,.4); background: rgba(128,128,128,.1); min-width: 130px;
+  }
+  .bar input[type=search] { min-width: 220px; }
+  .bar option { color: #111; background: #fff; }
+  .btn-dbg {
+    font: inherit; font-size: 13px; font-weight: 600; padding: 9px 14px; border-radius: 8px; cursor: pointer; color: inherit;
+    border: 1px solid rgba(128,128,128,.4); background: rgba(128,128,128,.14);
+  }
+  .btn-dbg:hover { border-color: var(--accent, currentColor); }
+  .count { margin: 6px 0 14px; font-size: 13px; opacity: .75; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .fc { display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; border: 1px solid rgba(128,128,128,.3); background: rgba(128,128,128,.07); }
+  .fc.err  { border-color: var(--ko-bd, rgba(220,60,60,.7)); }
+  .fc.warn { border-color: var(--yw-bd, rgba(230,180,40,.7)); }
+  .fc-img { position: relative; height: 230px; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,.12); }
+  .fc-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .noimg { color: var(--ko-bd, #d44); font-weight: 700; font-size: 13px; text-align: center; padding: 10px; }
+  .fc-idx { position: absolute; top: 6px; left: 8px; font-size: 11px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .fc-badge { position: absolute; top: 6px; right: 8px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .fc-badge.err  { background: var(--ko-bg, rgba(220,60,60,.35)); border: 1px solid var(--ko-bd, rgba(220,60,60,.7)); }
+  .fc-badge.warn { background: var(--yw-bg, rgba(230,180,40,.35)); border: 1px solid var(--yw-bd, rgba(230,180,40,.7)); }
+  .fc-badge.ok   { background: var(--ok-bg, rgba(60,180,90,.35)); border: 1px solid var(--ok-bd, rgba(60,180,90,.7)); }
+
+  .fc-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .fc-name { margin: 0; font-size: 18px; font-weight: 800; }
+  .fc-name.bad { color: var(--ko-bd, #d44); }
+  dl { margin: 0; display: grid; gap: 4px; }
+  .row { display: grid; grid-template-columns: 96px 1fr; gap: 8px; padding: 3px 8px; border-radius: 6px; border: 1px solid transparent; font-size: 13px; }
+  .row dt { opacity: .6; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; align-self: center; }
+  .row dd { margin: 0; word-break: break-word; }
+  .row.err  { background: var(--ko-bg, rgba(220,60,60,.18)); border-color: var(--ko-bd, rgba(220,60,60,.5)); }
+  .row.warn { background: var(--yw-bg, rgba(230,180,40,.18)); border-color: var(--yw-bd, rgba(230,180,40,.5)); }
+  .stars { letter-spacing: 1px; }
+  .path { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; opacity: .85; }
+  .dim { opacity: .55; font-size: 11px; }
+
+  .plist { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 12px; }
+  .plist li::before { content: "●"; margin-right: 6px; }
+  .plist li.err::before  { color: var(--ko-bd, #d44); }
+  .plist li.warn::before { color: var(--yw-bd, #d9a521); }
+  .empty { padding: 40px; text-align: center; opacity: .6; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" data-nav="index">
+      <span class="nav-logo-mark"><img src="assets/kisuke.jpg" alt="Kisuke"></span>
+      Kisuke Urahara
+    </a>
+    <ul class="nav-links">
+      <li><a data-nav="install">Installation</a></li>
+      <li><a data-nav="commandes">Commandes</a></li>
+      <li><a data-nav="guesser">Guesser</a></li>
+      <li><a data-nav="minijeux">Mini-jeux</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-btn" id="themeBtn" aria-label="Changer le thème"></button>
+      <button class="nav-burger" id="navBurger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="nav-mobile" id="navMobile">
+  <a data-nav="install">Installation</a>
+  <a data-nav="commandes">Commandes</a>
+  <a data-nav="guesser">Guesser</a>
+  <a data-nav="minijeux">Mini-jeux</a>
+</div>
+
+<main class="dbg">
+  <h1>Debug Guesser</h1>
+  <p class="sub">Toutes les fiches de <code>data.js</code> avec détection des problèmes. <a data-nav="guesser">← Retour au Guesser</a></p>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="bar">
+    <label>Recherche
+      <input type="search" id="q" placeholder="Nom du personnage…" autocomplete="off">
+    </label>
+    <label>Race <select id="f-r"></select></label>
+    <label>Genre <select id="f-sx"></select></label>
+    <label>Arc <select id="f-arc"></select></label>
+    <label>Affiliation <select id="f-af"></select></label>
+    <label>Force <select id="f-d"></select></label>
+    <label>Statut <select id="f-st"></select></label>
+    <label>Cheveux <select id="f-hc"></select></label>
+    <label>Problèmes
+      <select id="f-p">
+        <option value="">Tous</option>
+        <option value="any">Erreurs + avertissements</option>
+        <option value="err">Erreurs seulement</option>
+        <option value="warn">Avertissements seulement</option>
+        <option value="ok">Sans problème</option>
+      </select>
+    </label>
+    <label>Tri
+      <select id="sort">
+        <option value="file">Ordre du fichier</option>
+        <option value="name">Nom (A→Z)</option>
+        <option value="force">Force (décroissante)</option>
+        <option value="chapter">Chapitre</option>
+        <option value="problems">Problèmes d'abord</option>
+      </select>
+    </label>
+    <button class="btn-dbg" id="reset" type="button">Réinitialiser</button>
+    <button class="btn-dbg" id="copy" type="button">📋 Copier le rapport</button>
+  </div>
+
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+(function () {
+  // ---------- Référentiels ----------
+  const ARCS = [
+    { k: "Le Shinigami Remplaçant (1)",                     min: 1,   max: 70 },
+    { k: "Soul Society : L'Invasion (2.1)",                 min: 71,  max: 117 },
+    { k: "Soul Society : Le Sauvetage (2.2)",               min: 118, max: 182 },
+    { k: "Arrancar : Invasion du monde des humains (3.1)",  min: 183, max: 229 },
+    { k: "Arrancar : Invasion du Hueco Mundo (3.2)",        min: 230, max: 315 },
+    { k: "Arrancar : Bataille de Karakura (3.3)",           min: 316, max: 423 },
+    { k: "Arc Fullbringers (4)",                            min: 424, max: 479 },
+    { k: "Guerre Sanglante de Mille Ans (5)",               min: 480, max: 686 },
+    { k: "NO BREATHES FROM HELL (6)",                       min: 687, max: Infinity },
+  ];
+  const ARC_BY_KEY = new Map(ARCS.map((a) => [a.k, a]));
+  const STATUTS = ['Vivant', 'Mort', 'Incertain'];
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+  const LIST = CHARS.map((c, i) => ({ c, i }));
+  const imgState = new Map(); // c -> {ok, w, h}
+  let imgDone = 0;
+
+  // ---------- Fréquences (détection de valeurs uniques) ----------
+  const freq = { r: new Map(), af: new Map(), hc: new Map(), sx: new Map() };
+  const nameCount = new Map();
+  const imgCount = new Map();
+  for (const c of CHARS) {
+    for (const f of Object.keys(freq)) freq[f].set(c[f], (freq[f].get(c[f]) || 0) + 1);
+    const k = norm(c.n); nameCount.set(k, (nameCount.get(k) || 0) + 1);
+    if (c.img) imgCount.set(c.img, (imgCount.get(c.img) || 0) + 1);
+  }
+
+  // ---------- Analyse ----------
+  function analyse(c) {
+    const p = [];
+    const add = (lvl, field, msg) => p.push({ lvl, field, msg });
+
+    if (!c.n || !String(c.n).trim()) add('err', 'n', 'nom vide');
+    else if (nameCount.get(norm(c.n)) > 1) add('err', 'n', 'nom en double');
+
+    [['r', 'race'], ['sx', 'genre'], ['arc', 'arc'], ['af', 'affiliation'], ['st', 'statut'], ['hc', 'cheveux']].forEach(([f, label]) => {
+      if (c[f] == null || !String(c[f]).trim()) add('err', f, label + ' vide');
+    });
+
+    if (c.sx && !['M', 'F'].includes(c.sx)) add('err', 'sx', 'genre inattendu « ' + c.sx + ' » (M ou F)');
+    if (c.st && !STATUTS.includes(c.st)) add('err', 'st', 'statut inattendu « ' + c.st + ' »');
+
+    const arc = ARC_BY_KEY.get(c.arc);
+    if (c.arc && !arc) add('err', 'arc', 'arc inconnu (faute de frappe ?)');
+
+    const ch = parseInt(c.chapter, 10);
+    if (!Number.isFinite(ch)) add('err', 'chapter', 'chapitre manquant ou invalide');
+    else if (arc && (ch < arc.min || ch > arc.max)) {
+      add('warn', 'chapter', 'ch. ' + ch + ' hors de la plage de l\'arc (' + arc.min + '–' + (arc.max === Infinity ? '∞' : arc.max) + ')');
+    }
+
+    if (!Number.isInteger(c.d) || c.d < 1 || c.d > 5) add('err', 'd', 'force hors de 1–5');
+
+    if (c.bday === '??/??') add('warn', 'bday', 'anniversaire inconnu');
+    else {
+      const m = /^(\d{2})\/(\d{2})$/.exec(c.bday || '');
+      if (!m || +m[1] < 1 || +m[1] > 31 || +m[2] < 1 || +m[2] > 12) add('err', 'bday', 'format attendu JJ/MM');
+    }
+
+    ['w', 'l', 'draw'].forEach((f) => {
+      if (!Number.isInteger(c[f]) || c[f] < 0) add('err', 'bilan', f + ' invalide (entier ≥ 0)');
+    });
+
+    if (!c.img) add('err', 'img', 'chemin d\'image vide');
+    else {
+      const st = imgState.get(c);
+      if (st && !st.ok) add('err', 'img', 'image introuvable ou illisible');
+      if (imgCount.get(c.img) > 1) add('warn', 'img', 'même image utilisée par un autre personnage');
+    }
+
+    ['r', 'af', 'hc'].forEach((f) => {
+      if (c[f] && freq[f].get(c[f]) === 1) add('warn', f, 'valeur unique dans toute la base (faute de frappe ?)');
+    });
+
+    return p;
+  }
+
+  const level = (p) => (p.some((x) => x.lvl === 'err') ? 'err' : p.length ? 'warn' : 'ok');
+
+  function analyseAll() {
+    for (const e of LIST) { e.p = analyse(e.c); e.lvl = level(e.p); }
+  }
+
+  // ---------- Filtres ----------
+  const FIELDS = [
+    ['f-r', 'r', 'Toutes'], ['f-sx', 'sx', 'Tous'], ['f-arc', 'arc', 'Tous'],
+    ['f-af', 'af', 'Toutes'], ['f-d', 'd', 'Toutes'], ['f-st', 'st', 'Tous'], ['f-hc', 'hc', 'Tous'],
+  ];
+  function fillSelects() {
+    for (const [id, f, all] of FIELDS) {
+      let vals;
+      if (f === 'arc') vals = [...new Set([...ARCS.map((a) => a.k), ...CHARS.map((c) => c.arc)])];
+      else {
+        vals = [...new Set(CHARS.map((c) => c[f]))];
+        vals.sort((a, b) => (typeof a === 'number' && typeof b === 'number') ? a - b : String(a).localeCompare(String(b), 'fr'));
+      }
+      const counts = new Map();
+      CHARS.forEach((c) => counts.set(c[f], (counts.get(c[f]) || 0) + 1));
+      $(id).innerHTML = '<option value="">' + all + '</option>' +
+        vals.map((v) => '<option value="' + esc(v) + '">' + esc(v) + ' (' + (counts.get(v) || 0) + ')</option>').join('');
+    }
+  }
+
+  function filtered() {
+    const q = norm($('q').value);
+    const sel = {};
+    FIELDS.forEach(([id, f]) => { sel[f] = $(id).value; });
+    const pf = $('f-p').value;
+
+    let out = LIST.filter(({ c, lvl }) => {
+      if (q && !norm(c.n).includes(q)) return false;
+      for (const f of Object.keys(sel)) if (sel[f] !== '' && String(c[f]) !== sel[f]) return false;
+      if (pf === 'any' && lvl === 'ok') return false;
+      if (pf === 'err' && lvl !== 'err') return false;
+      if (pf === 'warn' && lvl !== 'warn') return false;
+      if (pf === 'ok' && lvl !== 'ok') return false;
+      return true;
+    });
+
+    const s = $('sort').value;
+    const rank = { err: 0, warn: 1, ok: 2 };
+    if (s === 'name') out.sort((a, b) => String(a.c.n).localeCompare(String(b.c.n), 'fr'));
+    else if (s === 'force') out.sort((a, b) => (b.c.d || 0) - (a.c.d || 0) || a.i - b.i);
+    else if (s === 'chapter') out.sort((a, b) => (parseInt(a.c.chapter, 10) || 0) - (parseInt(b.c.chapter, 10) || 0) || a.i - b.i);
+    else if (s === 'problems') out.sort((a, b) => rank[a.lvl] - rank[b.lvl] || b.p.length - a.p.length || a.i - b.i);
+    return out;
+  }
+
+  // ---------- Rendu ----------
+  function cardHtml({ c, i, p, lvl }) {
+    const by = {};
+    p.forEach((x) => { (by[x.field] = by[x.field] || []).push(x); });
+    const row = (f, label, val) => {
+      const arr = by[f] || [];
+      const cls = arr.some((x) => x.lvl === 'err') ? 'err' : arr.length ? 'warn' : '';
+      const tip = arr.map((x) => x.msg).join(' · ');
+      return '<div class="row ' + cls + '"' + (tip ? ' title="' + esc(tip) + '"' : '') + '><dt>' + label + '</dt><dd>' + val + '</dd></div>';
+    };
+    const raw = (v) => (v === '' || v == null) ? '<em>vide</em>' : esc(v);
+
+    const stars = (Number.isInteger(c.d) && c.d >= 1 && c.d <= 5)
+      ? '<span class="stars">' + '★'.repeat(c.d) + '☆'.repeat(5 - c.d) + '</span> (' + c.d + ')'
+      : raw(c.d);
+
+    const st = imgState.get(c);
+    const dims = st && st.ok ? '<span class="dim">' + st.w + '×' + st.h + '</span>' : '';
+    const imgBox = c.img
+      ? '<img src="' + esc(c.img) + '" alt="' + esc(c.n) + '" loading="lazy" ' +
+        'onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'noimg\',textContent:\'Image introuvable\'}))">'
+      : '<div class="noimg">Pas d\'image</div>';
+
+    const badge = lvl === 'err' ? '✖ ' + p.filter((x) => x.lvl === 'err').length + ' erreur(s)'
+                : lvl === 'warn' ? '⚠ ' + p.length + ' avert.'
+                : '✔ OK';
+
+    return '<article class="fc ' + lvl + '">' +
+      '<div class="fc-img"><span class="fc-idx">#' + (i + 1) + '</span><span class="fc-badge ' + lvl + '">' + badge + '</span>' + imgBox + '</div>' +
+      '<div class="fc-body">' +
+        '<h3 class="fc-name' + ((by.n || []).length ? ' bad' : '') + '">' + raw(c.n) + '</h3>' +
+        '<dl>' +
+          row('r', 'Race', raw(c.r)) +
+          row('sx', 'Genre', raw(c.sx)) +
+          row('chapter', 'Chapitre', raw(c.chapter)) +
+          row('arc', 'Arc', raw(c.arc)) +
+          row('af', 'Affiliation', raw(c.af)) +
+          row('d', 'Force', stars) +
+          row('st', 'Statut', raw(c.st)) +
+          row('hc', 'Cheveux', raw(c.hc)) +
+          row('bday', 'Anniversaire', raw(c.bday)) +
+          row('bilan', 'Bilan', esc(c.w) + ' V · ' + esc(c.l) + ' D · ' + esc(c.draw) + ' N') +
+          row('img', 'Image', '<span class="path">' + raw(c.img) + '</span> ' + dims) +
+        '</dl>' +
+        (p.length ? '<ul class="plist">' + p.map((x) => '<li class="' + x.lvl + '">' + esc(x.msg) + '</li>').join('') + '</ul>' : '') +
+      '</div></article>';
+  }
+
+  function renderStats() {
+    const n = LIST.length;
+    const e = LIST.filter((x) => x.lvl === 'err').length;
+    const w = LIST.filter((x) => x.lvl === 'warn').length;
+    const ok = n - e - w;
+    const imgKo = LIST.filter((x) => { const s = imgState.get(x.c); return s && !s.ok; }).length;
+    const pending = imgDone < n ? ' <span class="dim">(images : ' + imgDone + '/' + n + ')</span>' : '';
+    $('stats').innerHTML =
+      '<div class="stat"><strong>' + n + '</strong>personnages' + pending + '</div>' +
+      '<div class="stat err"><strong>' + e + '</strong>avec erreurs</div>' +
+      '<div class="stat warn"><strong>' + w + '</strong>avec avertissements</div>' +
+      '<div class="stat ok"><strong>' + ok + '</strong>sans problème</div>' +
+      '<div class="stat ' + (imgKo ? 'err' : '') + '"><strong>' + imgKo + '</strong>images KO</div>';
+  }
+
+  function render() {
+    const list = filtered();
+    $('count').textContent = list.length + ' / ' + LIST.length + ' personnages affichés';
+    $('grid').innerHTML = list.length ? list.map(cardHtml).join('') : '<div class="empty">Aucun personnage ne correspond aux filtres.</div>';
+  }
+
+  function refresh() { analyseAll(); renderStats(); render(); }
+
+  // ---------- Vérification des images (préchargement) ----------
+  function checkImages() {
+    let pendingRender = false;
+    const later = () => {
+      if (pendingRender) return;
+      pendingRender = true;
+      requestAnimationFrame(() => { pendingRender = false; refresh(); });
+    };
+    LIST.forEach(({ c }) => {
+      if (!c.img) { imgState.set(c, { ok: false }); imgDone++; return; }
+      const im = new Image();
+      im.onload = () => { imgState.set(c, { ok: im.naturalWidth > 0, w: im.naturalWidth, h: im.naturalHeight }); imgDone++; later(); };
+      im.onerror = () => { imgState.set(c, { ok: false }); imgDone++; later(); };
+      im.src = c.img;
+    });
+  }
+
+  // ---------- Rapport ----------
+  function report() {
+    const lines = [];
+    LIST.forEach(({ c, i, p }) => {
+      p.forEach((x) => lines.push('#' + (i + 1) + ' ' + c.n + ' — [' + (x.lvl === 'err' ? 'ERREUR' : 'AVERT.') + '] ' + x.field + ' : ' + x.msg));
+    });
+    return lines.length ? lines.join('\n') : 'Aucun problème détecté.';
+  }
+
+  // ---------- Événements ----------
+  let t = null;
+  $('q').addEventListener('input', () => { clearTimeout(t); t = setTimeout(render, 120); });
+  [...FIELDS.map(([id]) => id), 'f-p', 'sort'].forEach((id) => $(id).addEventListener('change', render));
+  $('reset').addEventListener('click', () => {
+    $('q').value = '';
+    [...FIELDS.map(([id]) => id), 'f-p'].forEach((id) => { $(id).value = ''; });
+    $('sort').value = 'file';
+    render();
+  });
+  $('copy').addEventListener('click', async () => {
+    const btn = $('copy');
+    try { await navigator.clipboard.writeText(report()); btn.textContent = '✔ Copié'; }
+    catch (e) { btn.textContent = '✖ Échec'; }
+    setTimeout(() => { btn.textContent = '📋 Copier le rapport'; }, 1500);
+  });
+
+  // ---------- Init ----------
+  fillSelects();
+  refresh();
+  checkImages();
+})();
+</script>
+</body>
+</html>
