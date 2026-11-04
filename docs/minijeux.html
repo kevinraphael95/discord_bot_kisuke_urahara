@@ -20,28 +20,6 @@
 <script src="js/nav.js" defer></script>
 <script src="js/theme.js" defer></script>
 
-<style>
-  .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-  .game-card { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; gap: 16px; text-decoration: none; color: inherit; position: relative; overflow: hidden; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; min-height: 260px; }
-  .game-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 20px 40px -20px var(--accent-soft); }
-  .game-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .3s ease; }
-  .game-card:hover::before { transform: scaleX(1); }
-  .game-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-  .game-icon { width: 52px; height: 52px; background: var(--accent-soft); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; transition: transform .3s ease; }
-  .game-card:hover .game-icon { transform: rotate(-8deg) scale(1.05); }
-  .game-badge { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; background: var(--bg-soft); color: var(--fg-soft); border: 1px solid var(--line-2); }
-  .game-name { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--fg); line-height: 1.25; letter-spacing: -.005em; margin: 0; }
-  .game-desc { font-size: 14px; color: var(--fg-soft); line-height: 1.6; margin: 0; flex: 1; }
-  .game-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--line); margin-top: auto; }
-  .game-meta { font-size: 12px; color: var(--fg-mute); font-weight: 500; }
-  .game-arrow { font-size: 13px; font-weight: 600; color: var(--accent); display: inline-flex; align-items: center; gap: 6px; transition: gap .25s ease; }
-  .game-card:hover .game-arrow { gap: 10px; }
-  @media (max-width: 700px) {
-    .games-grid { grid-template-columns: 1fr; gap: 16px; }
-    .game-card { padding: 22px; min-height: auto; }
-    .game-name { font-size: 18px; }
-  }
-</style>
 </head>
 <body>
 
@@ -78,7 +56,7 @@
   <p>Des jeux Bleach à faire en solo ou entre membres, directement dans Discord ou ici même.</p>
 </header>
 
-<main class="container" style="padding-bottom: 80px;">
+<main class="container pb-xl">
 
   <div class="games-grid">
 
