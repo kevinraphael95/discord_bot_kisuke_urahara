@@ -131,7 +131,8 @@ const CHARS = [
   // ============================================================
   {n:"Yumichika Ayasegawa",   r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"19/09", w:3,  l:1,  draw:0, img:"assets/personnages/yumichika-ayasegawa.png"},
   {n:"Hanataro Yamada",       r:"Shinigami", sx:"M", chapter:"92", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0, img:"assets/personnages/hanataro-yamada.png"},
- 
+  {n:"Yushiro Shihoin",       r:"Shinigami", sx:"M", chapter:"551", arc:"Guerre Sanglante de Mille Ans (5)", af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"03/03", w:1,  l:1,  draw:0, img:"assets/personnages/yushiro-shihoin.png"},
+  
   // ============================================================
   // VIZARDS (non promus à la fin)
   // ============================================================
@@ -236,4 +237,8 @@ const CHARS = [
   {n:"Royd Lloyd",            r:"Quincy",    sx:"M", chapter:"497", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"28/04", w:2,  l:1,  draw:0, img:"assets/personnages/royd-lloyd.png"},
   {n:"Loyd Lloyd",            r:"Quincy",    sx:"M", chapter:"502", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"28/04", w:1,  l:1,  draw:0, img:"assets/personnages/loyd-lloyd.png"},
   {n:"Giselle Gewelle",       r:"Quincy",    sx:"F", chapter:"544", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Vivant",    hc:"Noir",   bday:"24/12", w:2,  l:1,  draw:0, img:"assets/personnages/giselle-gewelle.png"},
+  {n:"James",                 r:"Quincy",    sx:"M", chapter:"495", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/james.png"},
+  {n:"Shaz Domino",           r:"Quincy",    sx:"M", chapter:"512", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"Noir",   bday:"21/02", w:2,  l:1,  draw:0, img:"assets/personnages/shaz-domino.png"},
+  {n:"Guenael Lee",           r:"Quincy",    sx:"M", chapter:"570", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0, img:"assets/personnages/guenael-lee.png"},
+  
 ];
