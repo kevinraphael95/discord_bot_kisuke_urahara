@@ -35,7 +35,7 @@ const CHARS = [
   // ============================================================
   // AMIS
   // ============================================================
-  {n:"Orihime Inoue",         r:"Fullbring", sx:"F", chapter:"2", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1, img:"assets/personnages/orihime-inoue.png"},
+  {n:"Orihime Inoue",         r:"Fullbring", sx:"F", chapter:"2", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Roux",   bday:"03/09", w:2,  l:5,  draw:1, img:"assets/personnages/orihime-inoue.png"},
   {n:"Yasutora Sado",         r:"Fullbring", sx:"M", chapter:"7", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:3, st:"Vivant",    hc:"Brun",   bday:"07/04", w:6,  l:4,  draw:0, img:"assets/personnages/yasutora-sado.png"},
   {n:"Uryuu Ishida",          r:"Quincy",    sx:"M", chapter:"29", arc:"Le Shinigami Remplaçant (1)",       af:"Karakura",    d:4, st:"Vivant",    hc:"Noir",   bday:"06/11", w:8,  l:4,  draw:1, img:"assets/personnages/uryu-ishida.png"},
   
@@ -58,7 +58,7 @@ const CHARS = [
   // URAHARA SHOP
   // ============================================================
   {n:"Kisuke Urahara",        r:"Shinigami",                   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Blond",  bday:"10/05", w:10, l:1,  draw:1, img:"assets/personnages/kisuke-urahara.png"},
-  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", chapter:"51", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Violet", bday:"11/02", w:8,  l:1,  draw:0, img:"assets/personnages/yoruichi-shihoin.png"},
+  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", chapter:"51", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:3, st:"Vivant",    hc:"Violet", bday:"11/02", w:8,  l:1,  draw:0, img:"assets/personnages/yoruichi-shihoin.png"},
   {n:"Tessai Tsukabishi",     r:"Shinigami",                   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"12/05", w:2,  l:0,  draw:0, img:"assets/personnages/tessai-tsukabishi.png"},
   {n:"Jinta Hanakari",        r:"Mod-Soul/Âme artificielle",   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:1, st:"Vivant",    hc:"Rouge",  bday:"04/04", w:0,  l:1,  draw:0, img:"assets/personnages/jinta-hanakari.png"},
   {n:"Ururu Tsumugiya",       r:"Mod-Soul/Âme artificielle",   sx:"F", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"09/09", w:1,  l:1,  draw:0, img:"assets/personnages/ururu-tsumugiya.png"},
@@ -77,14 +77,14 @@ const CHARS = [
   // ============================================================
   {n:"Shunsui Kyoraku",       r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Brun",   bday:"11/07", w:6,  l:1,  draw:1, img:"assets/personnages/shunsui-kyoraku.png"},
   {n:"Soi Fon",               r:"Shinigami",sx:"F", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"11/02", w:5,  l:2,  draw:1, img:"assets/personnages/sui-feng.png"},
-  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"17/03", w:2,  l:2,  draw:0, img:"assets/personnages/rojuro-otoribashi.png"},
+  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"17/03", w:2,  l:2,  draw:0, img:"assets/personnages/rojuro-otoribashi.png"},
   {n:"Isane Kotetsu",         r:"Shinigami",sx:"F", chapter:"109", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"02/08", w:1,  l:1,  draw:0, img:"assets/personnages/isane-kotetsu.png"},
   {n:"Shinji Hirako",         r:"Vizard",   sx:"M", chapter:"183", arc:"Arrancar : Invasion du monde des humains (3.1)",  af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"10/05", w:3,  l:2,  draw:0, img:"assets/personnages/shinji-hirako.png"},
-  {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", chapter:"51", arc:"Le Shinigami Remplaçant (1)",                     af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0, img:"assets/personnages/byakuya-kuchiki.png"},
-  {n:"Tetsuzaemon Iba",       r:"Shinigami",sx:"M", chapter:"80", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"18/07", w:0,  l:0,  draw:1, img:"assets/personnages/tetsuzaemon-iba.png"},
-  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"03/02", w:2,  l:2,  draw:0, img:"assets/personnages/lisa-yadomaru.png"},
-  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:4, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0, img:"assets/personnages/kensei-muguruma.png"},
-  {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0, img:"assets/personnages/toshiro-hitsugaya.png"},
+  {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", chapter:"51", arc:"Le Shinigami Remplaçant (1)",                     af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0, img:"assets/personnages/byakuya-kuchiki.png"},
+  {n:"Tetsuzaemon Iba",       r:"Shinigami",sx:"M", chapter:"80", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"18/07", w:0,  l:0,  draw:1, img:"assets/personnages/tetsuzaemon-iba.png"},
+  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"03/02", w:2,  l:2,  draw:0, img:"assets/personnages/lisa-yadomaru.png"},
+  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0, img:"assets/personnages/kensei-muguruma.png"},
+  {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0, img:"assets/personnages/toshiro-hitsugaya.png"},
   {n:"Kenpachi Zaraki",       r:"Shinigami",sx:"M", chapter:"65", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"19/11", w:9,  l:2,  draw:1, img:"assets/personnages/kenpachi-zaraki.png"},
   {n:"Mayuri Kurotsuchi",     r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"30/03", w:6,  l:1,  draw:0, img:"assets/personnages/mayuri-kurotsuchi.png"},
   {n:"Rukia Kuchiki",         r:"Shinigami",sx:"F", chapter:"1", arc:"Le Shinigami Remplaçant (1)",                     af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"14/01", w:9,  l:3,  draw:0, img:"assets/personnages/rukia-kuchiki.png"},
@@ -97,7 +97,7 @@ const CHARS = [
   {n:"Sosuke Aizen",          r:"Shinigami", sx:"M", chapter:"79", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:5, st:"Vivant",    hc:"Brun",   bday:"29/05", w:12, l:1,  draw:0, img:"assets/personnages/sosuke-aizen.png"},
   {n:"Sajin Komamura",        r:"Shinigami", sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:4, st:"Incertain", hc:"Brun",   bday:"23/08", w:4,  l:3,  draw:0, img:"assets/personnages/sajin-komamura.png"},
   {n:"Kaname Tousen",         r:"Shinigami", sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:4, st:"Mort",      hc:"Brun",   bday:"13/10", w:3,  l:2,  draw:0, img:"assets/personnages/kaname-tousen.webp"},
-  {n:"Gin Ichimaru",          r:"Shinigami", sx:"M", chapter:"65", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:5, st:"Mort",      hc:"Gris",   bday:"10/09", w:4,  l:1,  draw:0, img:"assets/personnages/gin-ichimaru.png"},
+  {n:"Gin Ichimaru",          r:"Shinigami", sx:"M", chapter:"65", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:4, st:"Mort",      hc:"Gris",   bday:"10/09", w:4,  l:1,  draw:0, img:"assets/personnages/gin-ichimaru.png"},
   {n:"Jushiro Ukitake",       r:"Shinigami", sx:"M", chapter:"23", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1, img:"assets/personnages/jushiro-ukitake.png"},
  
   // ============================================================
@@ -116,49 +116,49 @@ const CHARS = [
   {n:"Mashiro Kuna",          r:"Vizard",    sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0, img:"assets/personnages/mashiro-kuna.png"},
   {n:"Rangiku Matsumoto",     r:"Shinigami", sx:"F", chapter:"80", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"25/05", w:3,  l:3,  draw:0, img:"assets/personnages/rangiku-matsumoto.png"},
   {n:"Ikkaku Madarame",       r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0, img:"assets/personnages/ikkaku-madarame.png"},
-  {n:"Akon",                  r:"Shinigami", sx:"M", chapter:"69", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/akon.png"},
+  {n:"Akon",                  r:"Shinigami", sx:"M", chapter:"69", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/akon.png"},
   {n:"Sentaro Kotsubaki",     r:"Shinigami", sx:"M", chapter:"119", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"22/09", w:1,  l:1,  draw:0, img:"assets/personnages/sentaro-kotsubaki.png"},
  
   // ============================================================
   // GOTEI 13 — ANCIENS VICE-CAPITAINES
   // ============================================================
   {n:"Chojiro Sasakibe",      r:"Shinigami",                  sx:"M", chapter:"83", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Blanc",  bday:"04/11", w:0,  l:1,  draw:0, img:"assets/personnages/chojiro-sasakibe.png"},
-  {n:"Yachiru Kusajishi",     r:"Shinigami",                  sx:"F", chapter:"83", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:4, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1, img:"assets/personnages/yachiru-kusajishi.png"},
+  {n:"Yachiru Kusajishi",     r:"Shinigami",                  sx:"F", chapter:"83", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1, img:"assets/personnages/yachiru-kusajishi.png"},
   {n:"Nemu Kurotsuchi",       r:"Mod-Soul/Âme artificielle",  sx:"F", chapter:"93", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0, img:"assets/personnages/nemu-kurotsuchi.png"},
  
   // ============================================================
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
   // ============================================================
   {n:"Yumichika Ayasegawa",   r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"19/09", w:3,  l:1,  draw:0, img:"assets/personnages/yumichika-ayasegawa.png"},
-  {n:"Hanataro Yamada",       r:"Shinigami", sx:"M", chapter:"92", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13",    d:1, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0, img:"assets/personnages/hanataro-yamada.png"},
+  {n:"Hanataro Yamada",       r:"Shinigami", sx:"M", chapter:"92", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"01/04", w:1,  l:1,  draw:0, img:"assets/personnages/hanataro-yamada.png"},
  
   // ============================================================
   // VIZARDS (non promus à la fin)
   // ============================================================
   {n:"Hiyori Sarugaki",       r:"Vizard",    sx:"F", chapter:"189", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Indépendant", d:3, st:"Vivant",    hc:"Blond",  bday:"01/08", w:2,  l:2,  draw:0, img:"assets/personnages/hiyori-sarugaki.png"},
-  {n:"Love Aikawa",           r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0, img:"assets/personnages/love-aikawa.png"},
+  {n:"Love Aikawa",           r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0, img:"assets/personnages/love-aikawa.png"},
   {n:"Hachigen Ushoda",       r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Rose",   bday:"08/09", w:2,  l:1,  draw:0, img:"assets/personnages/hachigen-ushoda.png"},
  
   // ============================================================
   // ESPADA (par numéro tatoué : 1 → 10)
   // ============================================================
   {n:"Coyote Starrk",         r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Brun",   bday:"19/01", w:4,  l:1,  draw:0, img:"assets/personnages/coyote-starrk.png"},
-  {n:"Lilynette Gingerbuck",  r:"Arrancar",  sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Vert",   bday:"19/01", w:2,  l:1,  draw:0, img:"assets/personnages/lilynette-gingerbuck.png"},
+  {n:"Lilynette Gingerbuck",  r:"Arrancar",  sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:3, st:"Mort",      hc:"Vert",   bday:"19/01", w:2,  l:1,  draw:0, img:"assets/personnages/lilynette-gingerbuck.png"},
   {n:"Baraggan Louisenbairn", r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Espada",      d:5, st:"Mort",      hc:"Blanc",  bday:"09/02", w:3,  l:1,  draw:0, img:"assets/personnages/baraggan-louisenbairn.png"},
-  {n:"Tier Harribel",         r:"Arrancar",  sx:"F", chapter:"198", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Espada",      d:5, st:"Vivant",    hc:"Blond",  bday:"25/07", w:3,  l:1,  draw:0, img:"assets/personnages/tier-harribel.png"},
-  {n:"Ulquiorra Cifer",       r:"Arrancar",  sx:"M", chapter:"190", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"01/12", w:5,  l:1,  draw:0, img:"assets/personnages/ulquiorra-cifer.png"},
-  {n:"Nnoitra Gilga",         r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:5, st:"Mort",      hc:"Noir",   bday:"11/11", w:4,  l:1,  draw:0, img:"assets/personnages/nnoitra-gilga.png"},
-  {n:"Grimmjow Jaegerjaquez", r:"Arrancar",  sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Vivant",    hc:"Bleu",   bday:"31/07", w:4,  l:2,  draw:0, img:"assets/personnages/grimmjow-jaegerjaquez.png"},
-  {n:"Zommari Rureaux",       r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"13/10", w:2,  l:1,  draw:0, img:"assets/personnages/zommari-rureaux.png"},
+  {n:"Tier Harribel",         r:"Arrancar",  sx:"F", chapter:"198", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Espada",      d:4, st:"Vivant",    hc:"Blond",  bday:"25/07", w:3,  l:1,  draw:0, img:"assets/personnages/tier-harribel.png"},
+  {n:"Ulquiorra Cifer",       r:"Arrancar",  sx:"M", chapter:"190", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:4, st:"Mort",      hc:"Noir",   bday:"01/12", w:5,  l:1,  draw:0, img:"assets/personnages/ulquiorra-cifer.png"},
+  {n:"Nnoitra Gilga",         r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:3, st:"Mort",      hc:"Noir",   bday:"11/11", w:4,  l:1,  draw:0, img:"assets/personnages/nnoitra-gilga.png"},
+  {n:"Grimmjow Jaegerjaquez", r:"Arrancar",  sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:4, st:"Vivant",    hc:"Bleu",   bday:"31/07", w:4,  l:2,  draw:0, img:"assets/personnages/grimmjow-jaegerjaquez.png"},
+  {n:"Zommari Rureaux",       r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:3, st:"Mort",      hc:"Chauve", bday:"13/10", w:2,  l:1,  draw:0, img:"assets/personnages/zommari-rureaux.png"},
   {n:"Szayelaporro Grantz",   r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Rose",   bday:"22/06", w:3,  l:1,  draw:0, img:"assets/personnages/szayelaporro-granz.png"},
-  {n:"Aaroniero Arruruerie",  r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"23/04", w:2,  l:1,  draw:0, img:"assets/personnages/aaroniero-arruruerie.png"},
-  {n:"Yammy Llargo",          r:"Arrancar",  sx:"M", chapter:"190", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:5, st:"Mort",      hc:"Chauve", bday:"??/??", w:3,  l:1,  draw:0, img:"assets/personnages/yammy-llargo.png"},
+  {n:"Aaroniero Arruruerie",  r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:3, st:"Mort",      hc:"Chauve", bday:"23/04", w:2,  l:1,  draw:0, img:"assets/personnages/aaroniero-arruruerie.png"},
+  {n:"Yammy Llargo",          r:"Arrancar",  sx:"M", chapter:"190", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:3,  l:1,  draw:0, img:"assets/personnages/yammy-llargo.png"},
  
   // ============================================================
   // EX-ESPADA & ARRANCAR NOTABLES
   // ============================================================
   {n:"Kukkapuro",                r:"Arrancar", sx:"M", chapter:"342", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Chauve", bday:"04/04", w:0,  l:0,  draw:0, img:"assets/personnages/kukkapuro.png"},
-  {n:"Nelliel Tu Odelschwanck",  r:"Arrancar", sx:"F", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Vert",   bday:"24/04", w:4,  l:1,  draw:0, img:"assets/personnages/nelliel-tu-odelschwanck.png"},
+  {n:"Nelliel Tu Odelschwanck",  r:"Arrancar", sx:"F", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:4, st:"Vivant",    hc:"Vert",   bday:"24/04", w:4,  l:1,  draw:0, img:"assets/personnages/nelliel-tu-odelschwanck.png"},
   {n:"Luppi Antenor",            r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada", d:3, st:"Mort",      hc:"Noir",   bday:"05/06", w:1,  l:1,  draw:0, img:"assets/personnages/luppi-antenor.png"},
   {n:"Wonderweiss Margela",      r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Bataille de Karakura (3.4)",    af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"06/07", w:2,  l:1,  draw:0, img:"assets/personnages/wonderweiss-margela.png"},
  
@@ -216,10 +216,10 @@ const CHARS = [
   {n:"Gerard Valkyrie",       r:"Quincy",    sx:"M", chapter:"599", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Incertain", hc:"Blond",  bday:"07/01", w:3,  l:1,  draw:0, img:"assets/personnages/gerard-valkyrie.png"},
   {n:"Lille Barro",           r:"Quincy",    sx:"M", chapter:"599", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Blanc",  bday:"11/04", w:3,  l:1,  draw:0, img:"assets/personnages/lille-barro.png"},
   {n:"Bambietta Basterbine",  r:"Quincy",    sx:"F", chapter:"490", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Violet", bday:"06/08", w:2,  l:1,  draw:0, img:"assets/personnages/bambietta-basterbine.png"},
-  {n:"As Nodt",               r:"Quincy",    sx:"M", chapter:"494", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:5, st:"Mort",      hc:"Noir",   bday:"29/12", w:3,  l:1,  draw:0, img:"assets/personnages/as-nodt.png"},
+  {n:"As Nodt",               r:"Quincy",    sx:"M", chapter:"494", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"29/12", w:3,  l:1,  draw:0, img:"assets/personnages/as-nodt.png"},
   {n:"Liltotto Lamperd",      r:"Quincy",    sx:"F", chapter:"544", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Vivant",    hc:"Blond",  bday:"16/09", w:3,  l:1,  draw:0, img:"assets/personnages/liltotto-lamperd.png"},
   {n:"Bazz-B",                r:"Quincy",    sx:"M", chapter:"490", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Rouge",  bday:"14/07", w:2,  l:2,  draw:0, img:"assets/personnages/bazz-b.png"},
-  {n:"Cang Du",               r:"Quincy",    sx:"M", chapter:"495", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"27/05", w:2,  l:1,  draw:0, img:"assets/personnages/cang-du.png"},
+  {n:"Cang Du",               r:"Quincy",    sx:"M", chapter:"495", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"27/05", w:2,  l:1,  draw:0, img:"assets/personnages/cang-du.png"},
   {n:"Quilge Opie",           r:"Quincy",    sx:"M", chapter:"487", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Noir",   bday:"01/09", w:2,  l:1,  draw:0, img:"assets/personnages/quilge-opie.png"},
   {n:"BG9",                   r:"Quincy",    sx:"M", chapter:"495", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:2,  l:1,  draw:0, img:"assets/personnages/bg9.png"},
   {n:"PePe Waccabrada",       r:"Quincy",    sx:"M", chapter:"500", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Mort",      hc:"Chauve", bday:"03/04", w:2,  l:1,  draw:0, img:"assets/personnages/pepe-waccabrada.webp"},
