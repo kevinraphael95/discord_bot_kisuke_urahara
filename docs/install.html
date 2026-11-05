@@ -77,6 +77,46 @@
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
+        <div class="step-title">Créer l'application sur le Discord Developer Portal</div>
+        <p class="step-desc">
+          Rends-toi sur le <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">Discord Developer Portal</a> et connecte-toi avec ton compte Discord.
+        </p>
+        <ul style="list-style: none; padding: 0; margin-top: 10px; font-size: 14px; color: var(--fg-soft); display: flex; flex-direction: column; gap: 6px;">
+          <li>• Clique sur <strong>New Application</strong> en haut à droite.</li>
+          <li>• Donne-lui un nom (ex: Kisuke Urahara) et accepte les conditions.</li>
+          <li>• Va dans l'onglet <strong>Bot</strong> (menu de gauche).</li>
+          <li>• Clique sur <strong>Reset Token</strong> et copie le token généré (garde-le secret, c'est ton <code>DISCORD_TOKEN</code>).</li>
+        </ul>
+        <div class="note mt-md">
+          <span class="note-icon">💡</span>
+          <span>Ne partage jamais ce token. Si quelqu'un l'obtient, il pourra contrôler ton bot.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Inviter le bot sur ton serveur</div>
+        <p class="step-desc">
+          Toujours dans le Developer Portal, va dans l'onglet <strong>OAuth2</strong> > <strong>URL Generator</strong>.
+        </p>
+        <ul style="list-style: none; padding: 0; margin-top: 10px; font-size: 14px; color: var(--fg-soft); display: flex; flex-direction: column; gap: 6px;">
+          <li>• Dans <strong>Scopes</strong>, coche <code>bot</code> et <code>applications.commands</code>.</li>
+          <li>• Dans <strong>Bot Permissions</strong>, coche <code>Administrator</code> (ou les permissions dont ton bot a besoin).</li>
+          <li>• Copie l'URL générée en bas de page.</li>
+          <li>• Ouvre cette URL dans un nouvel onglet, choisis ton serveur et autorise l'invitation.</li>
+        </ul>
+        <div class="note mt-md">
+          <span class="note-icon">💡</span>
+          <span>Le bot apparaîtra hors ligne tant que tu ne l'auras pas lancé avec <code>python bot.py</code>.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
         <div class="step-title">Cloner le dépôt</div>
         <p class="step-desc">Clone le projet depuis GitHub dans le répertoire de ton choix, puis place-toi dedans.</p>
         <div class="code-group">
@@ -87,7 +127,7 @@
     </div>
 
     <div class="step">
-      <div class="step-num">3</div>
+      <div class="step-num">5</div>
       <div class="step-body">
         <div class="step-title">Installer les dépendances</div>
         <p class="step-desc">
@@ -98,7 +138,7 @@
     </div>
 
     <div class="step">
-      <div class="step-num">4</div>
+      <div class="step-num">6</div>
       <div class="step-body">
         <div class="step-title">Configurer les variables d'environnement</div>
         <p class="step-desc">
@@ -107,7 +147,7 @@
 
         <p class="step-desc"><strong>🔴 Variables obligatoires (le bot ne démarre pas sans elles) :</strong></p>
         <div class="env-list">
-          <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token secret du bot Discord (obligatoire)</span></div>
+          <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token secret du bot Discord (obtenu à l'étape 2)</span></div>
           <div class="env-row"><span class="env-key">ADMIN_PASSWORD</span><span class="env-val">Mot de passe pour accéder au panel admin (obligatoire si panel activé)</span></div>
           <div class="env-row"><span class="env-key">ADMIN_SECRET</span><span class="env-val">Clé secrète pour les sessions Flask (obligatoire si panel activé)</span></div>
         </div>
@@ -129,7 +169,7 @@
     </div>
 
     <div class="step">
-      <div class="step-num">5</div>
+      <div class="step-num">7</div>
       <div class="step-body">
         <div class="step-title">Lancer le bot</div>
         <p class="step-desc">Lance le bot directement avec Python :</p>
@@ -142,7 +182,7 @@
     </div>
 
     <div class="step">
-      <div class="step-num">6</div>
+      <div class="step-num">8</div>
       <div class="step-body">
         <div class="step-title">GitHub Actions (Keep-Alive) — optionnel</div>
         <p class="step-desc">
