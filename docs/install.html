@@ -181,26 +181,6 @@
       </div>
     </div>
 
-    <div class="step">
-      <div class="step-num">8</div>
-      <div class="step-body">
-        <div class="step-title">GitHub Actions (Keep-Alive) — optionnel</div>
-        <p class="step-desc">
-          Si tu déploies le bot sur un service gratuit comme Render, il peut se mettre en veille après une période d'inactivité. Pour l'éviter, le dépôt inclut un workflow GitHub Actions qui ping régulièrement l'URL publique du bot.
-        </p>
-        <p class="step-desc">
-          La variable <code class="inline-code">PING_URL</code> ne se met <strong>PAS</strong> dans le fichier <code class="inline-code">.env</code>. Elle se configure dans les paramètres GitHub :
-        </p>
-        <div class="env-list">
-          <div class="env-row"><span class="env-key">PING_URL</span><span class="env-val">URL publique du bot (ex : <code>https://kisuke-urahara-bot-discord.onrender.com/login</code>). À mettre dans <strong>GitHub → Settings → Secrets and variables → Actions → Variables</strong>.</span></div>
-        </div>
-        <div class="note">
-          <span class="note-icon">💡</span>
-          <span>Cette étape est facultative. Elle ne concerne que l'hébergement sur Render (ou un service similaire qui met les services en veille).</span>
-        </div>
-      </div>
-    </div>
-
   </div>
 
 </main>
