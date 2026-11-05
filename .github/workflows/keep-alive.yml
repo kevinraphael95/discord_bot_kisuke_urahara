@@ -40,4 +40,4 @@ jobs:
           # `curl` envoie la requête, ignore le corps de la réponse (-o /dev/null)
           # et affiche uniquement le code HTTP retourné (-w "%{http_code}")
           curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" \
-            https://kisuke-urahara-bot-discord.onrender.com/login
+            ${{ vars.PING_URL }}
