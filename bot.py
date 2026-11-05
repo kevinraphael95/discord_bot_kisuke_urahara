@@ -219,19 +219,32 @@ async def cleanup_aiohttp():
 # 🚀 Lancement
 # ================================================================================
 if __name__ == "__main__":
-
-    # init_logger() déjà appelé en haut du fichier
-
-    from admin.admin_panel import run_admin, set_bot
-    admin_thread = threading.Thread(target=run_admin, args=(ADMIN_PORT,), daemon=True)
-    admin_thread.start()
-    print(f"🌐 Panel admin lancé sur http://localhost:{ADMIN_PORT}")
+    # Vérifie si on veut lancer le panel admin
+    panel_active = os.getenv("ENABLE_ADMIN_PANEL", "False").lower() == "true"
+    
+    if panel_active:
+        try:
+            from admin.admin_panel import run_admin, set_bot
+            admin_thread = threading.Thread(target=run_admin, args=(ADMIN_PORT,), daemon=True)
+            admin_thread.start()
+            print(f"🌐 Panel admin lancé sur http://localhost:{ADMIN_PORT}")
+        except Exception as e:
+            print(f"⚠️ Impossible de lancer le panel admin : {e}")
+            print("⚠️ Le bot Discord va démarrer sans le panel admin.")
+            panel_active = False  # Si ça plante, on considère le panel comme désactivé
+    else:
+        print("ℹ️ Panel admin désactivé (ENABLE_ADMIN_PANEL=False).")
 
     async def start():
         init_db()
         await load_commands()
         await load_tasks()
-        set_bot(bot)
+        
+        # ⚠️ On appelle set_bot UNIQUEMENT si le panel admin est actif
+        if panel_active:
+            from admin.admin_panel import set_bot
+            set_bot(bot)
+        
         try:
             await bot.start(TOKEN)
         finally:
