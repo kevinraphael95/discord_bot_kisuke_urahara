@@ -1,90 +1,79 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nope · YGO Tools</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="utils/ygo.css">
-<script src="utils/ygo.js"></script>
-<style>
-  /* Styles spécifiques pour la page 404 */
-  .error-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    min-height: 60vh;
-    padding: 20px;
-  }
-  .nope-title {
-    font-family: var(--font-display);
-    font-size: clamp(4rem, 15vw, 8rem);
-    color: var(--gold);
-    margin: 0 0 10px;
-    line-height: 1;
-    text-shadow: 0 0 30px var(--gold-glow);
-  }
-  .video-container {
-    width: 100%;
-    max-width: 800px;
-    aspect-ratio: 16 / 9;
-    margin: 30px 0;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 2px solid var(--border);
-    box-shadow: var(--shadow-lg);
-  }
-  .video-container iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-</style>
+<title>Nope — Kisuke Urahara</title>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', saved || system);
+  })();
+</script>
+
+<link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/nav.js" defer></script>
+<script src="js/theme.js" defer></script>
+
 </head>
 <body>
 
-<header class="app-header">
-  <div class="app-header-inner">
-    <a class="brand" href="index.html" title="Accueil">
-      <div class="brand-logo"><i class="fa-solid fa-dragon"></i></div>
-      <div>
-        <div class="brand-name">YGO Tools</div>
-        <div class="brand-sub">Boîte à outils Yu-Gi-Oh!</div>
-      </div>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" data-nav="index">
+      <span class="nav-logo-mark"><img src="assets/kisuke.jpg" alt="Kisuke"></span>
+      Kisuke Urahara
     </a>
-    <div class="header-actions">
-      <button class="icon-btn" id="theme-toggle" type="button"></button>
+    <ul class="nav-links">
+      <li><a data-nav="install">Installation</a></li>
+      <li><a data-nav="commandes">Commandes</a></li>
+      <li><a data-nav="guesser">Guesser</a></li>
+      <li><a data-nav="minijeux">Mini-jeux</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-btn" id="themeBtn" aria-label="Changer le thème"></button>
+      <button class="nav-burger" id="navBurger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
-</header>
+</nav>
 
-<main class="container error-page">
-  <h1 class="nope-title">Nope</h1>
-  <p class="muted" style="font-size: 1.1rem; margin-bottom: 20px;">Cette page n'existe pas (ou plus).</p>
-  
+<div class="nav-mobile" id="navMobile">
+  <a data-nav="install">Installation</a>
+  <a data-nav="commandes">Commandes</a>
+  <a data-nav="guesser">Guesser</a>
+  <a data-nav="minijeux">Mini-jeux</a>
+</div>
+
+<main class="error-page">
+  <div class="error-code">Nope</div>
+  <p class="error-desc">Cette page n'existe pas (ou plus).</p>
+
   <div class="video-container">
-    <!-- L'ID de la vidéo Rick Roll : dQw4w9WgXcQ -->
-    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0" 
-            title="Rick Roll" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+    <!-- Rick Roll : dQw4w9WgXcQ -->
+    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0"
+            title="Rick Roll"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen>
     </iframe>
   </div>
 
-  <div class="actions" style="justify-content: center; margin-top: 20px;">
-    <a class="btn btn-primary" href="index.html">
-      <i class="fa-solid fa-house"></i> Retour à l'accueil
-    </a>
+  <div class="error-cta">
+    <a class="btn btn-primary" href="index.html">Retour à l'accueil</a>
   </div>
 </main>
 
-<footer class="app-footer">YGO Tools · tout s'exécute dans ton navigateur</footer>
-<div class="toasts" id="toasts"></div>
+<footer>
+  <div class="footer-inner">
+    <span>© kevinraphael95 · MIT License</span>
+  </div>
+</footer>
 
 </body>
 </html>
