@@ -651,6 +651,7 @@ footer {
   padding: 28px;
   position: relative;
   transition: border-color .2s;
+  overflow: hidden;
 }
 .step:hover { border-color: var(--line-2); }
 .step::before {
@@ -659,7 +660,6 @@ footer {
   left: 0; top: 0; bottom: 0;
   width: 3px;
   background: var(--accent);
-  border-radius: var(--radius) 0 0 var(--radius);
   transform: scaleY(0);
   transform-origin: top;
   transition: transform .25s;
