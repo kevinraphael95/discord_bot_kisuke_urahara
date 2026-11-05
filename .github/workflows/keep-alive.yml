@@ -1,6 +1,6 @@
 # ================================================================================
 # 📌 keep-alive.yml — GitHub Actions
-# Objectif : Pinger le service toutes les 14 minutes pour éviter la veille
+# Objectif : Pinger le service toutes les X minutes pour éviter la veille
 # Catégorie : CI/CD
 # Accès : Public
 # ================================================================================
@@ -14,11 +14,11 @@ name: Keep Bot Alive
 # 🔔 Déclencheurs
 # ================================================================================
 on:
-  # Exécution automatique toutes les 14 minutes (format cron UTC)
+  # Exécution automatique toutes les X minutes (format cron UTC)
   # GitHub impose un minimum de 5 minutes entre deux exécutions.
   # 14 minutes laisse une marge de sécurité sous la limite des 15 minutes.
   schedule:
-    - cron: '*/14 * * * *'
+    - cron: '*/6 * * * *'
 
   # Permet de lancer le workflow manuellement depuis l'onglet "Actions"
   workflow_dispatch:
