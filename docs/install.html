@@ -106,16 +106,17 @@
         </p>
         <div class="env-list">
           <div class="env-row"><span class="env-key">COMMAND_PREFIX</span><span class="env-val">Préfixe des commandes texte (ex : <code>!!</code>)</span></div>
-          <div class="env-row"><span class="env-key">DISCORD_APP_ID</span><span class="env-val">ID de l'application Discord (Developer Portal)</span></div>
-          <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token secret du bot Discord</span></div>
-          <div class="env-row"><span class="env-key">GPT_OSS_API_KEY</span><span class="env-val">Clé API pour le modèle GPT open-source</span></div>
-          <div class="env-row"><span class="env-key">ADMIN_PASSWORD</span><span class="env-val">Mot de passe pour accéder au panel admin</span></div>
+          <div class="env-row"><span class="env-key">DISCORD_TOKEN</span><span class="env-val">Token secret du bot Discord (obligatoire)</span></div>
+          <div class="env-row"><span class="env-key">ENABLE_ADMIN_PANEL</span><span class="env-val">Activer ou désactiver le panel admin (<code>True</code> ou <code>False</code>)</span></div>
+          <div class="env-row"><span class="env-key">ADMIN_PASSWORD</span><span class="env-val">Mot de passe pour accéder au panel admin (obligatoire si panel activé)</span></div>
           <div class="env-row"><span class="env-key">ADMIN_PORT</span><span class="env-val">Port du panel admin Flask (ex : <code>5050</code>)</span></div>
-          <div class="env-row"><span class="env-key">ADMIN_SECRET</span><span class="env-val">Clé secrète pour les sessions Flask</span></div>
-          <div class="env-row"><span class="env-key">BACKUP_AUTO_HOURS</span><span class="env-val">Intervalle en heures entre chaque backup auto de la base (ex : <code>6</code>). <code>0</code> = désactive le backup automatique.</span></div>
+          <div class="env-row"><span class="env-key">ADMIN_SECRET</span><span class="env-val">Clé secrète pour les sessions Flask (obligatoire si panel activé)</span></div>
+          <div class="env-row"><span class="env-key">BACKUP_AUTO_HOURS</span><span class="env-val">Intervalle en heures entre chaque backup auto de la base (ex : <code>6</code>). <code>0</code> = désactivé.</span></div>
+          <div class="env-row"><span class="env-key">GPT_OSS_API_KEY</span><span class="env-val">Clé API pour le modèle GPT open-source (optionnel)</span></div>
         </div>
         <div class="note">
           <span class="note-icon">💡</span>
+          <span>Le fichier <code>.env</code> ne doit jamais être commit sur GitHub. Il est déjà listé dans le <code>.gitignore</code>.</span>
         </div>
       </div>
     </div>
