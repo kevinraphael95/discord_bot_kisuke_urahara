@@ -33,9 +33,20 @@ jobs:
 
     steps:
       # ------------------------------------------------------------------------
-      # Étape unique : envoyer une requête HTTP GET vers l'URL publique du bot
+      # Étape 1 : Vérifier que l'URL est bien configurée
+      # ------------------------------------------------------------------------
+      - name: Vérification de la configuration
+        run: |
+          if [ -z "${{ vars.PING_URL }}" ]; then
+            echo "⚠️ PING_URL n'est pas configurée. Le ping est ignoré."
+            exit 0 # On quitte proprement sans faire d'erreur
+          fi
+
+      # ------------------------------------------------------------------------
+      # Étape 2 : envoyer une requête HTTP GET vers l'URL publique du bot
       # ------------------------------------------------------------------------
       - name: Ping le service Render
+        if: ${{ vars.PING_URL != '' }} # On ne ping que si la variable existe
         run: |
           # `curl` envoie la requête, ignore le corps de la réponse (-o /dev/null)
           # et affiche uniquement le code HTTP retourné (-w "%{http_code}")
