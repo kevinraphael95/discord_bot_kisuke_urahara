@@ -1,0 +1,43 @@
+# ================================================================================
+# 📌 keep-alive.yml — GitHub Actions
+# Objectif : Pinger le service toutes les 14 minutes pour éviter la veille
+# Catégorie : CI/CD
+# Accès : Public
+# ================================================================================
+
+# ================================================================================
+# 📦 Nom du workflow (visible dans l'onglet "Actions" de GitHub)
+# ================================================================================
+name: Keep Bot Alive
+
+# ================================================================================
+# 🔔 Déclencheurs
+# ================================================================================
+on:
+  # Exécution automatique toutes les 14 minutes (format cron UTC)
+  # GitHub impose un minimum de 5 minutes entre deux exécutions.
+  # 14 minutes laisse une marge de sécurité sous la limite des 15 minutes.
+  schedule:
+    - cron: '*/14 * * * *'
+
+  # Permet de lancer le workflow manuellement depuis l'onglet "Actions"
+  workflow_dispatch:
+
+# ================================================================================
+# 🛠️ Jobs
+# ================================================================================
+jobs:
+  ping:
+    # Machine virtuelle utilisée par GitHub pour exécuter le job
+    runs-on: ubuntu-latest
+
+    steps:
+      # ------------------------------------------------------------------------
+      # Étape unique : envoyer une requête HTTP GET vers l'URL publique du bot
+      # ------------------------------------------------------------------------
+      - name: Ping le service Render
+        run: |
+          # `curl` envoie la requête, ignore le corps de la réponse (-o /dev/null)
+          # et affiche uniquement le code HTTP retourné (-w "%{http_code}")
+          curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" \
+            https://kisuke-urahara-bot-discord.onrender.com/login
