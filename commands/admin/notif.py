@@ -19,7 +19,6 @@ from utils.stream_notif import (
     MAX_FOLLOWS_PER_GUILD,
     TWITCH_LOGIN_RE,
     UC_RE,
-    all_follows,
     delete_follow,
     init_table,
     query,
@@ -58,6 +57,17 @@ class Notif(commands.Cog):
             await self.client.start()
             self._client_started = True
 
+    @staticmethod
+    def _exists(guild_id: int, platform: str, handle: str) -> bool:
+        return bool(query(
+            "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? AND handle = ?",
+            (guild_id, platform, handle),
+        ))
+
+    @staticmethod
+    def _count(guild_id: int) -> int:
+        return query("SELECT COUNT(*) AS c FROM notif_follows WHERE guild_id = ?", (guild_id,))[0]["c"]
+
     async def _send_help(self, channel: discord.abc.Messageable):
         embed = discord.Embed(
             title="📡 Notifications de chaînes",
@@ -79,7 +89,10 @@ class Notif(commands.Cog):
         embed.add_field(
             name="Gestion",
             value="`!!notif list` → Affiche les abonnements du serveur.\n"
-                  "`!!notif remove <plateforme> <handle>` → Supprime un abonnement.",
+                  "`!!notif remove <plateforme> <handle>` → Supprime un abonnement.\n"
+                  "`!!notif test` → Force une vérification maintenant.\n"
+                  "*Pour modifier le salon ou le rôle : refais simplement la commande d'ajout.*\n"
+                  "*Si tu mets un rôle, mets aussi le salon avant.*",
             inline=False,
         )
         await safe_send(channel, embed=embed)
@@ -88,12 +101,13 @@ class Notif(commands.Cog):
         if not login:
             return await safe_send(ctx.channel, "❌ Précise le pseudo Twitch. Ex: `!!notif twitch shroud`")
 
-        login = login.lower()
+        # Accepte "pseudo", "@pseudo", "twitch.tv/pseudo", "https://twitch.tv/pseudo?sr=a"...
+        login = login.strip().split("?")[0].split("#")[0].rstrip("/").split("/")[-1].lstrip("@").lower()
         if not TWITCH_LOGIN_RE.match(login):
             return await safe_send(ctx.channel, "❌ Pseudo Twitch invalide (alphanumérique uniquement, max 25 caractères).")
 
-        count = query("SELECT COUNT(*) as c FROM notif_follows WHERE guild_id = ?", (ctx.guild.id,))[0]["c"]
-        if count >= MAX_FOLLOWS_PER_GUILD:
+        exists = self._exists(ctx.guild.id, "twitch", login)
+        if not exists and self._count(ctx.guild.id) >= MAX_FOLLOWS_PER_GUILD:
             return await safe_send(ctx.channel, f"❌ Limite atteinte ({MAX_FOLLOWS_PER_GUILD} abonnements par serveur).")
 
         await self._ensure_client()
@@ -103,7 +117,7 @@ class Notif(commands.Cog):
             except Exception as e:
                 log.warning(f"[notif] Erreur de vérification Twitch pour {login}: {e}")
                 return await safe_send(ctx.channel, "⚠️ Impossible de vérifier le compte Twitch pour le moment. Réessaie plus tard.")
-            
+
             if not user:
                 return await safe_send(ctx.channel, f"❌ Le compte Twitch `{login}` n'existe pas.")
             display_name = user["display_name"]
@@ -114,20 +128,21 @@ class Notif(commands.Cog):
         channel_id = salon.id if salon else ctx.channel.id
         role_id = role.id if role else None
 
-        try:
-            query(
-                """
-                INSERT INTO notif_follows (guild_id, platform, handle, display, channel_id, role_id)
-                VALUES (?, 'twitch', ?, ?, ?, ?)
-                """,
-                (ctx.guild.id, login, display_name, channel_id, role_id),
-            )
-        except Exception as e:
-            if "UNIQUE constraint failed" in str(e):
-                return await safe_send(ctx.channel, f"ℹ️ `{login}` est déjà suivi sur ce serveur.")
-            raise
+        query(
+            """
+            INSERT INTO notif_follows (guild_id, platform, handle, display, channel_id, role_id)
+            VALUES (?, 'twitch', ?, ?, ?, ?)
+            ON CONFLICT (guild_id, platform, handle) DO UPDATE SET
+                display = excluded.display,
+                channel_id = excluded.channel_id,
+                role_id = excluded.role_id,
+                fail_count = 0
+            """,
+            (ctx.guild.id, login, display_name, channel_id, role_id),
+        )
 
-        msg = f"✅ **{display_name}** ajouté aux notifications Twitch dans <#{channel_id}>."
+        verbe = "mis à jour" if exists else "ajouté"
+        msg = f"✅ **{display_name}** {verbe} (Twitch) → <#{channel_id}>."
         if role:
             msg += f" (mention : {role.mention})"
         await safe_send(ctx.channel, msg)
@@ -135,10 +150,6 @@ class Notif(commands.Cog):
     async def _add_youtube(self, ctx: commands.Context, cible: str, salon: discord.TextChannel, role: discord.Role):
         if not cible:
             return await safe_send(ctx.channel, "❌ Précise un lien, un @handle ou un ID de chaîne YouTube.")
-
-        count = query("SELECT COUNT(*) as c FROM notif_follows WHERE guild_id = ?", (ctx.guild.id,))[0]["c"]
-        if count >= MAX_FOLLOWS_PER_GUILD:
-            return await safe_send(ctx.channel, f"❌ Limite atteinte ({MAX_FOLLOWS_PER_GUILD} abonnements par serveur).")
 
         await self._ensure_client()
         try:
@@ -151,25 +162,34 @@ class Notif(commands.Cog):
             return await safe_send(ctx.channel, f"❌ Chaîne YouTube introuvable pour `{cible}`.")
 
         cid, name, entries = resolved
+
+        exists = self._exists(ctx.guild.id, "youtube", cid)
+        if not exists and self._count(ctx.guild.id) >= MAX_FOLLOWS_PER_GUILD:
+            return await safe_send(ctx.channel, f"❌ Limite atteinte ({MAX_FOLLOWS_PER_GUILD} abonnements par serveur).")
+
         channel_id = salon.id if salon else ctx.channel.id
         role_id = role.id if role else None
+        # On "amorce" avec la dernière vidéo pour ne pas annoncer l'ancien contenu
         last_id = entries[0]["id"] if entries else None
         last_published = entries[0]["published"].isoformat() if entries else None
 
-        try:
-            query(
-                """
-                INSERT INTO notif_follows (guild_id, platform, handle, display, channel_id, role_id, last_id, last_published)
-                VALUES (?, 'youtube', ?, ?, ?, ?, ?, ?)
-                """,
-                (ctx.guild.id, cid, name, channel_id, role_id, last_id, last_published),
-            )
-        except Exception as e:
-            if "UNIQUE constraint failed" in str(e):
-                return await safe_send(ctx.channel, f"ℹ️ La chaîne `{name}` est déjà suivie sur ce serveur.")
-            raise
+        # En cas de mise à jour, last_id / last_published ne sont PAS modifiés
+        query(
+            """
+            INSERT INTO notif_follows
+                (guild_id, platform, handle, display, channel_id, role_id, last_id, last_published)
+            VALUES (?, 'youtube', ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (guild_id, platform, handle) DO UPDATE SET
+                display = excluded.display,
+                channel_id = excluded.channel_id,
+                role_id = excluded.role_id,
+                fail_count = 0
+            """,
+            (ctx.guild.id, cid, name, channel_id, role_id, last_id, last_published),
+        )
 
-        msg = f"✅ **{name}** ajoutée aux notifications YouTube dans <#{channel_id}>."
+        verbe = "mise à jour" if exists else "ajoutée"
+        msg = f"✅ **{name}** {verbe} (YouTube) → <#{channel_id}>."
         if role:
             msg += f" (mention : {role.mention})"
         await safe_send(ctx.channel, msg)
@@ -185,24 +205,25 @@ class Notif(commands.Cog):
             description=f"{len(rows)} abonnement(s) configuré(s).",
         )
 
+        def line(r: dict, show_handle: bool = False) -> str:
+            handle = f" (`{r['handle']}`)" if show_handle else ""
+            role = f" | <@&{r['role_id']}>" if r["role_id"] else ""
+            warn = " ⚠️" if r.get("fail_count") else ""
+            return f"• **{r['display']}**{handle} → <#{r['channel_id']}>{role}{warn}"
+
         twitchs = [r for r in rows if r["platform"] == "twitch"]
         youtubes = [r for r in rows if r["platform"] == "youtube"]
 
         if twitchs:
-            txt = "\n".join(
-                f"• **{r['display']}** (`{r['handle']}`) → <#{r['channel_id']}>"
-                + (f" | <@&{r['role_id']}>" if r["role_id"] else "")
-                for r in twitchs
-            )
+            txt = "\n".join(line(r, show_handle=True) for r in twitchs)
             embed.add_field(name=f"🎮 Twitch ({len(twitchs)})", value=txt[:1024], inline=False)
 
         if youtubes:
-            txt = "\n".join(
-                f"• **{r['display']}** → <#{r['channel_id']}>"
-                + (f" | <@&{r['role_id']}>" if r["role_id"] else "")
-                for r in youtubes
-            )
+            txt = "\n".join(line(r) for r in youtubes)
             embed.add_field(name=f"📺 YouTube ({len(youtubes)})", value=txt[:1024], inline=False)
+
+        if any(r.get("fail_count") for r in rows):
+            embed.set_footer(text="⚠️ = le bot n'arrive pas à écrire dans ce salon (permissions ?)")
 
         await safe_send(ctx.channel, embed=embed)
 
@@ -211,26 +232,32 @@ class Notif(commands.Cog):
             return await safe_send(ctx.channel, "❌ Syntaxe : `!!notif remove <twitch|youtube> <handle>`")
 
         platform = platform.lower()
+        if platform == "yt":
+            platform = "youtube"
         if platform not in ("twitch", "youtube"):
             return await safe_send(ctx.channel, "❌ La plateforme doit être `twitch` ou `youtube`.")
 
         if platform == "twitch":
-            handle = handle.lower().lstrip("@")
+            handle = handle.strip().split("?")[0].rstrip("/").split("/")[-1].lstrip("@").lower()
             rows = query(
                 "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? AND handle = ?",
                 (ctx.guild.id, platform, handle),
             )
         else:
-            if UC_RE.search(handle):
-                handle = UC_RE.search(handle).group(0)
+            m = UC_RE.search(handle)
+            if m:
+                handle = m.group(0)
                 rows = query(
                     "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? AND handle = ?",
                     (ctx.guild.id, platform, handle),
                 )
             else:
+                # Correspondance EXACTE sur le nom affiché (sans le @ éventuel)
+                name = handle.lstrip("@")
                 rows = query(
-                    "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? AND (handle = ? OR display LIKE ?)",
-                    (ctx.guild.id, platform, handle, f"%{handle}%"),
+                    "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? "
+                    "AND (handle = ? OR LOWER(display) = LOWER(?))",
+                    (ctx.guild.id, platform, handle, name),
                 )
 
         if not rows:
@@ -256,13 +283,13 @@ class Notif(commands.Cog):
     # 🔹 Commande PREFIX
     # ============================================================================
     @commands.group(name="notif", invoke_without_command=True)
+    @commands.guild_only()
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_notif(self, ctx: commands.Context):
         await self._send_help(ctx.channel)
 
     @prefix_notif.command(name="twitch")
-    @commands.has_permissions(administrator=True)
     async def prefix_notif_twitch(
         self,
         ctx: commands.Context,
@@ -272,8 +299,7 @@ class Notif(commands.Cog):
     ):
         await self._add_twitch(ctx, login, salon, role)
 
-    @prefix_notif.command(name="youtube")
-    @commands.has_permissions(administrator=True)
+    @prefix_notif.command(name="youtube", aliases=["yt"])
     async def prefix_notif_youtube(
         self,
         ctx: commands.Context,
@@ -283,30 +309,29 @@ class Notif(commands.Cog):
     ):
         await self._add_youtube(ctx, cible, salon, role)
 
-    @prefix_notif.command(name="list")
-    @commands.has_permissions(administrator=True)
+    @prefix_notif.command(name="list", aliases=["liste"])
     async def prefix_notif_list(self, ctx: commands.Context):
         await self._list(ctx)
 
     @prefix_notif.command(name="remove", aliases=["rm", "del"])
-    @commands.has_permissions(administrator=True)
     async def prefix_notif_remove(self, ctx: commands.Context, platform: str = None, handle: str = None):
         await self._remove(ctx, platform, handle)
 
     @prefix_notif.command(name="test")
-    @commands.has_permissions(administrator=True)
     async def prefix_notif_test(self, ctx: commands.Context):
-        # On récupère le cog de la task
-        stream_alert_cog = self.bot.get_cog("StreamAlertTask")
-        if not stream_alert_cog:
+        """Force une vérification (⚠️ envoie de vraies annonces)."""
+        task_cog = self.bot.get_cog("StreamAlertTask")
+        if not task_cog:
             return await safe_send(ctx.channel, "❌ Le cog `StreamAlertTask` n'est pas chargé.")
-        
+
         await safe_send(ctx.channel, "🔄 Vérification manuelle en cours...")
         try:
-            await stream_alert_cog._check_twitch()
-            await stream_alert_cog._check_youtube()
+            if task_cog.client.twitch_ok:
+                await task_cog._check_twitch()
+            await task_cog._check_youtube()
             await safe_send(ctx.channel, "✅ Vérification terminée.")
         except Exception as e:
+            log.exception("[notif] Erreur pendant le test")
             await safe_send(ctx.channel, f"⚠️ Erreur pendant le test : `{e}`")
 
 
