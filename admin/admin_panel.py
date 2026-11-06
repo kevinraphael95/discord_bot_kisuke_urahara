@@ -51,7 +51,7 @@ if not SECRET_KEY:
 
 DB_PATH    = os.path.join(ROOT, "database", "reiatsu.db")
 BACKUP_DIR = os.path.join(ROOT, "database", "backups")
-ADMIN_HOST = os.getenv("ADMIN_HOST", "127.0.0.1")   # le tunnel Cloudflare tape sur localhost
+ADMIN_HOST = os.getenv("ADMIN_HOST", "0.0.0.0")   # comme avant (Render a besoin de 0.0.0.0)
 SQL_MAX_ROWS = 1000
 
 
