@@ -14,10 +14,14 @@
 #   (YouTube : aucune clé nécessaire, on lit les flux RSS publics)
 #
 # 🗄️ Table créée automatiquement dans database/reiatsu.db :
-#   notif_follows (id, guild_id, platform, handle, display, channel_id, role_id, last_id)
-#     platform = 'twitch' | 'youtube'
-#     handle   = pseudo Twitch (minuscules) | ID de chaîne YouTube (UC...)
-#     last_id  = dernier stream / dernière vidéo annoncé(e) (évite les doublons)
+#   notif_follows (id, guild_id, platform, handle, display, channel_id, role_id,
+#                  last_id, last_published, fail_count)
+#     platform       = 'twitch' | 'youtube'
+#     handle         = pseudo Twitch (minuscules) | ID de chaîne YouTube (UC...)
+#     last_id        = dernier stream / dernière vidéo annoncé(e) (évite les doublons)
+#     last_published = date de la dernière vidéo YouTube annoncée (évite les
+#                      ré-annonces si une vidéo est supprimée)
+#     fail_count     = échecs d'envoi consécutifs (salon inaccessible)
 #
 # 🛠️ Commandes (admin) :
 #   !!notif                                          → liste + aide
@@ -56,6 +60,7 @@ YOUTUBE_INTERVAL = 300      # secondes entre deux vérifs YouTube (RSS, pas de q
 MAX_FOLLOWS_PER_GUILD = 25  # garde-fou par serveur
 YT_MAX_AGE_HOURS = 48       # on n'annonce pas une vidéo plus vieille que ça
 YT_MAX_BURST = 3            # max de vidéos annoncées d'un coup pour une chaîne
+MAX_FAILS = 20              # échecs d'envoi consécutifs (Forbidden) avant suppression du follow
 
 TOKEN_URL = "https://id.twitch.tv/oauth2/token"
 STREAMS_URL = "https://api.twitch.tv/helix/streams"
@@ -111,26 +116,46 @@ def _init_table():
     _query(
         """
         CREATE TABLE IF NOT EXISTS notif_follows (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            guild_id   INTEGER NOT NULL,
-            platform   TEXT    NOT NULL,
-            handle     TEXT    NOT NULL,
-            display    TEXT,
-            channel_id INTEGER NOT NULL,
-            role_id    INTEGER,
-            last_id    TEXT,
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id       INTEGER NOT NULL,
+            platform       TEXT    NOT NULL,
+            handle         TEXT    NOT NULL,
+            display        TEXT,
+            channel_id     INTEGER NOT NULL,
+            role_id        INTEGER,
+            last_id        TEXT,
+            last_published TEXT,
+            fail_count     INTEGER NOT NULL DEFAULT 0,
             UNIQUE (guild_id, platform, handle)
         )
         """
     )
+
+    # Migration : ajoute les nouvelles colonnes sur une table déjà existante
+    existing = {r["name"] for r in _query("PRAGMA table_info(notif_follows)")}
+    if "last_published" not in existing:
+        _query("ALTER TABLE notif_follows ADD COLUMN last_published TEXT")
+    if "fail_count" not in existing:
+        _query("ALTER TABLE notif_follows ADD COLUMN fail_count INTEGER NOT NULL DEFAULT 0")
 
 
 def _all_follows(platform: str) -> list[dict]:
     return _query("SELECT * FROM notif_follows WHERE platform = ?", (platform,))
 
 
-def _set_last_id(follow_id: int, last_id: str):
-    _query("UPDATE notif_follows SET last_id = ? WHERE id = ?", (str(last_id), follow_id))
+def _set_last(follow_id: int, last_id: str, published: datetime | None = None):
+    """Mémorise la dernière annonce (et sa date pour YouTube)."""
+    if published is not None:
+        _query(
+            "UPDATE notif_follows SET last_id = ?, last_published = ? WHERE id = ?",
+            (str(last_id), published.isoformat(), follow_id),
+        )
+    else:
+        _query("UPDATE notif_follows SET last_id = ? WHERE id = ?", (str(last_id), follow_id))
+
+
+def _delete_follow(follow_id: int):
+    _query("DELETE FROM notif_follows WHERE id = ?", (follow_id,))
 
 
 def _parse_dt(value: str | None) -> datetime:
@@ -139,6 +164,14 @@ def _parse_dt(value: str | None) -> datetime:
         return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
     except (TypeError, ValueError):
         return datetime.now(timezone.utc)
+
+
+def _parse_dt_or_none(value: str | None) -> datetime | None:
+    try:
+        dt = datetime.fromisoformat(value)
+        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return None
 
 
 # ================================================================================
@@ -358,11 +391,38 @@ class StreamAlert(commands.Cog):
                 if role:
                     mention = f"{role.mention} "
             msg = await safe_send(channel, content=f"{mention}{text}", embed=embed)
-        except (discord.NotFound, discord.Forbidden):
-            log.warning("[stream_alert] Salon %s introuvable ou inaccessible (follow #%s).",
+
+        except discord.NotFound:
+            # Salon supprimé : définitif, on retire le follow
+            log.warning("[stream_alert] Salon %s supprimé → follow #%s retiré.",
                         follow["channel_id"], follow["id"])
+            _delete_follow(follow["id"])
             return False
-        return bool(msg)
+
+        except discord.Forbidden:
+            # Plus les droits : peut être temporaire, on compte les échecs
+            fails = (follow.get("fail_count") or 0) + 1
+            if fails >= MAX_FAILS:
+                log.warning("[stream_alert] Salon %s inaccessible depuis trop longtemps → follow #%s retiré.",
+                            follow["channel_id"], follow["id"])
+                _delete_follow(follow["id"])
+            else:
+                follow["fail_count"] = fails
+                _query("UPDATE notif_follows SET fail_count = ? WHERE id = ?", (fails, follow["id"]))
+                # On ne log qu'au premier échec pour ne pas spammer
+                if fails == 1:
+                    log.warning("[stream_alert] Pas la permission d'écrire dans %s (follow #%s).",
+                                follow["channel_id"], follow["id"])
+            return False
+
+        if not msg:
+            return False
+
+        # Succès : on remet le compteur d'échecs à zéro
+        if follow.get("fail_count"):
+            follow["fail_count"] = 0
+            _query("UPDATE notif_follows SET fail_count = 0 WHERE id = ?", (follow["id"],))
+        return True
 
     # ──────────────────────────────────────────────────────────
     # 🔁 Boucle Twitch
@@ -389,13 +449,15 @@ class StreamAlert(commands.Cog):
                 self._twitch_embed(stream, f["handle"]),
             )
             if ok:
-                _set_last_id(f["id"], stream["id"])
+                _set_last(f["id"], stream["id"])
                 log.info("[stream_alert] Live %s annoncé (follow #%s).", stream["id"], f["id"])
 
     @tasks.loop(seconds=TWITCH_INTERVAL)
     async def twitch_loop(self):
         try:
             await self._check_twitch()
+        except (aiohttp.ClientError, TimeoutError) as e:
+            log.warning("[stream_alert] Twitch injoignable : %s", e)
         except Exception:
             log.exception("[stream_alert] Erreur pendant la vérification Twitch")
 
@@ -418,8 +480,11 @@ class StreamAlert(commands.Cog):
         for cid, group in by_channel.items():
             try:
                 name, entries = await self._fetch_feed(cid)
+            except (aiohttp.ClientError, TimeoutError, ET.ParseError) as e:
+                log.warning("[stream_alert] Flux YouTube indisponible pour %s : %s", cid, e)
+                continue
             except Exception:
-                log.exception("[stream_alert] Flux YouTube illisible pour %s", cid)
+                log.exception("[stream_alert] Erreur inattendue sur le flux YouTube %s", cid)
                 continue
             if not entries:
                 continue
@@ -430,23 +495,32 @@ class StreamAlert(commands.Cog):
     async def _announce_videos(self, f: dict, author: str, entries: list[dict]):
         now = datetime.now(timezone.utc)
         max_age = timedelta(hours=YT_MAX_AGE_HOURS)
+        last_dt = _parse_dt_or_none(f.get("last_published"))
 
-        # Nouvelles vidéos = celles avant le dernier ID connu (et pas trop vieilles)
+        # Nouvelles vidéos = plus récentes que la dernière annoncée.
+        # On compare sur la DATE (et pas seulement l'ID) : si la dernière vidéo
+        # annoncée est supprimée, on ne ré-annonce pas les anciennes.
         new = []
-        for e in entries:
+        for e in entries:  # de la plus récente à la plus ancienne
             if e["id"] == f["last_id"]:
                 break
             if now - e["published"] > max_age:
                 break
+            if last_dt and e["published"] <= last_dt:
+                break
             new.append(e)
 
-        # Les plus récentes d'abord dans `new` → on envoie dans l'ordre chronologique
+        # On envoie dans l'ordre chronologique (la plus ancienne des nouvelles d'abord)
         for video in reversed(new[:YT_MAX_BURST]):
-            ok = await self._announce(f, f"📺 **{author}** vient de publier une vidéo !",
-                                      self._youtube_embed(video, author))
+            ok = await self._announce(
+                f,
+                f"📺 **{author}** vient de publier une vidéo !",
+                self._youtube_embed(video, author),
+            )
             if not ok:
-                return  # on réessaiera au prochain tour (last_id déjà à jour pour ce qui est parti)
-            _set_last_id(f["id"], video["id"])
+                return  # on réessaiera au prochain tour
+            _set_last(f["id"], video["id"], video["published"])
+            f["last_id"] = video["id"]
             log.info("[stream_alert] Vidéo %s annoncée (follow #%s).", video["id"], f["id"])
 
     @tasks.loop(seconds=YOUTUBE_INTERVAL)
@@ -485,12 +559,15 @@ class StreamAlert(commands.Cog):
         for r in rows:
             icon = "🟣 Twitch" if r["platform"] == "twitch" else "📺 YouTube"
             role = f" • <@&{r['role_id']}>" if r["role_id"] else ""
-            lines.append(f"`#{r['id']}` {icon} — **{r['display'] or r['handle']}** → <#{r['channel_id']}>{role}")
+            warn = " ⚠️" if r.get("fail_count") else ""
+            lines.append(f"`#{r['id']}` {icon} — **{r['display'] or r['handle']}** → <#{r['channel_id']}>{role}{warn}")
 
         twitch_state = "🟢" if self.twitch_loop.is_running() else "🔴 (désactivé)"
         yt_state = "🟢" if self.youtube_loop.is_running() else "🔴 (désactivé)"
         body = "\n".join(lines) if lines else "*Aucune chaîne suivie sur ce serveur.*"
         text = f"{body}\n\nTwitch : {twitch_state} • YouTube : {yt_state}"
+        if any(r.get("fail_count") for r in rows):
+            text += "\n⚠️ = le bot n'arrive pas à écrire dans ce salon (permissions ?)"
         if with_usage:
             text = f"{USAGE}\n\n{text}"
         await safe_send(ctx.channel, text)
@@ -525,11 +602,13 @@ class StreamAlert(commands.Cog):
 
         # --- Résolution de la chaîne ---
         last_id = None
+        last_published = None
         if plateforme == "twitch":
             if not self.twitch_ok:
                 return await safe_send(ctx.channel, "❌ Twitch n'est pas configuré (clés manquantes dans le `.env`).")
 
-            login = cible.strip().rstrip("/").split("/")[-1].lstrip("@").lower()
+            # Accepte "pseudo", "@pseudo", "twitch.tv/pseudo", "https://twitch.tv/pseudo?sr=a"...
+            login = cible.strip().split("?")[0].split("#")[0].rstrip("/").split("/")[-1].lstrip("@").lower()
             if not TWITCH_LOGIN_RE.match(login):
                 return await safe_send(ctx.channel, "❌ Pseudo Twitch invalide.")
             try:
@@ -549,7 +628,9 @@ class StreamAlert(commands.Cog):
                 )
             handle, display, entries = res
             # On "amorce" avec la dernière vidéo pour ne pas annoncer l'ancien contenu
-            last_id = entries[0]["id"] if entries else None
+            if entries:
+                last_id = entries[0]["id"]
+                last_published = entries[0]["published"].isoformat()
 
         exists = _query(
             "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? AND handle = ?",
@@ -560,14 +641,17 @@ class StreamAlert(commands.Cog):
 
         _query(
             """
-            INSERT INTO notif_follows (guild_id, platform, handle, display, channel_id, role_id, last_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO notif_follows
+                (guild_id, platform, handle, display, channel_id, role_id, last_id, last_published)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (guild_id, platform, handle) DO UPDATE SET
                 display = excluded.display,
                 channel_id = excluded.channel_id,
-                role_id = excluded.role_id
+                role_id = excluded.role_id,
+                fail_count = 0
             """,
-            (ctx.guild.id, plateforme, handle, display, channel.id, role_obj.id if role_obj else None, last_id),
+            (ctx.guild.id, plateforme, handle, display, channel.id,
+             role_obj.id if role_obj else None, last_id, last_published),
         )
 
         verbe = "mise à jour" if exists else "ajoutée"
