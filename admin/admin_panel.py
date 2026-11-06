@@ -21,6 +21,8 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 import requests
+from io import StringIO
+
 from dotenv import load_dotenv, dotenv_values
 from flask import (Flask, render_template, request, redirect, session,
                    jsonify, url_for, send_file, abort)
@@ -550,7 +552,6 @@ def backup_scheduler_loop():
 # ================================================================================
 # 🔑 API : config .env
 # ================================================================================
-SENSITIVE_RE = re.compile(r"TOKEN|PASSWORD|SECRET|KEY|WEBHOOK|COOKIE|PRIVATE", re.I)
 ENV_LINE_RE  = re.compile(r"^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=")
 
 
@@ -592,32 +593,26 @@ def write_env(updates: dict):
 @app.route("/api/env", methods=["GET", "POST"])
 @login_required
 def api_env():
-    current = dotenv_values(ENV_PATH) if os.path.exists(ENV_PATH) else {}
-
+    """Lecture / écriture du .env comme un simple fichier texte."""
     if request.method == "GET":
-        out = []
-        for k, v in current.items():
-            sensitive = bool(SENSITIVE_RE.search(k))
-            out.append({"key": k, "sensitive": sensitive,
-                        "value": "" if sensitive else (v or ""), "has_value": bool(v)})
-        return jsonify({"vars": out})
+        text = ""
+        if os.path.exists(ENV_PATH):
+            with open(ENV_PATH, encoding="utf-8") as f:
+                text = f.read()
+        return jsonify({"text": text})
 
-    updates = {}
-    for k, v in body().get("values", {}).items():
-        if k not in current:
-            return jsonify({"ok": False, "error": f"Variable inconnue : {k}"})
-        v = str(v)
-        if SENSITIVE_RE.search(k) and v == "":
-            continue   # vide = inchangé
-        updates[k] = v
-    if not updates:
-        return jsonify({"ok": True, "changed": 0})
-    try:
-        write_env(updates)
-    except ValueError as e:
-        return jsonify({"ok": False, "error": str(e)})
-    print(f"🔑 .env modifié : {', '.join(updates)}")
-    return jsonify({"ok": True, "changed": len(updates)})
+    text = str(body().get("text", "")).replace("\r\n", "\n")
+    vals = dotenv_values(stream=StringIO(text))
+    for k in ("ADMIN_PASSWORD", "ADMIN_SECRET"):
+        if not vals.get(k):
+            return jsonify({"ok": False, "error": f"{k} doit rester défini (sinon le panel ne redémarre plus)"})
+    tmp = ENV_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text if text.endswith("\n") else text + "\n")
+    os.replace(tmp, ENV_PATH)
+    load_dotenv(ENV_PATH, override=True)   # les réglages de backup s'appliquent tout de suite
+    print("🔑 .env modifié depuis le panel")
+    return jsonify({"ok": True})
 
 
 # ================================================================================
