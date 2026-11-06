@@ -293,6 +293,22 @@ class Notif(commands.Cog):
     async def prefix_notif_remove(self, ctx: commands.Context, platform: str = None, handle: str = None):
         await self._remove(ctx, platform, handle)
 
+    @prefix_notif.command(name="test")
+    @commands.has_permissions(administrator=True)
+    async def prefix_notif_test(self, ctx: commands.Context):
+        # On récupère le cog de la task
+        stream_alert_cog = self.bot.get_cog("StreamAlertTask")
+        if not stream_alert_cog:
+            return await safe_send(ctx.channel, "❌ Le cog `StreamAlertTask` n'est pas chargé.")
+        
+        await safe_send(ctx.channel, "🔄 Vérification manuelle en cours...")
+        try:
+            await stream_alert_cog._check_twitch()
+            await stream_alert_cog._check_youtube()
+            await safe_send(ctx.channel, "✅ Vérification terminée.")
+        except Exception as e:
+            await safe_send(ctx.channel, f"⚠️ Erreur pendant le test : `{e}`")
+
 
 # ================================================================================
 # 🔌 Setup du Cog
