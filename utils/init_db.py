@@ -131,9 +131,23 @@ def init_db():
         timestamp INTEGER NOT NULL
     )
     """)
-    
-    
-    
+
+
+    # === Table notif_follows (alertes Twitch / YouTube) ===========
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS notif_follows (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id   INTEGER NOT NULL,
+        platform   TEXT    NOT NULL,
+        handle     TEXT    NOT NULL,
+        display    TEXT,
+        channel_id INTEGER NOT NULL,
+        role_id    INTEGER,
+        last_id    TEXT,
+        UNIQUE (guild_id, platform, handle)
+    )
+    """)
+
 
     conn.commit()
     conn.close()
