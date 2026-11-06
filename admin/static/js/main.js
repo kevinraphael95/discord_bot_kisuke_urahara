@@ -1,513 +1,466 @@
 // ================================================================================
 // 📌 main.js — Script principal du panel admin Kisuke
-// Objectif : Logique front (onglets, thème, base de données, SQL, logs, actions)
-// Catégorie : Admin
+// Objectif : Logique front (onglets, thème, DB, SQL, logs, actions, backups, .env)
 // Accès : Admin uniquement (chargé par templates/main.html)
 // ================================================================================
 
+const $ = id => document.getElementById(id);
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const fmtSize = kb => kb < 1024 ? `${kb} Ko` : `${(kb / 1024).toFixed(1)} Mo`;
+
 // ================================================================================
-// 🔒 CSRF TOKEN — ajoute automatiquement le token sur toutes les requêtes POST
+// 🌐 API (GET si pas de body, POST sinon — token CSRF inclus)
 // ================================================================================
-const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || '';
-const _originalFetch = window.fetch;
-window.fetch = function(url, options = {}) {
-  if (options.method && options.method.toUpperCase() === 'POST') {
-    options.headers = options.headers || {};
-    options.headers['X-CSRFToken'] = CSRF_TOKEN;
+async function api(url, body) {
+  const opt = { method: body === undefined ? 'GET' : 'POST', headers: { 'X-CSRFToken': CSRF } };
+  if (body instanceof FormData) opt.body = body;
+  else if (body !== undefined) {
+    opt.headers['Content-Type'] = 'application/json';
+    opt.body = JSON.stringify(body);
   }
-  return _originalFetch(url, options);
+  let res;
+  try { res = await fetch(url, opt); } catch { return { ok: false, error: 'Erreur réseau' }; }
+  if (res.status === 401 || (res.redirected && res.url.includes('/login'))) {
+    location.href = '/login';
+    return { ok: false, error: 'Non connecté' };
+  }
+  try { return await res.json(); } catch { return { ok: false, error: `Réponse invalide (${res.status})` }; }
+}
+
+// ================================================================================
+// 🔔 Notifications + confirmation
+// ================================================================================
+let noticeTimer;
+function notify(msg, type = 'ok') {
+  const n = $('notice');
+  n.className = 'note float' + (type === 'ok' ? ' ok' : type === 'ko' ? ' ko' : '');
+  $('noticeIcon').textContent = { ok: '✓', ko: '✕', warn: '⚠' }[type] || '•';
+  $('noticeText').textContent = msg;
+  n.hidden = false;
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(() => { n.hidden = true; }, 3800);
+}
+
+function confirmAsk(text, label = 'Confirmer') {
+  return new Promise(resolve => {
+    const box = $('confirmBox');
+    $('confirmText').textContent = text;
+    $('confirmOk').textContent = label;
+    const done = v => { box.hidden = true; resolve(v); };
+    $('confirmOk').onclick = () => done(true);
+    $('confirmCancel').onclick = () => done(false);
+    box.hidden = false;
+  });
+}
+
+// ================================================================================
+// 🕒 Horloge + thème
+// ================================================================================
+function tick() {
+  $('clock').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+setInterval(tick, 1000); tick();
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('kisuke-theme', t);
+  $('themeToggle').textContent = t === 'dark' ? '☀' : '☾';
+}
+setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+$('themeToggle').onclick = () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+
+// ================================================================================
+// 📂 Onglets
+// ================================================================================
+let activeTab = 'db';
+const loaders = {
+  db: () => loadTableList(),
+  logs: () => loadLogs(),
+  backup: () => { loadBackups(); loadBackupSettings(); },
+  env: () => { if (!envDirtyCount()) loadEnv(); },
 };
 
-// ================================================================================
-// 🛠️ UTILS
-// ================================================================================
-function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function showTab(name) {
+  if (!$('tab-' + name)) name = 'db';
+  activeTab = name;
+  document.querySelectorAll('.adm-sec').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
+  document.querySelectorAll('.adm-side a[data-tab]').forEach(a => a.classList.toggle('active', a.dataset.tab === name));
+  history.replaceState(null, '', '#' + name);
+  loaders[name]?.();
 }
-
-function toast(msg, type='') {
-  const c = document.getElementById('toast-container');
-  const el = document.createElement('div');
-  el.className = 'toast-item' + (type ? ' ' + type : '');
-  el.textContent = msg;
-  c.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
-}
-
-function clock() {
-  const d = new Date();
-  document.getElementById('clock').textContent =
-    d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-setInterval(clock, 1000); clock();
+document.querySelectorAll('.adm-side a[data-tab]').forEach(a => a.onclick = () => showTab(a.dataset.tab));
 
 // ================================================================================
-// 🌗 THÈME CLAIR / SOMBRE
+// 🗄️ BASE DE DONNÉES
 // ================================================================================
-function initTheme() {
-  const saved = localStorage.getItem('kisuke-theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
-  updateThemeIcon(saved);
-}
-
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('kisuke-theme', next);
-  updateThemeIcon(next);
-}
-
-function updateThemeIcon(theme) {
-  const btn = document.getElementById('themeToggle');
-  if (btn) btn.textContent = theme === 'dark' ? '☀' : '☾';
-}
-
-initTheme();
-
-// ================================================================================
-// 📱 SIDEBAR MOBILE
-// ================================================================================
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
-}
-
-function closeSidebarIfMobile() {
-  if (window.innerWidth <= 900) {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('open');
-  }
-}
-
-// ================================================================================
-// 📂 TABS
-// ================================================================================
-function showTab(name, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  // sync sidebar
-  const sideIdx = {'db':0,'sql':1,'logs':2,'actions':3};
-  const links = document.querySelectorAll('.sidebar-link');
-  if (sideIdx[name] !== undefined) links[sideIdx[name]]?.classList.add('active');
-  if (name === 'db') loadTable();
-  if (name === 'logs') loadLogs();
-  if (name === 'actions') loadBackupList();
-  closeSidebarIfMobile();
-}
-
-// ================================================================================
-// 🗄️ DATABASE
-// ================================================================================
-let currentData = [], currentCols = [], currentTableName = '', currentPk = '';
-let sortCol = null, sortDir = 1;
-let rawLogs = [];
+const S = { table: '', cols: [], rows: [], pk: '', pkIdx: 0, sortCol: null, sortDir: 1 };
+const ROW_LIMIT = 1000;
+let edit = null;
 
 async function loadTableList() {
-  const res = await fetch('/api/tables');
-  const data = await res.json();
-  const sel = document.getElementById('tableSelect');
-  const previous = sel.value;
-  sel.innerHTML = data.tables.map(t => `<option value="${t}">${t}</option>`).join('');
-  document.getElementById('sb-table-count').textContent = data.tables.length;
-  // Reste sur la table précédente si elle existe encore, sinon prend la première
-  if (data.tables.includes(previous)) sel.value = previous;
+  const data = await api('/api/tables');
+  const sel = $('tableSelect');
+  const prev = sel.value;
+  sel.innerHTML = (data.tables || []).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  $('sb-table-count').textContent = (data.tables || []).length;
+  if ((data.tables || []).includes(prev)) sel.value = prev;
   loadTable();
 }
 
 async function loadTable() {
-  const table = document.getElementById('tableSelect').value;
+  const table = $('tableSelect').value;
+  closeEdit();
   if (!table) {
-    // Plus aucune table (ex: dernière supprimée) → on vide l'affichage
-    currentData = []; currentCols = []; currentTableName = ''; currentPk = '';
-    document.getElementById('tableHead').innerHTML = '';
-    document.getElementById('tableBody').innerHTML = '';
-    document.getElementById('ti-table').textContent = '—';
-    document.getElementById('bc-table').textContent = 'Base de données';
-    document.getElementById('ti-pk').textContent = '';
-    document.getElementById('ti-count').textContent = '0 entrée';
-    document.getElementById('db-stats-grid').innerHTML = '';
+    Object.assign(S, { table: '', cols: [], rows: [], pk: '' });
+    $('db-sub').textContent = 'Aucune table';
+    $('db-kpis').innerHTML = '';
+    $('tableHead').innerHTML = $('tableBody').innerHTML = '';
+    $('ti-info').textContent = '—';
     return;
   }
-  document.getElementById('ti-table').textContent = table;
-  document.getElementById('bc-table').textContent = table;
-  const res = await fetch('/api/table/' + table);
-  const data = await res.json();
-  currentData = data.rows;
-  currentCols = data.columns;
-  currentTableName = table;
-  currentPk = data.pk;
-  sortCol = null;
-  renderTable(data.columns, data.rows);
-  document.getElementById('ti-pk').textContent = 'PK: ' + data.pk;
-  document.getElementById('ti-count').textContent = data.rows.length + ' entrée' + (data.rows.length > 1 ? 's' : '');
-  updateStatCards(data);
+  const data = await api('/api/table/' + encodeURIComponent(table));
+  if (data.error) return notify(data.error, 'ko');
+  Object.assign(S, { table, cols: data.columns, rows: data.rows, pk: data.pk, sortCol: null, sortDir: 1 });
+  S.pkIdx = Math.max(0, S.cols.indexOf(S.pk));
+  $('db-sub').textContent = `${table} · clé primaire : ${S.pk}`;
+  renderKpis();
+  renderTable();
 }
 
-function updateStatCards(data) {
-  const grid = document.getElementById('db-stats-grid');
-  const colors = ['gold','cyan','green','purple','red'];
-  const icons = ['◈','∑','↑','⚙','★'];
-  // Quelques colonnes numériques
-  const numCols = data.columns
-    .map((c,i) => ({name:c, idx:i}))
-    .filter(({name}) => /point|niveau|count|total|nb|score/i.test(name))
-    .slice(0, 4);
-
-  const cards = [
-    { label:'Total entrées', value: data.rows.length, icon:'⬡', color:'gold' },
-    { label:'Colonnes', value: data.columns.length, icon:'◈', color:'cyan' },
-  ];
-
-  numCols.forEach(({name, idx}, i) => {
-    const vals = data.rows.map(r => parseFloat(r[idx])).filter(v => !isNaN(v));
-    if (vals.length) {
-      const sum = vals.reduce((a,b)=>a+b,0);
-      cards.push({ label: name.toUpperCase(), value: Math.round(sum).toLocaleString('fr'), icon: icons[i+2], color: colors[i+2] });
-    }
+function renderKpis() {
+  const kpi = (label, value, hint = '') =>
+    `<div class="kpi"><div class="kpi-label">${esc(label)}</div><div class="kpi-value">${esc(value)}</div><div class="kpi-hint">${esc(hint)}</div></div>`;
+  let html = kpi('Entrées', S.rows.length.toLocaleString('fr')) + kpi('Colonnes', S.cols.length);
+  S.cols.forEach((name, i) => {
+    if (html.split('class="kpi"').length > 5 || !/point|niveau|count|total|nb|score/i.test(name)) return;
+    const vals = S.rows.map(r => parseFloat(r[i])).filter(v => !isNaN(v));
+    if (vals.length) html += kpi(name, Math.round(vals.reduce((a, b) => a + b, 0)).toLocaleString('fr'), 'somme');
   });
-
-  grid.innerHTML = cards.map(c => `
-    <div class="stat-card ${c.color}">
-      <div class="stat-label">${esc(c.label)}</div>
-      <div class="stat-value">${esc(c.value)}</div>
-      <div class="stat-icon">${c.icon}</div>
-    </div>
-  `).join('');
+  $('db-kpis').innerHTML = html;
 }
 
-function sortBy(colIndex) {
-  if (sortCol === colIndex) sortDir *= -1; else { sortCol = colIndex; sortDir = 1; }
-  const sorted = [...currentData].sort((a, b) => {
-    const va = a[colIndex] ?? '', vb = b[colIndex] ?? '';
-    const na = parseFloat(va), nb = parseFloat(vb);
-    if (!isNaN(na) && !isNaN(nb)) return (na - nb) * sortDir;
-    return String(va).localeCompare(String(vb), 'fr', {sensitivity:'base'}) * sortDir;
-  });
-  renderTable(currentCols, sorted);
-}
-
-function renderTable(cols, rows) {
-  const head = document.getElementById('tableHead');
-  const body = document.getElementById('tableBody');
-  const htr = document.createElement('tr');
-  cols.forEach((c, i) => {
-    const th = document.createElement('th');
-    th.textContent = c;
-    if (sortCol === i) th.className = sortDir === 1 ? 'sort-asc' : 'sort-desc';
-    th.onclick = () => sortBy(i);
-    htr.appendChild(th);
-  });
-  head.innerHTML = ''; head.appendChild(htr);
-  body.innerHTML = '';
-  rows.forEach(row => {
-    const tr = document.createElement('tr');
-    cols.forEach((col, i) => {
-      const val = row[i];
-      const td = document.createElement('td');
-      const isPk = col === currentPk;
-      if (val === null || val === undefined || val === '') {
-        td.innerHTML = '<span class="cell-null">null</span>';
-      } else {
-        td.textContent = val;
-        td.title = String(val);
-      }
-      if (!isPk) {
-        td.className = 'editable';
-        td.onclick = () => openEdit(currentTableName, currentPk, String(row[0]), col, String(val ?? ''));
-      }
-      tr.appendChild(td);
+function renderTable() {
+  const f = $('filterInput').value.toLowerCase();
+  let order = S.rows.map((_, i) => i);
+  if (f) order = order.filter(i => S.rows[i].some(v => String(v ?? '').toLowerCase().includes(f)));
+  if (S.sortCol !== null) {
+    const c = S.sortCol, d = S.sortDir;
+    order.sort((a, b) => {
+      const va = S.rows[a][c] ?? '', vb = S.rows[b][c] ?? '';
+      const na = parseFloat(va), nb = parseFloat(vb);
+      if (!isNaN(na) && !isNaN(nb)) return (na - nb) * d;
+      return String(va).localeCompare(String(vb), 'fr', { sensitivity: 'base' }) * d;
     });
-    body.appendChild(tr);
-  });
-  filterRows();
-}
-
-function filterRows() {
-  const f = document.getElementById('filterInput').value.toLowerCase();
-  document.querySelectorAll('#tableBody tr').forEach(r => {
-    r.style.display = f === '' || r.textContent.toLowerCase().includes(f) ? '' : 'none';
-  });
-}
-
-// ================================================================================
-// 🗑️ SUPPRESSION DE TABLE
-// ================================================================================
-function confirmDeleteTable() {
-  const table = document.getElementById('tableSelect').value;
-  if (!table) { toast('Aucune table sélectionnée', 'err'); return; }
-
-  document.getElementById('modal-confirm-text').textContent =
-    `Supprimer définitivement la table "${table}" et toutes ses données ? Cette action est irréversible.`;
-
-  const btn = document.getElementById('modal-confirm-btn');
-  btn.textContent = 'Supprimer';
-  btn.onclick = () => {
-    deleteTable(table);
-    document.getElementById('modal-confirm').style.display = 'none';
-  };
-
-  document.getElementById('modal-confirm').style.display = 'flex';
-}
-
-async function deleteTable(table) {
-  try {
-    const res = await fetch('/api/table/' + table + '/delete', {method:'POST'});
-    const data = await res.json();
-    if (data.ok) {
-      toast('✓ Table "' + table + '" supprimée', 'ok');
-      loadTableList();
-    } else {
-      toast('✕ ' + data.error, 'err');
-    }
-  } catch (e) {
-    toast('✕ Erreur réseau', 'err');
   }
+  const shown = order.slice(0, ROW_LIMIT);
+
+  $('tableHead').innerHTML = '<tr>' + S.cols.map((c, i) =>
+    `<th class="sortable${S.sortCol === i ? (S.sortDir === 1 ? ' asc' : ' desc') : ''}" data-c="${i}">${esc(c)}</th>`).join('') + '</tr>';
+
+  $('tableBody').innerHTML = shown.map(r => '<tr>' + S.cols.map((col, c) => {
+    const v = S.rows[r][c];
+    const edit = c === S.pkIdx ? '' : ' editable';
+    if (v === null || v === undefined || v === '')
+      return `<td class="${edit}" data-r="${r}" data-c="${c}"><span class="mute">null</span></td>`;
+    return `<td class="${edit}" data-r="${r}" data-c="${c}" title="${esc(v)}">${esc(v)}</td>`;
+  }).join('') + '</tr>').join('');
+
+  let info = `${S.rows.length} entrée${S.rows.length > 1 ? 's' : ''}`;
+  if (f) info += ` · ${order.length} correspondante${order.length > 1 ? 's' : ''}`;
+  if (order.length > ROW_LIMIT) info += ` · affichage des ${ROW_LIMIT} premières (utilise le filtre ou la console SQL)`;
+  $('ti-info').textContent = info;
 }
 
-// ================================================================================
-// ✏️ MODAL EDIT
-// ================================================================================
-function openEdit(table, pk, pkVal, col, val) {
-  document.getElementById('editTable').value = table;
-  document.getElementById('editPk').value = pk;
-  document.getElementById('editPkVal').value = pkVal;
-  document.getElementById('editCol').value = col;
-  document.getElementById('editValue').value = val;
-  document.getElementById('modal-meta').textContent = `${table} · ${col} · ID ${pkVal}`;
-  document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('editValue').focus(), 50);
-}
+$('tableHead').onclick = e => {
+  const th = e.target.closest('th[data-c]');
+  if (!th) return;
+  const c = +th.dataset.c;
+  if (S.sortCol === c) S.sortDir *= -1; else { S.sortCol = c; S.sortDir = 1; }
+  renderTable();
+};
+$('tableBody').onclick = e => {
+  const td = e.target.closest('td.editable');
+  if (td) openEdit(+td.dataset.r, +td.dataset.c);
+};
+$('tableSelect').onchange = loadTable;
+$('filterInput').oninput = renderTable;
+$('reloadTable').onclick = loadTable;
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-
-async function saveEdit() {
-  const payload = {
-    table: document.getElementById('editTable').value,
-    pk:    document.getElementById('editPk').value,
-    pk_val:document.getElementById('editPkVal').value,
-    col:   document.getElementById('editCol').value,
-    value: document.getElementById('editValue').value,
-  };
-  const res = await fetch('/api/edit', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  const data = await res.json();
-  closeModal();
-  if (data.ok) { toast('✓ Modifié avec succès', 'ok'); loadTable(); }
-  else toast('✕ ' + data.error, 'err');
-}
-
-document.getElementById('modal-overlay').onclick = e => {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
+$('deleteTableBtn').onclick = async () => {
+  const t = $('tableSelect').value;
+  if (!t) return notify('Aucune table sélectionnée', 'ko');
+  if (!await confirmAsk(`Supprimer définitivement la table « ${t} » et toutes ses données ? Irréversible.`, 'Supprimer')) return;
+  const d = await api('/api/table/' + encodeURIComponent(t) + '/delete', {});
+  if (d.ok) { notify(`Table « ${t} » supprimée`); loadTableList(); } else notify(d.error, 'ko');
 };
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    if (document.getElementById('modal-overlay').classList.contains('open')) saveEdit();
-    else if (document.getElementById('tab-sql').classList.contains('active')) runSQL();
-  }
-});
+// ── Édition d'une cellule ─────────────────────────────────────────────────────
+function openEdit(r, c) {
+  edit = { r, c };
+  $('editMeta').textContent = `${S.table} · ${S.cols[c]} · ${S.pk} = ${S.rows[r][S.pkIdx]}`;
+  $('editValue').value = S.rows[r][c] ?? '';
+  $('editPanel').hidden = false;
+  $('editPanel').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  $('editValue').focus();
+}
+function closeEdit() { edit = null; $('editPanel').hidden = true; }
+
+async function saveEdit() {
+  if (!edit) return;
+  const d = await api('/api/edit', {
+    table: S.table, pk: S.pk, pk_val: String(S.rows[edit.r][S.pkIdx]),
+    col: S.cols[edit.c], value: $('editValue').value,
+  });
+  if (d.ok) { notify('Modifié avec succès'); loadTable(); } else notify(d.error, 'ko');
+}
+$('editSave').onclick = saveEdit;
+$('editCancel').onclick = closeEdit;
+$('editValue').onkeydown = e => { if (e.key === 'Enter') saveEdit(); };
 
 // ================================================================================
 // ◈ SQL
 // ================================================================================
-function quickSQL(q) {
-  showTab('sql', document.querySelector('[data-tab=sql]'));
-  document.getElementById('sqlQuery').value = q;
-  runSQL();
-}
-
 async function runSQL() {
-  const q = document.getElementById('sqlQuery').value.trim();
+  const q = $('sqlQuery').value.trim();
   if (!q) return;
-  const el = document.getElementById('sqlResult');
-  el.innerHTML = '<span style="color:var(--dim2);font-size:11px">⏳ Exécution…</span>';
-  const res = await fetch('/api/sql', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});
-  const data = await res.json();
+  const el = $('sqlResult');
+  el.innerHTML = '<div class="note"><span>⏳</span><span class="note-body">Exécution…</span></div>';
+  const d = await api('/api/sql', { query: q });
 
-  if (data.error) {
-    el.innerHTML = `<div style="background:var(--void);border:1px solid var(--red);border-left:3px solid var(--red);padding:12px 16px;color:var(--red);font-size:11px;margin-top:4px">✕ ${esc(data.error)}</div>`;
+  if (d.error) {
+    el.innerHTML = `<div class="note ko"><span>✕</span><span class="note-body">${esc(d.error)}</span></div>`;
     return;
   }
-
-  if (data.columns) {
-    let html = `<div class="table-wrap" style="margin-top:8px;border:1px solid var(--line);max-height:400px;overflow:auto"><table>`;
-    html += `<thead><tr>${data.columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
-    html += data.rows.map(r=>`<tr>${r.map(v=>`<td>${v===null?'<span class="cell-null">null</span>':esc(v)}</td>`).join('')}</tr>`).join('');
-    html += `</tbody></table></div>`;
-    html += `<div style="margin-top:8px;font-size:10px;color:var(--dim2);font-family:'Syne Mono',monospace">${data.rows.length} résultat(s)</div>`;
-    el.innerHTML = html;
-    // Si la requête SQL touchait une table qui vient d'être DROP/CREATE, on resynchronise la liste
-    if (/drop\s+table|create\s+table/i.test(q)) loadTableList();
+  if (d.columns) {
+    el.innerHTML = `<div class="panel"><div class="tbl"><table>
+      <thead><tr>${d.columns.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead>
+      <tbody>${d.rows.map(r => '<tr>' + r.map(v => v === null ? '<td class="mute">null</td>' : `<td title="${esc(v)}">${esc(v)}</td>`).join('') + '</tr>').join('')}</tbody>
+    </table></div><div class="panel-foot">${d.rows.length} résultat(s)${d.truncated ? ' — tronqué, ajoute un LIMIT' : ''}</div></div>`;
   } else {
-    el.innerHTML = `<div style="background:var(--void);border:1px solid var(--green);border-left:3px solid var(--green);padding:12px 16px;color:var(--green);font-size:11px;margin-top:4px">✓ ${esc(data.message)}</div>`;
-    if (/drop\s+table|create\s+table/i.test(q)) loadTableList();
+    el.innerHTML = `<div class="note ok"><span>✓</span><span class="note-body">${esc(d.message)}</span></div>`;
   }
+  if (/\b(drop|create|alter)\s+table/i.test(q)) loadTableList();
 }
+$('sqlRun').onclick = runSQL;
+$('sqlClear').onclick = () => { $('sqlQuery').value = ''; $('sqlResult').innerHTML = ''; };
+$('sqlQuery').onkeydown = e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runSQL(); };
+document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { $('sqlQuery').value = b.dataset.q; runSQL(); });
 
 // ================================================================================
 // ▤ LOGS
 // ================================================================================
-const LOG_REFRESH_INTERVAL_MS = 60000; // ✅ 60s au lieu de 6s → 60 req/h < 100 ✅
-let autoRefreshTimer = null;
+let rawLogs = [];
+const LOG_REFRESH_MS = 60000;
 
 async function loadLogs() {
-  const res = await fetch('/api/logs');
-  const data = await res.json();
-  rawLogs = data.logs;
-  const ts = new Date().toLocaleTimeString('fr-FR');
-  document.getElementById('log-ts').textContent = ts;
-  document.getElementById('log-count').textContent = rawLogs.length + ' ligne' + (rawLogs.length > 1 ? 's' : '');
+  const d = await api('/api/logs');
+  if (!d.logs) return;
+  rawLogs = d.logs;
+  $('log-ts').textContent = new Date().toLocaleTimeString('fr-FR');
+  $('log-count').textContent = `${rawLogs.length} ligne${rawLogs.length > 1 ? 's' : ''}`;
   renderLogs();
+}
+
+function logLevel(line) {
+  if (/❌|error|exception|traceback/i.test(line)) return 'err';
+  if (/⚠|warn/i.test(line)) return 'warn';
+  return 'info';
 }
 
 function renderLogs() {
-  const filter = document.getElementById('logFilter').value.toLowerCase();
-  const box = document.getElementById('logBox');
-  const wasAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 30;
-
-  const lines = filter ? rawLogs.filter(l => l.toLowerCase().includes(filter)) : rawLogs;
+  const f = $('logFilter').value.toLowerCase();
+  const level = $('logLevel').value;
+  const box = $('logBox');
+  const lines = rawLogs.filter(l => (!f || l.toLowerCase().includes(f)) && (level === 'all' || logLevel(l) === level));
 
   box.innerHTML = lines.map(line => {
-    let cls = 'log-line';
-    if (/❌|ERROR|error|Exception/i.test(line)) cls += ' err';
-    else if (/✅|Loaded|Connecté|OK|success/i.test(line)) cls += ' ok';
-    else if (/⚠|WARNING|warn/i.test(line)) cls += ' warn';
-    else if (/INFO|→|←/i.test(line)) cls += ' info';
-
-    // Essaye d'extraire timestamp
-    const tsMatch = line.match(/\d{2}:\d{2}:\d{2}/);
-    const ts = tsMatch ? `<span class="log-ts">${tsMatch[0]}</span>` : '';
+    const lv = logLevel(line);
+    const t = line.match(/\d{2}:\d{2}:\d{2}/);
     const msg = line.replace(/\d{2}:\d{2}:\d{2}\s*/, '');
-
-    return `<div class="${cls}">${ts}<span class="log-msg">${esc(msg)}</span></div>`;
+    return `<div class="logline ${lv}"><span class="t">${t ? t[0] : ''}</span><span class="t">${lv === 'info' ? '' : lv === 'err' ? 'ERR' : 'WARN'}</span><span class="m">${esc(msg)}</span></div>`;
   }).join('');
-
-  const autoScroll = document.getElementById('autoScroll').checked;
-  if ((wasAtBottom || autoScroll) && !filter) box.scrollTop = box.scrollHeight;
+  if ($('autoScroll').checked) box.scrollTop = box.scrollHeight;
 }
 
-function filterLogs() { renderLogs(); }
+$('logFilter').oninput = renderLogs;
+$('logLevel').onchange = renderLogs;
+$('logReload').onclick = loadLogs;
+$('logClear').onclick = async () => { await api('/api/logs/clear', {}); rawLogs = []; $('log-count').textContent = '0 ligne'; renderLogs(); };
 
-function clearLogs() {
-  rawLogs = [];
-  renderLogs();
-  fetch('/api/logs/clear', {method:'POST'});
-}
+// Un seul timer : actif uniquement si l'onglet Logs est affiché et la page visible
+setInterval(() => {
+  if (activeTab === 'logs' && !document.hidden && $('autoRefresh').checked) loadLogs();
+}, LOG_REFRESH_MS);
 
-function toggleAutoRefresh() {
-  const on = document.getElementById('autoRefresh').checked;
-  clearInterval(autoRefreshTimer);
-  if (on) autoRefreshTimer = setInterval(loadLogs, LOG_REFRESH_INTERVAL_MS);
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// ACTIONS
-// ══════════════════════════════════════════════════════════════════════════════
-function confirmRestart() {
-  document.getElementById('modal-confirm-text').textContent =
-    'Cette action va redémarrer le process du bot. Continuer ?';
-  const btn = document.getElementById('modal-confirm-btn');
-  btn.textContent = 'Redémarrer';
-  btn.onclick = () => {
-    doAction('restart_bot', btn);
-    document.getElementById('modal-confirm').style.display = 'none';
-  };
-  document.getElementById('modal-confirm').style.display = 'flex';
-}
-
+// ================================================================================
+// ⚙️ ACTIONS
+// ================================================================================
 async function doAction(action, btn) {
-  const resBox = document.getElementById('res-' + action);
-  resBox.style.display = 'block';
-  resBox.className = 'action-result';
-  resBox.textContent = '⏳ En cours…';
+  const out = $('res-' + action);
+  out.hidden = false;
+  out.className = 'out';
+  out.textContent = '⏳ En cours…';
   if (btn) btn.disabled = true;
-  try {
-    const res = await fetch('/api/action/' + action, {method:'POST'});
-    const data = await res.json();
-    resBox.textContent = data.output || data.message || '';
-    if (!data.ok) resBox.classList.add('err');
-    else toast('✓ ' + action + ' terminé', 'ok');
-  } catch(e) {
-    resBox.textContent = '✕ Erreur réseau';
-    resBox.classList.add('err');
-    toast('✕ Erreur réseau', 'err');
-  }
+  const d = await api('/api/action/' + action, {});
+  out.textContent = d.output || d.error || '';
+  if (d.ok) notify(`${action} terminé`); else { out.classList.add('err'); notify(`${action} : échec`, 'ko'); }
   if (btn) btn.disabled = false;
 }
+document.querySelectorAll('[data-action]').forEach(b => b.onclick = () => doAction(b.dataset.action, b));
 
-// ════════════════════════════════════════════════════════════════════════════
-// ⛁ BACKUP DATABASE
-// ════════════════════════════════════════════════════════════════════════════
-async function doBackup(btn) {
-  const resBox = document.getElementById('res-backup');
-  resBox.style.display = 'block';
-  resBox.className = 'action-result';
-  resBox.textContent = '⏳ Génération du backup…';
-  if (btn) btn.disabled = true;
-
-  try {
-    const res = await fetch('/api/backup', { method: 'POST' });
-    const data = await res.json();
-
-    if (!data.ok) {
-      throw new Error(data.error || 'Erreur inconnue');
-    }
-
-    let msg = `✓ Backup créé : ${data.filename} (${data.size_kb} Ko)`;
-    if (data.discord_sent) {
-      msg += ' — envoyé sur Discord ✓';
-      toast('✓ Backup créé et envoyé sur Discord', 'ok');
-    } else {
-      msg += ` — ⚠ non envoyé sur Discord (${data.discord_error})`;
-      toast('⚠ Backup créé, mais pas envoyé sur Discord', 'warn');
-    }
-    resBox.textContent = msg;
-    loadBackupList();
-  } catch (e) {
-    resBox.textContent = '✕ ' + e.message;
-    resBox.classList.add('err');
-    toast('✕ Erreur backup', 'err');
-  }
-  if (btn) btn.disabled = false;
+async function restartBot() {
+  if (!await confirmAsk('Redémarrer le process du bot ? Le panel changera d\'URL.', 'Redémarrer')) return false;
+  await api('/api/action/restart_bot', {});
+  notify('Redémarrage en cours — récupère la nouvelle URL du panel', 'warn');
+  return true;
 }
-
-async function loadBackupList() {
-  const box = document.getElementById('backup-list');
-  if (!box) return;
-  try {
-    const res = await fetch('/api/backup/list');
-    const data = await res.json();
-    if (!data.backups.length) {
-      box.innerHTML = '<div style="color:var(--dim2);font-size:11px">Aucun backup pour le moment.</div>';
-      return;
-    }
-    box.innerHTML = data.backups.map(b => `
-      <div class="backup-row" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:11px">
-        <span>${esc(b.name)} <span style="color:var(--dim2)">(${b.size_kb} Ko)</span></span>
-        <a class="btn btn-ghost" style="padding:2px 10px" href="/api/backup/download/${encodeURIComponent(b.name)}">↓</a>
-      </div>
-    `).join('');
-  } catch (e) {
-    box.innerHTML = '<div style="color:var(--red);font-size:11px">Erreur de chargement</div>';
-  }
-}
+$('restartBtn').onclick = restartBot;
 
 // ================================================================================
-// INIT
+// ⛁ BACKUPS
 // ================================================================================
-loadTableList();
-autoRefreshTimer = setInterval(loadLogs, LOG_REFRESH_INTERVAL_MS);
+async function loadBackups() {
+  const d = await api('/api/backup/list');
+  if (!d.backups) return;
+  $('sb-backup-count').textContent = d.backups.length;
+  const total = d.backups.reduce((a, b) => a + b.size_kb, 0);
+  const kpi = (l, v, h = '') => `<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-value">${esc(v)}</div><div class="kpi-hint">${esc(h)}</div></div>`;
+  $('bk-kpis').innerHTML =
+    kpi('Backups', d.backups.length, `max ${d.max}`) +
+    kpi('Espace utilisé', fmtSize(Math.round(total * 10) / 10)) +
+    kpi('Dernier backup', d.backups[0]?.date || '—') +
+    kpi('Automatique', d.auto_hours > 0 ? `${d.auto_hours} h` : 'Désactivé');
 
-// ✅ AJOUT : Stoppe le poll quand l'onglet est caché
-document.addEventListener('visibilitychange', () => {
-    clearInterval(autoRefreshTimer);
-    if (!document.hidden) {
-        autoRefreshTimer = setInterval(loadLogs, LOG_REFRESH_INTERVAL_MS);
-    }
+  $('bkBody').innerHTML = d.backups.length ? d.backups.map(b => `<tr>
+    <td class="mono">${esc(b.name)}</td><td class="mute">${esc(b.date)}</td><td class="num mono">${fmtSize(b.size_kb)}</td>
+    <td class="act"><div class="toolbar" style="justify-content:flex-end">
+      <a class="btn btn-ghost btn-sm" href="/api/backup/download/${encodeURIComponent(b.name)}">↓</a>
+      <button class="btn btn-ghost btn-sm" data-restore="${esc(b.name)}">↺ Restaurer</button>
+      <button class="btn btn-danger btn-sm" data-del="${esc(b.name)}">🗑</button>
+    </div></td></tr>`).join('') : '<tr><td colspan="4" class="mute">Aucun backup pour le moment.</td></tr>';
+}
+
+$('bkBody').onclick = async e => {
+  const r = e.target.closest('[data-restore]'), d = e.target.closest('[data-del]');
+  if (r) {
+    if (!await confirmAsk(`Remplacer la base actuelle par ${r.dataset.restore} ? Une copie de sécurité est créée avant.`, 'Restaurer')) return;
+    const res = await api(`/api/backup/${encodeURIComponent(r.dataset.restore)}/restore`, {});
+    res.ok ? notify(res.message) : notify(res.error, 'ko');
+    loadBackups(); loadTableList();
+  } else if (d) {
+    if (!await confirmAsk(`Supprimer ${d.dataset.del} ?`, 'Supprimer')) return;
+    const res = await api(`/api/backup/${encodeURIComponent(d.dataset.del)}/delete`, {});
+    res.ok ? notify('Backup supprimé') : notify(res.error, 'ko');
+    loadBackups();
+  }
+};
+
+$('bkCreate').onclick = async () => {
+  const btn = $('bkCreate'), out = $('res-backup');
+  btn.disabled = true;
+  out.hidden = false; out.className = 'out'; out.textContent = '⏳ Génération du backup…';
+  const d = await api('/api/backup', {});
+  if (d.ok) {
+    out.textContent = `✓ ${d.filename} (${fmtSize(d.size_kb)})` + (d.discord_sent ? ' — envoyé sur Discord ✓' : ` — ⚠ pas envoyé sur Discord (${d.discord_error})`);
+    notify(d.discord_sent ? 'Backup créé et envoyé sur Discord' : 'Backup créé (pas envoyé sur Discord)', d.discord_sent ? 'ok' : 'warn');
+    loadBackups();
+  } else {
+    out.textContent = '✕ ' + (d.error || 'Erreur inconnue'); out.classList.add('err');
+    notify('Erreur backup', 'ko');
+  }
+  btn.disabled = false;
+};
+
+$('bkImport').onclick = () => $('bkFile').click();
+$('bkFile').onchange = async () => {
+  const file = $('bkFile').files[0];
+  if (!file) return;
+  const fd = new FormData(); fd.append('file', file);
+  const d = await api('/api/backup/import', fd);
+  $('bkFile').value = '';
+  d.ok ? notify(`Importé : ${d.filename} — clique sur Restaurer pour l'appliquer`) : notify(d.error, 'ko');
+  loadBackups();
+};
+
+// ── Réglages backup ───────────────────────────────────────────────────────────
+async function loadBackupSettings() {
+  const d = await api('/api/backup/settings');
+  if (!d.settings) return;
+  $('bkSettings').innerHTML = d.settings.map(s => `<div class="row-set">
+    <div><div class="name">${esc(s.label)}</div><div class="desc">${esc(s.desc)}</div></div>
+    <div class="ctrl"><input class="field" data-key="${esc(s.key)}" type="${s.sensitive ? 'password' : s.type}" ${s.type === 'number' ? 'min="0" step="any"' : ''}
+      value="${esc(s.value)}" placeholder="${s.sensitive ? (s.has_value ? '•••••••• (inchangé)' : '(non défini)') : ''}" autocomplete="off"></div></div>`).join('');
+}
+$('bkSettingsSave').onclick = async () => {
+  const values = {};
+  $('bkSettings').querySelectorAll('input[data-key]').forEach(i => values[i.dataset.key] = i.value);
+  const d = await api('/api/backup/settings', { values });
+  d.ok ? notify('Réglages enregistrés') : notify(d.error, 'ko');
+  loadBackupSettings(); loadBackups();
+};
+
+// ================================================================================
+// 🔑 CONFIG .ENV
+// ================================================================================
+function envInputs() { return [...document.querySelectorAll('#envGroups input[data-key]')]; }
+function envDirtyInputs() { return envInputs().filter(i => i.value !== i.dataset.orig); }
+function envDirtyCount() { return envDirtyInputs().length; }
+
+function updateEnvDirty() {
+  const n = envDirtyCount();
+  $('envDirty').textContent = n ? `${n} modification${n > 1 ? 's' : ''} non enregistrée${n > 1 ? 's' : ''}` : 'Aucune modification';
+}
+
+async function loadEnv() {
+  const d = await api('/api/env');
+  if (!d.vars) return notify(d.error || 'Lecture du .env impossible', 'ko');
+
+  const prefixCount = {};
+  const prefix = k => k.includes('_') ? k.split('_')[0] : '';
+  d.vars.forEach(v => { prefixCount[prefix(v.key)] = (prefixCount[prefix(v.key)] || 0) + 1; });
+  const groups = {};
+  d.vars.forEach(v => {
+    const p = prefix(v.key);
+    const g = p && prefixCount[p] > 1 ? p : 'AUTRES';
+    (groups[g] ||= []).push(v);
+  });
+
+  $('envGroups').innerHTML = Object.entries(groups).map(([g, vars]) => `<div class="panel">
+    <div class="panel-head"><div class="panel-title">${esc(g)}</div></div>
+    ${vars.map(v => `<div class="row-set">
+      <div><div class="name mono">${esc(v.key)}</div>${v.sensitive ? '<div class="desc">Masquée — laisser vide pour ne pas modifier</div>' : ''}</div>
+      <div class="ctrl"><input class="field mono" data-key="${esc(v.key)}" data-orig="${esc(v.value)}" type="${v.sensitive ? 'password' : 'text'}"
+        value="${esc(v.value)}" placeholder="${v.sensitive ? (v.has_value ? '•••••••• (inchangé)' : '(vide)') : '(vide)'}" autocomplete="off"></div>
+    </div>`).join('')}</div>`).join('') || '<div class="note"><span>ℹ️</span><span class="note-body">Aucune variable dans le .env.</span></div>';
+  updateEnvDirty();
+}
+
+$('envGroups').oninput = updateEnvDirty;
+$('envReset').onclick = loadEnv;
+
+async function saveEnv() {
+  const dirty = envDirtyInputs();
+  if (!dirty.length) { notify('Aucune modification', 'warn'); return false; }
+  const values = {};
+  dirty.forEach(i => values[i.dataset.key] = i.value);
+  const d = await api('/api/env', { values });
+  if (!d.ok) { notify(d.error, 'ko'); return false; }
+  notify(`${d.changed} variable(s) enregistrée(s)`);
+  await loadEnv();
+  return true;
+}
+$('envSave').onclick = saveEnv;
+$('envSaveRestart').onclick = async () => { if (await saveEnv()) restartBot(); };
+
+// ================================================================================
+// ⌨️ Raccourcis + INIT
+// ================================================================================
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  closeEdit();
+  $('confirmCancel').click();
 });
+
+loadBackups();
+showTab(location.hash.slice(1) || 'db');
