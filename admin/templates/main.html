@@ -6,280 +6,196 @@
 <title>Kisuke Admin</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Shippori+Mincho:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<script>
+  // Applique le thème avant l'affichage (évite le flash)
+  document.documentElement.setAttribute('data-theme', localStorage.getItem('kisuke-theme') || 'dark');
+</script>
 </head>
 <body>
 
-<!-- ─── HEADER ─────────────────────────────────────────────────────────────── -->
-<header>
-  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-
-  <div class="logo">Kisuke <span class="logo-tag">Admin</span></div>
-
-  <nav>
-    <button class="tab active" data-tab="db" onclick="showTab('db', this)">
-      <span class="tab-ico">⬡</span> Base de données
-    </button>
-    <button class="tab" data-tab="sql" onclick="showTab('sql', this)">
-      <span class="tab-ico">◈</span> SQL
-    </button>
-    <button class="tab" data-tab="logs" onclick="showTab('logs', this)">
-      <span class="tab-ico">▤</span> Logs
-    </button>
-    <button class="tab" data-tab="actions" onclick="showTab('actions', this)">
-      <span class="tab-ico">⚙</span> Actions
-    </button>
-  </nav>
-
-  <div class="hdr-right">
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Changer de thème">☾</button>
-    <div class="status-pill">
-      <div class="status-dot"></div>
-      <span>En ligne</span>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><span class="logo-mark">K</span> Kisuke Admin</div>
+    <div class="topbar-actions">
+      <span class="live"><span>En ligne ·</span> <span id="clock">--:--:--</span></span>
+      <button class="theme-btn" id="themeToggle" type="button" aria-label="Changer de thème">☾</button>
+      <form method="POST" action="/logout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">Déconnexion</button>
+      </form>
     </div>
-    <div class="time-display" id="clock">--:--:--</div>
-    <form method="POST" action="/logout">
-      <button class="btn-logout">Déconnexion</button>
-    </form>
   </div>
 </header>
 
-<!-- ─── BODY ───────────────────────────────────────────────────────────────── -->
-<div class="app-body">
+<div class="adm">
 
-  <!-- Overlay mobile (ferme la sidebar au clic à côté) -->
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-section-title">Navigation</div>
-
-    <div class="sidebar-link active" onclick="showTab('db', document.querySelector('[data-tab=db]'))">
-      <span class="ico">⬡</span> Base de données
-    </div>
-    <div class="sidebar-link" onclick="showTab('sql', document.querySelector('[data-tab=sql]'))">
-      <span class="ico">◈</span> Requête SQL
-    </div>
-    <div class="sidebar-link" onclick="showTab('logs', document.querySelector('[data-tab=logs]'))">
-      <span class="ico">▤</span> Logs en direct
-    </div>
-    <div class="sidebar-link" onclick="showTab('actions', document.querySelector('[data-tab=actions]'))">
-      <span class="ico">⚙</span> Actions bot
-    </div>
-
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section-title">Requêtes rapides</div>
-
-    <div class="sidebar-link" onclick="quickSQL('SELECT user_id, username, points, classe, niveau FROM reiatsu ORDER BY points DESC LIMIT 20')">
-      <span class="ico">↑</span> Top 20 points
-    </div>
-    <div class="sidebar-link" onclick="quickSQL('SELECT * FROM reiatsu_config')">
-      <span class="ico">⚙</span> Config guildes
-    </div>
-    <div class="sidebar-link" onclick="quickSQL('SELECT user_id, username, last_found_at FROM mots_trouves ORDER BY last_found_at DESC LIMIT 20')">
-      <span class="ico">◷</span> Derniers mots
-    </div>
-    <div class="sidebar-link" onclick="quickSQL('SELECT COUNT(*) as total, SUM(points) as total_points FROM reiatsu')">
-      <span class="ico">∑</span> Stats globales
-    </div>
-    <div class="sidebar-link" onclick="quickSQL('SELECT classe, COUNT(*) as nb FROM reiatsu GROUP BY classe ORDER BY nb DESC')">
-      <span class="ico">≡</span> Par classe
-    </div>
-    <div class="sidebar-link" onclick="quickSQL('SELECT * FROM steam_keys ORDER BY won ASC')">
-      <span class="ico">🔑</span> Clés Steam
-    </div>
-
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section-title">Système</div>
-    <div class="sidebar-link" id="sidebar-db-path" title="">
-      <span class="ico">◉</span> <span id="sb-db-name">reiatsu.db</span>
-      <span class="badge-count" id="sb-table-count">—</span>
-    </div>
+  <aside class="adm-side">
+    <div class="adm-group">Données</div>
+    <a class="active" data-tab="db"><span class="ico">⬡</span> Base de données <span class="pill" id="sb-table-count">—</span></a>
+    <a data-tab="sql"><span class="ico">◈</span> Console SQL</a>
+    <div class="adm-group">Système</div>
+    <a data-tab="logs"><span class="ico">▤</span> Logs</a>
+    <a data-tab="actions"><span class="ico">⚙</span> Actions</a>
+    <a data-tab="backup"><span class="ico">⛁</span> Backups <span class="pill" id="sb-backup-count">—</span></a>
+    <a data-tab="env"><span class="ico">🔑</span> Config .env</a>
   </aside>
 
-  <!-- Content -->
-  <div class="content">
+  <main class="adm-main">
 
-    <!-- ══ TAB : BASE DE DONNÉES ══════════════════════════════════════════════ -->
-    <section class="section active" id="tab-db">
-      <div class="breadcrumb">Admin <span class="sep">/</span> <span id="bc-table">Base de données</span></div>
+    <!-- ═══════════ BASE DE DONNÉES ═══════════ -->
+    <section class="adm-sec active" id="tab-db">
+      <div class="adm-head"><div><h1>Base de données</h1><p id="db-sub">—</p></div></div>
+      <div class="kpis" id="db-kpis"></div>
 
-      <!-- Stats rapides -->
-      <div class="stats-grid" id="db-stats-grid"></div>
+      <div class="panel" id="editPanel" hidden>
+        <div class="panel-head"><div class="panel-title">Modifier la valeur <span class="panel-sub" id="editMeta"></span></div></div>
+        <div class="panel-body toolbar">
+          <input class="field" id="editValue" style="flex:1;min-width:220px">
+          <button class="btn btn-primary btn-sm" id="editSave">Enregistrer</button>
+          <button class="btn btn-ghost btn-sm" id="editCancel">Annuler</button>
+        </div>
+      </div>
 
-      <div class="card" style="flex:1;min-height:400px;overflow:hidden;display:flex;flex-direction:column;">
-        <div class="card-header">
-          <span class="card-title">Contenu</span>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Contenu <span class="panel-sub">cliquer une cellule pour la modifier</span></div>
           <div class="toolbar">
-            <select id="tableSelect" onchange="loadTable()"></select>
-            <input type="text" class="input" style="width:200px" id="filterInput" placeholder="Filtrer les lignes…" oninput="filterRows()">
-            <button class="btn btn-ghost" onclick="loadTable()">↻</button>
-            <button class="btn btn-red" onclick="confirmDeleteTable()">🗑 Supprimer la table</button>
+            <select class="field" id="tableSelect"></select>
+            <input class="field" id="filterInput" placeholder="Filtrer les lignes…">
+            <button class="btn btn-ghost btn-sm" id="reloadTable">↻ Recharger</button>
+            <button class="btn btn-danger btn-sm" id="deleteTableBtn">🗑 Supprimer la table</button>
           </div>
         </div>
-        <div class="table-info">
-          <span>Table : <strong class="ti-count" id="ti-table">—</strong></span>
-          <span id="ti-pk" style="color:var(--dim)"></span>
-          <span class="ml-auto" id="ti-count">—</span>
-        </div>
-        <div class="card-body-flush">
-          <div class="table-wrap">
-            <table id="mainTable">
-              <thead id="tableHead"></thead>
-              <tbody id="tableBody"></tbody>
-            </table>
-          </div>
-        </div>
+        <div class="tbl"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+        <div class="panel-foot" id="ti-info">—</div>
       </div>
     </section>
 
-    <!-- ══ TAB : SQL ══════════════════════════════════════════════════════════ -->
-    <section class="section" id="tab-sql">
-      <div class="breadcrumb">Admin <span class="sep">/</span> <span>SQL Console</span></div>
+    <!-- ═══════════ SQL ═══════════ -->
+    <section class="adm-sec" id="tab-sql">
+      <div class="adm-head"><div><h1>Console SQL</h1><p>Exécute une requête directement sur la base.</p></div></div>
 
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Requête SQL</span>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Requêtes rapides</div></div>
+        <div class="panel-body chips">
+          <button class="btn btn-ghost btn-sm" data-q="SELECT user_id, username, points, classe, niveau FROM reiatsu ORDER BY points DESC LIMIT 20">↑ Top 20 points</button>
+          <button class="btn btn-ghost btn-sm" data-q="SELECT * FROM reiatsu_config">⚙ Config guildes</button>
+          <button class="btn btn-ghost btn-sm" data-q="SELECT user_id, username, last_found_at FROM mots_trouves ORDER BY last_found_at DESC LIMIT 20">◷ Derniers mots</button>
+          <button class="btn btn-ghost btn-sm" data-q="SELECT COUNT(*) AS total, SUM(points) AS total_points FROM reiatsu">∑ Stats globales</button>
+          <button class="btn btn-ghost btn-sm" data-q="SELECT classe, COUNT(*) AS nb FROM reiatsu GROUP BY classe ORDER BY nb DESC">≡ Par classe</button>
+          <button class="btn btn-ghost btn-sm" data-q="SELECT * FROM steam_keys ORDER BY won ASC">🔑 Clés Steam</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Requête <span class="panel-sub">Ctrl + Entrée pour exécuter</span></div>
+          <div class="toolbar"><button class="btn btn-ghost btn-sm" id="sqlClear">Effacer</button><button class="btn btn-primary btn-sm" id="sqlRun">▶ Exécuter</button></div>
+        </div>
+        <div class="panel-body"><textarea class="field" id="sqlQuery" rows="6" placeholder="SELECT * FROM reiatsu LIMIT 10;"></textarea></div>
+        <div class="panel-foot">⚠ Les requêtes d'écriture modifient la vraie base.</div>
+      </div>
+
+      <div id="sqlResult"></div>
+    </section>
+
+    <!-- ═══════════ LOGS ═══════════ -->
+    <section class="adm-sec" id="tab-logs">
+      <div class="adm-head"><div><h1>Logs</h1><p>Sortie du bot, rafraîchie toutes les 60 s.</p></div></div>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Sortie du bot <span class="panel-sub"><span id="log-count">0 ligne</span> · maj <span id="log-ts">—</span></span></div>
           <div class="toolbar">
-            <button class="btn btn-ghost" onclick="document.getElementById('sqlQuery').value=''">Effacer</button>
-            <button class="btn btn-gold" onclick="runSQL()">▶ Exécuter</button>
+            <input class="field" id="logFilter" placeholder="Filtrer…">
+            <select class="field" id="logLevel"><option value="all">Tous les niveaux</option><option value="err">Erreurs</option><option value="warn">Avertissements</option></select>
+            <label class="live"><input type="checkbox" id="autoRefresh" checked> Auto-refresh</label>
+            <label class="live"><input type="checkbox" id="autoScroll" checked> Auto-scroll</label>
+            <button class="btn btn-ghost btn-sm" id="logReload">↻</button>
+            <button class="btn btn-ghost btn-sm" id="logClear">✕ Vider</button>
           </div>
         </div>
-        <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
-          <textarea id="sqlQuery" class="input" rows="6" placeholder="SELECT * FROM reiatsu LIMIT 10;
--- Ctrl+Enter pour exécuter"></textarea>
-          <div id="sqlResult"></div>
+        <div class="logs" id="logBox"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ ACTIONS ═══════════ -->
+    <section class="adm-sec" id="tab-actions">
+      <div class="adm-head"><div><h1>Actions</h1><p>Mises à jour et rechargement du bot.</p></div></div>
+
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Déploiement</div></div>
+        <div class="row-set act"><div class="ico-box">↓</div><div><div class="name">Git Pull</div><div class="desc">Récupère les dernières modifications depuis GitHub sans redémarrer le bot.</div></div><button class="btn btn-primary btn-sm" data-action="git_pull">Lancer</button></div>
+        <pre class="out" id="res-git_pull" hidden></pre>
+        <div class="row-set act"><div class="ico-box">↓↻</div><div><div class="name">Pull + Reload</div><div class="desc">Pull les mises à jour puis recharge tous les cogs sans interruption.</div></div><button class="btn btn-primary btn-sm" data-action="git_pull_restart">Lancer</button></div>
+        <pre class="out" id="res-git_pull_restart" hidden></pre>
+        <div class="row-set act"><div class="ico-box">↻</div><div><div class="name">Reload Cogs</div><div class="desc">Recharge toutes les commandes sans redémarrer. Idéal pour tester vite.</div></div><button class="btn btn-primary btn-sm" data-action="reload_cogs">Lancer</button></div>
+        <pre class="out" id="res-reload_cogs" hidden></pre>
+      </div>
+
+      <div class="panel danger">
+        <div class="panel-head"><div class="panel-title">Zone dangereuse</div></div>
+        <div class="row-set act"><div class="ico-box">⏻</div><div><div class="name">Redémarrer le bot</div><div class="desc">Redémarre le process via start.sh. Le panel changera d'URL.</div></div><button class="btn btn-danger btn-sm" id="restartBtn">Redémarrer</button></div>
+        <pre class="out" id="res-restart_bot" hidden></pre>
+      </div>
+    </section>
+
+    <!-- ═══════════ BACKUPS ═══════════ -->
+    <section class="adm-sec" id="tab-backup">
+      <div class="adm-head">
+        <div><h1>Backups</h1><p>Copies horodatées de reiatsu.db. Les 10 plus récentes sont gardées.</p></div>
+        <div class="toolbar">
+          <input type="file" id="bkFile" accept=".db" hidden>
+          <button class="btn btn-ghost" id="bkImport">↑ Importer</button>
+          <button class="btn btn-primary" id="bkCreate">⛁ Créer un backup</button>
+        </div>
+      </div>
+      <div class="kpis" id="bk-kpis"></div>
+      <pre class="out" id="res-backup" hidden style="margin:0"></pre>
+
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Backups sur le serveur</div></div>
+        <div class="tbl"><table>
+          <thead><tr><th>Fichier</th><th>Date</th><th class="num">Taille</th><th class="act">Actions</th></tr></thead>
+          <tbody id="bkBody"></tbody>
+        </table></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Réglages</div><button class="btn btn-primary btn-sm" id="bkSettingsSave">Enregistrer</button></div>
+        <div id="bkSettings"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ CONFIG .ENV ═══════════ -->
+    <section class="adm-sec" id="tab-env">
+      <div class="adm-head"><div><h1>Config .env</h1><p>Variables d'environnement du bot.</p></div></div>
+      <div class="note"><span>⚠️</span><span class="note-body">Les valeurs sensibles sont <strong>masquées</strong>. Un redémarrage du bot est nécessaire pour appliquer les changements.</span></div>
+      <div id="envGroups"></div>
+      <div class="savebar">
+        <span id="envDirty">Aucune modification</span>
+        <div class="toolbar">
+          <button class="btn btn-ghost btn-sm" id="envReset">Annuler</button>
+          <button class="btn btn-primary btn-sm" id="envSave">💾 Enregistrer</button>
+          <button class="btn btn-ghost btn-sm" id="envSaveRestart">⏻ Enregistrer et redémarrer</button>
         </div>
       </div>
     </section>
 
-    <!-- ══ TAB : LOGS ═════════════════════════════════════════════════════════ -->
-    <section class="section" id="tab-logs" style="flex:1">
-      <div class="breadcrumb">Admin <span class="sep">/</span> <span>Logs en direct</span></div>
-
-      <div class="card" style="flex:1;min-height:500px;overflow:hidden;display:flex;flex-direction:column;">
-        <div class="card-header">
-          <span class="card-title">Sortie du bot</span>
-          <div class="toolbar" style="margin-left:auto;gap:14px">
-            <label class="log-toggle">
-              <label class="switch"><input type="checkbox" id="autoRefresh" checked onchange="toggleAutoRefresh()"><span class="slider"></span></label>
-              Auto-refresh
-            </label>
-            <input type="text" class="input log-filter" id="logFilter" placeholder="Filtrer les logs…" oninput="filterLogs()">
-            <button class="btn btn-ghost" onclick="loadLogs()">↻ Refresh</button>
-            <button class="btn btn-ghost" onclick="clearLogs()">✕ Vider</button>
-          </div>
-        </div>
-        <div class="log-wrap" id="logBox"></div>
-        <div class="log-controls">
-          <span class="badge badge-cyan" id="log-count">0 lignes</span>
-          <span style="font-size:10px;color:var(--dim2);font-family:'Syne Mono',monospace">Dernière mise à jour : <span id="log-ts">—</span></span>
-          <label class="log-toggle ml-auto">
-            <label class="switch"><input type="checkbox" id="autoScroll" checked></label>
-            Auto-scroll
-          </label>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ TAB : ACTIONS ══════════════════════════════════════════════════════ -->
-    <section class="section" id="tab-actions">
-      <div class="breadcrumb">Admin <span class="sep">/</span> <span>Actions</span></div>
-
-      <div class="actions-grid">
-
-        <div class="action-card">
-          <div class="action-header">
-            <span class="action-icon">↓</span>
-            <span class="action-title">Git Pull</span>
-          </div>
-          <div class="action-desc">Récupère les dernières modifications depuis GitHub sans redémarrer le bot.</div>
-          <button class="btn btn-cyan" onclick="doAction('git_pull', this)">Lancer git pull</button>
-          <div class="action-result" id="res-git_pull"></div>
-        </div>
-
-        <div class="action-card">
-          <div class="action-header">
-            <span class="action-icon">↓↻</span>
-            <span class="action-title">Pull + Reload</span>
-          </div>
-          <div class="action-desc">Pull les mises à jour puis recharge tous les cogs sans interruption.</div>
-          <button class="btn btn-cyan" onclick="doAction('git_pull_restart', this)">Pull + reload cogs</button>
-          <div class="action-result" id="res-git_pull_restart"></div>
-        </div>
-
-        <div class="action-card">
-          <div class="action-header">
-            <span class="action-icon">↻</span>
-            <span class="action-title">Reload Cogs</span>
-          </div>
-          <div class="action-desc">Recharge tous les cogs/commandes sans redémarrer le bot. Idéal pour tester des changements rapides.</div>
-          <button class="btn btn-green" onclick="doAction('reload_cogs', this)">Reload cogs</button>
-          <div class="action-result" id="res-reload_cogs"></div>
-        </div>
-
-        <div class="action-card">
-          <div class="action-header">
-            <span class="action-icon">⏻</span>
-            <span class="action-title">Restart Bot</span>
-          </div>
-          <div class="action-desc">Redémarre le bot via start.sh. Le panel admin sera redémarré et changera d'url.</div>
-          <button class="btn btn-red" onclick="confirmRestart()">Redémarrer</button>
-          <div class="action-result" id="res-restart_bot"></div>
-        </div>
-
-        <div class="action-card">
-          <div class="action-header">
-            <span class="action-icon">⛁</span>
-            <span class="action-title">Backup Database</span>
-          </div>
-          <div class="action-desc">Crée une copie horodatée de la base, l'envoie automatiquement sur Discord (si configuré) et garde les 10 derniers backups sur le serveur.</div>
-          <button class="btn btn-gold" onclick="doBackup(this)">Créer un backup</button>
-          <div class="action-result" id="res-backup"></div>
-          <div style="margin-top:14px">
-            <div style="font-size:10px;color:var(--dim2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Backups sur le serveur</div>
-            <div id="backup-list"></div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </div><!-- /content -->
-</div><!-- /app-body -->
-
-<!-- ─── MODAL EDIT ──────────────────────────────────────────────────────────── -->
-<div id="modal-overlay">
-  <div class="modal">
-    <div class="modal-title">Modifier la valeur</div>
-    <div class="modal-meta" id="modal-meta"></div>
-    <input type="text" class="input modal-input" id="editValue">
-    <input type="hidden" id="editTable">
-    <input type="hidden" id="editPk">
-    <input type="hidden" id="editPkVal">
-    <input type="hidden" id="editCol">
-    <div class="modal-footer">
-      <button class="btn btn-gold" onclick="saveEdit()">Sauvegarder</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
-    </div>
-  </div>
+  </main>
 </div>
 
-<!-- ─── MODAL CONFIRM (générique : restart bot, suppression de table…) ───────── -->
-<div id="modal-confirm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(2px)">
-  <div class="modal" style="border-top-color:var(--red);">
-    <div class="modal-title" style="color:var(--red)">Confirmation</div>
-    <div class="modal-meta" id="modal-confirm-text">Cette action va redémarrer le process du bot. Continuer ?</div>
-    <div class="modal-footer" style="margin-top:20px">
-      <button class="btn btn-red" id="modal-confirm-btn" onclick="doAction('restart_bot',this);document.getElementById('modal-confirm').style.display='none'">Confirmer</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('modal-confirm').style.display='none'">Annuler</button>
-    </div>
+<!-- Notification + confirmation (remplacent les toasts et les modales) -->
+<div class="note float" id="notice" hidden><span id="noticeIcon">✓</span><span class="note-body" id="noticeText"></span></div>
+<div class="note confirm" id="confirmBox" hidden>
+  <span>⚠️</span>
+  <div class="note-body">
+    <div id="confirmText"></div>
+    <div class="toolbar"><button class="btn btn-solid-danger btn-sm" id="confirmOk">Confirmer</button><button class="btn btn-ghost btn-sm" id="confirmCancel">Annuler</button></div>
   </div>
 </div>
-
-<!-- ─── TOASTS ──────────────────────────────────────────────────────────────── -->
-<div id="toast-container"></div>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
