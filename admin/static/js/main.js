@@ -401,52 +401,31 @@ $('bkSettingsSave').onclick = async () => {
 };
 
 // ================================================================================
-// 🔑 CONFIG .ENV
+// 🔑 CONFIG .ENV (éditeur texte brut)
 // ================================================================================
-function envInputs() { return [...document.querySelectorAll('#envGroups input[data-key]')]; }
-function envDirtyInputs() { return envInputs().filter(i => i.value !== i.dataset.orig); }
-function envDirtyCount() { return envDirtyInputs().length; }
+let envOrig = '';
+const envDirtyCount = () => ($('envText').value !== envOrig ? 1 : 0);
 
 function updateEnvDirty() {
-  const n = envDirtyCount();
-  $('envDirty').textContent = n ? `${n} modification${n > 1 ? 's' : ''} non enregistrée${n > 1 ? 's' : ''}` : 'Aucune modification';
+  $('envDirty').textContent = envDirtyCount() ? 'Modifications non enregistrées' : 'Aucune modification';
 }
 
 async function loadEnv() {
   const d = await api('/api/env');
-  if (!d.vars) return notify(d.error || 'Lecture du .env impossible', 'ko');
-
-  const prefixCount = {};
-  const prefix = k => k.includes('_') ? k.split('_')[0] : '';
-  d.vars.forEach(v => { prefixCount[prefix(v.key)] = (prefixCount[prefix(v.key)] || 0) + 1; });
-  const groups = {};
-  d.vars.forEach(v => {
-    const p = prefix(v.key);
-    const g = p && prefixCount[p] > 1 ? p : 'AUTRES';
-    (groups[g] ||= []).push(v);
-  });
-
-  $('envGroups').innerHTML = Object.entries(groups).map(([g, vars]) => `<div class="panel">
-    <div class="panel-head"><div class="panel-title">${esc(g)}</div></div>
-    ${vars.map(v => `<div class="row-set">
-      <div><div class="name mono">${esc(v.key)}</div>${v.sensitive ? '<div class="desc">Masquée — laisser vide pour ne pas modifier</div>' : ''}</div>
-      <div class="ctrl"><input class="field mono" data-key="${esc(v.key)}" data-orig="${esc(v.value)}" type="${v.sensitive ? 'password' : 'text'}"
-        value="${esc(v.value)}" placeholder="${v.sensitive ? (v.has_value ? '•••••••• (inchangé)' : '(vide)') : '(vide)'}" autocomplete="off"></div>
-    </div>`).join('')}</div>`).join('') || '<div class="note"><span>ℹ️</span><span class="note-body">Aucune variable dans le .env.</span></div>';
+  if (d.text === undefined) return notify(d.error || 'Lecture du .env impossible', 'ko');
+  envOrig = d.text;
+  $('envText').value = d.text;
   updateEnvDirty();
 }
 
-$('envGroups').oninput = updateEnvDirty;
+$('envText').oninput = updateEnvDirty;
 $('envReset').onclick = loadEnv;
 
 async function saveEnv() {
-  const dirty = envDirtyInputs();
-  if (!dirty.length) { notify('Aucune modification', 'warn'); return false; }
-  const values = {};
-  dirty.forEach(i => values[i.dataset.key] = i.value);
-  const d = await api('/api/env', { values });
+  if (!envDirtyCount()) { notify('Aucune modification', 'warn'); return false; }
+  const d = await api('/api/env', { text: $('envText').value });
   if (!d.ok) { notify(d.error, 'ko'); return false; }
-  notify(`${d.changed} variable(s) enregistrée(s)`);
+  notify('.env enregistré');
   await loadEnv();
   return true;
 }
