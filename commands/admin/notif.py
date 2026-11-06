@@ -240,8 +240,9 @@ class Notif(commands.Cog):
         if platform == "twitch":
             handle = handle.strip().split("?")[0].rstrip("/").split("/")[-1].lstrip("@").lower()
             rows = query(
-                "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? AND handle = ?",
-                (ctx.guild.id, platform, handle),
+                "SELECT id FROM notif_follows WHERE guild_id = ? AND platform = ? "
+                "AND (handle = ? OR LOWER(display) = ?)",
+                (ctx.guild.id, platform, handle, handle),
             )
         else:
             m = UC_RE.search(handle)
