@@ -50,8 +50,7 @@ def init_db():
         fake_spawn_id INTEGER,
         fake_spawn_guild_id INTEGER,
         niveau INTEGER DEFAULT 0,
-        quetes TEXT DEFAULT '[]',
-        shop_effets TEXT DEFAULT '[]'
+        quetes TEXT DEFAULT '[]'
     )
     """)
 
