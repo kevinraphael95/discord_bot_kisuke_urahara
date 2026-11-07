@@ -283,7 +283,7 @@ class Notif(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.group(name="notif", invoke_without_command=True)
+    @commands.group(name="notif", help="Gère les notifications de live Twitch et de vidéos YouTube.", invoke_without_command=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5.0, commands.BucketType.user)
