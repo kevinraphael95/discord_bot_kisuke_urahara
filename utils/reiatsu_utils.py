@@ -49,7 +49,6 @@ def ensure_profile(user_id: int, username: str) -> dict:
 
         # Conversion JSON stocké en TEXT
         profile["quetes"] = json.loads(profile.get("quetes") or "[]")
-        profile["shop_effets"] = json.loads(profile.get("shop_effets") or "[]")
 
         conn.close()
         return profile
@@ -69,10 +68,9 @@ def ensure_profile(user_id: int, username: str) -> dict:
             fake_spawn_id,
             fake_spawn_guild_id,
             niveau,
-            quetes,
-            shop_effets
+            quetes
         )
-        VALUES (?, ?, 0, 0, NULL, 24, '', NULL, 0, NULL, NULL, 0, '[]', '[]')
+        VALUES (?, ?, 0, 0, NULL, 24, '', NULL, 0, NULL, NULL, 0, '[]')
     """, (user_id, username))
 
     conn.commit()
@@ -91,8 +89,7 @@ def ensure_profile(user_id: int, username: str) -> dict:
         "fake_spawn_id": None,
         "fake_spawn_guild_id": None,
         "niveau": 0,
-        "quetes": [],
-        "shop_effets": []
+        "quetes": []
     }
 
 
