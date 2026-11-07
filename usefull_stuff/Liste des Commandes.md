@@ -1,0 +1,77 @@
+Liste des Commandes
+
+### Admin
+- **adminpanel :** 🔒 Affiche le lien du panneau admin.
+- **commandslist :** Génère un .md avec toutes les commandes et les envoie en fichier.
+- **kisukevol :** 🌀 Kisuke vole le Reiatsu d'un membre comme un joueur normal.
+- **notif :** Gère les notifications de live Twitch et de vidéos YouTube.
+- **reiatsuadmin :** (Admin) Gère le Reiatsu : set, unset, change, spawn, speed.
+- **say_as :** (Admin) Fait répéter un message par le bot comme si c'était un autre membre.
+Usage: !say_as <mention|id|pseudo> <message>
+- **sync :** Synchronise les commandes slash (serveur ou global).
+- **test :** Affiche le ping, l'heure et le dernier commit du bot.
+- **testgame :** Tester un mini-jeu via son numéro ou 'all'.
+- **testtache :** 🕹️ Teste toutes les épreuves pour la commande hollow.
+
+### Bleach
+- **bleachship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
+- **bmoji :** Devine quel personnage Bleach se cache derrière ces emojis. (Ex: !bmoji multi)
+- **combat :** ⚔️ Combat style Pokémon entre 2 persos.
+- **division :** Détermine ta division dans le Gotei 13.
+- **kido :** Affiche un Kido précis, aléatoire ou la liste paginée.
+- **kluboutside :** Affiche une question de la FAQ du Klub Outside.
+- **perso :** Affiche la fiche d'un personnage Bleach.
+- **scans :** 📖 Lire un scan de Bleach.
+- **shifumi :** Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.
+- **versus :** ⚔️ Lance un combat interactif contre le bot.
+
+### Fun&Random
+- **calc :** Calculatrice scientifique interactive.
+- **couleur :** 🎨 Affiche une couleur aléatoire avec ses codes HEX et RGB.
+- **dice :** 🎲 Lance des dés. Ex: !dice 2d6, !dice 1d20
+- **gay :** 🌈 Calcule ton taux de gaytitude du jour.
+- **inspire :** Reçois une citation inspirante... très inspirante.
+- **palette :** 🎨 Génère une palette de 6 couleurs pour dessiner.
+- **pizza :** 🍕 Génère une pizza aléatoire.
+- **qrcode :** 📷 Génère un QR code depuis un texte ou une URL.
+- **ship :** 💘 Ship deux membres. Usage : !ship @user | !ship @user1 @user2
+- **sorting :** Trie 12 barres en longueurs différentes selon un algorithme.
+
+### Général
+- **emoji :** Montre un ou plusieurs emojis du serveur ou de tous les serveurs.
+- **help :** Affiche l’aide du bot.
+- **react :** Réagit à un message avec un ou plusieurs emojis.
+- **say :** Fait répéter un message par le bot. Options : *embed / *e, *as_me / *am, *chuchotte / *ch. Ex: !say *e *am Bonjour !
+
+### Jeux
+- **anagramme :** Lance une partie d'Anagramme. anagramme multi ou m pour jouer en multi.
+- **capitale :** Devine la capitale d'un pays
+- **compte_est_bon :** Lance le jeu du Compte est Bon
+- **conversion_bases :** Convertis un nombre entre bases 2 et 10. Ajoute 'm' ou 'multi' pour jouer en multi.
+- **departement :** Trouve le numéro, le nom ou la préfecture d'un département. Options : numero|nom|prefecture|mix, m|multi.
+- **devinelenombre :** Devine un nombre entre 0 et 100 (multi = plusieurs joueurs)
+- **drapeau :** Devine le pays à partir d'un drapeau
+- **entrainementcerebral :** Entraînement cérébral composé de 5 mini-jeux.
+- **formes :** Jouez au mini-jeu mémoire avec des formes et couleurs.
+- **lightsout :** Pas de description.
+- **mastermind :** Jouer au Mastermind interactif.
+- **mot_contraint :** Jeu du mot contraint. mot_contraint multi ou m pour jouer en multi.
+- **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
+- **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
+- **pendu :** Lance une partie du Pendu. pendu multi ou m pour jouer en multi.
+- **puissance4 :** Pas de description.
+- **tram_probleme :** Teste ta morale dans un quiz absurde du dilemme du tramway.
+
+### Reiatsu
+- **classe :** Choisir sa classe Reiatsu
+- **hollow :** 👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).
+- **keylottery :** Ticket à gratter : tente ta chance
+- **quetes :** 🎮 Affiche la liste des quêtes et ton niveau actuel.
+- **reiatsu :** 💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.
+- **reiatsuprofil :** 💠 Affiche ton profil Reiatsu détaillé.
+- **reiatsushop :** Affiche le shop et achète des effets
+- **reiatsutop :** 📊 Affiche le Top 20 Reiatsu et ta position dans le classement global.
+- **reiatsuvol :** 💠 Vole du Reiatsu à quelqu'un.
+- **skill :** Active la compétence de ta classe Reiatsu.
+- **tutoreiatsu :** Affiche le tutoriel complet pour les nouveaux joueurs.
+
