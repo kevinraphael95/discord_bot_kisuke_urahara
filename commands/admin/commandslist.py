@@ -57,7 +57,7 @@ class CommandsList(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_commandslist(self, interaction: discord.Interaction):
-        file = discord.File(io.StringIO(self._build_markdown_content()), filename="Liste des Commandes.md")
+        file = discord.File(io.StringIO(self._build_markdown_content()), filename="Liste_des_Commandes.md")
         await safe_respond(interaction, "📄 Voici la liste des commandes :", file=file)
 
     # ============================================================================
