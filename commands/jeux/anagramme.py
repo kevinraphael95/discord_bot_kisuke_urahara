@@ -12,6 +12,7 @@
 import asyncio
 import logging
 import random
+import threading
 from collections import Counter
 
 import aiohttp
@@ -26,56 +27,126 @@ from utils.jeux_utils import BuzzerView, ReplyView, normalize_text, parse_mode
 log = logging.getLogger(__name__)
 
 # ================================================================================
-# 🌐 Initialisation du spellchecker français
+# 🔤 Clé de comparaison : sans accents, sans ligatures, en MAJUSCULES
+# ================================================================================
+def to_key(text: str) -> str:
+    """'élève' -> 'ELEVE' ; 'cœur' -> 'COEUR'."""
+    return normalize_text(text).upper()
+
+# ================================================================================
+# 📚 Dictionnaire local (SpellChecker français) : validation + fallback
 # ================================================================================
 spell = SpellChecker(language="fr")
 
+MIN_LEN, MAX_LEN = 4, 10                        # on n'indexe que les longueurs utiles (économise la RAM)
+_valid_words: set[str] | None = None            # clés (sans accents) de tous les mots valides
+_fallback_pools: dict[int, list[str]] = {}      # longueur -> mots courants (avec accents)
+_index_lock = threading.Lock()
+
+
+def _build_index() -> None:
+    """Construit l'index une seule fois (appelable depuis un thread)."""
+    global _valid_words
+    with _index_lock:
+        if _valid_words is not None:
+            return
+
+        valid: set[str] = set()
+        by_len: dict[int, list[tuple[int, str]]] = {}
+
+        for word, count in spell.word_frequency.dictionary.items():
+            if not word.isalpha():
+                continue
+            key = to_key(word)
+            if not MIN_LEN <= len(key) <= MAX_LEN:
+                continue
+            valid.add(key)
+            by_len.setdefault(len(key), []).append((count, word))
+
+        for n, items in by_len.items():
+            items.sort(reverse=True)                        # mots les plus fréquents d'abord
+            _fallback_pools[n] = [w for _, w in items[:3000]]
+
+        _valid_words = valid
+
+
+def is_valid_word(guess: str, target: str) -> bool:
+    """Le mot cible est toujours accepté (l'API peut connaître des mots que
+    le spellchecker ignore). Sinon on cherche dans l'index sans accents."""
+    return guess == target or guess in (_valid_words or set())
+
+
+def get_local_random_word(length: int | None = None) -> str:
+    """Fallback hors-ligne : mot courant du dictionnaire, à la bonne longueur."""
+    _build_index()
+    pool = _fallback_pools.get(length) if length else None
+    if not pool:
+        pool = [w for p in _fallback_pools.values() for w in p]
+    return random.choice(pool).upper() if pool else "PYTHON"
+
 # ================================================================================
-# 🌐 Récupération d'un mot français aléatoire via la session partagée du bot
+# 🌐 Récupération d'un mot français aléatoire (API + retry + fallback local)
 # ================================================================================
+API_URL     = "https://trouve-mot.fr/api/random"
+API_TIMEOUT = aiohttp.ClientTimeout(total=6, connect=3)
+
+
+async def _fetch_word(session: aiohttp.ClientSession, url: str) -> str | None:
+    async with session.get(url, timeout=API_TIMEOUT) as resp:
+        if resp.status != 200:
+            log.warning("[anagramme] API status %s", resp.status)
+            return None
+        data = await resp.json()
+        if isinstance(data, list) and data:
+            return str(data[0]["name"]).strip().upper()
+    return None
+
+
 async def get_random_french_word(bot: commands.Bot, length: int | None = None) -> str:
-    url = "https://trouve-mot.fr/api/random"
-    if length:
-        url += f"?size={length}"
+    url = f"{API_URL}?size={length}" if length else API_URL
+
+    session     = getattr(bot, "aiohttp_session", None)
+    own_session = session is None
+    if own_session:
+        session = aiohttp.ClientSession()
+
+    network_errors = 0
     try:
-        session = getattr(bot, "aiohttp_session", None)
-        
-        if session is None:
-            async with aiohttp.ClientSession() as temp_session:
-                async with temp_session.get(url, timeout=5) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        if isinstance(data, list) and len(data) > 0:
-                            return data[0]["name"].upper()
-        else:
-            async with session.get(url, timeout=5) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    if isinstance(data, list) and len(data) > 0:
-                        return data[0]["name"].upper()
-                        
-    except Exception as e:
-        log.exception("[anagramme] Erreur API ou Timeout : %s", e)
-        
-    return "PYTHON"
+        for _ in range(4):
+            try:
+                word = await _fetch_word(session, url)
+            except (asyncio.TimeoutError, aiohttp.ClientError) as e:
+                network_errors += 1
+                log.warning("[anagramme] API injoignable (%d) : %r", network_errors, e)
+                if network_errors >= 2:
+                    break
+                continue
+            except Exception:
+                log.exception("[anagramme] Erreur inattendue")
+                break
+
+            # On exclut les mots composés (tiret, apostrophe, espace) : illisibles en anagramme
+            if word and word.isalpha():
+                return word
+            log.info("[anagramme] Mot rejeté (non alphabétique) : %r", word)
+    finally:
+        if own_session:
+            await session.close()
+
+    log.warning("[anagramme] Fallback sur le dictionnaire local")
+    return await asyncio.to_thread(get_local_random_word, length)
 
 # ================================================================================
-# 🌐 Vérification d'un mot via SpellChecker
-# ================================================================================
-def is_valid_word(word: str) -> bool:
-    return word.lower() in spell.word_frequency
-
-# ================================================================================
-# 🎮 Vue principale du jeu
+# 🎮 État d'une partie
 # ================================================================================
 class AnagrammeView:
     """Classe représentant une partie d'Anagramme"""
 
     def __init__(self, target_word: str, author_id: int | None = None, multi: bool = False):
-        normalized = target_word.replace("Œ", "OE").replace("œ", "oe")
-        self.target_word        = normalized.upper()
-        self.display_word       = ''.join(random.sample(self.target_word, len(self.target_word)))
-        self.display_length     = len([c for c in self.target_word if c.isalpha()])
+        self.reveal_word        = target_word.upper()       # affiché à la fin (avec accents)
+        self.target_word        = to_key(target_word)       # utilisé pour comparer
+        self.display_word       = self._shuffle(self.target_word)
+        self.display_length     = len(self.target_word)
         self.author_id          = author_id
         self.multi              = multi
         self.max_attempts       = None if multi else max(self.display_length, 5)
@@ -85,6 +156,16 @@ class AnagrammeView:
         self.winner: str | None = None
         self.last_error: str | None = None
         self.start_time         = asyncio.get_event_loop().time()
+
+    @staticmethod
+    def _shuffle(word: str) -> str:
+        """Mélange le mot en évitant qu'il reste identique à l'original."""
+        letters = list(word)
+        for _ in range(10):
+            random.shuffle(letters)
+            if "".join(letters) != word:
+                break
+        return "".join(letters)
 
     def build_embed(self) -> discord.Embed:
         mode_text = "Solo 🧍‍♂️" if not self.multi else "Multi 🌍"
@@ -99,7 +180,7 @@ class AnagrammeView:
                 "💡 **Comment jouer en mode Multi :**\n"
                 "1️⃣ Clique sur **🔔 Buzzer** pour prendre la main.\n"
                 "2️⃣ Le plus rapide ouvre une fenêtre pour proposer un mot.\n"
-                f"3️⃣ Le mot doit faire {self.display_length} lettres.\n"
+                f"3️⃣ Le mot doit faire {self.display_length} lettres (accents facultatifs).\n"
                 "4️⃣ Il n'y a **aucune limite d'essais**.\n"
                 "5️⃣ La partie se termine après 3 minutes ou quand le mot est trouvé."
             )
@@ -107,7 +188,7 @@ class AnagrammeView:
             instructions = (
                 "💡 **Comment jouer en mode Solo :**\n"
                 "1️⃣ Clique sur **✍️ Répondre** pour proposer ta réponse.\n"
-                f"2️⃣ Le mot doit faire {self.display_length} lettres.\n"
+                f"2️⃣ Le mot doit faire {self.display_length} lettres (accents facultatifs).\n"
                 f"3️⃣ Vous avez {self.max_attempts} essais maximum.\n"
                 "4️⃣ La partie se termine quand le mot est trouvé ou après 3 minutes."
             )
@@ -132,12 +213,12 @@ class AnagrammeView:
             if self.winner:
                 embed.title = "🔀 Anagramme - Gagné !"
                 embed.color = discord.Color.green()
-                embed.description = f"# 🔀 `{' '.join(self.display_word)}`\n\n🏆 **{self.winner}** a trouvé ! C'était bien **{self.target_word}**."
+                embed.description = f"# 🔀 `{' '.join(self.display_word)}`\n\n🏆 **{self.winner}** a trouvé ! C'était bien **{self.reveal_word}**."
                 embed.set_footer(text="Partie terminée")
             else:
                 embed.title = "🔀 Anagramme - Terminé"
                 embed.color = discord.Color.red()
-                embed.description = f"# 🔀 `{' '.join(self.display_word)}`\n\n❌ Personne n'a trouvé. Le mot était **{self.target_word}**."
+                embed.description = f"# 🔀 `{' '.join(self.display_word)}`\n\n❌ Personne n'a trouvé. Le mot était **{self.reveal_word}**."
                 embed.set_footer(text="Partie terminée")
         else:
             elapsed   = int(asyncio.get_event_loop().time() - self.start_time)
@@ -154,6 +235,10 @@ class Anagramme(commands.Cog):
         self.bot          = bot
         self.active_games: dict[int, AnagrammeView] = {}
 
+    async def cog_load(self):
+        # Pré-charge l'index du dictionnaire en arrière-plan (évite un gel au 1er essai)
+        asyncio.create_task(asyncio.to_thread(_build_index))
+
     async def _start_game(self, channel: discord.abc.Messageable, author_id: int, mode: str = "solo"):
         length      = random.choice(range(5, 9))
         target_word = await get_random_french_word(self.bot, length=length)
@@ -163,6 +248,10 @@ class Anagramme(commands.Cog):
         state = {"finished": False}
 
         embed = game.build_embed()
+
+        async def refresh():
+            if game.message:
+                await safe_edit(game.message, embed=game.build_embed())
 
         # ── Callback de validation ──
         async def on_submit(interaction: discord.Interaction, answer: str):
@@ -175,35 +264,27 @@ class Anagramme(commands.Cog):
             if not game.multi and interaction.user.id != game.author_id:
                 return
 
-            guess = answer.strip().upper()
+            guess = to_key(answer)
             game.last_error = None
 
-            # Vérification si le mot a déjà été proposé
             if any(entry['word'] == guess for entry in game.attempts):
                 game.last_error = f"Le mot `{guess}` a déjà été proposé !"
-                if game.message:
-                    await safe_edit(game.message, embed=game.build_embed())
-                return
+                return await refresh()
 
             if len(guess) != game.display_length:
                 game.last_error = f"Le mot doit faire exactement {game.display_length} lettres."
-                if game.message:
-                    await safe_edit(game.message, embed=game.build_embed())
-                return
+                return await refresh()
 
             if Counter(guess) != Counter(game.target_word):
                 game.last_error = "Ce mot n'utilise pas exactement les lettres proposées."
-                if game.message:
-                    await safe_edit(game.message, embed=game.build_embed())
-                return
+                return await refresh()
 
-            if not is_valid_word(guess):
+            await asyncio.to_thread(_build_index)   # no-op si déjà construit
+            if not is_valid_word(guess, game.target_word):
                 game.last_error = f"`{guess}` n'est pas un mot reconnu du dictionnaire."
-                if game.message:
-                    await safe_edit(game.message, embed=game.build_embed())
-                return
+                return await refresh()
 
-            is_correct = (normalize_text(guess) == normalize_text(game.target_word))
+            is_correct = (guess == game.target_word)
             game.attempts.append({
                 'word': guess,
                 'author': interaction.user.display_name,
@@ -216,23 +297,18 @@ class Anagramme(commands.Cog):
                 game.finished = True
                 game.winner = interaction.user.mention
                 self.active_games.pop(channel.id, None)
+                await view.mark_finished(embed=game.build_embed())
 
-                final_embed = game.build_embed()
-                await view.mark_finished(embed=final_embed)
+            # ❌ Limite d'essais atteinte (Solo)
+            elif not game.multi and len(game.attempts) >= game.max_attempts:
+                state["finished"] = True
+                game.finished = True
+                self.active_games.pop(channel.id, None)
+                await view.mark_finished(embed=game.build_embed())
 
-            # ❌ Mauvaise réponse
+            # ❌ Mauvaise réponse, on continue
             else:
-                # Vérification de la limite d'essais en Solo
-                if not game.multi and len(game.attempts) >= game.max_attempts:
-                    state["finished"] = True
-                    game.finished = True
-                    self.active_games.pop(channel.id, None)
-
-                    final_embed = game.build_embed()
-                    await view.mark_finished(embed=final_embed)
-                else:
-                    if game.message:
-                        await safe_edit(game.message, embed=game.build_embed())
+                await refresh()
 
         # ── Création de la view ──
         if multi:
@@ -251,7 +327,7 @@ class Anagramme(commands.Cog):
                 modal_title="✍️ Propose ton mot",
                 modal_label="Mot",
                 modal_placeholder=f"Mot de {game.display_length} lettres",
-                modal_max_length=game.display_length,
+                modal_max_length=game.display_length + 2,   # marge pour les ligatures (œ = 1 caractère)
                 on_submit=on_submit,
                 on_buzz=on_buzz,
                 buzz_timeout=30,
@@ -263,7 +339,7 @@ class Anagramme(commands.Cog):
                 modal_title="✍️ Propose ton mot",
                 modal_label="Mot",
                 modal_placeholder=f"Mot de {game.display_length} lettres",
-                modal_max_length=game.display_length,
+                modal_max_length=game.display_length + 2,
                 on_submit=on_submit,
                 timeout=300,
             )
@@ -286,10 +362,10 @@ class Anagramme(commands.Cog):
             return
 
         # ── Fin du temps ──
+        state["finished"] = True
         game.finished = True
         self.active_games.pop(channel.id, None)
-        final_embed = game.build_embed()
-        await view.mark_finished(embed=final_embed)
+        await view.mark_finished(embed=game.build_embed())
 
     # ============================================================================
     # 🔹 Commande SLASH
