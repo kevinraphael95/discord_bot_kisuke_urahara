@@ -160,7 +160,7 @@ const CHARS = [
   // ============================================================
   {n:"Kukkapuro",                r:"Arrancar", sx:"M", chapter:"342", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Chauve", bday:"04/04", w:0,  l:0,  draw:0, img:"assets/personnages/kukkapuro.png"},
   {n:"Nelliel Tu Odelschwanck",  r:"Arrancar", sx:"F", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:4, st:"Vivant",    hc:"Vert",   bday:"24/04", w:4,  l:1,  draw:0, img:"assets/personnages/nelliel-tu-odelschwanck.png"},
-  {n:"Luppi Antenor",            r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada", d:3, st:"Mort",      hc:"Noir",   bday:"05/06", w:1,  l:1,  draw:0, img:"assets/personnages/luppi-antenor.png"},
+  {n:"Luppi Antenor",            r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada", d:3, st:"Vivant",      hc:"Noir",   bday:"05/06", w:1,  l:1,  draw:0, img:"assets/personnages/luppi-antenor.png"},
   {n:"Wonderweiss Margela",      r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Bataille de Karakura (3.4)",    af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"06/07", w:2,  l:1,  draw:0, img:"assets/personnages/wonderweiss-margela.png"},
  
   // ============================================================
