@@ -2,9 +2,6 @@
 # 📌 stream_notif.py — Code partagé des notifications Twitch / YouTube
 # Objectif : Base de données + client API utilisés à la fois par la task
 #            (tasks/stream_alert.py) et les commandes (commands/notif.py)
-# Catégorie : 🧠 Utils
-# Accès : Interne
-# Cooldown : /
 # ================================================================================
 # 🗄️ Table notif_follows (database/reiatsu.db) :
 #   id, guild_id, platform ('twitch'|'youtube'), handle, display, channel_id,
