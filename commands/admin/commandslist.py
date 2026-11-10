@@ -67,7 +67,7 @@ class CommandsList(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_commandslist(self, ctx: commands.Context):
-        file = discord.File(io.StringIO(self._build_markdown_content()), filename="Liste des Commandes.md")
+        file = discord.File(io.StringIO(self._build_markdown_content()), filename="Liste_des_Commandes.md")
         await safe_send(ctx.channel, "📄 Voici la liste des commandes :", file=file)
 
 # ================================================================================
