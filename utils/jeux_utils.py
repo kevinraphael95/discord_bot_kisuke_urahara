@@ -1,8 +1,6 @@
 # ================================================================================
 # 📌 jeux_utils.py — Fonctions utilitaires communes aux jeux
 # Objectif : Standardiser le comportement des jeux (modes, embeds, réponses, fin)
-# Catégorie : Utils
-# Accès : Interne
 # ================================================================================
 
 # ================================================================================
