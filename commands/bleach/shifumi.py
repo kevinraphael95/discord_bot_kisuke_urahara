@@ -251,7 +251,7 @@ class QuincyHollowShinigami(commands.Cog):
     # ============================================================================
     def _build_vs_bot_view(self, author_id: int) -> tuple[discord.Embed, discord.ui.View]:
         embed = discord.Embed(
-            title="🎮 Quincy / Hollow / Shinigami — VS BOT",
+            title="🎮 Bleach Shifumi — VS BOT",
             description=" — ".join(f"{EMOJI[c]} {c.capitalize()}" for c in CHOICES) + "\nChoisis ton camp en cliquant un bouton.",
             color=0x2F3136
         )
@@ -262,7 +262,7 @@ class QuincyHollowShinigami(commands.Cog):
 
     def _build_challenge_view(self, challenger_id: int, opponent_id: int, channel) -> tuple[discord.Embed, ChallengeView]:
         embed = discord.Embed(
-            title="⚔️ Défi Quincy / Hollow / Shinigami",
+            title="⚔️ Bleach Shifumi",
             description=f"<@{challenger_id}> a défié <@{opponent_id}> !\n<@{opponent_id}>, acceptez-vous ?",
             color=0xFFA500
         )
@@ -273,7 +273,7 @@ class QuincyHollowShinigami(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="shifumi",description="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️ — précisez un adversaire pour défier.")
+    @app_commands.command(name="shifumi",description="Joue à Shifumi — précisez un adversaire pour défier.")
     @app_commands.describe(opponent="Mentionner un membre pour le défier (optionnel).")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
     async def slash_quincy_hollow_shinigami(self, interaction: discord.Interaction, opponent: Optional[discord.Member] = None):
@@ -291,7 +291,7 @@ class QuincyHollowShinigami(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="shifumi",aliases=["sfm", "pfc"],help="Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.")
+    @commands.command(name="shifumi",aliases=["sfm", "pfc"],help="Joue à Shifumi.")
     @commands.cooldown(1, 5.0, commands.BucketType.user)
     async def prefix_quincy_hollow_shinigami(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         if member is None or member.bot:
