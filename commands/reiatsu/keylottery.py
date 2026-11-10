@@ -15,7 +15,7 @@ from discord.ext import commands
 from discord.ui import View, Button
 import random
 import sqlite3
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_anti429 import safe_send, safe_edit, safe_respond
 from utils.init_db import REIATSU_DB_PATH
 
 # ================================================================================

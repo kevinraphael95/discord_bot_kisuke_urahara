@@ -15,7 +15,7 @@ from discord.ext import commands
 import hashlib
 import random
 from datetime import datetime
-from utils.discord_utils import safe_send, safe_respond
+from utils.discord_anti429 import safe_send, safe_respond
 
 # ================================================================================
 # 🧠 Fonction utilitaire pour calculer le score et générer l'embed

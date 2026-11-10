@@ -11,7 +11,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond  # ✅ Utilitaires sécurisés
+from utils.discord_anti429 import safe_send, safe_respond  # ✅ Utilitaires sécurisés
 from utils.reiatsu_utils import ensure_profile  # ⚡ Utilitaire pour les profils joueurs
 
 # ================================================================================

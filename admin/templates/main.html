@@ -83,7 +83,7 @@
         <div class="panel-body chips">
           <button class="btn btn-ghost btn-sm" data-q="SELECT user_id, username, points, classe, niveau FROM reiatsu ORDER BY points DESC LIMIT 20">↑ Top 20 points</button>
           <button class="btn btn-ghost btn-sm" data-q="SELECT * FROM reiatsu_config">⚙ Config guildes</button>
-          <button class="btn btn-ghost btn-sm" data-q="SELECT user_id, username, last_found_at FROM mots_trouves ORDER BY last_found_at DESC LIMIT 20">◷ Derniers mots</button>
+          <button class="btn btn-ghost btn-sm" data-q="SELECT user_id, username">◷ Derniers mots</button>
           <button class="btn btn-ghost btn-sm" data-q="SELECT COUNT(*) AS total, SUM(points) AS total_points FROM reiatsu">∑ Stats globales</button>
           <button class="btn btn-ghost btn-sm" data-q="SELECT classe, COUNT(*) AS nb FROM reiatsu GROUP BY classe ORDER BY nb DESC">≡ Par classe</button>
           <button class="btn btn-ghost btn-sm" data-q="SELECT * FROM steam_keys ORDER BY won ASC">🔑 Clés Steam</button>

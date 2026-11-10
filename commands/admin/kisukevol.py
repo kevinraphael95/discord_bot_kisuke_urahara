@@ -18,7 +18,7 @@ from dateutil import parser
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_send
+from utils.discord_anti429 import safe_send
 from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)

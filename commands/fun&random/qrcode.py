@@ -17,7 +17,7 @@ from discord.ext import commands
 import qrcode
 import io
 
-from utils.discord_utils import safe_send, safe_respond, safe_followup
+from utils.discord_anti429 import safe_send, safe_respond, safe_followup
 
 log = logging.getLogger(__name__)
 

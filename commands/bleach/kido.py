@@ -19,7 +19,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button
 
-from utils.discord_utils import safe_send, safe_edit
+from utils.discord_anti429 import safe_send, safe_edit
 
 log = logging.getLogger(__name__)
 

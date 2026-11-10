@@ -20,7 +20,7 @@ import discord
 from discord import app_commands, ui
 from discord.ext import commands
 
-from utils.discord_utils import safe_send, safe_respond, safe_interact, safe_edit
+from utils.discord_anti429 import safe_send, safe_respond, safe_interact, safe_edit
 from utils.init_db import get_conn
 
 log = logging.getLogger(__name__)

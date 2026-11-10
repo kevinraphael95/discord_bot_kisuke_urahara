@@ -76,21 +76,6 @@ def init_db():
     """)
 
 
-    # === Table mots_trouves ========================
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS mots_trouves (
-        user_id INTEGER PRIMARY KEY,
-        username TEXT NOT NULL,
-        mots TEXT DEFAULT '[]',
-        last_found_at TEXT
-    )
-    """)
-
-    cursor.execute("""
-    CREATE INDEX IF NOT EXISTS idx_mots_user_id
-    ON mots_trouves(user_id)
-    """)
-
     # === Table steam_keys ============================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS steam_keys (

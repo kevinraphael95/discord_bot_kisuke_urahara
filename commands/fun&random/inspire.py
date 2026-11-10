@@ -16,7 +16,7 @@ from discord import app_commands
 from discord.ext import commands
 import aiohttp
 
-from utils.discord_utils import safe_send, safe_followup
+from utils.discord_anti429 import safe_send, safe_followup
 
 log = logging.getLogger(__name__)
 

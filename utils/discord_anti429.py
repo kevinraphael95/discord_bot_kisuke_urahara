@@ -1,5 +1,5 @@
 # ================================================================================
-# 📌 discord_utils.py — Fonctions utilitaires sécurisées pour Discord
+# 📌 discord_anti429.py — Fonctions utilitaires sécurisées pour Discord
 # Objectif : Fournir des fonctions send/edit/respond optimisées avec gestion du rate-limit
 # ================================================================================
 

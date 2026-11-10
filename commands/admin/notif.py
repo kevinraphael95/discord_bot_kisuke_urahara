@@ -14,7 +14,7 @@ from discord import app_commands
 from discord.ext import commands
 import logging
 
-from utils.discord_utils import safe_send
+from utils.discord_anti429 import safe_send
 from utils.stream_notif import (
     MAX_FOLLOWS_PER_GUILD,
     TWITCH_LOGIN_RE,

@@ -26,7 +26,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils.discord_utils import safe_edit, safe_send
+from utils.discord_anti429 import safe_edit, safe_send
 from utils.jeux_utils import BuzzerView, ReplyView, normalize_text, parse_mode
 
 log = logging.getLogger(__name__)

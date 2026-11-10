@@ -17,7 +17,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from discord.ext import commands, tasks
-from utils.discord_utils import safe_send, safe_delete
+from utils.discord_anti429 import safe_send, safe_delete
 
 # ================================================================================
 # ⚙️ Paramètres globaux

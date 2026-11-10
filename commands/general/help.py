@@ -14,7 +14,7 @@ from discord.ext import commands
 from discord.ui import View, Button
 from bot import get_prefix
 import math
-from utils.discord_utils import safe_send, safe_edit
+from utils.discord_anti429 import safe_send, safe_edit
 
 # ================================================================================
 # 🎛️ UI — View principale (pagination + catégories)

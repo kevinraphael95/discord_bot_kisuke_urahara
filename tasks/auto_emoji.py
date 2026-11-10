@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 import re
 
-from utils.discord_utils import safe_create_webhook
+from utils.discord_anti429 import safe_create_webhook
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 🧠 Cog principal

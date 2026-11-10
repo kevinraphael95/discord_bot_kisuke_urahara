@@ -25,7 +25,7 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from utils.discord_utils import safe_send
+from utils.discord_anti429 import safe_send
 from utils.stream_notif import (
     MAX_FAILS,
     TWITCH_INTERVAL,

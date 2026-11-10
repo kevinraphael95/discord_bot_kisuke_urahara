@@ -15,7 +15,7 @@ from discord.ext import commands
 from discord.ui import View, Button
 import random
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond
+from utils.discord_anti429 import safe_send, safe_edit, safe_respond
 
 # ================================================================================
 # 🎨 Constantes du jeu

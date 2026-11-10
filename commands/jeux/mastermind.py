@@ -17,7 +17,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import Button, View
 
-from utils.discord_utils import safe_edit, safe_respond, safe_send
+from utils.discord_anti429 import safe_edit, safe_respond, safe_send
 
 # ================================================================================
 # 🎨 Liste des couleurs utilisables

@@ -16,7 +16,7 @@ from discord.ui import View, Select
 import json
 import os
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_delete  
+from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_delete  
 
 # ================================================================================
 # 📂 Chargement des données JSON (exemple)

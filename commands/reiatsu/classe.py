@@ -19,7 +19,7 @@ import os
 import sqlite3
 from datetime import datetime, timezone
 
-from utils.discord_utils import safe_send, safe_respond, safe_edit
+from utils.discord_anti429 import safe_send, safe_respond, safe_edit
 
 # ================================================================================
 # 📂 Chargement de la configuration Reiatsu

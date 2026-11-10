@@ -17,7 +17,7 @@ from discord.ext import commands
 from discord.ui import Button, Modal, TextInput, View
 from spellchecker import SpellChecker
 
-from utils.discord_utils import safe_edit, safe_respond, safe_send
+from utils.discord_anti429 import safe_edit, safe_respond, safe_send
 
 # ================================================================================
 # 🌐 Initialisation du spellchecker français

@@ -16,7 +16,7 @@ from discord.ui import View, Button
 import random
 import re
 
-from utils.discord_utils import safe_send, safe_interact
+from utils.discord_anti429 import safe_send, safe_interact
 
 # ================================================================================
 # 🎮 View pour la pagination

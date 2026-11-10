@@ -23,7 +23,7 @@ import aiohttp
 # ================================================================================
 # 📦 Modules internes
 # ================================================================================
-from utils.discord_utils import safe_send, safe_respond, safe_interact
+from utils.discord_anti429 import safe_send, safe_respond, safe_interact
 from utils.init_db import init_db
 from utils.logger import init_logger
 

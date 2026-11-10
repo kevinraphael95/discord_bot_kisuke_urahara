@@ -2,9 +2,6 @@
 # 📌 logger.py
 # Objectif : Capturer les print(), stderr et les logs (module logging) du bot
 #            pour les exposer au panel admin
-# Catégorie : Système
-# Accès : Interne
-# Cooldown : Aucun
 # ================================================================================
 
 # ================================================================================

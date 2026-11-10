@@ -1,8 +1,6 @@
 # ================================================================================
 # 📌 reiatsu_utils.py — Fonctions utilitaires pour les profils Reiatsu
 # Objectif : Centraliser la création et vérification des profils joueurs
-# Catégorie : Utils
-# Accès : Tous
 # ================================================================================
 
 # ================================================================================

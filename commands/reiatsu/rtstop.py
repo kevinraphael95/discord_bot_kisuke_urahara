@@ -14,7 +14,7 @@ import sqlite3
 import time
 from discord import app_commands
 from discord.ext import commands
-from utils.discord_utils import safe_send, safe_respond
+from utils.discord_anti429 import safe_send, safe_respond
 
 # ================================================================================
 # 🗄️ Configuration SQLite

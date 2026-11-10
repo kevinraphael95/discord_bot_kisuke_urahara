@@ -15,7 +15,7 @@ from typing import Awaitable, Callable
 
 import discord
 
-from utils.discord_utils import safe_send, safe_edit, safe_respond, safe_followup  # noqa: F401
+from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_followup  # noqa: F401
 
 log = logging.getLogger(__name__)
 
