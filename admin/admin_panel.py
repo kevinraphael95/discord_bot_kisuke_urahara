@@ -636,6 +636,25 @@ def run_git_pull():
     return r.returncode == 0, out
 
 
+def _discover_extensions():
+    """Liste les extensions présentes sur le disque (même logique que bot.py)."""
+    found = []
+    commands_dir = os.path.join(ROOT, "commands")
+    if os.path.isdir(commands_dir):
+        for category in sorted(os.listdir(commands_dir)):
+            cat_path = os.path.join(commands_dir, category)
+            if os.path.isdir(cat_path):
+                for filename in sorted(os.listdir(cat_path)):
+                    if filename.endswith(".py") and filename != "__init__.py":
+                        found.append(f"commands.{category}.{filename[:-3]}")
+    tasks_dir = os.path.join(ROOT, "tasks")
+    if os.path.isdir(tasks_dir):
+        for filename in sorted(os.listdir(tasks_dir)):
+            if filename.endswith(".py") and filename != "__init__.py":
+                found.append(f"tasks.{filename[:-3]}")
+    return found
+
+
 def reload_cogs():
     if _bot_ref is None:
         print("❌ Bot non disponible pour le reload")
@@ -643,19 +662,45 @@ def reload_cogs():
     lines = []
 
     async def go():
-        for ext in list(_bot_ref.extensions.keys()):
+        on_disk = set(_discover_extensions())
+        loaded = list(_bot_ref.extensions.keys())
+
+        # 1. Déjà chargés : recharger, ou décharger si le fichier a disparu
+        for ext in loaded:
             try:
-                await _bot_ref.reload_extension(ext)
-                lines.append(f"✅ {ext}")
-                print(f"✅ Reload : {ext}")
+                if ext in on_disk:
+                    await _bot_ref.reload_extension(ext)
+                    lines.append(f"✅ rechargé : {ext}")
+                elif ext.startswith(("commands.", "tasks.")):
+                    await _bot_ref.unload_extension(ext)
+                    lines.append(f"🗑️ déchargé (fichier supprimé) : {ext}")
             except Exception as e:
                 lines.append(f"❌ {ext}: {e}")
                 print(f"❌ Reload KO : {ext} — {e}")
 
+        # 2. Nouveaux fichiers : les charger
+        for ext in sorted(on_disk):
+            if ext not in _bot_ref.extensions:
+                try:
+                    await _bot_ref.load_extension(ext)
+                    lines.append(f"🆕 chargé : {ext}")
+                except Exception as e:
+                    lines.append(f"❌ {ext}: {e}")
+                    print(f"❌ Load KO : {ext} — {e}")
+
+        # 3. Slash commands : synchroniser avec Discord
+        try:
+            synced = await _bot_ref.tree.sync()
+            lines.append(f"🔁 {len(synced)} slash command(s) synchronisée(s)")
+        except Exception as e:
+            lines.append(f"❌ tree.sync : {e}")
+
     try:
-        asyncio.run_coroutine_threadsafe(go(), _bot_ref.loop).result(timeout=60)
+        asyncio.run_coroutine_threadsafe(go(), _bot_ref.loop).result(timeout=90)
     except Exception as e:
         lines.append(f"❌ Reload interrompu : {e}")
+    for l in lines:
+        print(l)
     return not any(l.startswith("❌") for l in lines), "\n".join(lines)
 
 
