@@ -355,7 +355,7 @@ class ChoiceSelect(Select):
 # ================================================================================
 # 🧠 Cog principal avec cooldowns centralisés
 # ================================================================================
-class Perso(commands.Cog):
+class bPerso(commands.Cog):
     """
     Commande /perso et !perso — Affiche la fiche d'un personnage Bleach depuis le wiki.
     """
