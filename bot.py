@@ -166,11 +166,11 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandNotFound):
         return
     else:
-        # 👇 Affiche la VRAIE erreur dans le terminal (avec traceback)
+        # Affiche la VRAIE erreur dans le terminal (avec traceback)
         import traceback
         traceback.print_exception(type(error), error, error.__traceback__)
 
-        # 👇 Et l'écrit aussi dans les logs du panel
+        # Et l'écrit aussi dans les logs du panel
         log.error(
             "Erreur non gérée dans !%s : %s",
             ctx.command.name if ctx.command else "?",
@@ -237,7 +237,7 @@ if __name__ == "__main__":
         await load_commands()
         await load_tasks()
         
-        # 👎 On appelle set_bot UNIQUEMENT si le panel admin est actif
+        # On appelle set_bot UNIQUEMENT si le panel admin est actif
         if panel_active:
             from admin.admin_panel import set_bot
             set_bot(bot)
