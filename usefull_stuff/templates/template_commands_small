@@ -5,32 +5,14 @@
 # Accès : Tous
 # Cooldown : 1 utilisation / 5 secondes / utilisateur
 # ================================================================================
-# ================================================================================
-# 📌 nom_de_la_commande.py
-# Objectif : Description
-# Catégorie : ?
-# Accès : Tous/Admin ?
-# Cooldown : ?
-# ================================================================================
 
 # ================================================================================
-# 📦 Modules standards
-# ================================================================================
-import json
-import os
-
-# ================================================================================
-# 📦 Modules tiers
+# 📦 Imports nécessaires
 # ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ui import View, Select
-
-# ================================================================================
-# 📦 Modules internes
-# ================================================================================
-from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_delete
+from utils.discord_anti429 import safe_send, safe_respond  # ✅ Utilitaires sécurisés
 
 # ================================================================================
 # 🧠 Cog principal
