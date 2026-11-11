@@ -1,10 +1,10 @@
 # ================================================================================
-# bot.py — Script principal du bot Discord 👍 👎
+# 📌 bot.py — Script principal du bot Discord
 # Objectif : Initialisation, gestion des commandes et événements du bot
 # ================================================================================
 
 # ================================================================================
-# Modules standards
+# 📦 Modules standards
 # ================================================================================
 import os
 import asyncio
@@ -12,7 +12,7 @@ import threading
 import logging
 
 # ================================================================================
-# Modules tiers
+# 📦 Modules tiers
 # ================================================================================
 import discord
 from discord.ext import commands
@@ -21,21 +21,22 @@ from discord import app_commands
 import aiohttp
 
 # ================================================================================
-# Modules internes
+# 📦 Modules internes
 # ================================================================================
 from utils.discord_anti429 import safe_send, safe_respond, safe_interact
 from utils.init_db import init_db
 from utils.logger import init_logger
 
 # ================================================================================
-# Initialisation du logger EN PREMIER
+# 📝 Initialisation du logger EN PREMIER
 # ================================================================================
-# Doit être appelé avant tout le reste pour capturer TOUTES les erreurs, y compris celles du démarrage (token manquant, import cassé, etc.).
+# Doit être appelé avant tout le reste pour capturer TOUTES les erreurs,
+# y compris celles du démarrage (token manquant, import cassé, etc.).
 init_logger()
 log = logging.getLogger(__name__)
 
 # ================================================================================
-# Initialisation de l'environnement
+# 🔧 Initialisation de l'environnement
 # ================================================================================
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
@@ -49,7 +50,7 @@ def get_prefix(bot, message):
     return COMMAND_PREFIX
 
 # ================================================================================
-# Intents & Création du bot
+# ⚙️ Intents & Création du bot
 # ================================================================================
 intents = discord.Intents.default()
 intents.message_content = True
@@ -66,7 +67,7 @@ bot = commands.Bot(
 bot.aiohttp_session = None  # sera initialisée dans on_ready
 
 # ================================================================================
-# Chargement dynamique des commandes depuis /commands/*
+# 🔌 Chargement dynamique des commandes depuis /commands/*
 # ================================================================================
 async def load_commands():
     for category in os.listdir("commands"):
@@ -77,12 +78,12 @@ async def load_commands():
                     path = f"commands.{category}.{filename[:-3]}"
                     try:
                         await bot.load_extension(path)
-                        print(f"👍 Loaded {path}")
+                        print(f"✅ Loaded {path}")
                     except Exception as e:
-                        print(f"👎 Failed to load {path}: {e}")
+                        print(f"❌ Failed to load {path}: {e}")
 
 # ================================================================================
-# Chargement dynamique des tasks depuis /tasks/*
+# 🔌 Chargement dynamique des tasks depuis /tasks/*
 # ================================================================================
 async def load_tasks():
     for filename in os.listdir("tasks"):
@@ -90,18 +91,18 @@ async def load_tasks():
             path = f"tasks.{filename[:-3]}"
             try:
                 await bot.load_extension(path)
-                print(f"👍 Task loaded: {path}")
+                print(f"✅ Task loaded: {path}")
             except Exception as e:
-                print(f"👎 Failed to load task {path}: {e}")
+                print(f"❌ Failed to load task {path}: {e}")
 
 # ================================================================================
-# On Ready : présence et création de la session aiohttp
+# 🔔 On Ready : présence et création de la session aiohttp
 # ================================================================================
 @bot.event
 async def on_ready():
     if bot.aiohttp_session is None:
-        bot.aiohttp_session = aiohttp.ClientSession()  # 👍 Créée dans le loop
-    print(f"👍 Connecté en tant que {bot.user.name}")
+        bot.aiohttp_session = aiohttp.ClientSession()  # ✅ Créée dans le loop
+    print(f"✅ Connecté en tant que {bot.user.name}")
     await bot.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
@@ -110,7 +111,7 @@ async def on_ready():
     )
 
 # ================================================================================
-# Message reçu : réagir aux mots-clés et lancer les commandes
+# 📩 Message reçu : réagir aux mots-clés et lancer les commandes
 # ================================================================================
 @bot.event
 async def on_message(message):
@@ -152,7 +153,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 # ================================================================================
-# Gestion des erreurs de commandes préfixe
+# ❗ Gestion des erreurs de commandes préfixe
 # ================================================================================
 @bot.event
 async def on_command_error(ctx, error):
@@ -160,17 +161,17 @@ async def on_command_error(ctx, error):
         retry = round(error.retry_after, 1)
         await safe_send(ctx.channel, f"⏳ Cette commande est en cooldown. Réessaie dans `{retry}` secondes.")
     elif isinstance(error, commands.MissingPermissions):
-        await safe_send(ctx.channel, "👎 Tu n'as pas les permissions pour cette commande.")
+        await safe_send(ctx.channel, "❌ Tu n'as pas les permissions pour cette commande.")
     elif isinstance(error, commands.MissingRequiredArgument):
-        await safe_send(ctx.channel, "👎 Il manque un argument à cette commande.")
+        await safe_send(ctx.channel, "⚠️ Il manque un argument à cette commande.")
     elif isinstance(error, commands.CommandNotFound):
         return
     else:
-        # Affiche la VRAIE erreur dans le terminal (avec traceback)
+        # 👇 Affiche la VRAIE erreur dans le terminal (avec traceback)
         import traceback
         traceback.print_exception(type(error), error, error.__traceback__)
 
-        # Et l'écrit aussi dans les logs du panel
+        # 👇 Et l'écrit aussi dans les logs du panel
         log.error(
             "Erreur non gérée dans !%s : %s",
             ctx.command.name if ctx.command else "?",
@@ -178,7 +179,7 @@ async def on_command_error(ctx, error):
         )
 
 # ================================================================================
-# Gestion des erreurs slash commands
+# ❗ Gestion des erreurs slash commands
 # ================================================================================
 @bot.tree.error
 async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
@@ -192,7 +193,7 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
     elif isinstance(error, app_commands.MissingPermissions):
         await safe_interact(
             interaction,
-            "👎 Tu n'as pas les permissions pour cette commande.",
+            "❌ Tu n'as pas les permissions pour cette commande.",
             edit=True,
             ephemeral=True,
         )
@@ -200,20 +201,20 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
         log.exception("[slash] Erreur non gérée : %s", error)
         await safe_interact(
             interaction,
-            "👎 Une erreur est survenue.",
+            "❌ Une erreur est survenue.",
             edit=True,
             ephemeral=True,
         )
 
 # ================================================================================
-# Nettoyage aiohttp
+# 🔒 Nettoyage aiohttp
 # ================================================================================
 async def cleanup_aiohttp():
     if bot.aiohttp_session and not bot.aiohttp_session.closed:
         await bot.aiohttp_session.close()
 
 # ================================================================================
-# Lancement
+# 🚀 Lancement
 # ================================================================================
 if __name__ == "__main__":
     # Vérifie si on veut lancer le panel admin
@@ -226,8 +227,8 @@ if __name__ == "__main__":
             admin_thread.start()
             print(f"🌐 Panel admin lancé sur http://localhost:{ADMIN_PORT}")
         except Exception as e:
-            print(f"👎 Impossible de lancer le panel admin : {e}")
-            print("👎 Le bot Discord va démarrer sans le panel admin.")
+            print(f"⚠️ Impossible de lancer le panel admin : {e}")
+            print("⚠️ Le bot Discord va démarrer sans le panel admin.")
             panel_active = False  # Si ça plante, on considère le panel comme désactivé
     else:
         print("ℹ️ Panel admin désactivé (ENABLE_ADMIN_PANEL=False).")
@@ -237,7 +238,7 @@ if __name__ == "__main__":
         await load_commands()
         await load_tasks()
         
-        # On appelle set_bot UNIQUEMENT si le panel admin est actif
+        # ⚠️ On appelle set_bot UNIQUEMENT si le panel admin est actif
         if panel_active:
             from admin.admin_panel import set_bot
             set_bot(bot)
