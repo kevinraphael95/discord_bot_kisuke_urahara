@@ -11,6 +11,7 @@
 # ================================================================================
 import random
 import re
+import unicodedata
 
 import discord
 from discord import app_commands
@@ -31,7 +32,10 @@ except ImportError:
 def get_wiki_field(char: dict, *aliases: str) -> str:
     """Récupère un champ de l'infobox wiki en ignorant la casse et les accents."""
     def norm(s):
-        return re.sub(r'[^a-z0-9]', '', s.lower().normalize('NFD').encode('ascii', 'ignore').decode())
+        # Remplace la fonction JS par la version Python correcte
+        s = unicodedata.normalize('NFD', s.lower())
+        s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
+        return re.sub(r'[^a-z0-9]', '', s)
     
     wanted = [norm(a) for a in aliases]
     for label, value in char.get("fields", []):
@@ -61,7 +65,10 @@ def a_meme_famille(p1, p2):
 def extraire_mois(date: str) -> int:
     mois_map = {"janvier":1, "fevrier":2, "mars":3, "avril":4, "mai":5, "juin":6,
                 "juillet":7, "aout":8, "septembre":9, "octobre":10, "novembre":11, "decembre":12}
-    norm = (date or "").lower().normalize('NFD').encode('ascii', 'ignore').decode()
+    # Utilisation de unicodedata pour enlever les accents de manière sûre
+    norm = unicodedata.normalize('NFD', (date or "").lower())
+    norm = ''.join(c for c in norm if unicodedata.category(c) != 'Mn')
+    
     for m, num in mois_map.items():
         if m in norm: return num
     match = re.search(r'\b(\d{1,2})[/\-](\d{1,2})\b', norm)
