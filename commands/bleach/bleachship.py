@@ -32,15 +32,14 @@ except ImportError:
 def get_wiki_field(char: dict, *aliases: str) -> str:
     """Récupère un champ de l'infobox wiki en ignorant la casse et les accents."""
     def norm(s):
-        # Remplace la fonction JS par la version Python correcte
-        s = unicodedata.normalize('NFD', s.lower())
+        s = unicodedata.normalize('NFD', str(s).lower())
         s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
         return re.sub(r'[^a-z0-9]', '', s)
     
     wanted = [norm(a) for a in aliases]
     for label, value in char.get("fields", []):
         if norm(label) in wanted:
-            return value
+            return str(value)
     return ""
 
 def split_list(val: str) -> list:
@@ -65,7 +64,6 @@ def a_meme_famille(p1, p2):
 def extraire_mois(date: str) -> int:
     mois_map = {"janvier":1, "fevrier":2, "mars":3, "avril":4, "mai":5, "juin":6,
                 "juillet":7, "aout":8, "septembre":9, "octobre":10, "novembre":11, "decembre":12}
-    # Utilisation de unicodedata pour enlever les accents de manière sûre
     norm = unicodedata.normalize('NFD', (date or "").lower())
     norm = ''.join(c for c in norm if unicodedata.category(c) != 'Mn')
     
@@ -124,6 +122,10 @@ def calculer_score(p1, p2):
     # Base d'opérations
     b1, b2 = split_list(get_wiki_field(p1, "Base d'opérations", "Base d'operations")), split_list(get_wiki_field(p2, "Base d'opérations", "Base d'operations"))
     if set(b1) & set(b2): score += 5
+
+    # Si aucun champ n'a matché, le score monte un peu au hasard pour ne pas être bloqué à 50
+    if score == 50 and r1 and r2: 
+        score += random.randint(-10, 10)
 
     return max(0, min(int(score), 100))
 
@@ -199,22 +201,22 @@ class BleachShipView(View):
         if interaction.user != self.author:
             return await safe_interact(interaction, content="❌ Ce n'est pas ton ship !", ephemeral=True)
 
-        # ✅ Recherche en direct sur le wiki
-        await safe_interact(interaction, content="⏳ Recherche de nouveaux personnages sur le wiki...", ephemeral=True)
+        # ✅ On defer pour éviter le message privé et faire patienter
+        await interaction.response.defer()
 
-        p1 = await fetch_random_character(self.session)
-        p2 = await fetch_random_character(self.session)
-        
-        # Si erreur de récupération
-        if not p1 or not p2:
-            return await safe_interact(interaction, content="❌ Impossible de trouver des personnages sur le wiki.", ephemeral=True)
-
-        # On s'assure que ce sont deux persos différents
-        while p2["title"] == p1["title"]:
+        # ✅ On boucle jusqu'à trouver 2 persos avec de vraies infobox
+        p1, p2 = None, None
+        attempts = 0
+        while (not p1 or not p2) and attempts < 5:
+            p1 = await fetch_random_character(self.session)
             p2 = await fetch_random_character(self.session)
+            attempts += 1
+
+        if not p1 or not p2 or p1["title"] == p2["title"]:
+            return await safe_edit(interaction.message, content="❌ Impossible de trouver assez de personnages valides sur le wiki. Réessaie plus tard.", embed=None, view=None)
 
         new_embed = generate_ship_embed(p1, p2)
-        await safe_interact(interaction, edit=True, embed=new_embed, view=self)
+        await safe_edit(interaction.message, embed=new_embed, view=self)
 
 # ================================================================================
 # 🧠 Cog principal
@@ -230,13 +232,6 @@ class BleachShipCommand(commands.Cog):
     # 🔹 Fonction interne commune
     # ============================================================================
     async def _build_ship(self, p1_name: str | None, p2_name: str | None):
-        """
-        Charge les personnages depuis le wiki, calcule le ship et retourne un dict :
-        {
-            "embed": discord.Embed | None,
-            "error": str | None,          # message d'erreur bloquant
-        }
-        """
         session = getattr(self.bot, "aiohttp_session", None)
         if session is None:
             return {"embed": None, "error": "⏳ Le bot n'est pas encore prêt, réessaie dans un instant."}
@@ -249,7 +244,12 @@ class BleachShipCommand(commands.Cog):
                 if candidates:
                     p1 = await fetch_character(session, candidates[0]["title"])
         else:
-            p1 = await fetch_random_character(session)
+            # ✅ On force la recherche jusqu'à avoir un perso avec infobox
+            p1 = None
+            attempts = 0
+            while not p1 and attempts < 5:
+                p1 = await fetch_random_character(session)
+                attempts += 1
 
         if not p1:
             return {"embed": None, "error": f"❌ Personnage `{p1_name or 'aléatoire'}` introuvable sur le wiki."}
@@ -262,9 +262,11 @@ class BleachShipCommand(commands.Cog):
                 if candidates:
                     p2 = await fetch_character(session, candidates[0]["title"])
         else:
-            p2 = await fetch_random_character(session)
-            while p2 and p2["title"] == p1["title"]:
+            p2 = None
+            attempts = 0
+            while (not p2 or (p1 and p2["title"] == p1["title"])) and attempts < 5:
                 p2 = await fetch_random_character(session)
+                attempts += 1
 
         if not p2:
             return {"embed": None, "error": f"❌ Personnage `{p2_name or 'aléatoire'}` introuvable sur le wiki."}
@@ -279,7 +281,6 @@ class BleachShipCommand(commands.Cog):
     @app_commands.describe(p1="Nom du premier personnage", p2="Nom du second personnage")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_bleachship(self, interaction: discord.Interaction, p1: str = None, p2: str = None):
-        # defer : Discord exige une réponse en 3 secondes, la recherche wiki peut durer plus.
         await interaction.response.defer()
         
         result = await self._build_ship(p1, p2)
@@ -297,7 +298,6 @@ class BleachShipCommand(commands.Cog):
     @commands.command(name="bleachship", aliases=["bship"], help="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_bleachship(self, ctx: commands.Context, p1: str = None, p2: str = None):
-        # "typing" : affiche « le bot écrit... » pendant la recherche.
         async with ctx.typing():
             result = await self._build_ship(p1, p2)
             
