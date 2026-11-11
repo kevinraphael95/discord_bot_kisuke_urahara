@@ -9,9 +9,10 @@
 # ================================================================================
 # 📦 Imports nécessaires
 # ================================================================================
+import json
+import os
 import random
 import re
-import unicodedata
 
 import discord
 from discord import app_commands
@@ -20,60 +21,62 @@ from discord.ui import View, button
 
 from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_interact
 
-# On importe les fonctions de perso.py pour aller chercher sur le wiki
-try:
-    from .perso import fetch_character, fetch_random_character, search_candidates
-except ImportError:
-    from perso import fetch_character, fetch_random_character, search_candidates
+# ================================================================================
+# 📂 Gestion des personnages
+# ================================================================================
+CHAR_DIR = os.path.join("data", "personnages")
+
+def load_character(name: str):
+    # ✅ Sécurité : refuse tout nom qui contient autre chose que
+    #    des lettres, chiffres, tirets et underscores.
+    if not name or not re.match(r"^[a-zA-Z0-9_\-]+$", name):
+        return None
+
+    path = os.path.join(CHAR_DIR, f"{name.lower()}.json")
+    if not os.path.isfile(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        char = json.load(f)
+        char["image"] = char.get("images", [""])[0] if char.get("images") else ""
+        return char
+
+def list_characters():
+    files = os.listdir(CHAR_DIR)
+    return [f.replace(".json", "") for f in files if f.endswith(".json")]
+
+def load_all_characters():
+    """Charge TOUS les personnages disponibles (utilisé pour le bouton Nouveau ship)."""
+    return [p for p in (load_character(n) for n in list_characters()) if p is not None]
 
 # ================================================================================
 # 🧮 Détection de même famille
 # ================================================================================
-def get_wiki_field(char: dict, *aliases: str) -> str:
-    """Récupère un champ de l'infobox wiki en ignorant la casse et les accents."""
-    def norm(s):
-        s = unicodedata.normalize('NFD', str(s).lower())
-        s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
-        return re.sub(r'[^a-z0-9]', '', s)
-    
-    wanted = [norm(a) for a in aliases]
-    for label, value in char.get("fields", []):
-        if norm(label) in wanted:
-            return str(value)
-    return ""
-
-def split_list(val: str) -> list:
-    return [s.strip().lower() for s in re.split(r',\s*', val) if s.strip()] if val else []
-
 def a_meme_famille(p1, p2):
-    """Retourne True si les deux persos ont au moins un mot en commun dans leur nom ou famille."""
-    f1, f2 = get_wiki_field(p1, "Famille", "Family"), get_wiki_field(p2, "Famille", "Family")
-    if f1 and f2:
-        m1 = set(re.split(r'[,、\s]+', f1.lower()))
-        m2 = set(re.split(r'[,、\s]+', f2.lower()))
-        if any(x in m2 and len(x) > 2 for x in m1):
-            return True
-            
-    mots1 = set(p1["title"].lower().split())
-    mots2 = set(p2["title"].lower().split())
-    return any(x in mots2 and len(x) > 2 for x in mots1)
+    """Retourne True si les deux persos ont au moins un mot en commun dans leur nom."""
+    mots1 = set(p1["nom"].lower().split())
+    mots2 = set(p2["nom"].lower().split())
+    return bool(mots1 & mots2)
 
 # ================================================================================
 # 🧮 Calcul du score de compatibilité
 # ================================================================================
-def extraire_mois(date: str) -> int:
-    mois_map = {"janvier":1, "fevrier":2, "mars":3, "avril":4, "mai":5, "juin":6,
-                "juillet":7, "aout":8, "septembre":9, "octobre":10, "novembre":11, "decembre":12}
-    norm = unicodedata.normalize('NFD', (date or "").lower())
-    norm = ''.join(c for c in norm if unicodedata.category(c) != 'Mn')
-    
-    for m, num in mois_map.items():
-        if m in norm: return num
-    match = re.search(r'\b(\d{1,2})[/\-](\d{1,2})\b', norm)
-    if match:
-        a, b = int(match.group(1)), int(match.group(2))
-        return a if 1 <= a <= 12 else (b if 1 <= b <= 12 else 0)
-    return 0
+def compatibilite_amoureuse(p1, p2):
+    def peut_aimer(person, cible):
+        if person["sexualite"].lower() == "hétéro":
+            return cible["genre"].lower() != person["genre"].lower()
+        elif person["sexualite"].lower() == "homo":
+            return cible["genre"].lower() == person["genre"].lower()
+        return True
+
+    if not (peut_aimer(p1, p2) and peut_aimer(p2, p1)):
+        return 0.2
+    s1, s2 = p1["sexualite"].lower(), p2["sexualite"].lower()
+    g1, g2 = p1["genre"].lower(), p2["genre"].lower()
+    if s1 == "bi" and s2 == "bi": return 1.0
+    if s1 == "hétéro" and s2 == "hétéro" and g1 != g2: return 0.9
+    if s1 == "homo" and s2 == "homo" and g1 == g2: return 0.95
+    if (s1 == "bi" and s2 in ["homo", "hétéro"]) or (s2 == "bi" and s1 in ["homo", "hétéro"]): return 0.85
+    return 0.5
 
 def calculer_score(p1, p2):
     # 🚫 Même famille → score 0
@@ -81,52 +84,20 @@ def calculer_score(p1, p2):
         return 0
 
     score = 50
-
-    # Race commune
-    r1, r2 = split_list(get_wiki_field(p1, "Race", "Espèce")), split_list(get_wiki_field(p2, "Race", "Espèce"))
-    score += 12 * len(set(r1) & set(r2))
-
-    # Sexe
-    g1, g2 = get_wiki_field(p1, "Sexe", "Genre").lower(), get_wiki_field(p2, "Sexe", "Genre").lower()
-    if g1 and g2:
-        score += 5 if g1 == g2 else 18
-
-    # Affiliation
-    a1, a2 = split_list(get_wiki_field(p1, "Affiliation")), split_list(get_wiki_field(p2, "Affiliation"))
-    if set(a1) & set(a2): score += 12
-
-    # Équipe
-    e1, e2 = split_list(get_wiki_field(p1, "Équipe", "Equipe")), split_list(get_wiki_field(p2, "Équipe", "Equipe"))
-    if set(e1) & set(e2): score += 8
-
-    # Partenaire
-    part1, part2 = get_wiki_field(p1, "Partenaire").lower(), get_wiki_field(p2, "Partenaire").lower()
-    if p2["title"].lower() in part1 and p1["title"].lower() in part2: score += 20
-    elif p2["title"].lower() in part1 or p1["title"].lower() in part2: score += 8
-
-    # Anniversaire
-    m1, m2 = extraire_mois(get_wiki_field(p1, "Anniversaire")), extraire_mois(get_wiki_field(p2, "Anniversaire"))
-    if m1 and m1 == m2: score += 6
-
-    # Statut vital
-    s1, s2 = get_wiki_field(p1, "status", "Statut").lower(), get_wiki_field(p2, "status", "Statut").lower()
-    dead = ["mort", "décédé", "deceased", "dead"]
-    if any(d in s1 for d in dead) != any(d in s2 for d in dead): score -= 15
-
-    # Taille / Poids
-    t1_val, t2_val = get_wiki_field(p1, "Taille"), get_wiki_field(p2, "Taille")
-    t1 = int(re.search(r'\d+', t1_val).group(0)) if re.search(r'\d+', t1_val) else 0
-    t2 = int(re.search(r'\d+', t2_val).group(0)) if re.search(r'\d+', t2_val) else 0
-    if t1 and t2 and abs(t1 - t2) <= 10: score += 4
-
-    # Base d'opérations
-    b1, b2 = split_list(get_wiki_field(p1, "Base d'opérations", "Base d'operations")), split_list(get_wiki_field(p2, "Base d'opérations", "Base d'operations"))
-    if set(b1) & set(b2): score += 5
-
-    # Si aucun champ n'a matché, le score monte un peu au hasard pour ne pas être bloqué à 50
-    if score == 50 and r1 and r2: 
-        score += random.randint(-10, 10)
-
+    score *= compatibilite_amoureuse(p1, p2)
+    commun_races = set(p1.get("race", [])) & set(p2.get("race", []))
+    score += 10 * len(commun_races)
+    commun_traits = set(p1.get("personnalite", [])) & set(p2.get("personnalite", []))
+    if len(commun_traits) >= 3: score += 20
+    elif len(commun_traits) == 2: score += 10
+    elif len(commun_traits) == 1: score += 5
+    stats1, stats2 = p1.get("stats_base", {}), p2.get("stats_base", {})
+    compte_proches = sum(
+        1 for s in ["attaque", "defense", "pression", "kido", "intelligence", "rapidite"]
+        if abs(stats1.get(s, 0) - stats2.get(s, 0)) < 20
+    )
+    if compte_proches >= 4: score += 15
+    elif compte_proches >= 2: score += 5
     return max(0, min(int(score), 100))
 
 def generate_ship_embed(p1, p2):
@@ -138,7 +109,7 @@ def generate_ship_embed(p1, p2):
         )
         embed.add_field(
             name="👩‍❤️‍👨 Couple",
-            value=f"**{p1['title']}** ❤️ **{p2['title']}**",
+            value=f"**{p1['nom']}** ❤️ **{p2['nom']}**",
             inline=False
         )
         embed.add_field(
@@ -151,8 +122,8 @@ def generate_ship_embed(p1, p2):
             value="*Non, parce que dans la même famille. 🚫*",
             inline=False
         )
-        if p1.get("image"): embed.set_thumbnail(url=p1["image"])
-        if p2.get("image"): embed.set_image(url=p2["image"])
+        embed.set_thumbnail(url=p1["image"])
+        embed.set_image(url=p2["image"])
         return embed
 
     # ✅ Cas normal
@@ -169,11 +140,11 @@ def generate_ship_embed(p1, p2):
         reaction, color = "aucune chance... ils sont incompatibles 💔", discord.Color.blue()
 
     embed = discord.Embed(title="💘 Test de compatibilité Bleach 💘", color=color)
-    embed.add_field(name="👩‍❤️‍👨 Couple", value=f"**{p1['title']}** ❤️ **{p2['title']}**", inline=False)
+    embed.add_field(name="👩‍❤️‍👨 Couple", value=f"**{p1['nom']}** ❤️ **{p2['nom']}**", inline=False)
     embed.add_field(name="🔢 Taux d'affinité", value=f"`{score}%`", inline=True)
     embed.add_field(name="💬 Verdict", value=f"*{reaction}*", inline=False)
-    if p1.get("image"): embed.set_thumbnail(url=p1["image"])
-    if p2.get("image"): embed.set_image(url=p2["image"])
+    embed.set_thumbnail(url=p1["image"])
+    embed.set_image(url=p2["image"])
     return embed
 
 # ================================================================================
@@ -181,10 +152,9 @@ def generate_ship_embed(p1, p2):
 # ================================================================================
 
 class BleachShipView(View):
-    def __init__(self, author: discord.User | discord.Member, session):
+    def __init__(self, author: discord.User | discord.Member):
         super().__init__(timeout=60)
         self.author  = author
-        self.session = session
         self.message: discord.Message | None = None
 
     async def on_timeout(self):
@@ -201,22 +171,14 @@ class BleachShipView(View):
         if interaction.user != self.author:
             return await safe_interact(interaction, content="❌ Ce n'est pas ton ship !", ephemeral=True)
 
-        # ✅ On defer pour éviter le message privé et faire patienter
-        await interaction.response.defer()
+        # ✅ Recharge la liste à chaque clic (au lieu de la figer au démarrage)
+        persos = load_all_characters()
+        if len(persos) < 2:
+            return await safe_interact(interaction, content="❌ Pas assez de personnages.", ephemeral=True)
 
-        # ✅ On boucle jusqu'à trouver 2 persos avec de vraies infobox
-        p1, p2 = None, None
-        attempts = 0
-        while (not p1 or not p2) and attempts < 5:
-            p1 = await fetch_random_character(self.session)
-            p2 = await fetch_random_character(self.session)
-            attempts += 1
-
-        if not p1 or not p2 or p1["title"] == p2["title"]:
-            return await safe_edit(interaction.message, content="❌ Impossible de trouver assez de personnages valides sur le wiki. Réessaie plus tard.", embed=None, view=None)
-
+        p1, p2    = random.sample(persos, 2)
         new_embed = generate_ship_embed(p1, p2)
-        await safe_edit(interaction.message, embed=new_embed, view=self)
+        await safe_interact(interaction, edit=True, embed=new_embed, view=self)
 
 # ================================================================================
 # 🧠 Cog principal
@@ -231,45 +193,24 @@ class BleachShipCommand(commands.Cog):
     # ============================================================================
     # 🔹 Fonction interne commune
     # ============================================================================
-    async def _build_ship(self, p1_name: str | None, p2_name: str | None):
-        session = getattr(self.bot, "aiohttp_session", None)
-        if session is None:
-            return {"embed": None, "error": "⏳ Le bot n'est pas encore prêt, réessaie dans un instant."}
+    def _build_ship(self, p1_name: str | None, p2_name: str | None):
+        """
+        Charge les personnages, calcule le ship et retourne un dict :
+        {
+            "embed": discord.Embed | None,
+            "error": str | None,          # message d'erreur bloquant
+        }
+        """
+        persos = load_all_characters()
+        if len(persos) < 2:
+            return {"embed": None, "error": "❌ Il faut au moins deux personnages pour créer un ship."}
 
-        # --- Perso 1 ---
-        if p1_name:
-            p1 = await fetch_character(session, p1_name, require_character=True)
-            if not p1:
-                candidates = await search_candidates(session, p1_name)
-                if candidates:
-                    p1 = await fetch_character(session, candidates[0]["title"])
-        else:
-            # ✅ On force la recherche jusqu'à avoir un perso avec infobox
-            p1 = None
-            attempts = 0
-            while not p1 and attempts < 5:
-                p1 = await fetch_random_character(session)
-                attempts += 1
+        p1 = (load_character(p1_name) if p1_name else None) or random.choice(persos)
 
-        if not p1:
-            return {"embed": None, "error": f"❌ Personnage `{p1_name or 'aléatoire'}` introuvable sur le wiki."}
-
-        # --- Perso 2 ---
-        if p2_name:
-            p2 = await fetch_character(session, p2_name, require_character=True)
-            if not p2:
-                candidates = await search_candidates(session, p2_name)
-                if candidates:
-                    p2 = await fetch_character(session, candidates[0]["title"])
-        else:
-            p2 = None
-            attempts = 0
-            while (not p2 or (p1 and p2["title"] == p1["title"])) and attempts < 5:
-                p2 = await fetch_random_character(session)
-                attempts += 1
-
-        if not p2:
-            return {"embed": None, "error": f"❌ Personnage `{p2_name or 'aléatoire'}` introuvable sur le wiki."}
+        p2 = load_character(p2_name) if p2_name else None
+        if p2 is None or p2["nom"] == p1["nom"]:
+            autres = [p for p in persos if p["nom"] != p1["nom"]]
+            p2 = random.choice(autres) if autres else p1
 
         embed = generate_ship_embed(p1, p2)
         return {"embed": embed, "error": None}
@@ -281,14 +222,10 @@ class BleachShipCommand(commands.Cog):
     @app_commands.describe(p1="Nom du premier personnage", p2="Nom du second personnage")
     @app_commands.checks.cooldown(rate=1, per=3.0, key=lambda i: i.user.id)
     async def slash_bleachship(self, interaction: discord.Interaction, p1: str = None, p2: str = None):
-        await interaction.response.defer()
-        
-        result = await self._build_ship(p1, p2)
+        result = self._build_ship(p1, p2)
         if result["error"]:
             return await safe_respond(interaction, result["error"], ephemeral=True)
-        
-        session = getattr(self.bot, "aiohttp_session", None)
-        view = BleachShipView(interaction.user, session)
+        view = BleachShipView(interaction.user)
         await safe_respond(interaction, embed=result["embed"], view=view)
         view.message = await interaction.original_response()
 
@@ -298,32 +235,12 @@ class BleachShipCommand(commands.Cog):
     @commands.command(name="bleachship", aliases=["bship"], help="💘 Teste la compatibilité entre deux personnages de Bleach.")
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix_bleachship(self, ctx: commands.Context, p1: str = None, p2: str = None):
-        async with ctx.typing():
-            result = await self._build_ship(p1, p2)
-            
+        result = self._build_ship(p1, p2)
         if result["error"]:
             return await safe_send(ctx.channel, result["error"])
-            
-        session = getattr(self.bot, "aiohttp_session", None)
-        view = BleachShipView(ctx.author, session)
+        view = BleachShipView(ctx.author)
         view.message = await safe_send(ctx.channel, embed=result["embed"], view=view)
 
-    # ============================================================================
-    # 🔹 Gestion des cooldowns (sinon l'utilisateur ne voit rien)
-    # ============================================================================
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                f"⏳ Doucement ! Réessaie dans {error.retry_after:.1f}s.", ephemeral=True
-            )
-            return
-        raise error
-
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Doucement ! Réessaie dans {error.retry_after:.1f}s.")
-            return
-        raise error
 
 # ================================================================================
 # 🔌 Setup du Cog
