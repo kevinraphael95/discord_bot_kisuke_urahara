@@ -12,6 +12,7 @@
 # 📦 Imports nécessaires
 # ================================================================================
 import asyncio
+import html
 import logging
 import re
 import time
@@ -23,7 +24,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Select
 
-from utils.discord_anti429 import safe_send, safe_edit, safe_interact
+from utils.discord_utils import safe_send, safe_edit, safe_interact
 
 log = logging.getLogger(__name__)
 
@@ -64,99 +65,72 @@ async def _api_get(session: aiohttp.ClientSession, params: dict):
         return None
 
 # ================================================================================
-# 🧩 Lecture de l'infobox dans le wikitext
+# 🧩 Lecture du HTML de la page (infobox + résumé)
 # ================================================================================
-# Le wikitext d'une page ressemble à :
-#     {{Character Infobox
-#     |race = [[Human]]
-#     |birthday = July 15
-#     }}
-# On isole ce bloc {{ ... }} puis on le découpe champ par champ.
-_INFOBOX_RE = re.compile(r"\{\{\s*([^|{}\n]*infobox[^|{}\n]*)", re.IGNORECASE)
+# On lit la page RENDUE (HTML) et non le wikitext : sur Fandom, l'infobox est
+# toujours rendue avec la même structure, quel que soit le modèle utilisé :
+#     <aside class="portable-infobox ...">
+#       <div class="pi-item pi-data">
+#         <h3 class="pi-data-label">Race</h3>
+#         <div class="pi-data-value">Shinigami</div>
+#       </div>
+#     </aside>
+_ASIDE_RE = re.compile(
+    r"<aside[^>]*class=\"([^\"]*portable-infobox[^\"]*)\"[^>]*>(.*?)</aside>",
+    re.S | re.I,
+)
+_DATA_RE = re.compile(
+    r"<h3[^>]*class=\"[^\"]*pi-data-label[^\"]*\"[^>]*>(.*?)</h3>\s*"
+    r"<div[^>]*class=\"[^\"]*pi-data-value[^\"]*\"[^>]*>(.*?)</div>",
+    re.S | re.I,
+)
 
-def _extract_template(text: str, start: int):
-    """Renvoie le contenu du modèle {{...}} qui commence à `start` (accolades équilibrées)."""
-    depth = 0
-    i = start
-    while i < len(text) - 1:
-        pair = text[i:i + 2]
-        if pair == "{{":
-            depth += 1
-            i += 2
-        elif pair == "}}":
-            depth -= 1
-            i += 2
-            if depth == 0:
-                return text[start + 2:i - 2]
-        else:
-            i += 1
-    return None
+def html_to_text(fragment: str, sep: str = ", ") -> str:
+    """Transforme un morceau de HTML en texte lisible."""
+    fragment = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", fragment, flags=re.S | re.I)
+    fragment = re.sub(r"<sup[^>]*>.*?</sup>", "", fragment, flags=re.S | re.I)     # notes [1]
+    fragment = re.sub(r"<br\s*/?>|</li>|</div>", sep, fragment, flags=re.I)        # séparateurs
+    fragment = re.sub(r"<[^>]+>", "", fragment)                                    # autres balises
+    fragment = html.unescape(fragment)                                             # &amp; -> &
+    fragment = re.sub(r"\s+", " ", fragment)
+    fragment = re.sub(r"\s+,", ",", fragment)
+    fragment = re.sub(r"(,\s*){2,}", ", ", fragment)
+    return fragment.strip(" ,")
 
-def _split_params(body: str):
-    """Découpe sur les "|" qui ne sont pas à l'intérieur de {{...}} ou [[...]]."""
-    parts, buf, depth, i = [], [], 0, 0
-    while i < len(body):
-        two = body[i:i + 2]
-        if two in ("{{", "[["):
-            depth += 1
-            buf.append(two)
-            i += 2
-        elif two in ("}}", "]]"):
-            depth = max(depth - 1, 0)
-            buf.append(two)
-            i += 2
-        elif body[i] == "|" and depth == 0:
-            parts.append("".join(buf))
-            buf = []
-            i += 1
-        else:
-            buf.append(body[i])
-            i += 1
-    parts.append("".join(buf))
-    return parts
-
-def parse_infobox(wikitext: str):
-    """Renvoie (nom_du_modèle, {champ: valeur_brute}) ou (None, {})."""
-    match = _INFOBOX_RE.search(wikitext)
+def parse_infobox_html(page_html: str):
+    """Renvoie ([(libellé, valeur), ...], classes_css_de_l_infobox, url_image)."""
+    match = _ASIDE_RE.search(page_html)
     if not match:
-        return None, {}
-    body = _extract_template(wikitext, match.start())
-    if body is None:
-        return None, {}
+        return [], "", None
+    css_class, inner = match.group(1), match.group(2)
 
-    parts = _split_params(body)
-    template_name = parts[0].strip()
+    fields = []
+    for label, value in _DATA_RE.findall(inner):
+        label_text = html_to_text(label, " ")
+        value_text = html_to_text(value)
+        if label_text and value_text:
+            fields.append((label_text, value_text))
 
-    fields = {}
-    for part in parts[1:]:
-        if "=" not in part:
-            continue
-        key, value = part.split("=", 1)
-        key = key.strip()
-        if key and key not in fields:
-            fields[key] = value.strip()
-    return template_name, fields
+    image = None
+    img = re.search(r"<img[^>]*pi-image-thumbnail[^>]*>", inner, re.S | re.I)
+    if img:
+        src = (re.search(r'data-src="([^"]+)"', img.group(0))
+               or re.search(r'src="([^"]+)"', img.group(0)))
+        if src:
+            image = html.unescape(src.group(1))
+    return fields, css_class, image
 
-def clean_wikitext(text: str) -> str:
-    """Transforme du wikitext en texte lisible."""
-    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)                        # commentaires
-    text = re.sub(r"<ref[^>]*?/>|<ref[^>]*>.*?</ref>", "", text, flags=re.DOTALL)  # références
-    text = re.sub(r"<br\s*/?>", ", ", text, flags=re.IGNORECASE)                   # <br> -> virgule
-    text = re.sub(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", r"\1", text)                  # [[lien|texte]] -> texte
-    for _ in range(5):                                                             # {{modèles}}
-        text = re.sub(r"\{\{[^{}]*\}\}", "", text)
-    text = text.replace("'''", "").replace("''", "")                               # gras / italique
-    text = re.sub(r"<[^>]+>", "", text)                                            # balises HTML
-    text = re.sub(r"\s*\n\s*", ", ", text)                                         # retours à la ligne
-    text = re.sub(r"\s{2,}", " ", text)
-    return text.strip(" ,")
-
-def _is_displayable(key: str) -> bool:
-    """Exclut les champs techniques (images, légendes, couleurs)."""
-    k = key.lower().replace(" ", "_")
-    if "image" in k or k.startswith("caption") or k in {"theme", "color", "colour", "bgcolor"}:
-        return False
-    return True
+def first_paragraphs(page_html: str, count: int = 2) -> str:
+    """Renvoie les premiers vrais paragraphes de la page (hors infobox)."""
+    without_infobox = re.sub(r"<aside.*?</aside>", "", page_html, flags=re.S | re.I)
+    paragraphs = []
+    for p in re.findall(r"<p[^>]*>(.*?)</p>", without_infobox, flags=re.S | re.I):
+        text = html_to_text(p, " ")
+        if len(text) >= 60:                  # ignore les paragraphes vides / trop courts
+            paragraphs.append(text)
+        if len(paragraphs) >= count:
+            break
+    return "\n\n".join(paragraphs)
 
 # ================================================================================
 # 📥 Récupération des fiches
@@ -170,28 +144,38 @@ async def fetch_character(session, title: str, require_character: bool = False):
         char = cached[1]
         return char if (char["is_character"] or not require_character) else None
 
-    # --- Requête 1 : le wikitext (redirects=1 suit les redirections) ---
+    # --- Requête 1 : la page rendue en HTML + ses catégories ---
     data = await _api_get(session, {
-        "action": "parse", "page": title, "prop": "wikitext", "redirects": 1,
+        "action": "parse", "page": title, "prop": "text|categories",
+        "redirects": 1, "disableeditsection": 1, "disablelimitreport": 1,
     })
     if not data or "parse" not in data:
         return None
 
-    real_title = data["parse"]["title"]
-    wikitext = data["parse"]["wikitext"]
-    if isinstance(wikitext, dict):               # ancien format de l'API
-        wikitext = wikitext.get("*", "")
+    parsed = data["parse"]
+    real_title = parsed["title"]
+    page_html = parsed.get("text", "")
+    if isinstance(page_html, dict):               # ancien format de l'API
+        page_html = page_html.get("*", "")
+    categories = [
+        (c.get("category", "") if isinstance(c, dict) else str(c))
+        for c in parsed.get("categories", [])
+    ]
 
-    template_name, raw_fields = parse_infobox(wikitext)
-    is_character = bool(
-        (template_name and "character" in template_name.lower())
-        or re.search(r"\[\[\s*Category:\s*Characters", wikitext, re.IGNORECASE)
+    raw_fields, aside_class, infobox_image = parse_infobox_html(page_html)
+    is_character = (
+        any("character" in c.lower() for c in categories)
+        or "character" in aside_class.lower()
     )
     if require_character and not is_character:
         return None
+    if not raw_fields:
+        log.info("[perso] Aucune infobox lisible pour « %s »", real_title)
 
-    # --- Requête 2 : résumé + image principale ---
-    summary, image = "", None
+    summary = first_paragraphs(page_html)
+
+    # --- Requête 2 : image principale (+ résumé de secours) ---
+    image = None
     extra = await _api_get(session, {
         "action": "query", "prop": "extracts|pageimages",
         "exintro": 1, "explaintext": 1, "exsentences": 5,
@@ -200,36 +184,17 @@ async def fetch_character(session, title: str, require_character: bool = False):
     if extra:
         pages = extra.get("query", {}).get("pages", [])
         if pages:
-            summary = (pages[0].get("extract") or "").strip()
             image = (pages[0].get("original") or {}).get("source")
+            if not summary:
+                summary = (pages[0].get("extract") or "").strip()
+    image = image or infobox_image
 
-    # --- Image de secours : champ "image" de l'infobox ---
-    if not image:
-        for k, v in raw_fields.items():
-            if k.lower() == "image":
-                m = re.search(r"([^\n|=\[\]]+\.(?:png|jpe?g|gif|webp))", v, re.IGNORECASE)
-                if m:
-                    info = await _api_get(session, {
-                        "action": "query", "prop": "imageinfo", "iiprop": "url",
-                        "titles": "File:" + m.group(1).strip(),
-                    })
-                    if info:
-                        pages = info.get("query", {}).get("pages", [])
-                        if pages and pages[0].get("imageinfo"):
-                            image = pages[0]["imageinfo"][0].get("url")
-                break
-
-    # --- Nettoyage des champs de l'infobox ---
+    # --- Champs de l'infobox : on garde les MAX_FIELDS premiers ---
     fields = []
-    for k, v in raw_fields.items():
-        if not _is_displayable(k):
-            continue
-        value = clean_wikitext(v)
-        if not value:
-            continue
+    for label, value in raw_fields:
         if len(value) > 300:
             value = value[:297] + "…"
-        fields.append((k.replace("_", " ").strip().capitalize(), value))
+        fields.append((label, value))
         if len(fields) >= MAX_FIELDS:
             break
 
@@ -285,7 +250,7 @@ async def fetch_random_character(session):
 def build_embed(char: dict) -> discord.Embed:
     summary = char["summary"]
     if len(summary) > 700:
-        summary = summary[:700] + "…"
+        summary = summary[:700].rstrip() + "…"
 
     embed = discord.Embed(
         title=char["title"][:256],
