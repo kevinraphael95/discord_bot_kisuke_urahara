@@ -7,19 +7,26 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
+# ================================================================================
+import json
+import os
+import sqlite3
+from datetime import datetime, timedelta, timezone
+
+# ================================================================================
+# 📦  Modules tiers
 # ================================================================================
 import discord
+from dateutil import parser
 from discord import app_commands
 from discord.ext import commands
-from dateutil import parser
-from datetime import datetime, timedelta, timezone
-import os
-import json
-import sqlite3
 
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_send, safe_respond
-from utils.reiatsu_utils import ensure_profile  # ✅ Ajout pour auto-création profil
+from utils.reiatsu_utils import ensure_profile
 
 # ================================================================================
 # 📂 Chargement des classes depuis JSON
