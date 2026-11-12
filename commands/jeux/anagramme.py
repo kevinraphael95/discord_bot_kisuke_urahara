@@ -7,7 +7,7 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
 import asyncio
 import logging
@@ -15,15 +15,24 @@ import random
 import threading
 from collections import Counter
 
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
 import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands
 from spellchecker import SpellChecker
 
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_edit, safe_send
 from utils.jeux_utils import BuzzerView, ReplyView, normalize_text, parse_mode
 
+# ================================================================================
+# 🪵 Logger
+# ================================================================================
 log = logging.getLogger(__name__)
 
 # ================================================================================
