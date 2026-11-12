@@ -8,17 +8,24 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
-import discord
-from discord import app_commands
-from discord.ext import commands
-from discord.ui import View, Button
 import json
 import os
 import sqlite3
 from datetime import datetime, timezone
 
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
+import discord
+from discord import app_commands
+from discord.ext import commands
+from discord.ui import View, Button
+
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_send, safe_respond, safe_edit
 
 # ================================================================================
