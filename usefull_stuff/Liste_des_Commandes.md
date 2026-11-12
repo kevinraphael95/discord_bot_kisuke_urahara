@@ -9,9 +9,6 @@ Liste des Commandes
 - **say_as :** (Admin) Fait répéter un message par le bot comme si c'était un autre membre.
 Usage: !say_as <mention|id|pseudo> <message>
 - **sync :** Synchronise les commandes slash (serveur ou global).
-- **test :** Affiche le ping, l'heure et le dernier commit du bot.
-- **testgame :** Tester un mini-jeu via son numéro ou 'all'.
-- **testtache :** 🕹️ Teste toutes les épreuves pour la commande hollow.
 
 ### Bleach
 - **bleachship :** 💘 Teste la compatibilité entre deux personnages de Bleach.
@@ -20,10 +17,9 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **division :** Détermine ta division dans le Gotei 13.
 - **kido :** Affiche un Kido précis, aléatoire ou la liste paginée.
 - **kluboutside :** Affiche une question de la FAQ du Klub Outside.
-- **perso :** Affiche la fiche d'un personnage Bleach.
+- **perso :** Affiche la fiche d'un personnage Bleach (depuis le wiki).
 - **scans :** 📖 Lire un scan de Bleach.
-- **shifumi :** Joue à Quincy 🏹 / Hollow 👹 / Shinigami ⚔️.
-- **versus :** ⚔️ Lance un combat interactif contre le bot.
+- **shifumi :** Joue à Shifumi.
 
 ### Fun&Random
 - **calc :** Calculatrice scientifique interactive.
@@ -56,7 +52,6 @@ Usage: !say_as <mention|id|pseudo> <message>
 - **lightsout :** Pas de description.
 - **mastermind :** Jouer au Mastermind interactif.
 - **mot_contraint :** Jeu du mot contraint. mot_contraint multi ou m pour jouer en multi.
-- **motsecret :** Pendant 3 minutes, cherchez l'un des 100 mots secrets pour gagner 10 Reiatsu.
 - **motus :** Lance une partie de Motus. motus multi ou m pour jouer en multi.
 - **pendu :** Lance une partie du Pendu. pendu multi ou m pour jouer en multi.
 - **puissance4 :** Pas de description.
@@ -64,14 +59,11 @@ Usage: !say_as <mention|id|pseudo> <message>
 
 ### Reiatsu
 - **classe :** Choisir sa classe Reiatsu
-- **hollow :** 👹 Fais apparaître un Hollow et tente de le vaincre (1 reiatsu requis).
 - **keylottery :** Ticket à gratter : tente ta chance
 - **quetes :** 🎮 Affiche la liste des quêtes et ton niveau actuel.
 - **reiatsu :** 💠 Affiche les informations de spawn Reiatsu du serveur et le classement global.
 - **reiatsuprofil :** 💠 Affiche ton profil Reiatsu détaillé.
-- **reiatsushop :** Affiche le shop et achète des effets
 - **reiatsutop :** 📊 Affiche le Top 20 Reiatsu et ta position dans le classement global.
 - **reiatsuvol :** 💠 Vole du Reiatsu à quelqu'un.
 - **skill :** Active la compétence de ta classe Reiatsu.
-- **tutoreiatsu :** Affiche le tutoriel complet pour les nouveaux joueurs.
 
