@@ -7,18 +7,28 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
+# ================================================================================
+import random
+import sqlite3
+from datetime import datetime, timedelta, timezone
+
+# ================================================================================
+# 📦  Modules tiers
 # ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
-from datetime import datetime, timedelta, timezone
-import random
-import sqlite3
 
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.reiatsu_utils import ensure_profile
 from utils.discord_anti429 import safe_send, safe_respond
 
+# ================================================================================
+# ⚙️ Constantes
+# ================================================================================
 DB_PATH = "database/reiatsu.db"
 
 # ================================================================================
