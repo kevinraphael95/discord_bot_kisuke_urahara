@@ -34,25 +34,8 @@ def calculer_gaytitude_embed(member: discord.Member) -> discord.Embed:
     base_str  = f"{member.id}-{date_jour}"
     hash_val  = hashlib.md5(base_str.encode()).digest()
 
-    # Score de base (0-100)
-    base_score = int.from_bytes(hash_val, "big") % 101
-
-    # ✅ Variation du jour : -20 à +20
-    bonus_jour = (int.from_bytes(hash_val[:4], "big") % 41) - 20
-
-    # Score final borné 0-100
-    score = max(0, min(100, base_score + bonus_jour))
-
-    # ✅ Message de variation selon le bonus
-    if bonus_jour >= 10:
-        variation_msg = f"📈 **Aujourd'hui, ton gaydar est en surchauffe ! (+{bonus_jour}%)**"
-        variation_color = discord.Color.from_rgb(255, 100, 200)
-    elif bonus_jour <= -10:
-        variation_msg = f"📉 **Aujourd'hui, c'est pas ton jour... ({bonus_jour}%)**"
-        variation_color = discord.Color.from_rgb(100, 150, 200)
-    else:
-        variation_msg = f"➡️ **Journée normale (variation : {bonus_jour:+d}%)**"
-        variation_color = None
+    # Score du jour (0-100) : fixe pour une personne et un jour donnés
+    score = int.from_bytes(hash_val, "big") % 101
 
     # Barre de progression
     filled = "█" * (score // 10)
@@ -60,27 +43,32 @@ def calculer_gaytitude_embed(member: discord.Member) -> discord.Embed:
     bar    = f"`{filled}{empty}`"
 
     niveaux = [
-        {"min": 90, "emoji": "🌈", "titre": "Légende arc-en-ciel", "couleur": discord.Color.magenta(), "descriptions": [
+        {"min": 90, "emoji": "🌈", "titre": "Légende arc-en-ciel", "couleur": discord.Color.magenta(),
+         "aujourdhui": "Aujourd'hui, tu es **extrêmement gay** 🌈", "descriptions": [
             "Ton aura pourrait repeindre une Pride entière.",
             "Tu transformes chaque salle en comédie musicale.",
             "Ta playlist est légalement un drapeau."
         ]},
-        {"min": 70, "emoji": "💖", "titre": "Icône de style", "couleur": discord.Color.pink(), "descriptions": [
+        {"min": 70, "emoji": "💖", "titre": "Icône de style", "couleur": discord.Color.pink(),
+         "aujourdhui": "Aujourd'hui, tu es **très gay** 💖", "descriptions": [
             "Tu portes plus de motifs que Zara.",
             "Tu brilles sans filtre.",
             "Ton regard déclenche des coming-outs."
         ]},
-        {"min": 50, "emoji": "🌀", "titre": "Curieux·se affirmé·e", "couleur": discord.Color.blurple(), "descriptions": [
+        {"min": 50, "emoji": "🌀", "titre": "Curieux·se affirmé·e", "couleur": discord.Color.blurple(),
+         "aujourdhui": "Aujourd'hui, tu es **plutôt gay** 🌀", "descriptions": [
             "Tu es une énigme en glitter.",
             "Explorateur·rice de toutes les vibes.",
             "Ton cœur a plus de bissections qu'un shōnen."
         ]},
-        {"min": 30, "emoji": "🤔", "titre": "Questionnement doux", "couleur": discord.Color.gold(), "descriptions": [
+        {"min": 30, "emoji": "🤔", "titre": "Questionnement doux", "couleur": discord.Color.gold(),
+         "aujourdhui": "Aujourd'hui, tu es **un peu gay** 🤔", "descriptions": [
             "Tu dis 'non' mais ton historique dit 'peut-être'.",
             "Un mojito et tout peut basculer.",
             "T'as déjà dit 'je suis fluide, genre dans l'humour'."
         ]},
-        {"min": 0, "emoji": "📏", "titre": "Straight mode activé", "couleur": discord.Color.dark_gray(), "descriptions": [
+        {"min": 0, "emoji": "📏", "titre": "Straight mode activé", "couleur": discord.Color.dark_gray(),
+         "aujourdhui": "Aujourd'hui, tu es **très peu gay** 📏", "descriptions": [
             "Tu joues à FIFA et ça te suffit.",
             "Ton placard contient 50 tee-shirts gris.",
             "Même ton Wi-Fi est en ligne droite."
@@ -90,13 +78,10 @@ def calculer_gaytitude_embed(member: discord.Member) -> discord.Embed:
     niveau      = next(n for n in niveaux if score >= n["min"])
     commentaire = random.choice(niveau["descriptions"])
 
-    # Couleur finale : celle du jour si variation forte, sinon celle du niveau
-    couleur_finale = variation_color if variation_color else niveau["couleur"]
-
     embed = discord.Embed(
         title=f"{niveau['emoji']} {niveau['titre']}",
         description=commentaire,
-        color=couleur_finale
+        color=niveau["couleur"]
     )
     embed.set_author(
         name=f"Taux de gaytitude de {member.display_name}",
@@ -104,7 +89,7 @@ def calculer_gaytitude_embed(member: discord.Member) -> discord.Embed:
     )
     embed.add_field(name="📊 Pourcentage", value=f"**{score}%**", inline=True)
     embed.add_field(name="📈 Niveau", value=bar, inline=False)
-    embed.add_field(name="🌅 Aujourd'hui", value=variation_msg, inline=False)
+    embed.add_field(name="🌅 Aujourd'hui", value=niveau["aujourdhui"], inline=False)
     embed.set_footer(text=f"✨ Calculé pour le {date_jour}. Change chaque jour !")
 
     return embed
