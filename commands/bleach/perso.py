@@ -63,6 +63,10 @@ SKIP_LABELS = {"taille", "poids", "groupe sanguin", "base d'opérations", "manga
 # False = image principale de la page (généralement la première).
 LATEST_IMAGE = False
 
+# True = image en petit (miniature en haut à droite de l'embed),
+# False = image en grand (sous le texte, sur toute la largeur).
+SMALL_IMAGE = True
+
 # Cache : { "ichigo kurosaki": (heure_de_mise_en_cache, fiche) }
 _cache: dict = {}
 
@@ -358,7 +362,10 @@ def build_embed(char: dict) -> discord.Embed:
             inline=len(field_value) <= 40,
         )
     if char["image"]:
-        embed.set_image(url=char["image"])
+        if SMALL_IMAGE:
+            embed.set_thumbnail(url=char["image"])   # petite image en haut à droite
+        else:
+            embed.set_image(url=char["image"])       # grande image sous le texte
     embed.set_footer(text="Source : Bleach Wiki FR (Fandom), texte sous licence CC BY-SA")
     return embed
 
