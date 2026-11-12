@@ -3,7 +3,7 @@
 # Objectif : Base de données + client API utilisés à la fois par la task
 #            (tasks/stream_alert.py) et les commandes (commands/notif.py)
 # ================================================================================
-# 🗄️ Table notif_follows (database/reiatsu.db) :
+# 🗄️ Table notif_follows (database/kisuke.db) :
 #   id, guild_id, platform ('twitch'|'youtube'), handle, display, channel_id,
 #   role_id, last_id, last_published, fail_count
 # ================================================================================

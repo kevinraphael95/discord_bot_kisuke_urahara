@@ -41,7 +41,7 @@ NORMAL_REIATSU_GAIN  = CONFIG["NORMAL_REIATSU_GAIN"]
 SPAWN_SPEED_RANGES   = CONFIG["SPAWN_SPEED_RANGES"]
 DEFAULT_SPAWN_SPEED  = CONFIG["DEFAULT_SPAWN_SPEED"]
 
-DB_PATH = "database/reiatsu.db"
+DB_PATH = "database/kisuke.db"
 
 
 # ================================================================================

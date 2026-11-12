@@ -49,7 +49,7 @@ if not ADMIN_PASSWORD:
 if not SECRET_KEY:
     raise RuntimeError("❌ ADMIN_SECRET manquant dans .env — arrêt du panel")
 
-DB_PATH    = os.path.join(ROOT, "database", "reiatsu.db")
+DB_PATH    = os.path.join(ROOT, "database", "kisuke.db")
 BACKUP_DIR = os.path.join(ROOT, "database", "backups")
 ADMIN_HOST = os.getenv("ADMIN_HOST", "0.0.0.0")   # comme avant (Render a besoin de 0.0.0.0)
 SQL_MAX_ROWS = 1000

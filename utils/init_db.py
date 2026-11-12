@@ -13,13 +13,13 @@ import sqlite3
 # 🗄️ Configuration SQLite
 # ================================================================================
 DB_DIR = "database"
-REIATSU_DB_PATH = os.path.join(DB_DIR, "reiatsu.db")
+REIATSU_DB_PATH = os.path.join(DB_DIR, "kisuke.db")
 
 os.makedirs(DB_DIR, exist_ok=True)
 
 
 def get_conn():
-    """Retourne une connexion SQLite vers reiatsu.db"""
+    """Retourne une connexion SQLite vers kisuke.db"""
     return sqlite3.connect(REIATSU_DB_PATH)
 
 

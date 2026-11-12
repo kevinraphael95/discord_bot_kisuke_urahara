@@ -34,7 +34,7 @@ from utils.reiatsu_utils import ensure_profile, has_class
 # ================================================================================
 # 🗄️ SQLite
 # ================================================================================
-DB_PATH = os.path.join("database", "reiatsu.db")
+DB_PATH = os.path.join("database", "kisuke.db")
 
 def get_conn():
     return sqlite3.connect(DB_PATH)

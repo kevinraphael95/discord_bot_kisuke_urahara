@@ -27,7 +27,7 @@ from utils.discord_anti429 import safe_send, safe_respond
 # ================================================================================
 # 🗄️ Configuration SQLite
 # ================================================================================
-DB_PATH = "database/reiatsu.db"
+DB_PATH = "database/kisuke.db"
 
 # ================================================================================
 # 🏅 Médailles pour le podium

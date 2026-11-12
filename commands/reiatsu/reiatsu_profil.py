@@ -32,7 +32,7 @@ from utils.reiatsu_utils import ensure_profile
 # 📂 Chargement des classes depuis JSON
 # ================================================================================
 CONFIG_JSON_PATH = os.path.join("data", "reiatsu_config.json")
-DB_PATH = "database/reiatsu.db"
+DB_PATH = "database/kisuke.db"
 
 def get_conn():
     return sqlite3.connect(DB_PATH)
