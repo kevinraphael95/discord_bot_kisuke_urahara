@@ -7,17 +7,23 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
 import discord
 from dateutil import parser
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import Button, View
 
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_respond, safe_send
 from utils.init_db import get_conn
 
