@@ -38,6 +38,7 @@ class AutoEmoji(commands.Cog):
         self._webhooks: dict[int, discord.Webhook] = {}  # channel_id -> webhook
         self._locks: dict[int, asyncio.Lock] = {}
         self._cooldown: dict[int, float] = {}  # channel_id -> fin de la pause
+        self._history: dict[int, list[float]] = {}  # user_id -> horodatages récents
 
     # ==========================================================
     # 🔹 Récupère (ou crée UNE seule fois) le webhook du salon
@@ -133,6 +134,14 @@ class AutoEmoji(commands.Cog):
 
         if new_content == content:
             return
+
+        # ✅ Anti-spam : max 5 messages avec emoji par utilisateur toutes les 10 s
+        now = time.monotonic()
+        recent = [t for t in self._history.get(message.author.id, []) if now - t < 10]
+        if len(recent) >= 5:
+            return  # trop de messages : on laisse le texte brut
+        recent.append(now)
+        self._history[message.author.id] = recent
 
         webhook = await self._get_webhook(message.channel)
         if webhook is None:
