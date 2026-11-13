@@ -21,6 +21,9 @@ from discord.ext import commands
 # ================================================================================
 from utils.discord_anti429 import safe_create_webhook
 
+# ================================================================================
+# ⚙️ Paramètres globaux
+# ================================================================================
 WEBHOOK_NAME = "auto-emoji"
 COOLDOWN_SECONDS = 900  # pause de 15 min après un échec de création
 
