@@ -7,16 +7,24 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
-import discord
-import random
 import asyncio
 import json
+import random
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
+
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
+import discord
 from discord.ext import commands, tasks
+
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_send, safe_delete
 
 # ================================================================================
@@ -33,7 +41,7 @@ NORMAL_REIATSU_GAIN  = CONFIG["NORMAL_REIATSU_GAIN"]
 SPAWN_SPEED_RANGES   = CONFIG["SPAWN_SPEED_RANGES"]
 DEFAULT_SPAWN_SPEED  = CONFIG["DEFAULT_SPAWN_SPEED"]
 
-DB_PATH = "database/reiatsu.db"
+DB_PATH = "database/kisuke.db"
 
 
 # ================================================================================

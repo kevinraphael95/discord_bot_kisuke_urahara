@@ -7,23 +7,32 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
+import colorsys
 import io
-import random
 import json
 import logging
-import colorsys
+import random
 from pathlib import Path
 
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_send, safe_edit, safe_interact
 from utils.init_db import get_conn
 
+# ================================================================================
+# 🪵 Logger
+# ================================================================================
 log = logging.getLogger(__name__)
 
 # ================================================================================

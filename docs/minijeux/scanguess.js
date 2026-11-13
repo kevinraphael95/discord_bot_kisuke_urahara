@@ -7,7 +7,7 @@
 
    Dépendances :
      - minijeux.css (styles)
-     - corsproxy.io (proxy CORS pour sushiscan.fr)
+     - proxys CORS (allorigins, codetabs, corsproxy.io) pour sushiscan.fr
 
    API externe :
      - sushiscan.fr → pages de manga
@@ -28,6 +28,17 @@
 const MAX_TRIES = 5;           // Nombre d'essais par manche
 const CLOSE_MARGIN = 3;        // Écart max pour avoir "proche"
 const MAX_VOLUME = 74;         // Bleach a 74 tomes
+const PROXY_TIMEOUT = 7000;    // Délai max (ms) par proxy avant de passer au suivant
+const MAX_NET_FAILS = 3;       // Tomes d'affilée injoignables avant d'abandonner
+
+// Proxys CORS essayés dans l'ordre. Si l'un renvoie une erreur (403, timeout…),
+// on passe au suivant. Le dernier qui a marché est réutilisé en premier.
+const PROXIES = [
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`,
+  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+];
+let proxyIdx = 0;              // Index du dernier proxy qui a fonctionné
 
 let target = null;             // { num, imgUrl }
 let tries = [];                // Historique des essais [{ result }]
@@ -82,22 +93,41 @@ async function newRound() {
     console.error(e);
     $("loadBox").style.display = "none";
     $("errorBox").style.display = "flex";
-    $("errMsg").textContent = "Connexion impossible.";
+    $("errMsg").textContent = e.message === "PROXY"
+      ? "Impossible de joindre sushiscan.fr (proxy bloqué ou site indisponible). Réessaie plus tard."
+      : "Connexion impossible.";
   }
 }
 
 /* ───────────────────────────────────────────────────────────────────
    4. CHARGEMENT D'UN TOME
-   Récupère les pages via corsproxy → extrait une image aléatoire
+   Récupère les pages via un proxy CORS → extrait une image aléatoire
    ─────────────────────────────────────────────────────────────────── */
 
+// Essaie chaque proxy à tour de rôle jusqu'à obtenir une réponse correcte
 async function fetchHtml(url) {
-  const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
+  let lastErr = null;
+  for (let k = 0; k < PROXIES.length; k++) {
+    const i = (proxyIdx + k) % PROXIES.length;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), PROXY_TIMEOUT);
+    try {
+      const res = await fetch(PROXIES[i](url), { signal: ctrl.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      proxyIdx = i;                       // on garde celui qui marche
+      return text;
+    } catch (e) {
+      lastErr = e;
+      console.warn(`[scanguess] proxy ${i} en échec pour ${url} :`, e.message);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastErr || new Error("Aucun proxy disponible");
 }
 
-async function loadVolume(attempt = 0) {
+async function loadVolume(attempt = 0, netFails = 0) {
   if (attempt > 8) throw new Error("Trop de tentatives");
 
   setLoad("🎲 Tirage du tome...", 20);
@@ -105,21 +135,26 @@ async function loadVolume(attempt = 0) {
   const num = Math.floor(Math.random() * MAX_VOLUME) + 1;
   const url = `https://sushiscan.fr/bleach-volume-${num}/`;
 
-  // 1. Récupère le HTML du tome
+  // 1. Récupère le HTML du tome (tous les proxys testés)
   let html;
-  try { html = await fetchHtml(url); }
-  catch { return loadVolume(attempt + 1); }
+  try {
+    html = await fetchHtml(url);
+  } catch {
+    // Plusieurs tomes d'affilée injoignables = problème de proxy, pas de tome
+    if (netFails + 1 >= MAX_NET_FAILS) throw new Error("PROXY");
+    return loadVolume(attempt + 1, netFails + 1);
+  }
 
   // 2. Extrait le JSON ts_reader (contient les URLs des images)
   const match = html.match(/ts_reader\.run\((.+?)\)\s*;/s);
-  if (!match) return loadVolume(attempt + 1);
+  if (!match) return loadVolume(attempt + 1, netFails);
 
   let data;
   try { data = JSON.parse(match[1]); }
-  catch { return loadVolume(attempt + 1); }
+  catch { return loadVolume(attempt + 1, netFails); }
 
   const images = data?.sources?.[0]?.images;
-  if (!images?.length) return loadVolume(attempt + 1);
+  if (!images?.length) return loadVolume(attempt + 1, netFails);
 
   // 3. Choisit une page au hasard (pas la 1ère qui est la couv')
   const pageIndex = Math.floor(Math.random() * (images.length - 1)) + 1;
@@ -127,14 +162,18 @@ async function loadVolume(attempt = 0) {
 
   setLoad("🖼 Chargement image...", 70);
 
-  // 4. Attend que l'image se charge
-  await new Promise((resolve, reject) => {
-    const img = $("mangaImg");
-    img.onload = resolve;
-    img.onerror = reject;
-    img.src = imgUrl;
-    setTimeout(reject, 10000);
-  });
+  // 4. Attend que l'image se charge (sinon on retente avec un autre tome)
+  try {
+    await new Promise((resolve, reject) => {
+      const img = $("mangaImg");
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = imgUrl;
+      setTimeout(reject, 10000);
+    });
+  } catch {
+    return loadVolume(attempt + 1, netFails);
+  }
 
   target = { num, imgUrl };
   round++;

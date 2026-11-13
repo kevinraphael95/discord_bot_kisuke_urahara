@@ -1,22 +1,29 @@
 # ================================================================================
 # 📌 jeux_utils.py — Fonctions utilitaires communes aux jeux
 # Objectif : Standardiser le comportement des jeux (modes, embeds, réponses, fin)
-# Catégorie : Utils
-# Accès : Interne
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
 import asyncio
 import logging
 import unicodedata
 from typing import Awaitable, Callable
 
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
 import discord
 
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_followup  # noqa: F401
 
+# ================================================================================
+# 🪵 Logger
+# ================================================================================
 log = logging.getLogger(__name__)
 
 # Type d'un callback de validation : (interaction, réponse_saisie) -> None

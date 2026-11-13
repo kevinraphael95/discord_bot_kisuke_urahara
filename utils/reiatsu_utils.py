@@ -4,21 +4,21 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
-import sqlite3
-import os
 import datetime
 import json
+import os
+import sqlite3
 
 # ================================================================================
 # 🗄️ Configuration SQLite
 # ================================================================================
-DB_PATH = os.path.join("database", "reiatsu.db")
+DB_PATH = os.path.join("database", "kisuke.db")
 
 
 def get_conn():
-    """Retourne une connexion SQLite vers reiatsu.db"""
+    """Retourne une connexion SQLite vers kisuke.db"""
     return sqlite3.connect(DB_PATH)
 
 

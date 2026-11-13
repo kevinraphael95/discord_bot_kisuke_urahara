@@ -7,21 +7,31 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
-import discord
-from discord.ext import commands
-from discord import app_commands
-import random
-import time
-import inspect
 import asyncio
+import inspect
 import json
 import logging
+import random
+import time
 
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
+import discord
+from discord import app_commands
+from discord.ext import commands
+
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils import kawashima_games
 from utils.init_db import get_conn
 
+# ================================================================================
+# 🪵 Logger
+# ================================================================================
 log = logging.getLogger(__name__)
 
 # ================================================================================

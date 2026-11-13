@@ -8,24 +8,31 @@
 # ================================================================================
 
 # ================================================================================
-# 📦 Imports nécessaires
+# 📦 Modules standards
 # ================================================================================
-import discord
-from discord import app_commands
-from discord.ext import commands
-from discord.ui import View, Button
 import json
 import os
 import sqlite3
 from datetime import datetime, timezone
 
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
+import discord
+from discord import app_commands
+from discord.ext import commands
+from discord.ui import View, Button
+
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
 from utils.discord_anti429 import safe_send, safe_respond, safe_edit
 
 # ================================================================================
 # 📂 Chargement de la configuration Reiatsu
 # ================================================================================
 REIATSU_CONFIG_PATH = os.path.join("data", "reiatsu_config.json")
-DB_PATH = os.path.join("database", "reiatsu.db")
+DB_PATH = os.path.join("database", "kisuke.db")
 
 def get_conn():
     return sqlite3.connect(DB_PATH)

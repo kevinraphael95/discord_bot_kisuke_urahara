@@ -115,7 +115,7 @@ const CHARS = [
   {n:"Shuhei Hisagi",         r:"Shinigami", sx:"M", chapter:"72", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"14/08", w:3,  l:3,  draw:0, img:"assets/personnages/shuhei-hisagi.png"},
   {n:"Mashiro Kuna",          r:"Vizard",    sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Gotei 13",    d:3, st:"Vivant",    hc:"Vert",   bday:"01/01", w:2,  l:1,  draw:0, img:"assets/personnages/mashiro-kuna.png"},
   {n:"Rangiku Matsumoto",     r:"Shinigami", sx:"F", chapter:"80", arc:"Soul Society : L'Invasion (2.1)",       af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"25/05", w:3,  l:3,  draw:0, img:"assets/personnages/rangiku-matsumoto.png"},
-  {n:"Ikkaku Madarame",       r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0, img:"assets/personnages/ikkaku-madarame.png"},
+  {n:"Ikkaku Madarame",       r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : L'Invasion (2.1)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Chauve", bday:"09/11", w:4,  l:3,  draw:0, img:"assets/personnages/ikkaku-madarame.png"},
   {n:"Akon",                  r:"Shinigami", sx:"M", chapter:"69", arc:"Guerre Sanglante de Mille Ans (5)",     af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/akon.png"},
   {n:"Sentaro Kotsubaki",     r:"Shinigami", sx:"M", chapter:"119", arc:"Soul Society : Le Sauvetage (2.2)",     af:"Gotei 13",    d:2, st:"Vivant",    hc:"Noir",   bday:"22/09", w:1,  l:1,  draw:0, img:"assets/personnages/sentaro-kotsubaki.png"},
  
@@ -160,7 +160,7 @@ const CHARS = [
   // ============================================================
   {n:"Kukkapuro",                r:"Arrancar", sx:"M", chapter:"342", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:5, st:"Vivant",    hc:"Chauve", bday:"04/04", w:0,  l:0,  draw:0, img:"assets/personnages/kukkapuro.png"},
   {n:"Nelliel Tu Odelschwanck",  r:"Arrancar", sx:"F", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:4, st:"Vivant",    hc:"Vert",   bday:"24/04", w:4,  l:1,  draw:0, img:"assets/personnages/nelliel-tu-odelschwanck.png"},
-  {n:"Luppi Antenor",            r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada", d:3, st:"Mort",      hc:"Noir",   bday:"05/06", w:1,  l:1,  draw:0, img:"assets/personnages/luppi-antenor.png"},
+  {n:"Luppi Antenor",            r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada", d:3, st:"Vivant",      hc:"Noir",   bday:"05/06", w:1,  l:1,  draw:0, img:"assets/personnages/luppi-antenor.png"},
   {n:"Wonderweiss Margela",      r:"Arrancar", sx:"M", chapter:"229", arc:"Arrancar : Bataille de Karakura (3.4)",    af:"Espada",      d:4, st:"Mort",      hc:"Blond",  bday:"06/07", w:2,  l:1,  draw:0, img:"assets/personnages/wonderweiss-margela.png"},
  
   // ============================================================
