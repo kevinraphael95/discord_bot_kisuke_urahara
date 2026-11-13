@@ -8,6 +8,7 @@
 # ================================================================================
 import asyncio
 import re
+import time
 
 # ================================================================================
 # 📦  Modules tiers
@@ -21,6 +22,7 @@ from discord.ext import commands
 from utils.discord_anti429 import safe_create_webhook
 
 WEBHOOK_NAME = "auto-emoji"
+COOLDOWN_SECONDS = 900  # pause de 15 min après un échec de création
 
 # ================================================================================
 # 🧠 Cog principal
@@ -32,6 +34,7 @@ class AutoEmoji(commands.Cog):
         self.bot = bot
         self._webhooks: dict[int, discord.Webhook] = {}  # channel_id -> webhook
         self._locks: dict[int, asyncio.Lock] = {}
+        self._cooldown: dict[int, float] = {}  # channel_id -> fin de la pause
 
     # ==========================================================
     # 🔹 Récupère (ou crée UNE seule fois) le webhook du salon
@@ -40,24 +43,41 @@ class AutoEmoji(commands.Cog):
         wh = self._webhooks.get(channel.id)
         if wh:
             return wh
+        if time.monotonic() < self._cooldown.get(channel.id, 0):
+            return None
 
         lock = self._locks.setdefault(channel.id, asyncio.Lock())
         async with lock:
             wh = self._webhooks.get(channel.id)
             if wh:
                 return wh
+            if time.monotonic() < self._cooldown.get(channel.id, 0):
+                return None
 
+            # 1) Cherche un webhook existant (simple lecture, pas de limite de création)
             try:
                 for existing in await channel.webhooks():
-                    if existing.name == WEBHOOK_NAME and existing.user and existing.user.id == self.bot.user.id:
+                    if existing.name == WEBHOOK_NAME:
                         self._webhooks[channel.id] = existing
                         return existing
             except discord.Forbidden:
+                self._cooldown[channel.id] = time.monotonic() + COOLDOWN_SECONDS
                 return None
 
-            wh = await safe_create_webhook(channel, name=WEBHOOK_NAME)
-            if wh:
-                self._webhooks[channel.id] = wh
+            # 2) Sinon, UNE seule tentative de création, abandon rapide si rate limit
+            try:
+                wh = await asyncio.wait_for(
+                    safe_create_webhook(channel, name=WEBHOOK_NAME, retry=0),
+                    timeout=10
+                )
+            except (asyncio.TimeoutError, discord.HTTPException):
+                wh = None
+
+            if wh is None:
+                self._cooldown[channel.id] = time.monotonic() + COOLDOWN_SECONDS
+                return None
+
+            self._webhooks[channel.id] = wh
             return wh
 
     # ==========================================================
@@ -123,14 +143,15 @@ class AutoEmoji(commands.Cog):
                 allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False)
             )
         except discord.NotFound:
-            # Webhook supprimé à la main : on vide le cache, il sera recréé au prochain message
+            # Webhook supprimé à la main : on vide le cache, il sera retrouvé/recréé au prochain message
             self._webhooks.pop(message.channel.id, None)
             return
 
+        # ✅ Gère le cas où le message a déjà été supprimé (404)
         try:
             await message.delete()
         except discord.NotFound:
-            pass
+            pass  # Le message est déjà supprimé, pas grave
 
 # ================================================================================
 # 🔌 Setup
