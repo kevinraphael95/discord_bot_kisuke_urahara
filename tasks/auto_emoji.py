@@ -1,8 +1,6 @@
 # ================================================================================
 # 📌 auto_say.py — Reposter automatiquement les messages avec emojis non accessibles
 # Objectif : Simuler un "say *me" automatique pour les emojis non affichables
-# Catégorie : Fun
-# Accès : Tous
 # ================================================================================
 
 # ================================================================================
@@ -34,20 +32,16 @@ class AutoEmoji(commands.Cog):
     # 🔹 Vérifie si le message est une commande bot
     # ==========================================================
     async def _is_command(self, message: discord.Message) -> bool:
-        """Retourne True si le message est une commande du bot."""
         ctx = await self.bot.get_context(message)
         return ctx.valid
 
     # ==========================================================
-    # 🔹 Fonction pour remplacer les emojis custom (identique à say.py)
+    # 🔹 Remplace les emojis custom
     # ==========================================================
     def _replace_custom_emojis(self, channel, message: str) -> str:
-        # Supprime l'affichage en texte brut des emojis non animés (<:nom:id>)
         message = re.sub(r"<:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
-        # Supprime aussi les emojis animés (<a:nom:id>)
         message = re.sub(r"<a:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
 
-        # Remplace par des emojis valides si trouvés dans les serveurs du bot
         all_emojis = {}
         if hasattr(channel, "guild"):
             all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
@@ -67,29 +61,26 @@ class AutoEmoji(commands.Cog):
     # ==========================================================
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.bot or not hasattr(message.channel, "guild"):
+        # ✅ Ignore les bots ET les webhooks (anti-boucle infinie)
+        if message.author.bot or message.webhook_id is not None:
+            return
+        if not hasattr(message.channel, "guild"):
             return
 
         content = message.content
         if not content:
             return
 
-        # Ignore les commandes du bot
         if await self._is_command(message):
             return
 
-        # Remplacement des emojis custom
         new_content = self._replace_custom_emojis(message.channel, content)
 
-        # Si rien n'a changé, aucun emoji à corriger → on ne repost pas
         if new_content == content:
             return
 
-        # Identique à _say_as_user dans say.py : webhook temporaire créé puis supprimé
         webhook = await safe_create_webhook(message.channel, name=f"tmp-{message.author.name}")
         if webhook is None:
-            # Rate-limit ou permissions manquantes : on laisse le message original tel quel
-            # plutôt que de le supprimer sans pouvoir le reposter.
             return
 
         try:
@@ -102,10 +93,12 @@ class AutoEmoji(commands.Cog):
         finally:
             await webhook.delete()
 
-        # Supprime le message original
-        await message.delete()
+        # ✅ Gère le cas où le message a déjà été supprimé (404)
+        try:
+            await message.delete()
+        except discord.NotFound:
+            pass  # Le message est déjà supprimé, pas grave
 
-        # Permettre aux autres cogs/commands de traiter le message
         await self.bot.process_commands(message)
 
 # ================================================================================
