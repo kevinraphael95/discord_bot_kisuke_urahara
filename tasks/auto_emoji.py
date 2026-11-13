@@ -25,7 +25,13 @@ from utils.discord_anti429 import safe_create_webhook
 # ⚙️ Paramètres globaux
 # ================================================================================
 WEBHOOK_NAME = "auto-emoji"
-COOLDOWN_SECONDS = 900  # pause de 15 min après un échec de création
+COOLDOWN_SECONDS = 900   # pause de 15 min après un échec de création
+SPAM_LIMIT = 5           # max de messages avec emoji par utilisateur...
+SPAM_WINDOW = 10         # ...sur cette fenêtre (secondes)
+
+RE_STATIC = re.compile(r"<:([a-zA-Z0-9_]+):\d+>")
+RE_ANIMATED = re.compile(r"<a:([a-zA-Z0-9_]+):\d+>")
+RE_SHORTCODE = re.compile(r":([a-zA-Z0-9_]+):")
 
 # ================================================================================
 # 🧠 Cog principal
@@ -35,10 +41,46 @@ class AutoEmoji(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self._webhooks: dict[int, discord.Webhook] = {}  # channel_id -> webhook
+        self._webhooks: dict[int, discord.Webhook] = {}   # channel_id -> webhook
         self._locks: dict[int, asyncio.Lock] = {}
-        self._cooldown: dict[int, float] = {}  # channel_id -> fin de la pause
-        self._history: dict[int, list[float]] = {}  # user_id -> horodatages récents
+        self._cooldown: dict[int, float] = {}             # channel_id -> fin de la pause
+        self._history: dict[int, list[float]] = {}        # user_id -> horodatages récents
+        self._emoji_by_guild: dict[int, dict[str, str]] = {}  # guild_id -> {nom: emoji}
+        self._emoji_global: dict[str, str] = {}               # nom -> emoji (tous serveurs)
+
+    # ==========================================================
+    # 🔹 Index des emojis (construit une fois, mis à jour si besoin)
+    # ==========================================================
+    def _build_emoji_index(self):
+        by_guild = {}
+        global_idx = {}
+        for g in self.bot.guilds:
+            names = {e.name.lower(): str(e) for e in g.emojis}
+            by_guild[g.id] = names
+            for name, emoji in names.items():
+                global_idx.setdefault(name, emoji)
+        self._emoji_by_guild = by_guild
+        self._emoji_global = global_idx
+
+    async def cog_load(self):
+        # Utile quand le cog est rechargé alors que le bot est déjà connecté
+        self._build_emoji_index()
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self._build_emoji_index()
+
+    @commands.Cog.listener()
+    async def on_guild_emojis_update(self, guild, before, after):
+        self._build_emoji_index()
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        self._build_emoji_index()
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        self._build_emoji_index()
 
     # ==========================================================
     # 🔹 Récupère (ou crée UNE seule fois) le webhook du salon
@@ -95,22 +137,33 @@ class AutoEmoji(commands.Cog):
     # 🔹 Remplace les emojis custom
     # ==========================================================
     def _replace_custom_emojis(self, channel, message: str) -> str:
-        message = re.sub(r"<:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
-        message = re.sub(r"<a:([a-zA-Z0-9_]+):\d+>", r":\1:", message)
+        message = RE_STATIC.sub(r":\1:", message)
+        message = RE_ANIMATED.sub(r":\1:", message)
 
-        all_emojis = {}
-        if hasattr(channel, "guild"):
-            all_emojis.update({e.name.lower(): str(e) for e in channel.guild.emojis})
-            for g in self.bot.guilds:
-                if g.id != channel.guild.id:
-                    all_emojis.update({e.name.lower(): str(e) for e in g.emojis})
+        if ":" not in message:
+            return message
 
-        return re.sub(
-            r":([a-zA-Z0-9_]+):",
-            lambda m: all_emojis.get(m.group(1).lower(), m.group(0)),
-            message,
-            flags=re.IGNORECASE
-        )
+        local = self._emoji_by_guild.get(channel.guild.id, {})
+
+        def repl(m):
+            name = m.group(1).lower()
+            # Serveur du salon d'abord, puis les autres serveurs
+            return local.get(name) or self._emoji_global.get(name) or m.group(0)
+
+        return RE_SHORTCODE.sub(repl, message)
+
+    # ==========================================================
+    # 🔹 Anti-spam par utilisateur
+    # ==========================================================
+    def _is_spam(self, user_id: int) -> bool:
+        now = time.monotonic()
+        recent = [t for t in self._history.get(user_id, []) if now - t < SPAM_WINDOW]
+        if len(recent) >= SPAM_LIMIT:
+            self._history[user_id] = recent
+            return True
+        recent.append(now)
+        self._history[user_id] = recent
+        return False
 
     # ==========================================================
     # 🔹 Listener sur tous les messages
@@ -131,17 +184,11 @@ class AutoEmoji(commands.Cog):
             return
 
         new_content = self._replace_custom_emojis(message.channel, content)
-
         if new_content == content:
             return
 
-        # ✅ Anti-spam : max 5 messages avec emoji par utilisateur toutes les 10 s
-        now = time.monotonic()
-        recent = [t for t in self._history.get(message.author.id, []) if now - t < 10]
-        if len(recent) >= 5:
+        if self._is_spam(message.author.id):
             return  # trop de messages : on laisse le texte brut
-        recent.append(now)
-        self._history[message.author.id] = recent
 
         webhook = await self._get_webhook(message.channel)
         if webhook is None:
@@ -158,12 +205,15 @@ class AutoEmoji(commands.Cog):
             # Webhook supprimé à la main : on vide le cache, il sera retrouvé/recréé au prochain message
             self._webhooks.pop(message.channel.id, None)
             return
+        except discord.HTTPException:
+            # Envoi impossible : on laisse le message original intact
+            return
 
         # ✅ Gère le cas où le message a déjà été supprimé (404)
         try:
             await message.delete()
-        except discord.NotFound:
-            pass  # Le message est déjà supprimé, pas grave
+        except (discord.NotFound, discord.Forbidden):
+            pass
 
 # ================================================================================
 # 🔌 Setup
