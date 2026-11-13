@@ -1,5 +1,5 @@
 # ================================================================================
-# 📌 auto_say.py — Reposter automatiquement les messages avec emojis non accessibles
+# 📌 auto_amoji.py — Reposter automatiquement les messages avec emojis non accessibles
 # Objectif : Simuler un "say *me" automatique pour les emojis non affichables
 # ================================================================================
 
