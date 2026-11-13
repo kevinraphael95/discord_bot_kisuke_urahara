@@ -1,11 +1,12 @@
 # ================================================================================
-# 📌 auto_amoji.py — Reposter automatiquement les messages avec emojis non accessibles
+# 📌 auto_say.py — Reposter automatiquement les messages avec emojis non accessibles
 # Objectif : Simuler un "say *me" automatique pour les emojis non affichables
 # ================================================================================
 
 # ================================================================================
 # 📦 Modules standards
 # ================================================================================
+import asyncio
 import re
 
 # ================================================================================
@@ -19,6 +20,8 @@ from discord.ext import commands
 # ================================================================================
 from utils.discord_anti429 import safe_create_webhook
 
+WEBHOOK_NAME = "auto-emoji"
+
 # ================================================================================
 # 🧠 Cog principal
 # ================================================================================
@@ -27,6 +30,35 @@ class AutoEmoji(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self._webhooks: dict[int, discord.Webhook] = {}  # channel_id -> webhook
+        self._locks: dict[int, asyncio.Lock] = {}
+
+    # ==========================================================
+    # 🔹 Récupère (ou crée UNE seule fois) le webhook du salon
+    # ==========================================================
+    async def _get_webhook(self, channel) -> discord.Webhook | None:
+        wh = self._webhooks.get(channel.id)
+        if wh:
+            return wh
+
+        lock = self._locks.setdefault(channel.id, asyncio.Lock())
+        async with lock:
+            wh = self._webhooks.get(channel.id)
+            if wh:
+                return wh
+
+            try:
+                for existing in await channel.webhooks():
+                    if existing.name == WEBHOOK_NAME and existing.user and existing.user.id == self.bot.user.id:
+                        self._webhooks[channel.id] = existing
+                        return existing
+            except discord.Forbidden:
+                return None
+
+            wh = await safe_create_webhook(channel, name=WEBHOOK_NAME)
+            if wh:
+                self._webhooks[channel.id] = wh
+            return wh
 
     # ==========================================================
     # 🔹 Vérifie si le message est une commande bot
@@ -79,7 +111,7 @@ class AutoEmoji(commands.Cog):
         if new_content == content:
             return
 
-        webhook = await safe_create_webhook(message.channel, name=f"tmp-{message.author.name}")
+        webhook = await self._get_webhook(message.channel)
         if webhook is None:
             return
 
@@ -88,18 +120,17 @@ class AutoEmoji(commands.Cog):
                 content=new_content,
                 username=message.author.display_name,
                 avatar_url=message.author.display_avatar.url,
-                allowed_mentions=discord.AllowedMentions.all()
+                allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False)
             )
-        finally:
-            await webhook.delete()
+        except discord.NotFound:
+            # Webhook supprimé à la main : on vide le cache, il sera recréé au prochain message
+            self._webhooks.pop(message.channel.id, None)
+            return
 
-        # ✅ Gère le cas où le message a déjà été supprimé (404)
         try:
             await message.delete()
         except discord.NotFound:
-            pass  # Le message est déjà supprimé, pas grave
-
-        await self.bot.process_commands(message)
+            pass
 
 # ================================================================================
 # 🔌 Setup
