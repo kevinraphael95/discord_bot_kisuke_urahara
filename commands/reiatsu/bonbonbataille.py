@@ -1,0 +1,257 @@
+# ================================================================================
+# 📌 bonbonbataille.py — Commande interactive /bonbonbataille et !bonbonbataille
+# Objectif : Mini-jeu de retournement de cases avec des bonbons et des pièges
+# Catégorie : Reiatsu
+# Accès : Tous
+# Cooldown : 1 utilisation / 5 secondes / utilisateur
+# ================================================================================
+
+# ================================================================================
+# 📦 Modules standards
+# ================================================================================
+import random
+
+# ================================================================================
+# 📦  Modules tiers
+# ================================================================================
+import discord
+from discord import app_commands
+from discord.ext import commands
+from discord.ui import View, Button
+
+# ================================================================================
+# 📦 Modules internes
+# ================================================================================
+from utils.discord_anti429 import safe_send, safe_edit, safe_respond
+from utils.init_db import get_conn
+
+# ================================================================================
+# 🍬 Configuration du jeu
+# ================================================================================
+GRID_SIZE = 5
+VALUES = {1: 10, 2: 50, 3: 200} # Valeur en Reiatsu pour chaque bonbon
+BOMBS_COUNT = 6
+
+# ================================================================================
+# 🗄️ Helpers DB pour le Reiatsu
+# ================================================================================
+def add_reiatsu(user_id: int, username: str, points_to_add: int):
+    """Ajoute du Reiatsu au joueur dans la base de données."""
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT points FROM reiatsu WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        
+        if row:
+            new_total = row[0] + points_to_add
+            cursor.execute("UPDATE reiatsu SET points = ? WHERE user_id = ?", (new_total, user_id))
+        else:
+            cursor.execute(
+                "INSERT INTO reiatsu (user_id, username, points) VALUES (?, ?, ?)",
+                (user_id, username, points_to_add)
+            )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[ERREUR DB] Impossible d'ajouter du Reiatsu : {e}")
+
+# ================================================================================
+# 🧩 Génération du plateau
+# ================================================================================
+def generer_plateau():
+    """Génère une grille 5x5 avec des valeurs (1,2,3) et des bombes (0)."""
+    pool = []
+    # Configuration de base (Niveau 1)
+    for _ in range(BOMBS_COUNT): pool.append(0) # Bombes (Bonbon super épicé)
+    for _ in range(10): pool.append(1) # Bonbons x1
+    for _ in range(6): pool.append(2)  # Bonbons x2
+    for _ in range(3): pool.append(3)  # Bonbons x3
+    
+    random.shuffle(pool)
+    
+    grid = []
+    for i in range(GRID_SIZE):
+        grid.append(pool[i*GRID_SIZE:(i+1)*GRID_SIZE])
+        
+    return grid
+
+def calculer_indicateurs(grid):
+    """Calcule les sommes et le nombre de bombes par ligne et colonne."""
+    rows_info = []
+    cols_info = []
+    
+    for i in range(GRID_SIZE):
+        row_sum = sum(val for val in grid[i] if val > 0)
+        row_bombs = sum(1 for val in grid[i] if val == 0)
+        rows_info.append((row_sum, row_bombs))
+        
+    for j in range(GRID_SIZE):
+        col_sum = sum(grid[i][j] for i in range(GRID_SIZE) if grid[i][j] > 0)
+        col_bombs = sum(1 for i in range(GRID_SIZE) if grid[i][j] == 0)
+        cols_info.append((col_sum, col_bombs))
+        
+    return rows_info, cols_info
+
+# ================================================================================
+# 🎛️ UI — La vue du jeu
+# ================================================================================
+class BonbonView(View):
+    def __init__(self, author: discord.User | discord.Member, grid: list, rows_info: list, cols_info: list):
+        super().__init__(timeout=300)
+        self.author = author
+        self.grid = grid
+        self.rows_info = rows_info
+        self.cols_info = cols_info
+        self.score = 0
+        self.cases_revelees = set()
+        self.is_dead = False
+        self.message = None
+        
+        # 1. Ajouter les indicateurs (ligne du haut)
+        for j in range(GRID_SIZE):
+            btn = Button(label=f"{cols_info[j][0]} | {cols_info[j][1]}", style=discord.ButtonStyle.secondary, disabled=True, row=0)
+            self.add_item(btn)
+        # Case vide en haut à gauche
+        self.add_item(Button(label="💠", style=discord.ButtonStyle.secondary, disabled=True, row=0))
+        # Ajouter un bouton "Encaisser" à la fin de la ligne du haut
+        self.add_item(Button(label="💰 Encaisser", style=discord.ButtonStyle.success, row=0, custom_id="encaisser"))
+
+        # 2. Ajouter les lignes du jeu (avec indicateur à gauche)
+        for i in range(GRID_SIZE):
+            # Indicateur de gauche
+            btn_left = Button(label=f"{rows_info[i][0]} | {rows_info[i][1]}", style=discord.ButtonStyle.secondary, disabled=True, row=i+1)
+            self.add_item(btn_left)
+            
+            # Cases du jeu
+            for j in range(GRID_SIZE):
+                btn = Button(label="❓", style=discord.ButtonStyle.primary, row=i+1)
+                btn.callback = self.create_callback(i, j, btn)
+                self.add_item(btn)
+
+    def create_callback(self, i, j, btn):
+        async def callback(interaction: discord.Interaction):
+            if interaction.user != self.author:
+                return await safe_respond(interaction, "❌ Ce n'est pas ta partie !", ephemeral=True)
+            if self.is_dead:
+                return
+
+            val = self.grid[i][j]
+            
+            if val == 0:
+                # BOUM ! Bonbon épicé
+                self.is_dead = True
+                self.disable_all_game_buttons()
+                embed = self.generate_embed("💥 **AÏE AÏE AÏE !** Tu es tombé sur un bonbon super épicé. Tu perds tous tes points !", discord.Color.red())
+                await safe_edit(interaction.message, embed=embed, view=self)
+                self.stop()
+            else:
+                # Bonbon normal
+                btn.style = discord.ButtonStyle.success
+                btn.label = f"🍬 {val}"
+                btn.disabled = True
+                self.cases_revelees.add((i, j))
+                
+                # Logique de score
+                if len([c for c in self.cases_revelees if self.grid[c[0]][c[1]] > 0]) == 1:
+                    self.score = VALUES[val]
+                else:
+                    self.score *= val
+                    
+                embed = self.generate_embed(f"Tu as mangé un bonbon de niveau **{val}** ! Ton score est de **{self.score}** Reiatsu.")
+                
+                # Vérifier si toutes les cases > 1 ont été révélées
+                total_high_cases = sum(1 for row in self.grid for v in row if v > 1)
+                revealed_high_cases = sum(1 for c in self.cases_revelees if self.grid[c[0]][c[1]] > 1)
+                
+                if revealed_high_cases == total_high_cases:
+                    self.is_dead = True
+                    self.disable_all_game_buttons()
+                    add_reiatsu(self.author.id, self.author.name, self.score)
+                    embed = self.generate_embed(f"🎉 **INCROYABLE !** Tu as trouvé tous les bons bonbons ! Tu remportes **{self.score} Reiatsu** !", discord.Color.green())
+                    await safe_edit(interaction.message, embed=embed, view=self)
+                    self.stop()
+                else:
+                    await safe_edit(interaction.message, embed=embed, view=self)
+                
+        return callback
+
+    def disable_all_game_buttons(self):
+        for child in self.children:
+            if child.label == "❓":
+                child.disabled = True
+
+    def generate_embed(self, action_text, color=discord.Color.orange()):
+        desc = f"**Score actuel :** {self.score} Reiatsu\n\n{action_text}"
+        embed = discord.Embed(
+            title="🍬 La Bonbonbataille de Urahara",
+            description=desc,
+            color=color
+        )
+        embed.set_footer(text="Clique sur une case pour manger un bonbon. Encaisse avant de tout perdre !")
+        return embed
+
+# ================================================================================
+# 🧠 Cog principal
+# ================================================================================
+class BonbonBataille(commands.Cog):
+    """Commandes /bonbonbataille et !bb — Mini-jeu de la boutique de Urahara."""
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    # ============================================================================
+    # 🔹 Commande SLASH
+    # ============================================================================
+    @app_commands.command(name="bonbonbataille", description="🍬 Joue à la Bonbonbataille de Urahara !")
+    @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
+    async def slash_bonbonbataille(self, interaction: discord.Interaction):
+        grid = generer_plateau()
+        rows_info, cols_info = calculer_indicateurs(grid)
+        
+        view = BonbonView(interaction.user, grid, rows_info, cols_info)
+        embed = view.generate_embed("Bienvenue dans la **Bonbonbataille** !\nClique sur une case pour manger un bonbon. Si tu tombes sur un bonbon super épicé, tu perds tout ! Encaisse avant de tout perdre.")
+        
+        await safe_respond(interaction, embed=embed, view=view)
+        view.message = await interaction.original_response()
+
+    # ============================================================================
+    # 🔹 Commande PREFIX
+    # ============================================================================
+    @commands.command(name="bonbonbataille", aliases=["bb"], help="🍬 Joue à la Bonbonbataille de Urahara !")
+    @commands.cooldown(1, 5.0, commands.BucketType.user)
+    async def prefix_bonbonbataille(self, ctx: commands.Context):
+        grid = generer_plateau()
+        rows_info, cols_info = calculer_indicateurs(grid)
+        
+        view = BonbonView(ctx.author, grid, rows_info, cols_info)
+        embed = view.generate_embed("Bienvenue dans la **Bonbonbataille** !\nClique sur une case pour manger un bonbon. Si tu tombes sur un bonbon super épicé, tu perds tout ! Encaisse avant de tout perdre.")
+        
+        view.message = await safe_send(ctx.channel, embed=embed, view=view)
+
+    # ============================================================================
+    # 🔹 Gestion des cooldowns (sinon l'utilisateur ne voit rien)
+    # ============================================================================
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                f"⏳ Doucement ! Réessaie dans {error.retry_after:.1f}s.", ephemeral=True
+            )
+            return
+        raise error
+
+    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CommandOnCooldown):
+            await safe_send(ctx.channel, f"⏳ Doucement ! Réessaie dans {error.retry_after:.1f}s.")
+            return
+        raise error
+
+# ================================================================================
+# 🔌 Setup du Cog
+# ================================================================================
+async def setup(bot: commands.Bot):
+    cog = BonbonBataille(bot)
+    for command in cog.get_commands():
+        if not hasattr(command, "category"):
+            command.category = "Reiatsu"
+    await bot.add_cog(cog)
