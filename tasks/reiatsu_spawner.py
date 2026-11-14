@@ -65,14 +65,20 @@ class ReiatsuSpawner(commands.Cog):
         self.conn  = sqlite3.connect(DB_PATH, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
+        self._startup_task: asyncio.Task | None = None
+        self._bg_tasks: set[asyncio.Task] = set()
 
     async def cog_load(self):
-        asyncio.create_task(self._check_on_startup())
+        self._startup_task = asyncio.create_task(self._check_on_startup())
         self.spawn_loop.start()
 
     def cog_unload(self):
         self.spawn_loop.cancel()
-        # self.conn.close()
+        if self._startup_task:
+            self._startup_task.cancel()
+        for t in list(self._bg_tasks):
+            t.cancel()
+        self.conn.close()
 
     # ==============================================================
     # 🔹 Nettoyage au démarrage
@@ -95,9 +101,13 @@ class ReiatsuSpawner(commands.Cog):
 
             try:
                 await channel.fetch_message(conf["message_id"])
-            except Exception:
+            except discord.NotFound:
+                # Le message n'existe vraiment plus : on nettoie
                 self._reset_spawn_config(conf["guild_id"], new_delay=True)
                 print(f"[STARTUP] Spawn fantôme nettoyé — guild {conf['guild_id']}")
+            except discord.HTTPException as e:
+                # Erreur réseau / permissions : on ne touche à rien
+                print(f"[STARTUP] Vérification spawn impossible — guild {conf['guild_id']} ({e})")
 
         # === 2. Nettoyage des FAUX spawns orphelins (Illusionniste) ===
         self.cursor.execute("""
@@ -126,7 +136,7 @@ class ReiatsuSpawner(commands.Cog):
                             old_msg = await channel.fetch_message(message_id)
                             await safe_delete(old_msg)
                             print(f"[STARTUP] Faux Reiatsu orphelin supprimé — user {user_id}")
-                        except Exception:
+                        except discord.HTTPException:
                             pass
 
             # Reset DB dans tous les cas
@@ -164,8 +174,17 @@ class ReiatsuSpawner(commands.Cog):
 
             spawn_speed      = conf["spawn_speed"] or DEFAULT_SPAWN_SPEED
             min_d, max_d     = SPAWN_SPEED_RANGES.get(spawn_speed, SPAWN_SPEED_RANGES[DEFAULT_SPAWN_SPEED])
-            spawn_delay      = conf["spawn_delay"] or random.randint(min_d, max_d)
+            spawn_delay      = conf["spawn_delay"]
             last_spawn_str   = conf["last_spawn_at"]
+
+            # Délai vide : on le tire UNE fois et on l'enregistre
+            if not spawn_delay:
+                spawn_delay = random.randint(min_d, max_d)
+                self.cursor.execute(
+                    "UPDATE reiatsu_config SET spawn_delay = ? WHERE guild_id = ?",
+                    (spawn_delay, guild_id)
+                )
+                self.conn.commit()
 
             if last_spawn_str:
                 try:
@@ -192,6 +211,9 @@ class ReiatsuSpawner(commands.Cog):
                 """)
                 players = self.cursor.fetchall()
                 for player in players:
+                    # Le joueur doit être présent sur ce serveur
+                    if not channel.guild.get_member(player["user_id"]):
+                        continue
                     self.cursor.execute("""
                         SELECT 1 FROM reiatsu WHERE fake_spawn_guild_id = ?
                         AND fake_spawn_id IS NOT NULL AND user_id = ?
@@ -252,9 +274,11 @@ class ReiatsuSpawner(commands.Cog):
         self.conn.commit()
 
         if is_fake:
-            asyncio.create_task(
+            task = asyncio.create_task(
                 self._delete_fake_after_delay(channel, message.id, owner_id)
             )
+            self._bg_tasks.add(task)
+            task.add_done_callback(self._bg_tasks.discard)
 
     def _get_spawn_speed(self, guild_id: int) -> str:
         self.cursor.execute(
@@ -284,7 +308,7 @@ class ReiatsuSpawner(commands.Cog):
         try:
             msg = await channel.fetch_message(message_id)
             await safe_delete(msg)
-        except Exception:
+        except discord.HTTPException:
             pass
 
         self.cursor.execute(
@@ -414,10 +438,9 @@ class ReiatsuSpawner(commands.Cog):
             return
 
         lock_key = f"{guild_id}-{message_id}"
-        if lock_key not in self.locks:
-            self.locks[lock_key] = asyncio.Lock()
+        lock = self.locks.setdefault(lock_key, asyncio.Lock())
 
-        async with self.locks[lock_key]:
+        async with lock:
             try:
                 if conf:
                     self.cursor.execute("""
@@ -459,7 +482,7 @@ class ReiatsuSpawner(commands.Cog):
                 try:
                     msg = await channel.fetch_message(message_id)
                     await safe_delete(msg)
-                except Exception:
+                except discord.HTTPException:
                     pass
 
                 if conf:
