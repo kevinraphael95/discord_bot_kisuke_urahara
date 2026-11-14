@@ -38,12 +38,10 @@ NB_X3 = 2  # 4 + 6 + 4 + 2 = 16 cases
 
 # --- Score ---
 FIRST_GAIN = 1     # score du tout premier bonbon, quel que soit son niveau
-MULT_BASE = 1.0    # multiplicateur de départ
-MULT_STEP = 0.5    # +0.5 par niveau : niveau 1 = x1.5, niveau 2 = x2, niveau 3 = x2.5
 
 def multiplicateur(niveau: int) -> float:
-    """Multiplicateur appliqué au score quand on mange un bonbon de ce niveau."""
-    return MULT_BASE + MULT_STEP * niveau
+    """Niveau 1 = x1, niveau 2 = x2, niveau 3 = x3."""
+    return float(niveau)
 
 # ================================================================================
 # 🗄️ Helpers DB pour le Reiatsu
