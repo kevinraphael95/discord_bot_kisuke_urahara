@@ -22,29 +22,36 @@ from discord.ui import View, Button
 # ================================================================================
 # 📦 Modules internes
 # ================================================================================
-from utils.discord_anti429 import safe_send, safe_edit, safe_respond
+from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_interact
 from utils.init_db import get_conn
 
 # ================================================================================
 # 🍬 Configuration du jeu
 # ================================================================================
-GRID_SIZE = 5
-VALUES = {1: 10, 2: 50, 3: 200} # Valeur en Reiatsu pour chaque bonbon
-BOMBS_COUNT = 6
+# Discord : 5 rangées x 5 boutons max. Avec les indicateurs (ligne + colonne),
+# la grille de jeu est donc limitée à 4x4.
+GRID_SIZE = 4
+VALUES = {1: 10, 2: 50, 3: 200}  # Valeur en Reiatsu pour chaque bonbon
+BOMBS_COUNT = 4
+NB_X1 = 6
+NB_X2 = 4
+NB_X3 = 2  # 4 + 6 + 4 + 2 = 16 cases
 
 # ================================================================================
 # 🗄️ Helpers DB pour le Reiatsu
 # ================================================================================
 def add_reiatsu(user_id: int, username: str, points_to_add: int):
     """Ajoute du Reiatsu au joueur dans la base de données."""
+    if points_to_add <= 0:
+        return
     try:
         conn = get_conn()
         cursor = conn.cursor()
         cursor.execute("SELECT points FROM reiatsu WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
-        
+
         if row:
-            new_total = row[0] + points_to_add
+            new_total = (row[0] or 0) + points_to_add
             cursor.execute("UPDATE reiatsu SET points = ? WHERE user_id = ?", (new_total, user_id))
         else:
             cursor.execute(
@@ -60,37 +67,26 @@ def add_reiatsu(user_id: int, username: str, points_to_add: int):
 # 🧩 Génération du plateau
 # ================================================================================
 def generer_plateau():
-    """Génère une grille 5x5 avec des valeurs (1,2,3) et des bombes (0)."""
-    pool = []
-    # Configuration de base (Niveau 1)
-    for _ in range(BOMBS_COUNT): pool.append(0) # Bombes (Bonbon super épicé)
-    for _ in range(10): pool.append(1) # Bonbons x1
-    for _ in range(6): pool.append(2)  # Bonbons x2
-    for _ in range(3): pool.append(3)  # Bonbons x3
-    
+    """Génère une grille 4x4 avec des valeurs (1,2,3) et des bombes (0)."""
+    pool = [0] * BOMBS_COUNT + [1] * NB_X1 + [2] * NB_X2 + [3] * NB_X3
     random.shuffle(pool)
-    
-    grid = []
-    for i in range(GRID_SIZE):
-        grid.append(pool[i*GRID_SIZE:(i+1)*GRID_SIZE])
-        
-    return grid
+    return [pool[i * GRID_SIZE:(i + 1) * GRID_SIZE] for i in range(GRID_SIZE)]
 
 def calculer_indicateurs(grid):
     """Calcule les sommes et le nombre de bombes par ligne et colonne."""
     rows_info = []
     cols_info = []
-    
+
     for i in range(GRID_SIZE):
         row_sum = sum(val for val in grid[i] if val > 0)
         row_bombs = sum(1 for val in grid[i] if val == 0)
         rows_info.append((row_sum, row_bombs))
-        
+
     for j in range(GRID_SIZE):
         col_sum = sum(grid[i][j] for i in range(GRID_SIZE) if grid[i][j] > 0)
         col_bombs = sum(1 for i in range(GRID_SIZE) if grid[i][j] == 0)
         cols_info.append((col_sum, col_bombs))
-        
+
     return rows_info, cols_info
 
 # ================================================================================
@@ -107,28 +103,49 @@ class BonbonView(View):
         self.cases_revelees = set()
         self.is_dead = False
         self.message = None
-        
-        # 1. Ajouter les indicateurs (ligne du haut)
-        for j in range(GRID_SIZE):
-            btn = Button(label=f"{cols_info[j][0]} | {cols_info[j][1]}", style=discord.ButtonStyle.secondary, disabled=True, row=0)
-            self.add_item(btn)
-        # Case vide en haut à gauche
-        self.add_item(Button(label="💠", style=discord.ButtonStyle.secondary, disabled=True, row=0))
-        # Ajouter un bouton "Encaisser" à la fin de la ligne du haut
-        self.add_item(Button(label="💰 Encaisser", style=discord.ButtonStyle.success, row=0, custom_id="encaisser"))
 
-        # 2. Ajouter les lignes du jeu (avec indicateur à gauche)
+        # 1. Rangée 0 : bouton Encaisser (coin) + indicateurs de colonnes
+        self.btn_encaisser = Button(label="💰", style=discord.ButtonStyle.success, row=0)
+        self.btn_encaisser.callback = self.encaisser_callback
+        self.add_item(self.btn_encaisser)
+
+        for j in range(GRID_SIZE):
+            self.add_item(Button(
+                label=f"{cols_info[j][0]}|{cols_info[j][1]}",
+                style=discord.ButtonStyle.secondary, disabled=True, row=0
+            ))
+
+        # 2. Rangées 1..4 : indicateur de ligne + cases du jeu
         for i in range(GRID_SIZE):
-            # Indicateur de gauche
-            btn_left = Button(label=f"{rows_info[i][0]} | {rows_info[i][1]}", style=discord.ButtonStyle.secondary, disabled=True, row=i+1)
-            self.add_item(btn_left)
-            
-            # Cases du jeu
+            self.add_item(Button(
+                label=f"{rows_info[i][0]}|{rows_info[i][1]}",
+                style=discord.ButtonStyle.secondary, disabled=True, row=i + 1
+            ))
+
             for j in range(GRID_SIZE):
-                btn = Button(label="❓", style=discord.ButtonStyle.primary, row=i+1)
+                btn = Button(label="❓", style=discord.ButtonStyle.primary, row=i + 1)
                 btn.callback = self.create_callback(i, j, btn)
                 self.add_item(btn)
 
+    # ------------------------------------------------------------------
+    # 💰 Encaisser
+    # ------------------------------------------------------------------
+    async def encaisser_callback(self, interaction: discord.Interaction):
+        if interaction.user != self.author:
+            return await safe_respond(interaction, "❌ Ce n'est pas ta partie !", ephemeral=True)
+        if self.is_dead:
+            return
+
+        self.is_dead = True
+        self.disable_all_game_buttons()
+        add_reiatsu(self.author.id, self.author.name, self.score)
+        embed = self.generate_embed(f"💰 Tu encaisses **{self.score} Reiatsu** !", discord.Color.green())
+        await safe_interact(interaction, edit=True, embed=embed, view=self)
+        self.stop()
+
+    # ------------------------------------------------------------------
+    # 🍬 Clic sur une case
+    # ------------------------------------------------------------------
     def create_callback(self, i, j, btn):
         async def callback(interaction: discord.Interaction):
             if interaction.user != self.author:
@@ -137,13 +154,19 @@ class BonbonView(View):
                 return
 
             val = self.grid[i][j]
-            
+
             if val == 0:
                 # BOUM ! Bonbon épicé
                 self.is_dead = True
+                btn.label = "🌶️"
+                btn.style = discord.ButtonStyle.danger
+                btn.disabled = True
                 self.disable_all_game_buttons()
-                embed = self.generate_embed("💥 **AÏE AÏE AÏE !** Tu es tombé sur un bonbon super épicé. Tu perds tous tes points !", discord.Color.red())
-                await safe_edit(interaction.message, embed=embed, view=self)
+                embed = self.generate_embed(
+                    "💥 **AÏE AÏE AÏE !** Tu es tombé sur un bonbon super épicé. Tu perds tous tes points !",
+                    discord.Color.red()
+                )
+                await safe_interact(interaction, edit=True, embed=embed, view=self)
                 self.stop()
             else:
                 # Bonbon normal
@@ -151,35 +174,52 @@ class BonbonView(View):
                 btn.label = f"🍬 {val}"
                 btn.disabled = True
                 self.cases_revelees.add((i, j))
-                
+
                 # Logique de score
                 if len([c for c in self.cases_revelees if self.grid[c[0]][c[1]] > 0]) == 1:
                     self.score = VALUES[val]
                 else:
                     self.score *= val
-                    
+
                 embed = self.generate_embed(f"Tu as mangé un bonbon de niveau **{val}** ! Ton score est de **{self.score}** Reiatsu.")
-                
+
                 # Vérifier si toutes les cases > 1 ont été révélées
                 total_high_cases = sum(1 for row in self.grid for v in row if v > 1)
                 revealed_high_cases = sum(1 for c in self.cases_revelees if self.grid[c[0]][c[1]] > 1)
-                
+
                 if revealed_high_cases == total_high_cases:
                     self.is_dead = True
                     self.disable_all_game_buttons()
                     add_reiatsu(self.author.id, self.author.name, self.score)
-                    embed = self.generate_embed(f"🎉 **INCROYABLE !** Tu as trouvé tous les bons bonbons ! Tu remportes **{self.score} Reiatsu** !", discord.Color.green())
-                    await safe_edit(interaction.message, embed=embed, view=self)
+                    embed = self.generate_embed(
+                        f"🎉 **INCROYABLE !** Tu as trouvé tous les bons bonbons ! Tu remportes **{self.score} Reiatsu** !",
+                        discord.Color.green()
+                    )
+                    await safe_interact(interaction, edit=True, embed=embed, view=self)
                     self.stop()
                 else:
-                    await safe_edit(interaction.message, embed=embed, view=self)
-                
+                    await safe_interact(interaction, edit=True, embed=embed, view=self)
+
         return callback
 
+    # ------------------------------------------------------------------
+    # 🔒 Utilitaires
+    # ------------------------------------------------------------------
     def disable_all_game_buttons(self):
+        """Désactive les cases non révélées et le bouton Encaisser."""
         for child in self.children:
-            if child.label == "❓":
+            if child.label == "❓" or child is self.btn_encaisser:
                 child.disabled = True
+
+    async def on_timeout(self):
+        """Fin de partie par inactivité : on désactive tout (rien n'est encaissé)."""
+        if self.is_dead:
+            return
+        self.is_dead = True
+        self.disable_all_game_buttons()
+        if self.message:
+            embed = self.generate_embed("⌛ Temps écoulé, la partie est terminée sans encaissement.", discord.Color.dark_grey())
+            await safe_edit(self.message, embed=embed, view=self)
 
     def generate_embed(self, action_text, color=discord.Color.orange()):
         desc = f"**Score actuel :** {self.score} Reiatsu\n\n{action_text}"
@@ -188,7 +228,7 @@ class BonbonView(View):
             description=desc,
             color=color
         )
-        embed.set_footer(text="Clique sur une case pour manger un bonbon. Encaisse avant de tout perdre !")
+        embed.set_footer(text="Indicateurs : somme des bonbons | nombre de bombes. 💰 pour encaisser.")
         return embed
 
 # ================================================================================
@@ -208,10 +248,10 @@ class BonbonBataille(commands.Cog):
     async def slash_bonbonbataille(self, interaction: discord.Interaction):
         grid = generer_plateau()
         rows_info, cols_info = calculer_indicateurs(grid)
-        
+
         view = BonbonView(interaction.user, grid, rows_info, cols_info)
         embed = view.generate_embed("Bienvenue dans la **Bonbonbataille** !\nClique sur une case pour manger un bonbon. Si tu tombes sur un bonbon super épicé, tu perds tout ! Encaisse avant de tout perdre.")
-        
+
         await safe_respond(interaction, embed=embed, view=view)
         view.message = await interaction.original_response()
 
@@ -223,10 +263,10 @@ class BonbonBataille(commands.Cog):
     async def prefix_bonbonbataille(self, ctx: commands.Context):
         grid = generer_plateau()
         rows_info, cols_info = calculer_indicateurs(grid)
-        
+
         view = BonbonView(ctx.author, grid, rows_info, cols_info)
         embed = view.generate_embed("Bienvenue dans la **Bonbonbataille** !\nClique sur une case pour manger un bonbon. Si tu tombes sur un bonbon super épicé, tu perds tout ! Encaisse avant de tout perdre.")
-        
+
         view.message = await safe_send(ctx.channel, embed=embed, view=view)
 
     # ============================================================================
