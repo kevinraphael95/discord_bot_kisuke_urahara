@@ -31,11 +31,19 @@ from utils.init_db import get_conn
 # Discord : 5 rangées x 5 boutons max. Avec les indicateurs (ligne + colonne),
 # la grille de jeu est donc limitée à 4x4.
 GRID_SIZE = 4
-VALUES = {1: 10, 2: 50, 3: 200}  # Valeur en Reiatsu pour chaque bonbon
 BOMBS_COUNT = 4
 NB_X1 = 6
 NB_X2 = 4
 NB_X3 = 2  # 4 + 6 + 4 + 2 = 16 cases
+
+# --- Score ---
+FIRST_GAIN = 1     # score du tout premier bonbon, quel que soit son niveau
+MULT_BASE = 1.0    # multiplicateur de départ
+MULT_STEP = 0.5    # +0.5 par niveau : niveau 1 = x1.5, niveau 2 = x2, niveau 3 = x2.5
+
+def multiplicateur(niveau: int) -> float:
+    """Multiplicateur appliqué au score quand on mange un bonbon de ce niveau."""
+    return MULT_BASE + MULT_STEP * niveau
 
 # ================================================================================
 # 🗄️ Helpers DB pour le Reiatsu
@@ -67,7 +75,7 @@ def add_reiatsu(user_id: int, username: str, points_to_add: int):
 # 🧩 Génération du plateau
 # ================================================================================
 def generer_plateau():
-    """Génère une grille 4x4 avec des valeurs (1,2,3) et des bombes (0)."""
+    """Génère une grille 4x4 avec des niveaux de bonbon (1,2,3) et des bombes (0)."""
     pool = [0] * BOMBS_COUNT + [1] * NB_X1 + [2] * NB_X2 + [3] * NB_X3
     random.shuffle(pool)
     return [pool[i * GRID_SIZE:(i + 1) * GRID_SIZE] for i in range(GRID_SIZE)]
@@ -99,7 +107,7 @@ class BonbonView(View):
         self.grid = grid
         self.rows_info = rows_info
         self.cols_info = cols_info
-        self.score = 0
+        self.score = 0.0
         self.cases_revelees = set()
         self.is_dead = False
         self.message = None
@@ -138,8 +146,9 @@ class BonbonView(View):
 
         self.is_dead = True
         self.disable_all_game_buttons()
-        add_reiatsu(self.author.id, self.author.name, self.score)
-        embed = self.generate_embed(f"💰 Tu encaisses **{self.score} Reiatsu** !", discord.Color.green())
+        gain = int(self.score)
+        add_reiatsu(self.author.id, self.author.name, gain)
+        embed = self.generate_embed(f"💰 Tu encaisses **{gain} Reiatsu** !", discord.Color.green())
         await safe_interact(interaction, edit=True, embed=embed, view=self)
         self.stop()
 
@@ -161,6 +170,7 @@ class BonbonView(View):
                 btn.label = "🌶️"
                 btn.style = discord.ButtonStyle.danger
                 btn.disabled = True
+                self.score = 0.0
                 self.disable_all_game_buttons()
                 embed = self.generate_embed(
                     "💥 **AÏE AÏE AÏE !** Tu es tombé sur un bonbon super épicé. Tu perds tous tes points !",
@@ -168,37 +178,41 @@ class BonbonView(View):
                 )
                 await safe_interact(interaction, edit=True, embed=embed, view=self)
                 self.stop()
+                return
+
+            # Bonbon normal
+            btn.style = discord.ButtonStyle.success
+            btn.label = f"🍬 {val}"
+            btn.disabled = True
+            self.cases_revelees.add((i, j))
+
+            # Logique de score : 1er bonbon = FIRST_GAIN, ensuite on multiplie
+            if len(self.cases_revelees) == 1:
+                self.score = float(FIRST_GAIN)
+                detail = f"Premier bonbon : **{FIRST_GAIN}** Reiatsu de départ."
             else:
-                # Bonbon normal
-                btn.style = discord.ButtonStyle.success
-                btn.label = f"🍬 {val}"
-                btn.disabled = True
-                self.cases_revelees.add((i, j))
+                self.score *= multiplicateur(val)
+                detail = f"Bonbon de niveau **{val}** (×{multiplicateur(val):g}) !"
 
-                # Logique de score
-                if len([c for c in self.cases_revelees if self.grid[c[0]][c[1]] > 0]) == 1:
-                    self.score = VALUES[val]
-                else:
-                    self.score *= val
+            embed = self.generate_embed(f"{detail} Ton score est de **{int(self.score)}** Reiatsu.")
 
-                embed = self.generate_embed(f"Tu as mangé un bonbon de niveau **{val}** ! Ton score est de **{self.score}** Reiatsu.")
+            # Victoire : toutes les cases de niveau > 1 ont été révélées
+            total_high_cases = sum(1 for row in self.grid for v in row if v > 1)
+            revealed_high_cases = sum(1 for c in self.cases_revelees if self.grid[c[0]][c[1]] > 1)
 
-                # Vérifier si toutes les cases > 1 ont été révélées
-                total_high_cases = sum(1 for row in self.grid for v in row if v > 1)
-                revealed_high_cases = sum(1 for c in self.cases_revelees if self.grid[c[0]][c[1]] > 1)
-
-                if revealed_high_cases == total_high_cases:
-                    self.is_dead = True
-                    self.disable_all_game_buttons()
-                    add_reiatsu(self.author.id, self.author.name, self.score)
-                    embed = self.generate_embed(
-                        f"🎉 **INCROYABLE !** Tu as trouvé tous les bons bonbons ! Tu remportes **{self.score} Reiatsu** !",
-                        discord.Color.green()
-                    )
-                    await safe_interact(interaction, edit=True, embed=embed, view=self)
-                    self.stop()
-                else:
-                    await safe_interact(interaction, edit=True, embed=embed, view=self)
+            if revealed_high_cases == total_high_cases:
+                self.is_dead = True
+                self.disable_all_game_buttons()
+                gain = int(self.score)
+                add_reiatsu(self.author.id, self.author.name, gain)
+                embed = self.generate_embed(
+                    f"🎉 **INCROYABLE !** Tu as trouvé tous les bons bonbons ! Tu remportes **{gain} Reiatsu** !",
+                    discord.Color.green()
+                )
+                await safe_interact(interaction, edit=True, embed=embed, view=self)
+                self.stop()
+            else:
+                await safe_interact(interaction, edit=True, embed=embed, view=self)
 
         return callback
 
@@ -222,13 +236,13 @@ class BonbonView(View):
             await safe_edit(self.message, embed=embed, view=self)
 
     def generate_embed(self, action_text, color=discord.Color.orange()):
-        desc = f"**Score actuel :** {self.score} Reiatsu\n\n{action_text}"
+        desc = f"**Score actuel :** {int(self.score)} Reiatsu\n\n{action_text}"
         embed = discord.Embed(
             title="🍬 La Bonbonbataille de Urahara",
             description=desc,
             color=color
         )
-        embed.set_footer(text="Indicateurs : somme des bonbons | nombre de bombes. 💰 pour encaisser.")
+        embed.set_footer(text="Indicateurs : somme des niveaux | nombre de bombes. 💰 pour encaisser.")
         return embed
 
 # ================================================================================
