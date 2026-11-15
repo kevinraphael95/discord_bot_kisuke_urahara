@@ -29,9 +29,8 @@ COOLDOWN_SECONDS = 900   # pause de 15 min après un échec de création
 SPAM_LIMIT = 5           # max de messages avec emoji par utilisateur...
 SPAM_WINDOW = 10         # ...sur cette fenêtre (secondes)
 
-RE_STATIC = re.compile(r"<:([a-zA-Z0-9_]+):\d+>")
-RE_ANIMATED = re.compile(r"<a:([a-zA-Z0-9_]+):\d+>")
-RE_SHORTCODE = re.compile(r":([a-zA-Z0-9_]+):")
+# Un vrai emoji <:nom:id> / <a:nom:id> (groupe 1 vide) OU un :nom: en texte brut (groupe 1 rempli)
+RE_TOKEN = re.compile(r"<a?:[a-zA-Z0-9_]+:\d+>|:([a-zA-Z0-9_]+):")
 
 # ================================================================================
 # 🧠 Cog principal
@@ -41,10 +40,10 @@ class AutoEmoji(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self._webhooks: dict[int, discord.Webhook] = {}   # channel_id -> webhook
+        self._webhooks: dict[int, discord.Webhook] = {}       # channel_id -> webhook
         self._locks: dict[int, asyncio.Lock] = {}
-        self._cooldown: dict[int, float] = {}             # channel_id -> fin de la pause
-        self._history: dict[int, list[float]] = {}        # user_id -> horodatages récents
+        self._cooldown: dict[int, float] = {}                 # channel_id -> fin de la pause
+        self._history: dict[int, list[float]] = {}            # user_id -> horodatages récents
         self._emoji_by_guild: dict[int, dict[str, str]] = {}  # guild_id -> {nom: emoji}
         self._emoji_global: dict[str, str] = {}               # nom -> emoji (tous serveurs)
 
@@ -109,6 +108,8 @@ class AutoEmoji(commands.Cog):
             except discord.Forbidden:
                 self._cooldown[channel.id] = time.monotonic() + COOLDOWN_SECONDS
                 return None
+            except discord.HTTPException:
+                return None
 
             # 2) Sinon, UNE seule tentative de création, abandon rapide si rate limit
             try:
@@ -134,23 +135,23 @@ class AutoEmoji(commands.Cog):
         return ctx.valid
 
     # ==========================================================
-    # 🔹 Remplace les emojis custom
+    # 🔹 Remplace les emojis custom (sans toucher aux vrais emojis)
     # ==========================================================
     def _replace_custom_emojis(self, channel, message: str) -> str:
-        message = RE_STATIC.sub(r":\1:", message)
-        message = RE_ANIMATED.sub(r":\1:", message)
-
         if ":" not in message:
             return message
 
         local = self._emoji_by_guild.get(channel.guild.id, {})
 
         def repl(m):
+            # Déjà un vrai emoji <:nom:id> : on ne touche à rien
+            if m.group(1) is None:
+                return m.group(0)
             name = m.group(1).lower()
             # Serveur du salon d'abord, puis les autres serveurs
             return local.get(name) or self._emoji_global.get(name) or m.group(0)
 
-        return RE_SHORTCODE.sub(repl, message)
+        return RE_TOKEN.sub(repl, message)
 
     # ==========================================================
     # 🔹 Anti-spam par utilisateur
@@ -177,14 +178,15 @@ class AutoEmoji(commands.Cog):
             return
 
         content = message.content
-        if not content:
+        if not content or ":" not in content:
+            return
+
+        # Remplacement d'abord (peu coûteux), vérification de commande ensuite
+        new_content = self._replace_custom_emojis(message.channel, content)
+        if new_content == content:
             return
 
         if await self._is_command(message):
-            return
-
-        new_content = self._replace_custom_emojis(message.channel, content)
-        if new_content == content:
             return
 
         if self._is_spam(message.author.id):
@@ -209,7 +211,7 @@ class AutoEmoji(commands.Cog):
             # Envoi impossible : on laisse le message original intact
             return
 
-        # ✅ Gère le cas où le message a déjà été supprimé (404)
+        # ✅ Gère le cas où le message a déjà été supprimé (404) ou non supprimable
         try:
             await message.delete()
         except (discord.NotFound, discord.Forbidden):
