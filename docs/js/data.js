@@ -224,7 +224,7 @@ const CHARS = [
   // FULLBRING — XCUTION
   // ============================================================
   {n:"Kugo Ginjo",            r:"Fullbring", sx:"M", chapter:"424", arc:"Arc Fullbringers (4)", af:"Xcution",     d:4, st:"Mort",      hc:"Brun",   bday:"15/11", w:4,  l:2,  draw:0, img:"assets/personnages/kugo-ginjo.png"},
-  {n:"Shukuro Tsukishima",    r:"Fullbring", sx:"M", chapter:"429", arc:"Arc Fullbringers (4)", af:"Xcution",     d:4, st:"Mort",      hc:"Brun",   bday:"04/02", w:4,  l:1,  draw:0, img:"assets/personnages/shukuro-tsukishima.png"},
+  {n:"Shukuro Tsukishima",    r:"Fullbring", sx:"M", chapter:"429", arc:"Arc Fullbringers (4)", af:"Xcution",     d:4, st:"Mort",      hc:"Noir",   bday:"04/02", w:4,  l:1,  draw:0, img:"assets/personnages/shukuro-tsukishima.png"},
   {n:"Riruka Dokugamine",     r:"Fullbring", sx:"F", chapter:"428", arc:"Arc Fullbringers (4)", af:"Xcution",     d:3, st:"Vivant",    hc:"Rose",   bday:"14/04", w:1,  l:1,  draw:0, img:"assets/personnages/riruka-dokugamine.png"},
   {n:"Yukio Hans Vorarlberna",r:"Fullbring", sx:"M", chapter:"431", arc:"Arc Fullbringers (4)", af:"Xcution",     d:3, st:"Vivant",    hc:"Blond",  bday:"23/12", w:1,  l:1,  draw:0, img:"assets/personnages/yukio-hans-vorarlberna.png"},
   {n:"Jackie Tristan",        r:"Fullbring", sx:"F", chapter:"431", arc:"Arc Fullbringers (4)", af:"Xcution",     d:3, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0, img:"assets/personnages/jackie-tristan.png"},
