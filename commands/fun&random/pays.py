@@ -1,5 +1,5 @@
 # ================================================================================
-# 📌 genererpays.py
+# 📌 pays.py
 # Objectif : Générateur de pays fictif ultra-réaliste
 # Catégorie : Fun&Random
 # Accès : Tous
@@ -17,12 +17,11 @@ import random
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ui import View, Select
 
 # ================================================================================
 # 📦 Modules internes
 # ================================================================================
-from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_delete
+from utils.discord_anti429 import safe_send, safe_respond
 
 # ================================================================================
 # 🏷️ Données pondérées intégrées
@@ -52,10 +51,10 @@ def tirer_pondere(options):
 # ================================================================================
 # 🏗️ Générateur de pays (logique ultra-réaliste)
 # ================================================================================
-def generer_pays(continent_force=None):
+def generer_pays():
     forme_etat = tirer_pondere(DATA["forme_etat"])
     religion = tirer_pondere(DATA["religion"])
-    continent = continent_force if continent_force else tirer_pondere(DATA["continent"])
+    continent = tirer_pondere(DATA["continent"])
     acces_mer = tirer_pondere(DATA["acces_mer"])
     ressources = tirer_pondere(DATA["ressources"])
     impact_regional = tirer_pondere(DATA["impact_regional"])
@@ -103,7 +102,8 @@ def generer_pays(continent_force=None):
     if climat in ["Tempéré", "Méditerranéen"]: densite_base += 30
     if climat == "Tropical": densite_base += 20
     if democratie < 3: densite_base = int(densite_base * 0.8)
-    
+    densite_base = max(1, densite_base)
+
     population = superficie * densite_base
     densite = round(population / superficie, 1)
     pib_total = int((population * pib_par_hab) / 1000000)
@@ -116,9 +116,11 @@ def generer_pays(continent_force=None):
     armee += armee_bonus
 
     # --- Divers ---
-    chomage = round(random.uniform(10 - (score_richesse/10), 25 - (score_richesse/5)), 1)
+    chomage_min = max(1.0, 10 - (score_richesse / 10))
+    chomage_max = max(chomage_min + 1, 25 - (score_richesse / 5))
+    chomage = round(random.uniform(chomage_min, chomage_max), 1)
     dette = round(random.uniform(20, 180), 1)
-    
+
     nom = f"{random.choice(['République', 'Royaume', 'Empire', 'Fédération', 'Union', 'Principauté'])} de {random.choice(['Valoria', 'Zephyria', 'Aethelgard', 'Kaltara', 'Oseron', 'Virelia', 'Brumelande', 'Thalassa', 'Necromia', 'Aurelia'])}"
     capitale = f"{random.choice(CAPITALES_PREFIX)}{random.choice(CAPITALES_SUFFIX)}"
     langue = random.choice(LANGUES)
@@ -135,168 +137,74 @@ def generer_pays(continent_force=None):
     }
 
 # ================================================================================
-# 🎛️ UI — Premier menu interactif
+# 🧱 Construction de l'embed
 # ================================================================================
-class FirstSelectView(View):
-    def __init__(self, bot):
-        super().__init__(timeout=120)
-        self.bot = bot
-        self.message = None
-        self.add_item(FirstSelect(self))
+def creer_embed(pays: dict) -> discord.Embed:
+    embed = discord.Embed(
+        title=f"🌍 {pays['nom']}",
+        description=f"Un pays situé en **{pays['continent']}**, avec un climat **{pays['climat']}**.\n"
+                    f"Capitale : **{pays['capitale']}** — Langue : **{pays['langue']}**",
+        color=discord.Color.random()
+    )
 
-    async def on_timeout(self):
-        for child in self.children:
-            child.disabled = True
-        if self.message:
-            await safe_edit(self.message, view=self)
+    embed.add_field(name="🏛️ Forme d'État", value=pays['forme_etat'], inline=True)
+    embed.add_field(name="🗳️ Démocratie", value=f"{pays['democratie']}/10", inline=True)
+    embed.add_field(name="🌊 Accès mer", value=pays['acces_mer'], inline=True)
 
-class FirstSelect(Select):
-    def __init__(self, parent_view: FirstSelectView):
-        self.parent_view = parent_view
-        options = [
-            discord.SelectOption(label="🌍 Monde entier (Aléatoire)", value="TOUS"),
-            discord.SelectOption(label="Europe", value="Europe"),
-            discord.SelectOption(label="Asie", value="Asie"),
-            discord.SelectOption(label="Afrique", value="Afrique"),
-            discord.SelectOption(label="Amérique du Nord", value="Amérique du Nord"),
-            discord.SelectOption(label="Amérique du Sud", value="Amérique du Sud"),
-            discord.SelectOption(label="Océanie", value="Océanie"),
-        ]
-        super().__init__(placeholder="Sélectionne un continent", options=options)
+    embed.add_field(name="⛪ Religion", value=pays['religion'], inline=True)
+    embed.add_field(name="🎉 Fête nationale", value=pays['fete'], inline=True)
+    embed.add_field(name="🌍 Impact régional", value=pays['impact_regional'], inline=True)
 
-    async def callback(self, interaction: discord.Interaction):
-        selected_key = self.values[0]
-        new_view = SecondSelectView(self.parent_view.bot, selected_key)
-        new_view.message = interaction.message
-        await safe_edit(
-            interaction.message,
-            content=f"Continent sélectionné : **{selected_key}**\nPrêt à générer ?",
-            embed=None,
-            view=new_view
-        )
+    embed.add_field(name="💎 Ressources", value=pays['ressources'], inline=True)
+    embed.add_field(name="💰 Économie", value=pays['economie'], inline=True)
+    embed.add_field(name="📊 IDH", value=str(pays['idh']), inline=True)
+
+    embed.add_field(name="💸 PIB total", value=f"{pays['pib_total']:,} M$", inline=True)
+    embed.add_field(name="📉 Chômage", value=f"{pays['chomage']} %", inline=True)
+    embed.add_field(name="💳 Dette", value=f"{pays['dette']} % du PIB", inline=True)
+
+    embed.add_field(name="👥 Population", value=f"{pays['population']:,} hab.", inline=True)
+    embed.add_field(name="📏 Superficie", value=f"{pays['superficie']:,} km²", inline=True)
+    embed.add_field(name="🏙️ Densité", value=f"{pays['densite']} hab/km²", inline=True)
+
+    embed.add_field(name="⏳ Espérance de vie", value=f"{pays['esperance']} ans", inline=True)
+    embed.add_field(name="🪖 Armée", value=f"{pays['armee']:,} soldats", inline=True)
+
+    return embed
 
 # ================================================================================
-# 🎛️ UI — Deuxième menu interactif
+# 🧠 Cog principal (SANS gestion des cooldowns centralisée)
 # ================================================================================
-class SecondSelectView(View):
-    def __init__(self, bot, continent):
-        super().__init__(timeout=120)
-        self.bot = bot
-        self.continent = continent
-        self.message = None
-        self.add_item(SecondSelect(self))
-
-    async def on_timeout(self):
-        for child in self.children:
-            child.disabled = True
-        if self.message:
-            await safe_edit(self.message, view=self)
-
-class SecondSelect(Select):
-    def __init__(self, parent_view: SecondSelectView):
-        self.parent_view = parent_view
-        options = [
-            discord.SelectOption(label="🎲 Générer le pays", value="generer"),
-            discord.SelectOption(label="🔙 Retour", value="retour")
-        ]
-        super().__init__(placeholder="Que veux-tu faire ?", options=options)
-
-    async def callback(self, interaction: discord.Interaction):
-        action = self.values[0]
-        
-        if action == "retour":
-            new_view = FirstSelectView(self.parent_view.bot)
-            new_view.message = interaction.message
-            await safe_edit(
-                interaction.message,
-                content="🌍 **Générateur de pays**\nChoisis un continent :",
-                embed=None,
-                view=new_view
-            )
-            return
-
-        # Action "generer"
-        pays = generer_pays()
-        if self.parent_view.continent != "TOUS":
-            pays["continent"] = self.parent_view.continent
-
-        embed = discord.Embed(
-            title=f"🌍 {pays['nom']}",
-            description=f"Un pays situé en **{pays['continent']}**, avec un climat **{pays['climat']}**.\n"
-                        f"Capitale : **{pays['capitale']}** — Langue : **{pays['langue']}**",
-            color=discord.Color.random()
-        )
-        
-        embed.add_field(name="🏛️ Forme d'État", value=pays['forme_etat'], inline=True)
-        embed.add_field(name="🗳️ Démocratie", value=f"{pays['democratie']}/10", inline=True)
-        embed.add_field(name="🌊 Accès mer", value=pays['acces_mer'], inline=True)
-
-        embed.add_field(name="⛪ Religion", value=pays['religion'], inline=True)
-        embed.add_field(name="🎉 Fête nationale", value=pays['fete'], inline=True)
-        embed.add_field(name="🌍 Impact régional", value=pays['impact_regional'], inline=True)
-
-        embed.add_field(name="💎 Ressources", value=pays['ressources'], inline=True)
-        embed.add_field(name="💰 Économie", value=pays['economie'], inline=True)
-        embed.add_field(name="📊 IDH", value=str(pays['idh']), inline=True)
-
-        embed.add_field(name="💸 PIB total", value=f"{pays['pib_total']:,} M$", inline=True)
-        embed.add_field(name="📉 Chômage", value=f"{pays['chomage']} %", inline=True)
-        embed.add_field(name="💳 Dette", value=f"{pays['dette']} % du PIB", inline=True)
-
-        embed.add_field(name="👥 Population", value=f"{pays['population']:,} hab.", inline=True)
-        embed.add_field(name="📏 Superficie", value=f"{pays['superficie']:,} km²", inline=True)
-        embed.add_field(name="🏙️ Densité", value=f"{pays['densite']} hab/km²", inline=True)
-
-        embed.add_field(name="⏳ Espérance de vie", value=f"{pays['esperance']} ans", inline=True)
-        embed.add_field(name="🪖 Armée", value=f"{pays['armee']:,} soldats", inline=True)
-
-        await safe_edit(
-            interaction.message,
-            content=None,
-            embed=embed,
-            view=None
-        )
-
-# ================================================================================
-# 🧠 Cog principal (SANS gestion des cooldowns)
-# ================================================================================
-class GenerateurPaysCommand(commands.Cog):
+class PaysCommand(commands.Cog):
     """
-    Commande /genererpays et !genererpays — Génère un pays fictif via menus
+    Commande /pays et !pays — Génère directement un pays fictif
     """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     # ============================================================================
-    # 🔹 Fonction interne commune
-    # ============================================================================
-    async def _send_menu(self, channel: discord.abc.Messageable):
-        view = FirstSelectView(self.bot)
-        view.message = await safe_send(channel, "🌍 **Générateur de pays**\nChoisis un continent (ou aléatoire) :", view=view)
-
-    # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="genererpays", description="🌍 Génère un pays fictif aléatoire complet.")
+    @app_commands.command(name="pays", description="🌍 Génère un pays fictif aléatoire complet.")
     @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
-    async def slash_genererpays(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        await self._send_menu(interaction.channel)
-        await interaction.delete_original_response()
+    async def slash_pays(self, interaction: discord.Interaction):
+        embed = creer_embed(generer_pays())
+        await safe_respond(interaction, embed=embed)
 
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="genererpays", aliases=["genpays"])
+    @commands.command(name="pays", aliases=["genpays"])
     @commands.cooldown(1, 5.0, commands.BucketType.user)
-    async def prefix_genererpays(self, ctx: commands.Context):
-        await self._send_menu(ctx.channel)
+    async def prefix_pays(self, ctx: commands.Context):
+        embed = creer_embed(generer_pays())
+        await safe_send(ctx.channel, embed=embed)
 
 # ================================================================================
 # 🔌 Setup du Cog
 # ================================================================================
 async def setup(bot: commands.Bot):
-    cog = GenerateurPaysCommand(bot)
+    cog = PaysCommand(bot)
     for command in cog.get_commands():
         if not hasattr(command, "category"):
             command.category = "Fun&Random"
