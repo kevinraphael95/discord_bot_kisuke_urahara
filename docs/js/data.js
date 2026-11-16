@@ -59,7 +59,7 @@ const CHARS = [
   // URAHARA SHOP
   // ============================================================
   {n:"Kisuke Urahara",        r:"Shinigami",                   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Blond",  bday:"10/05", w:10, l:1,  draw:1, img:"assets/personnages/kisuke-urahara.png"},
-  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", chapter:"51", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:3, st:"Vivant",    hc:"Violet", bday:"11/02", w:8,  l:1,  draw:0, img:"assets/personnages/yoruichi-shihoin.png"},
+  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", chapter:"51", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:3, st:"Vivant",    hc:"Violet", bday:"01/01", w:8,  l:1,  draw:0, img:"assets/personnages/yoruichi-shihoin.png"},
   {n:"Tessai Tsukabishi",     r:"Shinigami",                   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"12/05", w:2,  l:0,  draw:0, img:"assets/personnages/tessai-tsukabishi.png"},
   {n:"Jinta Hanakari",        r:"Mod-Soul/Âme artificielle",   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:1, st:"Vivant",    hc:"Rouge",  bday:"04/04", w:0,  l:1,  draw:0, img:"assets/personnages/jinta-hanakari.png"},
   {n:"Ururu Tsumugiya",       r:"Mod-Soul/Âme artificielle",   sx:"F", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"09/09", w:1,  l:1,  draw:0, img:"assets/personnages/ururu-tsumugiya.png"},
@@ -126,7 +126,8 @@ const CHARS = [
   {n:"Chojiro Sasakibe",      r:"Shinigami",                  sx:"M", chapter:"83", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Blanc",  bday:"04/11", w:0,  l:1,  draw:0, img:"assets/personnages/chojiro-sasakibe.png"},
   {n:"Yachiru Kusajishi",     r:"Shinigami",                  sx:"F", chapter:"83", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1, img:"assets/personnages/yachiru-kusajishi.png"},
   {n:"Nemu Kurotsuchi",       r:"Mod-Soul/Âme artificielle",  sx:"F", chapter:"93", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0, img:"assets/personnages/nemu-kurotsuchi.png"},
- 
+  {n:"Kaien Shiba",           r:"Shinigami",       sx:"M", chapter:"133", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:4, st:"Mort",      hc:"Noir",   bday:"27/10", w:1,  l:1,  draw:0, img:"assets/personnages/kaien-shiba.png"},
+  
   // ============================================================
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
   // ============================================================
