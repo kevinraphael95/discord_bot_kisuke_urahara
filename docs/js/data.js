@@ -266,8 +266,8 @@ const CHARS = [
   {n:"Guenael Lee",           r:"Quincy",    sx:"M", chapter:"570", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0, img:"assets/personnages/guenael-lee.png"},
   
   // ARRANCARS DU WANDENREICH
-  {n:"Asguiaro Ebern", r:"Arrancar", sx:"M", chapter:"481", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/asguiaro-ebern.png"},
-  {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"594", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
+  {n:"Asguiaro Ebern", r:"Arrancar", sx:"M", chapter:"481", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"??", bday:"18/06", w:0, l:1, draw:0, img:"assets/personnages/asguiaro-ebern.png"},
+  {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"594", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"12/08", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
 
   
 ];
