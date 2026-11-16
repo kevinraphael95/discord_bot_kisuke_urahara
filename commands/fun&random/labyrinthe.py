@@ -1,5 +1,5 @@
 # ================================================================================
-# 📌 labyrinthe3d.py
+# 📌 labyrinthe.py
 # Objectif : Labyrinthe 3D (raycasting) animé en GIF, fidèle à l'écran de veille HTML.
 #            La caméra parcourt le chemin le plus court jusqu'au logo Discord.
 # Catégorie : Fun
@@ -41,7 +41,7 @@ LEVELS = 24               # niveaux de brouillard
 FOG_DIV = 10.0            # shade = min(0.95, dist / 10)
 SPEED = 0.002 * 16.67     # vitesse par tick (60 ticks/s comme le navigateur)
 TURN = 0.15               # lissage de l'angle
-MAX_FRAMES = 200
+MAX_FRAMES = 400
 FRAME_MS = 60
 HOLD_FRAMES = 12
 MAX_BYTES = 8 * 1024 * 1024
@@ -318,7 +318,7 @@ class Labyrinthe3D(commands.Cog):
     # 🔹 Commande SLASH
     # ============================================================================
     @app_commands.command(
-        name="labyrinthe3d",
+        name="labyrinthe",
         description="Labyrinthe 3D animé jusqu'au logo Discord."
     )
     @app_commands.checks.cooldown(rate=1, per=15.0, key=lambda i: i.user.id)
@@ -342,7 +342,7 @@ class Labyrinthe3D(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="labyrinthe3d")
+    @commands.command(name="labyrinthe")
     @commands.cooldown(1, 15.0, commands.BucketType.user)
     async def prefix_labyrinthe3d(self, ctx: commands.Context):
         if self._lock.locked():
