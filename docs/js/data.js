@@ -191,9 +191,9 @@ const CHARS = [
   {n:"Dondochakka Birstanne", r:"Arrancar",  sx:"M", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Chauve", bday:"30/06", w:0,  l:1,  draw:0, img:"assets/personnages/dondochakka-birstanne.png"},
   
   // FRACCIÓN DE SZAYELAPORRO
-  {n:"Lumina",    r:"Arrancar", sx:"F", chapter:"???", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/lumina-verona.png"},
-  {n:"Verona",    r:"Arrancar", sx:"F", chapter:"???", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Vivant", hc:"??", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/lumina-verona.png"},
-  {n:"Medazeppi", r:"Arrancar", sx:"M", chapter:"???", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/medazeppi.png"},
+  {n:"Lumina",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/lumina-verona.png"},
+  {n:"Verona",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Vivant", hc:"??", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/lumina-verona.png"},
+  {n:"Medazeppi", r:"Arrancar", sx:"M", chapter:"272", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/medazeppi.png"},
   
   // ============================================================
   // ARRANCAR DIVERS
@@ -266,8 +266,8 @@ const CHARS = [
   {n:"Guenael Lee",           r:"Quincy",    sx:"M", chapter:"570", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0, img:"assets/personnages/guenael-lee.png"},
   
   // ARRANCARS DU WANDENREICH
-  {n:"Asguiaro Ebern", r:"Arrancar", sx:"M", chapter:"???", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/asguiaro-ebern.png"},
-  {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"???", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
+  {n:"Asguiaro Ebern", r:"Arrancar", sx:"M", chapter:"481", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/asguiaro-ebern.png"},
+  {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"594", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
 
   
 ];
