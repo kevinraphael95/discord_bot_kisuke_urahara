@@ -36,6 +36,19 @@ init_logger()
 log = logging.getLogger(__name__)
 
 # ================================================================================
+# ⏳ Formattage des durées (cooldowns)
+# ================================================================================
+def format_duree(secondes: float) -> str:
+    secondes = int(secondes)
+    h, reste = divmod(secondes, 3600)
+    m, s = divmod(reste, 60)
+    if h:
+        return f"{h}h {m:02d}min"
+    if m:
+        return f"{m}min {s:02d}s"
+    return f"{s}s"
+
+# ================================================================================
 # 🔧 Initialisation de l'environnement
 # ================================================================================
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -158,8 +171,10 @@ async def on_message(message):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        retry = round(error.retry_after, 1)
-        await safe_send(ctx.channel, f"⏳ Cette commande est en cooldown. Réessaie dans `{retry}` secondes.")
+        await safe_send(
+            ctx.channel,
+            f"⏳ Cette commande est en cooldown. Réessaie dans `{format_duree(error.retry_after)}`."
+        )
     elif isinstance(error, commands.MissingPermissions):
         await safe_send(ctx.channel, "❌ Tu n'as pas les permissions pour cette commande.")
     elif isinstance(error, commands.MissingRequiredArgument):
@@ -186,8 +201,7 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
     if isinstance(error, app_commands.CommandOnCooldown):
         await safe_interact(
             interaction,
-            f"⏳ Attends encore {error.retry_after:.1f}s.",
-            edit=True,
+            f"⏳ Cette commande est en cooldown. Réessaie dans {format_duree(error.retry_after)}.",
             ephemeral=True,
         )
     elif isinstance(error, app_commands.MissingPermissions):
@@ -219,7 +233,7 @@ async def cleanup_aiohttp():
 if __name__ == "__main__":
     # Vérifie si on veut lancer le panel admin
     panel_active = os.getenv("ENABLE_ADMIN_PANEL", "False").lower() == "true"
-    
+
     if panel_active:
         try:
             from admin.admin_panel import run_admin, set_bot
@@ -237,12 +251,12 @@ if __name__ == "__main__":
         init_db()
         await load_commands()
         await load_tasks()
-        
+
         # ⚠️ On appelle set_bot UNIQUEMENT si le panel admin est actif
         if panel_active:
             from admin.admin_panel import set_bot
             set_bot(bot)
-        
+
         try:
             await bot.start(TOKEN)
         finally:
