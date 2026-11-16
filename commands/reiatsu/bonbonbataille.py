@@ -3,7 +3,7 @@
 # Objectif : Mini-jeu de retournement de cases avec des bonbons et des pièges
 # Catégorie : Reiatsu
 # Accès : Tous
-# Cooldown : 1 utilisation / 5 secondes / utilisateur
+# Cooldown : 1 utilisation / 1 heure / utilisateur
 # ================================================================================
 
 # ================================================================================
@@ -12,7 +12,7 @@
 import random
 
 # ================================================================================
-# 📦  Modules tiers
+# 📦 Modules tiers
 # ================================================================================
 import discord
 from discord import app_commands
@@ -251,7 +251,7 @@ class BonbonBataille(commands.Cog):
     # 🔹 Commande SLASH
     # ============================================================================
     @app_commands.command(name="bonbonbataille", description="🍬 Joue à la Bonbonbataille de Urahara !")
-    @app_commands.checks.cooldown(rate=1, per=5.0, key=lambda i: i.user.id)
+    @app_commands.checks.cooldown(rate=1, per=3600.0, key=lambda i: i.user.id)
     async def slash_bonbonbataille(self, interaction: discord.Interaction):
         grid = generer_plateau()
         rows_info, cols_info = calculer_indicateurs(grid)
@@ -266,7 +266,7 @@ class BonbonBataille(commands.Cog):
     # 🔹 Commande PREFIX
     # ============================================================================
     @commands.command(name="bonbonbataille", aliases=["bb"], help="🍬 Joue à la Bonbonbataille de Urahara !")
-    @commands.cooldown(1, 5.0, commands.BucketType.user)
+    @commands.cooldown(1, 3600.0, commands.BucketType.user)
     async def prefix_bonbonbataille(self, ctx: commands.Context):
         grid = generer_plateau()
         rows_info, cols_info = calculer_indicateurs(grid)
@@ -275,23 +275,6 @@ class BonbonBataille(commands.Cog):
         embed = view.generate_embed("Bienvenue dans la **Bonbonbataille** !\nClique sur une case pour manger un bonbon. Si tu tombes sur un bonbon super épicé, tu perds tout ! Encaisse avant de tout perdre.")
 
         view.message = await safe_send(ctx.channel, embed=embed, view=view)
-
-    # ============================================================================
-    # 🔹 Gestion des cooldowns (sinon l'utilisateur ne voit rien)
-    # ============================================================================
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                f"⏳ Doucement ! Réessaie dans {error.retry_after:.1f}s.", ephemeral=True
-            )
-            return
-        raise error
-
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandOnCooldown):
-            await safe_send(ctx.channel, f"⏳ Doucement ! Réessaie dans {error.retry_after:.1f}s.")
-            return
-        raise error
 
 # ================================================================================
 # 🔌 Setup du Cog
