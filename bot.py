@@ -26,6 +26,7 @@ import aiohttp
 from utils.discord_anti429 import safe_send, safe_respond, safe_interact
 from utils.init_db import init_db
 from utils.logger import init_logger
+from utils.profile_updater import update_bot_profile 
 
 # ================================================================================
 # 📝 Initialisation du logger EN PREMIER
@@ -109,19 +110,35 @@ async def load_tasks():
                 print(f"❌ Failed to load task {path}: {e}")
 
 # ================================================================================
-# 🔔 On Ready : présence et création de la session aiohttp
+# 🔔 On Ready : présence, session aiohttp et mise à jour du profil
 # ================================================================================
 @bot.event
 async def on_ready():
     if bot.aiohttp_session is None:
-        bot.aiohttp_session = aiohttp.ClientSession()  # ✅ Créée dans le loop
+        bot.aiohttp_session = aiohttp.ClientSession()
+
     print(f"✅ Connecté en tant que {bot.user.name}")
+
     await bot.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
             name="Bleach"
         )
     )
+
+    # 👇 AJOUT : Mise à jour unique du profil (avatar + bannière)
+    # Protégée par un fichier "flag" pour ne s'exécuter qu'une seule fois.
+    if os.path.exists("set_profile.flag"):
+        ok = await update_bot_profile(
+            bot,
+            avatar_path="assets/kisuke.gif",
+            banner_path="assets/kisuke2.gif",
+        )
+        if ok:
+            os.remove("set_profile.flag")
+            print("🖼️ Profil mis à jour, flag supprimé.")
+        else:
+            print("⚠️ Échec de la mise à jour du profil, flag conservé.")
 
 # ================================================================================
 # 📩 Message reçu : réagir aux mots-clés et lancer les commandes
@@ -182,11 +199,11 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandNotFound):
         return
     else:
-        # 👇 Affiche la VRAIE erreur dans le terminal (avec traceback)
+        # Affiche la VRAIE erreur dans le terminal (avec traceback)
         import traceback
         traceback.print_exception(type(error), error, error.__traceback__)
 
-        # 👇 Et l'écrit aussi dans les logs du panel
+        # Et l'écrit aussi dans les logs du panel
         log.error(
             "Erreur non gérée dans !%s : %s",
             ctx.command.name if ctx.command else "?",
