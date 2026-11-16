@@ -51,9 +51,10 @@ const CHARS = [
   // ============================================================
   // ÂMES
   // ============================================================
-  {n:"Ganju Shiba",           r:"Humain",    sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0, img:"assets/personnages/ganju-shiba.webp"},
-  {n:"Kukaku Shiba",          r:"Humain",    sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0, img:"assets/personnages/shiba-kukaku.webp"},
-
+  {n:"Ganju Shiba",           r:"Âme",    sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0, img:"assets/personnages/ganju-shiba.webp"},
+  {n:"Kukaku Shiba",          r:"Âme",    sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0, img:"assets/personnages/shiba-kukaku.webp"},
+  {n:"Jidanbo Ikkanzaka",     r:"Âme",    sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)",   af:"Soul Society", d:2, st:"Vivant",    hc:"Noir",   bday:"10/01", w:0,  l:1,  draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
+  
   // ============================================================
   // URAHARA SHOP
   // ============================================================
