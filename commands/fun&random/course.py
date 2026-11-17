@@ -1,6 +1,7 @@
 # ================================================================================
 # 📌 course_kart.py
-# Objectif : Course de karting (1 tour) style Super Mario Kart (Mode 7) en GIF.
+# Objectif : Course de karting (1 tour) façon Super Mario Kart (Mode 7) en GIF.
+#            Circuit aléatoire à chaque course, tout est dessiné par le code.
 # Catégorie : Fun
 # Accès : Tous
 # Cooldown : 15s (slash) / 15s (prefix)
@@ -12,204 +13,356 @@
 import asyncio
 import io
 import math
-import os
 import random
+from bisect import bisect_right
 
 # ================================================================================
-# 📦  Modules tiers
+# 📦 Modules tiers
 # ================================================================================
 import discord
 from discord import app_commands
 from discord.ext import commands
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageOps
 
 # ================================================================================
 # 📦 Modules internes
 # ================================================================================
-from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_delete
+from utils.discord_anti429 import safe_send
 
 # ================================================================================
-# ⚙️ Constantes du jeu
+# ⚙️ Constantes
 # ================================================================================
-W, H = 320, 240
-HALF = 160
-MINI_H = 80
-FOV = math.radians(75)
-CAM_HEIGHT = 0.4           # Caméra basse
-MAP_SIZE = 512
-SPEED = 0.005
-FRAME_MS = 60
-MAX_FRAMES = 120
+W, H = 256, 224                     # résolution Super Nintendo
+HZ = 66                             # ligne d'horizon
+FOV = math.radians(72)
+FOCAL = (W / 2) / math.tan(FOV / 2)
+CAM_H = 40.0                        # hauteur de la caméra (en pixels de texture)
+FOOT_ROW = int(H * 0.88)            # ligne où se pose le kart à l'écran
+BACK = CAM_H * FOCAL / (FOOT_ROW - HZ)   # distance caméra -> kart
+
+MAP = 1024                          # taille de la texture du circuit
+ROAD_W = 62                         # largeur de la piste
+STEP = 2.0                          # espacement des points de la ligne centrale
+
+FRAMES = 150
+FRAME_MS = 50
+FINISH_HOLD_MS = 3000
+PALETTE_COLORS = 128
 MAX_BYTES = 8 * 1024 * 1024
 
-# ================================================================================
-# 🗺️ Chargement des Sprites et Textures
-# ================================================================================
-def _load_assets():
-    """Charge la texture du sol et le sprite du kart."""
-    # 1. Texture du sol
-    try:
-        track = Image.open("assets/track.png").convert("RGB").resize((MAP_SIZE, MAP_SIZE))
-    except FileNotFoundError:
-        # Fallback si l'image n'existe pas (pour éviter le crash)
-        track = Image.new("RGB", (MAP_SIZE, MAP_SIZE), (34, 139, 34))
-        d = ImageDraw.Draw(track)
-        d.ellipse([50, 50, 462, 462], fill=(218, 180, 130))
-        
-    # 2. Sprite du Kart (avec transparence)
-    try:
-        kart = Image.open("assets/kart.png").convert("RGBA")
-        # Redimensionner si le kart est trop grand
-        kart = kart.resize((60, 60), Image.NEAREST)
-    except FileNotFoundError:
-        # Fallback (un rectangle rouge si pas d'image)
-        kart = Image.new("RGBA", (60, 60), (0,0,0,0))
-        d = ImageDraw.Draw(kart)
-        d.rectangle([10, 10, 50, 50], fill=(211, 47, 47))
-        
-    return track, kart
-
-TRACK_IMG, KART_IMG = _load_assets()
-TRACK_DATA = TRACK_IMG.load()
-KART_DATA = KART_IMG.load()
+GRASS = (60, 176, 50)
 
 # ================================================================================
-# 🏎️ Rendu Mode 7 + Sprites
+# 🔤 Texte pixelisé (police PIL agrandie, avec contour)
 # ================================================================================
-def _render_frame(camX, camY, camAngle, time_ms):
-    frame = Image.new("RGB", (W, H))
-    d = ImageDraw.Draw(frame)
-    
-    # 1. Ciel (on garde une bande de ciel en haut)
-    d.rectangle([0, 0, W, 80], fill=(135, 206, 235))
+def _text(img: Image.Image, s: str, x: int, y: int, scale: int, color, outline=(0, 0, 0), anchor="la") -> int:
+    probe = ImageDraw.Draw(Image.new("L", (1, 1)))
+    box = probe.textbbox((0, 0), s)
+    w, h = box[2] + 2, box[3] + 2
+    layer = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(layer).text((1, 1), s, fill=255)
+    layer = layer.point(lambda v: 255 if v > 100 else 0).resize((w * scale, h * scale), Image.NEAREST)  # pixels nets
+    if anchor == "ra":
+        x -= layer.width
+    elif anchor == "ma":
+        x -= layer.width // 2
+    if outline:
+        o = max(1, scale)
+        for dx, dy in ((-o, 0), (o, 0), (0, -o), (0, o), (-o, -o), (o, o), (-o, o), (o, -o)):
+            img.paste(Image.new("RGB", layer.size, outline), (x + dx, y + dy), layer)
+    img.paste(Image.new("RGB", layer.size, color), (x, y), layer)
+    return layer.width
 
-    # 2. Route (Mode 7)
-    dirX, dirY = math.cos(camAngle), math.sin(camAngle)
-    planeX, planeY = -dirY * math.tan(FOV/2), dirX * math.tan(FOV/2)
-    
-    pixels = frame.load()
-    
-    for y in range(80, HALF):
-        p = y - 80
-        rowDistance = (CAM_HEIGHT * HALF) / (p + 1e-5)
-        
-        rayDirX0, rayDirY0 = dirX - planeX, dirY - planeY
-        rayDirX1, rayDirY1 = dirX + planeX, dirY + planeY
-        
-        floorStepX = rowDistance * (rayDirX1 - rayDirX0) / W
-        floorStepY = rowDistance * (rayDirY1 - rayDirY0) / W
-        
-        floorX = camX + rowDistance * rayDirX0
-        floorY = camY + rowDistance * rayDirY0
-        
-        # Brouillard très léger
-        fog = min(1.0, rowDistance / 1000.0)
-        
-        for x in range(W):
-            tx = int(floorX) % MAP_SIZE
-            ty = int(floorY) % MAP_SIZE
-            
-            c = TRACK_DATA[tx, ty]
-            
-            if fog > 0:
-                r = int(c[0] * (1 - fog) + 135 * fog)
-                g = int(c[1] * (1 - fog) + 206 * fog)
-                b = int(c[2] * (1 - fog) + 235 * fog)
-                c = (r, g, b)
-                
-            pixels[x, y] = c
-            floorX += floorStepX
-            floorY += floorStepY
 
-    # 3. Insertion du Sprite du Kart (avec transparence)
-    kx, ky = W // 2, HALF - 30
-    # On "colle" le sprite en utilisant son canal alpha (masque)
-    frame.paste(KART_IMG, (kx - 30, ky), KART_IMG)
+# ================================================================================
+# 🏎️ Sprite du kart (vu de dos, dessiné en pixel art)
+# ================================================================================
+KART_MAP = (
+    ".....RRRRRR.....",
+    "....RRRRRRRR....",
+    "....RRWWWWRR....",
+    "....RRRRRRRR....",
+    "...BBBBBBBBBB...",
+    "..BBBBBBBBBBBB..",
+    "..BBBBBBBBBBBB..",
+    "KK.RRRRRRRRRR.KK",
+    "KK.RRRRRRRRRR.KK",
+    "KKKRRWWWWWWRRKKK",
+    "KKKRRRRRRRRRRKKK",
+    "KKK.KKKKKKKK.KKK",
+    ".KK..........KK.",
+)
+KART_PAL = {"R": (214, 40, 40), "W": (245, 245, 245), "B": (40, 70, 200), "K": (24, 24, 28)}
 
-    # 4. Mini-map
-    d.rectangle([0, HALF, W, H], fill=(34, 139, 34))
-    d.line([(0, HALF), (W, HALF)], fill=(255,255,255), width=2)
-    
-    mapScale = 0.12
-    mapCX, mapCY = W // 2, HALF + (MINI_H // 2)
-    
-    # Une simple ellipse pour représenter le circuit sur la mini-map
-    d.ellipse([mapCX-80, mapCY-40, mapCX+80, mapCY+40], outline=(218, 180, 130), width=20)
-    
-    # Point rouge du joueur
-    px = mapCX + int((camX - MAP_SIZE/2) * mapScale)
-    py = mapCY + int((camY - MAP_SIZE/2) * mapScale)
-    d.ellipse([px-4, py-4, px+4, py+4], fill=(255, 0, 0))
 
-    # 5. HUD (Chrono)
-    sec = int(time_ms / 1000)
-    ms = int((time_ms % 1000) / 10)
-    time_str = f"{sec:02d}\"{ms:02d}"
-    
-    d.rectangle([W - 80, 5, W - 5, 25], fill=(0, 0, 0), outline=(255, 255, 255))
-    d.text((W - 10, 8), time_str, fill=(255, 255, 255), anchor="ra")
+def _make_kart(lean: int) -> Image.Image:
+    """lean = -1 (gauche), 0 (droit), 1 (droite) : le pilote se penche dans les virages."""
+    img = Image.new("RGBA", (18, len(KART_MAP)), (0, 0, 0, 0))
+    for y, row in enumerate(KART_MAP):
+        shift = lean if y < 7 else 0
+        for x, ch in enumerate(row):
+            if ch in KART_PAL:
+                img.putpixel((x + 1 + shift, y), KART_PAL[ch] + (255,))
+    return img.resize((img.width * 2, img.height * 2), Image.NEAREST)
 
-    return frame
+
+# ================================================================================
+# 🌄 Décor : ciel, nuages, collines rayées (défile selon le cap)
+# ================================================================================
+BG_LEN = int(W * 2 * math.pi / FOV)      # largeur du panorama (360°)
+
+
+def _make_background(rng: random.Random) -> Image.Image:
+    bg = Image.new("RGB", (BG_LEN, HZ))
+    d = ImageDraw.Draw(bg)
+    for y in range(HZ):
+        t = y / HZ
+        d.line([(0, y), (BG_LEN, y)], fill=(int(150 + 46 * t), int(190 + 34 * t), int(250 + 5 * t)))
+
+    # nuages (répétés de chaque côté pour que le panorama boucle)
+    for _ in range(9):
+        cx, cy = rng.randrange(BG_LEN), rng.randint(6, 26)
+        for off in (-BG_LEN, 0, BG_LEN):
+            for dx, dy, rw, rh in ((0, 0, 22, 7), (-14, 3, 14, 5), (15, 3, 16, 5)):
+                d.ellipse([cx + off + dx - rw, cy + dy - rh, cx + off + dx + rw, cy + dy + rh], fill=(255, 255, 255))
+
+    # collines rondes à rayures horizontales
+    hills = sorted(((rng.randrange(BG_LEN), rng.randint(70, 150), rng.randint(20, 46)) for _ in range(12)),
+                   key=lambda h: h[2])
+    for cx, w, h in hills:
+        dark = rng.random() < 0.5
+        base, light = ((30, 140, 40), (52, 172, 56)) if dark else ((44, 164, 50), (84, 200, 70))
+        stripes = Image.new("RGB", (w + 1, h))
+        sd = ImageDraw.Draw(stripes)
+        for y in range(h):
+            sd.line([(0, y), (w, y)], fill=light if (y // 3) % 2 == 0 else base)
+        mask = Image.new("L", (w + 1, h), 0)
+        ImageDraw.Draw(mask).ellipse([0, 0, w, 2 * h - 1], fill=255)
+        for off in (-BG_LEN, 0, BG_LEN):
+            bg.paste(stripes, (cx + off - w // 2, HZ - h), mask)
+    return bg
+
+
+# ================================================================================
+# 🛣️ Circuit aléatoire (texture vue du dessus)
+# ================================================================================
+def _speckle(base_dark, base_mid, base_light) -> Image.Image:
+    """Texture "pointillée" façon SNES (blocs de 2x2 pixels, contraste doux)."""
+    n = Image.effect_noise((MAP // 2, MAP // 2), 60)
+    n = ImageOps.autocontrast(n, cutoff=2).resize((MAP, MAP), Image.NEAREST)
+    return ImageOps.colorize(n, black=base_dark, mid=base_mid, white=base_light, blackpoint=40, whitepoint=215)
+
+
+def _make_centerline(rng: random.Random) -> list:
+    """Courbe fermée aléatoire (somme d'harmoniques), puis points régulièrement espacés."""
+    amps = {2: rng.uniform(0.05, 0.18), 3: rng.uniform(0.04, 0.14), 4: rng.uniform(0.02, 0.08), 5: rng.uniform(0.0, 0.05)}
+    ph = {k: rng.uniform(0, 2 * math.pi) for k in amps}
+    sx, sy = rng.uniform(0.85, 1.2), rng.uniform(0.85, 1.2)
+    raw = []
+    for i in range(900):
+        th = 2 * math.pi * i / 900
+        r = 1 + sum(a * math.cos(k * th + ph[k]) for k, a in amps.items())
+        raw.append((r * math.cos(th) * sx, r * math.sin(th) * sy))
+    if rng.random() < 0.5:
+        raw.reverse()                                    # sens horaire ou anti-horaire
+
+    xs, ys = [p[0] for p in raw], [p[1] for p in raw]
+    ext = max(max(xs) - min(xs), max(ys) - min(ys))
+    scale = 2 * 380 * rng.uniform(0.85, 1.0) / ext
+    mx, my = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
+    raw = [(MAP / 2 + (x - mx) * scale, MAP / 2 + (y - my) * scale) for x, y in raw]
+    raw.append(raw[0])
+
+    cum = [0.0]
+    for i in range(1, len(raw)):
+        cum.append(cum[-1] + math.hypot(raw[i][0] - raw[i - 1][0], raw[i][1] - raw[i - 1][1]))
+    count = int(cum[-1] / STEP)
+    pts = []
+    for k in range(count):
+        s = k * cum[-1] / count
+        i = min(bisect_right(cum, s) - 1, len(raw) - 2)
+        t = (s - cum[i]) / (cum[i + 1] - cum[i])
+        pts.append((raw[i][0] + (raw[i + 1][0] - raw[i][0]) * t, raw[i][1] + (raw[i + 1][1] - raw[i][1]) * t))
+    shift = rng.randrange(count)                         # emplacement de la ligne de départ
+    return pts[shift:] + pts[:shift]
+
+
+def _make_track(pts: list) -> Image.Image:
+    img = _speckle((50, 164, 46), GRASS, (84, 198, 62))
+    d = ImageDraw.Draw(img)
+    n = len(pts)
+    half = ROAD_W / 2
+    curb = [(222, 44, 44), (242, 242, 242), (40, 80, 210), (246, 206, 40)]
+
+    # Vibreurs colorés, bordure brune, puis piste en terre.
+    for i, (x, y) in enumerate(pts):
+        r = half + 9
+        d.ellipse([x - r, y - r, x + r, y + r], fill=curb[(i // 5) % 4])
+    for x, y in pts:
+        r = half + 3
+        d.ellipse([x - r, y - r, x + r, y + r], fill=(138, 108, 64))
+    road = Image.new("L", (MAP, MAP), 0)
+    rd = ImageDraw.Draw(road)
+    for x, y in pts:
+        rd.ellipse([x - half, y - half, x + half, y + half], fill=255)
+    img.paste(_speckle((186, 158, 102), (198, 170, 110), (210, 184, 124)), (0, 0), road)
+
+    # Tirets jaunes au centre.
+    for i in range(0, n, 12):
+        a, b = pts[i], pts[(i + 3) % n]
+        d.line([a, b], fill=(246, 214, 40), width=3)
+
+    # Ligne de départ en damier.
+    (x0, y0), (x1, y1) = pts[0], pts[3]
+    tx, ty = x1 - x0, y1 - y0
+    tl = math.hypot(tx, ty)
+    tx, ty = tx / tl, ty / tl
+    nx, ny = -ty, tx
+    cols, cw = 10, ROAD_W / 10
+    for row in range(2):
+        for c in range(cols):
+            a0, a1 = -half + c * cw, -half + (c + 1) * cw
+            b0, b1 = row * 6 - 6, row * 6
+            quad = [(x0 + nx * a + tx * b, y0 + ny * a + ty * b) for a, b in ((a0, b0), (a1, b0), (a1, b1), (a0, b1))]
+            d.polygon(quad, fill=(250, 250, 250) if (row + c) % 2 else (20, 20, 20))
+    return img
+
+
+# ================================================================================
+# 🎥 Rendu d'une image (Mode 7 par transformation perspective)
+# ================================================================================
+class Scene:
+
+    def __init__(self, rng: random.Random):
+        self.pts = _make_centerline(rng)
+        self.length = len(self.pts) * STEP
+        self.track = _make_track(self.pts)
+        self.bg = _make_background(rng)
+        self.bg2 = Image.new("RGB", (BG_LEN * 2, HZ))
+        self.bg2.paste(self.bg, (0, 0))
+        self.bg2.paste(self.bg, (BG_LEN, 0))
+        self.karts = {k: _make_kart(k) for k in (-1, 0, 1)}
+        self.shadow = Image.new("L", (44, 12), 0)
+        ImageDraw.Draw(self.shadow).ellipse([0, 0, 43, 11], fill=110)
+
+    def pos(self, u: float) -> tuple:
+        n = len(self.pts)
+        f = (u / STEP) % n
+        i = int(f)
+        t = f - i
+        a, b = self.pts[i], self.pts[(i + 1) % n]
+        return a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
+
+    def render(self, px: float, py: float, ang: float, lean: int, bob: int,
+               timer: str, finished: bool) -> Image.Image:
+        fx, fy = math.cos(ang), math.sin(ang)
+        rx, ry = -fy, fx
+        cx, cy = px - fx * BACK, py - fy * BACK          # la caméra suit derrière le kart
+
+        # Sol : une transformation perspective (1 unité = 1 pixel de la texture du circuit).
+        coeffs = (
+            2 * CAM_H * rx, 2 * cx, 2 * (0.5 * cx + CAM_H * FOCAL * fx - CAM_H * rx * W / 2),
+            2 * CAM_H * ry, 2 * cy, 2 * (0.5 * cy + CAM_H * FOCAL * fy - CAM_H * ry * W / 2),
+            0.0, 2.0,
+        )
+        floor = self.track.transform((W, H - HZ), Image.PERSPECTIVE, coeffs, Image.BILINEAR, fillcolor=GRASS)
+
+        frame = Image.new("RGB", (W, H))
+        x0 = int((ang % (2 * math.pi)) / (2 * math.pi) * BG_LEN)
+        frame.paste(self.bg2.crop((x0, 0, x0 + W, HZ)), (0, 0))
+        frame.paste(floor, (0, HZ))
+
+        # Kart + ombre.
+        kart = self.karts[lean]
+        kx, ky = (W - kart.width) // 2, FOOT_ROW - kart.height + 2 + bob
+        frame.paste((0, 0, 0), ((W - 44) // 2, FOOT_ROW - 8), self.shadow)
+        frame.paste(kart, (kx, ky), kart)
+
+        # HUD : position + chrono (boîte calée à gauche du chrono).
+        tw = _text(frame, timer, W - 6, 6, 2, (255, 255, 255), outline=(30, 90, 170), anchor="ra")
+        bx = W - 6 - tw - 40
+        ImageDraw.Draw(frame).rounded_rectangle([bx, 3, bx + 32, 27], radius=6, fill=(0, 0, 0), outline=(120, 220, 255), width=2)
+        _text(frame, "1", bx + 16, 6, 2, (120, 220, 255), outline=None, anchor="ma")
+
+        if finished:
+            _text(frame, "FINISH !", W // 2, 78, 4, (255, 226, 60), outline=(120, 40, 0), anchor="ma")
+        return frame
+
 
 # ================================================================================
 # 🏁 Génération du GIF
 # ================================================================================
-def _generate_race_gif(seed: int = None) -> io.BytesIO:
-    rng = random.Random(seed)
-    cx, cy = MAP_SIZE / 2, MAP_SIZE / 2
-    radius = 180 
-    
-    frames = []
-    states = []
-    start_angle = math.pi / 2
-    total_steps = MAX_FRAMES * 2 
-    
-    for i in range(total_steps):
-        t = i / total_steps
-        angle_pos = start_angle + (t * math.pi * 2)
-        px = cx + math.cos(angle_pos) * radius
-        py = cy + math.sin(angle_pos) * radius
-        cam_angle = angle_pos + math.pi / 2
-        states.append((px, py, cam_angle))
-        
-    step = len(states) // MAX_FRAMES
-    picks = states[::step][:MAX_FRAMES]
-    
-    for i, (px, py, ang) in enumerate(picks):
-        time_ms = i * FRAME_MS
-        frame = _render_frame(px, py, ang, time_ms)
-        frames.append(frame)
-        
-    sample = Image.new("RGB", (W, H * 4))
-    for k in range(4):
-        sample.paste(frames[(len(frames) - 1) * k // 3], (0, H * k))
-    
-    pal = sample.quantize(colors=128, method=Image.MEDIANCUT)
+def _timer(ms: float) -> str:
+    return f"{int(ms // 60000):02d}' {int(ms // 1000) % 60:02d}\" {int(ms % 1000 / 10):02d}"
+
+
+def _profile(p: float, acc: float = 0.08, dec: float = 0.06) -> float:
+    """Avancement 0..1 : démarrage progressif, vitesse constante, freinage après l'arrivée."""
+    v = 1 / (1 - acc / 2 - dec / 2)
+    if p < acc:
+        return v * p * p / (2 * acc)
+    if p <= 1 - dec:
+        return v * (acc / 2 + p - acc)
+    return 1 - v * (1 - p) ** 2 / (2 * dec)
+
+
+def _wrap(a: float) -> float:
+    return (a + math.pi) % (2 * math.pi) - math.pi
+
+
+def _generate_race_gif() -> io.BytesIO:
+    rng = random.Random()                                # graine système : circuit unique
+    scene = Scene(rng)
+    u0, u1 = -110.0, scene.length + 90.0                 # départ avant la ligne, arrêt après l'arrivée
+    race_ms = rng.uniform(46, 78) * 1000                 # temps affiché (la course est accélérée)
+
+    frames, ang = [], None
+    for i in range(FRAMES):
+        u = u0 + (u1 - u0) * _profile(i / (FRAMES - 1))
+        px, py = scene.pos(u)
+        ax, ay = scene.pos(u + 26)
+        target = math.atan2(ay - py, ax - px)
+        prev = target if ang is None else ang
+        ang = target if ang is None else ang + _wrap(target - ang) * 0.45
+        turn = _wrap(ang - prev)
+        lean = 1 if turn > 0.02 else -1 if turn < -0.02 else 0
+
+        done = u >= scene.length
+        shown = race_ms * (min(u, scene.length) - u0) / (scene.length - u0)
+        frames.append(scene.render(px, py, ang, lean, -(i % 2), _timer(shown), done and u > scene.length + 30))
+
+    # Palette commune à toutes les images.
+    pick = [frames[i * (len(frames) - 1) // 5] for i in range(6)]
+    sample = Image.new("RGB", (W, H * len(pick)))
+    for k, f in enumerate(pick):
+        sample.paste(f, (0, H * k))
+    sd = ImageDraw.Draw(sample)                          # couleurs du HUD à garder dans la palette
+    for i, c in enumerate(((120, 220, 255), (255, 226, 60), (30, 90, 170), (255, 255, 255), (0, 0, 0), (120, 40, 0))):
+        sd.rectangle([i * 8, 0, i * 8 + 7, 7], fill=c)
+    pal = sample.quantize(colors=PALETTE_COLORS, method=Image.MEDIANCUT)
     q = [f.quantize(palette=pal, dither=0) for f in frames]
-    
+
+    durations = [FRAME_MS] * len(q)
+    durations[-1] = FINISH_HOLD_MS
     buf = io.BytesIO()
-    q[0].save(buf, "GIF", save_all=True, append_images=q[1:], 
-              duration=FRAME_MS, loop=0, optimize=True)
-    buf.seek(0)
+    q[0].save(buf, "GIF", save_all=True, append_images=q[1:], duration=durations, optimize=False)
+    buf.seek(0)  # 🔑 indispensable pour Discord
     return buf
 
+
 # ================================================================================
-# 🧠 Cog principal avec cooldowns centralisés
+# 🧠 Cog principal
 # ================================================================================
 class CourseKart(commands.Cog):
     """
-    Commande /course et !course — Course de karting (1 tour) en Mode 7.
+    Commande /course et !course — Course de karting (1 tour) façon Super Mario Kart.
     """
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self._lock = asyncio.Lock()
 
     def _embed(self) -> discord.Embed:
-        embed = discord.Embed(
-            title="🏎️ Course de Karting",
-            description="Un tour de circuit en Mode 7 !",
-            color=discord.Color.green()
-        )
+        embed = discord.Embed(title="🏎️ Course de Karting", color=discord.Color.green())
         embed.set_image(url="attachment://course.gif")
         return embed
 
@@ -218,9 +371,9 @@ class CourseKart(commands.Cog):
     # ============================================================================
     async def _build(self):
         async with self._lock:
-            buffer = await asyncio.to_thread(_generate_race_gif, random.randint(0, 999999))
+            buffer = await asyncio.to_thread(_generate_race_gif)
         if buffer.getbuffer().nbytes > MAX_BYTES:
-            return None, "❌ Le GIF est trop lourd pour Discord."
+            return None, "❌ Le GIF est trop lourd pour Discord, réessaie."
         return discord.File(fp=buffer, filename="course.gif"), None
 
     async def _send_race(self, target):
@@ -253,6 +406,7 @@ class CourseKart(commands.Cog):
     async def prefix_course(self, ctx: commands.Context):
         async with ctx.typing():
             await self._send_race(ctx.channel)
+
 
 # ================================================================================
 # 🔌 Setup du Cog
