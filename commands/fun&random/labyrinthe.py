@@ -432,8 +432,7 @@ class Labyrinthe3D(commands.Cog):
 
     def _embed(self) -> discord.Embed:
         embed = discord.Embed(
-            title="🧱 Labyrinthe 3D",
-            description="Style écran de veille Windows — direction le logo Discord !",
+            title="🧱 Labyrinthe",
             color=discord.Color.dark_red()
         )
         embed.set_image(url="attachment://labyrinthe.gif")
