@@ -1,7 +1,8 @@
 # ================================================================================
 # 📌 labyrinthe.py
 # Objectif : Labyrinthe 3D animé (GIF) façon écran de veille Windows : briques rouges,
-#            plafond carrelé, sol beige. Labyrinthe aléatoire, la caméra se balade au hasard.
+#            plafond carrelé, sol beige. Labyrinthe et trajet aléatoires : la caméra explore
+#            jusqu'à tomber sur le logo Discord (cul-de-sac), puis écran de fin.
 # Catégorie : Fun
 # Accès : Tous
 # Cooldown : 15s (slash) / 15s (prefix)
@@ -14,6 +15,7 @@ import asyncio
 import io
 import math
 import random
+from collections import deque
 
 # ================================================================================
 # 📦 Modules tiers
@@ -37,22 +39,31 @@ COL_W = 2                  # largeur d'une colonne de rayon (160 rayons)
 FOV = math.radians(66)
 FOCAL = (W / 2) / math.tan(FOV / 2)
 EYE = 0.5                  # hauteur des yeux (murs = 1 case de haut)
-MAP_SIZE = 25
-WALK_CELLS = 40            # longueur de la balade (en cases)
+MAP_SIZES = (13, 15, 17, 19, 21)   # taille tirée au hasard (impair)
 TEX = 64                   # texture des murs
 FLOOR_PX = 24              # pixels de texture sol/plafond par case
 LEVELS = 16                # niveaux d'ombrage des murs
 FOG_DIST = 14.0
-FOG_MAX = 0.4              # assombrissement max au loin (0.4 = -40 %)
+FOG_MAX = 0.4              # assombrissement max au loin
+CLOSE_SHADE = 0.4          # murs très proches plus sombres
+CLOSE_DIST = 1.5
 SPEED = 0.002 * 16.67      # vitesse par tick (60 ticks/s)
 TURN = 0.15                # lissage de l'angle
-MAX_FRAMES = 240
+MAX_FRAMES = 320           # images max pour la balade (la vitesse s'adapte)
 FRAME_MS = 60
+FOUND_HOLD_MS = 1000       # pause sur le logo
+FADE_FRAMES = 8            # fondu vers l'écran de fin
+END_HOLD_MS = 8000         # durée de l'écran de fin
+GRAIN = 0                  # grain des briques (0 = lisse = GIF léger)
+GROUND_BLUR = 2.5          # flou du bruit sol/plafond
+PALETTE_COLORS = 64        # couleurs du GIF (moins = plus léger)
 MAX_BYTES = 8 * 1024 * 1024
+
+DIRS = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
 
 # ================================================================================
-# 🧱 Textures
+# 🧱 Textures (générées une seule fois)
 # ================================================================================
 def _noise(size, sigma: float) -> Image.Image:
     return Image.effect_noise(size, sigma)
@@ -63,16 +74,15 @@ def _make_brick(rng: random.Random) -> Image.Image:
     img = Image.new("RGB", (TEX, TEX), (232, 226, 220))
     d = ImageDraw.Draw(img)
     for row in range(4):
-        y = row * 16
-        off = 0 if row % 2 == 0 else 16
+        y, off = row * 16, (0 if row % 2 == 0 else 16)
         for bx in range(-1, 3):
-            x = bx * 32 + off
-            v = rng.randint(-18, 14)
+            x, v = bx * 32 + off, rng.randint(-18, 14)
             d.rectangle([x + 2, y + 2, x + 29, y + 13], fill=(178 + v, 30 + v // 3, 36 + v // 3))
-            d.line([x + 2, y + 2, x + 29, y + 2], fill=(205 + v, 60, 60))      # reflet haut
-            d.line([x + 2, y + 13, x + 29, y + 13], fill=(130 + v, 20, 26))    # ombre bas
-    grain = _noise((TEX, TEX), 14).convert("RGB")
-    return ImageChops.add(img, grain, 1, -128)
+            d.line([x + 2, y + 2, x + 29, y + 2], fill=(205 + v, 60, 60))
+            d.line([x + 2, y + 13, x + 29, y + 13], fill=(130 + v, 20, 26))
+    if GRAIN:
+        img = ImageChops.add(img, _noise((TEX, TEX), GRAIN).convert("RGB"), 1, -128)
+    return img
 
 
 def _make_logo(rng: random.Random) -> Image.Image:
@@ -89,31 +99,21 @@ def _make_logo(rng: random.Random) -> Image.Image:
 
 
 def _shade_variants(tex: Image.Image) -> list:
-    out = []
-    for i in range(LEVELS):
-        f = 1.0 - FOG_MAX * i / (LEVELS - 1)
-        out.append(tex.point(lambda v, f=f: int(v * f)))
-    return out
+    rng_shade = FOG_MAX + CLOSE_SHADE
+    return [tex.point(lambda v, f=1 - rng_shade * i / (LEVELS - 1): int(v * f)) for i in range(LEVELS)]
 
 
-def _make_floor() -> Image.Image:
-    """Sol beige/bois, couvre toute la carte (1 case = FLOOR_PX px)."""
-    s = MAP_SIZE * FLOOR_PX
-    n = _noise((s, s), 40).filter(ImageFilter.GaussianBlur(0.9))
-    n = ImageOps.autocontrast(n, cutoff=1)
-    return ImageOps.colorize(n, black=(196, 152, 92), white=(238, 200, 136))
-
-
-def _make_ceiling() -> Image.Image:
-    """Plafond carrelé gris-bleu clair avec joints."""
-    s = MAP_SIZE * FLOOR_PX
-    n = _noise((s, s), 40).filter(ImageFilter.GaussianBlur(0.9))
-    n = ImageOps.autocontrast(n, cutoff=1)
+def _make_ground(ceiling: bool, size: int) -> Image.Image:
+    """Sol beige/bois ou plafond carrelé gris-bleu, couvre toute la carte."""
+    s = size * FLOOR_PX
+    n = ImageOps.autocontrast(_noise((s, s), 40).filter(ImageFilter.GaussianBlur(GROUND_BLUR)), cutoff=1)
+    if not ceiling:
+        return ImageOps.colorize(n, black=(196, 152, 92), white=(238, 200, 136))
     img = ImageOps.colorize(n, black=(150, 172, 178), white=(238, 246, 246))
     d = ImageDraw.Draw(img)
     for k in range(0, s, FLOOR_PX):
-        d.line([(k, 0), (k, s)], fill=(120, 140, 146), width=1)
-        d.line([(0, k), (s, k)], fill=(120, 140, 146), width=1)
+        d.line([(k, 0), (k, s)], fill=(120, 140, 146))
+        d.line([(0, k), (s, k)], fill=(120, 140, 146))
     return img
 
 
@@ -122,9 +122,7 @@ def _make_fog_mask() -> Image.Image:
     mask = Image.new("RGB", (W, HALF))
     d = ImageDraw.Draw(mask)
     for j in range(HALF):
-        dist = EYE * FOCAL / (j + 1.0)
-        f = 1.0 - FOG_MAX * min(1.0, dist / FOG_DIST)
-        v = int(255 * f)
+        v = int(255 * (1 - FOG_MAX * min(1.0, EYE * FOCAL / (j + 1.0) / FOG_DIST)))
         d.line([(0, j), (W, j)], fill=(v, v, v))
     return mask
 
@@ -133,77 +131,111 @@ _ASSETS = {}
 
 
 def _assets() -> dict:
+    """Textures de murs et brouillard : créés une fois. Sol/plafond : une fois par taille de carte."""
     if not _ASSETS:
         rng = random.Random(3)
         _ASSETS["wall"] = {1: _shade_variants(_make_brick(rng)), 3: _shade_variants(_make_logo(rng))}
-        _ASSETS["floor"] = _make_floor()
-        _ASSETS["ceiling"] = _make_ceiling()
         _ASSETS["fog"] = _make_fog_mask()
+        _ASSETS["ground"] = {}
     return _ASSETS
 
 
+def _ground(size: int) -> tuple:
+    cache = _assets()["ground"]
+    if size not in cache:
+        cache[size] = (_make_ground(False, size), _make_ground(True, size))
+    return cache[size]
+
+
 # ================================================================================
-# 🗺️ Labyrinthe aléatoire + balade aléatoire
+# 🗺️ Labyrinthe aléatoire, logo en cul-de-sac, exploration aléatoire
 # ================================================================================
 def _gen_maze(n: int, rng: random.Random) -> list:
-    """Labyrinthe (DFS) + quelques murs retirés pour créer des boucles."""
+    """
+    Algorithme "growing tree" avec un paramètre tiré au hasard :
+    proche de 1 = longs couloirs sinueux, proche de 0 = beaucoup de petites impasses.
+    Puis quelques murs percés au hasard pour créer des boucles.
+    """
     m = [[1] * n for _ in range(n)]
-    m[1][1] = 0
-    stack = [(1, 1)]
-    while stack:
-        x, y = stack[-1]
+    sx, sy = rng.randrange(1, n, 2), rng.randrange(1, n, 2)
+    m[sy][sx] = 0
+    active = [(sx, sy)]
+    newest = rng.uniform(0.2, 1.0)
+    while active:
+        i = len(active) - 1 if rng.random() < newest else rng.randrange(len(active))
+        x, y = active[i]
         nb = [(dx, dy) for dx, dy in ((2, 0), (-2, 0), (0, 2), (0, -2))
               if 0 < x + dx < n - 1 and 0 < y + dy < n - 1 and m[y + dy][x + dx] == 1]
         if nb:
             dx, dy = rng.choice(nb)
             m[y + dy // 2][x + dx // 2] = 0
             m[y + dy][x + dx] = 0
-            stack.append((x + dx, y + dy))
+            active.append((x + dx, y + dy))
         else:
-            stack.pop()
+            active.pop(i)
 
-    # Boucles : on perce des murs entre deux couloirs
-    candidates = []
-    for y in range(1, n - 1):
-        for x in range(1, n - 1):
-            if m[y][x] == 1 and (x + y) % 2 == 1:
-                if (m[y][x - 1] == 0 and m[y][x + 1] == 0) or (m[y - 1][x] == 0 and m[y + 1][x] == 0):
-                    candidates.append((x, y))
-    rng.shuffle(candidates)
-    for x, y in candidates[: n]:
+    holes = [(x, y) for y in range(1, n - 1) for x in range(1, n - 1)
+             if m[y][x] == 1 and ((m[y][x - 1] == 0 and m[y][x + 1] == 0) or (m[y - 1][x] == 0 and m[y + 1][x] == 0))]
+    rng.shuffle(holes)
+    for x, y in holes[: int(len(holes) * rng.uniform(0.0, 0.12))]:
         m[y][x] = 0
     return m
 
 
-def _place_logos(m: list, n: int, rng: random.Random, count: int = 5) -> None:
-    """Quelques murs avec le logo Discord, à côté d'un couloir."""
-    spots = []
-    for y in range(1, n - 1):
-        for x in range(1, n - 1):
-            if m[y][x] == 1 and any(m[y + dy][x + dx] == 0 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
-                spots.append((x, y))
-    for x, y in rng.sample(spots, min(count, len(spots))):
-        m[y][x] = 3
+def _open_neighbors(m: list, x: int, y: int) -> list:
+    return [(x + dx, y + dy) for dx, dy in DIRS if m[y + dy][x + dx] == 0]
 
 
-def _random_walk(m: list, n: int, rng: random.Random, steps: int) -> list:
-    """Balade au hasard : tout droit de préférence, demi-tour seulement en cul-de-sac."""
-    opens = [(x, y) for y in range(1, n - 1) for x in range(1, n - 1) if m[y][x] == 0]
-    path = [rng.choice(opens)]
-    prev, last_dir = None, None
-    for _ in range(steps):
+def _distances(m: list, start: tuple) -> dict:
+    dist, q = {start: 0}, deque([start])
+    while q:
+        x, y = q.popleft()
+        for nxt in _open_neighbors(m, x, y):
+            if nxt not in dist:
+                dist[nxt] = dist[(x, y)] + 1
+                q.append(nxt)
+    return dist
+
+
+def _build_level(rng: random.Random) -> tuple:
+    """Retourne (labyrinthe, case de départ, cul-de-sac du logo, direction du logo)."""
+    while True:
+        n = rng.choice(MAP_SIZES)
+        m = _gen_maze(n, rng)
+        opens = [(x, y) for y in range(1, n - 1) for x in range(1, n - 1) if m[y][x] == 0]
+        start = rng.choice(opens)
+        dist = _distances(m, start)
+        far = max(dist.values())
+        dead_ends = [c for c in opens if c != start and len(_open_neighbors(m, *c)) == 1 and dist[c] >= far * 0.5]
+        if not dead_ends:
+            continue  # pas de bon cul-de-sac : on retire un labyrinthe
+        goal = rng.choice(dead_ends)
+        ox, oy = _open_neighbors(m, *goal)[0]
+        d = (goal[0] - ox, goal[1] - oy)                 # sens d'entrée dans l'impasse
+        m[goal[1] + d[1]][goal[0] + d[0]] = 3            # logo sur le mur du fond
+        return m, start, goal, d
+
+
+def _explore(m: list, rng: random.Random, start: tuple, goal: tuple) -> list:
+    """
+    Exploration aléatoire (DFS) : on avance au hasard vers les cases pas encore visitées
+    (plutôt tout droit), et on revient en arrière en cas d'impasse. S'arrête sur le logo.
+    """
+    path, stack, visited, last = [start], [start], {start}, None
+    while path[-1] != goal:
         x, y = path[-1]
-        dirs = [(dx, dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)) if m[y + dy][x + dx] == 0]
-        forward = [d for d in dirs if (x + d[0], y + d[1]) != prev]
-        if forward:
-            if last_dir in forward and rng.random() < 0.7:
-                d = last_dir
-            else:
-                d = rng.choice(forward)
+        free = [c for c in _open_neighbors(m, x, y) if c not in visited]
+        if free:
+            ahead = (x + last[0], y + last[1]) if last else None
+            nxt = ahead if ahead in free and rng.random() < 0.6 else rng.choice(free)
+            last = (nxt[0] - x, nxt[1] - y)
+            visited.add(nxt)
+            stack.append(nxt)
         else:
-            d = rng.choice(dirs)
-        prev, last_dir = (x, y), d
-        path.append((x + d[0], y + d[1]))
+            stack.pop()
+            nxt = stack[-1]
+            last = (nxt[0] - x, nxt[1] - y)
+        path.append(nxt)
     return path
 
 
@@ -214,143 +246,157 @@ def _cast(m: list, n: int, px: float, py: float, dx: float, dy: float):
     mx, my = int(px), int(py)
     ddx = abs(1.0 / dx) if dx else 1e30
     ddy = abs(1.0 / dy) if dy else 1e30
-    if dx < 0:
-        sx, sdx = -1, (px - mx) * ddx
-    else:
-        sx, sdx = 1, (mx + 1.0 - px) * ddx
-    if dy < 0:
-        sy, sdy = -1, (py - my) * ddy
-    else:
-        sy, sdy = 1, (my + 1.0 - py) * ddy
+    sx, sdx = (-1, (px - mx) * ddx) if dx < 0 else (1, (mx + 1.0 - px) * ddx)
+    sy, sdy = (-1, (py - my) * ddy) if dy < 0 else (1, (my + 1.0 - py) * ddy)
 
     side = 0
     while True:
         if sdx < sdy:
-            sdx += ddx
-            mx += sx
-            side = 0
+            sdx, mx, side = sdx + ddx, mx + sx, 0
         else:
-            sdy += ddy
-            my += sy
-            side = 1
+            sdy, my, side = sdy + ddy, my + sy, 1
         if not (0 <= mx < n and 0 <= my < n):
             return 99.0, 0, 0.0, 1
-        if m[my][mx] != 0:
+        if m[my][mx]:
             break
 
-    dist = (sdx - ddx) if side == 0 else (sdy - ddy)
     if side == 0:
-        wx = py + dy * dist
-        wx -= math.floor(wx)
-        if dx > 0:
-            wx = 1.0 - wx
+        dist = sdx - ddx
+        wx = (py + dy * dist) % 1.0
+        wx = 1.0 - wx if dx > 0 else wx
     else:
-        wx = px + dx * dist
-        wx -= math.floor(wx)
-        if dy < 0:
-            wx = 1.0 - wx
+        dist = sdy - ddy
+        wx = (px + dx * dist) % 1.0
+        wx = 1.0 - wx if dy < 0 else wx
     return dist, side, wx, m[my][mx]
+
+
+# ================================================================================
+# 🏁 Écran de fin (texte pixelisé façon Windows 95)
+# ================================================================================
+def _pixel_text(img: Image.Image, text: str, cy: int, scale: int, color: tuple) -> None:
+    probe = ImageDraw.Draw(Image.new("L", (1, 1)))
+    box = probe.textbbox((0, 0), text)
+    w, h = box[2] + 2, box[3] + 2
+    layer = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(layer).text((1, 1), text, fill=255)
+    layer = layer.resize((w * scale, h * scale), Image.NEAREST)
+    x, y = (W - layer.width) // 2, cy - layer.height // 2
+    shadow = Image.new("RGB", layer.size, (0, 0, 0))
+    img.paste(shadow, (x + scale, y + scale), layer)          # ombre
+    img.paste(Image.new("RGB", layer.size, color), (x, y), layer)
+
+
+def _end_screen(last: Image.Image, steps: int) -> Image.Image:
+    img = Image.blend(last, Image.new("RGB", (W, H), (8, 8, 20)), 0.78)
+    _pixel_text(img, "FIN", 70, 9, (255, 255, 255))
+    _pixel_text(img, "DISCORD TROUVE !", 128, 2, (150, 160, 255))
+    _pixel_text(img, f"{steps} CASES PARCOURUES", 156, 2, (200, 200, 210))
+    return img
 
 
 # ================================================================================
 # 🎞️ Génération du GIF
 # ================================================================================
-def _encode(frames: list) -> io.BytesIO:
-    """Palette commune (moins de scintillement), et on retire des images si trop lourd."""
-    sample = Image.new("RGB", (W, H * 4))
-    for k in range(4):
-        sample.paste(frames[(len(frames) - 1) * k // 3], (0, H * k))
-    ImageDraw.Draw(sample).rectangle([0, 0, 7, 7], fill=(88, 101, 242))
-    pal = sample.quantize(colors=224, method=Image.MEDIANCUT)
+def _encode(frames: list, durations: list) -> io.BytesIO:
+    """Palette commune à toutes les images ; on retire des images de la balade si trop lourd."""
+    logo_frame = len(frames) - FADE_FRAMES - 2          # dernière image de la balade (logo bien visible)
+    pick = [frames[i * (logo_frame - 1) // 5] for i in range(6)] + [frames[logo_frame], frames[-1]]
+    sample = Image.new("RGB", (W, H * len(pick)))
+    for k, f in enumerate(pick):
+        sample.paste(f, (0, H * k))
+    pal = sample.quantize(colors=PALETTE_COLORS, method=Image.MEDIANCUT)
     q = [f.quantize(palette=pal, dither=0) for f in frames]
 
+    tail = FADE_FRAMES + 1                       # fondu + écran de fin : toujours conservés
     step = 1
     while True:
-        sel = q[::step]
+        body = list(range(0, len(q) - tail, step))
+        idx = body + list(range(len(q) - tail, len(q)))
+        sel = [q[i] for i in idx]
+        dur = [durations[i] * (step if i < len(q) - tail else 1) for i in idx]
         buf = io.BytesIO()
-        sel[0].save(buf, "GIF", save_all=True, append_images=sel[1:],
-                    duration=FRAME_MS * step, loop=0, optimize=False)
-        if buf.tell() <= MAX_BYTES or len(sel) <= 40:
+        # pas de "loop" : lecture unique là où c'est géré, l'écran de fin reste affiché
+        sel[0].save(buf, "GIF", save_all=True, append_images=sel[1:], duration=dur, optimize=False)
+        if buf.tell() <= MAX_BYTES or len(body) <= 40:
             break
         step += 1
     buf.seek(0)  # 🔑 indispensable pour Discord
     return buf
 
 
-def generate_maze_gif(seed: int = None) -> io.BytesIO:
-    rng = random.Random(seed)
-    n = MAP_SIZE
-    m = _gen_maze(n, rng)
-    _place_logos(m, n, rng)
+def generate_maze_gif() -> io.BytesIO:
+    rng = random.Random()                        # graine système : vraiment aléatoire
+    m, start, goal, (ddx, ddy) = _build_level(rng)
+    n = len(m)
+    cells = _explore(m, rng, start, goal)
 
-    cells = _random_walk(m, n, rng, WALK_CELLS)
-    nodes = [(x + 0.5, y + 0.5) for x, y in cells]
+    # Nœuds suivis par la caméra : on s'arrête dans la case avant l'impasse, face au logo
+    ox, oy = cells[-2]
+    nodes = [(x + 0.5, y + 0.5) for x, y in cells[:-1]]
+    nodes.append((ox + 0.5 + ddx * 0.3, oy + 0.5 + ddy * 0.3))
+    final_angle = math.atan2(ddy, ddx)
 
-    # --- Simulation de la caméra ---
+    # --- Simulation de la caméra (tick par tick) ---
     def wrap(a: float) -> float:
         return (a + math.pi) % (2 * math.pi) - math.pi
 
     x, y = nodes[0]
-    angle = math.atan2(nodes[1][1] - y, nodes[1][0] - x)
+    angle = rng.choice((0.0, math.pi / 2, math.pi, -math.pi / 2))   # cap de départ aléatoire
     idx = 1
     states = [(x, y, angle)]
-    while idx < len(nodes):
+    while idx < len(nodes) and len(states) < 40000:
         tx, ty = nodes[idx]
         diff = wrap(math.atan2(ty - y, tx - x) - angle)
-        angle += diff * TURN
-        spd = SPEED if abs(diff) < 0.5 else SPEED * 0.15  # on ralentit pour tourner
+        angle += diff * (TURN * 2 if abs(diff) > 1.2 else TURN)   # demi-tour en impasse : plus vite
+        spd = SPEED if abs(diff) < 0.5 else SPEED * 0.15           # on ralentit pour tourner
         nx, ny = x + math.cos(angle) * spd, y + math.sin(angle) * spd
         if m[int(ny)][int(nx)] == 0:
             x, y = nx, ny
-        if math.hypot(tx - x, ty - y) < 0.2:
+        if math.hypot(tx - x, ty - y) < (0.2 if idx < len(nodes) - 1 else 0.05):
             idx += 1
         states.append((x, y, angle))
-        if len(states) > 20000:  # sécurité
-            break
+    for _ in range(40):                          # on se tourne face au logo
+        angle += wrap(final_angle - angle) * 0.2
+        states.append((x, y, angle))
 
-    if len(states) > MAX_FRAMES:
-        picks = [states[int(i * (len(states) - 1) / (MAX_FRAMES - 1))] for i in range(MAX_FRAMES)]
-    else:
-        picks = states
+    picks = states if len(states) <= MAX_FRAMES else [
+        states[int(i * (len(states) - 1) / (MAX_FRAMES - 1))] for i in range(MAX_FRAMES)]
 
     # --- Rendu ---
     a = _assets()
+    floor_tex, ceil_tex = _ground(n)
     n_rays = W // COL_W
     tan_half = math.tan(FOV / 2)
-    T = FLOOR_PX
+    t = FLOOR_PX
+    shade_range = FOG_MAX + CLOSE_SHADE
 
     def render(px: float, py: float, ang: float) -> Image.Image:
         fx, fy = math.cos(ang), math.sin(ang)
         rx, ry = -fy, fx
-
-        # Sol et plafond : une seule transformation perspective chacun
         coeffs = (
-            2 * T * EYE * rx, 2 * T * px, 2 * T * (0.5 * px + EYE * FOCAL * fx - EYE * rx * W / 2),
-            2 * T * EYE * ry, 2 * T * py, 2 * T * (0.5 * py + EYE * FOCAL * fy - EYE * ry * W / 2),
+            2 * t * EYE * rx, 2 * t * px, 2 * t * (0.5 * px + EYE * FOCAL * fx - EYE * rx * W / 2),
+            2 * t * EYE * ry, 2 * t * py, 2 * t * (0.5 * py + EYE * FOCAL * fy - EYE * ry * W / 2),
             0.0, 2.0,
         )
-        floor = a["floor"].transform((W, HALF), Image.PERSPECTIVE, coeffs, Image.BILINEAR)
-        ceil = a["ceiling"].transform((W, HALF), Image.PERSPECTIVE, coeffs, Image.BILINEAR)
-        floor = ImageChops.multiply(floor, a["fog"])
-        ceil = ImageOps.flip(ImageChops.multiply(ceil, a["fog"]))
-
+        floor = floor_tex.transform((W, HALF), Image.PERSPECTIVE, coeffs, Image.BILINEAR)
+        ceil = ceil_tex.transform((W, HALF), Image.PERSPECTIVE, coeffs, Image.BILINEAR)
         frame = Image.new("RGB", (W, H))
-        frame.paste(ceil, (0, 0))
-        frame.paste(floor, (0, HALF))
+        frame.paste(ImageOps.flip(ImageChops.multiply(ceil, a["fog"])), (0, 0))
+        frame.paste(ImageChops.multiply(floor, a["fog"]), (0, HALF))
 
-        # Murs
         for i in range(n_rays):
-            cx = 2.0 * (i + 0.5) / n_rays - 1.0
-            dist, side, wx, kind = _cast(m, n, px, py, fx + rx * cx * tan_half, fy + ry * cx * tan_half)
-            perp = max(0.05, dist)
-            lh = max(1, int(FOCAL / perp))
-            lvl = min(LEVELS - 1, int(min(1.0, perp / FOG_DIST) * (LEVELS - 1)) + (1 if side else 0))
-            tex = a["wall"][kind][lvl]
+            cam = 2.0 * (i + 0.5) / n_rays - 1.0
+            dist, side, wx, kind = _cast(m, n, px, py, fx + rx * cam * tan_half, fy + ry * cam * tan_half)
+            dist = max(0.05, dist)
+            shade = min(1.0, dist / FOG_DIST) * FOG_MAX + (0.08 if side else 0)
+            shade += max(0.0, CLOSE_DIST - dist) / CLOSE_DIST * CLOSE_SHADE
+            tex = a["wall"][kind][min(LEVELS - 1, int(shade / shade_range * (LEVELS - 1) + 0.5))]
             tx = min(TEX - 1, int(wx * TEX))
+            lh = max(1, int(FOCAL / dist))
             if lh > H:
                 y0 = int(TEX * (1 - H / lh) / 2)
-                y1 = max(y0 + 1, TEX - y0)
-                col = tex.crop((tx, y0, tx + 1, y1)).resize((COL_W, H), Image.NEAREST)
+                col = tex.crop((tx, y0, tx + 1, max(y0 + 1, TEX - y0))).resize((COL_W, H), Image.NEAREST)
                 frame.paste(col, (i * COL_W, 0))
             else:
                 col = tex.crop((tx, 0, tx + 1, TEX)).resize((COL_W, lh), Image.NEAREST)
@@ -358,7 +404,18 @@ def generate_maze_gif(seed: int = None) -> io.BytesIO:
         return frame
 
     frames = [render(px, py, ang) for px, py, ang in picks]
-    return _encode(frames)
+    durations = [FRAME_MS] * len(frames)
+    durations[-1] = FOUND_HOLD_MS                # pause sur le logo
+
+    # Fondu vers l'écran de fin, puis écran de fin
+    end = _end_screen(frames[-1], len(cells) - 1)
+    dark = Image.blend(frames[-1], Image.new("RGB", (W, H), (8, 8, 20)), 0.78)
+    for k in range(1, FADE_FRAMES + 1):
+        frames.append(Image.blend(frames[len(picks) - 1], dark, k / FADE_FRAMES))
+        durations.append(FRAME_MS)
+    frames.append(end)
+    durations.append(END_HOLD_MS)
+    return _encode(frames, durations)
 
 
 # ================================================================================
@@ -366,8 +423,8 @@ def generate_maze_gif(seed: int = None) -> io.BytesIO:
 # ================================================================================
 class Labyrinthe3D(commands.Cog):
     """
-    Commande /labyrinthe3d et !labyrinthe3d — Labyrinthe 3D animé (GIF),
-    style écran de veille Windows, labyrinthe et balade aléatoires.
+    Commande /labyrinthe et !labyrinthe — Labyrinthe 3D animé (GIF),
+    style écran de veille Windows : exploration aléatoire jusqu'au logo Discord.
     """
 
     def __init__(self, bot: commands.Bot):
@@ -377,25 +434,25 @@ class Labyrinthe3D(commands.Cog):
     def _embed(self) -> discord.Embed:
         embed = discord.Embed(
             title="🧱 Labyrinthe 3D",
-            description="Style écran de veille Windows",
+            description="Style écran de veille Windows — direction le logo Discord !",
             color=discord.Color.dark_red()
         )
-        embed.set_image(url="attachment://labyrinthe3d.gif")
+        embed.set_image(url="attachment://labyrinthe.gif")
         return embed
 
     async def _build(self):
         async with self._lock:
-            buffer = await asyncio.to_thread(generate_maze_gif, random.randint(0, 999999))
+            buffer = await asyncio.to_thread(generate_maze_gif)
         if buffer.getbuffer().nbytes > MAX_BYTES:
             return None, "❌ Le GIF est trop lourd pour Discord, réessaie."
-        return discord.File(fp=buffer, filename="labyrinthe3d.gif"), None
+        return discord.File(fp=buffer, filename="labyrinthe.gif"), None
 
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
     @app_commands.command(
         name="labyrinthe",
-        description="Labyrinthe 3D animé façon écran de veille Windows."
+        description="Labyrinthe 3D animé : la caméra explore jusqu'au logo Discord."
     )
     @app_commands.checks.cooldown(rate=1, per=15.0, key=lambda i: i.user.id)
     async def slash_labyrinthe3d(self, interaction: discord.Interaction):
