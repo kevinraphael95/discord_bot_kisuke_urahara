@@ -535,6 +535,7 @@ def _render_frame(segments, joints, angle, progress):
     return frame
 
 
+
 # ================================================================================
 # 🏁 Écran final
 # ================================================================================
@@ -547,44 +548,44 @@ def _end_screen(last):
 
     draw = ImageDraw.Draw(img)
 
-    try:
-        font_big = ImageFont.truetype("DejaVuSans.ttf", 19)
-        font_small = ImageFont.truetype("DejaVuSans.ttf", 9)
-    except OSError:
-        font_big = ImageFont.load_default()
-        font_small = ImageFont.load_default()
+    # Police intégrée de Pillow : aucune dépendance FreeType.
+    font = ImageFont.load_default()
 
     title = "3D PIPES"
     subtitle = "NETWORK COMPLETE"
 
-    box = draw.textbbox((0, 0), title, font=font_big)
-    x = (W - (box[2] - box[0])) // 2
+    # Titre principal
+    box = draw.textbbox((0, 0), title, font=font)
+    text_w = box[2] - box[0]
+    x = (W - text_w) // 2
 
     draw.text(
-        (x + 1, 69 + 1),
+        (x + 1, 79),
         title,
-        font=font_big,
+        font=font,
         fill=(0, 0, 0),
     )
 
     draw.text(
-        (x, 69),
+        (x, 78),
         title,
-        font=font_big,
+        font=font,
         fill=(230, 235, 255),
     )
 
-    box = draw.textbbox((0, 0), subtitle, font=font_small)
-    x = (W - (box[2] - box[0])) // 2
+    # Sous-titre
+    box = draw.textbbox((0, 0), subtitle, font=font)
+    text_w = box[2] - box[0]
+    x = (W - text_w) // 2
 
     draw.text(
         (x, 105),
         subtitle,
-        font=font_small,
+        font=font,
         fill=(115, 190, 255),
     )
 
-    # Barre décorative.
+    # Barre décorative
     draw.rounded_rectangle(
         [105, 124, 215, 127],
         radius=2,
