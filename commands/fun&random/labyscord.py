@@ -243,11 +243,12 @@ class MazeGame:
     # ============================================================================
     # 🔹 Actions
     # ============================================================================
-    def move(self, direction: int) -> str:
+    def _step(self, offset: float, direction: int, text: str) -> str:
+        """Avance d'une case dans la direction (cap + offset). offset = 0 : avant/arrière, ±90° : côtés."""
         if self.finished:
             return "La partie est déjà terminée."
-        dx = round(math.cos(self.angle)) * direction
-        dy = round(math.sin(self.angle)) * direction
+        a = self.angle + offset
+        dx, dy = round(math.cos(a)) * direction, round(math.sin(a)) * direction
         cx, cy = int(self.x), int(self.y)
         tile = self._tile(cx + dx, cy + dy)
 
@@ -259,7 +260,15 @@ class MazeGame:
             self.angle = math.atan2(dy, dx) % (2 * math.pi)
             return "🎉 **Discord retrouvé !** Tu as trouvé le logo !"
         self.x, self.y = cx + dx + 0.5, cy + dy + 0.5
-        return "Continue à chercher le logo Discord…"
+        return text
+
+    def move(self, direction: int) -> str:
+        """1 = avancer, -1 = reculer."""
+        return self._step(0.0, direction, "Continue à chercher le logo Discord…")
+
+    def strafe(self, direction: int) -> str:
+        """1 = pas à droite, -1 = pas à gauche (sans tourner)."""
+        return self._step(math.pi / 2, direction, "Tu te décales sur le côté.")
 
     def turn(self, direction: int) -> str:
         if self.finished:
@@ -394,6 +403,8 @@ class MazeView(discord.ui.View):
             self.status = {
                 "forward": lambda: self.game.move(1),
                 "back": lambda: self.game.move(-1),
+                "strafe_left": lambda: self.game.strafe(-1),
+                "strafe_right": lambda: self.game.strafe(1),
                 "left": lambda: self.game.turn(-1),
                 "right": lambda: self.game.turn(1),
             }[action]()
@@ -405,6 +416,7 @@ class MazeView(discord.ui.View):
     # ============================================================================
     # 🔹 Boutons
     # ============================================================================
+    # Ligne 1 : tourner gauche / avancer / tourner droite
     @discord.ui.button(label="↶", style=discord.ButtonStyle.secondary, row=0)
     async def left(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.act(interaction, "left")
@@ -417,9 +429,18 @@ class MazeView(discord.ui.View):
     async def right(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.act(interaction, "right")
 
+    # Ligne 2 : straff gauche / reculer / straff droite / recommencer
+    @discord.ui.button(label="◀", style=discord.ButtonStyle.secondary, row=1)
+    async def strafe_left(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.act(interaction, "strafe_left")
+
     @discord.ui.button(label="▼", style=discord.ButtonStyle.secondary, row=1)
     async def back(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.act(interaction, "back")
+
+    @discord.ui.button(label="▶", style=discord.ButtonStyle.secondary, row=1)
+    async def strafe_right(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.act(interaction, "strafe_right")
 
     @discord.ui.button(label="Recommencer", emoji="🔄", style=discord.ButtonStyle.success, row=1, custom_id="labyscord:restart")
     async def restart(self, interaction: discord.Interaction, button: discord.ui.Button):
