@@ -48,13 +48,10 @@ FOG_MAX = 0.40
 SIDE_SHADE = 0.12                      # murs Est/Ouest un peu plus sombres
 CLOSE_SHADE = 0.40                     # murs très proches plus sombres (évite l'écran tout rouge en tournant)
 CLOSE_DIST = 1.5
-GRAIN = 0                              # grain des briques (0 = lisse = GIF léger)
-GROUND_BLUR = 2.5                      # flou du bruit sol/plafond (plus haut = plus léger)
-PALETTE_COLORS = 64                    # couleurs du GIF (moins = plus léger)
 LEVELS = 16                            # niveaux d'ombrage précalculés
 SHADE_RANGE = FOG_MAX + SIDE_SHADE + CLOSE_SHADE
 GAME_TIMEOUT = 180
-ANIM_FRAMES = 10
+ANIM_FRAMES = 12
 ANIM_MS = 40
 START_TEXT = "Trouve le logo Discord !"
 COMPASS = ("➡️ Est", "⬇️ Sud", "⬅️ Ouest", "⬆️ Nord")
@@ -80,7 +77,7 @@ def _make_brick() -> Image.Image:
             d.rectangle((x + 2, y + 2, x + 29, y + 13), fill=(178 + v, 30 + v // 3, 36 + v // 3))
             d.line((x + 2, y + 2, x + 29, y + 2), fill=(205 + v, 60, 60))
             d.line((x + 2, y + 13, x + 29, y + 13), fill=(130 + v, 20, 26))
-    return ImageChops.add(img, _noise((TEX, TEX), GRAIN).convert("RGB"), 1, -128) if GRAIN else img
+    return ImageChops.add(img, _noise((TEX, TEX), 14).convert("RGB"), 1, -128)
 
 
 def _make_logo(brick: Image.Image) -> Image.Image:
@@ -99,7 +96,7 @@ def _make_logo(brick: Image.Image) -> Image.Image:
 def _make_ground(ceiling: bool) -> Image.Image:
     """Sol beige (bois) ou plafond carrelé gris-bleu, couvre toute la carte."""
     size = MAP_SIZE * FLOOR_PX
-    noise = ImageOps.autocontrast(_noise((size, size), 40).filter(ImageFilter.GaussianBlur(GROUND_BLUR)), cutoff=1)
+    noise = ImageOps.autocontrast(_noise((size, size), 40).filter(ImageFilter.GaussianBlur(0.9)), cutoff=1)
     if not ceiling:
         return ImageOps.colorize(noise, black=(196, 152, 92), white=(238, 200, 136))
     img = ImageOps.colorize(noise, black=(150, 172, 178), white=(238, 246, 246))
@@ -221,7 +218,7 @@ def quantize_frames(frames: list) -> list:
     for i, f in enumerate(frames):
         sample.paste(f, (0, HEIGHT * i))
     ImageDraw.Draw(sample).rectangle((0, 0, 7, 7), fill="#5865f2")
-    pal = sample.quantize(colors=PALETTE_COLORS, method=Image.MEDIANCUT)
+    pal = sample.quantize(colors=256, method=Image.MEDIANCUT)
     return [f.quantize(palette=pal, dither=0) for f in frames]
 
 
@@ -519,7 +516,6 @@ class Labyscord(commands.Cog):
             await safe_send(ctx.channel, f"⏳ Attends encore **{max(1, math.ceil(error.retry_after))} seconde(s)** avant de relancer une partie.")
             return
         raise error
-
 
 # ================================================================================
 # 🔌 Setup du Cog
