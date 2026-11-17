@@ -34,8 +34,8 @@ from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_delet
 W, H = 320, 240
 HALF = 160
 MINI_H = 80
-FOV = math.radians(75)     # Champ de vision large pour le Mode 7
-CAM_HEIGHT = 0.5           # Caméra basse
+FOV = math.radians(75)
+CAM_HEIGHT = 0.4           # Caméra basse
 MAP_SIZE = 512
 SPEED = 0.005
 FRAME_MS = 60
@@ -43,32 +43,44 @@ MAX_FRAMES = 120
 MAX_BYTES = 8 * 1024 * 1024
 
 # ================================================================================
-# 🗺️ Chargement et génération de la texture
+# 🗺️ Chargement des Sprites et Textures
 # ================================================================================
-def _load_track_texture():
-    """Charge une vraie image de circuit (Mode 7). Fallback si absente."""
-    path = os.path.join("assets", "track.png")
+def _load_assets():
+    """Charge la texture du sol et le sprite du kart."""
+    # 1. Texture du sol
     try:
-        img = Image.open(path).convert("RGB").resize((MAP_SIZE, MAP_SIZE))
+        track = Image.open("assets/track.png").convert("RGB").resize((MAP_SIZE, MAP_SIZE))
     except FileNotFoundError:
-        # Fallback (si l'image n'existe pas)
-        img = Image.new("RGB", (MAP_SIZE, MAP_SIZE), (34, 139, 34))
-        d = ImageDraw.Draw(img)
+        # Fallback si l'image n'existe pas (pour éviter le crash)
+        track = Image.new("RGB", (MAP_SIZE, MAP_SIZE), (34, 139, 34))
+        d = ImageDraw.Draw(track)
         d.ellipse([50, 50, 462, 462], fill=(218, 180, 130))
-    return img
+        
+    # 2. Sprite du Kart (avec transparence)
+    try:
+        kart = Image.open("assets/kart.png").convert("RGBA")
+        # Redimensionner si le kart est trop grand
+        kart = kart.resize((60, 60), Image.NEAREST)
+    except FileNotFoundError:
+        # Fallback (un rectangle rouge si pas d'image)
+        kart = Image.new("RGBA", (60, 60), (0,0,0,0))
+        d = ImageDraw.Draw(kart)
+        d.rectangle([10, 10, 50, 50], fill=(211, 47, 47))
+        
+    return track, kart
 
-TRACK_IMG = _load_track_texture()
+TRACK_IMG, KART_IMG = _load_assets()
 TRACK_DATA = TRACK_IMG.load()
+KART_DATA = KART_IMG.load()
 
 # ================================================================================
-# 🏎️ Rendu Mode 7 (Pillow)
+# 🏎️ Rendu Mode 7 + Sprites
 # ================================================================================
 def _render_frame(camX, camY, camAngle, time_ms):
-    """Génère une image : 3D en haut, Minimap en bas, HUD."""
     frame = Image.new("RGB", (W, H))
     d = ImageDraw.Draw(frame)
     
-    # 1. Ciel
+    # 1. Ciel (on garde une bande de ciel en haut)
     d.rectangle([0, 0, W, 80], fill=(135, 206, 235))
 
     # 2. Route (Mode 7)
@@ -90,7 +102,8 @@ def _render_frame(camX, camY, camAngle, time_ms):
         floorX = camX + rowDistance * rayDirX0
         floorY = camY + rowDistance * rayDirY0
         
-        fog = min(1.0, rowDistance / 600.0)
+        # Brouillard très léger
+        fog = min(1.0, rowDistance / 1000.0)
         
         for x in range(W):
             tx = int(floorX) % MAP_SIZE
@@ -108,14 +121,10 @@ def _render_frame(camX, camY, camAngle, time_ms):
             floorX += floorStepX
             floorY += floorStepY
 
-    # 3. Kart (Sprite)
-    kx, ky = W // 2, HALF - 15
-    d.rectangle([kx-25, ky, kx-15, ky+20], fill=(34, 34, 34))
-    d.rectangle([kx+15, ky, kx+25, ky+20], fill=(34, 34, 34))
-    d.rectangle([kx-20, ky-10, kx+20, ky+15], fill=(211, 47, 47))
-    d.rectangle([kx-25, ky-15, kx+25, ky-5], fill=(200, 0, 0))
-    d.rectangle([kx-8, ky-20, kx+8, ky-8], fill=(255, 204, 128))
-    d.rectangle([kx-10, ky-22, kx+10, ky-14], fill=(30, 136, 229))
+    # 3. Insertion du Sprite du Kart (avec transparence)
+    kx, ky = W // 2, HALF - 30
+    # On "colle" le sprite en utilisant son canal alpha (masque)
+    frame.paste(KART_IMG, (kx - 30, ky), KART_IMG)
 
     # 4. Mini-map
     d.rectangle([0, HALF, W, H], fill=(34, 139, 34))
@@ -123,11 +132,14 @@ def _render_frame(camX, camY, camAngle, time_ms):
     
     mapScale = 0.12
     mapCX, mapCY = W // 2, HALF + (MINI_H // 2)
-    d.ellipse([mapCX-60, mapCY-30, mapCX+60, mapCY+30], outline=(218, 180, 130), width=15)
     
+    # Une simple ellipse pour représenter le circuit sur la mini-map
+    d.ellipse([mapCX-80, mapCY-40, mapCX+80, mapCY+40], outline=(218, 180, 130), width=20)
+    
+    # Point rouge du joueur
     px = mapCX + int((camX - MAP_SIZE/2) * mapScale)
     py = mapCY + int((camY - MAP_SIZE/2) * mapScale)
-    d.ellipse([px-3, py-3, px+3, py+3], fill=(255, 0, 0))
+    d.ellipse([px-4, py-4, px+4, py+4], fill=(255, 0, 0))
 
     # 5. HUD (Chrono)
     sec = int(time_ms / 1000)
@@ -145,7 +157,7 @@ def _render_frame(camX, camY, camAngle, time_ms):
 def _generate_race_gif(seed: int = None) -> io.BytesIO:
     rng = random.Random(seed)
     cx, cy = MAP_SIZE / 2, MAP_SIZE / 2
-    radius = 150 
+    radius = 180 
     
     frames = []
     states = []
