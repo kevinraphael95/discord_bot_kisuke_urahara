@@ -46,11 +46,13 @@ FLOOR_PX = 24                          # pixels de texture sol/plafond par case
 FOG_DIST = 14.0
 FOG_MAX = 0.40
 SIDE_SHADE = 0.12                      # murs Est/Ouest un peu plus sombres
+CLOSE_SHADE = 0.40                     # murs très proches plus sombres (évite l'écran tout rouge en tournant)
+CLOSE_DIST = 1.5
 LEVELS = 16                            # niveaux d'ombrage précalculés
-SHADE_RANGE = FOG_MAX + SIDE_SHADE
+SHADE_RANGE = FOG_MAX + SIDE_SHADE + CLOSE_SHADE
 GAME_TIMEOUT = 180
-ANIM_FRAMES = 8
-ANIM_MS = 60
+ANIM_FRAMES = 12
+ANIM_MS = 40
 START_TEXT = "Trouve le logo Discord !"
 COMPASS = ("➡️ Est", "⬇️ Sud", "⬅️ Ouest", "⬆️ Nord")
 
@@ -212,11 +214,11 @@ def cast_ray(maze: list, px: float, py: float, dx: float, dy: float) -> tuple:
 
 def quantize_frames(frames: list) -> list:
     """Palette commune à toutes les images : GIF plus léger et sans scintillement."""
-    sample = Image.new("RGB", (WIDTH, HEIGHT * 2))
-    sample.paste(frames[0], (0, 0))
-    sample.paste(frames[-1], (0, HEIGHT))
+    sample = Image.new("RGB", (WIDTH, HEIGHT * len(frames)))
+    for i, f in enumerate(frames):
+        sample.paste(f, (0, HEIGHT * i))
     ImageDraw.Draw(sample).rectangle((0, 0, 7, 7), fill="#5865f2")
-    pal = sample.quantize(colors=224, method=Image.MEDIANCUT)
+    pal = sample.quantize(colors=256, method=Image.MEDIANCUT)
     return [f.quantize(palette=pal, dither=0) for f in frames]
 
 
@@ -306,6 +308,7 @@ class MazeGame:
             cam = 2 * (i + 0.5) / rays - 1
             dist, side, wx, tile = cast_ray(self.maze, px, py, fx + rx * cam * half_tan, fy + ry * cam * half_tan)
             shade = min(1.0, dist / FOG_DIST) * FOG_MAX + (SIDE_SHADE if side else 0)
+            shade += max(0.0, CLOSE_DIST - dist) / CLOSE_DIST * CLOSE_SHADE
             tex = a["walls"][tile][min(LEVELS - 1, int(shade / SHADE_RANGE * (LEVELS - 1) + 0.5))]
             tx = min(TEX - 1, int(wx * TEX))
             lh = max(1, int(FOCAL / dist))
@@ -322,10 +325,10 @@ class MazeGame:
     # 🔹 Export GIF
     # ============================================================================
     @staticmethod
-    def _gif(frames: list) -> io.BytesIO:
+    def _gif(frames: list, durations: list | int = ANIM_MS) -> io.BytesIO:
         frames = quantize_frames(frames)
         out = io.BytesIO()
-        frames[0].save(out, "GIF", save_all=True, append_images=frames[1:], duration=ANIM_MS, optimize=False)
+        frames[0].save(out, "GIF", save_all=True, append_images=frames[1:], duration=durations, optimize=False)
         out.seek(0)
         return out
 
@@ -338,12 +341,14 @@ class MazeGame:
         sx, sy, sa = start
         ex, ey, ea = end
         delta = (ea - sa + math.pi) % (2 * math.pi) - math.pi
-        frames = []
+        frames, durations = [], []
         for i in range(ANIM_FRAMES):
-            p = i / (ANIM_FRAMES - 1)
-            p = p * p * (3 - 2 * p)  # accélération/décélération douces
+            t = i / (ANIM_FRAMES - 1)
+            p = t * t * (3 - 2 * t)  # accélération/décélération douces
             frames.append(self.render((sx + (ex - sx) * p, sy + (ey - sy) * p, (sa + delta * p) % (2 * math.pi))))
-        return self._gif(frames)
+            # images du milieu (mouvement rapide) plus courtes, début/fin plus longs : moins de "flash"
+            durations.append(max(20, int(ANIM_MS * (0.5 + abs(2 * t - 1)) // 10 * 10)))
+        return self._gif(frames, durations)
 
 
 # ================================================================================
@@ -511,7 +516,6 @@ class Labyscord(commands.Cog):
             await safe_send(ctx.channel, f"⏳ Attends encore **{max(1, math.ceil(error.retry_after))} seconde(s)** avant de relancer une partie.")
             return
         raise error
-
 
 # ================================================================================
 # 🔌 Setup du Cog
