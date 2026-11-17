@@ -20,7 +20,7 @@ import random
 import discord
 from discord import app_commands
 from discord.ext import commands
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 # ================================================================================
 # 📦 Modules internes
@@ -30,12 +30,13 @@ from utils.discord_anti429 import safe_send, safe_edit, safe_respond, safe_delet
 # ================================================================================
 # ⚙️ Constantes du jeu
 # ================================================================================
-W, H = 320, 200
-HALF = H // 2
+W, H = 320, 240            # Écran total (Haut 3D + Bas Minimap)
+HALF = 160                 # Hauteur de la vue 3D
+MINI_H = 80                # Hauteur de la minimap
 FOV = math.radians(60)
 CAM_HEIGHT = 1.0
 MAP_SIZE = 512
-SPEED = 0.002
+SPEED = 0.005
 FRAME_MS = 60
 MAX_FRAMES = 150
 MAX_BYTES = 8 * 1024 * 1024
@@ -44,16 +45,30 @@ MAX_BYTES = 8 * 1024 * 1024
 # 🗺️ Génération de la texture de la piste (Vue de dessus)
 # ================================================================================
 def _create_track_texture():
-    """Dessine un circuit ovale avec de l'herbe autour et une ligne de départ."""
-    img = Image.new("RGB", (MAP_SIZE, MAP_SIZE), (76, 175, 80)) # Herbe
+    """Dessine un circuit ovale avec de l'herbe, des bordures et une ligne de départ."""
+    img = Image.new("RGB", (MAP_SIZE, MAP_SIZE), (59, 122, 56)) # Herbe
     d = ImageDraw.Draw(img)
     
     cx, cy = MAP_SIZE // 2, MAP_SIZE // 2
     r_out, r_in = 200, 140
     
     # Route (Anneau)
-    d.ellipse([cx - r_out, cy - r_out, cx + r_out, cy + r_out], fill=(150, 140, 130))
-    d.ellipse([cx - r_in, cy - r_in, cx + r_in, cy + r_in], fill=(76, 175, 80))
+    d.ellipse([cx - r_out, cy - r_out, cx + r_out, cy + r_out], fill=(194, 167, 125)) # Sable
+    d.ellipse([cx - r_in, cy - r_in, cx + r_in, cy + r_in], fill=(59, 122, 56))
+    
+    # Bordures de piste (Rouge / Blanc)
+    for a in range(0, 360, 10):
+        rad = math.radians(a)
+        # Bord extérieur
+        ox = cx + math.cos(rad) * r_out
+        oy = cy + math.sin(rad) * r_out
+        color = (255, 0, 0) if (a // 10) % 2 == 0 else (255, 255, 255)
+        d.rectangle([ox-5, oy-5, ox+5, oy+5], fill=color)
+        
+        # Bord intérieur
+        ix = cx + math.cos(rad) * r_in
+        iy = cy + math.sin(rad) * r_in
+        d.rectangle([ix-5, iy-5, ix+5, iy+5], fill=color)
     
     # Ligne de départ (damier)
     start_y = cy + r_out
@@ -61,14 +76,6 @@ def _create_track_texture():
         x0 = cx - 30 + (i * 6)
         color = (255, 255, 255) if i % 2 == 0 else (0, 0, 0)
         d.rectangle([x0, start_y - 20, x0 + 6, start_y], fill=color)
-        
-    # Arbres
-    for _ in range(200):
-        tx = random.randint(0, MAP_SIZE)
-        ty = random.randint(0, MAP_SIZE)
-        dist = math.hypot(tx - cx, ty - cy)
-        if dist < r_in or dist > r_out:
-            d.ellipse([tx-8, ty-8, tx+8, ty+8], fill=(46, 125, 50))
             
     return img
 
@@ -78,24 +85,24 @@ TRACK_DATA = TRACK_IMG.load()
 # ================================================================================
 # 🏎️ Rendu Mode 7 (Pillow)
 # ================================================================================
-def _render_mode7(camX, camY, camAngle):
-    """Génère une image 3D de la piste vue depuis la caméra."""
+def _render_frame(camX, camY, camAngle, time_ms, map_img):
+    """Génère une image complète : 3D en haut, Minimap en bas, HUD."""
     frame = Image.new("RGB", (W, H))
-    d = ImageDraw.Draw(frame)
     
-    # 1. Ciel (Dégradé)
-    for y in range(HALF):
-        c = int(135 + (y / HALF) * 100)
-        d.line([(0, y), (W, y)], fill=(c, 206, 235))
+    # --- 1. RENDU 3D (Mode 7) ---
+    # Ciel
+    d3d = ImageDraw.Draw(frame)
+    for y in range(100):
+        c = int(135 + (y / 100) * 100)
+        d3d.line([(0, y), (W, y)], fill=(c, 206, 235))
         
-    # 2. Sol (Mode 7)
     dirX, dirY = math.cos(camAngle), math.sin(camAngle)
     planeX, planeY = -dirY * math.tan(FOV/2), dirX * math.tan(FOV/2)
     
     pixels = frame.load()
     
-    for y in range(HALF, H):
-        p = y - HALF
+    for y in range(100, HALF):
+        p = y - 100
         rowDistance = (CAM_HEIGHT * H) / (p + 1e-5)
         
         rayDirX0, rayDirY0 = dirX - planeX, dirY - planeY
@@ -107,8 +114,7 @@ def _render_mode7(camX, camY, camAngle):
         floorX = camX + rowDistance * rayDirX0
         floorY = camY + rowDistance * rayDirY0
         
-        fog = min(1.0, rowDistance / 300.0)
-        fogColor = (135, 206, 235)
+        fog = min(1.0, rowDistance / 400.0)
         
         for x in range(W):
             tx = int(floorX) % MAP_SIZE
@@ -117,24 +123,62 @@ def _render_mode7(camX, camY, camAngle):
             c = TRACK_DATA[tx, ty]
             
             if fog > 0:
-                r = int(c[0] * (1 - fog) + fogColor[0] * fog)
-                g = int(c[1] * (1 - fog) + fogColor[1] * fog)
-                b = int(c[2] * (1 - fog) + fogColor[2] * fog)
+                r = int(c[0] * (1 - fog) + 135 * fog)
+                g = int(c[1] * (1 - fog) + 206 * fog)
+                b = int(c[2] * (1 - fog) + 235 * fog)
                 c = (r, g, b)
                 
             pixels[x, y] = c
-            
             floorX += floorStepX
             floorY += floorStepY
-            
-    # 3. La voiture (au centre, vue de dos)
-    cx, cy = W // 2, H - 40
-    d.rectangle([cx-15, cy-5, cx+15, cy+15], fill=(211, 47, 47))
-    d.rectangle([cx-20, cy, cx-12, cy+15], fill=(34, 34, 34))
-    d.rectangle([cx+12, cy, cx+20, cy+15], fill=(34, 34, 34))
-    d.ellipse([cx-6, cy-12, cx+6, cy], fill=(255, 204, 128))
-    d.ellipse([cx-7, cy-15, cx+7, cy-5], fill=(255, 255, 255))
+
+    # --- 2. LE KART (Sprite) ---
+    kx, ky = W // 2, HALF - 10
+    d = ImageDraw.Draw(frame)
+    # Ombre
+    d.ellipse([kx-20, ky+10, kx+20, ky+18], fill=(0,0,0))
+    # Pneus
+    d.rectangle([kx-25, ky, kx-15, ky+20], fill=(34, 34, 34))
+    d.rectangle([kx+15, ky, kx+25, ky+20], fill=(34, 34, 34))
+    # Châssis
+    d.rectangle([kx-20, ky-10, kx+20, ky+15], fill=(211, 47, 47))
+    # Pilote
+    d.rectangle([kx-8, ky-20, kx+8, ky-8], fill=(255, 204, 128))
+    d.rectangle([kx-10, ky-22, kx+10, ky-14], fill=(30, 136, 229))
+
+    # --- 3. MINI-MAP (En bas) ---
+    # Fond herbe
+    d.rectangle([0, HALF, W, H], fill=(42, 122, 42))
+    d.line([(0, HALF), (W, HALF)], fill=(255,255,255), width=2)
     
+    # Dessin du circuit
+    mapScale = 0.1
+    mapCX, mapCY = W // 2, HALF + (MINI_H // 2)
+    rx, ry = int(300 * mapScale), int(200 * mapScale)
+    
+    d.ellipse([mapCX-rx, mapCY-ry, mapCX+rx, mapCY+ry], outline=(194, 167, 125), width=int(140*mapScale))
+    
+    # Position du joueur
+    px = mapCX + int((camX - MAP_SIZE/2) * mapScale)
+    py = mapCY + int((camY - MAP_SIZE/2) * mapScale)
+    d.ellipse([px-3, py-3, px+3, py+3], fill=(255,0,0))
+    
+    # Direction
+    ex = px + int(math.cos(camAngle) * 8)
+    ey = py + int(math.sin(camAngle) * 8)
+    d.line([(px, py), (ex, ey)], fill=(255,0,0), width=2)
+
+    # --- 4. HUD (Chrono & Position) ---
+    sec = int(time_ms / 1000)
+    ms = int((time_ms % 1000) / 10)
+    time_str = f"00' {sec:02d}\" {ms:02d}"
+    
+    d.rectangle([W - 90, 5, W - 5, 30], fill=(0,0,0))
+    d.text((W - 15, 10), time_str, fill=(255,255,255), anchor="ra")
+    
+    d.rectangle([W - 120, 5, W - 95, 30], fill=(255,0,0))
+    d.text((W - 110, 10), "1er", fill=(255,255,255), anchor="ma")
+
     return frame
 
 # ================================================================================
@@ -165,14 +209,18 @@ def _generate_race_gif(seed: int = None) -> io.BytesIO:
     step = len(states) // MAX_FRAMES
     picks = states[::step][:MAX_FRAMES]
     
-    for px, py, ang in picks:
-        frame = _render_mode7(px, py, ang)
+    for i, (px, py, ang) in enumerate(picks):
+        # Simulation du chrono (50ms par frame)
+        time_ms = i * FRAME_MS
+        frame = _render_frame(px, py, ang, time_ms, TRACK_IMG)
         frames.append(frame)
         
     # Encodage en GIF
     sample = Image.new("RGB", (W, H * 4))
     for k in range(4):
         sample.paste(frames[(len(frames) - 1) * k // 3], (0, H * k))
+    
+    # Palette optimisée
     pal = sample.quantize(colors=128, method=Image.MEDIANCUT)
     q = [f.quantize(palette=pal, dither=0) for f in frames]
     
