@@ -22,7 +22,8 @@
 #   - Génération procédurale d'un labyrinthe 15x15.
 #   - Vue 3D à la première personne par raycasting.
 #   - Textures générées avec Pillow.
-#   - Déplacements et rotations animés en GIF.
+#   - Déplacements et rotations animés en GIF (lecture unique).
+#   - Chaque animation s'arrête sur la vue finale.
 #   - Une partie privée par joueur.
 #   - Le joueur qui lance la commande est le seul à pouvoir jouer.
 #
@@ -868,7 +869,7 @@ class MazeGame:
                 self.angle = (
                     start_angle
                     + angle_delta * progress
-                ) % (2 * math.pi)
+                ) % (math.pi * 2)
 
                 frame_data = self.render()
 
@@ -884,6 +885,10 @@ class MazeGame:
             self.y = original[1]
             self.angle = original[2]
 
+        # ========================================================================
+        # 🔹 Export du GIF (lecture unique)
+        # ========================================================================
+
         output = io.BytesIO()
 
         frames[0].save(
@@ -892,7 +897,6 @@ class MazeGame:
             save_all=True,
             append_images=frames[1:],
             duration=ANIMATION_DURATION,
-            loop=0,
             optimize=True
         )
 
@@ -1371,15 +1375,21 @@ class Labyscord(commands.Cog):
                 "avant de relancer une partie."
             )
             return
+
         raise error
 
 
 # ================================================================================
 # 🔌 SETUP DU COG
 # ================================================================================
+
 async def setup(bot: commands.Bot):
+
     cog = Labyscord(bot)
+
     for command in cog.get_commands():
+
         if not hasattr(command, "category"):
             command.category = "Fun&Random"
+
     await bot.add_cog(cog)
