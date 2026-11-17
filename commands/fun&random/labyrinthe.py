@@ -39,24 +39,23 @@ COL_W = 2                  # largeur d'une colonne de rayon (160 rayons)
 FOV = math.radians(66)
 FOCAL = (W / 2) / math.tan(FOV / 2)
 EYE = 0.5                  # hauteur des yeux (murs = 1 case de haut)
-MAP_SIZES = (13, 15, 17, 19, 21)   # taille tirée au hasard (impair)
+MAP_SIZES = (11, 13, 15, 17)       # taille tirée au hasard (impair)
+MAX_PATH = 80                      # balade max (en cases) : sinon on retire un autre labyrinthe
 TEX = 64                   # texture des murs
 FLOOR_PX = 24              # pixels de texture sol/plafond par case
 LEVELS = 16                # niveaux d'ombrage des murs
 FOG_DIST = 14.0
 FOG_MAX = 0.4              # assombrissement max au loin
-CLOSE_SHADE = 0.4          # murs très proches plus sombres
-CLOSE_DIST = 1.5
 SPEED = 0.002 * 16.67      # vitesse par tick (60 ticks/s)
 TURN = 0.15                # lissage de l'angle
-MAX_FRAMES = 320           # images max pour la balade (la vitesse s'adapte)
-FRAME_MS = 60
+MAX_FRAMES = 250           # images max pour la balade (la vitesse s'adapte)
+FRAME_MS = 75              # plus grand = plus lent
 FOUND_HOLD_MS = 1000       # pause sur le logo
 FADE_FRAMES = 8            # fondu vers l'écran de fin
 END_HOLD_MS = 8000         # durée de l'écran de fin
-GRAIN = 0                  # grain des briques (0 = lisse = GIF léger)
-GROUND_BLUR = 2.5          # flou du bruit sol/plafond
-PALETTE_COLORS = 64        # couleurs du GIF (moins = plus léger)
+GRAIN = 14                 # grain des briques (0 = lisse = GIF plus léger)
+GROUND_BLUR = 0.9          # flou du bruit sol/plafond (plus haut = plus lisse et plus léger)
+PALETTE_COLORS = 128       # couleurs du GIF (moins = plus léger)
 MAX_BYTES = 8 * 1024 * 1024
 
 DIRS = ((1, 0), (-1, 0), (0, 1), (0, -1))
@@ -99,8 +98,7 @@ def _make_logo(rng: random.Random) -> Image.Image:
 
 
 def _shade_variants(tex: Image.Image) -> list:
-    rng_shade = FOG_MAX + CLOSE_SHADE
-    return [tex.point(lambda v, f=1 - rng_shade * i / (LEVELS - 1): int(v * f)) for i in range(LEVELS)]
+    return [tex.point(lambda v, f=1 - FOG_MAX * i / (LEVELS - 1): int(v * f)) for i in range(LEVELS)]
 
 
 def _make_ground(ceiling: bool, size: int) -> Image.Image:
@@ -327,9 +325,12 @@ def _encode(frames: list, durations: list) -> io.BytesIO:
 
 def generate_maze_gif() -> io.BytesIO:
     rng = random.Random()                        # graine système : vraiment aléatoire
-    m, start, goal, (ddx, ddy) = _build_level(rng)
+    while True:
+        m, start, goal, (ddx, ddy) = _build_level(rng)
+        cells = _explore(m, rng, start, goal)
+        if len(cells) <= MAX_PATH:               # balade trop longue = trop rapide à l'écran : on retire
+            break
     n = len(m)
-    cells = _explore(m, rng, start, goal)
 
     # Nœuds suivis par la caméra : on s'arrête dans la case avant l'impasse, face au logo
     ox, oy = cells[-2]
@@ -369,7 +370,6 @@ def generate_maze_gif() -> io.BytesIO:
     n_rays = W // COL_W
     tan_half = math.tan(FOV / 2)
     t = FLOOR_PX
-    shade_range = FOG_MAX + CLOSE_SHADE
 
     def render(px: float, py: float, ang: float) -> Image.Image:
         fx, fy = math.cos(ang), math.sin(ang)
@@ -389,9 +389,8 @@ def generate_maze_gif() -> io.BytesIO:
             cam = 2.0 * (i + 0.5) / n_rays - 1.0
             dist, side, wx, kind = _cast(m, n, px, py, fx + rx * cam * tan_half, fy + ry * cam * tan_half)
             dist = max(0.05, dist)
-            shade = min(1.0, dist / FOG_DIST) * FOG_MAX + (0.08 if side else 0)
-            shade += max(0.0, CLOSE_DIST - dist) / CLOSE_DIST * CLOSE_SHADE
-            tex = a["wall"][kind][min(LEVELS - 1, int(shade / shade_range * (LEVELS - 1) + 0.5))]
+            lvl = min(LEVELS - 1, int(min(1.0, dist / FOG_DIST) * (LEVELS - 1)) + (1 if side else 0))
+            tex = a["wall"][kind][lvl]
             tx = min(TEX - 1, int(wx * TEX))
             lh = max(1, int(FOCAL / dist))
             if lh > H:
