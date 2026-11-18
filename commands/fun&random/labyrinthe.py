@@ -450,7 +450,7 @@ class Labyrinthe3D(commands.Cog):
     # ============================================================================
     @app_commands.command(
         name="labyrinthe",
-        description="Labyrinthe 3D animé : la caméra explore jusqu'au logo Discord."
+        description="Labyrinthe : la caméra explore jusqu'au logo Discord."
     )
     @app_commands.checks.cooldown(rate=1, per=15.0, key=lambda i: i.user.id)
     async def slash_labyrinthe3d(self, interaction: discord.Interaction):
@@ -473,7 +473,7 @@ class Labyrinthe3D(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="labyrinthe")
+    @commands.command(name="labyrinthe", help="Labyrinthe : la caméra explore jusqu'au logo Discord.")
     @commands.cooldown(1, 15.0, commands.BucketType.user)
     async def prefix_labyrinthe3d(self, ctx: commands.Context):
         if self._lock.locked():
