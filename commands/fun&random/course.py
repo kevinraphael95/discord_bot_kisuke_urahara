@@ -63,6 +63,9 @@ RACERS = (
     ("CYAN", (40, 180, 230), (30, 60, 140)),
     ("ORANGE", (240, 130, 40), (60, 160, 60)),
 )
+KART_SEP = 15.0                     # écart latéral minimum entre deux karts qui se croisent (px de circuit)
+KART_LONG = 30.0                    # à cette distance (devant/derrière) ils commencent à s'éviter
+ROAD_LIM = 22.0                     # les karts restent dans cette bande autour du centre de la piste
 PLACE_WEIGHTS = (30, 25, 18, 12, 10, 5)   # chances de finir 1er, 2e, ... 6e
 
 # ================================================================================
@@ -373,8 +376,8 @@ class Rival:
     def __init__(self, rng: random.Random, ci: int, lane: float, final_gap: float):
         self.ci, self.lane, self.final = ci, lane, final_gap
         self.start = rng.uniform(-35, 70)                # écart au départ (+ = devant le joueur)
-        self.mean = rng.uniform(-25, 35)
-        self.amp = rng.uniform(30, 75)
+        self.mean = rng.uniform(-40, 60)
+        self.amp = rng.uniform(45, 95)
         self.freq = rng.uniform(0.7, 1.7)
         self.phase = rng.uniform(0, 2 * math.pi)
         self.late = None                                 # écart avant le dépassement final (rival "suspense")
@@ -390,7 +393,7 @@ class Rival:
         else:
             t = _smooth((q - (qc - 0.28)) / 0.26)
             mid = (self.mean + self.amp * wave) * (1 - t) + self.final * t
-        s = _smooth(q / 0.12)
+        s = _smooth(q / 0.2)
         return (1 - s) * self.start + s * mid
 
 
@@ -403,11 +406,15 @@ def _plan_race(rng: random.Random) -> tuple:
     lanes = [-23, -12, 0, 12, 23]
     rng.shuffle(lanes)
 
-    gaps = [8 + 16 * j + rng.uniform(0, 6) for j in range(ahead)] + [-(8 + 16 * j + rng.uniform(0, 6)) for j in range(behind)]
+    gaps = [10 + 26 * j + rng.uniform(0, 6) for j in range(ahead)] + [-(10 + 26 * j + rng.uniform(0, 6)) for j in range(behind)]
     rivals = [Rival(rng, ci, lane, g) for ci, lane, g in zip(ids, lanes, gaps)]
+    slots = [-72, -48, -24, 24, 48, 72]                  # grille de départ : karts espacés
+    rng.shuffle(slots)
+    for r, slot in zip(rivals, slots):
+        r.start = slot + rng.uniform(-4, 4)
 
     # Le rival le plus proche de la place finale du joueur crée le suspense : il bascule à la fin.
-    near = [r for r in rivals if abs(r.final) < 16 + 6]
+    near = [r for r in rivals if abs(r.final) < 10 + 6 + 1]
     pick = rng.choice(near) if near else rivals[0]
     pick.late = -pick.final * rng.uniform(1.6, 3.0)
     return place, rivals
@@ -445,6 +452,51 @@ def _swerve(u: float, phase: tuple, start: float, end: float) -> float:
     return fade * (11 * math.sin(u / 85 + phase[0]) + 6 * math.sin(u / 37 + phase[1]))
 
 
+def _lateral_paths(rivals: list, sway, u0: float, u1: float, qc: float) -> list:
+    """
+    Position latérale de chaque kart à chaque image (indice 0 = joueur, 1.. = rivaux).
+    Chaque kart vise sa voie, mais deux karts proches (devant/derrière) se repoussent sur le côté :
+    ils se croisent côte à côte au lieu de se traverser, et ça reste fluide (vitesse latérale limitée).
+    """
+    n, sub = 1 + len(rivals), 4
+    kt, c, kr, kw, vmax, dt = 0.03, 0.4, 0.45, 0.5, 3.0, 1.0 / sub
+    lat, vel = [0.0] * n, [0.0] * n
+
+    def state(q: float) -> tuple:
+        u = u0 + (u1 - u0) * _profile(q)
+        us = [u] + [u + r.gap(q, qc) for r in rivals]
+        targets = [sway(u)] + [r.lane + 4 * math.sin(us[i + 1] / 50 + r.wobble) for i, r in enumerate(rivals)]
+        return us, targets
+
+    def step(q: float):
+        us, targets = state(q)
+        acc = [kt * (targets[i] - lat[i]) - c * vel[i] for i in range(n)]
+        for i in range(n):
+            for j in range(i + 1, n):
+                du = abs(us[i] - us[j])
+                dl = lat[i] - lat[j]
+                if du < KART_LONG and abs(dl) < KART_SEP:
+                    f = kr * (1 - du / KART_LONG) * (KART_SEP - abs(dl))
+                    sgn = 1 if dl > 0 else -1 if dl < 0 else (1 if i < j else -1)
+                    acc[i] += f * sgn
+                    acc[j] -= f * sgn
+        for i in range(n):
+            if abs(lat[i]) > ROAD_LIM:                  # rappel doux vers la piste
+                acc[i] -= kw * (abs(lat[i]) - ROAD_LIM) * (1 if lat[i] > 0 else -1)
+            vel[i] = max(-vmax, min(vmax, vel[i] + acc[i] * dt))
+            lat[i] = max(-ROAD_LIM - 3, min(ROAD_LIM + 3, lat[i] + vel[i] * dt))
+
+    lat[:] = state(0.0)[1]
+    for _ in range(120):                                # mise en place de la grille de départ
+        step(0.0)
+    paths = [list(lat)]
+    for k in range(1, (FRAMES - 1) * sub + 1):
+        step(k / ((FRAMES - 1) * sub))
+        if k % sub == 0:
+            paths.append(list(lat))
+    return paths
+
+
 def _generate_race_gif() -> io.BytesIO:
     rng = random.Random()                                # graine système : tout est unique
     scene = Scene(rng)
@@ -458,19 +510,24 @@ def _generate_race_gif() -> io.BytesIO:
     # Moment où le joueur franchit la ligne.
     qc = next(i / (FRAMES - 1) for i in range(FRAMES) if u0 + (u1 - u0) * _profile(i / (FRAMES - 1)) >= scene.length)
 
+    lats = _lateral_paths(rivals, sway, u0, u1, qc)
+    us = [u0 + (u1 - u0) * _profile(i / (FRAMES - 1)) for i in range(FRAMES)]
+
     frames, ang = [], None
     for i in range(FRAMES):
         q = i / (FRAMES - 1)
-        u = u0 + (u1 - u0) * _profile(q)
-        px, py = scene.point_at(u, sway(u))
-        ax, ay = scene.point_at(u + 26, sway(u + 26))         # le cap suit le zigzag : le pilote se penche
+        u = us[i]
+        i0, i1 = max(i - 1, 0), min(i + 1, FRAMES - 1)
+        slope = (lats[i1][0] - lats[i0][0]) / max(1e-6, us[i1] - us[i0])    # le cap suit le mouvement latéral
+        px, py = scene.point_at(u, lats[i][0])
+        ax, ay = scene.point_at(u + 26, lats[i][0] + slope * 26)
         target = math.atan2(ay - py, ax - px)
         prev = target if ang is None else ang
         ang = target if ang is None else ang + _wrap(target - ang) * 0.45
         turn = _wrap(ang - prev)
         lean = 1 if turn > 0.02 else -1 if turn < -0.02 else 0
 
-        others = [(*scene.point_at(u + r.gap(q, qc), r.lane + 4 * math.sin(u / 50 + r.wobble)), r.ci) for r in rivals]
+        others = [(*scene.point_at(u + r.gap(q, qc), lats[i][k + 1]), r.ci) for k, r in enumerate(rivals)]
         rank = _rank_at(rivals, min(q, qc), qc) if q < qc else place
         shown = race_ms * (min(u, scene.length) - u0) / (scene.length - u0)
         frames.append(scene.render(px, py, ang, lean, -(i % 2), _timer(shown), rank, others,
