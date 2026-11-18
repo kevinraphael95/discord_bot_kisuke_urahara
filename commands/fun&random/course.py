@@ -601,7 +601,7 @@ class CourseKart(commands.Cog):
     # ============================================================================
     # 🔹 Commande SLASH
     # ============================================================================
-    @app_commands.command(name="course", description="Lance une course de karting (1 tour).")
+    @app_commands.command(name="course", description="Lance une course de karting.")
     @app_commands.checks.cooldown(rate=1, per=15.0, key=lambda i: i.user.id)
     async def slash_course(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -611,7 +611,7 @@ class CourseKart(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="course")
+    @commands.command(name="course", help="Lance une course de karting.")
     @commands.cooldown(1, 15.0, commands.BucketType.user)
     async def prefix_course(self, ctx: commands.Context):
         async with ctx.typing():
