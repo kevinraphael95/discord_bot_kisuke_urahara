@@ -289,7 +289,7 @@ class Scene:
         return self._shadows[width]
 
     def render(self, px: float, py: float, ang: float, lean: int, bob: int, timer: str,
-               rank: int, coins: int, rivals: list, banner: bool) -> Image.Image:
+               rank: int, rivals: list, banner: bool) -> Image.Image:
         fx, fy = math.cos(ang), math.sin(ang)
         rx, ry = -fy, fx
         cx, cy = px - fx * BACK, py - fy * BACK          # la caméra suit derrière le kart
@@ -328,12 +328,10 @@ class Scene:
             frame.paste((0, 0, 0), (int(sx - sh.width / 2), int(foot - sh.height + 1)), sh)
             frame.paste(spr, (int(sx - spr.width / 2), int(foot - spr.height + 2)), spr)
 
-        # HUD : case d'objet vide, chrono, pièces, position.
+        # HUD : case d'objet vide, chrono, position.
         tw = _text(frame, timer, W - 6, 6, 2, (255, 255, 255), outline=(30, 90, 170), anchor="ra")
         bx = W - 6 - tw - 40
         ImageDraw.Draw(frame).rounded_rectangle([bx, 3, bx + 32, 27], radius=6, fill=(0, 0, 0), outline=(120, 220, 255), width=2)
-        ImageDraw.Draw(frame).ellipse([W - 100, H - 36, W - 88, H - 24], fill=(250, 214, 40), outline=(140, 100, 0))
-        _text(frame, f"x{coins:02d}", W - 84, H - 38, 2, (255, 255, 255), outline=(40, 40, 40))
         _text(frame, str(rank), W - 8, H - 82, 6, (255, 255, 255), outline=(70, 70, 70), anchor="ra", outline_px=2)
 
         if banner:
@@ -440,13 +438,22 @@ def _wrap(a: float) -> float:
     return (a + math.pi) % (2 * math.pi) - math.pi
 
 
+def _swerve(u: float, phase: tuple, start: float, end: float) -> float:
+    """Écart latéral du joueur par rapport au centre de la piste (px, + = à droite).
+    Nul au départ et à l'arrivée, léger zigzag entre les deux."""
+    fade = _smooth((u - start) / 70) * (1 - _smooth((u - end) / 60))
+    return fade * (11 * math.sin(u / 85 + phase[0]) + 6 * math.sin(u / 37 + phase[1]))
+
+
 def _generate_race_gif() -> io.BytesIO:
     rng = random.Random()                                # graine système : tout est unique
     scene = Scene(rng)
     place, rivals = _plan_race(rng)
     u0, u1 = -110.0, scene.length + 90.0                 # départ avant la ligne, arrêt après l'arrivée
     race_ms = rng.uniform(46, 78) * 1000                 # temps affiché (la course est accélérée)
-    coins_total = rng.randint(3, 12)
+
+    phase = (rng.uniform(0, 6.28), rng.uniform(0, 6.28))
+    sway = lambda v: _swerve(v, phase, u0, scene.length + 10)
 
     # Moment où le joueur franchit la ligne.
     qc = next(i / (FRAMES - 1) for i in range(FRAMES) if u0 + (u1 - u0) * _profile(i / (FRAMES - 1)) >= scene.length)
@@ -455,8 +462,8 @@ def _generate_race_gif() -> io.BytesIO:
     for i in range(FRAMES):
         q = i / (FRAMES - 1)
         u = u0 + (u1 - u0) * _profile(q)
-        px, py = scene.pos(u)
-        ax, ay = scene.pos(u + 26)
+        px, py = scene.point_at(u, sway(u))
+        ax, ay = scene.point_at(u + 26, sway(u + 26))         # le cap suit le zigzag : le pilote se penche
         target = math.atan2(ay - py, ax - px)
         prev = target if ang is None else ang
         ang = target if ang is None else ang + _wrap(target - ang) * 0.45
@@ -466,8 +473,7 @@ def _generate_race_gif() -> io.BytesIO:
         others = [(*scene.point_at(u + r.gap(q, qc), r.lane + 4 * math.sin(u / 50 + r.wobble)), r.ci) for r in rivals]
         rank = _rank_at(rivals, min(q, qc), qc) if q < qc else place
         shown = race_ms * (min(u, scene.length) - u0) / (scene.length - u0)
-        coins = int(coins_total * max(0.0, min(1.0, (u - u0) / (scene.length - u0))))
-        frames.append(scene.render(px, py, ang, lean, -(i % 2), _timer(shown), rank, coins, others,
+        frames.append(scene.render(px, py, ang, lean, -(i % 2), _timer(shown), rank, others,
                                    u > scene.length + 30))
 
     # Classement final : les rivaux triés par écart final, le joueur inséré à sa place.
