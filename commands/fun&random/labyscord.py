@@ -505,7 +505,7 @@ class Labyscord(commands.Cog):
     # ============================================================================
     # 🔹 Commande PREFIX
     # ============================================================================
-    @commands.command(name="labyscord")
+    @commands.command(name="labyscord", help="Explore un labyrinthe 3D et retrouve le logo Discord.")
     @commands.cooldown(1, 15.0, commands.BucketType.user)
     async def prefix_labyscord(self, ctx: commands.Context):
         await self._start_game(ctx.channel, ctx.author.id)
