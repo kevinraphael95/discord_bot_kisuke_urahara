@@ -264,7 +264,7 @@ const CHARS = [
   {n:"Loyd Lloyd",            r:"Quincy",    sx:"M", chapter:"502", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"28/04", w:1,  l:1,  draw:0, img:"assets/personnages/loyd-lloyd.png"},
   {n:"Giselle Gewelle",       r:"Quincy",    sx:"F", chapter:"544", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Vivant",    hc:"Noir",   bday:"24/12", w:2,  l:1,  draw:0, img:"assets/personnages/giselle-gewelle.png"},
   {n:"James",                 r:"Quincy",    sx:"M", chapter:"495", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/james.png"},
-  {n:"Shaz Domino",           r:"Quincy",    sx:"M", chapter:"512", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"Noir",   bday:"21/02", w:2,  l:1,  draw:0, img:"assets/personnages/shaz-domino.png"},
+  {n:"Shaz Domino",           r:"Quincy",    sx:"M", chapter:"512", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"Blond",   bday:"21/02", w:2,  l:1,  draw:0, img:"assets/personnages/shaz-domino.png"},
   {n:"Guenael Lee",           r:"Quincy",    sx:"M", chapter:"570", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0, img:"assets/personnages/guenael-lee.png"},
   
   // ARRANCARS DU WANDENREICH
