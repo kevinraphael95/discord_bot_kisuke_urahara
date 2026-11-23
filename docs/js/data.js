@@ -51,14 +51,15 @@ const CHARS = [
   // ============================================================
   // ÂMES
   // ============================================================
-  {n:"Ganju Shiba",           r:"Humain",    sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0, img:"assets/personnages/ganju-shiba.webp"},
-  {n:"Kukaku Shiba",          r:"Humain",    sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0, img:"assets/personnages/shiba-kukaku.webp"},
-
+  {n:"Ganju Shiba",           r:"Âme",    sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0, img:"assets/personnages/ganju-shiba.webp"},
+  {n:"Kukaku Shiba",          r:"Âme",    sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0, img:"assets/personnages/shiba-kukaku.webp"},
+  {n:"Jidanbo Ikkanzaka",     r:"Âme",    sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)",   af:"Soul Society", d:2, st:"Vivant",    hc:"Noir",   bday:"10/01", w:0,  l:1,  draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
+  
   // ============================================================
   // URAHARA SHOP
   // ============================================================
   {n:"Kisuke Urahara",        r:"Shinigami",                   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:5, st:"Vivant",    hc:"Blond",  bday:"10/05", w:10, l:1,  draw:1, img:"assets/personnages/kisuke-urahara.png"},
-  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", chapter:"51", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:3, st:"Vivant",    hc:"Violet", bday:"11/02", w:8,  l:1,  draw:0, img:"assets/personnages/yoruichi-shihoin.png"},
+  {n:"Yoruichi Shihoin",      r:"Shinigami",                   sx:"F", chapter:"51", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:3, st:"Vivant",    hc:"Violet", bday:"01/01", w:8,  l:1,  draw:0, img:"assets/personnages/yoruichi-shihoin.png"},
   {n:"Tessai Tsukabishi",     r:"Shinigami",                   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:4, st:"Vivant",    hc:"Noir",   bday:"12/05", w:2,  l:0,  draw:0, img:"assets/personnages/tessai-tsukabishi.png"},
   {n:"Jinta Hanakari",        r:"Mod-Soul/Âme artificielle",   sx:"M", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:1, st:"Vivant",    hc:"Rouge",  bday:"04/04", w:0,  l:1,  draw:0, img:"assets/personnages/jinta-hanakari.png"},
   {n:"Ururu Tsumugiya",       r:"Mod-Soul/Âme artificielle",   sx:"F", chapter:"13", arc:"Le Shinigami Remplaçant (1)",       af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"09/09", w:1,  l:1,  draw:0, img:"assets/personnages/ururu-tsumugiya.png"},
@@ -125,7 +126,8 @@ const CHARS = [
   {n:"Chojiro Sasakibe",      r:"Shinigami",                  sx:"M", chapter:"83", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Blanc",  bday:"04/11", w:0,  l:1,  draw:0, img:"assets/personnages/chojiro-sasakibe.png"},
   {n:"Yachiru Kusajishi",     r:"Shinigami",                  sx:"F", chapter:"83", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Incertain", hc:"Rose",   bday:"12/02", w:2,  l:0,  draw:1, img:"assets/personnages/yachiru-kusajishi.png"},
   {n:"Nemu Kurotsuchi",       r:"Mod-Soul/Âme artificielle",  sx:"F", chapter:"93", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13",    d:3, st:"Mort",      hc:"Noir",   bday:"30/03", w:2,  l:2,  draw:0, img:"assets/personnages/nemu-kurotsuchi.png"},
- 
+  {n:"Kaien Shiba",           r:"Shinigami",       sx:"M", chapter:"133", arc:"Soul Society : Le Sauvetage (2.2)", af:"Gotei 13",    d:4, st:"Mort",      hc:"Noir",   bday:"27/10", w:1,  l:1,  draw:0, img:"assets/personnages/kaien-shiba.png"},
+  
   // ============================================================
   // GOTEI 13 — AUTRES MEMBRES NOTABLES
   // ============================================================
@@ -175,8 +177,8 @@ const CHARS = [
   {n:"Shawlong Koufang",      r:"Arrancar",  sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción",      d:3, st:"Mort",      hc:"Noir",   bday:"04/11", w:1,  l:1,  draw:0, img:"assets/personnages/shawlong-koufang.png"},
   {n:"Edrad Liones",       r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/edrad-liones.png"},
   {n:"Nakeem Grindina",    r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/nakeem-grindina.png"},
-  {n:"Iilford Grantz",    r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/iilford-grantz.png"},
-  {n:"Di Roy Rinker",     r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/di-roy-rinker.png"},
+  {n:"Iilford Grantz",    r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Blond", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/iilford-grantz.png"},
+  {n:"Di Roy Rinker",     r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Gris", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/di-roy-rinker.png"},
 
   // FRACCIÓN DE BARRAGAN
   {n:"Charlotte Cuuhlhourne", r:"Arrancar", sx:"M", chapter:"319", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Violet", bday:"08/08", w:1, l:1, draw:0, img:"assets/personnages/charlotte-chuhlhourne.png"},
@@ -184,16 +186,16 @@ const CHARS = [
   {n:"Findorr Calius",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Blond",  bday:"27/06", w:1, l:1, draw:0, img:"assets/personnages/findorr-calius.png"},
   {n:"Choe Neng Poww",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/choe-neng-poww.png"},
   {n:"Ggio Vega",             r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/ggio-vega.png"},
-  {n:"Nirgge Parduoc",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/nirgge-parduoc.png"},
+  {n:"Nirgge Parduoc",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Blond",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/nirgge-parduoc.png"},
 
   // FRACCIÓN DE NELL
   {n:"Pesche Guatiche",       r:"Arrancar",  sx:"M", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Blond",  bday:"25/05", w:0,  l:1,  draw:0, img:"assets/personnages/pesche-guatiche.png"},
   {n:"Dondochakka Birstanne", r:"Arrancar",  sx:"M", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Chauve", bday:"30/06", w:0,  l:1,  draw:0, img:"assets/personnages/dondochakka-birstanne.png"},
   
   // FRACCIÓN DE SZAYELAPORRO
-  {n:"Lumina",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/lumina-verona.png"},
-  {n:"Verona",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Vivant", hc:"??", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/lumina-verona.png"},
-  {n:"Medazeppi", r:"Arrancar", sx:"M", chapter:"272", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/medazeppi.png"},
+  {n:"Lumina",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/lumina-verona.png"},
+  {n:"Verona",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Vivant", hc:"Chauve", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/lumina-verona.png"},
+  {n:"Medazeppi", r:"Arrancar", sx:"M", chapter:"272", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/medazeppi.png"},
   
   // ============================================================
   // ARRANCAR DIVERS
@@ -224,7 +226,7 @@ const CHARS = [
   // FULLBRING — XCUTION
   // ============================================================
   {n:"Kugo Ginjo",            r:"Fullbring", sx:"M", chapter:"424", arc:"Arc Fullbringers (4)", af:"Xcution",     d:4, st:"Mort",      hc:"Brun",   bday:"15/11", w:4,  l:2,  draw:0, img:"assets/personnages/kugo-ginjo.png"},
-  {n:"Shukuro Tsukishima",    r:"Fullbring", sx:"M", chapter:"429", arc:"Arc Fullbringers (4)", af:"Xcution",     d:4, st:"Mort",      hc:"Brun",   bday:"04/02", w:4,  l:1,  draw:0, img:"assets/personnages/shukuro-tsukishima.png"},
+  {n:"Shukuro Tsukishima",    r:"Fullbring", sx:"M", chapter:"429", arc:"Arc Fullbringers (4)", af:"Xcution",     d:4, st:"Mort",      hc:"Noir",   bday:"04/02", w:4,  l:1,  draw:0, img:"assets/personnages/shukuro-tsukishima.png"},
   {n:"Riruka Dokugamine",     r:"Fullbring", sx:"F", chapter:"428", arc:"Arc Fullbringers (4)", af:"Xcution",     d:3, st:"Vivant",    hc:"Rose",   bday:"14/04", w:1,  l:1,  draw:0, img:"assets/personnages/riruka-dokugamine.png"},
   {n:"Yukio Hans Vorarlberna",r:"Fullbring", sx:"M", chapter:"431", arc:"Arc Fullbringers (4)", af:"Xcution",     d:3, st:"Vivant",    hc:"Blond",  bday:"23/12", w:1,  l:1,  draw:0, img:"assets/personnages/yukio-hans-vorarlberna.png"},
   {n:"Jackie Tristan",        r:"Fullbring", sx:"F", chapter:"431", arc:"Arc Fullbringers (4)", af:"Xcution",     d:3, st:"Vivant",    hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0, img:"assets/personnages/jackie-tristan.png"},
@@ -262,12 +264,12 @@ const CHARS = [
   {n:"Loyd Lloyd",            r:"Quincy",    sx:"M", chapter:"502", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"28/04", w:1,  l:1,  draw:0, img:"assets/personnages/loyd-lloyd.png"},
   {n:"Giselle Gewelle",       r:"Quincy",    sx:"F", chapter:"544", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:4, st:"Vivant",    hc:"Noir",   bday:"24/12", w:2,  l:1,  draw:0, img:"assets/personnages/giselle-gewelle.png"},
   {n:"James",                 r:"Quincy",    sx:"M", chapter:"495", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Chauve", bday:"??/??", w:1,  l:0,  draw:0, img:"assets/personnages/james.png"},
-  {n:"Shaz Domino",           r:"Quincy",    sx:"M", chapter:"512", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"Noir",   bday:"21/02", w:2,  l:1,  draw:0, img:"assets/personnages/shaz-domino.png"},
+  {n:"Shaz Domino",           r:"Quincy",    sx:"M", chapter:"512", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"Blond",   bday:"21/02", w:2,  l:1,  draw:0, img:"assets/personnages/shaz-domino.png"},
   {n:"Guenael Lee",           r:"Quincy",    sx:"M", chapter:"570", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"Noir",   bday:"??/??", w:1,  l:1,  draw:0, img:"assets/personnages/guenael-lee.png"},
   
   // ARRANCARS DU WANDENREICH
-  {n:"Asguiaro Ebern", r:"Arrancar", sx:"M", chapter:"481", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"??", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/asguiaro-ebern.png"},
-  {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"594", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
+  {n:"Asguiaro Ebern", r:"Arrancar", sx:"M", chapter:"481", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"??", bday:"18/06", w:0, l:1, draw:0, img:"assets/personnages/asguiaro-ebern.png"},
+  {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"594", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"12/08", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
 
   
 ];
