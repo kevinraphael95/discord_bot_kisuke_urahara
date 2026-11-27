@@ -50,14 +50,14 @@ const CHARS = [
   {n:"Keigo Asano", r:"Humain", sx:"M", chapter:"7", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Vivant", hc:"Brun", bday:"01/04", w:0, l:0, draw:0, img:"assets/personnages/keigo-asano.png"},
   {n:"Mizuiro Kojima", r:"Humain", sx:"M", chapter:"2", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Vivant", hc:"Noir", bday:"23/05", w:0, l:0, draw:0, img:"assets/personnages/mizuiro-kojima.png"},
   {n:"Chizuru Honsho", r:"Humain", sx:"F", chapter:"6", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Vivant", hc:"Rouge", bday:"13/04", w:0, l:0, draw:0, img:"assets/personnages/chizuru-honsho.png"},
-  {n:"Oscar Joaquín de la Rosa", r:"Humain", sx:"M", chapter:"39", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Mort", hc:"Gris", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/oscar-joaquin-de-la-rosa.png"},
+  {n:"Oscar Joaquín de la Rosa", alias:["Abuelo"], r:"Humain", sx:"M", chapter:"39", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Mort", hc:"Gris", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/oscar-joaquin-de-la-rosa.png"},
   
   // ============================================================
   // ÂMES
   // ============================================================
   {n:"Ganju Shiba", r:"Âme", sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)", af:"Soul Society", d:2, st:"Vivant", hc:"Noir", bday:"15/10", w:2, l:2, draw:0, img:"assets/personnages/ganju-shiba.webp"},
   {n:"Kukaku Shiba", r:"Âme", sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)", af:"Soul Society", d:3, st:"Vivant", hc:"Noir", bday:"01/09", w:1, l:0, draw:0, img:"assets/personnages/shiba-kukaku.webp"},
-  {n:"Jidanbo Ikkanzaka", r:"Âme", sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:2, st:"Vivant", hc:"Noir", bday:"10/01", w:0, l:1, draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
+  {n:"Jidanbo Ikkanzaka", alias:["Jidanbou Ikkanzaka"], r:"Âme", sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:2, st:"Vivant", hc:"Noir", bday:"10/01", w:0, l:1, draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
   {n:"Hisana Kuchiki", r:"Âme", sx:"F", chapter:"179", arc:"Soul Society : Le Sauvetage (2.2)", af:"Soul Society", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/hisana-kuchiki.png"},
 
   // ============================================================
@@ -82,7 +82,7 @@ const CHARS = [
   // GOTEI 13 — CAPITAINES
   // ============================================================
   {n:"Shunsui Kyoraku", r:"Shinigami", sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:5, st:"Vivant", hc:"Brun", bday:"11/07", w:6, l:1, draw:1, img:"assets/personnages/shunsui-kyoraku.png"},
-  {n:"Soi Fon", r:"Shinigami", sx:"F", chapter:"81", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:4, st:"Vivant", hc:"Noir", bday:"11/02", w:5, l:2, draw:1, img:"assets/personnages/sui-feng.png"},
+  {n:"Soi Fon", alias:["Sui Feng"], r:"Shinigami", sx:"F", chapter:"81", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:4, st:"Vivant", hc:"Noir", bday:"11/02", w:5, l:2, draw:1, img:"assets/personnages/sui-feng.png"},
   {n:"Rose Otoribashi", r:"Vizard", sx:"M", chapter:"214", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Gotei 13", d:3, st:"Vivant", hc:"Blond", bday:"17/03", w:2, l:2, draw:0, img:"assets/personnages/rojuro-otoribashi.png"},
   {n:"Isane Kotetsu", r:"Shinigami", sx:"F", chapter:"109", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:3, st:"Vivant", hc:"Gris", bday:"02/08", w:1, l:1, draw:0, img:"assets/personnages/isane-kotetsu.png"},
   {n:"Shinji Hirako", r:"Vizard", sx:"M", chapter:"183", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Gotei 13", d:4, st:"Vivant", hc:"Blond", bday:"10/05", w:3, l:2, draw:0, img:"assets/personnages/shinji-hirako.png"},
@@ -184,7 +184,7 @@ const CHARS = [
   {n:"Shawlong Koufang", r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"04/11", w:1, l:1, draw:0, img:"assets/personnages/shawlong-koufang.png"},
   {n:"Edrad Liones", r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"25/08", w:0, l:1, draw:0, img:"assets/personnages/edrad-liones.png"},
   {n:"Nakeem Grindina", r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"03/08", w:0, l:1, draw:0, img:"assets/personnages/nakeem-grindina.png"},
-  {n:"Iilford Grantz", r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Blond", bday:"22/06", w:0, l:1, draw:0, img:"assets/personnages/iilford-grantz.png"},
+  {n:"Iilford Grantz", alias:["Yylfordt Grantz"], r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Blond", bday:"22/06", w:0, l:1, draw:0, img:"assets/personnages/iilford-grantz.png"},
   {n:"Di Roy Rinker", r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Gris", bday:"19/06", w:0, l:1, draw:0, img:"assets/personnages/di-roy-rinker.png"},
 
   // FRACCIÓN DE BARRAGAN
