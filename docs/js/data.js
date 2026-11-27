@@ -201,7 +201,7 @@ const CHARS = [
   {n:"Medazeppi", r:"Arrancar", sx:"M", chapter:"272", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/medazeppi.png"},
 
   // FRACCIÓN DE NNOITRA
-  {n:"Tesra Lindocruz", r:"RACE", sx:"M", chapter:"263", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort", hc:"Blond", bday:"13/05", w:0, l:1, draw:0, img:"assets/personnages/tesra-lindocruz.png"},
+  {n:"Tesra Lindocruz", r:"Arrancar", sx:"M", chapter:"263", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort", hc:"Blond", bday:"13/05", w:0, l:1, draw:0, img:"assets/personnages/tesra-lindocruz.png"},
   
   // ============================================================
   // ARRANCAR DIVERS
