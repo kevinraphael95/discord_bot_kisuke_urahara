@@ -277,5 +277,9 @@ const CHARS = [
   {n:"Asguiaro Ebern", r:"Arrancar", sx:"M", chapter:"481", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Mort",      hc:"??", bday:"18/06", w:0, l:1, draw:0, img:"assets/personnages/asguiaro-ebern.png"},
   {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"594", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"12/08", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
 
+  // AUTRES QUINCYS
+  {n:"Ryuken Ishida", r:"Quincy", sx:"M", chapter:"124", arc:"Soul Society : Le Sauvetage (2.2)", af:"Kurakara", d:4, st:"Vivant", hc:"Blanc", bday:"14/03", w:1, l:0, draw:0, img:"assets/personnages/ryuken-ishida.png"},
+  {n:"Kanae Katagiri", r:"Quincy", sx:"F", chapter:"530", arc:"Guerre Sanglante de Mille Ans (5)", af:"Indépendant", d:4, st:"Mort", hc:"Noir", bday:"10/06", w:0, l:1, draw:0, img:"assets/personnages/kanae-katagiri.png"},
+  {n:"Soken Ishida", r:"Quincy", sx:"M", chapter:"44", arc:"Le Shinigami Remplaçant (1)", af:"Indépendant", d:4, st:"Mort", hc:"Blanc", bday:"22/03", w:0, l:1, draw:0, img:"assets/personnages/soken-ishida.png"},
   
 ];
