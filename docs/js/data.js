@@ -172,9 +172,9 @@ const CHARS = [
   // FRACCIÓNS
   // ============================================================
   // FRACCIÓN DE HARRIBEL (Espada 3)
-  {n:"Franceska Mila Rose",   r:"Arrancar",  sx:"F", chapter:"282", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción",      d:3, st:"Vivant",    hc:"Brun",   bday:"17/08", w:1,  l:1,  draw:0, img:"assets/personnages/franceska-mila-rose.png"},
-  {n:"Apache",                r:"Arrancar",  sx:"F", chapter:"269", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción",      d:3, st:"Vivant",    hc:"Noir",   bday:"17/05", w:1,  l:1,  draw:0, img:"assets/personnages/apacci.webp"},
-  {n:"Sun-Sun",               r:"Arrancar",  sx:"F", chapter:"282", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción",      d:3, st:"Vivant",    hc:"Vert",   bday:"17/02", w:1,  l:1,  draw:0, img:"assets/personnages/cyan-sung-sun.png"},
+  {n:"Franceska Mila Rose",   r:"Arrancar",  sx:"F", chapter:"282", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción",      d:3, st:"Vivant",    hc:"Brun",   bday:"17/08", w:1,  l:1,  draw:0, img:"assets/personnages/franceska-mila-rose.png"},
+  {n:"Apache",                r:"Arrancar",  sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción",      d:3, st:"Vivant",    hc:"Noir",   bday:"17/05", w:1,  l:1,  draw:0, img:"assets/personnages/apacci.webp"},
+  {n:"Sun-Sun",               r:"Arrancar",  sx:"F", chapter:"282", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción",      d:3, st:"Vivant",    hc:"Vert",   bday:"17/02", w:1,  l:1,  draw:0, img:"assets/personnages/cyan-sung-sun.png"},
 
   // FRACCIÓN DE GRIMMJOW
   {n:"Shawlong Koufang",      r:"Arrancar",  sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción",      d:3, st:"Mort",      hc:"Noir",   bday:"04/11", w:1,  l:1,  draw:0, img:"assets/personnages/shawlong-koufang.png"},
