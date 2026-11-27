@@ -57,6 +57,7 @@ const CHARS = [
   {n:"Ganju Shiba",           r:"Âme",    sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0, img:"assets/personnages/ganju-shiba.webp"},
   {n:"Kukaku Shiba",          r:"Âme",    sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0, img:"assets/personnages/shiba-kukaku.webp"},
   {n:"Jidanbo Ikkanzaka",     r:"Âme",    sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13", d:2, st:"Vivant",    hc:"Noir",   bday:"10/01", w:0,  l:1,  draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
+  {n:"Hisana Kuchiki",        r:"Âme", sx:"F", chapter:"179", arc:"Soul Society : Le Sauvetage (2.2)", af:"Kuchiki", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/hisana-kuchiki.png"},
   
   // ============================================================
   // URAHARA SHOP
@@ -101,9 +102,10 @@ const CHARS = [
   {n:"Sosuke Aizen",          r:"Shinigami", sx:"M", chapter:"79", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:5, st:"Vivant",    hc:"Brun",   bday:"29/05", w:12, l:1,  draw:0, img:"assets/personnages/sosuke-aizen.png"},
   {n:"Sajin Komamura",        r:"Shinigami", sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:4, st:"Incertain", hc:"Brun",   bday:"23/08", w:4,  l:3,  draw:0, img:"assets/personnages/sajin-komamura.png"},
   {n:"Kaname Tousen",         r:"Shinigami", sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",  af:"Indépendant", d:4, st:"Mort",      hc:"Brun",   bday:"13/10", w:3,  l:2,  draw:0, img:"assets/personnages/kaname-tousen.webp"},
-  {n:"Gin Ichimaru",          r:"Shinigami", sx:"M", chapter:"65", arc:"Le Shinigami Remplaçant (1)",  af:"Indépendant", d:4, st:"Mort",      hc:"Gris",   bday:"10/09", w:4,  l:1,  draw:0, img:"assets/personnages/gin-ichimaru.png"},
-  {n:"Jushiro Ukitake",       r:"Shinigami", sx:"M", chapter:"116", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1, img:"assets/personnages/jushiro-ukitake.png"},
- 
+  {n:"Gin Ichimaru", r:"Shinigami", sx:"M", chapter:"65", arc:"Le Shinigami Remplaçant (1)",  af:"Indépendant", d:4, st:"Mort",      hc:"Gris",   bday:"10/09", w:4,  l:1,  draw:0, img:"assets/personnages/gin-ichimaru.png"},
+  {n:"Jushiro Ukitake", r:"Shinigami", sx:"M", chapter:"116", arc:"Soul Society : L'Invasion (2.1)",  af:"Gotei 13",    d:4, st:"Mort",      hc:"Blanc",  bday:"21/12", w:2,  l:1,  draw:1, img:"assets/personnages/jushiro-ukitake.png"},
+  {n:"Ginrei Kuchiki", r:"Shinigami", sx:"M", chapter:"-107", arc:"Turn Back The Pendulum (3.3)", af:"Gotei 13", d:4, st:"Vivant", hc:"Gris", bday:"02/06", w:0, l:0, draw:0, img:"assets/personnages/ginrei-kuchiki.png"},
+  
   // ============================================================
   // GOTEI 13 — VICE-CAPITAINES
   // ============================================================
@@ -278,7 +280,7 @@ const CHARS = [
   {n:"Luders Friegen", r:"Arrancar", sx:"M", chapter:"594", arc:"Guerre Sanglante de Mille Ans (5)", af:"Wandenreich", d:3, st:"Incertain", hc:"??", bday:"12/08", w:0, l:0, draw:0, img:"assets/personnages/luders-friegen.png"},
 
   // AUTRES QUINCYS
-  {n:"Ryuken Ishida", r:"Quincy", sx:"M", chapter:"124", arc:"Soul Society : Le Sauvetage (2.2)", af:"Kurakara", d:4, st:"Vivant", hc:"Blanc", bday:"14/03", w:1, l:0, draw:0, img:"assets/personnages/ryuken-ishida.png"},
+  {n:"Ryuken Ishida", r:"Quincy", sx:"M", chapter:"124", arc:"Soul Society : Le Sauvetage (2.2)", af:"Karakura", d:4, st:"Vivant", hc:"Blanc", bday:"14/03", w:1, l:0, draw:0, img:"assets/personnages/ryuken-ishida.png"},
   {n:"Kanae Katagiri", r:"Quincy", sx:"F", chapter:"530", arc:"Guerre Sanglante de Mille Ans (5)", af:"Indépendant", d:4, st:"Mort", hc:"Noir", bday:"10/06", w:0, l:1, draw:0, img:"assets/personnages/kanae-katagiri.png"},
   {n:"Soken Ishida", r:"Quincy", sx:"M", chapter:"44", arc:"Le Shinigami Remplaçant (1)", af:"Indépendant", d:4, st:"Mort", hc:"Blanc", bday:"22/03", w:0, l:1, draw:0, img:"assets/personnages/soken-ishida.png"},
   
