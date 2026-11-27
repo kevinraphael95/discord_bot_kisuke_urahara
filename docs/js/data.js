@@ -21,6 +21,9 @@
 // NO BREATHES FROM HELL (6)                         — ch. 687+
 // ouai ouai
 
+// TEMPLATE DE PERSONNAGE
+//   {n:"NOM", r:"RACE", sx:"M/F", chapter:"CHAPITRE", arc:"ARC", af:"Affiliation", d:1, st:"Vivant/Mort/Incertain", hc:"Couleuir de cheveux", bday:"01/01", w:0, l:0, draw:0, img:"assets/personnages/nom.png"},
+
 const CHARS = [
   // ============================================================
   // FAMILLE DE ICHIGO
@@ -196,6 +199,9 @@ const CHARS = [
   {n:"Lumina",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/lumina-verona.png"},
   {n:"Verona",    r:"Arrancar", sx:"F", chapter:"269", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Vivant", hc:"Chauve", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/lumina-verona.png"},
   {n:"Medazeppi", r:"Arrancar", sx:"M", chapter:"272", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort",   hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/medazeppi.png"},
+
+  // FRACCIÓN DE NNOITRA
+  {n:"Tesra Lindocruz", r:"RACE", sx:"M", chapter:"263", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Fracción", d:2, st:"Mort", hc:"Blond", bday:"13/05", w:0, l:1, draw:0, img:"assets/personnages/tesra-lindocruz.png"},
   
   // ============================================================
   // ARRANCAR DIVERS
