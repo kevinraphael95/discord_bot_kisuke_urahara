@@ -56,7 +56,7 @@ const CHARS = [
   // ============================================================
   {n:"Ganju Shiba",           r:"Âme",    sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:2, st:"Vivant",    hc:"Noir",   bday:"15/10", w:2,  l:2,  draw:0, img:"assets/personnages/ganju-shiba.webp"},
   {n:"Kukaku Shiba",          r:"Âme",    sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)",   af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"01/09", w:1,  l:0,  draw:0, img:"assets/personnages/shiba-kukaku.webp"},
-  {n:"Jidanbo Ikkanzaka",     r:"Âme",    sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)",   af:"Soul Society", d:2, st:"Vivant",    hc:"Noir",   bday:"10/01", w:0,  l:1,  draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
+  {n:"Jidanbo Ikkanzaka",     r:"Âme",    sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)",   af:"Gotei 13", d:2, st:"Vivant",    hc:"Noir",   bday:"10/01", w:0,  l:1,  draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
   
   // ============================================================
   // URAHARA SHOP
@@ -81,13 +81,13 @@ const CHARS = [
   // ============================================================
   {n:"Shunsui Kyoraku",       r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Brun",   bday:"11/07", w:6,  l:1,  draw:1, img:"assets/personnages/shunsui-kyoraku.png"},
   {n:"Soi Fon",               r:"Shinigami",sx:"F", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"11/02", w:5,  l:2,  draw:1, img:"assets/personnages/sui-feng.png"},
-  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"17/03", w:2,  l:2,  draw:0, img:"assets/personnages/rojuro-otoribashi.png"},
+  {n:"Rose Otoribashi",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Invasion du monde des humains (3.1)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Blond",  bday:"17/03", w:2,  l:2,  draw:0, img:"assets/personnages/rojuro-otoribashi.png"},
   {n:"Isane Kotetsu",         r:"Shinigami",sx:"F", chapter:"109", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"02/08", w:1,  l:1,  draw:0, img:"assets/personnages/isane-kotetsu.png"},
   {n:"Shinji Hirako",         r:"Vizard",   sx:"M", chapter:"183", arc:"Arrancar : Invasion du monde des humains (3.1)",  af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blond",  bday:"10/05", w:3,  l:2,  draw:0, img:"assets/personnages/shinji-hirako.png"},
   {n:"Byakuya Kuchiki",       r:"Shinigami",sx:"M", chapter:"51", arc:"Le Shinigami Remplaçant (1)",                     af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"31/01", w:8,  l:3,  draw:0, img:"assets/personnages/byakuya-kuchiki.png"},
   {n:"Tetsuzaemon Iba",       r:"Shinigami",sx:"M", chapter:"80", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"18/07", w:0,  l:0,  draw:1, img:"assets/personnages/tetsuzaemon-iba.png"},
-  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"03/02", w:2,  l:2,  draw:0, img:"assets/personnages/lisa-yadomaru.png"},
-  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0, img:"assets/personnages/kensei-muguruma.png"},
+  {n:"Lisa Yadomaru",         r:"Vizard",   sx:"F", chapter:"214", arc:"Arrancar : Invasion du monde des humains (3.1)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Noir",   bday:"03/02", w:2,  l:2,  draw:0, img:"assets/personnages/lisa-yadomaru.png"},
+  {n:"Kensei Muguruma",       r:"Vizard",   sx:"M", chapter:"214", arc:"Arrancar : Invasion du monde des humains (3.1)",           af:"Gotei 13",    d:3, st:"Vivant",    hc:"Gris",   bday:"30/07", w:3,  l:2,  draw:0, img:"assets/personnages/kensei-muguruma.png"},
   {n:"Toshiro Hitsugaya",     r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Blanc",  bday:"20/12", w:7,  l:3,  draw:0, img:"assets/personnages/toshiro-hitsugaya.png"},
   {n:"Kenpachi Zaraki",       r:"Shinigami",sx:"M", chapter:"65", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:5, st:"Vivant",    hc:"Noir",   bday:"19/11", w:9,  l:2,  draw:1, img:"assets/personnages/kenpachi-zaraki.png"},
   {n:"Mayuri Kurotsuchi",     r:"Shinigami",sx:"M", chapter:"81", arc:"Soul Society : L'Invasion (2.1)",                 af:"Gotei 13",    d:4, st:"Vivant",    hc:"Noir",   bday:"30/03", w:6,  l:1,  draw:0, img:"assets/personnages/mayuri-kurotsuchi.png"},
@@ -142,8 +142,8 @@ const CHARS = [
   // VIZARDS (non promus à la fin)
   // ============================================================
   {n:"Hiyori Sarugaki",       r:"Vizard",    sx:"F", chapter:"189", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Indépendant", d:3, st:"Vivant",    hc:"Blond",  bday:"01/08", w:2,  l:2,  draw:0, img:"assets/personnages/hiyori-sarugaki.png"},
-  {n:"Love Aikawa",           r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0, img:"assets/personnages/love-aikawa.png"},
-  {n:"Hachigen Ushoda",       r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Bataille de Karakura (3.4)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Rose",   bday:"08/09", w:2,  l:1,  draw:0, img:"assets/personnages/hachigen-ushoda.png"},
+  {n:"Love Aikawa",           r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Invasion du monde des humains (3.1)",          af:"Indépendant", d:3, st:"Vivant",    hc:"Noir",   bday:"10/10", w:2,  l:2,  draw:0, img:"assets/personnages/love-aikawa.png"},
+  {n:"Hachigen Ushoda",       r:"Vizard",    sx:"M", chapter:"214", arc:"Arrancar : Invasion du monde des humains (3.1)",          af:"Indépendant", d:4, st:"Vivant",    hc:"Rose",   bday:"08/09", w:2,  l:1,  draw:0, img:"assets/personnages/hachigen-ushoda.png"},
  
   // ============================================================
   // ESPADA (par numéro tatoué : 1 → 10)
