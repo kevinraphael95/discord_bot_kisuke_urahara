@@ -11,6 +11,10 @@ const COLS = [
 const MAX = 8;
 const $   = id => document.getElementById(id);
 
+// Normalisation : minuscules, sans accents, sans ponctuation ("Sui-Feng" = "sui feng")
+const norm = s => String(s).toLowerCase().normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+
 let CHAR_MAP = new Map();
 
 // ── État daily ────────────────────────────────────────────────
@@ -497,7 +501,7 @@ function share() {
 function subD() {
   if (dOver) return;
   const inp = $('gi'); const v = inp.value.trim(); if (!v) return;
-  const m = CHAR_MAP.get(v.toLowerCase());
+  const m = CHAR_MAP.get(v);
   if (!m) { shake(inp, 'Introuvable…'); return; }
   if (dG.find(x => x.m.n === m.n)) { shake(inp, 'Déjà essayé !'); return; }
   const f = cmp(m, tgt); dG.push({ m, f });
@@ -615,7 +619,7 @@ function sShare() {
 function subS() {
   if (sOver || !sCur) return;
   const inp = $('gi'); const v = inp.value.trim(); if (!v) return;
-  const m = CHAR_MAP.get(v.toLowerCase());
+  const m = CHAR_MAP.get(v);
   if (!m) { shake(inp, 'Introuvable…'); return; }
   if (sG.find(x => x.m.n === m.n)) { shake(inp, 'Déjà essayé !'); return; }
   const f = cmp(m, sCur); sG.push({ m, f });
@@ -629,7 +633,7 @@ function subS() {
 
 function sub() { mode === 'daily' ? subD() : subS(); }
 
-// ── Autocomplete ──────────────────────────────────────────────
+// ── Autocomplete (nom + alias) ────────────────────────────────
 let _acTimer = null;
 
 function onIn() {
@@ -638,16 +642,31 @@ function onIn() {
 }
 
 function _doAC() {
-  const v = $('gi').value.toLowerCase().trim();
+  const v = norm($('gi').value);
   const l = $('acl'); l.innerHTML = '';
   if (mode === 'daily') dSel = -1; else sSel = -1;
   if (!v) return;
   const done = new Set((mode === 'daily' ? dG : sG).map(x => x.m.n));
-  CHARS.filter(x => x.n.toLowerCase().includes(v) && !done.has(x.n)).slice(0, 8).forEach(x => {
+  const hits = [];
+  CHARS.forEach(x => {
+    if (done.has(x.n)) return;
+    const i = x._k.findIndex(k => k.includes(v));
+    if (i < 0) return;
+    const start = x._k.some(k => k.startsWith(v) || k.split(' ').some(w => w.startsWith(v)));
+    hits.push({ x, alias: i > 0 ? x.a[i - 1] : null, rank: start ? 0 : 1 });
+  });
+  hits.sort((a, b) => a.rank - b.rank);
+  hits.slice(0, 8).forEach(({ x, alias }) => {
     const i = document.createElement('div'); i.className = 'aci';
     const img = document.createElement('img'); img.className = 'aci-img'; setImg(img, x);
     const txt = document.createElement('span'); txt.textContent = x.n;
     i.appendChild(img); i.appendChild(txt);
+    if (alias) {
+      const sm = document.createElement('small');
+      sm.style.cssText = 'opacity:.5;margin-left:.4rem';
+      sm.textContent = '(' + alias + ')';
+      i.appendChild(sm);
+    }
     i.onclick = () => { $('gi').value = x.n; l.innerHTML = ''; sub(); };
     l.appendChild(i);
   });
@@ -796,7 +815,17 @@ function shake(inp, msg) {
 })();
 
 // ── INIT ──────────────────────────────────────────────────────
-CHAR_MAP = new Map(CHARS.map(c => [c.n.toLowerCase(), c]));
+// Alias : champ optionnel dans data.js → alias:"Sui Feng" ou alias:["Tosen","Kaname Tosen"]
+CHARS.forEach(c => {
+  c.a  = c.alias ? [].concat(c.alias) : [];
+  c._k = [c.n, ...c.a].map(norm);
+});
+CHAR_MAP = new Map();
+CHARS.forEach(c => { if (!CHAR_MAP.has(c._k[0])) CHAR_MAP.set(c._k[0], c); });
+CHARS.forEach(c => c._k.slice(1).forEach(k => { if (!CHAR_MAP.has(k)) CHAR_MAP.set(k, c); }));
+const _mapGet = CHAR_MAP.get.bind(CHAR_MAP);
+CHAR_MAP.get = k => _mapGet(norm(k));
+
 tgt = todayChar();
 loadRec();
 
