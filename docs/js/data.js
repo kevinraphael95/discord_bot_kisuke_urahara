@@ -50,7 +50,8 @@ const CHARS = [
   {n:"Keigo Asano", r:"Humain", sx:"M", chapter:"7", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Vivant", hc:"Brun", bday:"01/04", w:0, l:0, draw:0, img:"assets/personnages/keigo-asano.png"},
   {n:"Mizuiro Kojima", r:"Humain", sx:"M", chapter:"2", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Vivant", hc:"Noir", bday:"23/05", w:0, l:0, draw:0, img:"assets/personnages/mizuiro-kojima.png"},
   {n:"Chizuru Honsho", r:"Humain", sx:"F", chapter:"6", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Vivant", hc:"Rouge", bday:"13/04", w:0, l:0, draw:0, img:"assets/personnages/chizuru-honsho.png"},
-
+  {n:"Oscar Joaquín de la Rosa", r:"Humain", sx:"M", chapter:"39", arc:"Le Shinigami Remplaçant (1)", af:"Karakura", d:1, st:"Mort", hc:"Gris", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/oscar-joaquin-de-la-rosa.png"},
+  
   // ============================================================
   // ÂMES
   // ============================================================
@@ -139,7 +140,8 @@ const CHARS = [
   {n:"Yumichika Ayasegawa", r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:3, st:"Vivant", hc:"Noir", bday:"19/09", w:3, l:1, draw:0, img:"assets/personnages/yumichika-ayasegawa.png"},
   {n:"Hanataro Yamada", r:"Shinigami", sx:"M", chapter:"92", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:2, st:"Vivant", hc:"Noir", bday:"01/04", w:1, l:1, draw:0, img:"assets/personnages/hanataro-yamada.png"},
   {n:"Yushiro Shihoin", r:"Shinigami", sx:"M", chapter:"551", arc:"Guerre Sanglante de Mille Ans (5)", af:"Indépendant", d:3, st:"Vivant", hc:"Noir", bday:"03/03", w:1, l:1, draw:0, img:"assets/personnages/yushiro-shihoin.png"},
-
+  {n:"Asuka Katakura", r:"Shinigami", sx:"M", chapter:"494", arc:"Guerre Sanglante de Mille Ans (5)", af:"Gotei 13", d:2, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/asuka-katakura.png"},
+  
   // ============================================================
   // VIZARDS (non promus à la fin)
   // ============================================================
@@ -225,6 +227,7 @@ const CHARS = [
   {n:"Shrieker", r:"Hollow", sx:"M", chapter:"9", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:2, st:"Mort", hc:"Chauve", bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/shrieker.webp"},
   {n:"Metastacia", r:"Hollow", sx:"M", chapter:"134", arc:"Soul Society : Le Sauvetage (2.2)", af:"Hueco Mundo", d:3, st:"Mort", hc:"Chauve", bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/metaastacia.jpg"},
   {n:"Runuganga", r:"Hollow", sx:"M", chapter:"246", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:2, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/runuganga.webp"},
+  {n:"Bawabawa", r:"Hollow", sx:"M", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Hueco Mundo", d:2, st:"Vivant", hc:"Chauve", bday:"??/??", w:0, l:0, draw:0, img:"assets/personnages/bawabawa.png"},
   {n:"Fishbone D", r:"Hollow", sx:"M", chapter:"1", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:1, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/fishbone-d.webp"},
   {n:"Bulbous G", r:"Hollow", sx:"M", chapter:"38", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:2, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/bublous-g.webp"},
   {n:"Hexapodus", r:"Hollow", sx:"M", chapter:"2", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:2, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/hexapodus.webp"},
