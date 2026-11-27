@@ -158,7 +158,7 @@ const CHARS = [
   {n:"Zommari Rureaux",       r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:3, st:"Mort",      hc:"Chauve", bday:"13/10", w:2,  l:1,  draw:0, img:"assets/personnages/zommari-rureaux.png"},
   {n:"Szayelaporro Grantz",   r:"Arrancar",  sx:"M", chapter:"244", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:4, st:"Mort",      hc:"Rose",   bday:"22/06", w:3,  l:1,  draw:0, img:"assets/personnages/szayelaporro-granz.png"},
   {n:"Aaroniero Arruruerie",  r:"Arrancar",  sx:"M", chapter:"229", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Espada",      d:3, st:"Mort",      hc:"Chauve", bday:"23/04", w:2,  l:1,  draw:0, img:"assets/personnages/aaroniero-arruruerie.png"},
-  {n:"Yammy Llargo",          r:"Arrancar",  sx:"M", chapter:"190", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"??/??", w:3,  l:1,  draw:0, img:"assets/personnages/yammy-llargo.png"},
+  {n:"Yammy Llargo",          r:"Arrancar",  sx:"M", chapter:"190", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Espada",      d:4, st:"Mort",      hc:"Chauve", bday:"03/04", w:3,  l:1,  draw:0, img:"assets/personnages/yammy-llargo.png"},
  
   // ============================================================
   // EX-ESPADA & ARRANCAR NOTABLES
@@ -178,18 +178,18 @@ const CHARS = [
 
   // FRACCIÓN DE GRIMMJOW
   {n:"Shawlong Koufang",      r:"Arrancar",  sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción",      d:3, st:"Mort",      hc:"Noir",   bday:"04/11", w:1,  l:1,  draw:0, img:"assets/personnages/shawlong-koufang.png"},
-  {n:"Edrad Liones",       r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/edrad-liones.png"},
-  {n:"Nakeem Grindina",    r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/nakeem-grindina.png"},
-  {n:"Iilford Grantz",    r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Blond", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/iilford-grantz.png"},
-  {n:"Di Roy Rinker",     r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Gris", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/di-roy-rinker.png"},
+  {n:"Edrad Liones",       r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"25/08", w:0, l:1, draw:0, img:"assets/personnages/edrad-liones.png"},
+  {n:"Nakeem Grindina",    r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Noir", bday:"03/08", w:0, l:1, draw:0, img:"assets/personnages/nakeem-grindina.png"},
+  {n:"Iilford Grantz",    r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Blond", bday:"22/06", w:0, l:1, draw:0, img:"assets/personnages/iilford-grantz.png"},
+  {n:"Di Roy Rinker",     r:"Arrancar", sx:"M", chapter:"198", arc:"Arrancar : Invasion du monde des humains (3.1)", af:"Fracción", d:3, st:"Mort", hc:"Gris", bday:"19/06", w:0, l:1, draw:0, img:"assets/personnages/di-roy-rinker.png"},
 
   // FRACCIÓN DE BARRAGAN
   {n:"Charlotte Cuuhlhourne", r:"Arrancar", sx:"M", chapter:"319", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Violet", bday:"08/08", w:1, l:1, draw:0, img:"assets/personnages/charlotte-chuhlhourne.png"},
-  {n:"Abirama Redder",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/abirama-redder.png"},
+  {n:"Abirama Redder",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"19/08", w:1, l:1, draw:0, img:"assets/personnages/abirama-redder.png"},
   {n:"Findorr Calius",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Blond",  bday:"27/06", w:1, l:1, draw:0, img:"assets/personnages/findorr-calius.png"},
-  {n:"Choe Neng Poww",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/choe-neng-poww.png"},
-  {n:"Ggio Vega",             r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/ggio-vega.png"},
-  {n:"Nirgge Parduoc",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Blond",   bday:"??/??", w:1, l:1, draw:0, img:"assets/personnages/nirgge-parduoc.png"},
+  {n:"Choe Neng Poww",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"04/03", w:1, l:1, draw:0, img:"assets/personnages/choe-neng-poww.png"},
+  {n:"Ggio Vega",             r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Noir",   bday:"07/05", w:1, l:1, draw:0, img:"assets/personnages/ggio-vega.png"},
+  {n:"Nirgge Parduoc",        r:"Arrancar", sx:"M", chapter:"318", arc:"Arrancar : Bataille de Karakura (3.4)", af:"Fracción", d:3, st:"Mort", hc:"Blond",   bday:"17/10", w:1, l:1, draw:0, img:"assets/personnages/nirgge-parduoc.png"},
 
   // FRACCIÓN DE NELL
   {n:"Pesche Guatiche",       r:"Arrancar",  sx:"M", chapter:"245", arc:"Arrancar : Invasion du Hueco Mundo (3.2)",       af:"Hueco Mundo", d:2, st:"Vivant",    hc:"Blond",  bday:"25/05", w:0,  l:1,  draw:0, img:"assets/personnages/pesche-guatiche.png"},
