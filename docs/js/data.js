@@ -22,7 +22,7 @@
 // ouai ouai
 
 // TEMPLATE DE PERSONNAGE
-// {n:"NOM", r:"RACE", sx:"M/F", chapter:"CHAPITRE", arc:"ARC", af:"Affiliation", d:1, st:"Vivant/Mort/Incertain", hc:"Couleuir de cheveux", bday:"01/01", w:0, l:0, draw:0, img:"assets/personnages/nom.png"},
+// {n:"NOM", r:"RACE", sx:"M/F", chapter:"CHAPITRE", arc:"ARC", af:"Affiliation", d:1, st:"Vivant/Mort/Incertain", hc:"Couleur de cheveux", bday:"01/01", w:0, l:0, draw:0, img:"assets/personnages/nom.png"},
 
 const CHARS = [
   // ============================================================
