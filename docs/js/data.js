@@ -139,6 +139,7 @@ const CHARS = [
   // ============================================================
   {n:"Yumichika Ayasegawa", r:"Shinigami", sx:"M", chapter:"85", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:3, st:"Vivant", hc:"Noir", bday:"19/09", w:3, l:1, draw:0, img:"assets/personnages/yumichika-ayasegawa.png"},
   {n:"Hanataro Yamada", r:"Shinigami", sx:"M", chapter:"92", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:2, st:"Vivant", hc:"Noir", bday:"01/04", w:1, l:1, draw:0, img:"assets/personnages/hanataro-yamada.png"},
+  {n:"Tatsufusa Enjoji", r:"Shinigami", sx:"M", chapter:"105", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:2, st:"Vivant", hc:"Noir", bday:"08/07", w:0, l:1, draw:0, img:"assets/personnages/tatsufusa-enjoji.png"},
   {n:"Yushiro Shihoin", r:"Shinigami", sx:"M", chapter:"551", arc:"Guerre Sanglante de Mille Ans (5)", af:"Indépendant", d:3, st:"Vivant", hc:"Noir", bday:"03/03", w:1, l:1, draw:0, img:"assets/personnages/yushiro-shihoin.png"},
   {n:"Asuka Katakura", r:"Shinigami", sx:"M", chapter:"494", arc:"Guerre Sanglante de Mille Ans (5)", af:"Gotei 13", d:2, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/asuka-katakura.png"},
   
