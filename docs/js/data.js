@@ -238,6 +238,7 @@ const CHARS = [
   {n:"Fishbone D", r:"Hollow", sx:"M", chapter:"1", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:1, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/fishbone-d.webp"},
   {n:"Bulbous G", r:"Hollow", sx:"M", chapter:"38", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:2, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/bublous-g.webp"},
   {n:"Hexapodus", r:"Hollow", sx:"M", chapter:"2", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:2, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/hexapodus.webp"},
+  {n:"Numb Chandelier", r:"Hollow", sx:"F", chapter:"13", arc:"Le Shinigami Remplaçant (1)", af:"Hueco Mundo", d:2, st:"Mort", hc:"Chauve", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/numb-chandelier.png"},
   {n:"White", r:"Hollow", sx:"M", chapter:"530", arc:"Guerre Sanglante de Mille Ans (5)", af:"Indépendant", d:4, st:"Mort", hc:"Blanc", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/white.png"},
 
   // ============================================================
