@@ -57,7 +57,7 @@ const CHARS = [
   // ============================================================
   {n:"Ganju Shiba", r:"Âme", sx:"M", chapter:"76", arc:"Soul Society : L'Invasion (2.1)", af:"Soul Society", d:2, st:"Vivant", hc:"Noir", bday:"15/10", w:2, l:2, draw:0, img:"assets/personnages/ganju-shiba.webp"},
   {n:"Kukaku Shiba", r:"Âme", sx:"F", chapter:"78", arc:"Soul Society : L'Invasion (2.1)", af:"Soul Society", d:3, st:"Vivant", hc:"Noir", bday:"01/09", w:1, l:0, draw:0, img:"assets/personnages/shiba-kukaku.webp"},
-  {n:"Jidanbo Ikkanzaka", alias:["Jidanbou Ikkanzaka"], r:"Âme", sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)", af:"Gotei 13", d:2, st:"Vivant", hc:"Noir", bday:"10/01", w:0, l:1, draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
+  {n:"Jidanbo Ikkanzaka", alias:["Jidanbou Ikkanzaka"], r:"Âme", sx:"M", chapter:"71", arc:"Soul Society : L'Invasion (2.1)", af:"Soul Society", d:2, st:"Vivant", hc:"Noir", bday:"10/01", w:0, l:1, draw:0, img:"assets/personnages/jidanbo-ikkanzaka.png"},
   {n:"Hisana Kuchiki", r:"Âme", sx:"F", chapter:"179", arc:"Soul Society : Le Sauvetage (2.2)", af:"Soul Society", d:3, st:"Mort", hc:"Noir", bday:"??/??", w:0, l:1, draw:0, img:"assets/personnages/hisana-kuchiki.png"},
 
   // ============================================================
