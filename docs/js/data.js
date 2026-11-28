@@ -222,6 +222,10 @@ const CHARS = [
   {n:"Cirucci Sanderwicci", r:"Arrancar", sx:"F", chapter:"251", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Armée d'Aizen", d:3, st:"Mort", hc:"Violet", bday:"27/02", w:1, l:1, draw:0, img:"assets/personnages/cirucci-sanderwicci.png"},
   {n:"Gantenbainne Mosqueda", r:"Arrancar", sx:"M", chapter:"251", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Armée d'Aizen", d:3, st:"Mort", hc:"Roux", bday:"21/09", w:1, l:1, draw:0, img:"assets/personnages/gantenbainne-mosqueda.png"},
 
+  // AUTRES
+  {n:"Aisslinger Wernarr", r:"Arrancar", sx:"M", chapter:"44", arc:"Le Shinigami Remplaçant (1)", af:"Armée d'Aizen", d:2, st:"Mort", hc:"Noir", bday:"23/11", w:0, l:1, draw:0, img:"assets/personnages/aisslinger-wernarr.png"},
+  {n:"Demoura Zodd", r:"Arrancar", sx:"M", chapter:"241", arc:"Arrancar : Invasion du Hueco Mundo (3.2)", af:"Armée d'Aizen", d:2, st:"Mort", hc:"Chauve", bday:"27/07", w:0, l:1, draw:0, img:"assets/personnages/demoura-zodd.png"},
+  
   // ============================================================
   // HOLLOWS
   // ============================================================
